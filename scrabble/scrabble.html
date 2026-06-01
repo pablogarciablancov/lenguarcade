@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrabble: Edición Definitiva</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Nunito:wght@400;700&display=swap');
+
+        :root {
+            --primary: #3b82f6; --success: #22c55e; --warning: #f59e0b; --danger: #ef4444; --magic: #8b5cf6; --blank: #f1f5f9;
+            --bg: #f8fafc; --surface: #ffffff; --surface-light: #e2e8f0; --border: #cbd5e1;
+            --text: #1e293b; --text-muted: #64748b;
+            --dl: #93c5fd; --tl: #3b82f6; --dp: #fca5a5; --tp: #ef4444; --centro: #fde047;
+            --wood-bg: linear-gradient(135deg, #e4c59e 0%, #c29b6e 100%);
+            --wood-border: #8b5a2b; --wood-text: #3e2723;
+        }
+
+        body.theme-ocean { --bg: #e0f2fe; --surface: #ffffff; --surface-light: #bae6fd; --border: #7dd3fc; --dl: #a7f3d0; --tl: #10b981; --dp: #fbcfe8; --tp: #ec4899; }
+        body.theme-forest { --bg: #ecfdf5; --surface: #ffffff; --surface-light: #d1fae5; --border: #a7f3d0; --dl: #bfdbfe; --tl: #3b82f6; --dp: #fde68a; --tp: #d97706; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: background 0.3s; }
+
+        header { padding: 1vh 2vh; text-align: center; background: var(--surface); box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 10; display: flex; justify-content: space-between; align-items: center; }
+        h1 { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 3vh; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; margin: 0 auto; padding-left: 100px; }
+        #timer-display { font-family: 'Montserrat', sans-serif; font-size: 2.5vh; font-weight: 900; background: var(--surface-light); padding: 0.5vh 1.5vh; border-radius: 20px; color: var(--danger); display: none; }
+        
+        .audio-controls { display: flex; gap: 1vh; width: 100px; justify-content: flex-end; }
+        .audio-btn { background: var(--surface-light); border: none; font-size: 2vh; padding: 0.8vh; border-radius: 50%; cursor: pointer; transition: 0.2s; width: 4vh; height: 4vh; display: flex; justify-content: center; align-items: center; }
+        .audio-btn:hover { background: var(--border); }
+        .audio-btn.muted { opacity: 0.5; text-decoration: line-through; }
+
+        #game-layout { display: flex; height: 92vh; padding: 1.5vh; gap: 2vh; justify-content: center; align-items: flex-start; }
+
+        .board-container { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; }
+        #board { display: grid; grid-template-columns: repeat(15, 1fr); grid-template-rows: repeat(15, 1fr); gap: 2px; background: var(--border); padding: 4px; border-radius: 8px; border: 4px solid var(--surface-light); width: 75vh; height: 75vh; }
+        
+        .cell { background: var(--surface); border-radius: 2px; position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1vh; font-weight: 700; text-align: center; overflow: hidden; width: 100%; height: 100%; transition: 0.2s; }
+        .cell.dl { background: var(--dl); } .cell.tl { background: var(--tl); color: white;}
+        .cell.dp { background: var(--dp); } .cell.tp { background: var(--tp); color: white;}
+        .cell.centro { background: var(--centro); color: #b45309; font-size: 2vh;}
+        .cell span.mult-text { opacity: 0.8; pointer-events: none; line-height: 1; }
+        .cell.drag-over { box-shadow: inset 0 0 0 3px var(--primary); filter: brightness(0.9); }
+
+        .tile { position: absolute; inset: 0; background: var(--wood-bg); color: var(--wood-text); border-radius: 3px; display: flex; justify-content: center; align-items: center; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 3vh; border: 1px solid var(--wood-border); box-shadow: 1px 2px 3px rgba(0,0,0,0.3), inset 1px 1px 2px rgba(255,255,255,0.4); cursor: grab; z-index: 2; text-transform: uppercase; }
+        .tile:active { cursor: grabbing; }
+        .tile .pts { position: absolute; bottom: 2px; right: 3px; font-size: 1.1vh; font-weight: 900; color: #5d4037; pointer-events: none; }
+        .tile.draft { opacity: 0.85; transform: scale(0.92); border: 2px dashed var(--primary); }
+        .tile.selected { transform: translateY(-4px); box-shadow: 0 4px 8px rgba(0,0,0,0.4); border: 2px solid var(--primary); }
+        .tile.dragging { opacity: 0.5; transform: scale(1.05); }
+        .tile.blank-tile { background: var(--blank); color: var(--primary); border-color: var(--border); }
+
+        .side-panel { flex: 1; max-width: 400px; display: flex; flex-direction: column; gap: 1.5vh; background: var(--surface); padding: 2vh; border-radius: 12px; height: 100%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border); }
+        .players-list { display: flex; flex-direction: column; gap: 1vh; }
+        .player-card { background: var(--surface-light); padding: 1.5vh; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; border-left: 5px solid transparent; transition: 0.3s; }
+        .player-card.active { border-left-color: var(--primary); background: var(--bg); border: 1px solid var(--primary); box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2); }
+        .player-name { font-weight: 700; font-size: 2vh; width: 60%;}
+        .player-score { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 2.5vh; color: var(--primary); width: 30%; text-align: right;}
+        .player-tokens { font-size: 1.5vh; color: var(--magic); font-weight: bold; width: 100%; margin-top: 0.5vh;}
+
+        .controls-wrapper { background: var(--bg); padding: 1.5vh; border-radius: 8px; margin-top: auto; border: 1px solid var(--border); }
+        #rack { display: flex; gap: 1vh; justify-content: center; height: 6vh; margin-bottom: 1.5vh; }
+        .rack-slot { width: 6vh; height: 6vh; background: var(--border); border-radius: 4px; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1vh; }
+        button { padding: 1.2vh; border: none; border-radius: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1.4vh; cursor: pointer; transition: 0.2s; color: white; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        button:active { transform: translateY(1px); }
+        .btn-validate { background: var(--success); grid-column: span 2; font-size: 2vh; padding: 1.5vh; }
+        .btn-shuffle { background: var(--primary); }
+        .btn-swap { background: var(--magic); }
+        .btn-buy { background: #6366f1; }
+        .btn-recall { background: var(--warning); color: #fff; }
+        .btn-pass { background: #94a3b8; color: #1e293b; }
+        .btn-end { background: var(--danger); grid-column: span 2; margin-top: 0.5vh; }
+
+        .info-panel { font-size: 1.6vh; color: var(--text-muted); display: flex; justify-content: space-between; }
+        #log { font-size: 1.5vh; max-height: 10vh; overflow-y: auto; padding: 1vh; background: var(--surface-light); border-radius: 6px; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); display: flex; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
+        .modal { background: var(--surface); padding: 4vh; border-radius: 12px; width: 90%; max-width: 500px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid var(--border); max-height: 90vh; overflow-y: auto;}
+        .modal h2 { font-family: 'Montserrat', sans-serif; margin-bottom: 2vh; color: var(--primary); }
+        .modal input, .modal select { width: 100%; padding: 1.5vh; margin-bottom: 1.5vh; border-radius: 6px; border: 1px solid var(--border); font-size: 1.8vh; font-family: inherit; }
+        .hidden { display: none !important; }
+
+
+        .blank-letter-modal p { margin-bottom: 2vh; font-size: 1.8vh; color: var(--text-muted); }
+        .blank-letter-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.8vh; margin: 2vh 0; }
+        .blank-letter-btn { background: var(--wood-bg); color: var(--wood-text); border: 1px solid var(--wood-border); font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 2vh; padding: 1.2vh 0; border-radius: 8px; box-shadow: 1px 2px 3px rgba(0,0,0,0.25), inset 1px 1px 2px rgba(255,255,255,0.4); }
+        .blank-letter-btn:hover { filter: brightness(1.08); transform: translateY(-2px); }
+
+        .replace-tile-modal p { margin-bottom: 2vh; font-size: 1.8vh; color: var(--text-muted); }
+        .replace-tile-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1vh; margin: 2vh 0; }
+        .replace-tile-btn { position: relative; min-height: 6.5vh; background: var(--wood-bg); color: var(--wood-text); border: 1px solid var(--wood-border); font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 2.4vh; padding: 1vh 0; border-radius: 8px; box-shadow: 1px 2px 3px rgba(0,0,0,0.25), inset 1px 1px 2px rgba(255,255,255,0.4); }
+        .replace-tile-btn:hover { filter: brightness(1.08); transform: translateY(-2px); }
+        .replace-tile-btn .pts { position: absolute; bottom: 0.35vh; right: 0.6vh; font-size: 1.1vh; font-weight: 900; color: #5d4037; }
+        .replace-tile-btn.blank-option { background: var(--blank); color: var(--primary); border-color: var(--border); }
+
+        .point-anim { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Montserrat', sans-serif; font-size: 10vh; font-weight: 900; color: var(--success); text-shadow: 0px 4px 10px rgba(0,0,0,0.3), 0 0 20px white; animation: floatUp 2s ease-out forwards; z-index: 1000; pointer-events: none; }
+        @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, -40%) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 80% { opacity: 1; transform: translate(-50%, -60%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -80%) scale(0.8); } }
+    </style>
+</head>
+<body>
+
+<div id="setup-screen" class="overlay">
+    <div class="modal">
+        <h2>SCRABBLE</h2>
+        <div id="player-inputs-container" style="display: flex; flex-direction: column; gap: 1vh; margin-bottom: 1.5vh;">
+            <input type="text" class="p-input" value="Equipo Cervantes" placeholder="Nombre Jugador/Equipo 1">
+            <input type="text" class="p-input" value="Equipo Góngora" placeholder="Nombre Jugador/Equipo 2">
+        </div>
+        <div style="display: flex; gap: 1vh; margin-bottom: 2vh;">
+            <button style="flex: 1; background: var(--success); padding: 1vh;" onclick="addPlayerInput()">+ Añadir</button>
+            <button style="flex: 1; background: var(--danger); padding: 1vh;" onclick="removePlayerInput()">- Quitar</button>
+        </div>
+        
+        <select id="setup-win">
+            <option value="classic">Victoria: Clásica (Agotar fichas)</option>
+            <option value="100">Victoria: Primero en 100 puntos</option>
+            <option value="300">Victoria: Primero en 300 puntos</option>
+            <option value="500">Victoria: Primero en 500 puntos</option>
+        </select>
+
+        <select id="setup-layout">
+            <option value="classic">Tablero: Clásico</option>
+            <option value="cross">Tablero: En Cruz</option>
+            <option value="borders">Tablero: Bordes</option>
+            <option value="random">Tablero: Aleatorio</option>
+        </select>
+
+        <select id="setup-timer">
+            <option value="0">Tiempo: Sin Límite</option>
+            <option value="60">Tiempo: 1 Minuto / Turno</option>
+        </select>
+
+        <button class="btn-validate" onclick="startGame()">¡Comenzar Partida!</button>
+    </div>
+</div>
+
+<div id="end-screen" class="overlay hidden">
+    <div class="modal">
+        <h2 id="end-title" style="font-size: 4vh; margin-bottom: 1vh;">¡FIN DE LA PARTIDA!</h2>
+        <div id="end-scores" style="display: flex; flex-direction: column; gap: 1vh; margin-bottom: 3vh; font-size: 2vh; text-align: left;"></div>
+        <button class="btn-validate" onclick="location.reload()">Jugar de Nuevo</button>
+    </div>
+</div>
+
+<div id="juez-modal" class="overlay hidden">
+    <div class="modal" style="border: 3px solid var(--warning);">
+        <h2 style="color: var(--warning);">MÚLTIPLES PALABRAS</h2>
+        <p id="juez-msg" style="margin-bottom: 2vh; font-size: 2vh;"></p>
+        <div style="display: flex; gap: 1vh;">
+            <button class="btn-validate" style="flex: 1;" onclick="resolveJuez(true)">¡Son Válidas!</button>
+            <button class="btn-pass" style="flex: 1;" onclick="resolveJuez(false)">Hay errores</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="blank-modal" class="overlay hidden">
+    <div class="modal blank-letter-modal" style="border: 3px solid var(--magic);">
+        <h2 style="color: var(--magic);">ELIGE LA LETRA DEL COMODÍN ⭐</h2>
+        <p>Esta ficha blanca representará la letra que elijas y valdrá 0 puntos durante toda la partida.</p>
+        <div id="blank-letter-grid" class="blank-letter-grid"></div>
+        <button class="btn-pass" style="width: 100%; margin-top: 1vh;" onclick="cancelBlankChoice()">Cancelar</button>
+    </div>
+</div>
+
+<div id="replace-modal" class="overlay hidden">
+    <div class="modal replace-tile-modal" style="border: 3px solid var(--magic);">
+        <h2 style="color: var(--magic);">CAMBIAR UNA FICHA POR ⭐</h2>
+        <p>Tu atril está lleno. Elige qué ficha vuelve a la bolsa para comprar una ficha blanca. La compra cuesta 2 🃏.</p>
+        <div id="replace-tile-grid" class="replace-tile-grid"></div>
+        <button class="btn-pass" style="width: 100%; margin-top: 1vh;" onclick="cancelBlankPurchase()">Cancelar compra</button>
+    </div>
+</div>
+
+<header>
+    <div id="timer-display">01:00</div>
+    <h1>Scrabble</h1>
+    <div class="audio-controls">
+        <button id="btn-music" class="audio-btn muted" onclick="toggleMusic()" title="Música de fondo">🎵</button>
+        <button id="btn-sfx" class="audio-btn" onclick="toggleSFX()" title="Efectos de sonido">🔊</button>
+    </div>
+</header>
+
+<div id="game-layout">
+    <div class="board-container"><div id="board"></div></div>
+    <div class="side-panel">
+        <div class="players-list" id="players-container"></div>
+        <div class="info-panel"><span>Fichas en bolsa: <strong id="bag-count"></strong></span></div>
+        <div id="log"></div>
+        <div class="controls-wrapper">
+            <div id="rack"></div>
+            <div class="btn-grid">
+                <button class="btn-validate" onclick="attemptValidation()">Validar Jugada</button>
+                <button class="btn-shuffle" onclick="shuffleRack()">Mezclar</button>
+                <button class="btn-swap" onclick="useComodin()">Renovar (-1 🃏)</button>
+                <button class="btn-buy" onclick="buyBlankTile()">Comprar ⭐ (-2 🃏)</button>
+                <button class="btn-recall" onclick="recallDraftTiles()">Recuperar</button>
+                <button class="btn-pass" onclick="passTurn(true)">Pasar</button>
+                <button class="btn-end" onclick="finishGame('¡Partida finalizada manualmente!')">Terminar Partida / Rendirse</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- SISTEMA DE AUDIO ---
+const AUDIO_CLACK = new Audio('https://actions.google.com/sounds/v1/wood/wood_click.ogg');
+const AUDIO_BGM = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3');
+AUDIO_BGM.loop = true; AUDIO_BGM.volume = 0.2; AUDIO_CLACK.volume = 0.8;
+
+let sfxEnabled = true;
+let musicEnabled = false;
+
+function playClack() {
+    if (sfxEnabled) {
+        let sound = AUDIO_CLACK.cloneNode(); 
+        sound.volume = 0.8;
+        sound.play().catch(e => console.log("Audio bloqueado por el navegador"));
+    }
+}
+
+function toggleMusic() {
+    musicEnabled = !musicEnabled;
+    const btn = document.getElementById('btn-music');
+    if (musicEnabled) { AUDIO_BGM.play().catch(e=>{}); btn.classList.remove('muted'); } 
+    else { AUDIO_BGM.pause(); btn.classList.add('muted'); }
+}
+
+function toggleSFX() {
+    sfxEnabled = !sfxEnabled;
+    const btn = document.getElementById('btn-sfx');
+    if (sfxEnabled) { btn.classList.remove('muted'); playClack(); } 
+    else { btn.classList.add('muted'); }
+}
+
+// --- CONSTANTES DEL JUEGO ---
+const TILE_DATA = {'A':1, 'E':1, 'O':1, 'I':1, 'S':1, 'N':1, 'R':1, 'U':1, 'L':1, 'T':1, 'D':2, 'G':2, 'C':3, 'B':3, 'M':3, 'P':3, 'H':4, 'F':4, 'V':4, 'Y':4, 'Q':5, 'J':8, 'Ñ':8, 'X':8, 'Z':10, '*':0};
+const BAG_INIT = "AAAAAAAAAAAAEEEEEEEEEEEEOOOOOOOOOIIIIIISSSSSSNNNNNRRRRRUUUUULLLLTTTTDDDDDGGCCBBMM PPHHFV YQJÑXZ**".replace(/\s/g, '').split('');
+const DICCIONARIO = ["CASA", "LENGUA", "PALABRA", "VERBO", "RETO", "PERRO", "MESA", "LIBRO", "PROFESOR", "ALUMNO", "CLASE", "LA", "EL", "UN", "YO", "TU", "SI", "NO"];
+
+const BOARD_SIZE = 15;
+let boardState = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+let draftTiles = []; let players = []; let turnIdx = 0; let bag = []; let selectedRackIdx = null; let isFirstTurn = true;
+let pendingBlankPlacement = null;
+let timerInterval, timeLeft = 0, useTimer = 0, winCondition = 'classic';
+let pendingScore = 0, pendingWord = "";
+
+document.addEventListener('keydown', (e) => {
+    const blankModal = document.getElementById('blank-modal');
+    const replaceModal = document.getElementById('replace-modal');
+
+    if (e.key === 'Escape') {
+        if (blankModal && !blankModal.classList.contains('hidden')) cancelBlankChoice();
+        if (replaceModal && !replaceModal.classList.contains('hidden')) cancelBlankPurchase();
+        return;
+    }
+
+    if (!blankModal || blankModal.classList.contains('hidden')) return;
+
+    const pressed = e.key.toUpperCase();
+    if (/^[A-ZÑ]$/.test(pressed)) chooseBlankLetter(pressed);
+});
+
+
+const LAYOUTS = {
+    classic: { tp: [[0,0],[0,7],[0,14],[7,0],[7,14],[14,0],[14,7],[14,14]], dp: [[1,1],[2,2],[3,3],[4,4],[10,10],[11,11],[12,12],[13,13],[1,13],[2,12],[3,11],[4,10],[13,1],[12,2],[11,3],[10,4]], tl: [[1,5],[1,9],[5,1],[5,5],[5,9],[5,13],[9,1],[9,5],[9,9],[9,13],[13,5],[13,9]], dl: [[0,3],[0,11],[2,6],[2,8],[3,0],[3,7],[3,14],[6,2],[6,6],[6,8],[6,12],[7,3],[7,11],[8,2],[8,6],[8,8],[8,12],[11,0],[11,7],[11,14],[12,6],[12,8],[14,3],[14,11]] },
+    cross: { tp: [[1,7],[13,7],[7,1],[7,13]], dp: [[3,7],[11,7],[7,3],[7,11]], tl: [[5,7],[9,7],[7,5],[7,9]], dl: [[2,7],[12,7],[7,2],[7,12],[4,7],[10,7],[7,4],[7,10]] },
+    borders: { tp: [[0,0],[0,14],[14,0],[14,14]], dp: [[0,3],[0,11],[14,3],[14,11],[3,0],[11,0],[3,14],[11,14]], tl: [[0,6],[0,8],[14,6],[14,8],[6,0],[8,0],[6,14],[8,14]], dl: [[1,1],[1,13],[13,1],[13,13]] }
+};
+
+function addPlayerInput() { const c = document.getElementById('player-inputs-container'); const i = document.createElement('input'); i.type = 'text'; i.className = 'p-input'; i.placeholder = `Nombre Jugador/Equipo ${c.children.length + 1}`; c.appendChild(i); }
+function removePlayerInput() { const c = document.getElementById('player-inputs-container'); if (c.children.length > 2) c.removeChild(c.lastChild); }
+
+function startGame() {
+    const inputs = document.querySelectorAll('.p-input');
+    let names = Array.from(inputs).map(inp => inp.value.trim()).filter(n => n !== "");
+    if (names.length < 2) return alert("Se necesitan al menos 2 jugadores.");
+    
+    winCondition = document.getElementById('setup-win').value;
+    useTimer = parseInt(document.getElementById('setup-timer').value);
+    if(useTimer > 0) document.getElementById('timer-display').style.display = 'block';
+
+    names.sort(() => Math.random() - 0.5);
+    players = names.map(n => ({ name: n, score: 0, rack: [], tokens: 3, milestones: 0 }));
+    bag = [...BAG_INIT].sort(() => Math.random() - 0.5);
+    players.forEach(p => fillRack(p));
+    
+    document.getElementById('setup-screen').classList.add('hidden');
+    initBoardUI(document.getElementById('setup-layout').value);
+    updateUI();
+    logMsg(`<strong>¡Comienza la batalla!</strong> Empieza ${players[0].name}.`);
+    startTimer();
+
+    // Activar música al arrancar si no estaba puesta
+    if (!musicEnabled) toggleMusic();
+}
+
+function fillRack(player) { while (player.rack.length < 7 && bag.length > 0) player.rack.push(bag.pop()); }
+
+function initBoardUI(layoutType) {
+    const boardEl = document.getElementById('board');
+    boardEl.innerHTML = '';
+    const cellMap = {};
+
+    if (layoutType === 'random') {
+        let coords = [];
+        for(let r=0; r<15; r++) for(let c=0; c<15; c++) if(!(r===7 && c===7)) coords.push([r,c]);
+        coords.sort(() => Math.random() - 0.5);
+        const assign = (type, count) => { for(let i=0; i<count && coords.length>0; i++) { const [r,c] = coords.pop(); cellMap[`${r},${c}`] = type; } };
+        assign('tp', 8); assign('dp', 16); assign('tl', 12); assign('dl', 24);
+    } else {
+        const layout = LAYOUTS[layoutType];
+        for (const [type, coords] of Object.entries(layout)) coords.forEach(([r, c]) => cellMap[`${r},${c}`] = type);
+    }
+    cellMap['7,7'] = 'centro';
+
+    for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            const type = cellMap[`${r},${c}`];
+            if (type) { cell.classList.add(type); cell.innerHTML = type === 'centro' ? `★` : `<span class="mult-text">${type.toUpperCase()}</span>`; }
+            cell.dataset.r = r; cell.dataset.c = c;
+            
+            cell.ondragover = (e) => { e.preventDefault(); if (!boardState[r][c] && !draftTiles.find(d => d.r === r && d.c === c)) cell.classList.add('drag-over'); };
+            cell.ondragleave = () => cell.classList.remove('drag-over');
+            cell.ondrop = (e) => {
+                e.preventDefault(); cell.classList.remove('drag-over');
+                if (boardState[r][c] || draftTiles.find(d => d.r === r && d.c === c)) return;
+
+                const source = e.dataTransfer.getData('source');
+                if (source === 'rack') {
+                    const rackIdx = parseInt(e.dataTransfer.getData('rackIdx'));
+                    placeTileFromRack(r, c, rackIdx);
+                } else if (source === 'board') {
+                    const oldR = parseInt(e.dataTransfer.getData('oldR')), oldC = parseInt(e.dataTransfer.getData('oldC'));
+                    const draftObj = draftTiles.find(d => d.r === oldR && d.c === oldC);
+                    if (draftObj) { draftObj.r = r; draftObj.c = c; playClack(); }
+                }
+                selectedRackIdx = null; updateUI();
+            };
+            cell.onclick = () => handleBoardClick(r, c);
+            boardEl.appendChild(cell);
+        }
+    }
+}
+
+function placeTileFromRack(r, c, rackIdx) {
+    let letter = players[turnIdx].rack[rackIdx];
+    if (letter === '*') {
+        showBlankLetterModal(r, c, rackIdx);
+        return;
+    }
+    draftTiles.push({ r, c, letter, isBlank: false, rackIndex: rackIdx });
+    playClack();
+}
+
+function showBlankLetterModal(r, c, rackIdx) {
+    pendingBlankPlacement = { r, c, rackIdx };
+    const grid = document.getElementById('blank-letter-grid');
+    const letters = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
+    grid.innerHTML = letters.map(letter => `<button type="button" class="blank-letter-btn" onclick="chooseBlankLetter('${letter}')">${letter}</button>`).join('');
+    document.getElementById('blank-modal').classList.remove('hidden');
+}
+
+function chooseBlankLetter(letter) {
+    if (!pendingBlankPlacement) return;
+    const { r, c, rackIdx } = pendingBlankPlacement;
+
+    // Seguridad extra: si mientras el modal estaba abierto se ha ocupado la casilla, no colocamos nada.
+    if (boardState[r][c] || draftTiles.find(d => d.r === r && d.c === c)) {
+        cancelBlankChoice();
+        return;
+    }
+
+    draftTiles.push({ r, c, letter, isBlank: true, rackIndex: rackIdx });
+    pendingBlankPlacement = null;
+    document.getElementById('blank-modal').classList.add('hidden');
+    selectedRackIdx = null;
+    playClack();
+    updateUI();
+}
+
+function cancelBlankChoice() {
+    pendingBlankPlacement = null;
+    document.getElementById('blank-modal').classList.add('hidden');
+    selectedRackIdx = null;
+    updateUI();
+}
+
+function updateUI() {
+    document.querySelectorAll('.cell').forEach(cell => {
+        const r = parseInt(cell.dataset.r), c = parseInt(cell.dataset.c);
+        const fixed = boardState[r][c], draft = draftTiles.find(d => d.r === r && d.c === c);
+        
+        if (!fixed && !draft) {
+            if (r===7 && c===7) cell.innerHTML = `★`;
+            else if (cell.classList.length > 1) cell.innerHTML = `<span class="mult-text">${cell.classList[1].toUpperCase()}</span>`;
+            else cell.innerHTML = '';
+            return;
+        }
+        
+        let letter = fixed ? fixed.char : draft.letter;
+        let isBlank = fixed ? fixed.isBlank : draft.isBlank;
+        let pts = isBlank ? 0 : TILE_DATA[letter];
+        let tileClass = `tile ${isBlank ? 'blank-tile' : ''}`;
+        
+        if (fixed) {
+            cell.innerHTML = `<div class="${tileClass}">${letter}<span class="pts">${pts}</span></div>`;
+        } else if (draft) {
+            cell.innerHTML = `<div class="${tileClass} draft" draggable="true">${letter}<span class="pts">${pts}</span></div>`;
+            const tileDiv = cell.querySelector('.tile');
+            tileDiv.ondragstart = (e) => { e.dataTransfer.setData('source', 'board'); e.dataTransfer.setData('oldR', r); e.dataTransfer.setData('oldC', c); setTimeout(() => tileDiv.classList.add('dragging'), 0); };
+            tileDiv.ondragend = () => tileDiv.classList.remove('dragging');
+            tileDiv.onclick = (e) => { e.stopPropagation(); handleBoardClick(r, c); };
+        }
+    });
+
+    const p = players[turnIdx], rackEl = document.getElementById('rack'); rackEl.innerHTML = '';
+    for (let i = 0; i < 7; i++) {
+        const slot = document.createElement('div'); slot.className = 'rack-slot';
+        if (p.rack[i] && !draftTiles.some(d => d.rackIndex === i)) {
+            let isBlank = p.rack[i] === '*';
+            const tile = document.createElement('div');
+            tile.className = `tile ${isBlank ? 'blank-tile' : ''} ${selectedRackIdx === i ? 'selected' : ''}`;
+            tile.innerHTML = `${isBlank ? '⭐' : p.rack[i]}<span class="pts">${isBlank ? 0 : TILE_DATA[p.rack[i]]}</span>`;
+            tile.draggable = true;
+            
+            tile.ondragstart = (e) => { e.dataTransfer.setData('source', 'rack'); e.dataTransfer.setData('rackIdx', i); selectedRackIdx = i; setTimeout(() => tile.classList.add('dragging'), 0); };
+            tile.ondragend = () => { tile.classList.remove('dragging'); selectedRackIdx = null; updateUI(); };
+            tile.onclick = () => { selectedRackIdx = selectedRackIdx === i ? null : i; updateUI(); playClack(); };
+            slot.appendChild(tile);
+        }
+        rackEl.appendChild(slot);
+    }
+
+    const pc = document.getElementById('players-container'); pc.innerHTML = '';
+    players.forEach((player, idx) => {
+        pc.innerHTML += `<div class="player-card ${idx === turnIdx ? 'active' : ''}"><span class="player-name">${player.name}</span><span class="player-score">${player.score}</span><span class="player-tokens">Comodines: ${"🃏".repeat(player.tokens) || 'Agotados'}</span></div>`;
+    });
+    document.getElementById('bag-count').innerText = bag.length;
+}
+
+function shuffleRack() { players[turnIdx].rack.sort(() => Math.random() - 0.5); selectedRackIdx = null; updateUI(); }
+function useComodin() {
+    const p = players[turnIdx];
+    if (p.tokens < 1) return alert("¡No te quedan comodines 🃏!");
+    if (draftTiles.length > 0) return alert("Recupera tus fichas del tablero primero.");
+    p.tokens--; bag.push(...p.rack); bag.sort(() => Math.random() - 0.5); p.rack = []; fillRack(p);
+    logMsg(`<i>${p.name} usó 1 🃏 para renovar su atril.</i>`); updateUI(); playClack();
+}
+function buyBlankTile() {
+    const p = players[turnIdx];
+    if (p.tokens < 2) return alert("Necesitas 2 🃏 para comprar una ficha blanca.");
+    if (draftTiles.length > 0) return alert("Recupera tus fichas del tablero antes de comprar una ⭐.");
+
+    // Si hay hueco, la compra entra directamente en el atril.
+    if (p.rack.length < 7) {
+        p.tokens -= 2;
+        p.rack.push('*');
+        logMsg(`<i>⭐ ${p.name} compró una ficha blanca (-2 🃏).</i>`);
+        updateUI();
+        playClack();
+        return;
+    }
+
+    // Si el atril está lleno, el jugador elige qué ficha devuelve a la bolsa.
+    showBuyBlankReplacementModal();
+}
+
+function showBuyBlankReplacementModal() {
+    const p = players[turnIdx];
+    const grid = document.getElementById('replace-tile-grid');
+    grid.innerHTML = '';
+
+    p.rack.forEach((letter, idx) => {
+        const isBlank = letter === '*';
+        const pts = isBlank ? 0 : TILE_DATA[letter];
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `replace-tile-btn ${isBlank ? 'blank-option' : ''}`;
+        btn.innerHTML = `${isBlank ? '⭐' : letter}<span class="pts">${pts}</span>`;
+        btn.title = isBlank ? 'Cambiar una ficha blanca por otra no aporta ventaja, pero se permite.' : `Devolver ${letter} a la bolsa`;
+        btn.onclick = () => confirmBuyBlankReplacement(idx);
+        grid.appendChild(btn);
+    });
+
+    document.getElementById('replace-modal').classList.remove('hidden');
+}
+
+function confirmBuyBlankReplacement(rackIdx) {
+    const p = players[turnIdx];
+    if (p.tokens < 2) return cancelBlankPurchase();
+    if (draftTiles.length > 0) return cancelBlankPurchase();
+    if (rackIdx < 0 || rackIdx >= p.rack.length) return cancelBlankPurchase();
+
+    const returnedLetter = p.rack[rackIdx];
+    p.tokens -= 2;
+    p.rack[rackIdx] = '*';
+
+    // La ficha sustituida vuelve a la bolsa y se mezcla para futuros robos.
+    if (returnedLetter) {
+        bag.push(returnedLetter);
+        bag.sort(() => Math.random() - 0.5);
+    }
+
+    selectedRackIdx = null;
+    document.getElementById('replace-modal').classList.add('hidden');
+    logMsg(`<i>⭐ ${p.name} compró una ficha blanca y devolvió ${returnedLetter === '*' ? 'una ⭐' : returnedLetter} a la bolsa (-2 🃏).</i>`);
+    updateUI();
+    playClack();
+}
+
+function cancelBlankPurchase() {
+    selectedRackIdx = null;
+    document.getElementById('replace-modal').classList.add('hidden');
+    updateUI();
+}
+
+function handleBoardClick(r, c) {
+    const draftIdx = draftTiles.findIndex(d => d.r === r && d.c === c);
+    if (draftIdx !== -1) { draftTiles.splice(draftIdx, 1); selectedRackIdx = null; updateUI(); return; }
+    if (!boardState[r][c] && selectedRackIdx !== null) { placeTileFromRack(r, c, selectedRackIdx); selectedRackIdx = null; updateUI(); }
+}
+function recallDraftTiles() { draftTiles = []; selectedRackIdx = null; updateUI(); }
+
+function attemptValidation() {
+    if (draftTiles.length === 0) return;
+    if (isFirstTurn && !draftTiles.some(d => d.r === 7 && d.c === 7)) return alert("¡La primera jugada debe cubrir la estrella central (★)!");
+
+    const sameRow = draftTiles.every(d => d.r === draftTiles[0].r);
+    const sameCol = draftTiles.every(d => d.c === draftTiles[0].c);
+    if (!sameRow && !sameCol) return alert("Las fichas deben colocarse en la misma fila o columna.");
+
+    let wordsFormed = [];
+
+    function extractWord(startR, startC, checkHor) {
+        let r = startR, c = startC;
+        if (checkHor) while (c > 0 && (boardState[r][c-1] || draftTiles.find(d=>d.r===r && d.c===c-1))) c--;
+        else while (r > 0 && (boardState[r-1][c] || draftTiles.find(d=>d.r===r-1 && d.c===c))) r--;
+
+        let wordStr = "", wordScore = 0, wordMult = 1, draftUsed = 0, pos = {r, c};
+
+        while (r < BOARD_SIZE && c < BOARD_SIZE) {
+            const fixed = boardState[r][c], draft = draftTiles.find(d => d.r === r && d.c === c);
+            if (!fixed && !draft) break;
+            
+            let char = fixed ? fixed.char : draft.letter;
+            let isBlank = fixed ? fixed.isBlank : draft.isBlank;
+            wordStr += char; 
+            
+            let pts = isBlank ? 0 : TILE_DATA[char];
+            if (draft) {
+                draftUsed++;
+                const cell = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+                if (cell.classList.contains('dl')) pts *= 2; if (cell.classList.contains('tl')) pts *= 3;
+                if (cell.classList.contains('dp') || cell.classList.contains('centro')) wordMult *= 2;
+                if (cell.classList.contains('tp')) wordMult *= 3;
+            }
+            wordScore += pts;
+            if (checkHor) c++; else r++;
+        }
+        return { text: wordStr, score: wordScore * wordMult, length: wordStr.length, draftUsed, pos, checkHor };
+    }
+
+    let isHorMain = sameRow;
+    if (sameRow && sameCol) {
+        const d0 = draftTiles[0];
+        isHorMain = (d0.c>0 && boardState[d0.r][d0.c-1]) || (d0.c<14 && boardState[d0.r][d0.c+1]); 
+    }
+
+    let mainWord = extractWord(draftTiles[0].r, draftTiles[0].c, isHorMain);
+    if (mainWord.length > 1 || draftTiles.length === 1) wordsFormed.push(mainWord);
+
+    draftTiles.forEach(d => {
+        let crossWord = extractWord(d.r, d.c, !isHorMain);
+        if (crossWord.length > 1) wordsFormed.push(crossWord);
+    });
+
+    if (!isFirstTurn && wordsFormed.length === 0) return alert("Debes conectar tus fichas con las del tablero.");
+    if (!isFirstTurn && !wordsFormed.some(w => w.length > w.draftUsed)) return alert("Las palabras deben cruzar o tocar letras existentes.");
+
+    let uniqueWords = [], seen = new Set();
+    wordsFormed.forEach(w => {
+        let key = `${w.pos.r},${w.pos.c},${w.checkHor}`;
+        if (!seen.has(key)) { seen.add(key); uniqueWords.push(w); }
+    });
+
+    if (uniqueWords.length === 0) return alert("Jugada inválida.");
+
+    let totalScore = uniqueWords.reduce((sum, w) => sum + w.score, 0);
+    if (draftTiles.length === 7) totalScore += 50;
+
+    pendingScore = totalScore; pendingWord = uniqueWords.map(w => w.text).join(" + ");
+
+    let invalidWords = uniqueWords.map(w => w.text).filter(w => !DICCIONARIO.includes(w));
+    if (invalidWords.length > 0) {
+        document.getElementById('juez-msg').innerHTML = `El sistema no reconoce estas palabras:<br><strong style="color:var(--danger)">${invalidWords.join(", ")}</strong><br>¿Son correctas, profe?`;
+        document.getElementById('juez-modal').classList.remove('hidden');
+    } else {
+        finalizeValidation();
+    }
+}
+
+function resolveJuez(isValid) { document.getElementById('juez-modal').classList.add('hidden'); if (isValid) finalizeValidation(); else alert("Palabras rechazadas. Recupera tus fichas."); }
+
+function finalizeValidation() {
+    isFirstTurn = false;
+    draftTiles.forEach(d => { boardState[d.r][d.c] = { char: d.letter, isBlank: d.isBlank }; players[turnIdx].rack[d.rackIndex] = null; });
+    players[turnIdx].rack = players[turnIdx].rack.filter(l => l !== null);
+    draftTiles = [];
+    
+    let p = players[turnIdx]; p.score += pendingScore;
+    
+    let metasSuperadas = Math.floor(p.score / 50);
+    if (metasSuperadas > p.milestones) {
+        p.tokens += (metasSuperadas - p.milestones); p.milestones = metasSuperadas;
+        playPointAnimation(`¡+1 🃏!`, 'var(--magic)');
+    } else playPointAnimation(`+${pendingScore}`, 'var(--success)');
+
+    logMsg(`<strong>${p.name}</strong>: <span style="color:var(--success)">${pendingWord}</span> (+${pendingScore})`);
+    
+    checkWinCondition();
+}
+
+function checkWinCondition() {
+    let p = players[turnIdx];
+    if (winCondition !== 'classic' && p.score >= parseInt(winCondition)) {
+        finishGame(`¡${p.name} ha alcanzado los ${winCondition} puntos!`); return;
+    }
+    if (winCondition === 'classic' && bag.length === 0 && p.rack.length === 0) {
+        finishGame(`¡${p.name} se ha quedado sin fichas!`); return;
+    }
+    passTurn(false);
+}
+
+function finishGame(reasonStr) {
+    clearInterval(timerInterval);
+    let html = `<p style="color: var(--danger); font-weight: bold; margin-bottom: 2vh;">${reasonStr}</p>`;
+    
+    let penalizations = players.map(p => {
+        let pen = p.rack.reduce((sum, letter) => sum + (letter === '*' ? 0 : TILE_DATA[letter]), 0);
+        p.score = Math.max(0, p.score - pen);
+        return { name: p.name, score: p.score, pen: pen };
+    });
+
+    penalizations.sort((a,b) => b.score - a.score);
+    
+    penalizations.forEach((p, idx) => {
+        let medal = idx === 0 ? '🏆' : (idx === 1 ? '🥈' : '🥉');
+        html += `<div style="background: var(--surface-light); padding: 1vh; border-radius: 6px; margin-bottom: 1vh;">
+                    <strong>${medal} ${p.name}</strong>: <span style="color:var(--primary); font-size:2.5vh; font-weight:900;">${p.score} pts</span> 
+                    <span style="font-size:1.2vh; color:var(--text-muted)">(-${p.pen} por letras sobrantes)</span>
+                 </div>`;
+    });
+
+    document.getElementById('end-scores').innerHTML = html;
+    document.getElementById('end-screen').classList.remove('hidden');
+}
+
+function playPointAnimation(text, color) { const anim = document.createElement('div'); anim.className = 'point-anim'; anim.style.color = color; anim.innerText = text; document.body.appendChild(anim); setTimeout(() => anim.remove(), 2000); }
+
+function startTimer() {
+    if (useTimer <= 0) return; clearInterval(timerInterval); timeLeft = useTimer; updateTimerUI();
+    timerInterval = setInterval(() => {
+        timeLeft--; updateTimerUI();
+        if (timeLeft <= 0) { alert(`¡Tiempo agotado para ${players[turnIdx].name}!`); passTurn(true); }
+    }, 1000);
+}
+function updateTimerUI() { const disp = document.getElementById('timer-display'); disp.innerText = `${String(Math.floor(timeLeft / 60)).padStart(2,'0')}:${String(timeLeft % 60).padStart(2,'0')}`; disp.style.color = timeLeft <= 10 ? 'var(--danger)' : 'var(--text)'; }
+
+function passTurn(skipped = false) {
+    if (skipped) recallDraftTiles();
+    fillRack(players[turnIdx]); turnIdx = (turnIdx + 1) % players.length;
+    selectedRackIdx = null; updateUI(); startTimer();
+}
+
+function logMsg(html) { const log = document.getElementById('log'); const entry = document.createElement('div'); entry.style.marginBottom = "0.5vh"; entry.innerHTML = `• ${html}`; log.prepend(entry); }
+</script>
+</body>
+</html>
