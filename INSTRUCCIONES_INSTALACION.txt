@@ -1,0 +1,165 @@
+LENGUARCADE v0.1 - INSTRUCCIONES DE INSTALACIÓN
+===============================================
+
+QUÉ INCLUYE ESTA VERSIÓN
+------------------------
+1. Backend central en Google Apps Script.
+2. Un único Google Sheets central: LenguArcade_DB.
+3. Panel del alumno con estética arcade tipo launcher/Steam educativo.
+4. Panel del profesor con resumen de clase, progreso, ranking, errores y recomendaciones.
+5. 8 clases ficticias:
+   - 1ESO A, 1ESO B
+   - 2ESO A, 2ESO B
+   - 3ESO A, 3ESO B
+   - 4ESO A, 4ESO B
+6. 30 alumnos ficticios por clase, todos con email terminado en @alumno.fomento.edu.
+7. Catálogo inicial de juegos:
+   - Battlegrafía
+   - Maniacgrafía
+   - Narratoria
+   - Versópolis
+   - Scrabble
+   - Conjuga y Apuesta
+   - Jeopardy de Verbos
+8. Datos demo de progreso para que el panel se pueda probar desde el primer minuto.
+9. Funciones comunes preparadas para integrar juegos mediante saveProgress(payload).
+
+INSTALACIÓN RECOMENDADA
+-----------------------
+1. Crea una hoja de cálculo nueva en Google Sheets.
+2. Ponle este nombre:
+   LenguArcade_DB
+
+3. En esa hoja, ve a:
+   Extensiones > Apps Script
+
+4. En Apps Script, deja o crea estos archivos:
+   - Code.gs
+   - LenguArcade_Alumno.html
+   - LenguArcade_Profesor.html
+
+5. Copia el contenido de cada archivo de esta carpeta en su archivo correspondiente.
+   IMPORTANTE:
+   - El archivo de Apps Script debe llamarse Code.gs.
+   - Los archivos HTML deben llamarse exactamente:
+     LenguArcade_Alumno
+     LenguArcade_Profesor
+   Google Apps Script no muestra la extensión .html en el nombre, pero el archivo sí debe ser de tipo HTML.
+
+6. Ejecuta manualmente la función:
+   setupLenguArcade
+
+7. Autoriza los permisos que pida Google.
+
+8. Cuando termine, vuelve a la hoja de cálculo. Deberían haberse creado estas pestañas:
+   - Config
+   - Clases
+   - Alumnos
+   - Juegos
+   - ProgresoJuegos
+   - Eventos
+   - Logros
+   - Misiones
+   - Evaluaciones
+   - Errores
+   - RawPayloads
+   - BackendErrors
+
+9. Implementa la aplicación web:
+   Apps Script > Implementar > Nueva implementación
+   Tipo: Aplicación web
+   Ejecutar como: Tú
+   Quién tiene acceso: según tu entorno.
+   Para probar, puedes usar "Cualquier usuario con el enlace" o la opción equivalente de tu dominio.
+
+10. Copia la URL de la aplicación web.
+
+CÓMO ABRIR CADA PANEL
+---------------------
+Panel del alumno:
+URL_DE_TU_WEBAPP?page=alumno
+
+Panel del profesor:
+URL_DE_TU_WEBAPP?page=profesor
+
+USO INICIAL
+-----------
+1. Abre el panel del alumno.
+2. Selecciona clase y alumno.
+3. Entra en LenguArcade.
+4. Verás datos demo: nivel, XP, plumas, misiones, ranking y tarjetas de juegos.
+
+5. Abre el panel del profesor.
+6. Filtra por clase o juego.
+7. Comprueba resumen, tabla de alumnos, juegos populares, errores frecuentes y recomendaciones.
+
+CÓMO EDITAR ALUMNOS
+-------------------
+Todo está en la pestaña Alumnos.
+Puedes cambiar:
+- nombre
+- apellidos
+- email
+- curso
+- línea
+- clase
+- avatar
+- activo
+
+Si pones activo = FALSE, el alumno dejará de aparecer en los selectores.
+
+CÓMO EDITAR JUEGOS
+------------------
+Todo está en la pestaña Juegos.
+Puedes cambiar:
+- nombre
+- subtítulo
+- estado
+- orden
+- color
+- icono
+- url
+- descripción
+- activo
+
+Cuando integremos un juego real, pegaremos su URL en la columna url o lo conectaremos desde Apps Script.
+
+FUNCIÓN CENTRAL PARA FUTURAS INTEGRACIONES
+------------------------------------------
+Los juegos integrados tendrán que enviar progreso al backend central con esta función:
+
+saveProgress(payload)
+
+Ejemplo conceptual:
+
+{
+  studentId: "2ESO_A_01",
+  gameId: "maniacgrafia",
+  xpDelta: 40,
+  progress: {
+    xp: 340,
+    percentage: 62,
+    accuracy: 84,
+    attempts: 40,
+    successes: 34,
+    errors: 6,
+    streak: 7
+  },
+  achievements: [
+    { id: "racha_5", title: "Racha de 5", description: "Corrige 5 palabras seguidas." }
+  ],
+  errorsBySkill: {
+    "Acentuación": 2,
+    "b/v": 1
+  },
+  rawGameData: {
+    cualquierDatoPropioDelJuego: true
+  }
+}
+
+SIGUIENTE PASO DEL PROYECTO
+---------------------------
+Cuando esta v0.1 esté instalada y funcione, el siguiente paso lógico es integrar Maniacgrafía como primer juego real.
+
+La prueba completa será:
+Alumno entra en LenguArcade > abre Maniacgrafía > juega > se guarda progreso > aparece en el panel del profesor.
