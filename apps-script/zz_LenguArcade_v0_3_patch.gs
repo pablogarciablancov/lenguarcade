@@ -1,5 +1,6 @@
 /**
  * LenguArcade v0.4.1 - parche acumulativo estable.
+ * Mantiene los nombres V03 para no obligar a cambiar todos los HTML.
  */
 
 function setupLenguArcadeV03() {
