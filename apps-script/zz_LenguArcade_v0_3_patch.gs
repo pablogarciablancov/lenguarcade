@@ -1,6 +1,6 @@
 /**
  * LenguArcade v0.4.1 - parche acumulativo.
- * Funciones añadidas sin romper el backend base.
+ * Añade funciones nuevas sin romper el backend base.
  */
 
 function setupLenguArcadeV03() {
@@ -13,4 +13,4 @@ function setupLenguArcadeV03() {
   migrateStudentPins_();
   upgradeCatalogV03_();
   clearCacheV03_();
-  return { ok:true, version:'0.4.1', spreadsheetUrl
+  return { ok:true, version:'0.4.1', spreadsheetUrl:getDb_().getUrl(), counts
