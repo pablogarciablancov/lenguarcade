@@ -1,27 +1,44 @@
 # Instalación de LenguArcade
 
-## Objetivo de esta versión
+## Requisitos
 
-Esta estructura prepara el repositorio para trabajar de forma ordenada y automática.
+- Node.js
+- Git
+- acceso autorizado al proyecto de Apps Script
 
-La instalación funcional en Google Apps Script se hará con los archivos de `apps-script/`:
+## Preparación local
 
-- `LenguArcade_Code.gs`
-- `LenguArcade_Alumno.html`
-- `LenguArcade_Profesor.html`
+```powershell
+npm.cmd install
+npx.cmd clasp login
+npm.cmd run apps:status
+```
 
-## Pasos previstos
+La autorización de `clasp` solo se repite si Google invalida o revoca la sesión.
 
-1. Crear un proyecto nuevo de Google Apps Script.
-2. Crear los archivos anteriores con el mismo nombre.
-3. Ejecutar `setupLenguArcade()`.
-4. Autorizar permisos.
-5. Desplegar como aplicación web.
-6. Abrir:
+## Publicación
+
+```powershell
+npm.cmd run apps:publish -- "descripcion del cambio"
+```
+
+Este comando:
+
+1. sube `apps-script/`
+2. crea una versión inmutable
+3. actualiza el despliegue web estable
+
+URL estable:
 
 ```text
-URL_WEBAPP?page=alumno
-URL_WEBAPP?page=profesor
+https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec
+```
+
+Paneles:
+
+```text
+URL_ESTABLE?page=alumno
+URL_ESTABLE?page=profesor
 ```
 
 ## Backend
@@ -51,6 +68,8 @@ Con máximo 30 alumnos por clase y correos terminados en:
 @alumno.fomento.edu
 ```
 
-## Próximo hito
+## Precauciones
 
-Subir al repositorio el núcleo funcional `v0.1` y probarlo en Apps Script antes de integrar juegos reales.
+- No ejecutar `clasp pull` con cambios locales pendientes.
+- No crear despliegues nuevos; actualizar el estable.
+- No ejecutar funciones de inicialización o migración sin revisar su efecto sobre la hoja central.

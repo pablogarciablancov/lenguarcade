@@ -21,6 +21,8 @@ apps-script/
   LenguArcade_Code.gs
   LenguArcade_Alumno.html
   LenguArcade_Profesor.html
+  zz_LenguArcade_v0_3_patch.gs
+  appsscript.json
 
 games/
   maniacgrafia/
@@ -41,11 +43,25 @@ docs/
   PRUEBAS.md
 ```
 
-## Estado
+## Desarrollo y publicación
 
-Versión inicial del núcleo: `v0.1`.
+El repositorio está conectado al proyecto de Google Apps Script mediante `clasp`.
 
-Esta versión prepara la base de LenguArcade con Google Apps Script y Google Sheets central, pero todavía no integra en profundidad los juegos reales.
+```powershell
+npm.cmd install
+npm.cmd run apps:status
+npm.cmd run apps:publish -- "descripcion del cambio"
+```
+
+El último comando sube el código, crea una versión inmutable y actualiza el despliegue web estable.
+
+Los recursos visuales públicos se mantienen en:
+
+```text
+https://github.com/pablogarciablancov/lenguarcade-assets
+```
+
+Battlegrafía se mantiene como proyecto independiente y no se modifica desde este repositorio salvo petición expresa.
 
 ## Regla de oro
 

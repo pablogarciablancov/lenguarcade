@@ -18,6 +18,27 @@ La prioridad es que el profesor pueda probar versiones funcionales sin tener que
 8. Separar siempre el núcleo de LenguArcade de los juegos individuales.
 9. Battlegrafía se trata como integración avanzada posterior. No tocarla sin petición expresa.
 10. Documentar cambios en `docs/CAMBIOS.md` y añadir pasos de prueba en `docs/PRUEBAS.md`.
+11. `lenguarcade-assets` es el repositorio de recursos visuales. Mantener estables las rutas públicas de los archivos ya utilizados.
+12. No editar manualmente el proyecto online de Apps Script mientras haya cambios locales pendientes.
+
+## Publicación
+
+El proyecto está conectado con Google Apps Script mediante `clasp`.
+
+- Proyecto Apps Script: `1KQB4f1flavfbkhpfoTWljzTxsQSI6Jb9-qZWnFvbk5VUA8O24pSNi42i`
+- Despliegue web estable: `AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa`
+- Código sincronizado: `apps-script/`
+
+Flujo obligatorio al terminar un cambio solicitado:
+
+1. Ejecutar las comprobaciones disponibles.
+2. Revisar `npm.cmd run apps:status`.
+3. Publicar con `npm.cmd run apps:publish -- "descripcion breve"`.
+4. Comprobar la URL `/exec` en alumno y profesor.
+5. Confirmar los cambios en Git y subirlos a GitHub.
+
+No crear un despliegue web nuevo. Actualizar siempre el despliegue estable indicado arriba.
+No ejecutar funciones de inicialización o migración de datos sin petición expresa.
 
 ## Flujo de trabajo recomendado
 

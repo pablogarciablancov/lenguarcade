@@ -1,3 +1,0 @@
-/** LenguArcade v0.4.1 - parche estable. Copiar este archivo en Apps Script y conservarlo después de los archivos base. */
-function setupLenguArcadeV041(){return setupLenguArcadeV03();}
-function getFastMetaV041(){return {ok:true,version:'0.4.1',classes:[{classCode:'1ESO_A',nombreVisible:'1.º ESO A'},{classCode:'1ESO_B',nombreVisible:'1.º ESO B'},{classCode:'2ESO_A',nombreVisible:'2.º ESO A'},{classCode:'2ESO_B',nombreVisible:'2.º ESO B'},{classCode:'3ESO_A',nombreVisible:'3.º ESO A'},{classCode:'3ESO_B',nombreVisible:'3.º ESO B'},{classCode:'4ESO_A',nombreVisible:'4.º ESO A'},{classCode:'4ESO_B',nombreVisible:'4.º ESO B'}],games:[{gameId:'battlegrafia',nombre:'Battlegrafía',subtitulo:'La aventura de las palabras',categoria:'RPG',estado:'

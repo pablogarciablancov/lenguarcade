@@ -2,7 +2,22 @@
 
 ## Regla general
 
-Cada version debe poder probarse sin tocar codigo manualmente mas alla de copiar los archivos indicados.
+Cada versión debe poder probarse sin copiar código manualmente al editor de Apps Script.
+
+## Comprobación de sincronización
+
+1. Ejecutar `npm.cmd install`.
+2. Ejecutar `npm.cmd run apps:status`.
+3. Confirmar que solo aparecen los archivos de `apps-script/`.
+4. No ejecutar la publicación si aparece un archivo inesperado.
+
+## Publicación
+
+1. Ejecutar `npm.cmd run apps:publish -- "descripcion del cambio"`.
+2. Confirmar que se crea una versión nueva.
+3. Confirmar que se actualiza el despliegue estable.
+4. Abrir la URL `/exec?page=alumno`.
+5. Abrir la URL `/exec?page=profesor`.
 
 ## Pruebas de LenguArcade v0.1
 
