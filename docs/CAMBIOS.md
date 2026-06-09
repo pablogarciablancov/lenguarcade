@@ -4,6 +4,7 @@
 
 - Se sustituyeron los siete banners provisionales por portadas JPG 16:9 con estética de biblioteca de videojuegos.
 - Se añadió un nuevo emblema de LenguArcade y un banner general del universo de juegos.
+- El banner general se refinó con una composición pixel art centrada en una plaza arcade, sin escenas ni personajes repetidos.
 - La vista del alumno muestra la nueva marca en el lateral y en la cabecera.
 - La vista del profesor muestra la nueva marca en el lateral y el banner general en la cabecera.
 - Se añadió favicon PNG en ambas vistas.
