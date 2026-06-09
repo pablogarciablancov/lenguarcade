@@ -1,0 +1,23 @@
+prefix_rule(
+    pattern = ["npm.cmd", "install"],
+    decision = "allow",
+    justification = "Instala únicamente las dependencias declaradas por LenguArcade.",
+    match = [
+        "npm.cmd install",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npm.cmd", "run", ["check", "apps:status", "apps:publish"]],
+    decision = "allow",
+    justification = "Permite validar y publicar LenguArcade mediante los scripts controlados del repositorio.",
+    match = [
+        "npm.cmd run check",
+        "npm.cmd run apps:status",
+        "npm.cmd run apps:publish -- \"Actualiza el panel\"",
+    ],
+    not_match = [
+        "npm.cmd run apps:pull",
+        "npm.cmd run apps:push",
+    ],
+)

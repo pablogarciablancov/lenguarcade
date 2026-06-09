@@ -55,6 +55,8 @@ npm.cmd run apps:publish -- "descripcion del cambio"
 
 El último comando sube el código, crea una versión inmutable y actualiza el despliegue web estable.
 
+La carpeta `.codex/rules/` permite a Codex ejecutar estos comandos concretos sin solicitar permisos repetidos cuando el repositorio está abierto como proyecto confiable.
+
 Los recursos visuales públicos se mantienen en:
 
 ```text

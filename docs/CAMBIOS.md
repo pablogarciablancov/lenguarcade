@@ -7,6 +7,7 @@
 - Se restauró desde la versión 7 publicada el parche completo `zz_LenguArcade_v0_3_patch.gs`.
 - Se eliminaron dos fragmentos v0.4.1 truncados que no eran código ejecutable completo.
 - Se añadió un comando de publicación que actualiza el despliegue estable.
+- Se añadieron reglas limitadas de Codex para evitar permisos repetidos en los comandos de instalación, comprobación y publicación.
 - No se modificó la lógica funcional publicada ni el repositorio de Battlegrafía.
 
 Prueba:
