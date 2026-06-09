@@ -1,5 +1,14 @@
 # Registro de cambios
 
+## 2026-06-09 - Nueva identidad visual y portadas
+
+- Se sustituyeron los siete banners provisionales por portadas JPG 16:9 con estética de biblioteca de videojuegos.
+- Se añadió un nuevo emblema de LenguArcade y un banner general del universo de juegos.
+- La vista del alumno muestra la nueva marca en el lateral y en la cabecera.
+- La vista del profesor muestra la nueva marca en el lateral y el banner general en la cabecera.
+- Se añadió favicon PNG en ambas vistas.
+- No se modificó la lógica de datos, autenticación, progreso ni evaluación.
+
 ## 2026-06-09 - Verificación y protección del despliegue
 
 - Las rutas públicas de alumno y profesor responden con HTTP 200.

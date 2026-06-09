@@ -1,5 +1,14 @@
 # Plan de pruebas
 
+## Identidad visual y portadas
+
+1. Abrir `/exec?page=alumno`.
+2. Confirmar que aparece el emblema nuevo en el lateral y el banner general en la cabecera.
+3. Confirmar que las siete tarjetas cargan portadas JPG distintas sin imágenes rotas.
+4. Cambiar entre modo oscuro y claro y comprobar la legibilidad de título, subtítulo y controles.
+5. Repetir las comprobaciones en `/exec?page=profesor`.
+6. Comprobar en móvil o ventana estrecha que cabecera, logo y tarjetas no desbordan.
+
 ## Regla general
 
 Cada versión debe poder probarse sin copiar código manualmente al editor de Apps Script.
