@@ -3,7 +3,7 @@
  * Este archivo añade funciones nuevas sin romper el backend v0.2.
  */
 
-function setupLenguArcadeV03() {
+function setupLenguArcadeV03_() {
   ensureSheets_();
   seedConfig_();
   seedClasses_();
@@ -34,7 +34,7 @@ function getStudentsByClassV03(classCode) {
   return cachedJsonV03_('students_v03_' + String(classCode || 'all'), function(){
     return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS))
       .filter(s => isTrue_(s.activo) && String(s.clase) === String(classCode))
-      .map(safeStudent_);
+      .map(publicStudent_);
   }, 300);
 }
 

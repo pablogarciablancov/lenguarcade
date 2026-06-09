@@ -14,7 +14,17 @@ if (-not (Test-Path -LiteralPath $clasp)) {
 
 Push-Location $repoRoot
 try {
-  & $clasp push
+  & npm.cmd run check
+  if ($LASTEXITCODE -ne 0) {
+    throw "Las comprobaciones locales han fallado."
+  }
+
+  & $clasp status
+  if ($LASTEXITCODE -ne 0) {
+    throw "No se pudo comprobar la lista de archivos de Apps Script."
+  }
+
+  & $clasp push --force
   if ($LASTEXITCODE -ne 0) {
     throw "clasp push ha fallado."
   }

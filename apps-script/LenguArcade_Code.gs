@@ -13,7 +13,6 @@ const LA_CONFIG = {
   DB_NAME: 'LenguArcade_DB',
   SPREADSHEET_ID: '',
   STUDENT_DOMAIN: '@alumno.fomento.edu',
-  DEFAULT_TEACHER_PASSWORD: 'LenguArcade42',
   SHEETS: {
     CONFIG: 'Config',
     CLASES: 'Clases',
@@ -53,7 +52,7 @@ function doGet(e) {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
-function setupLenguArcade() {
+function setupLenguArcade_() {
   try {
     ensureSheets_();
     seedConfig_();
@@ -85,7 +84,7 @@ function getStudentsByClass(classCode) {
   ensureSheets_();
   return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS))
     .filter(s => isTrue_(s.activo) && String(s.clase) === String(classCode))
-    .map(s => safeStudent_(s));
+    .map(publicStudent_);
 }
 
 function loginStudent(identifier, pin) {
@@ -100,7 +99,8 @@ function loginStudent(identifier, pin) {
 
 function loginTeacher(password) {
   ensureSheets_();
-  const expected = getConfigValue_('TEACHER_PASSWORD') || LA_CONFIG.DEFAULT_TEACHER_PASSWORD;
+  const expected = getConfigValue_('TEACHER_PASSWORD');
+  if (!expected) throw new Error('No hay una clave de profesor configurada.');
   if (String(password || '') !== String(expected)) throw new Error('Clave de profesor incorrecta.');
   return { ok:true, token:createSession_('teacher', 'teacher'), version:LA_CONFIG.VERSION };
 }
@@ -111,7 +111,7 @@ function getStudentDashboardByToken(token) {
   return getStudentDashboardCore_(studentId);
 }
 
-function getStudentDashboard(identifier) {
+function getStudentDashboard_(identifier) {
   ensureSheets_();
   const student = findStudent_(identifier);
   if (!student) throw new Error('No he encontrado ese alumno.');
@@ -127,12 +127,9 @@ function saveProgress(payload) {
   ensureSheets_();
   try {
     payload = payload || {};
-    if (payload.sessionToken) {
-      const sessionStudentId = requireSession_(payload.sessionToken, 'student');
-      payload.studentId = payload.studentId || sessionStudentId;
-      if (String(payload.studentId) !== String(sessionStudentId)) throw new Error('La sesion no corresponde a ese alumno.');
-    }
-    if (!payload.studentId && !payload.email && !payload.studentEmail) throw new Error('saveProgress necesita studentId, email o sessionToken.');
+    const sessionStudentId = requireSession_(payload.sessionToken, 'student');
+    payload.studentId = payload.studentId || sessionStudentId;
+    if (String(payload.studentId) !== String(sessionStudentId)) throw new Error('La sesion no corresponde a ese alumno.');
     if (!payload.gameId) throw new Error('saveProgress necesita gameId.');
     const student = findStudent_(payload.studentId || payload.email || payload.studentEmail);
     if (!student) throw new Error('Alumno no encontrado.');
@@ -171,7 +168,7 @@ function saveProgress(payload) {
   }
 }
 
-function calculateStudentGrade(studentId, gameId) {
+function calculateStudentGradeForTeacher_(studentId, gameId) {
   ensureSheets_();
   return calculateStudentGrade_(studentId, gameId || null);
 }
@@ -291,7 +288,7 @@ function updateStudent_(studentId, fields) {
   sheet.getRange(idx + 2, 1, 1, headers.length).setValues([headers.map(h => merged[h] != null ? merged[h] : '')]);
 }
 
-function seedConfig_() { if (!getConfigValue_('TEACHER_PASSWORD')) setConfigValue_('TEACHER_PASSWORD', LA_CONFIG.DEFAULT_TEACHER_PASSWORD); }
+function seedConfig_() { if (!getConfigValue_('TEACHER_PASSWORD')) setConfigValue_('TEACHER_PASSWORD', Utilities.getUuid().replace(/-/g, '').slice(0, 16)); }
 function getConfigValue_(key) { const r = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.CONFIG)).find(x => String(x.key) === String(key)); return r ? r.value : ''; }
 function setConfigValue_(key, value) { upsertByKeys_(getSheet_(LA_CONFIG.SHEETS.CONFIG), ['key'], { key:key, value:value, updatedAt:nowIso_() }); }
 
@@ -333,6 +330,7 @@ function seedDemoProgress_() {
 function createSession_(type, id) { const token = Utilities.getUuid(); CacheService.getScriptCache().put('LA_SESSION_' + token, JSON.stringify({ type:type, id:id, created:nowIso_() }), 21600); return token; }
 function requireSession_(token, expectedType) { if (!token) throw new Error('Sesion no iniciada.'); const raw = CacheService.getScriptCache().get('LA_SESSION_' + token); if (!raw) throw new Error('Sesion caducada. Vuelve a entrar.'); const s = JSON.parse(raw); if (s.type !== expectedType) throw new Error('Sesion no valida.'); return s.id; }
 function safeStudent_(s) { return { studentId:s.studentId, nombre:s.nombre, apellidos:s.apellidos, email:s.email, clase:s.clase, curso:s.curso, linea:s.linea, avatar:s.avatar, xpGeneral:Number(s.xpGeneral || 0), nivelGeneral:Number(s.nivelGeneral || 1), plumas:Number(s.plumas || 0), ultimaSesion:s.ultimaSesion || '' }; }
+function publicStudent_(s) { return { studentId:s.studentId, nombre:s.nombre, apellidos:s.apellidos, clase:s.clase, avatar:s.avatar }; }
 function getActiveGames_() { return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS)).filter(g => isTrue_(g.activo)).sort((a,b) => Number(a.orden || 0) - Number(b.orden || 0)); }
 function findStudent_(identifier) { const id = String(identifier || '').toLowerCase(); return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS)).find(s => String(s.studentId).toLowerCase() === id || String(s.email).toLowerCase() === id); }
 function findGame_(gameId) { return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS)).find(g => String(g.gameId) === String(gameId)); }

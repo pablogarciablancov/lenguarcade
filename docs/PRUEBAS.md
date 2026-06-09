@@ -25,7 +25,7 @@ Cada versión debe poder probarse sin copiar código manualmente al editor de Ap
 
 1. Crear proyecto de Apps Script.
 2. Copiar los archivos de apps-script.
-3. Ejecutar setupLenguArcade().
+3. Ejecutar `setupLenguArcade_()` desde el editor solo durante una instalación o reparación controlada.
 4. Confirmar que se crea el Google Sheets central.
 
 ### Panel del alumno
