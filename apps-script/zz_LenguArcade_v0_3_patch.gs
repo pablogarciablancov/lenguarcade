@@ -16,12 +16,12 @@ const LA_AVATAR_OPTIONS = {
 
 const LA_AVATAR_DEFAULT = {
   version:1,
-  skin:'warm',
-  hairStyle:'side',
+  skin:'light',
+  hairStyle:'messy',
   hairColor:'brown',
   eyeColor:'brown',
-  jacketColor:'blue',
-  shirtColor:'red',
+  jacketColor:'red',
+  shirtColor:'navy',
   pantsColor:'navy',
   background:'meadow'
 };
@@ -53,12 +53,7 @@ function getPublicMetaV03() {
 }
 
 function getStudentsByClassV03(classCode) {
-  ensureSheets_();
-  return cachedJsonV03_('students_v03_' + String(classCode || 'all'), function(){
-    return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS))
-      .filter(s => isTrue_(s.activo) && String(s.clase) === String(classCode))
-      .map(publicStudent_);
-  }, 300);
+  throw new Error('La lista pública de alumnos no está disponible.');
 }
 
 function changeStudentPinV03(token, oldPin, newPin) {

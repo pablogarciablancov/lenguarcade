@@ -96,6 +96,23 @@ if (!/function updateStudentAvatar\(token,\s*avatarConfig\)[\s\S]*?requireSessio
 if (!/function normalizeStudentAvatar_\(avatarConfig\)[\s\S]*?LA_AVATAR_OPTIONS\[key\]\.indexOf\(value\)\s*<\s*0/.test(serverSource)) {
   errors.push("updateStudentAvatar debe validar todas las opciones del avatar.");
 }
+if (!/function loginStudent\(email,\s*pin\)[\s\S]*?normalizeStudentLoginEmail_\(email\)[\s\S]*?findStudentByEmail_\(cleanEmail\)/.test(serverSource)) {
+  errors.push("El acceso del alumno debe buscar exclusivamente por correo institucional.");
+}
+if (!/function loginStudent\(email,\s*pin\)[\s\S]*?getStudentLoginThrottle_\(cleanEmail\)[\s\S]*?registerStudentLoginFailure_/.test(serverSource)) {
+  errors.push("El acceso del alumno debe limitar los intentos fallidos.");
+}
+if (!/function getStudentsByClass\(classCode\)\s*\{\s*throw new Error/.test(serverSource) ||
+    !/function getStudentsByClassV03\(classCode\)\s*\{\s*throw new Error/.test(serverSource)) {
+  errors.push("Las listas publicas de alumnos deben permanecer desactivadas.");
+}
+
+const studentHtml = fs.readFileSync(path.join(root, "LenguArcade_Alumno.html"), "utf8");
+if (!studentHtml.includes("mountSecureStudentLogin") ||
+    !studentHtml.includes("@alumno.fomento.edu") ||
+    !studentHtml.includes("body.authPending")) {
+  errors.push("La vista del alumno debe quedar bloqueada por el acceso institucional.");
+}
 
 const publicStudentMatch = serverSource.match(/function publicStudent_\(s\)\s*\{([^}]+)\}/);
 if (!publicStudentMatch || /\b(email|pin)\b/.test(publicStudentMatch[1])) {

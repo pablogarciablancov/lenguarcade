@@ -1,5 +1,17 @@
 # Registro de cambios
 
+## 2026-06-10 - Acceso institucional y sprite refinado
+
+- La página del alumno se oculta hasta validar una sesión.
+- La pantalla inicial solicita el correo completo `@alumno.fomento.edu` y el PIN personal.
+- Se eliminaron de la experiencia pública los selectores de clases y alumnos.
+- Las antiguas funciones públicas de listado de alumnos quedan desactivadas para impedir enumeraciones.
+- Los errores de acceso son genéricos, se limitan los intentos fallidos y, cuando Apps Script identifica una cuenta escolar de Google, se exige que coincida con el correo introducido.
+- El avatar se redibujó con una cuadrícula de mayor resolución, rostro y cuerpo más proporcionados, pelo por mechones, chaqueta abierta, pantalones y botas detallados.
+- El personaje predeterminado usa pelo castaño despeinado, piel clara, chaqueta roja y ropa azul para aproximarse a la referencia visual.
+- Se mantienen la personalización de colores, peinado y fondo, así como la compatibilidad con configuraciones guardadas.
+- No se modificaron el progreso, las notas, los juegos ni el panel del profesor.
+
 ## 2026-06-10 - Constructor de avatares pixel art
 
 - Se añadió al perfil del alumno un constructor de personajes de cuerpo entero con estética de videojuego de 16 bits.

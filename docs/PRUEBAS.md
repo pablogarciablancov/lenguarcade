@@ -1,9 +1,20 @@
 # Plan de pruebas
 
+## Acceso institucional
+
+1. Abrir `/exec?page=alumno` en una ventana privada.
+2. Confirmar que solo aparece la pantalla de acceso y que no se ve el panel, ninguna clase ni ningún nombre de alumno.
+3. Probar un correo que no termine en `@alumno.fomento.edu` y comprobar que se rechaza en el navegador.
+4. Probar un correo institucional o PIN incorrectos y confirmar que el mensaje no indica cuál de los dos datos ha fallado.
+5. Iniciar sesión con correo institucional y PIN correctos y confirmar que entonces aparece el panel.
+6. Pulsar `Salir` y comprobar que el panel vuelve a quedar oculto.
+7. Repetir cinco intentos fallidos con una cuenta de prueba y comprobar el bloqueo temporal.
+8. Si el navegador tiene iniciada otra cuenta escolar de Google, confirmar que no permite acceder como un alumno distinto.
+
 ## Avatares personalizables
 
 1. Iniciar sesión como alumno.
-2. Abrir la sección Perfil y confirmar que aparece el personaje de cuerpo entero y todos los controles.
+2. Abrir la sección Perfil y confirmar que el personaje predeterminado tiene chaqueta roja, ropa azul, botas marrones, pelo castaño detallado y proporciones similares a la referencia.
 3. Cambiar peinado, piel, ojos, ropa y fondo, comprobando que la vista previa responde a cada cambio.
 4. Pulsar `Aleatorio` varias veces y confirmar que genera combinaciones válidas.
 5. Pulsar `Guardar` y comprobar que el retrato de la cabecera adopta la combinación elegida.

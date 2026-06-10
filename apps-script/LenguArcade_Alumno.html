@@ -12,8 +12,13 @@
 .brand{position:relative;overflow:hidden;isolation:isolate;min-height:150px}.brand:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,7,18,.96),rgba(5,7,18,.76) 47%,rgba(5,7,18,.12)),url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-hero-banner.jpg?v=20260609-pixel2') center/cover;z-index:-2}.brand:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,212,255,.10),transparent 48%,rgba(255,92,138,.12));z-index:-1}.brand>*{position:relative;z-index:1}.brand .sub{color:#dbeafe;text-shadow:0 2px 10px #000}.brandIcon{width:78px;height:78px;border-radius:22px;font-size:0;background:rgba(6,9,23,.7) url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-logo.png') center/72px 72px no-repeat;border:1px solid rgba(255,255,255,.22);box-shadow:0 12px 30px rgba(0,0,0,.35);backdrop-filter:blur(8px)}
 .avatar{width:72px;height:86px;border-radius:15px;overflow:hidden;border:2px solid rgba(255,255,255,.24);box-shadow:0 10px 24px rgba(0,0,0,.28);image-rendering:pixelated;background:#0b1020}.avatar canvas{display:block;width:100%;height:100%;image-rendering:pixelated}.profileSettings{display:grid;grid-template-columns:220px minmax(0,1fr) minmax(240px,.7fr);gap:22px;align-items:start}.profileSettings h3{margin:0 0 10px;font-size:15px}.avatarBuilder{display:grid;gap:12px}.avatarPreview{width:200px;height:240px;border-radius:22px;overflow:hidden;border:2px solid var(--line);box-shadow:0 16px 30px rgba(0,0,0,.26);background:#0b1020}.avatarPreview canvas{display:block;width:100%;height:100%;image-rendering:pixelated}.avatarActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.avatarActions button{padding:10px;font-size:12px}.avatarControls{display:grid;grid-template-columns:1fr 1fr;gap:14px}.avatarControl{border:1px solid var(--line);border-radius:16px;padding:11px;background:rgba(0,0,0,.14)}.avatarControl>span{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}.avatarControl select{padding:9px 10px}.swatches{display:flex;gap:7px;flex-wrap:wrap}.swatch{width:29px;height:29px;padding:0;margin:0;border-radius:9px;background:var(--swatch);border:2px solid rgba(255,255,255,.32);box-shadow:none}.swatch.selected{border-color:#fff;box-shadow:0 0 0 3px var(--accent)}.avatarStatus{min-height:34px}.activityPanel{min-width:0}@media(max-width:1160px){.profileSettings{grid-template-columns:220px 1fr}.activityPanel{grid-column:1/-1}}@media(max-width:720px){.profileSettings,.avatarControls{grid-template-columns:1fr}.avatarPreview{width:min(220px,100%);height:auto;aspect-ratio:5/6}.activityPanel{grid-column:auto}}
 </style>
+<style>
+.avatar{width:72px;height:108px;border-radius:13px}.profile{grid-template-columns:78px 1fr}.avatarPreview{width:240px;height:360px;border-radius:18px}.profileSettings{grid-template-columns:260px minmax(0,1fr) minmax(240px,.7fr)}
+body.authPending{overflow:hidden}.authPending .rail,.authPending .main>section:not(#loginCard){visibility:hidden;pointer-events:none}.authPending #loginCard{display:block!important;position:fixed;inset:0;z-index:80;margin:0;border:0;border-radius:0;background:radial-gradient(circle at 72% 18%,rgba(0,212,255,.18),transparent 30%),radial-gradient(circle at 18% 85%,rgba(124,77,255,.24),transparent 36%),#070b19;padding:24px;overflow:auto}.authShell{width:min(980px,100%);min-height:calc(100vh - 48px);margin:auto;display:grid;grid-template-columns:minmax(280px,.95fr) minmax(320px,.75fr);align-items:center;gap:42px}.authWelcome{min-height:570px;border-radius:30px;padding:34px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(5,8,20,.06),rgba(5,8,20,.92)),url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-hero-banner.jpg?v=20260609-pixel2') center/cover;border:1px solid rgba(255,255,255,.16);box-shadow:var(--shadow)}.authWelcomeLogo{width:96px;height:96px;position:absolute;top:30px;left:30px;border-radius:24px;background:#09102a url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-logo.png') center/88px no-repeat;border:1px solid rgba(255,255,255,.18)}.authWelcome h1{font-size:48px;line-height:1;margin:0 0 12px}.authWelcome p{max-width:500px;color:#dbeafe;font-size:17px;line-height:1.55;margin:0}.authForm{background:linear-gradient(180deg,rgba(23,33,61,.98),rgba(13,19,39,.98));border:1px solid rgba(255,255,255,.14);border-radius:28px;padding:34px;box-shadow:0 24px 70px rgba(0,0,0,.44)}.authForm h2{font-size:27px;margin-bottom:8px}.authForm .field{margin-top:18px}.authForm input{font-size:16px;padding:15px}.authForm button{width:100%;margin-top:20px;padding:15px;font-size:15px}.authDomain{display:inline-block;margin-top:12px;padding:7px 10px;border-radius:999px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.24);color:#a9ecff;font-size:12px;font-weight:800}.authSecurity{display:flex;gap:9px;align-items:flex-start;margin-top:20px;padding:12px;border-radius:16px;background:rgba(54,211,153,.08);border:1px solid rgba(54,211,153,.18);color:#c8f7e5;font-size:12px;line-height:1.45}.authStatus{min-height:38px;margin-top:14px}.authPending .loader{z-index:70}.authPending #loginCard{visibility:visible!important;pointer-events:auto!important}
+@media(max-width:850px){.authShell{grid-template-columns:1fr;gap:18px}.authWelcome{min-height:280px;padding:24px}.authWelcomeLogo{width:68px;height:68px;top:20px;left:20px;background-size:62px}.authWelcome h1{font-size:36px}.authForm{padding:24px}.profileSettings{grid-template-columns:1fr}.avatarPreview{width:min(240px,100%);height:auto;aspect-ratio:2/3}}
+</style>
 </head>
-<body>
+<body class="authPending">
 <div class="loader open" id="loader"><div class="loaderBox"><div class="loaderTitle">Cargando LenguArcade</div><div class="sub" id="loaderText">Preparando interfaz...</div><div class="loaderBar"><div class="loaderFill" id="loaderFill"></div></div><div><span class="loaderPct" id="loaderPct">0%</span> <span class="sub">estimado</span></div></div></div>
 <div class="app"><aside class="rail"><div class="logoBox"><div class="pixel">LENGU<br>ARCADE</div></div><nav class="nav"><button type="button" class="active" data-target="inicio">🏠 Inicio</button><button type="button" data-target="juegos">🎮 Mis juegos</button><button type="button" data-target="misiones">🎯 Misiones</button><button type="button" data-target="ranking">🏆 Ranking</button><button type="button" data-target="perfil">👤 Perfil</button></nav><div class="railFooter"><button type="button" class="ghost" id="themeBtn">🌓 Modo claro/oscuro</button><button type="button" class="ghost" id="logoutBtn">Salir</button><div class="sub">Aprender jugando. Jugar para expresarse mejor.</div></div></aside><main class="main"><section id="inicio" class="hero"><div class="topCard brand"><div class="brandIcon">✒️</div><div><h1 class="title"><span class="grad">LenguArcade</span></h1><div class="sub">El salón recreativo de las palabras</div></div></div><div class="topCard profile"><div class="avatar" role="img" aria-label="Avatar del alumno"><canvas id="studentAvatar" width="40" height="48"></canvas></div><div><div class="who" id="studentName">Inicia sesión</div><div class="sub" id="studentMail">Elige tu clase, tu nombre y tu PIN.</div></div><div class="stats"><div class="stat"><span>Nivel</span><b id="level">-</b><div class="bar"><div class="fill" id="levelFill"></div></div></div><div class="stat"><span>XP</span><b id="xp">0</b></div><div class="stat"><span>Plumas</span><b id="plumas">0</b></div><div class="stat"><span>Nota</span><b id="grade">-</b></div></div></div></section><section class="card" id="loginCard"><div class="head"><div><h2>Entrada de alumno</h2><div class="sub">Carga rápida: primero clase; después, solo los alumnos de esa clase.</div></div><span class="sub" id="version">v0.4</span></div><div class="login"><div class="field"><label>Clase</label><select id="classSelect"></select></div><div class="field"><label>Alumno</label><select id="studentSelect"></select></div><div class="field"><label>PIN</label><input id="pin" type="password" placeholder="1001"></div><button type="button" id="loginBtn">Entrar</button></div><div class="status" id="status">Cargando...</div></section><section class="layout"><div class="card" id="juegos"><div class="head"><div><h2>Juegos activos</h2><div class="sub">Biblioteca de juegos de Lengua</div></div><button type="button" class="ghost" id="demoBtn">Simular progreso</button></div><div class="games" id="games"></div></div><aside class="sidePanels"><div class="card" id="misiones"><h2>Misiones de hoy</h2><div id="missions"></div></div><div class="card" id="ranking"><h2>Ranking de clase</h2><div id="rankingRows"></div></div></aside></section><section class="card" id="perfil"><div class="head"><div><h2>Perfil</h2><div class="sub">Diseña tu personaje y revisa tu actividad.</div></div><button type="button" class="ghost" id="openPinBtn">Cambiar PIN</button></div><div class="profileSettings"><div class="avatarBuilder"><h3>Tu personaje</h3><div class="avatarPreview"><canvas id="avatarPreview" width="40" height="48"></canvas></div><div class="avatarActions"><button type="button" class="ghost" id="randomAvatarBtn">Aleatorio</button><button type="button" id="saveAvatarBtn">Guardar</button></div><div class="status avatarStatus" id="avatarStatus">Inicia sesión para personalizarlo.</div></div><div><h3>Personalización</h3><div class="avatarControls" id="avatarControls"></div></div><div class="activityPanel"><h3>Actividad reciente</h3><div id="activity"></div></div></div></section></main></div><div class="modal" id="pinModal"><div class="dialog"><h2>Cambiar PIN</h2><div class="field"><label>PIN actual</label><input id="oldPin" type="password"></div><div class="field"><label>Nuevo PIN</label><input id="newPin" type="password" placeholder="4-8 números"></div><div class="actions"><button type="button" id="savePinBtn">Guardar</button><button type="button" class="ghost" id="closePinBtn">Cancelar</button></div><div class="status" id="pinStatus"></div></div></div><div class="modal" id="gameModal"><div class="dialog"><h2 id="gameModalTitle">Juego</h2><p class="sub" id="gameModalText"></p><div class="actions"><button type="button" id="gameModalMain">Entendido</button><button type="button" class="ghost" id="gameModalClose">Cerrar</button></div></div></div>
 <script>
@@ -32,8 +37,8 @@ const AVATAR_OPTIONS_CLIENT={
   background:['meadow','mountains','sunset','library','arcade','moon']
 };
 const AVATAR_DEFAULT_CLIENT={
-  version:1,skin:'warm',hairStyle:'side',hairColor:'brown',eyeColor:'brown',
-  jacketColor:'blue',shirtColor:'red',pantsColor:'navy',background:'meadow'
+  version:1,skin:'light',hairStyle:'messy',hairColor:'brown',eyeColor:'brown',
+  jacketColor:'red',shirtColor:'navy',pantsColor:'navy',background:'meadow'
 };
 const AVATAR_LABELS={
   skin:'Piel',hairStyle:'Peinado',hairColor:'Pelo',eyeColor:'Ojos',
@@ -48,11 +53,11 @@ const AVATAR_LABELS={
 };
 const AVATAR_PALETTES={
   skin:{light:'#f2c7a0',warm:'#d99661',tan:'#bd754b',brown:'#8c563d',deep:'#5b382f'},
-  hairColor:{brown:'#6a3725',black:'#27242c',auburn:'#a34e31',blonde:'#d5a74c',silver:'#c7ccd1'},
+  hairColor:{brown:'#7b401e',black:'#27242c',auburn:'#a34e31',blonde:'#d5a74c',silver:'#c7ccd1'},
   eyeColor:{brown:'#4b2c20',blue:'#3e78a6',green:'#4e7a51',hazel:'#82703e',grey:'#64717d'},
-  jacketColor:{blue:'#315a9a',red:'#a44443',green:'#3e7652',purple:'#704d8c',orange:'#b46736',black:'#41434b'},
+  jacketColor:{blue:'#315a9a',red:'#b6372c',green:'#3e7652',purple:'#704d8c',orange:'#b46736',black:'#41434b'},
   shirtColor:{white:'#e5e1d6',red:'#b6423c',yellow:'#d3ac3e',cyan:'#4ba5ac',pink:'#bd6682',navy:'#34466f'},
-  pantsColor:{navy:'#303b5b',black:'#303137',brown:'#5e4437',green:'#405e49',purple:'#55446a'}
+  pantsColor:{navy:'#254783',black:'#303137',brown:'#5e4437',green:'#405e49',purple:'#55446a'}
 };
 const AVATAR_FIELDS=[
   {key:'hairStyle',type:'select'},{key:'background',type:'select'},
@@ -95,88 +100,111 @@ function shadeHex(hex,amount){
 
 function drawAvatar(canvas,config){
   if(!canvas)return;
+  if(canvas.width!==64||canvas.height!==96){canvas.width=64;canvas.height=96;}
   const avatar=normalizeAvatarConfig(config);
   const ctx=canvas.getContext('2d');
   const p=(x,y,w,h,color)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h);};
-  ctx.clearRect(0,0,40,48);
+  ctx.clearRect(0,0,64,96);
   ctx.imageSmoothingEnabled=false;
-  p(0,0,40,48,'#5a311d');p(1,1,38,46,'#d66d25');p(2,2,36,44,'#f3a13d');p(3,3,34,42,'#1a3657');
+  p(0,0,64,96,'#4b2414');p(2,2,60,92,'#a64d0b');p(4,4,56,88,'#ed8b08');
+  p(6,6,52,84,'#6f310b');p(8,8,48,80,'#17243d');
+  p(4,4,10,4,'#ffc43b');p(50,4,10,4,'#ffc43b');p(4,88,10,4,'#ffc43b');p(50,88,10,4,'#ffc43b');
+  p(7,10,2,70,'#ffab16');p(55,10,2,70,'#8c3e09');
   drawAvatarBackground(p,avatar.background);
 
-  const skin=AVATAR_PALETTES.skin[avatar.skin],skinShadow=shadeHex(skin,-34),skinLight=shadeHex(skin,24);
-  const hair=AVATAR_PALETTES.hairColor[avatar.hairColor],hairShadow=shadeHex(hair,-38),hairLight=shadeHex(hair,27);
+  const skin=AVATAR_PALETTES.skin[avatar.skin],skinShadow=shadeHex(skin,-30),skinDeep=shadeHex(skin,-55),skinLight=shadeHex(skin,25);
+  const hair=AVATAR_PALETTES.hairColor[avatar.hairColor],hairShadow=shadeHex(hair,-42),hairDeep=shadeHex(hair,-68),hairLight=shadeHex(hair,30);
   const eye=AVATAR_PALETTES.eyeColor[avatar.eyeColor];
-  const jacket=AVATAR_PALETTES.jacketColor[avatar.jacketColor],jacketShadow=shadeHex(jacket,-36),jacketLight=shadeHex(jacket,26);
-  const shirt=AVATAR_PALETTES.shirtColor[avatar.shirtColor];
-  const pants=AVATAR_PALETTES.pantsColor[avatar.pantsColor],pantsShadow=shadeHex(pants,-32);
-  const outline='#342b32';
+  const jacket=AVATAR_PALETTES.jacketColor[avatar.jacketColor],jacketShadow=shadeHex(jacket,-40),jacketDeep=shadeHex(jacket,-62),jacketLight=shadeHex(jacket,26);
+  const shirt=AVATAR_PALETTES.shirtColor[avatar.shirtColor],shirtShadow=shadeHex(shirt,-38),shirtLight=shadeHex(shirt,24);
+  const pants=AVATAR_PALETTES.pantsColor[avatar.pantsColor],pantsShadow=shadeHex(pants,-36),pantsDeep=shadeHex(pants,-58),pantsLight=shadeHex(pants,23);
+  const outline='#251a1b',boot='#6a3519',bootShadow='#3a2117',bootLight='#9a5122';
 
-  p(11,42,18,2,'rgba(36,39,45,.35)');
-  p(14,33,5,9,outline);p(21,33,5,9,outline);p(15,34,4,6,pants);p(21,34,4,6,pants);
-  p(15,39,4,3,pantsShadow);p(21,39,4,3,pantsShadow);p(13,41,6,2,'#44352f');p(21,41,6,2,'#44352f');
-  p(14,42,6,1,'#281f20');p(21,42,6,1,'#281f20');
+  p(17,84,30,4,'rgba(16,55,29,.55)');
+  p(17,73,15,14,outline);p(34,73,15,14,outline);p(19,73,12,12,boot);p(35,73,12,12,boot);
+  p(19,76,12,4,bootLight);p(19,82,12,4,bootShadow);p(35,76,12,4,bootLight);p(35,82,12,4,bootShadow);
+  p(17,85,15,3,outline);p(34,85,15,3,outline);
 
-  p(12,23,16,12,outline);p(13,24,14,10,jacket);p(13,31,14,3,jacketShadow);
-  p(14,24,2,7,jacketLight);p(24,24,2,7,jacketShadow);p(18,24,4,8,shirt);
-  p(18,31,4,1,shadeHex(shirt,-28));p(16,32,8,2,'#5a402f');p(19,32,2,2,'#d6a64a');
-  p(9,24,4,9,outline);p(27,24,4,9,outline);p(10,25,3,7,jacket);p(27,25,3,7,jacketShadow);
-  p(10,32,3,3,outline);p(27,32,3,3,outline);p(11,32,2,2,skin);p(27,32,2,2,skinShadow);
+  p(19,55,14,21,outline);p(32,55,14,21,outline);p(21,56,11,18,pants);p(34,56,10,18,pants);
+  p(21,57,3,15,pantsLight);p(29,58,3,16,pantsShadow);p(34,58,3,16,pantsLight);p(41,57,3,17,pantsDeep);
+  p(30,55,5,5,pantsDeep);p(23,70,9,4,pantsShadow);p(34,70,9,4,pantsShadow);
 
-  p(13,9,14,15,outline);p(14,10,12,13,skin);p(14,18,12,5,skinShadow);p(15,11,8,2,skinLight);
-  p(16,16,2,2,'#f4f0df');p(22,16,2,2,'#f4f0df');p(17,16,1,2,eye);p(22,16,1,2,eye);
-  p(19,18,2,1,skinShadow);p(18,21,4,1,'#7e3c37');
-  drawAvatarHair(p,avatar.hairStyle,{hair,hairShadow,hairLight,outline});
+  p(17,37,30,22,outline);p(19,38,26,19,jacket);p(19,51,26,7,jacketDeep);
+  p(21,39,5,14,jacketLight);p(39,39,5,15,jacketShadow);
+  p(27,38,11,18,shirt);p(29,39,7,14,shirtLight);p(34,41,4,13,shirtShadow);
+  p(30,54,7,3,'#4a321e');p(32,54,3,3,'#e4b34a');
+  p(14,40,7,23,outline);p(44,40,7,23,outline);p(16,41,5,18,jacket);p(44,41,5,18,jacketShadow);
+  p(16,43,2,13,jacketLight);p(47,45,2,12,jacketDeep);
+  p(15,58,7,8,outline);p(44,58,7,8,outline);p(17,59,4,5,skin);p(45,59,4,5,skinShadow);
+  p(17,59,2,4,skinLight);p(48,60,1,3,skinDeep);
+
+  p(29,36,8,6,outline);p(30,36,6,6,skinShadow);
+  p(21,18,24,3,outline);p(19,21,28,15,outline);p(22,36,22,5,outline);
+  p(21,20,24,15,skin);p(23,35,20,4,skin);p(19,25,4,9,skinShadow);p(44,24,3,10,skinShadow);
+  p(24,21,16,3,skinLight);p(24,37,18,2,skinShadow);
+  p(27,29,2,4,eye);p(37,29,2,4,eye);p(27,29,1,1,shadeHex(eye,42));p(37,29,1,1,shadeHex(eye,42));
+  p(26,27,5,1,hairDeep);p(35,27,5,1,hairDeep);p(32,32,2,3,skinShadow);p(33,33,2,2,skinDeep);
+  p(29,37,8,2,skinDeep);p(31,37,4,1,'#d57963');
+  drawAvatarHair(p,avatar.hairStyle,{hair,hairShadow,hairDeep,hairLight,outline});
 }
 
 function drawAvatarBackground(p,background){
   if(background==='sunset'){
-    p(3,3,34,16,'#e88b61');p(3,19,34,10,'#744a83');p(27,8,6,6,'#ffd36b');
-    p(3,27,34,18,'#4d5354');p(3,32,34,13,'#34413c');p(5,29,10,3,'#62655b');
+    p(8,8,48,44,'#e37b55');p(8,30,48,25,'#775184');p(44,13,8,8,'#ffd36b');
+    p(8,47,48,41,'#3d5753');p(8,56,48,32,'#29493e');p(10,49,18,5,'#617064');
   }else if(background==='library'){
-    p(3,3,34,42,'#513826');p(5,5,30,23,'#7a5230');
-    [7,13,19].forEach(y=>{p(5,y,30,1,'#2f261f');for(let x=6;x<34;x+=3)p(x,y-4,2,4,['#9b4c42','#426a74','#ba8a3e'][x%3]);});
-    p(3,28,34,17,'#835f3c');p(3,37,34,2,'#65442f');
+    p(8,8,48,80,'#4d3324');p(11,10,42,43,'#765030');
+    [19,31,43].forEach(y=>{p(11,y,42,2,'#2b211b');for(let x=13;x<52;x+=5)p(x,y-8,3,8,['#9b4c42','#426a74','#ba8a3e'][x%3]);});
+    p(8,53,48,35,'#7f5a39');p(8,70,48,3,'#5d3e2d');
   }else if(background==='arcade'){
-    p(3,3,34,42,'#181b3c');p(5,5,30,22,'#27205b');p(7,8,9,14,'#553270');
-    p(8,9,7,7,'#35a9b8');p(24,7,9,15,'#3d397e');p(25,8,7,8,'#cf4a87');
-    p(3,29,34,16,'#202746');p(3,37,34,1,'#8d3e91');p(10,29,1,16,'#315d83');p(30,29,1,16,'#315d83');
+    p(8,8,48,80,'#171936');p(10,10,44,40,'#28205b');p(12,16,14,27,'#553270');
+    p(14,18,10,12,'#35a9b8');p(39,14,13,29,'#3d397e');p(41,17,9,13,'#cf4a87');
+    p(8,53,48,35,'#202746');p(8,71,48,2,'#8d3e91');p(18,53,2,35,'#315d83');p(48,53,2,35,'#315d83');
   }else if(background==='moon'){
-    p(3,3,34,42,'#17264b');p(27,6,7,7,'#e6ddaa');p(29,6,3,2,'#b9b68f');
-    p(6,8,1,1,'#d7e8ff');p(18,6,1,1,'#d7e8ff');p(33,17,1,1,'#d7e8ff');
-    p(3,27,34,18,'#263d4d');p(3,32,34,13,'#1e463d');p(6,29,8,3,'#34575a');
+    p(8,8,48,80,'#16254a');p(43,13,10,10,'#e6ddaa');p(47,13,4,3,'#b9b68f');
+    p(13,17,2,2,'#d7e8ff');p(31,12,1,2,'#d7e8ff');p(51,33,2,2,'#d7e8ff');
+    p(8,48,48,40,'#263d4d');p(8,58,48,30,'#1e463d');p(11,51,16,6,'#34575a');
   }else{
     const mountains=background==='mountains';
-    p(3,3,34,22,mountains?'#73add2':'#6dc1e6');p(7,7,8,3,'#eff5ed');p(5,9,13,3,'#eff5ed');p(27,10,7,3,'#e6f1ed');
+    p(8,8,48,46,mountains?'#68b4e7':'#3eaaf1');
+    p(11,20,8,5,'#eaf6ff');p(9,24,15,6,'#eaf6ff');p(16,27,12,5,'#eaf6ff');
+    p(46,18,7,5,'#dff2ff');p(42,22,14,7,'#dff2ff');
     if(mountains){
-      p(3,17,8,10,'#657b8a');p(8,13,12,14,'#758b96');p(17,16,12,11,'#536f77');p(25,12,12,15,'#6d818e');
-      p(9,13,4,4,'#e8eee9');p(27,12,4,4,'#e8eee9');
+      p(8,40,13,18,'#4f8297');p(17,32,18,26,'#6096a5');p(31,38,17,20,'#3e7489');p(43,31,13,27,'#56889b');
+      p(19,32,6,7,'#e5f0ec');p(45,31,5,7,'#e5f0ec');
     }else{
-      p(3,21,10,8,'#4c9870');p(9,18,14,11,'#68aa6f');p(22,20,15,9,'#3f8a67');
+      p(8,43,15,17,'#2d8e96');p(19,39,19,21,'#3b9fa0');p(35,43,21,17,'#287d8a');
     }
-    p(3,27,34,18,'#4e9b50');p(3,31,34,14,'#3e8745');
-    p(5,29,1,2,'#7cc85c');p(9,35,1,2,'#7cc85c');p(31,32,1,2,'#76bf56');p(34,39,1,2,'#76bf56');
+    p(8,55,48,33,'#159044');p(8,64,48,24,'#08723c');p(8,80,48,8,'#075c35');
+    p(11,58,4,3,'#43b64d');p(18,69,3,5,'#3fb84c');p(47,62,4,3,'#42bc4c');p(52,77,2,5,'#60c34b');
+    p(14,75,2,2,'#f2c73f');p(16,73,2,2,'#f2c73f');p(48,68,2,2,'#ffd14c');p(50,70,2,2,'#ffd14c');
   }
 }
 
 function drawAvatarHair(p,style,colors){
-  const {hair,hairShadow,hairLight,outline}=colors;
-  p(12,8,16,7,outline);p(13,7,13,7,hair);p(15,6,9,3,hair);p(17,5,5,2,hair);
-  p(14,8,5,2,hairLight);p(13,13,3,6,hairShadow);p(24,12,3,7,hairShadow);
-  p(15,11,3,3,hair);p(22,10,4,4,hair);
+  const {hair,hairShadow,hairDeep,hairLight,outline}=colors;
+  p(18,13,29,12,outline);p(16,17,7,15,outline);p(43,17,6,16,outline);
+  p(20,12,24,5,hair);p(18,16,29,10,hair);p(18,22,7,12,hairShadow);p(41,21,7,13,hairDeep);
+  p(22,14,7,4,hairLight);p(30,16,6,5,hairShadow);p(38,14,6,5,hairLight);
+  p(22,23,7,6,hair);p(37,22,8,7,hairShadow);
   if(style==='messy'){
-    p(12,6,3,4,hair);p(15,4,3,4,hair);p(21,4,3,3,hair);p(25,6,3,4,hair);
+    p(17,11,6,7,hair);p(21,8,6,7,hair);p(27,10,5,5,hairLight);p(32,7,8,8,hair);
+    p(39,10,7,7,hairShadow);p(45,14,5,9,hairDeep);p(14,19,5,8,hairDeep);
+    p(25,18,6,8,hair);p(34,19,5,7,hairShadow);
   }else if(style==='curly'){
-    p(11,8,4,5,outline);p(25,8,4,5,outline);p(12,7,4,5,hair);p(24,7,4,5,hair);
-    p(11,13,4,5,hairShadow);p(25,13,4,5,hairShadow);p(13,5,4,4,hair);p(22,5,4,4,hair);
+    p(14,15,8,9,outline);p(43,14,8,10,outline);p(17,10,9,8,hair);p(24,8,9,9,hairShadow);
+    p(32,9,9,8,hair);p(40,11,8,8,hairShadow);p(15,23,8,11,hairDeep);p(43,23,8,11,hairDeep);
   }else if(style==='bob'){
-    p(11,9,4,13,outline);p(25,9,4,13,outline);p(12,10,3,11,hair);p(25,10,3,11,hairShadow);
+    p(15,17,8,24,outline);p(43,17,8,24,outline);p(17,18,6,22,hair);p(43,18,6,22,hairShadow);
+    p(18,36,8,6,hairDeep);p(40,36,9,6,hairDeep);
   }else if(style==='braids'){
-    p(11,13,4,12,outline);p(25,13,4,12,outline);p(12,14,2,10,hair);p(26,14,2,10,hairShadow);
-    p(11,23,4,3,hairShadow);p(25,23,4,3,hairShadow);
+    p(14,22,7,27,outline);p(45,22,7,27,outline);p(16,23,4,24,hair);p(46,23,4,24,hairShadow);
+    p(14,45,8,6,hairDeep);p(44,45,8,6,hairDeep);p(15,32,6,4,hairLight);p(45,34,6,4,hair);
   }else if(style==='short'){
-    p(13,7,14,5,hair);p(14,11,3,3,hairShadow);p(24,10,3,3,hairShadow);
+    p(20,11,25,7,hair);p(18,15,29,8,hair);p(19,22,7,6,hairShadow);p(41,21,6,7,hairDeep);
   }else{
-    p(12,7,5,8,hair);p(11,10,4,7,hairShadow);p(22,6,5,7,hair);p(25,10,3,8,hairShadow);
+    p(16,13,9,15,hair);p(14,18,7,13,hairDeep);p(23,10,10,10,hairLight);
+    p(36,11,10,11,hair);p(43,16,7,17,hairDeep);p(25,20,7,8,hair);
   }
 }
 
@@ -251,6 +279,140 @@ renderDashboard=function(dashboard){
   applyAvatarProfile(dashboard);
 };
 applyAvatarProfile(currentDashboard);
+</script>
+<script>
+let secureSessionVerified=false;
+const studentCallServerBase=callServer;
+callServer=function(fn,args){
+  return studentCallServerBase(fn,args).then(result=>{
+    if(fn==='getStudentDashboardByToken')secureSessionVerified=true;
+    return result;
+  });
+};
+
+renderClasses=function(){};
+loadStudentsForClass=async function(){};
+renderStudents=function(){};
+
+function secureLoginElement(selector){
+  return $('loginCard').querySelector(selector);
+}
+
+function mountSecureStudentLogin(){
+  document.body.classList.add('authPending');
+  const card=$('loginCard');
+  card.classList.remove('hidden');
+  card.innerHTML=`
+    <div class="authShell">
+      <section class="authWelcome">
+        <div class="authWelcomeLogo" aria-hidden="true"></div>
+        <h1><span class="grad">LenguArcade</span></h1>
+        <p>Tu universo de juegos de Lengua. Identifícate antes de entrar para que tu progreso, tus logros y tu personaje sean solo tuyos.</p>
+      </section>
+      <section class="authForm" aria-labelledby="secureLoginTitle">
+        <div class="sub">ACCESO DE ALUMNOS</div>
+        <h2 id="secureLoginTitle">Entra en tu cuenta</h2>
+        <p class="sub">Usa tu correo institucional completo y tu PIN personal.</p>
+        <span class="authDomain">@alumno.fomento.edu</span>
+        <div class="field">
+          <label>Correo institucional</label>
+          <input name="studentEmail" type="email" inputmode="email" autocomplete="username" placeholder="nombre.apellidos@alumno.fomento.edu" spellcheck="false">
+        </div>
+        <div class="field">
+          <label>PIN</label>
+          <input name="studentPin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" placeholder="Tu PIN">
+        </div>
+        <button type="button" data-secure-login>Entrar en LenguArcade</button>
+        <div class="status authStatus" data-auth-status>Introduce tus datos para continuar.</div>
+        <div class="authSecurity"><span>✓</span><span>No mostramos listas de clases ni de alumnos. Si has iniciado sesión con una cuenta escolar de Google, también comprobamos que coincida con el correo introducido.</span></div>
+      </section>
+    </div>`;
+
+  ['version','status'].forEach(id=>{
+    const hidden=document.createElement('span');
+    hidden.id=id;
+    hidden.hidden=true;
+    card.appendChild(hidden);
+  });
+
+  const email=secureLoginElement('[name="studentEmail"]');
+  const pinInput=secureLoginElement('[name="studentPin"]');
+  const button=secureLoginElement('[data-secure-login]');
+  const submit=()=>secureStudentLogin();
+  button.onclick=submit;
+  email.addEventListener('keydown',event=>{if(event.key==='Enter')pinInput.focus();});
+  pinInput.addEventListener('keydown',event=>{if(event.key==='Enter')submit();});
+  setTimeout(()=>email.focus(),0);
+}
+
+function setSecureLoginStatus(message){
+  const status=secureLoginElement('[data-auth-status]');
+  if(status)status.textContent=message;
+}
+
+function revealStudentApp(){
+  document.body.classList.remove('authPending');
+  $('loginCard').classList.add('hidden');
+}
+
+async function secureStudentLogin(){
+  if(busy)return;
+  const email=String(secureLoginElement('[name="studentEmail"]').value||'').trim().toLowerCase();
+  const pinValue=String(secureLoginElement('[name="studentPin"]').value||'').trim();
+  const button=secureLoginElement('[data-secure-login]');
+  if(!/^[^@\s]+@alumno\.fomento\.edu$/i.test(email)){
+    setSecureLoginStatus('Introduce tu correo completo @alumno.fomento.edu.');
+    return;
+  }
+  if(!/^\d{4,8}$/.test(pinValue)){
+    setSecureLoginStatus('El PIN debe tener entre 4 y 8 números.');
+    return;
+  }
+  busy=true;
+  button.disabled=true;
+  setSecureLoginStatus('Comprobando tus datos...');
+  try{
+    const result=await callServer('loginStudent',[email,pinValue]);
+    secureSessionVerified=true;
+    token=result.token;
+    localStorage.setItem('LA_STUDENT_TOKEN',token);
+    currentDashboard=result.dashboard;
+    saveCache('LA_DASHBOARD_CACHE',currentDashboard);
+    renderDashboard(currentDashboard);
+    revealStudentApp();
+  }catch(error){
+    secureSessionVerified=false;
+    setSecureLoginStatus(error.message||'No se ha podido iniciar sesión.');
+  }finally{
+    busy=false;
+    button.disabled=false;
+  }
+}
+
+function secureStudentLogout(){
+  localStorage.removeItem('LA_STUDENT_TOKEN');
+  localStorage.removeItem('LA_DASHBOARD_CACHE');
+  token='';
+  currentDashboard=null;
+  secureSessionVerified=false;
+  document.body.classList.add('authPending');
+  $('loginCard').classList.remove('hidden');
+  const pinInput=secureLoginElement('[name="studentPin"]');
+  if(pinInput)pinInput.value='';
+  setSecureLoginStatus('Sesión cerrada correctamente.');
+}
+
+login=secureStudentLogin;
+logout=secureStudentLogout;
+$('logoutBtn').onclick=secureStudentLogout;
+
+const renderDashboardWithSecureAccess=renderDashboard;
+renderDashboard=function(dashboard){
+  renderDashboardWithSecureAccess(dashboard);
+  if(secureSessionVerified)revealStudentApp();
+};
+
+mountSecureStudentLogin();
 </script>
 </body>
 </html>

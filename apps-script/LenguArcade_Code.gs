@@ -81,17 +81,35 @@ function getPublicMeta() {
 }
 
 function getStudentsByClass(classCode) {
-  ensureSheets_();
-  return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS))
-    .filter(s => isTrue_(s.activo) && String(s.clase) === String(classCode))
-    .map(publicStudent_);
+  throw new Error('La lista pública de alumnos no está disponible.');
 }
 
-function loginStudent(identifier, pin) {
+function loginStudent(email, pin) {
   ensureSheets_();
-  const student = findStudent_(identifier);
-  if (!student) throw new Error('No he encontrado ese alumno.');
-  if (String(student.pin || '') !== String(pin || '')) throw new Error('PIN incorrecto.');
+  const cleanEmail = normalizeStudentLoginEmail_(email);
+  const cleanPin = String(pin || '').trim();
+  const throttle = getStudentLoginThrottle_(cleanEmail);
+  if (throttle.blockedUntil > Date.now()) {
+    throw new Error('Demasiados intentos. Espera unos minutos antes de volver a probar.');
+  }
+
+  const student = findStudentByEmail_(cleanEmail);
+  const activeUserEmail = String(getActiveUserEmail_() || '').trim().toLowerCase();
+  const activeSchoolAccount = activeUserEmail.endsWith(LA_CONFIG.STUDENT_DOMAIN);
+  const accountMatches = !activeSchoolAccount || activeUserEmail === cleanEmail;
+  const valid = student &&
+    isTrue_(student.activo) &&
+    /^\d{4,8}$/.test(cleanPin) &&
+    String(student.pin || '') === cleanPin &&
+    accountMatches;
+
+  if (!valid) {
+    registerStudentLoginFailure_(cleanEmail, throttle);
+    Utilities.sleep(300);
+    throw new Error('Correo o PIN incorrectos.');
+  }
+
+  clearStudentLoginFailures_(cleanEmail);
   const token = createSession_('student', student.studentId);
   touchStudent_(student.studentId);
   return { ok:true, token:token, student:safeStudent_(student), dashboard:getStudentDashboardCore_(student.studentId) };
@@ -333,6 +351,29 @@ function safeStudent_(s) { return { studentId:s.studentId, nombre:s.nombre, apel
 function publicStudent_(s) { return { studentId:s.studentId, nombre:s.nombre, apellidos:s.apellidos, clase:s.clase, avatar:s.avatar }; }
 function getActiveGames_() { return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS)).filter(g => isTrue_(g.activo)).sort((a,b) => Number(a.orden || 0) - Number(b.orden || 0)); }
 function findStudent_(identifier) { const id = String(identifier || '').toLowerCase(); return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS)).find(s => String(s.studentId).toLowerCase() === id || String(s.email).toLowerCase() === id); }
+function findStudentByEmail_(email) { const clean = String(email || '').trim().toLowerCase(); return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS)).find(s => String(s.email || '').trim().toLowerCase() === clean); }
+function normalizeStudentLoginEmail_(email) {
+  const clean = String(email || '').trim().toLowerCase();
+  const escapedDomain = LA_CONFIG.STUDENT_DOMAIN.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (!new RegExp('^[^@\\s]+' + escapedDomain + '$').test(clean)) throw new Error('Introduce tu correo completo @alumno.fomento.edu.');
+  return clean;
+}
+function studentLoginThrottleKey_(email) {
+  const digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, email, Utilities.Charset.UTF_8);
+  return 'LA_LOGIN_' + Utilities.base64EncodeWebSafe(digest).slice(0, 42);
+}
+function getStudentLoginThrottle_(email) {
+  const raw = CacheService.getScriptCache().get(studentLoginThrottleKey_(email));
+  if (!raw) return { count:0, blockedUntil:0 };
+  try { return JSON.parse(raw); } catch (err) { return { count:0, blockedUntil:0 }; }
+}
+function registerStudentLoginFailure_(email, previous) {
+  const state = previous || { count:0, blockedUntil:0 };
+  state.count = Number(state.count || 0) + 1;
+  if (state.count >= 5) state.blockedUntil = Date.now() + 15 * 60 * 1000;
+  CacheService.getScriptCache().put(studentLoginThrottleKey_(email), JSON.stringify(state), 900);
+}
+function clearStudentLoginFailures_(email) { CacheService.getScriptCache().remove(studentLoginThrottleKey_(email)); }
 function findGame_(gameId) { return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS)).find(g => String(g.gameId) === String(gameId)); }
 function touchStudent_(studentId) { updateStudent_(studentId, { ultimaSesion:nowIso_() }); }
 function recalculateStudentGeneral_(studentId) { const rows = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.PROGRESO)).filter(r => String(r.studentId) === String(studentId)).map(normalizeProgressRow_); const xp = rows.reduce((a,r) => a + Number(r.xp || 0), 0); const plumas = rows.reduce((a,r) => a + Number(r.plumas || 0), 0); updateStudent_(studentId, { xpGeneral:xp, nivelGeneral:Math.floor(xp / 500) + 1, plumas:plumas, ultimaSesion:nowIso_() }); }
