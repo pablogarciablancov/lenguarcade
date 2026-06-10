@@ -1,5 +1,17 @@
 # Plan de pruebas
 
+## Avatares personalizables
+
+1. Iniciar sesión como alumno.
+2. Abrir la sección Perfil y confirmar que aparece el personaje de cuerpo entero y todos los controles.
+3. Cambiar peinado, piel, ojos, ropa y fondo, comprobando que la vista previa responde a cada cambio.
+4. Pulsar `Aleatorio` varias veces y confirmar que genera combinaciones válidas.
+5. Pulsar `Guardar` y comprobar que el retrato de la cabecera adopta la combinación elegida.
+6. Recargar la página y confirmar que se conserva.
+7. Cerrar sesión, volver a entrar con el mismo alumno y confirmar que sigue seleccionado.
+8. Comprobar que otro alumno mantiene su propia configuración.
+9. Revisar el editor en escritorio y móvil, especialmente selectores, muestras de color y proporción del personaje.
+
 ## Identidad visual y portadas
 
 1. Abrir `/exec?page=alumno`.

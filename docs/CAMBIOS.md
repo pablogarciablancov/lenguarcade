@@ -1,5 +1,16 @@
 # Registro de cambios
 
+## 2026-06-10 - Constructor de avatares pixel art
+
+- Se añadió al perfil del alumno un constructor de personajes de cuerpo entero con estética de videojuego de 16 bits.
+- Se pueden combinar tono de piel, peinado, color de pelo, color de ojos, chaqueta, camiseta, pantalón y escenario.
+- La vista previa se dibuja por capas en un `canvas` de baja resolución para conservar píxeles nítidos al ampliarlo.
+- Se añadió un botón para generar combinaciones aleatorias.
+- La configuración se guarda como JSON en la columna `avatar` de la hoja `Alumnos` y reaparece en la cabecera y entre sesiones.
+- Los antiguos identificadores `avatar_01` a `avatar_12` se convierten automáticamente a una combinación compatible.
+- El servidor exige una sesión de alumno y valida cada opción contra una lista cerrada.
+- No se modificaron el PIN, el progreso, las notas ni la evaluación.
+
 ## 2026-06-09 - Nueva identidad visual y portadas
 
 - Se sustituyeron los siete banners provisionales por portadas JPG 16:9 con estética de biblioteca de videojuegos.

@@ -3,6 +3,29 @@
  * Este archivo añade funciones nuevas sin romper el backend v0.2.
  */
 
+const LA_AVATAR_OPTIONS = {
+  skin:['light','warm','tan','brown','deep'],
+  hairStyle:['side','messy','curly','bob','braids','short'],
+  hairColor:['brown','black','auburn','blonde','silver'],
+  eyeColor:['brown','blue','green','hazel','grey'],
+  jacketColor:['blue','red','green','purple','orange','black'],
+  shirtColor:['white','red','yellow','cyan','pink','navy'],
+  pantsColor:['navy','black','brown','green','purple'],
+  background:['meadow','mountains','sunset','library','arcade','moon']
+};
+
+const LA_AVATAR_DEFAULT = {
+  version:1,
+  skin:'warm',
+  hairStyle:'side',
+  hairColor:'brown',
+  eyeColor:'brown',
+  jacketColor:'blue',
+  shirtColor:'red',
+  pantsColor:'navy',
+  background:'meadow'
+};
+
 function setupLenguArcadeV03_() {
   ensureSheets_();
   seedConfig_();
@@ -49,6 +72,51 @@ function changeStudentPinV03(token, oldPin, newPin) {
   updateStudent_(studentId, { pin:clean });
   clearCacheV03_();
   return { ok:true, message:'PIN actualizado correctamente.' };
+}
+
+function updateStudentAvatar(token, avatarConfig) {
+  ensureSheets_();
+  const studentId = requireSession_(token, 'student');
+  if (!findStudent_(studentId)) throw new Error('Alumno no encontrado.');
+  const clean = normalizeStudentAvatar_(avatarConfig);
+  updateStudent_(studentId, { avatar:JSON.stringify(clean) });
+  clearCacheV03_();
+  return {
+    ok:true,
+    avatar:clean,
+    message:'Avatar actualizado correctamente.',
+    dashboard:getStudentDashboardCore_(studentId)
+  };
+}
+
+function normalizeStudentAvatar_(avatarConfig) {
+  let input = avatarConfig;
+  if (typeof input === 'string') {
+    const raw = input.trim();
+    if (raw.charAt(0) === '{') {
+      try { input = JSON.parse(raw); } catch (err) { throw new Error('Configuración de avatar no válida.'); }
+    } else if (/^avatar_\d{2}$/.test(raw)) {
+      const index = Math.max(0, Number(raw.slice(-2)) - 1);
+      input = {
+        skin:LA_AVATAR_OPTIONS.skin[index % LA_AVATAR_OPTIONS.skin.length],
+        hairStyle:LA_AVATAR_OPTIONS.hairStyle[index % LA_AVATAR_OPTIONS.hairStyle.length],
+        hairColor:LA_AVATAR_OPTIONS.hairColor[index % LA_AVATAR_OPTIONS.hairColor.length],
+        eyeColor:LA_AVATAR_OPTIONS.eyeColor[index % LA_AVATAR_OPTIONS.eyeColor.length],
+        jacketColor:LA_AVATAR_OPTIONS.jacketColor[index % LA_AVATAR_OPTIONS.jacketColor.length],
+        shirtColor:LA_AVATAR_OPTIONS.shirtColor[(index + 1) % LA_AVATAR_OPTIONS.shirtColor.length],
+        pantsColor:LA_AVATAR_OPTIONS.pantsColor[index % LA_AVATAR_OPTIONS.pantsColor.length],
+        background:LA_AVATAR_OPTIONS.background[index % LA_AVATAR_OPTIONS.background.length]
+      };
+    }
+  }
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Configuración de avatar no válida.');
+  const clean = { version:1 };
+  Object.keys(LA_AVATAR_OPTIONS).forEach(function(key) {
+    const value = String(input[key] || LA_AVATAR_DEFAULT[key]);
+    if (LA_AVATAR_OPTIONS[key].indexOf(value) < 0) throw new Error('Opción de avatar no válida: ' + key);
+    clean[key] = value;
+  });
+  return clean;
 }
 
 function getTeacherDashboardV03(filters, token) {

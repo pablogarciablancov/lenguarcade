@@ -10,14 +10,247 @@
 /* Identidad visual LenguArcade */
 .logoBox{overflow:hidden;background:#070d22}.pixel{width:92px;height:92px;border-radius:22px;font-size:0;background:url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-logo.png') center/cover;filter:drop-shadow(0 12px 16px rgba(0,0,0,.35))}
 .brand{position:relative;overflow:hidden;isolation:isolate;min-height:150px}.brand:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,7,18,.96),rgba(5,7,18,.76) 47%,rgba(5,7,18,.12)),url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-hero-banner.jpg?v=20260609-pixel2') center/cover;z-index:-2}.brand:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,212,255,.10),transparent 48%,rgba(255,92,138,.12));z-index:-1}.brand>*{position:relative;z-index:1}.brand .sub{color:#dbeafe;text-shadow:0 2px 10px #000}.brandIcon{width:78px;height:78px;border-radius:22px;font-size:0;background:rgba(6,9,23,.7) url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-logo.png') center/72px 72px no-repeat;border:1px solid rgba(255,255,255,.22);box-shadow:0 12px 30px rgba(0,0,0,.35);backdrop-filter:blur(8px)}
+.avatar{width:72px;height:86px;border-radius:15px;overflow:hidden;border:2px solid rgba(255,255,255,.24);box-shadow:0 10px 24px rgba(0,0,0,.28);image-rendering:pixelated;background:#0b1020}.avatar canvas{display:block;width:100%;height:100%;image-rendering:pixelated}.profileSettings{display:grid;grid-template-columns:220px minmax(0,1fr) minmax(240px,.7fr);gap:22px;align-items:start}.profileSettings h3{margin:0 0 10px;font-size:15px}.avatarBuilder{display:grid;gap:12px}.avatarPreview{width:200px;height:240px;border-radius:22px;overflow:hidden;border:2px solid var(--line);box-shadow:0 16px 30px rgba(0,0,0,.26);background:#0b1020}.avatarPreview canvas{display:block;width:100%;height:100%;image-rendering:pixelated}.avatarActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.avatarActions button{padding:10px;font-size:12px}.avatarControls{display:grid;grid-template-columns:1fr 1fr;gap:14px}.avatarControl{border:1px solid var(--line);border-radius:16px;padding:11px;background:rgba(0,0,0,.14)}.avatarControl>span{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}.avatarControl select{padding:9px 10px}.swatches{display:flex;gap:7px;flex-wrap:wrap}.swatch{width:29px;height:29px;padding:0;margin:0;border-radius:9px;background:var(--swatch);border:2px solid rgba(255,255,255,.32);box-shadow:none}.swatch.selected{border-color:#fff;box-shadow:0 0 0 3px var(--accent)}.avatarStatus{min-height:34px}.activityPanel{min-width:0}@media(max-width:1160px){.profileSettings{grid-template-columns:220px 1fr}.activityPanel{grid-column:1/-1}}@media(max-width:720px){.profileSettings,.avatarControls{grid-template-columns:1fr}.avatarPreview{width:min(220px,100%);height:auto;aspect-ratio:5/6}.activityPanel{grid-column:auto}}
 </style>
 </head>
 <body>
 <div class="loader open" id="loader"><div class="loaderBox"><div class="loaderTitle">Cargando LenguArcade</div><div class="sub" id="loaderText">Preparando interfaz...</div><div class="loaderBar"><div class="loaderFill" id="loaderFill"></div></div><div><span class="loaderPct" id="loaderPct">0%</span> <span class="sub">estimado</span></div></div></div>
-<div class="app"><aside class="rail"><div class="logoBox"><div class="pixel">LENGU<br>ARCADE</div></div><nav class="nav"><button type="button" class="active" data-target="inicio">🏠 Inicio</button><button type="button" data-target="juegos">🎮 Mis juegos</button><button type="button" data-target="misiones">🎯 Misiones</button><button type="button" data-target="ranking">🏆 Ranking</button><button type="button" data-target="perfil">👤 Perfil</button></nav><div class="railFooter"><button type="button" class="ghost" id="themeBtn">🌓 Modo claro/oscuro</button><button type="button" class="ghost" id="logoutBtn">Salir</button><div class="sub">Aprender jugando. Jugar para expresarse mejor.</div></div></aside><main class="main"><section id="inicio" class="hero"><div class="topCard brand"><div class="brandIcon">✒️</div><div><h1 class="title"><span class="grad">LenguArcade</span></h1><div class="sub">El salón recreativo de las palabras</div></div></div><div class="topCard profile"><div class="avatar">🧑‍🚀</div><div><div class="who" id="studentName">Inicia sesión</div><div class="sub" id="studentMail">Elige tu clase, tu nombre y tu PIN.</div></div><div class="stats"><div class="stat"><span>Nivel</span><b id="level">-</b><div class="bar"><div class="fill" id="levelFill"></div></div></div><div class="stat"><span>XP</span><b id="xp">0</b></div><div class="stat"><span>Plumas</span><b id="plumas">0</b></div><div class="stat"><span>Nota</span><b id="grade">-</b></div></div></div></section><section class="card" id="loginCard"><div class="head"><div><h2>Entrada de alumno</h2><div class="sub">Carga rápida: primero clase; después, solo los alumnos de esa clase.</div></div><span class="sub" id="version">v0.4</span></div><div class="login"><div class="field"><label>Clase</label><select id="classSelect"></select></div><div class="field"><label>Alumno</label><select id="studentSelect"></select></div><div class="field"><label>PIN</label><input id="pin" type="password" placeholder="1001"></div><button type="button" id="loginBtn">Entrar</button></div><div class="status" id="status">Cargando...</div></section><section class="layout"><div class="card" id="juegos"><div class="head"><div><h2>Juegos activos</h2><div class="sub">Biblioteca de juegos de Lengua</div></div><button type="button" class="ghost" id="demoBtn">Simular progreso</button></div><div class="games" id="games"></div></div><aside class="sidePanels"><div class="card" id="misiones"><h2>Misiones de hoy</h2><div id="missions"></div></div><div class="card" id="ranking"><h2>Ranking de clase</h2><div id="rankingRows"></div></div></aside></section><section class="card" id="perfil"><div class="head"><div><h2>Perfil</h2><div class="sub">Desde aquí podrás cambiar tu PIN.</div></div><button type="button" class="ghost" id="openPinBtn">Cambiar PIN</button></div><div id="activity"></div></section></main></div><div class="modal" id="pinModal"><div class="dialog"><h2>Cambiar PIN</h2><div class="field"><label>PIN actual</label><input id="oldPin" type="password"></div><div class="field"><label>Nuevo PIN</label><input id="newPin" type="password" placeholder="4-8 números"></div><div class="actions"><button type="button" id="savePinBtn">Guardar</button><button type="button" class="ghost" id="closePinBtn">Cancelar</button></div><div class="status" id="pinStatus"></div></div></div><div class="modal" id="gameModal"><div class="dialog"><h2 id="gameModalTitle">Juego</h2><p class="sub" id="gameModalText"></p><div class="actions"><button type="button" id="gameModalMain">Entendido</button><button type="button" class="ghost" id="gameModalClose">Cerrar</button></div></div></div>
+<div class="app"><aside class="rail"><div class="logoBox"><div class="pixel">LENGU<br>ARCADE</div></div><nav class="nav"><button type="button" class="active" data-target="inicio">🏠 Inicio</button><button type="button" data-target="juegos">🎮 Mis juegos</button><button type="button" data-target="misiones">🎯 Misiones</button><button type="button" data-target="ranking">🏆 Ranking</button><button type="button" data-target="perfil">👤 Perfil</button></nav><div class="railFooter"><button type="button" class="ghost" id="themeBtn">🌓 Modo claro/oscuro</button><button type="button" class="ghost" id="logoutBtn">Salir</button><div class="sub">Aprender jugando. Jugar para expresarse mejor.</div></div></aside><main class="main"><section id="inicio" class="hero"><div class="topCard brand"><div class="brandIcon">✒️</div><div><h1 class="title"><span class="grad">LenguArcade</span></h1><div class="sub">El salón recreativo de las palabras</div></div></div><div class="topCard profile"><div class="avatar" role="img" aria-label="Avatar del alumno"><canvas id="studentAvatar" width="40" height="48"></canvas></div><div><div class="who" id="studentName">Inicia sesión</div><div class="sub" id="studentMail">Elige tu clase, tu nombre y tu PIN.</div></div><div class="stats"><div class="stat"><span>Nivel</span><b id="level">-</b><div class="bar"><div class="fill" id="levelFill"></div></div></div><div class="stat"><span>XP</span><b id="xp">0</b></div><div class="stat"><span>Plumas</span><b id="plumas">0</b></div><div class="stat"><span>Nota</span><b id="grade">-</b></div></div></div></section><section class="card" id="loginCard"><div class="head"><div><h2>Entrada de alumno</h2><div class="sub">Carga rápida: primero clase; después, solo los alumnos de esa clase.</div></div><span class="sub" id="version">v0.4</span></div><div class="login"><div class="field"><label>Clase</label><select id="classSelect"></select></div><div class="field"><label>Alumno</label><select id="studentSelect"></select></div><div class="field"><label>PIN</label><input id="pin" type="password" placeholder="1001"></div><button type="button" id="loginBtn">Entrar</button></div><div class="status" id="status">Cargando...</div></section><section class="layout"><div class="card" id="juegos"><div class="head"><div><h2>Juegos activos</h2><div class="sub">Biblioteca de juegos de Lengua</div></div><button type="button" class="ghost" id="demoBtn">Simular progreso</button></div><div class="games" id="games"></div></div><aside class="sidePanels"><div class="card" id="misiones"><h2>Misiones de hoy</h2><div id="missions"></div></div><div class="card" id="ranking"><h2>Ranking de clase</h2><div id="rankingRows"></div></div></aside></section><section class="card" id="perfil"><div class="head"><div><h2>Perfil</h2><div class="sub">Diseña tu personaje y revisa tu actividad.</div></div><button type="button" class="ghost" id="openPinBtn">Cambiar PIN</button></div><div class="profileSettings"><div class="avatarBuilder"><h3>Tu personaje</h3><div class="avatarPreview"><canvas id="avatarPreview" width="40" height="48"></canvas></div><div class="avatarActions"><button type="button" class="ghost" id="randomAvatarBtn">Aleatorio</button><button type="button" id="saveAvatarBtn">Guardar</button></div><div class="status avatarStatus" id="avatarStatus">Inicia sesión para personalizarlo.</div></div><div><h3>Personalización</h3><div class="avatarControls" id="avatarControls"></div></div><div class="activityPanel"><h3>Actividad reciente</h3><div id="activity"></div></div></div></section></main></div><div class="modal" id="pinModal"><div class="dialog"><h2>Cambiar PIN</h2><div class="field"><label>PIN actual</label><input id="oldPin" type="password"></div><div class="field"><label>Nuevo PIN</label><input id="newPin" type="password" placeholder="4-8 números"></div><div class="actions"><button type="button" id="savePinBtn">Guardar</button><button type="button" class="ghost" id="closePinBtn">Cancelar</button></div><div class="status" id="pinStatus"></div></div></div><div class="modal" id="gameModal"><div class="dialog"><h2 id="gameModalTitle">Juego</h2><p class="sub" id="gameModalText"></p><div class="actions"><button type="button" id="gameModalMain">Entendido</button><button type="button" class="ghost" id="gameModalClose">Cerrar</button></div></div></div>
 <script>
 const ASSET_BASE='https://raw.githubusercontent.com/pablogarciiblancov/lenguarcade-assets/main/assets/games/'.replace('pablogarciiblancov','pablogarciablancov');const BANNERS={battlegrafia:'battlegrafia-banner.jpg',maniacgrafia:'maniacgrafia-banner.jpg',narratoria:'narratoria-banner.jpg',versopolis:'versopolis-banner.jpg',scrabble:'scrabble-banner.jpg',conjuga_apuesta:'conjuga-apuesta-banner.jpg',verb_battle:'verb-battle-banner.jpg'};
 let meta=null,token=localStorage.getItem('LA_STUDENT_TOKEN')||'',currentDashboard=null,busy=false,loaderTimer=null,loaderValue=0;const $=id=>document.getElementById(id);function callServer(fn,args){return new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn].apply(null,args||[]);});}function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}function bannerUrl(id){return ASSET_BASE+(BANNERS[id]||'maniacgrafia-banner.svg')}function setStatus(t){$('status').textContent=t;}function showLoader(text,start){$('loader').classList.add('open');loaderValue=start||8;updateLoader(text||'Cargando...',loaderValue);clearInterval(loaderTimer);loaderTimer=setInterval(()=>{loaderValue=Math.min(92,loaderValue+Math.ceil((94-loaderValue)/12));updateLoader(null,loaderValue)},450)}function updateLoader(text,pct){if(text)$('loaderText').textContent=text;$('loaderPct').textContent=Math.round(pct)+'%';$('loaderFill').style.width=Math.round(pct)+'%'}function hideLoader(){clearInterval(loaderTimer);updateLoader('Listo.',100);setTimeout(()=>$('loader').classList.remove('open'),180)}function setBusy(v,t){busy=v;if(v)showLoader(t||'Cargando...',20);else hideLoader();if(t)setStatus(t)}function jump(id,btn){document.getElementById(id)?.scrollIntoView({block:'start'});document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active')}function toggleTheme(){document.body.classList.toggle('light');localStorage.setItem('LA_THEME',document.body.classList.contains('light')?'light':'dark')}function logout(){localStorage.removeItem('LA_STUDENT_TOKEN');localStorage.removeItem('LA_DASHBOARD_CACHE');token='';currentDashboard=null;$('loginCard').classList.remove('hidden');setStatus('Sesión cerrada.')}async function boot(){if(localStorage.getItem('LA_THEME')==='light')document.body.classList.add('light');bind();showLoader('Preparando interfaz...',8);if(token)$('loginCard').classList.add('hidden');const cachedDash=readCache('LA_DASHBOARD_CACHE');if(cachedDash){currentDashboard=cachedDash;renderDashboard(cachedDash)}try{const cachedMeta=readCache('LA_META_CACHE');if(cachedMeta){meta=cachedMeta;renderClasses(false);updateLoader('Usando datos guardados...',35)}meta=await callServer('getPublicMetaV03');saveCache('LA_META_CACHE',meta);$('version').textContent='v'+(meta.version||'0.4');renderClasses(!cachedMeta);updateLoader('Cargando sesión...',65);if(token){try{currentDashboard=await callServer('getStudentDashboardByToken',[token]);saveCache('LA_DASHBOARD_CACHE',currentDashboard);renderDashboard(currentDashboard);$('loginCard').classList.add('hidden');}catch(e){localStorage.removeItem('LA_STUDENT_TOKEN');token='';$('loginCard').classList.remove('hidden');setStatus('Sesión caducada. Entra de nuevo.');}}else setStatus('Datos básicos cargados.');}catch(e){$('loginCard').classList.remove('hidden');setStatus('Error al cargar: '+(e.message||e));}finally{hideLoader()}}function bind(){document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>jump(b.dataset.target,b)));$('themeBtn').onclick=toggleTheme;$('logoutBtn').onclick=logout;$('loginBtn').onclick=login;$('demoBtn').onclick=simulateProgress;$('openPinBtn').onclick=()=>$('pinModal').classList.add('open');$('closePinBtn').onclick=()=>$('pinModal').classList.remove('open');$('savePinBtn').onclick=changePin;$('gameModalClose').onclick=()=>$('gameModal').classList.remove('open');$('gameModalMain').onclick=()=>$('gameModal').classList.remove('open')}function renderClasses(loadStudents=true){const sel=$('classSelect');sel.innerHTML=meta.classes.map(c=>`<option value="${esc(c.classCode)}">${esc(c.nombreVisible)}</option>`).join('');sel.onchange=loadStudentsForClass;if(loadStudents)loadStudentsForClass();}async function loadStudentsForClass(){if(busy)return;const cls=$('classSelect').value;setStatus('Cargando alumnos de '+cls+'...');const key='LA_STUDENTS_'+cls;const cached=readCache(key);if(cached)renderStudents(cached);try{const students=await callServer('getStudentsByClassV03',[cls]);saveCache(key,students);renderStudents(students);setStatus('Alumnos cargados. Escribe tu PIN.');}catch(e){setStatus('Error al cargar alumnos: '+(e.message||e));}}function renderStudents(students){$('studentSelect').innerHTML=students.map(s=>`<option value="${esc(s.studentId)}">${esc(s.nombre)} ${esc(s.apellidos)}</option>`).join('')}async function login(){if(busy)return;setBusy(true,'Entrando...');try{const res=await callServer('loginStudent',[$('studentSelect').value,$('pin').value]);token=res.token;localStorage.setItem('LA_STUDENT_TOKEN',token);currentDashboard=res.dashboard;saveCache('LA_DASHBOARD_CACHE',currentDashboard);renderDashboard(currentDashboard);$('loginCard').classList.add('hidden');setStatus('Sesión iniciada.');}catch(e){$('loginCard').classList.remove('hidden');setStatus('No se ha podido entrar: '+(e.message||e));}finally{setBusy(false);}}function renderDashboard(d){const s=d.student,g=d.general;$('loginCard').classList.add('hidden');$('studentName').textContent=s.nombre+' '+s.apellidos;$('studentMail').textContent=s.email+' · '+s.clase;$('xp').textContent=g.xp;$('level').textContent=g.level;$('plumas').textContent=g.plumas;$('grade').textContent=d.grade.score||0;$('levelFill').style.width=(g.levelProgress||0)+'%';renderGames(d.games);renderRows('missions',d.missions.map(m=>({l:m.title+' ('+m.progress+'/'+m.target+')',r:m.completed?'✅':'⌛'})));renderRows('rankingRows',d.ranking.map((r,i)=>({l:(i+1)+'. '+r.nombre,r:r.xp+' XP'})));renderRows('activity',d.events.map(e=>({l:e.gameId+' · '+e.eventType,r:'+'+(e.xpDelta||0)+' XP'})));}function renderGames(games){$('games').innerHTML=games.map((g,i)=>`<article class="game ${i===0?'big':''} ${g.locked?'locked':''}" style="--c:${esc(g.color||'#7c4dff')};--img:url('${bannerUrl(g.gameId)}')"><span class="chip">${esc(g.estado)}</span><div class="gameArt"><div class="icon">${esc(g.icono||'🎮')}</div><div><strong>${esc(g.categoria||'Juego')}</strong><div class="sub">${esc(g.subtitulo||'')}</div></div></div><div class="gameText"><h3>${esc(g.nombre)}</h3><p>${esc(g.descripcion||g.subtitulo)}</p></div><div class="gameMeta"><div class="bar"><div class="fill" style="width:${Number(g.progress.percentage||0)}%"></div></div><button type="button" class="play" onclick="openGame('${esc(g.gameId)}')" ${g.locked?'disabled':''}>${esc(g.buttonLabel)}</button></div></article>`).join('');}function openGame(gameId){const g=(currentDashboard?.games||[]).find(x=>x.gameId===gameId);if(!g)return;if(g.url){window.open(g.url,'_blank');return}$('gameModalTitle').textContent=g.nombre;$('gameModalText').textContent='Este juego ya está en el catálogo de LenguArcade, pero todavía no está integrado para abrirse desde aquí. El siguiente paso será conectar Maniacgrafía como primer juego real.';$('gameModal').classList.add('open')}function renderRows(id,rows){$(id).innerHTML=rows.length?rows.map(x=>`<div class="row"><span>${esc(x.l)}</span><strong>${esc(x.r)}</strong></div>`).join(''):'<div class="sub">Sin datos todavía.</div>'}async function simulateProgress(){if(!token)return setStatus('Primero inicia sesión.');const game=(currentDashboard?.games||[]).find(g=>!g.locked)||{gameId:'maniacgrafia'};setBusy(true,'Guardando progreso simulado...');try{const res=await callServer('saveProgress',[{sessionToken:token,gameId:game.gameId,eventType:'progreso_demo',progress:{xpDelta:80,plumasDelta:3,percentage:Math.floor(20+Math.random()*70),accuracy:Math.floor(65+Math.random()*30),attempts:10,successes:8,errors:2,streak:3},achievements:[{id:'demo_'+Date.now(),title:'Pulso arcade',description:'Progreso simulado',xpReward:10}],rawGameData:{source:'v0.4_demo'}}]);currentDashboard=res.dashboard;saveCache('LA_DASHBOARD_CACHE',currentDashboard);renderDashboard(currentDashboard);setStatus('Progreso guardado.');}catch(e){setStatus('Error al guardar: '+(e.message||e));}finally{setBusy(false);}}async function changePin(){if(!token)return;$('pinStatus').textContent='Guardando...';try{const r=await callServer('changeStudentPinV03',[token,$('oldPin').value,$('newPin').value]);$('pinStatus').textContent=r.message;}catch(e){$('pinStatus').textContent=e.message||e;}}function saveCache(k,v){try{localStorage.setItem(k,JSON.stringify({t:Date.now(),v:v}))}catch(e){}}function readCache(k){try{const raw=localStorage.getItem(k);if(!raw)return null;const o=JSON.parse(raw);return o.v||null}catch(e){return null}}boot();
+</script>
+<script>
+const AVATAR_OPTIONS_CLIENT={
+  skin:['light','warm','tan','brown','deep'],
+  hairStyle:['side','messy','curly','bob','braids','short'],
+  hairColor:['brown','black','auburn','blonde','silver'],
+  eyeColor:['brown','blue','green','hazel','grey'],
+  jacketColor:['blue','red','green','purple','orange','black'],
+  shirtColor:['white','red','yellow','cyan','pink','navy'],
+  pantsColor:['navy','black','brown','green','purple'],
+  background:['meadow','mountains','sunset','library','arcade','moon']
+};
+const AVATAR_DEFAULT_CLIENT={
+  version:1,skin:'warm',hairStyle:'side',hairColor:'brown',eyeColor:'brown',
+  jacketColor:'blue',shirtColor:'red',pantsColor:'navy',background:'meadow'
+};
+const AVATAR_LABELS={
+  skin:'Piel',hairStyle:'Peinado',hairColor:'Pelo',eyeColor:'Ojos',
+  jacketColor:'Chaqueta',shirtColor:'Camiseta',pantsColor:'Pantalón',background:'Fondo',
+  light:'Clara',warm:'Cálida',tan:'Bronceada',deep:'Oscura',
+  side:'Lateral',messy:'Despeinado',curly:'Rizado',bob:'Media melena',braids:'Trenzas',short:'Corto',
+  brown:'Marrón',black:'Negro',auburn:'Cobrizo',blonde:'Rubio',silver:'Plateado',
+  blue:'Azul',green:'Verde',hazel:'Avellana',grey:'Gris',red:'Rojo',purple:'Morado',
+  orange:'Naranja',white:'Blanco',yellow:'Amarillo',cyan:'Turquesa',pink:'Rosa',navy:'Azul marino',
+  meadow:'Pradera',mountains:'Montañas',sunset:'Atardecer',library:'Biblioteca',
+  arcade:'Arcade',moon:'Noche'
+};
+const AVATAR_PALETTES={
+  skin:{light:'#f2c7a0',warm:'#d99661',tan:'#bd754b',brown:'#8c563d',deep:'#5b382f'},
+  hairColor:{brown:'#6a3725',black:'#27242c',auburn:'#a34e31',blonde:'#d5a74c',silver:'#c7ccd1'},
+  eyeColor:{brown:'#4b2c20',blue:'#3e78a6',green:'#4e7a51',hazel:'#82703e',grey:'#64717d'},
+  jacketColor:{blue:'#315a9a',red:'#a44443',green:'#3e7652',purple:'#704d8c',orange:'#b46736',black:'#41434b'},
+  shirtColor:{white:'#e5e1d6',red:'#b6423c',yellow:'#d3ac3e',cyan:'#4ba5ac',pink:'#bd6682',navy:'#34466f'},
+  pantsColor:{navy:'#303b5b',black:'#303137',brown:'#5e4437',green:'#405e49',purple:'#55446a'}
+};
+const AVATAR_FIELDS=[
+  {key:'hairStyle',type:'select'},{key:'background',type:'select'},
+  {key:'skin',type:'swatches'},{key:'hairColor',type:'swatches'},
+  {key:'eyeColor',type:'swatches'},{key:'jacketColor',type:'swatches'},
+  {key:'shirtColor',type:'swatches'},{key:'pantsColor',type:'swatches'}
+];
+let avatarDraft={...AVATAR_DEFAULT_CLIENT};
+
+function normalizeAvatarConfig(value){
+  let input=value;
+  if(typeof input==='string'){
+    try{input=JSON.parse(input);}catch(error){
+      const legacy=input.match(/^avatar_(\d{2})$/);
+      if(legacy){
+        const index=Math.max(0,Number(legacy[1])-1);
+        input={
+          hairStyle:AVATAR_OPTIONS_CLIENT.hairStyle[index%AVATAR_OPTIONS_CLIENT.hairStyle.length],
+          hairColor:AVATAR_OPTIONS_CLIENT.hairColor[index%AVATAR_OPTIONS_CLIENT.hairColor.length],
+          jacketColor:AVATAR_OPTIONS_CLIENT.jacketColor[index%AVATAR_OPTIONS_CLIENT.jacketColor.length],
+          background:AVATAR_OPTIONS_CLIENT.background[index%AVATAR_OPTIONS_CLIENT.background.length]
+        };
+      }else input={};
+    }
+  }
+  if(!input||typeof input!=='object'||Array.isArray(input))input={};
+  const clean={version:1};
+  Object.keys(AVATAR_OPTIONS_CLIENT).forEach(key=>{
+    const candidate=String(input[key]||'');
+    clean[key]=AVATAR_OPTIONS_CLIENT[key].includes(candidate)?candidate:AVATAR_DEFAULT_CLIENT[key];
+  });
+  return clean;
+}
+
+function shadeHex(hex,amount){
+  const value=parseInt(hex.slice(1),16);
+  const channel=shift=>Math.max(0,Math.min(255,(value>>shift&255)+amount));
+  return `#${[channel(16),channel(8),channel(0)].map(n=>n.toString(16).padStart(2,'0')).join('')}`;
+}
+
+function drawAvatar(canvas,config){
+  if(!canvas)return;
+  const avatar=normalizeAvatarConfig(config);
+  const ctx=canvas.getContext('2d');
+  const p=(x,y,w,h,color)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h);};
+  ctx.clearRect(0,0,40,48);
+  ctx.imageSmoothingEnabled=false;
+  p(0,0,40,48,'#5a311d');p(1,1,38,46,'#d66d25');p(2,2,36,44,'#f3a13d');p(3,3,34,42,'#1a3657');
+  drawAvatarBackground(p,avatar.background);
+
+  const skin=AVATAR_PALETTES.skin[avatar.skin],skinShadow=shadeHex(skin,-34),skinLight=shadeHex(skin,24);
+  const hair=AVATAR_PALETTES.hairColor[avatar.hairColor],hairShadow=shadeHex(hair,-38),hairLight=shadeHex(hair,27);
+  const eye=AVATAR_PALETTES.eyeColor[avatar.eyeColor];
+  const jacket=AVATAR_PALETTES.jacketColor[avatar.jacketColor],jacketShadow=shadeHex(jacket,-36),jacketLight=shadeHex(jacket,26);
+  const shirt=AVATAR_PALETTES.shirtColor[avatar.shirtColor];
+  const pants=AVATAR_PALETTES.pantsColor[avatar.pantsColor],pantsShadow=shadeHex(pants,-32);
+  const outline='#342b32';
+
+  p(11,42,18,2,'rgba(36,39,45,.35)');
+  p(14,33,5,9,outline);p(21,33,5,9,outline);p(15,34,4,6,pants);p(21,34,4,6,pants);
+  p(15,39,4,3,pantsShadow);p(21,39,4,3,pantsShadow);p(13,41,6,2,'#44352f');p(21,41,6,2,'#44352f');
+  p(14,42,6,1,'#281f20');p(21,42,6,1,'#281f20');
+
+  p(12,23,16,12,outline);p(13,24,14,10,jacket);p(13,31,14,3,jacketShadow);
+  p(14,24,2,7,jacketLight);p(24,24,2,7,jacketShadow);p(18,24,4,8,shirt);
+  p(18,31,4,1,shadeHex(shirt,-28));p(16,32,8,2,'#5a402f');p(19,32,2,2,'#d6a64a');
+  p(9,24,4,9,outline);p(27,24,4,9,outline);p(10,25,3,7,jacket);p(27,25,3,7,jacketShadow);
+  p(10,32,3,3,outline);p(27,32,3,3,outline);p(11,32,2,2,skin);p(27,32,2,2,skinShadow);
+
+  p(13,9,14,15,outline);p(14,10,12,13,skin);p(14,18,12,5,skinShadow);p(15,11,8,2,skinLight);
+  p(16,16,2,2,'#f4f0df');p(22,16,2,2,'#f4f0df');p(17,16,1,2,eye);p(22,16,1,2,eye);
+  p(19,18,2,1,skinShadow);p(18,21,4,1,'#7e3c37');
+  drawAvatarHair(p,avatar.hairStyle,{hair,hairShadow,hairLight,outline});
+}
+
+function drawAvatarBackground(p,background){
+  if(background==='sunset'){
+    p(3,3,34,16,'#e88b61');p(3,19,34,10,'#744a83');p(27,8,6,6,'#ffd36b');
+    p(3,27,34,18,'#4d5354');p(3,32,34,13,'#34413c');p(5,29,10,3,'#62655b');
+  }else if(background==='library'){
+    p(3,3,34,42,'#513826');p(5,5,30,23,'#7a5230');
+    [7,13,19].forEach(y=>{p(5,y,30,1,'#2f261f');for(let x=6;x<34;x+=3)p(x,y-4,2,4,['#9b4c42','#426a74','#ba8a3e'][x%3]);});
+    p(3,28,34,17,'#835f3c');p(3,37,34,2,'#65442f');
+  }else if(background==='arcade'){
+    p(3,3,34,42,'#181b3c');p(5,5,30,22,'#27205b');p(7,8,9,14,'#553270');
+    p(8,9,7,7,'#35a9b8');p(24,7,9,15,'#3d397e');p(25,8,7,8,'#cf4a87');
+    p(3,29,34,16,'#202746');p(3,37,34,1,'#8d3e91');p(10,29,1,16,'#315d83');p(30,29,1,16,'#315d83');
+  }else if(background==='moon'){
+    p(3,3,34,42,'#17264b');p(27,6,7,7,'#e6ddaa');p(29,6,3,2,'#b9b68f');
+    p(6,8,1,1,'#d7e8ff');p(18,6,1,1,'#d7e8ff');p(33,17,1,1,'#d7e8ff');
+    p(3,27,34,18,'#263d4d');p(3,32,34,13,'#1e463d');p(6,29,8,3,'#34575a');
+  }else{
+    const mountains=background==='mountains';
+    p(3,3,34,22,mountains?'#73add2':'#6dc1e6');p(7,7,8,3,'#eff5ed');p(5,9,13,3,'#eff5ed');p(27,10,7,3,'#e6f1ed');
+    if(mountains){
+      p(3,17,8,10,'#657b8a');p(8,13,12,14,'#758b96');p(17,16,12,11,'#536f77');p(25,12,12,15,'#6d818e');
+      p(9,13,4,4,'#e8eee9');p(27,12,4,4,'#e8eee9');
+    }else{
+      p(3,21,10,8,'#4c9870');p(9,18,14,11,'#68aa6f');p(22,20,15,9,'#3f8a67');
+    }
+    p(3,27,34,18,'#4e9b50');p(3,31,34,14,'#3e8745');
+    p(5,29,1,2,'#7cc85c');p(9,35,1,2,'#7cc85c');p(31,32,1,2,'#76bf56');p(34,39,1,2,'#76bf56');
+  }
+}
+
+function drawAvatarHair(p,style,colors){
+  const {hair,hairShadow,hairLight,outline}=colors;
+  p(12,8,16,7,outline);p(13,7,13,7,hair);p(15,6,9,3,hair);p(17,5,5,2,hair);
+  p(14,8,5,2,hairLight);p(13,13,3,6,hairShadow);p(24,12,3,7,hairShadow);
+  p(15,11,3,3,hair);p(22,10,4,4,hair);
+  if(style==='messy'){
+    p(12,6,3,4,hair);p(15,4,3,4,hair);p(21,4,3,3,hair);p(25,6,3,4,hair);
+  }else if(style==='curly'){
+    p(11,8,4,5,outline);p(25,8,4,5,outline);p(12,7,4,5,hair);p(24,7,4,5,hair);
+    p(11,13,4,5,hairShadow);p(25,13,4,5,hairShadow);p(13,5,4,4,hair);p(22,5,4,4,hair);
+  }else if(style==='bob'){
+    p(11,9,4,13,outline);p(25,9,4,13,outline);p(12,10,3,11,hair);p(25,10,3,11,hairShadow);
+  }else if(style==='braids'){
+    p(11,13,4,12,outline);p(25,13,4,12,outline);p(12,14,2,10,hair);p(26,14,2,10,hairShadow);
+    p(11,23,4,3,hairShadow);p(25,23,4,3,hairShadow);
+  }else if(style==='short'){
+    p(13,7,14,5,hair);p(14,11,3,3,hairShadow);p(24,10,3,3,hairShadow);
+  }else{
+    p(12,7,5,8,hair);p(11,10,4,7,hairShadow);p(22,6,5,7,hair);p(25,10,3,8,hairShadow);
+  }
+}
+
+function renderAvatarControls(){
+  const container=$('avatarControls');
+  if(!container)return;
+  container.innerHTML=AVATAR_FIELDS.map(field=>{
+    const options=AVATAR_OPTIONS_CLIENT[field.key];
+    if(field.type==='select'){
+      return `<label class="avatarControl"><span>${AVATAR_LABELS[field.key]}</span><select data-avatar-select="${field.key}">${options.map(value=>`<option value="${value}"${avatarDraft[field.key]===value?' selected':''}>${AVATAR_LABELS[value]}</option>`).join('')}</select></label>`;
+    }
+    const palette=AVATAR_PALETTES[field.key];
+    return `<div class="avatarControl"><span>${AVATAR_LABELS[field.key]}</span><div class="swatches">${options.map(value=>`<button type="button" class="swatch${avatarDraft[field.key]===value?' selected':''}" data-avatar-key="${field.key}" data-avatar-value="${value}" style="--swatch:${palette[value]}" title="${AVATAR_LABELS[value]}" aria-label="${AVATAR_LABELS[field.key]}: ${AVATAR_LABELS[value]}" aria-pressed="${avatarDraft[field.key]===value}"></button>`).join('')}</div></div>`;
+  }).join('');
+  container.querySelectorAll('[data-avatar-select]').forEach(select=>select.onchange=()=>updateAvatarDraft(select.dataset.avatarSelect,select.value));
+  container.querySelectorAll('[data-avatar-key]').forEach(button=>button.onclick=()=>updateAvatarDraft(button.dataset.avatarKey,button.dataset.avatarValue));
+}
+
+function updateAvatarDraft(key,value){
+  if(!AVATAR_OPTIONS_CLIENT[key]?.includes(value))return;
+  avatarDraft={...avatarDraft,[key]:value};
+  drawAvatar($('avatarPreview'),avatarDraft);
+  renderAvatarControls();
+  $('avatarStatus').textContent=token?'Vista previa lista. Guarda para aplicar los cambios.':'Inicia sesión para guardar tu personaje.';
+}
+
+function applyAvatarProfile(dashboard){
+  const saved=normalizeAvatarConfig(dashboard?.student?.avatar);
+  avatarDraft={...saved};
+  drawAvatar($('studentAvatar'),saved);
+  drawAvatar($('avatarPreview'),saved);
+  renderAvatarControls();
+  $('avatarStatus').textContent=token?'Personaliza tu personaje y guarda los cambios.':'Inicia sesión para personalizarlo.';
+  $('saveAvatarBtn').disabled=!token;
+}
+
+function randomizeAvatar(){
+  Object.keys(AVATAR_OPTIONS_CLIENT).forEach(key=>{
+    const options=AVATAR_OPTIONS_CLIENT[key];
+    avatarDraft[key]=options[Math.floor(Math.random()*options.length)];
+  });
+  drawAvatar($('avatarPreview'),avatarDraft);
+  renderAvatarControls();
+  $('avatarStatus').textContent='Combinación aleatoria preparada.';
+}
+
+async function saveAvatarCustomization(){
+  if(!token||busy)return;
+  busy=true;
+  $('saveAvatarBtn').disabled=true;
+  $('avatarStatus').textContent='Guardando personaje...';
+  try{
+    const result=await callServer('updateStudentAvatar',[token,avatarDraft]);
+    currentDashboard=result.dashboard||currentDashboard;
+    saveCache('LA_DASHBOARD_CACHE',currentDashboard);
+    renderDashboard(currentDashboard);
+    $('avatarStatus').textContent=result.message||'Personaje actualizado.';
+  }catch(error){
+    $('avatarStatus').textContent='No se ha podido guardar: '+(error.message||error);
+  }finally{
+    busy=false;
+    $('saveAvatarBtn').disabled=!token;
+  }
+}
+
+$('randomAvatarBtn').onclick=randomizeAvatar;
+$('saveAvatarBtn').onclick=saveAvatarCustomization;
+$('logoutBtn').addEventListener('click',()=>applyAvatarProfile(null));
+const renderDashboardWithoutAvatar=renderDashboard;
+renderDashboard=function(dashboard){
+  renderDashboardWithoutAvatar(dashboard);
+  applyAvatarProfile(dashboard);
+};
+applyAvatarProfile(currentDashboard);
 </script>
 </body>
 </html>

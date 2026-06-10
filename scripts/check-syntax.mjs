@@ -90,6 +90,13 @@ if (!/function saveProgress\(payload\)[\s\S]*?requireSession_\(payload\.sessionT
   errors.push("saveProgress debe exigir una sesión de alumno.");
 }
 
+if (!/function updateStudentAvatar\(token,\s*avatarConfig\)[\s\S]*?requireSession_\(token,\s*'student'\)/.test(serverSource)) {
+  errors.push("updateStudentAvatar debe exigir una sesion de alumno.");
+}
+if (!/function normalizeStudentAvatar_\(avatarConfig\)[\s\S]*?LA_AVATAR_OPTIONS\[key\]\.indexOf\(value\)\s*<\s*0/.test(serverSource)) {
+  errors.push("updateStudentAvatar debe validar todas las opciones del avatar.");
+}
+
 const publicStudentMatch = serverSource.match(/function publicStudent_\(s\)\s*\{([^}]+)\}/);
 if (!publicStudentMatch || /\b(email|pin)\b/.test(publicStudentMatch[1])) {
   errors.push("El selector público de alumnos expone email o PIN.");
