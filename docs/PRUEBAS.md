@@ -14,14 +14,16 @@
 ## Avatares personalizables
 
 1. Iniciar sesión como alumno.
-2. Abrir la sección Perfil y confirmar que el personaje predeterminado tiene chaqueta roja, ropa azul, botas marrones, pelo castaño detallado y proporciones similares a la referencia.
-3. Cambiar peinado, piel, ojos, ropa y fondo, comprobando que la vista previa responde a cada cambio.
-4. Pulsar `Aleatorio` varias veces y confirmar que genera combinaciones válidas.
-5. Pulsar `Guardar` y comprobar que el retrato de la cabecera adopta la combinación elegida.
-6. Recargar la página y confirmar que se conserva.
-7. Cerrar sesión, volver a entrar con el mismo alumno y confirmar que sigue seleccionado.
-8. Comprobar que otro alumno mantiene su propia configuración.
-9. Revisar el editor en escritorio y móvil, especialmente selectores, muestras de color y proporción del personaje.
+2. Abrir la sección Perfil y confirmar que aparecen 16 personajes distintos y 12 fondos.
+3. Seleccionar varios personajes y comprobar que la vista previa cambia sin modificar el fondo.
+4. Probar montañas, castillo, volcán, bosque, nieve, costa, ruinas, ciudad nocturna, arcade, biblioteca, islas flotantes y pueblo otoñal.
+5. Confirmar que cualquier personaje se puede combinar con cualquier fondo.
+6. Pulsar `Aleatorio` varias veces y confirmar que genera combinaciones válidas.
+7. Pulsar `Guardar` y comprobar que el retrato de la cabecera adopta la combinación elegida.
+8. Recargar la página y confirmar que se conserva.
+9. Cerrar sesión, volver a entrar con el mismo alumno y confirmar que sigue seleccionado.
+10. Comprobar que otro alumno mantiene su propia configuración.
+11. Revisar las galerías y la vista previa en escritorio y móvil.
 
 ## Identidad visual y portadas
 

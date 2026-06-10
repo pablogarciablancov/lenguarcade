@@ -16,6 +16,7 @@
 .avatar{width:72px;height:108px;border-radius:13px}.profile{grid-template-columns:78px 1fr}.avatarPreview{width:240px;height:360px;border-radius:18px}.profileSettings{grid-template-columns:260px minmax(0,1fr) minmax(240px,.7fr)}
 body.authPending{overflow:hidden}.authPending .rail,.authPending .main>section:not(#loginCard){visibility:hidden;pointer-events:none}.authPending #loginCard{display:block!important;position:fixed;inset:0;z-index:80;margin:0;border:0;border-radius:0;background:radial-gradient(circle at 72% 18%,rgba(0,212,255,.18),transparent 30%),radial-gradient(circle at 18% 85%,rgba(124,77,255,.24),transparent 36%),#070b19;padding:24px;overflow:auto}.authShell{width:min(980px,100%);min-height:calc(100vh - 48px);margin:auto;display:grid;grid-template-columns:minmax(280px,.95fr) minmax(320px,.75fr);align-items:center;gap:42px}.authWelcome{min-height:570px;border-radius:30px;padding:34px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(5,8,20,.06),rgba(5,8,20,.92)),url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-hero-banner.jpg?v=20260609-pixel2') center/cover;border:1px solid rgba(255,255,255,.16);box-shadow:var(--shadow)}.authWelcomeLogo{width:96px;height:96px;position:absolute;top:30px;left:30px;border-radius:24px;background:#09102a url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-logo.png') center/88px no-repeat;border:1px solid rgba(255,255,255,.18)}.authWelcome h1{font-size:48px;line-height:1;margin:0 0 12px}.authWelcome p{max-width:500px;color:#dbeafe;font-size:17px;line-height:1.55;margin:0}.authForm{background:linear-gradient(180deg,rgba(23,33,61,.98),rgba(13,19,39,.98));border:1px solid rgba(255,255,255,.14);border-radius:28px;padding:34px;box-shadow:0 24px 70px rgba(0,0,0,.44)}.authForm h2{font-size:27px;margin-bottom:8px}.authForm .field{margin-top:18px}.authForm input{font-size:16px;padding:15px}.authForm button{width:100%;margin-top:20px;padding:15px;font-size:15px}.authDomain{display:inline-block;margin-top:12px;padding:7px 10px;border-radius:999px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.24);color:#a9ecff;font-size:12px;font-weight:800}.authSecurity{display:flex;gap:9px;align-items:flex-start;margin-top:20px;padding:12px;border-radius:16px;background:rgba(54,211,153,.08);border:1px solid rgba(54,211,153,.18);color:#c8f7e5;font-size:12px;line-height:1.45}.authStatus{min-height:38px;margin-top:14px}.authPending .loader{z-index:70}.authPending #loginCard{visibility:visible!important;pointer-events:auto!important}
 @media(max-width:850px){.authShell{grid-template-columns:1fr;gap:18px}.authWelcome{min-height:280px;padding:24px}.authWelcomeLogo{width:68px;height:68px;top:20px;left:20px;background-size:62px}.authWelcome h1{font-size:36px}.authForm{padding:24px}.profileSettings{grid-template-columns:1fr}.avatarPreview{width:min(240px,100%);height:auto;aspect-ratio:2/3}}
+.avatarCard{position:relative;width:100%;height:100%;overflow:hidden;background:#10182e}.avatarCard img{position:absolute;inset:0;width:100%;height:100%;display:block}.avatarCard .avatarBackdrop{object-fit:cover}.avatarCard .avatarCharacter{object-fit:contain;z-index:1;filter:drop-shadow(0 6px 4px rgba(0,0,0,.32))}.avatarPicker{display:grid;gap:18px}.avatarPickerGroup{border:1px solid var(--line);border-radius:18px;padding:13px;background:rgba(0,0,0,.14)}.avatarPickerGroup h4{margin:0 0 10px;font-size:13px;color:var(--muted)}.characterGrid{display:grid;grid-template-columns:repeat(4,minmax(62px,1fr));gap:9px}.backgroundGrid{display:grid;grid-template-columns:repeat(3,minmax(78px,1fr));gap:9px}.avatarChoice{position:relative;min-height:104px;padding:0;overflow:hidden;border:2px solid transparent;border-radius:13px;background:#18213c;box-shadow:none}.avatarChoice img{width:100%;height:100%;display:block;object-fit:contain}.avatarChoice.backgroundChoice{min-height:90px}.avatarChoice.backgroundChoice img{object-fit:cover}.avatarChoice.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,213,79,.22)}.choiceLabel{position:absolute;left:5px;right:5px;bottom:5px;padding:3px 5px;border-radius:7px;background:rgba(5,7,18,.78);font-size:10px;color:#fff;text-align:center}.avatarHint{margin-top:8px;color:var(--muted);font-size:11px;line-height:1.4}@media(max-width:720px){.characterGrid{grid-template-columns:repeat(4,1fr)}.backgroundGrid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body class="authPending">
@@ -25,7 +26,7 @@ body.authPending{overflow:hidden}.authPending .rail,.authPending .main>section:n
 const ASSET_BASE='https://raw.githubusercontent.com/pablogarciiblancov/lenguarcade-assets/main/assets/games/'.replace('pablogarciiblancov','pablogarciablancov');const BANNERS={battlegrafia:'battlegrafia-banner.jpg',maniacgrafia:'maniacgrafia-banner.jpg',narratoria:'narratoria-banner.jpg',versopolis:'versopolis-banner.jpg',scrabble:'scrabble-banner.jpg',conjuga_apuesta:'conjuga-apuesta-banner.jpg',verb_battle:'verb-battle-banner.jpg'};
 let meta=null,token=localStorage.getItem('LA_STUDENT_TOKEN')||'',currentDashboard=null,busy=false,loaderTimer=null,loaderValue=0;const $=id=>document.getElementById(id);function callServer(fn,args){return new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn].apply(null,args||[]);});}function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}function bannerUrl(id){return ASSET_BASE+(BANNERS[id]||'maniacgrafia-banner.svg')}function setStatus(t){$('status').textContent=t;}function showLoader(text,start){$('loader').classList.add('open');loaderValue=start||8;updateLoader(text||'Cargando...',loaderValue);clearInterval(loaderTimer);loaderTimer=setInterval(()=>{loaderValue=Math.min(92,loaderValue+Math.ceil((94-loaderValue)/12));updateLoader(null,loaderValue)},450)}function updateLoader(text,pct){if(text)$('loaderText').textContent=text;$('loaderPct').textContent=Math.round(pct)+'%';$('loaderFill').style.width=Math.round(pct)+'%'}function hideLoader(){clearInterval(loaderTimer);updateLoader('Listo.',100);setTimeout(()=>$('loader').classList.remove('open'),180)}function setBusy(v,t){busy=v;if(v)showLoader(t||'Cargando...',20);else hideLoader();if(t)setStatus(t)}function jump(id,btn){document.getElementById(id)?.scrollIntoView({block:'start'});document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active')}function toggleTheme(){document.body.classList.toggle('light');localStorage.setItem('LA_THEME',document.body.classList.contains('light')?'light':'dark')}function logout(){localStorage.removeItem('LA_STUDENT_TOKEN');localStorage.removeItem('LA_DASHBOARD_CACHE');token='';currentDashboard=null;$('loginCard').classList.remove('hidden');setStatus('Sesión cerrada.')}async function boot(){if(localStorage.getItem('LA_THEME')==='light')document.body.classList.add('light');bind();showLoader('Preparando interfaz...',8);if(token)$('loginCard').classList.add('hidden');const cachedDash=readCache('LA_DASHBOARD_CACHE');if(cachedDash){currentDashboard=cachedDash;renderDashboard(cachedDash)}try{const cachedMeta=readCache('LA_META_CACHE');if(cachedMeta){meta=cachedMeta;renderClasses(false);updateLoader('Usando datos guardados...',35)}meta=await callServer('getPublicMetaV03');saveCache('LA_META_CACHE',meta);$('version').textContent='v'+(meta.version||'0.4');renderClasses(!cachedMeta);updateLoader('Cargando sesión...',65);if(token){try{currentDashboard=await callServer('getStudentDashboardByToken',[token]);saveCache('LA_DASHBOARD_CACHE',currentDashboard);renderDashboard(currentDashboard);$('loginCard').classList.add('hidden');}catch(e){localStorage.removeItem('LA_STUDENT_TOKEN');token='';$('loginCard').classList.remove('hidden');setStatus('Sesión caducada. Entra de nuevo.');}}else setStatus('Datos básicos cargados.');}catch(e){$('loginCard').classList.remove('hidden');setStatus('Error al cargar: '+(e.message||e));}finally{hideLoader()}}function bind(){document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>jump(b.dataset.target,b)));$('themeBtn').onclick=toggleTheme;$('logoutBtn').onclick=logout;$('loginBtn').onclick=login;$('demoBtn').onclick=simulateProgress;$('openPinBtn').onclick=()=>$('pinModal').classList.add('open');$('closePinBtn').onclick=()=>$('pinModal').classList.remove('open');$('savePinBtn').onclick=changePin;$('gameModalClose').onclick=()=>$('gameModal').classList.remove('open');$('gameModalMain').onclick=()=>$('gameModal').classList.remove('open')}function renderClasses(loadStudents=true){const sel=$('classSelect');sel.innerHTML=meta.classes.map(c=>`<option value="${esc(c.classCode)}">${esc(c.nombreVisible)}</option>`).join('');sel.onchange=loadStudentsForClass;if(loadStudents)loadStudentsForClass();}async function loadStudentsForClass(){if(busy)return;const cls=$('classSelect').value;setStatus('Cargando alumnos de '+cls+'...');const key='LA_STUDENTS_'+cls;const cached=readCache(key);if(cached)renderStudents(cached);try{const students=await callServer('getStudentsByClassV03',[cls]);saveCache(key,students);renderStudents(students);setStatus('Alumnos cargados. Escribe tu PIN.');}catch(e){setStatus('Error al cargar alumnos: '+(e.message||e));}}function renderStudents(students){$('studentSelect').innerHTML=students.map(s=>`<option value="${esc(s.studentId)}">${esc(s.nombre)} ${esc(s.apellidos)}</option>`).join('')}async function login(){if(busy)return;setBusy(true,'Entrando...');try{const res=await callServer('loginStudent',[$('studentSelect').value,$('pin').value]);token=res.token;localStorage.setItem('LA_STUDENT_TOKEN',token);currentDashboard=res.dashboard;saveCache('LA_DASHBOARD_CACHE',currentDashboard);renderDashboard(currentDashboard);$('loginCard').classList.add('hidden');setStatus('Sesión iniciada.');}catch(e){$('loginCard').classList.remove('hidden');setStatus('No se ha podido entrar: '+(e.message||e));}finally{setBusy(false);}}function renderDashboard(d){const s=d.student,g=d.general;$('loginCard').classList.add('hidden');$('studentName').textContent=s.nombre+' '+s.apellidos;$('studentMail').textContent=s.email+' · '+s.clase;$('xp').textContent=g.xp;$('level').textContent=g.level;$('plumas').textContent=g.plumas;$('grade').textContent=d.grade.score||0;$('levelFill').style.width=(g.levelProgress||0)+'%';renderGames(d.games);renderRows('missions',d.missions.map(m=>({l:m.title+' ('+m.progress+'/'+m.target+')',r:m.completed?'✅':'⌛'})));renderRows('rankingRows',d.ranking.map((r,i)=>({l:(i+1)+'. '+r.nombre,r:r.xp+' XP'})));renderRows('activity',d.events.map(e=>({l:e.gameId+' · '+e.eventType,r:'+'+(e.xpDelta||0)+' XP'})));}function renderGames(games){$('games').innerHTML=games.map((g,i)=>`<article class="game ${i===0?'big':''} ${g.locked?'locked':''}" style="--c:${esc(g.color||'#7c4dff')};--img:url('${bannerUrl(g.gameId)}')"><span class="chip">${esc(g.estado)}</span><div class="gameArt"><div class="icon">${esc(g.icono||'🎮')}</div><div><strong>${esc(g.categoria||'Juego')}</strong><div class="sub">${esc(g.subtitulo||'')}</div></div></div><div class="gameText"><h3>${esc(g.nombre)}</h3><p>${esc(g.descripcion||g.subtitulo)}</p></div><div class="gameMeta"><div class="bar"><div class="fill" style="width:${Number(g.progress.percentage||0)}%"></div></div><button type="button" class="play" onclick="openGame('${esc(g.gameId)}')" ${g.locked?'disabled':''}>${esc(g.buttonLabel)}</button></div></article>`).join('');}function openGame(gameId){const g=(currentDashboard?.games||[]).find(x=>x.gameId===gameId);if(!g)return;if(g.url){window.open(g.url,'_blank');return}$('gameModalTitle').textContent=g.nombre;$('gameModalText').textContent='Este juego ya está en el catálogo de LenguArcade, pero todavía no está integrado para abrirse desde aquí. El siguiente paso será conectar Maniacgrafía como primer juego real.';$('gameModal').classList.add('open')}function renderRows(id,rows){$(id).innerHTML=rows.length?rows.map(x=>`<div class="row"><span>${esc(x.l)}</span><strong>${esc(x.r)}</strong></div>`).join(''):'<div class="sub">Sin datos todavía.</div>'}async function simulateProgress(){if(!token)return setStatus('Primero inicia sesión.');const game=(currentDashboard?.games||[]).find(g=>!g.locked)||{gameId:'maniacgrafia'};setBusy(true,'Guardando progreso simulado...');try{const res=await callServer('saveProgress',[{sessionToken:token,gameId:game.gameId,eventType:'progreso_demo',progress:{xpDelta:80,plumasDelta:3,percentage:Math.floor(20+Math.random()*70),accuracy:Math.floor(65+Math.random()*30),attempts:10,successes:8,errors:2,streak:3},achievements:[{id:'demo_'+Date.now(),title:'Pulso arcade',description:'Progreso simulado',xpReward:10}],rawGameData:{source:'v0.4_demo'}}]);currentDashboard=res.dashboard;saveCache('LA_DASHBOARD_CACHE',currentDashboard);renderDashboard(currentDashboard);setStatus('Progreso guardado.');}catch(e){setStatus('Error al guardar: '+(e.message||e));}finally{setBusy(false);}}async function changePin(){if(!token)return;$('pinStatus').textContent='Guardando...';try{const r=await callServer('changeStudentPinV03',[token,$('oldPin').value,$('newPin').value]);$('pinStatus').textContent=r.message;}catch(e){$('pinStatus').textContent=e.message||e;}}function saveCache(k,v){try{localStorage.setItem(k,JSON.stringify({t:Date.now(),v:v}))}catch(e){}}function readCache(k){try{const raw=localStorage.getItem(k);if(!raw)return null;const o=JSON.parse(raw);return o.v||null}catch(e){return null}}boot();
 </script>
-<script>
+<script type="text/plain" id="legacyAvatarBuilder">
 const AVATAR_OPTIONS_CLIENT={
   skin:['light','warm','tan','brown','deep'],
   hairStyle:['side','messy','curly','bob','braids','short'],
@@ -279,6 +280,153 @@ renderDashboard=function(dashboard){
   applyAvatarProfile(dashboard);
 };
 applyAvatarProfile(currentDashboard);
+</script>
+<script>
+const AVATAR_ASSET_ROOT='https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/';
+const AVATAR_ASSET_VERSION='20260610-v2';
+const AVATAR_CHARACTERS=Array.from({length:16},(_,index)=>({
+  id:`avatar-${String(index+1).padStart(2,'0')}`,
+  label:`Personaje ${index+1}`,
+  file:`avatar-${String(index+1).padStart(2,'0')}.webp`
+}));
+const AVATAR_BACKGROUNDS=[
+  {id:'mountains',label:'Montañas',file:'background-01.webp'},
+  {id:'castle',label:'Castillo',file:'background-02.webp'},
+  {id:'volcano',label:'Volcán',file:'background-03.webp'},
+  {id:'forest',label:'Bosque mágico',file:'background-04.webp'},
+  {id:'snow',label:'Nieve',file:'background-05.webp'},
+  {id:'coast',label:'Costa',file:'background-06.webp'},
+  {id:'desert',label:'Ruinas',file:'background-07.webp'},
+  {id:'moon-city',label:'Ciudad nocturna',file:'background-08.webp'},
+  {id:'arcade',label:'Arcade',file:'background-09.webp'},
+  {id:'library',label:'Biblioteca',file:'background-10.webp'},
+  {id:'sky-islands',label:'Islas flotantes',file:'background-11.webp'},
+  {id:'autumn-village',label:'Pueblo otoñal',file:'background-12.webp'}
+];
+const AVATAR_DEFAULT_CLIENT_V2={version:2,character:'avatar-01',background:'mountains'};
+const LEGACY_BACKGROUND_MAP={meadow:'mountains',mountains:'mountains',sunset:'volcano',library:'library',arcade:'arcade',moon:'moon-city'};
+let avatarDraftV2={...AVATAR_DEFAULT_CLIENT_V2};
+
+function avatarAssetUrl(folder,file){
+  return `${AVATAR_ASSET_ROOT}${folder}/${file}?v=${AVATAR_ASSET_VERSION}`;
+}
+
+function normalizeAvatarConfigV2(value){
+  let input=value;
+  if(typeof input==='string'){
+    const raw=input.trim();
+    try{input=JSON.parse(raw);}catch(error){
+      const legacy=raw.match(/^avatar_(\d{2})$/);
+      input=legacy?{character:`avatar-${String(Math.min(16,Math.max(1,Number(legacy[1])))).padStart(2,'0')}`}:{};
+    }
+  }
+  if(!input||typeof input!=='object'||Array.isArray(input))input={};
+  if(!input.character){
+    const fingerprint=JSON.stringify(input);
+    let hash=0;
+    for(let index=0;index<fingerprint.length;index++)hash=(hash*31+fingerprint.charCodeAt(index))>>>0;
+    input={...input,character:`avatar-${String(hash%16+1).padStart(2,'0')}`};
+  }
+  const character=AVATAR_CHARACTERS.some(option=>option.id===input.character)?input.character:AVATAR_DEFAULT_CLIENT_V2.character;
+  const requestedBackground=LEGACY_BACKGROUND_MAP[input.background]||input.background;
+  const background=AVATAR_BACKGROUNDS.some(option=>option.id===requestedBackground)?requestedBackground:AVATAR_DEFAULT_CLIENT_V2.background;
+  return {version:2,character,background};
+}
+
+function renderAvatarCardV2(target,config){
+  if(!target)return;
+  const clean=normalizeAvatarConfigV2(config);
+  const character=AVATAR_CHARACTERS.find(option=>option.id===clean.character);
+  const background=AVATAR_BACKGROUNDS.find(option=>option.id===clean.background);
+  target.innerHTML=`<img class="avatarBackdrop" src="${avatarAssetUrl('avatar-backgrounds',background.file)}" alt=""><img class="avatarCharacter" src="${avatarAssetUrl('avatars',character.file)}" alt="${character.label}">`;
+}
+
+function renderAvatarControlsV2(){
+  const container=$('avatarControls');
+  if(!container)return;
+  container.className='avatarPicker';
+  container.innerHTML=`
+    <div class="avatarPickerGroup">
+      <h4>Elige uno de los 16 personajes</h4>
+      <div class="characterGrid">${AVATAR_CHARACTERS.map(option=>`<button type="button" class="avatarChoice${avatarDraftV2.character===option.id?' selected':''}" data-avatar-character="${option.id}" aria-label="${option.label}" aria-pressed="${avatarDraftV2.character===option.id}"><img src="${avatarAssetUrl('avatars',option.file)}" alt=""><span class="choiceLabel">${option.label.replace('Personaje ','#')}</span></button>`).join('')}</div>
+    </div>
+    <div class="avatarPickerGroup">
+      <h4>Elige uno de los 12 fondos</h4>
+      <div class="backgroundGrid">${AVATAR_BACKGROUNDS.map(option=>`<button type="button" class="avatarChoice backgroundChoice${avatarDraftV2.background===option.id?' selected':''}" data-avatar-background="${option.id}" aria-label="${option.label}" aria-pressed="${avatarDraftV2.background===option.id}"><img src="${avatarAssetUrl('avatar-backgrounds',option.file)}" alt=""><span class="choiceLabel">${option.label}</span></button>`).join('')}</div>
+      <div class="avatarHint">Puedes combinar cualquier personaje con cualquier escenario.</div>
+    </div>`;
+  container.querySelectorAll('[data-avatar-character]').forEach(button=>button.onclick=()=>updateAvatarDraftV2('character',button.dataset.avatarCharacter));
+  container.querySelectorAll('[data-avatar-background]').forEach(button=>button.onclick=()=>updateAvatarDraftV2('background',button.dataset.avatarBackground));
+}
+
+function updateAvatarDraftV2(key,value){
+  const valid=key==='character'?AVATAR_CHARACTERS.some(option=>option.id===value):AVATAR_BACKGROUNDS.some(option=>option.id===value);
+  if(!valid)return;
+  avatarDraftV2={...avatarDraftV2,[key]:value};
+  renderAvatarCardV2($('avatarPreview'),avatarDraftV2);
+  renderAvatarControlsV2();
+  $('avatarStatus').textContent=token?'Vista previa lista. Guarda para aplicar los cambios.':'Inicia sesión para guardar tu personaje.';
+}
+
+function applyAvatarProfileV2(dashboard){
+  const saved=normalizeAvatarConfigV2(dashboard?.student?.avatar);
+  avatarDraftV2={...saved};
+  renderAvatarCardV2($('studentAvatar'),saved);
+  renderAvatarCardV2($('avatarPreview'),saved);
+  renderAvatarControlsV2();
+  $('avatarStatus').textContent=token?'Elige personaje y fondo, y guarda los cambios.':'Inicia sesión para personalizarlo.';
+  $('saveAvatarBtn').disabled=!token;
+}
+
+function randomizeAvatarV2(){
+  avatarDraftV2={
+    version:2,
+    character:AVATAR_CHARACTERS[Math.floor(Math.random()*AVATAR_CHARACTERS.length)].id,
+    background:AVATAR_BACKGROUNDS[Math.floor(Math.random()*AVATAR_BACKGROUNDS.length)].id
+  };
+  renderAvatarCardV2($('avatarPreview'),avatarDraftV2);
+  renderAvatarControlsV2();
+  $('avatarStatus').textContent='Combinación aleatoria preparada.';
+}
+
+async function saveAvatarCustomizationV2(){
+  if(!token||busy)return;
+  busy=true;
+  $('saveAvatarBtn').disabled=true;
+  $('avatarStatus').textContent='Guardando personaje...';
+  try{
+    const result=await callServer('updateStudentAvatar',[token,avatarDraftV2]);
+    currentDashboard=result.dashboard||currentDashboard;
+    saveCache('LA_DASHBOARD_CACHE',currentDashboard);
+    renderDashboard(currentDashboard);
+    $('avatarStatus').textContent=result.message||'Personaje actualizado.';
+  }catch(error){
+    $('avatarStatus').textContent='No se ha podido guardar: '+(error.message||error);
+  }finally{
+    busy=false;
+    $('saveAvatarBtn').disabled=!token;
+  }
+}
+
+function replaceAvatarCanvasV2(id,label){
+  const oldElement=$(id);
+  const card=document.createElement('div');
+  card.id=id;
+  card.className='avatarCard';
+  card.setAttribute('aria-label',label);
+  oldElement.replaceWith(card);
+}
+replaceAvatarCanvasV2('studentAvatar','Avatar del alumno');
+replaceAvatarCanvasV2('avatarPreview','Vista previa del avatar');
+$('randomAvatarBtn').onclick=randomizeAvatarV2;
+$('saveAvatarBtn').onclick=saveAvatarCustomizationV2;
+$('logoutBtn').addEventListener('click',()=>applyAvatarProfileV2(null));
+const renderDashboardWithoutAvatarV2=renderDashboard;
+renderDashboard=function(dashboard){
+  renderDashboardWithoutAvatarV2(dashboard);
+  applyAvatarProfileV2(dashboard);
+};
+applyAvatarProfileV2(currentDashboard);
 </script>
 <script>
 let secureSessionVerified=false;

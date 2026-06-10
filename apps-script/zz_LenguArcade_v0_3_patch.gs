@@ -4,26 +4,22 @@
  */
 
 const LA_AVATAR_OPTIONS = {
-  skin:['light','warm','tan','brown','deep'],
-  hairStyle:['side','messy','curly','bob','braids','short'],
-  hairColor:['brown','black','auburn','blonde','silver'],
-  eyeColor:['brown','blue','green','hazel','grey'],
-  jacketColor:['blue','red','green','purple','orange','black'],
-  shirtColor:['white','red','yellow','cyan','pink','navy'],
-  pantsColor:['navy','black','brown','green','purple'],
-  background:['meadow','mountains','sunset','library','arcade','moon']
+  character:[
+    'avatar-01','avatar-02','avatar-03','avatar-04',
+    'avatar-05','avatar-06','avatar-07','avatar-08',
+    'avatar-09','avatar-10','avatar-11','avatar-12',
+    'avatar-13','avatar-14','avatar-15','avatar-16'
+  ],
+  background:[
+    'mountains','castle','volcano','forest','snow','coast',
+    'desert','moon-city','arcade','library','sky-islands','autumn-village'
+  ]
 };
 
 const LA_AVATAR_DEFAULT = {
-  version:1,
-  skin:'light',
-  hairStyle:'messy',
-  hairColor:'brown',
-  eyeColor:'brown',
-  jacketColor:'red',
-  shirtColor:'navy',
-  pantsColor:'navy',
-  background:'meadow'
+  version:2,
+  character:'avatar-01',
+  background:'mountains'
 };
 
 function setupLenguArcadeV03_() {
@@ -91,21 +87,32 @@ function normalizeStudentAvatar_(avatarConfig) {
     if (raw.charAt(0) === '{') {
       try { input = JSON.parse(raw); } catch (err) { throw new Error('Configuración de avatar no válida.'); }
     } else if (/^avatar_\d{2}$/.test(raw)) {
-      const index = Math.max(0, Number(raw.slice(-2)) - 1);
+      const index = Math.min(16, Math.max(1, Number(raw.slice(-2))));
       input = {
-        skin:LA_AVATAR_OPTIONS.skin[index % LA_AVATAR_OPTIONS.skin.length],
-        hairStyle:LA_AVATAR_OPTIONS.hairStyle[index % LA_AVATAR_OPTIONS.hairStyle.length],
-        hairColor:LA_AVATAR_OPTIONS.hairColor[index % LA_AVATAR_OPTIONS.hairColor.length],
-        eyeColor:LA_AVATAR_OPTIONS.eyeColor[index % LA_AVATAR_OPTIONS.eyeColor.length],
-        jacketColor:LA_AVATAR_OPTIONS.jacketColor[index % LA_AVATAR_OPTIONS.jacketColor.length],
-        shirtColor:LA_AVATAR_OPTIONS.shirtColor[(index + 1) % LA_AVATAR_OPTIONS.shirtColor.length],
-        pantsColor:LA_AVATAR_OPTIONS.pantsColor[index % LA_AVATAR_OPTIONS.pantsColor.length],
-        background:LA_AVATAR_OPTIONS.background[index % LA_AVATAR_OPTIONS.background.length]
+        character:'avatar-' + String(index).padStart(2, '0'),
+        background:'mountains'
       };
     }
   }
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Configuración de avatar no válida.');
-  const clean = { version:1 };
+  if (!input.character) {
+    const fingerprint = JSON.stringify(input);
+    let hash = 0;
+    for (let i = 0; i < fingerprint.length; i++) hash = ((hash * 31) + fingerprint.charCodeAt(i)) >>> 0;
+    const legacyBackgrounds = {
+      meadow:'mountains',
+      mountains:'mountains',
+      sunset:'volcano',
+      library:'library',
+      arcade:'arcade',
+      moon:'moon-city'
+    };
+    input = {
+      character:'avatar-' + String((hash % 16) + 1).padStart(2, '0'),
+      background:legacyBackgrounds[input.background] || 'mountains'
+    };
+  }
+  const clean = { version:2 };
   Object.keys(LA_AVATAR_OPTIONS).forEach(function(key) {
     const value = String(input[key] || LA_AVATAR_DEFAULT[key]);
     if (LA_AVATAR_OPTIONS[key].indexOf(value) < 0) throw new Error('Opción de avatar no válida: ' + key);

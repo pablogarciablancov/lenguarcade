@@ -1,5 +1,16 @@
 # Registro de cambios
 
+## 2026-06-10 - Galería de 16 avatares y 12 escenarios
+
+- El constructor por colores se sustituyó por 16 personajes masculinos completos con estética pixel art uniforme.
+- Se añadieron 12 fondos independientes: montañas, castillo, volcán, bosque mágico, nieve, costa, ruinas, ciudad nocturna, arcade, biblioteca, islas flotantes y pueblo otoñal.
+- Cualquier personaje se puede combinar con cualquier escenario desde dos galerías visuales.
+- La cabecera y la vista previa componen el fondo y el personaje en capas.
+- Los recursos están optimizados en WebP y se sirven desde `lenguarcade-assets`.
+- La configuración se guarda como `{version:2, character, background}` en la misma columna `avatar`.
+- Los identificadores antiguos y las configuraciones del constructor anterior se convierten automáticamente.
+- No se modificaron el acceso, el progreso, las notas, los juegos ni el panel del profesor.
+
 ## 2026-06-10 - Acceso institucional y sprite refinado
 
 - La página del alumno se oculta hasta validar una sesión.

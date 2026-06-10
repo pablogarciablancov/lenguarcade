@@ -113,6 +113,12 @@ if (!studentHtml.includes("mountSecureStudentLogin") ||
     !studentHtml.includes("body.authPending")) {
   errors.push("La vista del alumno debe quedar bloqueada por el acceso institucional.");
 }
+if (!studentHtml.includes("Array.from({length:16}") ||
+    !studentHtml.includes("AVATAR_BACKGROUNDS=[") ||
+    !studentHtml.includes("background-12.webp") ||
+    !studentHtml.includes("version:2,character")) {
+  errors.push("La vista del alumno debe ofrecer 16 personajes y 12 fondos con el formato de avatar v2.");
+}
 
 const publicStudentMatch = serverSource.match(/function publicStudent_\(s\)\s*\{([^}]+)\}/);
 if (!publicStudentMatch || /\b(email|pin)\b/.test(publicStudentMatch[1])) {
