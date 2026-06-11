@@ -54,6 +54,10 @@
         .mode-card h3 { margin-bottom: 10px; font-size: 1.1rem; }
         .aventura-card { border: 2px solid var(--gold); background: #fffbeb; }
         .aventura-card:hover { border-color: var(--warning); box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3); }
+        .world-selector-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:18px; }
+        .world-selector-btn { border:2px solid #c7d2fe; border-radius:14px; padding:13px 8px; background:#eef2ff; color:#312e81; font-weight:900; cursor:pointer; }
+        .world-selector-btn:hover { border-color:var(--gold); transform:translateY(-2px); }
+        .world-selector-btn small { display:block; margin-top:4px; color:var(--text-light); font-weight:700; }
         
         /* Modales */
         .modal-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); display: flex; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(5px); }
@@ -100,8 +104,9 @@
         #combo-text { position: absolute; width: 100%; top: 0; left: 0; text-align: center; color: white; font-weight: bold; font-size: 0.8rem; line-height: 14px; text-shadow: 1px 1px 2px rgba(0,0,0,0.6); pointer-events: none; }
 
         /* SISTEMA DE APAGÓN, EVENTOS Y MUNDOS DE AVENTURA */
-        #game-area-wrapper { flex-grow: 1; position: relative; overflow: hidden; background: #e2e8f0; width: 100%; perspective: 1000px; }
-        #game-area { width: 100%; height: 100%; position: absolute; background: linear-gradient(to bottom, #f8fafc, #e2e8f0); transform-origin: 50% 50%; z-index: auto; transition: background 2s;}
+        #game-area-wrapper { flex-grow: 1; position: relative; overflow: hidden; background: #e2e8f0; width: 100%; perspective: 1000px; user-select:none; -webkit-user-select:none; }
+        #game-area { width: 100%; height: 100%; position: absolute; background: linear-gradient(to bottom, #f8fafc, #e2e8f0); transform-origin: 50% 50%; z-index: 1; transition: background 2s;}
+        #event-visibility-mask { position:absolute; inset:0; z-index:40; pointer-events:none; opacity:0; }
         body.apagon #game-area-wrapper { background: #000 !important; }
         body.apagon #game-area { background: #000 !important; filter: none; }
         
@@ -116,7 +121,9 @@
         /* El Abismo (Apagón): linterna central. La palabra solo se ve al cruzar el centro. */
         body.apagon #game-area-wrapper::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, transparent 0 18%, rgba(0,0,0,0.35) 23%, rgba(0,0,0,0.96) 36%, #000 100%); pointer-events: none; z-index: 14; }
         body.apagon #game-area-wrapper::before { content: ''; position: absolute; left: 50%; top: 50%; width: min(46vw, 430px); height: min(24vh, 180px); transform: translate(-50%, -50%); border-radius: 50%; box-shadow: 0 0 40px 18px rgba(255,255,210,0.18), inset 0 0 18px rgba(255,255,255,0.20); pointer-events: none; z-index: 15; mix-blend-mode: screen; }
-        body.apagon .falling-word { background: rgba(255, 255, 230, 0.98) !important; color: #111827 !important; border: 3px solid rgba(255,255,255,0.92); box-shadow: 0 0 22px rgba(255,255,190,0.75), 0 6px 18px rgba(0,0,0,0.35); text-shadow: none !important; }        
+        body.apagon #game-area-wrapper::before, body.apagon #game-area-wrapper::after { display:none; }
+        body.apagon #event-visibility-mask { opacity:1; background:radial-gradient(ellipse 105px 72px at 50% 50%, transparent 0 38%, rgba(0,0,0,.72) 54%, rgba(0,0,0,.98) 72%, #000 100%); box-shadow:inset 0 0 80px 35px #000; }
+        body.apagon .falling-word { background: rgba(255, 255, 230, 0.98) !important; color: #111827 !important; border: 3px solid rgba(255,255,255,0.92); box-shadow: 0 0 22px rgba(255,255,190,0.75), 0 6px 18px rgba(0,0,0,0.35); text-shadow: none !important; }
         /* Modo Fiebre */
         body.modo-fiebre #game-area-wrapper { box-shadow: 0 0 30px 10px #ff0055, inset 0 0 20px #ff0055 !important; border-color: #ff0055; animation: palpitarFiebre 0.5s infinite alternate; }
         @keyframes palpitarFiebre { from { box-shadow: 0 0 20px 5px #ff0055, inset 0 0 10px #ff0055; } to { box-shadow: 0 0 40px 15px #ffea00, inset 0 0 20px #ffea00; } }
@@ -173,19 +180,20 @@
 
         body.viento .falling-word, .viento { animation: vientoAnim 1.15s infinite ease-in-out alternate; }
         @keyframes vientoAnim { from { margin-left: -150px; } to { margin-left: 150px; } }
-        body.parpadeo .falling-word, .parpadeo { animation: blinkAnim 0.82s steps(1, end) infinite; }
-        body.parpadeo .falling-word *, .parpadeo * { animation: inherit; }
-        @keyframes blinkAnim { 
-            0%, 45% { opacity: 1; color: inherit; }
-            46%, 100% { opacity: 1; color: #ffffff !important; background: #ffffff !important; border-color: #ffffff !important; text-shadow: none !important; box-shadow: 0 0 28px rgba(255,255,255,0.95) !important; }
-        }
+        body.parpadeo #game-area { animation:circuitScene .58s steps(1,end) infinite; }
+        body.parpadeo #event-visibility-mask { opacity:1; animation:circuitOverlay .58s steps(1,end) infinite; }
+        body.parpadeo .falling-word { animation:circuitWord .58s steps(1,end) infinite !important; }
+        @keyframes circuitScene { 0%,18%,54%,100%{filter:none} 19%,31%{filter:brightness(.08) contrast(2)} 32%,42%{filter:brightness(2.8) saturate(0)} 43%,53%{filter:hue-rotate(135deg) contrast(1.8)} }
+        @keyframes circuitOverlay { 0%,18%,54%,100%{background:transparent} 19%,31%{background:rgba(0,0,0,.92)} 32%,42%{background:repeating-linear-gradient(0deg,rgba(255,255,255,.9) 0 3px,rgba(0,212,255,.45) 3px 7px)} 43%,53%{background:linear-gradient(90deg,rgba(255,0,128,.46),rgba(0,225,255,.46))} }
+        @keyframes circuitWord { 0%,18%,54%,100%{opacity:1;filter:none} 19%,31%{opacity:.04} 32%,42%{opacity:0} 43%,53%{opacity:.55;filter:drop-shadow(8px 0 #00e5ff) drop-shadow(-8px 0 #ff0080)} }
         
 		.jefe-final { font-size: clamp(1.2rem, 4vw, 3rem) !important; width: 95%; max-width: 800px; text-align: center; white-space: normal !important; word-break: break-word; color: white; background: linear-gradient(135deg, var(--danger), #991b1b); border: 4px solid #7f1d1d; }        .typed-correct { color: var(--success); }
         .missing-letter { color: var(--secondary); border-bottom: 3px solid var(--secondary); padding: 0 5px; }
         
         /* INPUT Y FEEDBACK */
         #input-area { padding: 15px; background: var(--card-bg); display: flex; flex-direction: column; align-items: center; z-index: 20; position: relative; box-shadow: 0 -4px 10px rgba(0,0,0,0.05);}
-        #word-input { width: 100%; max-width: 600px; padding: 15px 25px; font-size: 2rem; border: 3px solid var(--primary-light); border-radius: 50px; text-align: center; outline: none; transition: all 0.2s; }
+        #word-input { width: 100%; max-width: 600px; padding: 15px 25px; font-size: 2rem; border: 3px solid var(--primary-light); border-radius: 50px; text-align: center; outline: none; transition: all 0.2s; user-select:none; -webkit-user-select:none; }
+        @media(max-width:700px){.world-selector-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
         .input-error { background-color: #fee2e2 !important; border-color: var(--danger) !important; color: var(--danger) !important; }
 
         .shake { animation: shake 0.2s; }
@@ -218,7 +226,7 @@
 
     <div id="start-screen" class="screen">
         <h1>Maniacgrafía</h1>
-        <p class="subtitle">Aventura ortográfica con guardado en Google Sheets · efectos v3 🌍</p>
+        <p class="subtitle standalone-save-copy">Aventura ortográfica con guardado en Google Sheets · efectos v3 🌍</p>
         <div class="dashboard">
             <div class="player-profile">
                 <span style="font-size:1.35rem;">👤</span>
@@ -236,7 +244,7 @@
         </div>
         <p class="autosave-note">El progreso se guarda en Google Sheets cuando configures la URL del Apps Script. También queda una copia local de emergencia.</p>
         <div class="mode-container">
-            <div class="mode-card aventura-card" onclick="startGame('aventura')"><h3 style="color:var(--gold);">🌍 Aventura</h3><p>Continúa desde tu último mundo guardado.</p></div>
+            <div class="mode-card aventura-card" onclick="startAdventureMode()"><h3 style="color:var(--gold);">🌍 Aventura</h3><p id="adventure-mode-description">Continúa desde tu último mundo guardado.</p></div>
             <div class="mode-card" onclick="startGame('practica')"><h3 style="color:var(--primary);">🕹️ Práctica</h3><p>Infinito. 3 vidas.</p></div>
             <div class="mode-card" onclick="startGame('supervivencia')"><h3 style="color:var(--text-main);">💀 Supervivencia</h3><p>1 vida. Acelerado.</p></div>
             <div class="mode-card" onclick="startGame('hueco')"><h3 style="color:var(--success);">🧩 Letra Perdida</h3><p>Rellena el hueco.</p></div>
@@ -264,7 +272,7 @@
                     </select>
                 </div>
             </div>
-            <div class="settings-group" style="border-color: var(--primary-light); background: #e0e7ff;">
+            <div class="settings-group" id="game-save-management" style="border-color: var(--primary-light); background: #e0e7ff;">
                 <h3 style="text-align: center; color: var(--primary); font-size: 1rem;">Gestión de Partida</h3>
                 <p style="font-size:0.9rem; color:var(--text-light); text-align:center; margin:8px 0;">Guardado automático en Google Sheets + copia local de emergencia. Exportar sirve como copia manual.</p>
                 <div class="save-btn-group">
@@ -276,6 +284,15 @@
                 </div>
             </div>
             <div style="text-align: center; margin-top: 25px;"><button class="btn btn-secondary" onclick="closePanel('settings-screen')">Volver</button></div>
+        </div>
+    </div>
+
+    <div id="world-selector-screen" class="modal-wrapper hidden">
+        <div class="modal-panel" style="max-width:720px;">
+            <h2 style="color:var(--gold); text-align:center;">Elige un mundo para batir tu récord</h2>
+            <p style="color:var(--text-light); text-align:center; margin-top:8px;">Supera su jefe y mejora tu mejor puntuación.</p>
+            <div class="world-selector-grid" id="world-selector-grid"></div>
+            <div style="text-align:center; margin-top:22px;"><button class="btn btn-secondary" onclick="closePanel('world-selector-screen')">Volver</button></div>
         </div>
     </div>
 
@@ -296,7 +313,7 @@
 
     <div id="achievements-screen" class="modal-wrapper hidden">
         <div class="modal-panel">
-            <h2 style="color: var(--primary); text-align:center;">Sala de Trofeos (106 Logros)</h2>
+            <h2 id="achievements-title" style="color: var(--primary); text-align:center;">Sala de Trofeos</h2>
             <div id="achievements-grid"></div>
             <div style="text-align: center; margin-top: 25px;"><button class="btn btn-secondary" onclick="closePanel('achievements-screen')">Volver</button></div>
         </div>
@@ -328,6 +345,7 @@
         <div id="game-area-wrapper">
             <div id="anuncio-poder"></div>
             <div id="game-area"></div>
+            <div id="event-visibility-mask" aria-hidden="true"></div>
         </div>
         <div id="input-area"><input type="text" id="word-input" autocomplete="off" spellcheck="false" placeholder="Escribe la palabra..."></div>
     </div>
@@ -345,7 +363,8 @@
     </div>
 
     <div id="end-screen" class="screen hidden">
-        <h1>¡Partida Terminada!</h1>
+        <h1 id="end-title">¡Partida Terminada!</h1>
+        <p id="end-message" style="font-size:1.15rem; color:var(--text-light); text-align:center; max-width:650px;"></p>
         <div style="font-size: 2rem; margin: 20px; color: var(--gold); font-weight: bold;">Has ganado +<span id="end-coins">0</span> 💰</div>
         <button class="btn btn-primary" onclick="showStartScreen()">Volver al Menú</button>
     </div>
@@ -357,7 +376,10 @@
         let userStats = { 
             coins: 0, maxCombo: 0, premiumCaught: 0, diamondsCaught: 0, heartsCaught: 0, bossesDefeated: 0, itemsBought: 0, totalWords: 0, bombsUsed: 0, freezesUsed: 0, lupasUsed: 0, escobasUsed: 0,
             musicToggles: 0, emptyBombsTriggered: 0, bossesBombed: 0, blindWords: 0, zeroCoinPurchases: 0, pacifistDeaths: 0, masochistCombos: 0, feverCount: 0, bonusCount: 0, livesLost: 0, bankChanges: 0,
-            playerName: 'Jugador', classGroup: '', studentCode: '', adventureWorld: 1, adventureCompleted: false, gamesPlayed: 0, bestScores: { practica: 0, supervivencia: 0, hueco: 0, pendulo: 0, extremo: 0, aventura: 0 }
+            playerName: 'Jugador', classGroup: '', studentCode: '', adventureWorld: 1, adventureCompleted: false, gamesPlayed: 0,
+            adventureWorldBestScores: {}, worldReplays: 0, worldsReplayed: [], replaySelections: {}, perfectWorldReplays: 0, replayBestImprovements: 0,
+            pasteAttempts: 0, zoomAttempts: 0, timeoutWithText: 0, bossWordsDefeated: [],
+            bestScores: { practica: 0, supervivencia: 0, hueco: 0, pendulo: 0, extremo: 0, aventura: 0 }
         };
         let userInventory = { shield: 0, freeze: 0, bomb: 0, lupa: 0, escoba: 0 };
         let achievements = [];
@@ -504,6 +526,10 @@
             userStats = { ...userStats, ...(data.stats || {}) };
             userStats.bestScores = { practica: 0, supervivencia: 0, hueco: 0, pendulo: 0, extremo: 0, aventura: 0, ...(userStats.bestScores || {}) };
             userStats.adventureWorld = Math.min(12, Math.max(1, Number(userStats.adventureWorld || 1)));
+            userStats.adventureWorldBestScores = { ...(userStats.adventureWorldBestScores || {}) };
+            userStats.worldsReplayed = Array.isArray(userStats.worldsReplayed) ? userStats.worldsReplayed : [];
+            userStats.replaySelections = { ...(userStats.replaySelections || {}) };
+            userStats.bossWordsDefeated = Array.isArray(userStats.bossWordsDefeated) ? userStats.bossWordsDefeated : [];
             userInventory = { ...userInventory, ...(data.inv || {}) };
             achievements.forEach(a => a.unlocked = false);
             if (Array.isArray(data.unlockedAch)) data.unlockedAch.forEach((isUnlocked, i) => { if (achievements[i]) achievements[i].unlocked = !!isUnlocked; });
@@ -791,19 +817,72 @@
                 { id: 'abs_28', icon: '🌍', title: 'Trotamundos', desc: 'Llega al Mundo 5 en el Modo Aventura.', check: () => false },
                 { id: 'abs_29', icon: '🌌', title: 'Guardián del Multiverso', desc: 'Alcanza el Mundo 10 en Aventura.', check: () => false },
                 { id: 'abs_30', icon: '🤪', title: 'Aporreando el teclado', desc: 'Escribe más de 15 letras en un error.', check: () => false },
-                { id: 'abs_31', icon: '👑', title: 'Dios de las Palabras', desc: 'Completa el Mundo 12 y vence al Jefe Supremo.', check: () => false }
+                { id: 'abs_31', icon: '👑', title: 'Dios de las Palabras', desc: 'Completa el Mundo 12 y vence al Jefe Supremo.', check: () => false },
+                { id: 'abs_32', icon: '📋', title: 'El Ctrl+V es Lava', desc: 'Intenta pegar una respuesta. Buen intento.', check: () => Number(userStats.pasteAttempts || 0) >= 1 },
+                { id: 'abs_33', icon: '🔬', title: 'Ant-Man Ortográfico', desc: 'Intenta encoger el navegador para ganar tiempo.', check: () => Number(userStats.zoomAttempts || 0) >= 1 },
+                { id: 'abs_34', icon: '🗺️', title: 'Turista con Espada', desc: 'Repite 3 mundos después de completar la aventura.', check: () => Number(userStats.worldReplays || 0) >= 3 },
+                { id: 'abs_35', icon: '🧳', title: 'Abono Transporte Multiversal', desc: 'Vuelve a visitar los 12 mundos.', check: () => (userStats.worldsReplayed || []).length >= 12 },
+                { id: 'abs_36', icon: '🔁', title: 'El Día de la Marmota', desc: 'Elige el mismo mundo 3 veces.', check: () => Object.values(userStats.replaySelections || {}).some(value => Number(value || 0) >= 3) },
+                { id: 'abs_37', icon: '🧾', title: 'Álbum de Jefes', desc: 'Derrota 12 palabras-jefe diferentes.', check: () => (userStats.bossWordsDefeated || []).length >= 12 },
+                { id: 'abs_38', icon: '🧼', title: 'Mundo Recién Fregado', desc: 'Repite un mundo sin cometer ningún error.', check: () => Number(userStats.perfectWorldReplays || 0) >= 1 },
+                { id: 'abs_39', icon: '🌱', title: 'Nostalgia del Tutorial', desc: 'Vuelve al Mundo 1 después de coronarte.', check: () => (userStats.worldsReplayed || []).includes(1) },
+                { id: 'abs_40', icon: '🌋', title: 'No Aprendiste la Lección', desc: 'Regresa voluntariamente al Mundo 12.', check: () => (userStats.worldsReplayed || []).includes(12) },
+                { id: 'abs_41', icon: '📈', title: 'Eso Antes No Era Récord', desc: 'Mejora tres récords de mundo.', check: () => Number(userStats.replayBestImprovements || 0) >= 3 },
+                { id: 'abs_42', icon: '⌛', title: 'La Palabra a Medias', desc: 'Deja que caiga una palabra que ya habías empezado.', check: () => Number(userStats.timeoutWithText || 0) >= 1 },
+                { id: 'abs_43', icon: '🎰', title: 'Mundo Siete, Naturalmente', desc: 'Elige el Mundo 7 porque el siete siempre parece importante.', check: () => (userStats.worldsReplayed || []).includes(7) },
+                { id: 'abs_44', icon: '📊', title: 'Doce Columnas en una Hoja Mental', desc: 'Registra una puntuación en cada mundo.', check: () => Object.keys(userStats.adventureWorldBestScores || {}).filter(key => Number(userStats.adventureWorldBestScores[key] || 0) > 0).length >= 12 },
+                { id: 'abs_45', icon: '🧠', title: 'Jefe con Apellidos', desc: 'Derrota hipopotomonstrosesquipedaliofobia.', check: () => (userStats.bossWordsDefeated || []).includes('hipopotomonstrosesquipedaliofobia') },
+                { id: 'abs_46', icon: '🏠', title: 'Aquí Se Está Mejor', desc: 'Repite 10 mundos en vez de empezar otro juego.', check: () => Number(userStats.worldReplays || 0) >= 10 }
             ];
             absurdos.forEach(ach => achievements.push({ ...ach, unlocked: false }));
         }
 
         function unlockSecret(id) { let ach = achievements.find(a => a.id === id); if (ach && !ach.unlocked) { ach.unlocked = true; showToast({ icon: ach.icon, title: "¡Logro Desbloqueado!", desc: ach.title }); saveProgress(); } }
         
-        let state = { mode: 'practica', score: 0, combo: 1, lives: 3, mistakes: 0, sessionCoins: 0, sessionCorrect: 0, sessionErrors: 0, sessionMaxCombo: 1, activeWordObj: null, activeElements: [], isPlaying: false, fever: false, currentFallSpeed: 1.0, wordsToBoss: 15, isBossActive: false, currentEvent: null, blankIndex: -1, lastInputLen: 0, wordType: 'normal', failedKeystrokes: 0, worldLevel: 1 };
+        let state = { mode: 'practica', score: 0, combo: 1, lives: 3, mistakes: 0, sessionCoins: 0, sessionCorrect: 0, sessionErrors: 0, sessionMaxCombo: 1, activeWordObj: null, activeElements: [], isPlaying: false, fever: false, currentFallSpeed: 1.0, wordsToBoss: 15, isBossActive: false, currentEvent: null, blankIndex: -1, lastInputLen: 0, wordType: 'normal', failedKeystrokes: 0, worldLevel: 1, fallProgress: 0, fallStartY: -60, adventureReplay: false, worldScoreStart: 0, usedBossWords: [] };
         let gameLoopId, wordY = 0, lastTimestamp = 0; let wordStartTime = 0;
+
+        function registerBlockedPaste(event) {
+            if (!state.isPlaying) return;
+            event.preventDefault();
+            event.stopPropagation();
+            userStats.pasteAttempts = Number(userStats.pasteAttempts || 0) + 1;
+            unlockSecret('abs_32');
+            showToast({icon:'⌨️', title:'Aquí se escribe de verdad', desc:'Pegar y arrastrar texto está desactivado durante la partida.'});
+        }
+
+        function registerBlockedZoom(event) {
+            const key = String(event.key || '').toLowerCase();
+            if (!(event.ctrlKey || event.metaKey) || !['-','_','+','=','0'].includes(key)) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            userStats.zoomAttempts = Number(userStats.zoomAttempts || 0) + 1;
+            unlockSecret('abs_33');
+        }
+
+        function installFairPlayControls() {
+            const input = document.getElementById('word-input');
+            ['paste','drop'].forEach(type => input.addEventListener(type, registerBlockedPaste));
+            input.addEventListener('beforeinput', event => {
+                if (['insertFromPaste','insertFromDrop','insertFromYank'].includes(event.inputType)) registerBlockedPaste(event);
+            });
+            input.addEventListener('contextmenu', event => { if (state.isPlaying) event.preventDefault(); });
+            document.addEventListener('copy', event => { if (state.isPlaying) event.preventDefault(); }, true);
+            document.addEventListener('cut', event => { if (state.isPlaying) event.preventDefault(); }, true);
+            document.addEventListener('keydown', registerBlockedZoom, true);
+            document.addEventListener('wheel', event => {
+                if (!(event.ctrlKey || event.metaKey)) return;
+                event.preventDefault();
+                userStats.zoomAttempts = Number(userStats.zoomAttempts || 0) + 1;
+                unlockSecret('abs_33');
+            }, { passive:false, capture:true });
+            document.addEventListener('gesturestart', event => event.preventDefault(), { passive:false });
+        }
 
         window.onload = () => {
             initAchievements(); loadProgress(); 
             document.getElementById('word-input').addEventListener('input', checkInput);
+            installFairPlayControls();
             window.addEventListener('keydown', (e) => {
                 if (!state.isPlaying) { if(e.key === 'Enter' && !document.getElementById('feedback-modal').classList.contains('hidden')) resumeGame(); return; }
                 if (e.key === ' ') { e.preventDefault(); if (poderDisponible) { poderDisponible = false; rachaPoder = 0; actualizarBarraPoder(false); if (Math.random() < 0.5) iniciarModoFiebre(); else iniciarFaseBonus(); } else { useBomb(); } }
@@ -821,13 +900,73 @@
         function bankSessionCoins() { const earned = state.sessionCoins || 0; if (earned > 0) { userStats.coins += earned; state.sessionCoins = 0; } return earned; }
         function saveAdventureProgress() { if (state.mode === 'aventura') { userStats.adventureWorld = Math.min(12, Math.max(userStats.adventureWorld || 1, state.worldLevel || 1)); saveProgress(); } }
 
-        async function startGame(mode) {
+        function startAdventureMode() {
+            if (userStats.adventureCompleted) openAdventureWorldSelector();
+            else startGame('aventura');
+        }
+
+        function openAdventureWorldSelector() {
+            const grid = document.getElementById('world-selector-grid');
+            grid.innerHTML = '';
+            for (let world = 1; world <= 12; world++) {
+                const button = document.createElement('button');
+                const best = Number((userStats.adventureWorldBestScores || {})[world] || 0);
+                button.className = 'world-selector-btn';
+                button.innerHTML = `Mundo ${world}<small>Récord: ${best.toLocaleString('es-ES')} puntos</small>`;
+                button.onclick = () => {
+                    closePanel('world-selector-screen');
+                    startGame('aventura', world);
+                };
+                grid.appendChild(button);
+            }
+            openPanel('world-selector-screen');
+        }
+
+        function recordAdventureWorldScore(world) {
+            userStats.adventureWorldBestScores = userStats.adventureWorldBestScores || {};
+            const score = Math.max(0, Math.round(Number(state.score || 0) - Number(state.worldScoreStart || 0)));
+            const oldBest = Number(userStats.adventureWorldBestScores[world] || 0);
+            if (score > oldBest) {
+                userStats.adventureWorldBestScores[world] = score;
+                if (state.adventureReplay && oldBest > 0) userStats.replayBestImprovements = Number(userStats.replayBestImprovements || 0) + 1;
+            }
+            return { score, best:Number(userStats.adventureWorldBestScores[world] || 0), improved:score > oldBest };
+        }
+
+        function finishAdventureReplay(world) {
+            state.isPlaying = false;
+            cancelAnimationFrame(gameLoopId);
+            document.getElementById('bgm').pause();
+            clearEvents();
+            const result = recordAdventureWorldScore(world);
+            if (state.sessionErrors === 0) userStats.perfectWorldReplays = Number(userStats.perfectWorldReplays || 0) + 1;
+            const earned = bankSessionCoins();
+            recordBestScore();
+            checkAchievements();
+            saveProgress();
+            notifyLenguArcadeResult('world_replay');
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('end-title').textContent = `¡Mundo ${world} superado!`;
+            document.getElementById('end-message').textContent = `${result.score.toLocaleString('es-ES')} puntos en este mundo. Récord: ${result.best.toLocaleString('es-ES')}${result.improved ? ' · ¡Nuevo récord!' : ''}`;
+            document.getElementById('end-coins').textContent = earned;
+            document.getElementById('end-screen').classList.remove('hidden');
+        }
+
+        async function startGame(mode, selectedWorld = null) {
             await saveProfileName(false);
             initAudio(); const bgm = document.getElementById('bgm'); bgm.src = musicTracks[mode] || musicTracks['practica']; if (musicEnabled) { bgm.volume = 0.4; bgm.play(); }
             state.mode = mode; state.score = 0; state.combo = 1; state.sessionCoins = 0; state.sessionCorrect = 0; state.sessionErrors = 0; state.sessionMaxCombo = 1; state.fever = false; state.isBossActive = false; state.mistakes = 0; state.lastInputLen = 0; state.failedKeystrokes = 0;
-            state.worldLevel = (mode === 'aventura') ? Math.min(12, Math.max(1, userStats.adventureWorld || 1)) : 1;
+            state.adventureReplay = mode === 'aventura' && userStats.adventureCompleted && selectedWorld != null;
+            state.worldLevel = (mode === 'aventura') ? Math.min(12, Math.max(1, state.adventureReplay ? selectedWorld : (userStats.adventureWorld || 1))) : 1;
             state.wordsToBoss = (mode === 'aventura') ? getWordsToBossForWorld(state.worldLevel) : 15;
             state.currentFallSpeed = (mode === 'supervivencia') ? 1.5 : 1.0;
+            state.worldScoreStart = 0; state.usedBossWords = [];
+            if (state.adventureReplay) {
+                userStats.worldReplays = Number(userStats.worldReplays || 0) + 1;
+                userStats.worldsReplayed = Array.from(new Set([...(userStats.worldsReplayed || []), state.worldLevel])).sort((a,b) => a-b);
+                userStats.replaySelections = userStats.replaySelections || {};
+                userStats.replaySelections[state.worldLevel] = Number(userStats.replaySelections[state.worldLevel] || 0) + 1;
+            }
             userStats.gamesPlayed = (userStats.gamesPlayed || 0) + 1;
             rachaPoder = 0; poderDisponible = false; actualizarBarraPoder(false);
             
@@ -841,7 +980,9 @@
             if (mode === 'aventura') { document.getElementById('world-hud').style.display = 'flex'; cambiarMundo(); } 
             else { document.getElementById('world-hud').style.display = 'none'; }
 
-            saveProgress(); updateHUD(); state.isPlaying = true; notifyLenguArcadeSessionStarted(); spawnWord(); lastTimestamp = performance.now(); requestAnimationFrame(gameLoop); setTimeout(() => input.focus(), 100);
+            document.getElementById('end-title').textContent = '¡Partida Terminada!';
+            document.getElementById('end-message').textContent = '';
+            checkAchievements(); saveProgress(); updateHUD(); state.isPlaying = true; notifyLenguArcadeSessionStarted(); spawnWord(); lastTimestamp = performance.now(); requestAnimationFrame(gameLoop); setTimeout(() => input.focus(), 100);
         }
 
         // --- MODO AVENTURA: LÓGICA DE MUNDOS ---
@@ -915,16 +1056,25 @@
             if(state.fever) document.body.classList.add('fever'); 
         }
 
+        function getUniqueBossWord() {
+            const available = bossWords.filter(word => !state.usedBossWords.includes(word));
+            const pool = available.length ? available : bossWords;
+            const word = pool[Math.floor(Math.random() * pool.length)];
+            state.usedBossWords.push(word);
+            return word;
+        }
+
         function spawnBoss() {
             state.isBossActive = true; state.bossWasApagon = (state.currentEvent === 'apagon');
             playSFX('boss'); clearEvents(); state.mistakes = 0; updateHUD();
             
-            let bossWordText = bossWords[Math.floor(Math.random()*bossWords.length)];
+            let bossWordText = getUniqueBossWord();
             let titleBanner = '¡JEFE FINAL!';
             
             // LÓGICA DEL JEFE SUPREMO
             if (state.mode === 'aventura' && state.worldLevel === 12) {
                 bossWordText = "hipopotomonstrosesquipedaliofobia";
+                if (!state.usedBossWords.includes(bossWordText)) state.usedBossWords.push(bossWordText);
                 state.activeWordObj = { texto: bossWordText, categoria: "DIOS ORTOGRÁFICO", explicacion: "¡EL JEFE SUPREMO! ¡NO FALLES!" };
                 titleBanner = '¡JEFE SUPREMO!';
                 document.body.classList.add('fuego');
@@ -938,7 +1088,7 @@
             const banner = document.createElement('div'); banner.className = 'event-banner'; banner.style.color = 'var(--danger)'; banner.textContent = titleBanner;
             document.body.appendChild(banner); setTimeout(() => banner.remove(), 2000);
 
-            const gameArea = document.getElementById('game-area'); gameArea.innerHTML = ''; wordY = -100; state.activeElements = [];
+            const gameArea = document.getElementById('game-area'); gameArea.innerHTML = ''; wordY = -100; state.fallStartY = -100; state.fallProgress = 0; state.activeElements = [];
             let el = document.createElement('div'); el.className = 'falling-word jefe-final'; el.innerHTML = state.activeWordObj.texto; el.style.left = '50%'; el.style.top = wordY + 'px';
             gameArea.appendChild(el); state.activeElements.push({ element: el, text: state.activeWordObj.texto, isCorrect: true, active: true }); state.currentFallSpeed = 0.5;
         }
@@ -956,7 +1106,7 @@
             state.wordType = 'normal';
             if (!state.isBossActive) { let r = Math.random(); if (r < 0.05) state.wordType = 'corazon'; else if (r < 0.10) state.wordType = 'diamante'; else if (r < 0.20) state.wordType = 'premium'; }
 
-            const gameArea = document.getElementById('game-area'); gameArea.innerHTML = ''; state.activeElements = []; wordY = -60; wordStartTime = performance.now();
+            const gameArea = document.getElementById('game-area'); gameArea.innerHTML = ''; state.activeElements = []; wordY = -60; state.fallStartY = -60; state.fallProgress = 0; wordStartTime = performance.now();
             let words = [state.activeWordObj.texto]; let positions = ['50%'];
 
             if (state.mode === 'extremo') { words.push(state.activeWordObj.texto.replace(/b/g,'v').replace(/s/g,'c') + 'x', state.activeWordObj.texto.replace(/j/g,'g') + 'z'); positions = ['20%', '50%', '80%'].sort(() => Math.random() - 0.5); }
@@ -980,10 +1130,12 @@
             const delta = timestamp - lastTimestamp; lastTimestamp = timestamp;
             let actualSpeed = state.currentFallSpeed; if(state.fever && !state.isBossActive) actualSpeed *= 1.2;
             
-            wordY += actualSpeed * (delta / 16.6);
+            state.fallProgress += (delta / 11000) * actualSpeed;
+            const travelHeight = document.getElementById('game-area-wrapper').clientHeight + Math.abs(state.fallStartY) - 70;
+            wordY = state.fallStartY + (travelHeight * state.fallProgress);
             state.activeElements.forEach(item => { if(item.active) item.element.style.top = wordY + 'px'; });
             
-            if (wordY > document.getElementById('game-area-wrapper').clientHeight - 70) { handleDamage('fall'); return; }
+            if (state.fallProgress >= 1) { handleDamage('fall'); return; }
             gameLoopId = requestAnimationFrame(gameLoop);
         }
 
@@ -1027,6 +1179,8 @@
 
         function processCorrectWord(correctItem) {
             let timeTaken = performance.now() - wordStartTime;
+            const defeatedBoss = state.isBossActive;
+            const defeatedWorld = state.worldLevel;
             if (timeTaken < 1000) unlockSecret('abs_26');
             if (timeTaken > 10000) unlockSecret('abs_27');
 
@@ -1039,32 +1193,19 @@
             if(state.combo > userStats.maxCombo) userStats.maxCombo = state.combo;
             
             // LÓGICA DE DERROTAR AL JEFE
-            if(state.isBossActive) { 
+            if(defeatedBoss) {
                 state.isBossActive = false; 
                 userStats.bossesDefeated++; 
+                userStats.bossWordsDefeated = Array.from(new Set([...(userStats.bossWordsDefeated || []), state.activeWordObj.texto]));
                 if(state.bossWasApagon) unlockSecret('abs_24'); 
                 
-                if(state.mode === 'aventura') {
-                    if (state.worldLevel >= 12) {
-                        winAdventure(); // ¡VICTORIA FINAL!
-                        return;
-                    } else {
-                        state.worldLevel++;
-                        userStats.adventureWorld = Math.max(userStats.adventureWorld || 1, state.worldLevel);
-                        state.wordsToBoss = getWordsToBossForWorld(state.worldLevel);
-                        cambiarMundo();
-                        saveAdventureProgress();
-                    }
-                } else {
-                    state.wordsToBoss = 15;
-                }
             } 
             
             if (state.mode === 'pendulo') state.currentFallSpeed = Math.max(0.6, state.currentFallSpeed * 0.85);
 
             actualizarBarraPoder(true);
 
-            let pts = 10 * state.combo * (state.isBossActive ? 5 : 1) * (state.currentEvent ? 2 : 1) * multiplicadorPuntos; 
+            let pts = 10 * state.combo * (defeatedBoss ? 5 : 1) * (state.currentEvent ? 2 : 1) * multiplicadorPuntos;
             
             if (multiplicadorPuntos === 3) { state.sessionFeverPoints += pts; if(state.sessionFeverPoints >= 300) unlockSecret('abs_14'); }
 
@@ -1073,15 +1214,44 @@
             else if (state.wordType === 'corazon') { userStats.heartsCaught++; playSFX('premium'); if (state.lives === 1 && state.mode !== 'supervivencia') unlockSecret('abs_16'); if (state.lives < 3 && state.mode !== 'supervivencia') { state.lives++; showToast({icon: '❤️', title: `¡Vida Recuperada!`}); } else { userInventory.shield++; showToast({icon: '🛡️', title: `¡Escudo Extra!`}); } } 
             else { state.score += pts; state.sessionCoins++; playSFX('correct'); }
 
+            if (defeatedBoss) {
+                if (state.mode === 'aventura') {
+                    if (state.adventureReplay) {
+                        finishAdventureReplay(defeatedWorld);
+                        return;
+                    }
+                    recordAdventureWorldScore(defeatedWorld);
+                    if (defeatedWorld >= 12) {
+                        winAdventure();
+                        return;
+                    }
+                    state.worldLevel++;
+                    state.worldScoreStart = state.score;
+                    userStats.adventureWorld = Math.max(userStats.adventureWorld || 1, state.worldLevel);
+                    state.wordsToBoss = getWordsToBossForWorld(state.worldLevel);
+                    cambiarMundo();
+                    saveAdventureProgress();
+                } else {
+                    state.wordsToBoss = 15;
+                }
+            }
+
             checkAchievements(); updateHUD(); saveProgress(); document.getElementById('word-input').value = ''; spawnWord();
         }
 
         function handleDamage(reason) {
             state.combo = 1; playSFX('error'); state.fever = false; document.body.classList.remove('fever'); state.mistakes = 0; state.lastInputLen = 0;
+            const input = document.getElementById('word-input');
+            if (reason === 'fall') {
+                if (input.value.trim()) userStats.timeoutWithText = Number(userStats.timeoutWithText || 0) + 1;
+                input.value = '';
+                input.classList.remove('input-error');
+                checkAchievements();
+            }
             actualizarBarraPoder(false);
             if (userInventory.shield > 0) {
                 userInventory.shield--; updateHUD(); saveProgress(); 
-                if (reason === 'fall') { spawnWord(); lastTimestamp = performance.now(); requestAnimationFrame(gameLoop); } else { document.getElementById('word-input').value = ''; }
+                if (reason === 'fall') { spawnWord(); lastTimestamp = performance.now(); requestAnimationFrame(gameLoop); } else { input.value = ''; }
             } else {
                 userStats.livesLost++; checkAchievements();
                 state.isPlaying = false; cancelAnimationFrame(gameLoopId); clearEvents(); state.lives--; updateHUD();
@@ -1126,13 +1296,28 @@
             const codeInput = document.getElementById('student-code-input'); if (codeInput && document.activeElement !== codeInput) codeInput.value = userStats.studentCode || '';
             const progress = document.getElementById('adventure-progress-display');
             if (progress) progress.textContent = userStats.adventureCompleted ? 'Completada 👑' : `Mundo ${Math.min(12, Math.max(1, userStats.adventureWorld || 1))}`;
+            const adventureDescription = document.getElementById('adventure-mode-description');
+            if (adventureDescription) {
+                adventureDescription.textContent = userStats.adventureCompleted
+                    ? 'Elige cualquier mundo y supera tu mejor puntuación.'
+                    : 'Continúa desde tu último mundo guardado.';
+            }
             ['shield', 'freeze', 'bomb', 'lupa', 'escoba'].forEach(i => document.getElementById(`inv-${i}`).textContent = userInventory[i]);
         }
         
         // --- HABILIDADES ---
         function buyItem(item, price) { if (userStats.coins >= price) { userStats.coins -= price; userInventory[item]++; userStats.itemsBought++; if(userStats.coins === 0) userStats.zeroCoinPurchases++; checkAchievements(); updateMenuUI(); saveProgress(); } else alert("Sin monedas suficientes."); }
         function showToast(ach) { const container = document.getElementById('toast-container'); const toast = document.createElement('div'); toast.className = 'toast'; toast.innerHTML = `<div style="font-size:2.5rem;">${ach.icon}</div><div><p style="font-weight:bold; font-size:1.1rem; margin-bottom: 2px;">${ach.title}</p><p style="font-size:0.9rem">${ach.desc || ''}</p></div>`; container.appendChild(toast); setTimeout(() => toast.remove(), 4000); }
-        function renderAchievements() { const grid = document.getElementById('achievements-grid'); grid.innerHTML = ''; achievements.forEach(ach => { grid.innerHTML += `<div class="achievement-card ${ach.unlocked ? 'unlocked' : ''}"><div style="font-size:2.5rem;">${ach.icon}</div><div style="font-weight:bold; font-size:1rem; margin: 5px 0;">${ach.title}</div><div style="font-size:0.75rem; color:var(--text-light);">${ach.desc}</div></div>`; }); }
+        function renderAchievements() {
+            const title = document.getElementById('achievements-title');
+            const unlocked = achievements.filter(achievement => achievement.unlocked).length;
+            if (title) title.textContent = `Sala de Trofeos (${unlocked}/${achievements.length} Logros)`;
+            const grid = document.getElementById('achievements-grid');
+            grid.innerHTML = '';
+            achievements.forEach(ach => {
+                grid.innerHTML += `<div class="achievement-card ${ach.unlocked ? 'unlocked' : ''}"><div style="font-size:2.5rem;">${ach.icon}</div><div style="font-weight:bold; font-size:1rem; margin: 5px 0;">${ach.title}</div><div style="font-size:0.75rem; color:var(--text-light);">${ach.desc}</div></div>`;
+            });
+        }
         
         function useBomb() { if (userInventory.bomb > 0) { if (state.isBossActive) userStats.bossesBombed++; if (state.lives >= 3 && state.mode !== 'supervivencia') unlockSecret('abs_17'); userInventory.bomb--; userStats.bombsUsed++; checkAchievements(); document.getElementById('word-input').value=''; state.lastInputLen=0; spawnWord(); saveProgress(); } else { userStats.emptyBombsTriggered++; checkAchievements(); } }
         function useFreeze() { if (userInventory.freeze > 0) { state.freezeActive = true; setTimeout(()=>state.freezeActive=false, 3000); userInventory.freeze--; userStats.freezesUsed++; checkAchievements(); saveProgress(); state.currentFallSpeed=0.2; setTimeout(()=>state.currentFallSpeed=(state.mode==='supervivencia'?1.5:1)+(state.combo*0.05)+(state.mode==='aventura'?state.worldLevel*0.1:0), 3000); } }
@@ -1193,7 +1378,10 @@
         body.lenguarcade-embedded .player-profile { min-width:260px; justify-content:flex-start; }
         body.lenguarcade-embedded .player-profile input,
         body.lenguarcade-embedded .player-profile .small-save-btn { display:none; }
-        body.lenguarcade-embedded #cloud-status { background:#ecfdf5; color:#047857; border-color:#a7f3d0; }
+        body.lenguarcade-embedded #cloud-status,
+        body.lenguarcade-embedded .autosave-note,
+        body.lenguarcade-embedded .standalone-save-copy,
+        body.lenguarcade-embedded #game-save-management { display:none; }
         .lenguarcade-profile-state { display:grid; gap:2px; min-width:0; }
         .lenguarcade-profile-state strong { color:var(--primary); font-size:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .lenguarcade-profile-state span { color:var(--text-light); font-size:.8rem; font-weight:700; }

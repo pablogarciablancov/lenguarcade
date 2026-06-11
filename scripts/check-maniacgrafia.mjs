@@ -29,6 +29,14 @@ for (const required of [
   "google.script.url.getLocation",
   "postToAncestors",
   "Cargando datos del perfil",
+  "installFairPlayControls",
+  "fallProgress",
+  "event-visibility-mask",
+  "startAdventureMode",
+  "adventureWorldBestScores",
+  "getUniqueBossWord",
+  "game-save-management",
+  "timeoutWithText",
 ]) {
   if (!studentHtml.includes(required)) {
     errors.push(`Falta el componente de integración: ${required}`);
