@@ -14,16 +14,18 @@
 ## Avatares personalizables
 
 1. Iniciar sesión como alumno.
-2. Abrir la sección Perfil y confirmar que aparecen 16 personajes distintos y 12 fondos.
-3. Seleccionar varios personajes y comprobar que la vista previa cambia sin modificar el fondo.
-4. Probar montañas, castillo, volcán, bosque, nieve, costa, ruinas, ciudad nocturna, arcade, biblioteca, islas flotantes y pueblo otoñal.
-5. Confirmar que cualquier personaje se puede combinar con cualquier fondo.
-6. Pulsar `Aleatorio` varias veces y confirmar que genera combinaciones válidas.
-7. Pulsar `Guardar` y comprobar que el retrato de la cabecera adopta la combinación elegida.
-8. Recargar la página y confirmar que se conserva.
-9. Cerrar sesión, volver a entrar con el mismo alumno y confirmar que sigue seleccionado.
-10. Comprobar que otro alumno mantiene su propia configuración.
-11. Revisar las galerías y la vista previa en escritorio y móvil.
+2. Abrir la sección Perfil y confirmar que solo aparece el retrato actual y el botón `Cambiar avatar`, sin galerías completas.
+3. Pulsar `Cambiar avatar` y comprobar que se abre una ventana con una vista previa grande.
+4. Usar las flechas de personaje y confirmar que recorre 16 opciones sin modificar el paisaje.
+5. Usar las flechas de paisaje y probar montañas, castillo, volcán, bosque, nieve, costa, ruinas, ciudad nocturna, arcade, biblioteca, islas flotantes y pueblo otoñal.
+6. Confirmar que las flechas vuelven al inicio al superar la primera o la última opción.
+7. Pulsar `Aleatorio` varias veces y confirmar que genera combinaciones válidas.
+8. Pulsar `Cancelar`, reabrir el selector y comprobar que la combinación no guardada se descarta.
+9. Pulsar `Guardar avatar` y comprobar que el retrato de la cabecera y del perfil adoptan la combinación elegida.
+10. Recargar la página y confirmar que se conserva.
+11. Cerrar sesión, volver a entrar con el mismo alumno y confirmar que sigue seleccionado.
+12. Comprobar que otro alumno mantiene su propia configuración.
+13. Revisar la ventana y la vista previa en escritorio y móvil.
 
 ## Identidad visual y portadas
 

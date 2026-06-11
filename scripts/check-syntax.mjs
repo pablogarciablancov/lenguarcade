@@ -119,6 +119,12 @@ if (!studentHtml.includes("Array.from({length:16}") ||
     !studentHtml.includes("version:2,character")) {
   errors.push("La vista del alumno debe ofrecer 16 personajes y 12 fondos con el formato de avatar v2.");
 }
+if (!studentHtml.includes('id="avatarEditorModal"') ||
+    !studentHtml.includes("cycleAvatarOptionV2") ||
+    !studentHtml.includes('id="previousAvatarCharacter"') ||
+    !studentHtml.includes('id="nextAvatarBackground"')) {
+  errors.push("La personalizacion del avatar debe abrirse en un selector modal con flechas.");
+}
 
 const publicStudentMatch = serverSource.match(/function publicStudent_\(s\)\s*\{([^}]+)\}/);
 if (!publicStudentMatch || /\b(email|pin)\b/.test(publicStudentMatch[1])) {

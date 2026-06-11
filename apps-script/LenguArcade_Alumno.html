@@ -18,6 +18,39 @@ body.authPending{overflow:hidden}.authPending .rail,.authPending .main>section:n
 @media(max-width:850px){.authShell{grid-template-columns:1fr;gap:18px}.authWelcome{min-height:280px;padding:24px}.authWelcomeLogo{width:68px;height:68px;top:20px;left:20px;background-size:62px}.authWelcome h1{font-size:36px}.authForm{padding:24px}.profileSettings{grid-template-columns:1fr}.avatarPreview{width:min(240px,100%);height:auto;aspect-ratio:2/3}}
 .avatarCard{position:relative;width:100%;height:100%;overflow:hidden;background:#10182e}.avatarCard img{position:absolute;inset:0;width:100%;height:100%;display:block}.avatarCard .avatarBackdrop{object-fit:cover}.avatarCard .avatarCharacter{object-fit:contain;z-index:1;filter:drop-shadow(0 6px 4px rgba(0,0,0,.32))}.avatarPicker{display:grid;gap:18px}.avatarPickerGroup{border:1px solid var(--line);border-radius:18px;padding:13px;background:rgba(0,0,0,.14)}.avatarPickerGroup h4{margin:0 0 10px;font-size:13px;color:var(--muted)}.characterGrid{display:grid;grid-template-columns:repeat(4,minmax(62px,1fr));gap:9px}.backgroundGrid{display:grid;grid-template-columns:repeat(3,minmax(78px,1fr));gap:9px}.avatarChoice{position:relative;min-height:104px;padding:0;overflow:hidden;border:2px solid transparent;border-radius:13px;background:#18213c;box-shadow:none}.avatarChoice img{width:100%;height:100%;display:block;object-fit:contain}.avatarChoice.backgroundChoice{min-height:90px}.avatarChoice.backgroundChoice img{object-fit:cover}.avatarChoice.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,213,79,.22)}.choiceLabel{position:absolute;left:5px;right:5px;bottom:5px;padding:3px 5px;border-radius:7px;background:rgba(5,7,18,.78);font-size:10px;color:#fff;text-align:center}.avatarHint{margin-top:8px;color:var(--muted);font-size:11px;line-height:1.4}@media(max-width:720px){.characterGrid{grid-template-columns:repeat(4,1fr)}.backgroundGrid{grid-template-columns:repeat(2,1fr)}}
 </style>
+<style>
+.profileSettings{grid-template-columns:260px minmax(240px,.72fr) minmax(260px,1fr)}
+.avatarBuilder{padding:16px;border:1px solid var(--line);border-radius:20px;background:rgba(0,0,0,.13)}
+.avatarBuilder .avatarPreview{width:100%;height:auto;aspect-ratio:2/3}
+.avatarActions{grid-template-columns:1fr}
+.avatarActions button{font-size:14px;padding:12px}
+.avatarProfileIntro{height:100%;display:flex;align-items:center}
+.avatarProfileIntroCard{width:100%;padding:20px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,rgba(124,77,255,.14),rgba(0,212,255,.07))}
+.avatarProfileIntroCard strong{display:block;font-size:18px;margin-bottom:8px}
+.avatarProfileIntroCard p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+.avatarEditorModal{z-index:100;padding:14px;backdrop-filter:blur(12px);background:rgba(3,6,18,.82)}
+.avatarEditorDialog{position:relative;width:min(680px,100%);max-height:calc(100vh - 28px);overflow:auto;padding:24px;background:linear-gradient(180deg,#17213d,#0d142a);border-color:rgba(255,255,255,.18)}
+body.light .avatarEditorDialog{background:linear-gradient(180deg,#fff,#eef3ff)}
+.avatarEditorHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
+.avatarEditorHeader h2{font-size:24px;margin-bottom:5px}
+.avatarEditorClose{width:42px;height:42px;padding:0;flex:0 0 auto;border-radius:50%;font-size:22px;background:rgba(255,255,255,.08);box-shadow:none}
+.avatarEditorStage{width:min(330px,72vw);aspect-ratio:2/3;margin:0 auto 20px;border-radius:24px;overflow:hidden;border:2px solid rgba(255,213,79,.55);box-shadow:0 22px 50px rgba(0,0,0,.42),0 0 0 7px rgba(255,213,79,.08);background:#10182e}
+.avatarEditorStage .avatarCard{border-radius:0}
+.avatarSelectorList{display:grid;gap:12px}
+.avatarSelectorRow{display:grid;grid-template-columns:54px minmax(0,1fr) 54px;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.16)}
+body.light .avatarSelectorRow{background:rgba(94,53,177,.06)}
+.avatarArrow{height:48px;padding:0;border-radius:14px;font-size:25px;line-height:1;background:linear-gradient(135deg,rgba(0,212,255,.82),rgba(124,77,255,.88))}
+.avatarSelectorInfo{text-align:center;min-width:0}
+.avatarSelectorInfo span{display:block;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.avatarSelectorInfo strong{display:block;margin:3px 0 2px;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.avatarSelectorInfo small{color:var(--muted)}
+.avatarEditorActions{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:10px;margin-top:18px}
+.avatarEditorActions button{width:100%}
+.avatarEditorStatus{min-height:20px;margin-top:12px;text-align:center}
+body.avatarEditorOpen{overflow:hidden}
+@media(max-width:1160px){.profileSettings{grid-template-columns:250px 1fr}.activityPanel{grid-column:1/-1}}
+@media(max-width:720px){.profileSettings{grid-template-columns:1fr}.avatarBuilder{max-width:300px}.activityPanel{grid-column:auto}.avatarEditorDialog{padding:18px}.avatarEditorStage{width:min(270px,68vw)}.avatarSelectorRow{grid-template-columns:48px minmax(0,1fr) 48px;gap:8px}.avatarEditorActions{grid-template-columns:1fr 1fr}.avatarEditorActions .saveAvatarModalBtn{grid-column:1/-1;grid-row:1}}
+</style>
 </head>
 <body class="authPending">
 <div class="loader open" id="loader"><div class="loaderBox"><div class="loaderTitle">Cargando LenguArcade</div><div class="sub" id="loaderText">Preparando interfaz...</div><div class="loaderBar"><div class="loaderFill" id="loaderFill"></div></div><div><span class="loaderPct" id="loaderPct">0%</span> <span class="sub">estimado</span></div></div></div>
@@ -408,6 +441,157 @@ async function saveAvatarCustomizationV2(){
   }
 }
 
+let avatarSavedV2={...AVATAR_DEFAULT_CLIENT_V2};
+let avatarEditorLastFocusV2=null;
+
+renderAvatarControlsV2=function(){
+  const container=$('avatarControls');
+  if(!container)return;
+  container.className='avatarProfileIntro';
+  container.innerHTML=`
+    <div class="avatarProfileIntroCard">
+      <strong>Tu retrato, a tu manera</strong>
+      <p>Combina 16 personajes con 12 escenarios. El selector se abre en una ventana para que puedas comparar las opciones una a una sin llenar el perfil de miniaturas.</p>
+    </div>`;
+};
+
+applyAvatarProfileV2=function(dashboard){
+  const saved=normalizeAvatarConfigV2(dashboard?.student?.avatar);
+  avatarSavedV2={...saved};
+  avatarDraftV2={...saved};
+  renderAvatarCardV2($('studentAvatar'),saved);
+  renderAvatarCardV2($('avatarPreview'),saved);
+  renderAvatarControlsV2();
+  renderAvatarEditorV2();
+  $('avatarStatus').textContent=token?'Pulsa Cambiar avatar para elegir personaje y paisaje.':'Inicia sesión para personalizarlo.';
+  const openButton=$('openAvatarEditorBtn');
+  if(openButton)openButton.disabled=!token;
+};
+
+function renderAvatarEditorV2(){
+  const preview=$('avatarEditorPreview');
+  if(!preview)return;
+  renderAvatarCardV2(preview,avatarDraftV2);
+  const characterIndex=AVATAR_CHARACTERS.findIndex(option=>option.id===avatarDraftV2.character);
+  const backgroundIndex=AVATAR_BACKGROUNDS.findIndex(option=>option.id===avatarDraftV2.background);
+  const character=AVATAR_CHARACTERS[characterIndex]||AVATAR_CHARACTERS[0];
+  const background=AVATAR_BACKGROUNDS[backgroundIndex]||AVATAR_BACKGROUNDS[0];
+  $('avatarCharacterName').textContent=character.label;
+  $('avatarCharacterCount').textContent=`${characterIndex+1} de ${AVATAR_CHARACTERS.length}`;
+  $('avatarBackgroundName').textContent=background.label;
+  $('avatarBackgroundCount').textContent=`${backgroundIndex+1} de ${AVATAR_BACKGROUNDS.length}`;
+}
+
+function cycleAvatarOptionV2(key,direction){
+  const options=key==='character'?AVATAR_CHARACTERS:AVATAR_BACKGROUNDS;
+  const currentValue=avatarDraftV2[key];
+  const currentIndex=Math.max(0,options.findIndex(option=>option.id===currentValue));
+  const nextIndex=(currentIndex+direction+options.length)%options.length;
+  avatarDraftV2={...avatarDraftV2,[key]:options[nextIndex].id};
+  renderAvatarEditorV2();
+  $('avatarEditorStatus').textContent='Vista previa lista. Guarda para aplicar la combinación.';
+}
+
+function openAvatarEditorV2(){
+  if(!token){
+    $('avatarStatus').textContent='Inicia sesión para personalizar tu avatar.';
+    return;
+  }
+  avatarSavedV2=normalizeAvatarConfigV2(currentDashboard?.student?.avatar);
+  avatarDraftV2={...avatarSavedV2};
+  renderAvatarEditorV2();
+  $('avatarEditorStatus').textContent='Usa las flechas para elegir tu combinación.';
+  avatarEditorLastFocusV2=document.activeElement;
+  $('avatarEditorModal').classList.add('open');
+  document.body.classList.add('avatarEditorOpen');
+  $('previousAvatarCharacter').focus();
+}
+
+function closeAvatarEditorV2(keepDraft){
+  if(!keepDraft)avatarDraftV2={...avatarSavedV2};
+  $('avatarEditorModal').classList.remove('open');
+  document.body.classList.remove('avatarEditorOpen');
+  if(avatarEditorLastFocusV2?.focus)avatarEditorLastFocusV2.focus();
+}
+
+function randomizeAvatarModalV2(){
+  avatarDraftV2={
+    version:2,
+    character:AVATAR_CHARACTERS[Math.floor(Math.random()*AVATAR_CHARACTERS.length)].id,
+    background:AVATAR_BACKGROUNDS[Math.floor(Math.random()*AVATAR_BACKGROUNDS.length)].id
+  };
+  renderAvatarEditorV2();
+  $('avatarEditorStatus').textContent='Combinación aleatoria preparada.';
+}
+
+async function saveAvatarCustomizationModalV2(){
+  if(!token||busy)return;
+  busy=true;
+  $('saveAvatarModalBtn').disabled=true;
+  $('avatarEditorStatus').textContent='Guardando personaje...';
+  try{
+    const result=await callServer('updateStudentAvatar',[token,avatarDraftV2]);
+    currentDashboard=result.dashboard||currentDashboard;
+    saveCache('LA_DASHBOARD_CACHE',currentDashboard);
+    renderDashboard(currentDashboard);
+    $('avatarStatus').textContent=result.message||'Personaje actualizado.';
+    closeAvatarEditorV2(true);
+  }catch(error){
+    $('avatarEditorStatus').textContent='No se ha podido guardar: '+(error.message||error);
+  }finally{
+    busy=false;
+    $('saveAvatarModalBtn').disabled=false;
+  }
+}
+
+function mountAvatarEditorV2(){
+  document.querySelector('.avatarActions').innerHTML='<button type="button" id="openAvatarEditorBtn">Cambiar avatar</button>';
+  document.body.insertAdjacentHTML('beforeend',`
+    <div class="modal avatarEditorModal" id="avatarEditorModal" role="dialog" aria-modal="true" aria-labelledby="avatarEditorTitle">
+      <div class="dialog avatarEditorDialog">
+        <div class="avatarEditorHeader">
+          <div><h2 id="avatarEditorTitle">Elige tu avatar</h2><div class="sub">Cambia el personaje y el paisaje con las flechas.</div></div>
+          <button type="button" class="avatarEditorClose" id="closeAvatarEditorBtn" aria-label="Cerrar selector">&times;</button>
+        </div>
+        <div class="avatarEditorStage"><div class="avatarCard" id="avatarEditorPreview" aria-label="Vista previa del avatar"></div></div>
+        <div class="avatarSelectorList">
+          <div class="avatarSelectorRow">
+            <button type="button" class="avatarArrow" id="previousAvatarCharacter" aria-label="Personaje anterior">&#8249;</button>
+            <div class="avatarSelectorInfo"><span>Personaje</span><strong id="avatarCharacterName"></strong><small id="avatarCharacterCount"></small></div>
+            <button type="button" class="avatarArrow" id="nextAvatarCharacter" aria-label="Personaje siguiente">&#8250;</button>
+          </div>
+          <div class="avatarSelectorRow">
+            <button type="button" class="avatarArrow" id="previousAvatarBackground" aria-label="Paisaje anterior">&#8249;</button>
+            <div class="avatarSelectorInfo"><span>Paisaje</span><strong id="avatarBackgroundName"></strong><small id="avatarBackgroundCount"></small></div>
+            <button type="button" class="avatarArrow" id="nextAvatarBackground" aria-label="Paisaje siguiente">&#8250;</button>
+          </div>
+        </div>
+        <div class="avatarEditorActions">
+          <button type="button" class="ghost" id="randomAvatarModalBtn">Aleatorio</button>
+          <button type="button" class="ghost" id="cancelAvatarEditorBtn">Cancelar</button>
+          <button type="button" class="saveAvatarModalBtn" id="saveAvatarModalBtn">Guardar avatar</button>
+        </div>
+        <div class="status avatarEditorStatus" id="avatarEditorStatus"></div>
+      </div>
+    </div>`);
+  $('openAvatarEditorBtn').onclick=openAvatarEditorV2;
+  $('closeAvatarEditorBtn').onclick=()=>closeAvatarEditorV2(false);
+  $('cancelAvatarEditorBtn').onclick=()=>closeAvatarEditorV2(false);
+  $('randomAvatarModalBtn').onclick=randomizeAvatarModalV2;
+  $('saveAvatarModalBtn').onclick=saveAvatarCustomizationModalV2;
+  $('previousAvatarCharacter').onclick=()=>cycleAvatarOptionV2('character',-1);
+  $('nextAvatarCharacter').onclick=()=>cycleAvatarOptionV2('character',1);
+  $('previousAvatarBackground').onclick=()=>cycleAvatarOptionV2('background',-1);
+  $('nextAvatarBackground').onclick=()=>cycleAvatarOptionV2('background',1);
+  $('avatarEditorModal').addEventListener('click',event=>{
+    if(event.target===$('avatarEditorModal'))closeAvatarEditorV2(false);
+  });
+  document.addEventListener('keydown',event=>{
+    if(!$('avatarEditorModal').classList.contains('open'))return;
+    if(event.key==='Escape')closeAvatarEditorV2(false);
+  });
+}
+
 function replaceAvatarCanvasV2(id,label){
   const oldElement=$(id);
   const card=document.createElement('div');
@@ -418,8 +602,7 @@ function replaceAvatarCanvasV2(id,label){
 }
 replaceAvatarCanvasV2('studentAvatar','Avatar del alumno');
 replaceAvatarCanvasV2('avatarPreview','Vista previa del avatar');
-$('randomAvatarBtn').onclick=randomizeAvatarV2;
-$('saveAvatarBtn').onclick=saveAvatarCustomizationV2;
+mountAvatarEditorV2();
 $('logoutBtn').addEventListener('click',()=>applyAvatarProfileV2(null));
 const renderDashboardWithoutAvatarV2=renderDashboard;
 renderDashboard=function(dashboard){

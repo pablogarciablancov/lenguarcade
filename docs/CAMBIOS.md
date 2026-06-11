@@ -1,5 +1,14 @@
 # Registro de cambios
 
+## 2026-06-11 - Selector modal de avatar y paisaje
+
+- Las galerías completas del perfil se sustituyeron por un selector compacto con flechas.
+- La personalización se abre en una ventana modal y muestra una única vista previa grande.
+- El personaje y el paisaje se recorren por separado, con nombre y contador de opción.
+- Se mantienen las 16 opciones de personaje, los 12 paisajes, la combinación aleatoria y el guardado existente.
+- Cancelar o cerrar la ventana descarta la vista previa y conserva el avatar guardado.
+- No se modificaron los datos, el acceso, el progreso, los juegos ni el panel del profesor.
+
 ## 2026-06-10 - Galería de 16 avatares y 12 escenarios
 
 - El constructor por colores se sustituyó por 16 personajes masculinos completos con estética pixel art uniforme.
