@@ -56,6 +56,8 @@ npm.cmd run maniac:publish -- "descripcion del cambio"
 
 Maniacgrafía es el primer juego integrado: se abre dentro de LenguArcade, recibe la identidad del alumno autenticado y devuelve el resultado de la partida al progreso central. El token de sesión nunca se entrega al juego.
 
+El protocolo reutilizable para los siguientes juegos se describe en `docs/INTEGRACION_JUEGOS.md`.
+
 Los comandos de publicación suben el código, crean una versión inmutable y actualizan el despliegue web estable correspondiente.
 
 La carpeta `.codex/rules/` permite a Codex ejecutar estos comandos concretos sin solicitar permisos repetidos cuando el repositorio está abierto como proyecto confiable.

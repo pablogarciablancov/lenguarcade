@@ -26,6 +26,9 @@ for (const required of [
   "notifyLenguArcadeResult",
   "sessionCorrect",
   "sessionErrors",
+  "google.script.url.getLocation",
+  "postToAncestors",
+  "Cargando datos del perfil",
 ]) {
   if (!studentHtml.includes(required)) {
     errors.push(`Falta el componente de integración: ${required}`);

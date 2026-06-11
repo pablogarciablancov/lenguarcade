@@ -1190,27 +1190,86 @@
         };
     </script>
     <style>
-        body.lenguarcade-embedded .player-profile input { pointer-events:none; opacity:.9; }
+        body.lenguarcade-embedded .player-profile { min-width:260px; justify-content:flex-start; }
+        body.lenguarcade-embedded .player-profile input,
         body.lenguarcade-embedded .player-profile .small-save-btn { display:none; }
         body.lenguarcade-embedded #cloud-status { background:#ecfdf5; color:#047857; border-color:#a7f3d0; }
+        .lenguarcade-profile-state { display:grid; gap:2px; min-width:0; }
+        .lenguarcade-profile-state strong { color:var(--primary); font-size:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .lenguarcade-profile-state span { color:var(--text-light); font-size:.8rem; font-weight:700; }
+        .lenguarcade-profile-loading strong:after { content:""; display:inline-block; width:1.4em; animation:profileDots 1.1s steps(4,end) infinite; }
+        @keyframes profileDots { 0%{content:""} 25%{content:"."} 50%{content:".."} 75%,100%{content:"..."} }
     </style>
     <script>
         const LenguArcadeBridge = (() => {
-            const params = new URLSearchParams(location.search);
-            const enabled = params.get('lenguarcade') === '1' && window.parent !== window;
-            const channel = params.get('channel') || '';
+            let enabled = false;
+            let channel = '';
+            let hostWindow = null;
+            let initialized = false;
+            let readyTimer = null;
+            let runtimeReady = document.readyState === 'complete';
+            let pendingContext = null;
             let sessionActive = false;
             let unlockedAtSessionStart = new Set();
 
+            function postToAncestors(message) {
+                let target = window;
+                for (let depth = 0; depth < 5; depth++) {
+                    try {
+                        if (!target.parent || target.parent === target) break;
+                        target = target.parent;
+                        target.postMessage(message, '*');
+                    } catch (error) {
+                        break;
+                    }
+                }
+            }
+
             function post(type, payload = {}) {
                 if (!enabled || !channel) return;
-                window.parent.postMessage({
+                const message = {
                     namespace: 'lenguarcade-game',
                     channel,
                     gameId: 'maniacgrafia',
                     type,
                     payload
-                }, '*');
+                };
+                if (hostWindow) hostWindow.postMessage(message, '*');
+                else postToAncestors(message);
+            }
+
+            function renderProfileState(title, subtitle, loading = false) {
+                const profile = document.querySelector('.player-profile');
+                if (!profile) return;
+                const icon = document.createElement('span');
+                icon.style.fontSize = '1.35rem';
+                icon.textContent = '👤';
+                const stateElement = document.createElement('div');
+                stateElement.className = 'lenguarcade-profile-state' + (loading ? ' lenguarcade-profile-loading' : '');
+                const titleElement = document.createElement('strong');
+                titleElement.textContent = title;
+                const subtitleElement = document.createElement('span');
+                subtitleElement.textContent = subtitle || '';
+                stateElement.append(titleElement, subtitleElement);
+                profile.replaceChildren(icon, stateElement);
+            }
+
+            function announceReady() {
+                post('READY', { protocol:1, version:6 });
+            }
+
+            function startBridge(params) {
+                enabled = String(params.lenguarcade || '') === '1' && window.parent !== window;
+                channel = String(params.channel || '');
+                if (!enabled || !channel) return;
+                document.body.classList.add('lenguarcade-embedded');
+                renderProfileState('Cargando datos del perfil', 'Conectando con LenguArcade', true);
+                setCloudStatus('Conectando con LenguArcade...', 'sync');
+                announceReady();
+                readyTimer = setInterval(() => {
+                    if (initialized) clearInterval(readyTimer);
+                    else announceReady();
+                }, 600);
             }
 
             function applyContext(context) {
@@ -1222,20 +1281,10 @@
                 userStats.playerName = [student.nombre, student.apellidos].filter(Boolean).join(' ') || 'Jugador';
                 userStats.classGroup = student.clase || '';
                 userStats.studentCode = student.studentId || '';
-
-                const fields = [
-                    ['player-name-input', userStats.playerName],
-                    ['class-group-input', userStats.classGroup],
-                    ['student-code-input', userStats.studentCode]
-                ];
-                fields.forEach(([id, value]) => {
-                    const input = document.getElementById(id);
-                    if (!input) return;
-                    input.value = value;
-                    input.readOnly = true;
-                    input.tabIndex = -1;
-                });
+                initialized = true;
+                clearInterval(readyTimer);
                 document.body.classList.add('lenguarcade-embedded');
+                renderProfileState(userStats.playerName, userStats.classGroup || 'Perfil de LenguArcade');
                 setCloudStatus('Conectado a LenguArcade', 'ok');
                 saveProgress(false, { localOnly:true });
                 updateMenuUI();
@@ -1272,22 +1321,34 @@
             }
 
             function onMessage(event) {
-                if (!enabled || event.source !== window.parent) return;
+                if (!enabled) return;
                 const message = event.data || {};
                 if (message.namespace !== 'lenguarcade-host' || message.channel !== channel) return;
-                if (message.type === 'INIT') applyContext(message.payload || {});
+                if (hostWindow && event.source !== hostWindow) return;
+                if (message.type === 'INIT') {
+                    hostWindow = event.source;
+                    if (initialized) {
+                        post('INITIALIZED', { profileId:currentProfileId });
+                        return;
+                    }
+                    pendingContext = message.payload || {};
+                    if (runtimeReady) applyContext(pendingContext);
+                }
                 if (message.type === 'REQUEST_EXIT') {
                     if (sessionActive) exitToMenu();
                     else post('CLOSE_READY');
                 }
             }
 
-            if (enabled) {
-                window.addEventListener('message', onMessage);
-                window.addEventListener('load', () => {
-                    document.body.classList.add('lenguarcade-embedded');
-                    post('READY', { version:4 });
-                });
+            window.addEventListener('message', onMessage);
+            window.addEventListener('load', () => {
+                runtimeReady = true;
+                if (pendingContext && !initialized) applyContext(pendingContext);
+            });
+            if (window.google && google.script && google.script.url) {
+                google.script.url.getLocation(locationData => startBridge((locationData && locationData.parameter) || {}));
+            } else {
+                startBridge(Object.fromEntries(new URLSearchParams(location.search).entries()));
             }
 
             return { sessionStarted, result };

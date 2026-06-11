@@ -126,9 +126,11 @@ if (!studentHtml.includes('id="avatarEditorModal"') ||
   errors.push("La personalizacion del avatar debe abrirse en un selector modal con flechas.");
 }
 if (!studentHtml.includes("GAME_BRIDGE_NAMESPACE='lenguarcade-game'") ||
-    !studentHtml.includes("event.source!==runner.iframe.contentWindow") ||
+    !studentHtml.includes("runner.gameWindow&&event.source!==runner.gameWindow") ||
+    !studentHtml.includes("message.gameId!==runner.game.gameId") ||
     !studentHtml.includes("processedGameResults.has(result.resultId)") ||
-    !studentHtml.includes("sessionToken:token")) {
+    !studentHtml.includes("sessionToken:token") ||
+    !studentHtml.includes("preloadIntegratedGame")) {
   errors.push("La integración de juegos debe validar el canal y guardar el progreso desde la sesión de LenguArcade.");
 }
 if (!serverSource.includes("AKfycbxgtB6NP9zVvkkEZjodyGhSQbZmFifeFdMf8uDr0QsXoWsp_AxZdb7OFxtS5vKM-VruPw") ||
