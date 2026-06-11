@@ -449,9 +449,18 @@
         function isCloudConfigured() {
             return !!getCloudEndpoint();
         }
+        function isLenguArcadeMode() {
+            return document.documentElement.classList.contains('lenguarcade-embedded')
+                || document.body.classList.contains('lenguarcade-embedded')
+                || new URLSearchParams(location.search).get('lenguarcade') === '1';
+        }
         function setCloudStatus(text, kind = 'warn') {
             const el = document.getElementById('cloud-status');
             if (!el) return;
+            if (isLenguArcadeMode()) {
+                el.hidden = true;
+                return;
+            }
             el.className = `cloud-status ${kind}`;
             el.textContent = text;
         }
@@ -562,16 +571,18 @@
             localStorage.setItem(LAST_PROFILE_KEY, currentProfileId);
         }
         function saveProgress(showNotice = false, options = {}) {
+            const integrated = isLenguArcadeMode();
             try {
                 saveLocalProgress();
-                if (showNotice && !isCloudConfigured()) showToast({icon: '💾', title: 'Progreso guardado en este navegador', desc: 'Configura Sheets para verlo en el panel del profesor.'});
+                if (showNotice && !integrated && !isCloudConfigured()) showToast({icon: '💾', title: 'Progreso guardado en este navegador', desc: 'Configura Sheets para verlo en el panel del profesor.'});
             } catch (e) {
                 console.error('No se pudo guardar la copia local.', e);
-                if (showNotice) alert('No se ha podido guardar en este navegador. Revisa si el almacenamiento está bloqueado.');
+                if (showNotice && !integrated) alert('No se ha podido guardar en este navegador. Revisa si el almacenamiento está bloqueado.');
             }
-            if (!options.localOnly) syncToCloud(!!options.forceCloud || showNotice, showNotice);
+            if (!integrated && !options.localOnly) syncToCloud(!!options.forceCloud || showNotice, showNotice);
         }
         function syncToCloud(force = false, showNotice = false) {
+            if (isLenguArcadeMode()) return;
             if (!isCloudConfigured()) {
                 setCloudStatus('☁️ Sheets sin configurar', 'warn');
                 return;
@@ -636,7 +647,9 @@
             if (classInput) classInput.value = userStats.classGroup || '';
             const codeInput = document.getElementById('student-code-input');
             if (codeInput) codeInput.value = userStats.studentCode || '';
-            setCloudStatus(isCloudConfigured() ? '☁️ Sheets listo' : '☁️ Sheets sin configurar', isCloudConfigured() ? 'ok' : 'warn');
+            if (!isLenguArcadeMode()) {
+                setCloudStatus(isCloudConfigured() ? '☁️ Sheets listo' : '☁️ Sheets sin configurar', isCloudConfigured() ? 'ok' : 'warn');
+            }
         }
         async function saveProfileName(showNotice = true) {
             const typedName = getStudentNameFromUI();
@@ -972,7 +985,7 @@
             
             state.startTime = performance.now(); state.sessionStars = 0; state.sessionFeverPoints = 0; state.escobasThisSession = 0;
 
-            document.body.className = ''; document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden')); document.getElementById('game-ui').classList.remove('hidden');
+            clearGameBodyClasses(); document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden')); document.getElementById('game-ui').classList.remove('hidden');
             const input = document.getElementById('word-input'); input.value = ''; input.classList.remove('input-error');
             
             state.lives = (mode === 'supervivencia') ? 1 : 3; document.getElementById('mistake-meter').style.display = (mode === 'pendulo') ? 'none' : 'flex';
@@ -986,8 +999,16 @@
         }
 
         // --- MODO AVENTURA: LÓGICA DE MUNDOS ---
+        function clearGameBodyClasses() {
+            [
+                'apagon', 'viento', 'parpadeo', 'espejo', 'fuego', 'agua', 'remolino', 'terremoto',
+                'mundo-1', 'mundo-2', 'mundo-3', 'mundo-4', 'mundo-5', 'mundo-6',
+                'modo-fiebre', 'fever'
+            ].forEach(className => document.body.classList.remove(className));
+        }
+
         function cambiarMundo() {
-            document.body.className = ''; 
+            clearGameBodyClasses();
             
             // EL MUNDO 12 ES EL FINAL ÉPICO
             if (state.worldLevel === 12) {
@@ -1375,13 +1396,20 @@
         };
     </script>
     <style>
+        html.lenguarcade-embedded .player-profile,
         body.lenguarcade-embedded .player-profile { min-width:260px; justify-content:flex-start; }
+        html.lenguarcade-embedded .player-profile input,
+        html.lenguarcade-embedded .player-profile .small-save-btn,
         body.lenguarcade-embedded .player-profile input,
         body.lenguarcade-embedded .player-profile .small-save-btn { display:none; }
+        html.lenguarcade-embedded #cloud-status,
+        html.lenguarcade-embedded .autosave-note,
+        html.lenguarcade-embedded .standalone-save-copy,
+        html.lenguarcade-embedded #game-save-management,
         body.lenguarcade-embedded #cloud-status,
         body.lenguarcade-embedded .autosave-note,
         body.lenguarcade-embedded .standalone-save-copy,
-        body.lenguarcade-embedded #game-save-management { display:none; }
+        body.lenguarcade-embedded #game-save-management { display:none !important; }
         .lenguarcade-profile-state { display:grid; gap:2px; min-width:0; }
         .lenguarcade-profile-state strong { color:var(--primary); font-size:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .lenguarcade-profile-state span { color:var(--text-light); font-size:.8rem; font-weight:700; }
@@ -1450,9 +1478,9 @@
                 enabled = String(params.lenguarcade || '') === '1' && window.parent !== window;
                 channel = String(params.channel || '');
                 if (!enabled || !channel) return;
+                document.documentElement.classList.add('lenguarcade-embedded');
                 document.body.classList.add('lenguarcade-embedded');
                 renderProfileState('Cargando datos del perfil', 'Conectando con LenguArcade', true);
-                setCloudStatus('Conectando con LenguArcade...', 'sync');
                 announceReady();
                 readyTimer = setInterval(() => {
                     if (initialized) clearInterval(readyTimer);
@@ -1471,9 +1499,9 @@
                 userStats.studentCode = student.studentId || '';
                 initialized = true;
                 clearInterval(readyTimer);
+                document.documentElement.classList.add('lenguarcade-embedded');
                 document.body.classList.add('lenguarcade-embedded');
                 renderProfileState(userStats.playerName, userStats.classGroup || 'Perfil de LenguArcade');
-                setCloudStatus('Conectado a LenguArcade', 'ok');
                 saveProgress(false, { localOnly:true });
                 updateMenuUI();
                 post('INITIALIZED', { profileId:currentProfileId });

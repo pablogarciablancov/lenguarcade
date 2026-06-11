@@ -37,6 +37,9 @@ for (const required of [
   "getUniqueBossWord",
   "game-save-management",
   "timeoutWithText",
+  "isLenguArcadeMode",
+  "clearGameBodyClasses",
+  "document.documentElement.classList.add('lenguarcade-embedded')",
 ]) {
   if (!studentHtml.includes(required)) {
     errors.push(`Falta el componente de integración: ${required}`);
@@ -45,6 +48,10 @@ for (const required of [
 
 if (studentHtml.includes("include('GameBridge')")) {
   errors.push("Alumno.html conserva una inclusión de plantilla que no funciona con createHtmlOutputFromFile.");
+}
+
+if (studentHtml.includes("document.body.className = ''")) {
+  errors.push("Maniacgrafía borra las clases del body y puede perder el modo integrado de LenguArcade.");
 }
 
 const serverSource = fs.readFileSync(path.join(root, "Code.js"), "utf8");
