@@ -37,12 +37,12 @@ function setupLenguArcadeV03_() {
 
 function getPublicMetaV03() {
   ensureSheets_();
-  return cachedJsonV03_('public_meta_v03', function(){
+  return cachedJsonV03_('public_meta_v04', function(){
     return {
       ok:true,
-      version:'0.3.0',
+      version:'0.4.0',
       classes: rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.CLASES)).filter(c => isTrue_(c.activa)),
-      games: getActiveGames_(),
+      games: getActiveGames_().map(decorateGameIntegration_),
       activeUserEmail:getActiveUserEmail_()
     };
   }, 300);

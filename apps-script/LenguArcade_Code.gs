@@ -29,6 +29,13 @@ const LA_CONFIG = {
   }
 };
 
+const LA_GAME_INTEGRATIONS = {
+  maniacgrafia: {
+    url: 'https://script.google.com/macros/s/AKfycbxgtB6NP9zVvkkEZjodyGhSQbZmFifeFdMf8uDr0QsXoWsp_AxZdb7OFxtS5vKM-VruPw/exec?view=alumno',
+    integration: 'embedded'
+  }
+};
+
 const LA_HEADERS = {
   Config: ['key','value','updatedAt'],
   Clases: ['classCode','curso','linea','nombreVisible','activa','updatedAt'],
@@ -162,6 +169,20 @@ function saveProgress(payload) {
     const xpDelta = Math.max(0, newXp - Number(old.xp || 0));
     const newPlumas = Number(progress.plumas != null ? progress.plumas : old.plumas + Number(progress.plumasDelta || 0));
     const plumasDelta = Math.max(0, newPlumas - Number(old.plumas || 0));
+    const achievementSheet = getSheet_(LA_CONFIG.SHEETS.LOGROS);
+    const existingAchievementIds = {};
+    rowsToObjects_(achievementSheet)
+      .filter(a => String(a.studentId) === String(student.studentId) && String(a.gameId) === String(game.gameId))
+      .forEach(a => {
+        const id = String(a.achievementId || '');
+        if (id) existingAchievementIds[id] = true;
+      });
+    const newAchievements = (payload.achievements || []).filter(a => {
+      const id = String(typeof a === 'string' ? a : (a.id || a.achievementId || ''));
+      if (!id || existingAchievementIds[id]) return false;
+      existingAchievementIds[id] = true;
+      return true;
+    });
     const record = {
       studentId:student.studentId, email:student.email, nombre:student.nombre + ' ' + student.apellidos, clase:student.clase,
       gameId:game.gameId, gameName:game.nombre, xp:newXp,
@@ -170,13 +191,13 @@ function saveProgress(payload) {
       accuracy:clamp_(Number(progress.accuracy || old.accuracy || 0), 0, 100),
       attempts:Number(progress.attempts || old.attempts || 0), successes:Number(progress.successes || old.successes || 0), errors:Number(progress.errors || old.errors || 0),
       streak:Number(progress.streak || old.streak || 0), sessions:Number(old.sessions || 0) + 1,
-      achievementsCount:Number((payload.achievements || []).length || old.achievementsCount || 0), missionsCompleted:Number(progress.missionsCompleted || old.missionsCompleted || 0),
+      achievementsCount:Object.keys(existingAchievementIds).length, missionsCompleted:Number(progress.missionsCompleted || old.missionsCompleted || 0),
       plumas:newPlumas, lastActivity:now, rawJson:JSON.stringify(payload.rawGameData || payload), updatedAt:now
     };
     upsertByKeys_(sheet, ['studentId','gameId'], record);
     appendObject_(getSheet_(LA_CONFIG.SHEETS.EVENTOS), { eventId:Utilities.getUuid(), timestamp:now, studentId:student.studentId, email:student.email, nombre:record.nombre, clase:student.clase, gameId:game.gameId, eventType:payload.eventType || 'progress_saved', xpDelta:xpDelta, plumasDelta:plumasDelta, accuracy:record.accuracy, detailsJson:JSON.stringify(payload.details || {}) });
     appendObject_(getSheet_(LA_CONFIG.SHEETS.RAW), { timestamp:now, studentId:student.studentId, email:student.email, gameId:game.gameId, payloadJson:JSON.stringify(payload) });
-    (payload.achievements || []).forEach(a => appendObject_(getSheet_(LA_CONFIG.SHEETS.LOGROS), { achievementId:typeof a === 'string' ? a : (a.id || a.achievementId || Utilities.getUuid()), studentId:student.studentId, email:student.email, gameId:game.gameId, title:typeof a === 'string' ? a : (a.title || a.name || 'Logro'), description:typeof a === 'string' ? '' : (a.description || ''), xpReward:typeof a === 'string' ? 0 : Number(a.xpReward || 0), unlockedAt:now }));
+    newAchievements.forEach(a => appendObject_(achievementSheet, { achievementId:typeof a === 'string' ? a : (a.id || a.achievementId || Utilities.getUuid()), studentId:student.studentId, email:student.email, gameId:game.gameId, title:typeof a === 'string' ? a : (a.title || a.name || 'Logro'), description:typeof a === 'string' ? '' : (a.description || ''), xpReward:typeof a === 'string' ? 0 : Number(a.xpReward || 0), unlockedAt:now }));
     if (payload.errors && payload.errors.length) payload.errors.forEach(er => appendObject_(getSheet_(LA_CONFIG.SHEETS.ERRORES), { timestamp:now, studentId:student.studentId, email:student.email, gameId:game.gameId, skill:er.skill || '', errorType:er.type || er.errorType || '', count:Number(er.count || 1), detailsJson:JSON.stringify(er) }));
     recalculateStudentGeneral_(student.studentId);
     return { ok:true, message:'Progreso guardado', record:record, dashboard:getStudentDashboardCore_(student.studentId) };
@@ -194,7 +215,7 @@ function calculateStudentGradeForTeacher_(studentId, gameId) {
 function getStudentDashboardCore_(studentId) {
   const student = findStudent_(studentId);
   if (!student) throw new Error('Alumno no encontrado.');
-  const games = getActiveGames_();
+  const games = getActiveGames_().map(decorateGameIntegration_);
   const progressRows = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.PROGRESO)).filter(r => String(r.studentId) === String(student.studentId)).map(normalizeProgressRow_);
   const byGame = {};
   progressRows.forEach(r => byGame[r.gameId] = r);
@@ -350,6 +371,10 @@ function requireSession_(token, expectedType) { if (!token) throw new Error('Ses
 function safeStudent_(s) { return { studentId:s.studentId, nombre:s.nombre, apellidos:s.apellidos, email:s.email, clase:s.clase, curso:s.curso, linea:s.linea, avatar:s.avatar, xpGeneral:Number(s.xpGeneral || 0), nivelGeneral:Number(s.nivelGeneral || 1), plumas:Number(s.plumas || 0), ultimaSesion:s.ultimaSesion || '' }; }
 function publicStudent_(s) { return { studentId:s.studentId, nombre:s.nombre, apellidos:s.apellidos, clase:s.clase, avatar:s.avatar }; }
 function getActiveGames_() { return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS)).filter(g => isTrue_(g.activo)).sort((a,b) => Number(a.orden || 0) - Number(b.orden || 0)); }
+function decorateGameIntegration_(game) {
+  const integration = LA_GAME_INTEGRATIONS[String(game.gameId || '').toLowerCase()];
+  return integration ? Object.assign({}, game, integration) : game;
+}
 function findStudent_(identifier) { const id = String(identifier || '').toLowerCase(); return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS)).find(s => String(s.studentId).toLowerCase() === id || String(s.email).toLowerCase() === id); }
 function findStudentByEmail_(email) { const clean = String(email || '').trim().toLowerCase(); return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS)).find(s => String(s.email || '').trim().toLowerCase() === clean); }
 function normalizeStudentLoginEmail_(email) {

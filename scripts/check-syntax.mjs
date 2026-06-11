@@ -125,6 +125,16 @@ if (!studentHtml.includes('id="avatarEditorModal"') ||
     !studentHtml.includes('id="nextAvatarBackground"')) {
   errors.push("La personalizacion del avatar debe abrirse en un selector modal con flechas.");
 }
+if (!studentHtml.includes("GAME_BRIDGE_NAMESPACE='lenguarcade-game'") ||
+    !studentHtml.includes("event.source!==runner.iframe.contentWindow") ||
+    !studentHtml.includes("processedGameResults.has(result.resultId)") ||
+    !studentHtml.includes("sessionToken:token")) {
+  errors.push("La integración de juegos debe validar el canal y guardar el progreso desde la sesión de LenguArcade.");
+}
+if (!serverSource.includes("AKfycbxgtB6NP9zVvkkEZjodyGhSQbZmFifeFdMf8uDr0QsXoWsp_AxZdb7OFxtS5vKM-VruPw") ||
+    !serverSource.includes("decorateGameIntegration_")) {
+  errors.push("Maniacgrafía debe estar enlazada al despliegue estable mediante el catálogo integrado.");
+}
 
 const publicStudentMatch = serverSource.match(/function publicStudent_\(s\)\s*\{([^}]+)\}/);
 if (!publicStudentMatch || /\b(email|pin)\b/.test(publicStudentMatch[1])) {

@@ -3,13 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "check": "node scripts/check-syntax.mjs",
+    "check": "node scripts/check-syntax.mjs && node scripts/check-maniacgrafia.mjs",
     "apps:status": "clasp status",
     "apps:pull": "clasp pull",
     "apps:push": "clasp push",
     "apps:versions": "clasp versions",
     "apps:deployments": "clasp deployments",
-    "apps:publish": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/publish-apps-script.ps1"
+    "apps:publish": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/publish-apps-script.ps1",
+    "maniac:publish": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/publish-maniacgrafia.ps1"
   },
   "devDependencies": {
     "@google/clasp": "3.3.0"

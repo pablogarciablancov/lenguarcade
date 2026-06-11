@@ -8,13 +8,14 @@ prefix_rule(
 )
 
 prefix_rule(
-    pattern = ["npm.cmd", "run", ["check", "apps:status", "apps:publish"]],
+    pattern = ["npm.cmd", "run", ["check", "apps:status", "apps:publish", "maniac:publish"]],
     decision = "allow",
-    justification = "Permite validar y publicar LenguArcade mediante los scripts controlados del repositorio.",
+    justification = "Permite validar y publicar LenguArcade y Maniacgrafía mediante los scripts controlados del repositorio.",
     match = [
         "npm.cmd run check",
         "npm.cmd run apps:status",
         "npm.cmd run apps:publish -- \"Actualiza el panel\"",
+        "npm.cmd run maniac:publish -- \"Actualiza Maniacgrafía\"",
     ],
     not_match = [
         "npm.cmd run apps:pull",

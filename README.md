@@ -26,11 +26,11 @@ apps-script/
 
 games/
   maniacgrafia/
-  narratoria/
-  versopolis/
-  scrabble/
-  conjuga-apuesta/
-  jeopardy-verbos/
+    apps-script/
+      Code.js
+      Alumno.html
+      Profesor.html
+      appsscript.json
 
 shared/
   lenguarcade-core.js
@@ -51,9 +51,12 @@ El repositorio está conectado al proyecto de Google Apps Script mediante `clasp
 npm.cmd install
 npm.cmd run apps:status
 npm.cmd run apps:publish -- "descripcion del cambio"
+npm.cmd run maniac:publish -- "descripcion del cambio"
 ```
 
-El último comando sube el código, crea una versión inmutable y actualiza el despliegue web estable.
+Maniacgrafía es el primer juego integrado: se abre dentro de LenguArcade, recibe la identidad del alumno autenticado y devuelve el resultado de la partida al progreso central. El token de sesión nunca se entrega al juego.
+
+Los comandos de publicación suben el código, crean una versión inmutable y actualizan el despliegue web estable correspondiente.
 
 La carpeta `.codex/rules/` permite a Codex ejecutar estos comandos concretos sin solicitar permisos repetidos cuando el repositorio está abierto como proyecto confiable.
 

@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Maniacgrafía - Aventura Ortográfica 👑</title>
+    <style>
+        :root {
+            --primary: #4338ca; --primary-light: #6366f1; --secondary: #ec4899;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --gold: #fbbf24; --bg-color: #f8fafc; --text-main: #1e293b;
+            --text-light: #64748b; --card-bg: #ffffff; --font-main: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        html, body { width: 100%; max-width: 100vw; overflow-x: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-main); background-color: var(--bg-color); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: background-color 0.5s; position: relative; }
+
+        .hidden { display: none !important; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; text-transform: uppercase; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.95); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3); }
+        .btn-secondary { background: var(--secondary); color: white; }
+        .btn-danger { background: #fee2e2; color: var(--danger); border: 2px solid var(--danger); padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .btn-danger:hover { background: var(--danger); color: white; }
+        
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-color); z-index: 10; }
+
+        /* Menú Principal */
+        #start-screen h1 { font-size: 4rem; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; color: transparent; margin-bottom: 5px; text-align: center; }
+        .subtitle { font-size: 1.2rem; color: var(--text-light); margin-bottom: 20px; }
+        
+        .dashboard { display: flex; gap: 15px; margin-bottom: 30px; background: white; padding: 15px 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); align-items: center; flex-wrap: wrap; justify-content: center; }
+        .player-profile { display: flex; align-items: center; gap: 8px; background: #eef2ff; padding: 8px 10px; border-radius: 12px; border: 2px solid #c7d2fe; }
+        .player-profile input { width: 170px; max-width: 42vw; border: 0; background: white; border-radius: 8px; padding: 8px 10px; font-size: 1rem; font-weight: bold; color: var(--primary); outline: 2px solid transparent; }
+        .player-profile input.class-input { width: 95px; max-width: 28vw; color: #047857; }
+        .player-profile input.code-input { width: 110px; max-width: 30vw; color: #be123c; }
+        .player-profile input:focus { outline-color: var(--primary-light); }
+        .small-save-btn { border: 0; background: var(--primary); color: white; border-radius: 8px; padding: 8px 10px; font-weight: 800; cursor: pointer; }
+        .small-save-btn:hover { background: var(--primary-light); }
+        .progress-badge { background: #ecfdf5; color: #047857; border: 2px solid #a7f3d0; border-radius: 12px; padding: 9px 12px; font-weight: 800; }
+        .cloud-status { background: #eff6ff; color: #1d4ed8; border: 2px solid #bfdbfe; border-radius: 12px; padding: 9px 12px; font-weight: 800; min-width: 170px; text-align: center; }
+        .cloud-status.ok { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+        .cloud-status.sync { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+        .cloud-status.warn { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+        .autosave-note { font-size: 0.85rem; color: var(--text-light); text-align: center; width: 100%; margin-top: -8px; }
+        .coin-counter { font-size: 1.5rem; font-weight: bold; color: var(--gold); display: flex; align-items: center; gap: 5px; margin-right: 15px; background: #fffbeb; padding: 10px 20px; border-radius: 10px; border: 2px solid #fde68a;}
+        .dash-btn { background: #f1f5f9; border: 2px solid #e2e8f0; padding: 10px 20px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.2s; color: var(--text-main); display: flex; align-items: center; gap: 5px;}
+        .dash-btn:hover { background: var(--primary-light); color: white; border-color: var(--primary); transform: translateY(-2px); }
+
+        .mode-container { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; max-width: 1000px; }
+        .mode-card { background: var(--card-bg); padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 180px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+        .mode-card:hover { border-color: var(--primary-light); transform: translateY(-5px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.2); }
+        .mode-card h3 { margin-bottom: 10px; font-size: 1.1rem; }
+        .aventura-card { border: 2px solid var(--gold); background: #fffbeb; }
+        .aventura-card:hover { border-color: var(--warning); box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3); }
+        
+        /* Modales */
+        .modal-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); display: flex; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(5px); }
+        .modal-panel { background: white; padding: 30px; border-radius: 20px; width: 95%; max-width: 1000px; max-height: 90vh; overflow-y: auto; }
+        
+        /* Ajustes y Guardado */
+        .settings-group { margin: 20px 0; background: #f8fafc; padding: 20px; border-radius: 15px; border: 2px solid #e2e8f0; }
+        .settings-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.2rem; font-weight: bold; }
+        select.settings-select { padding: 10px; font-size: 1.1rem; border-radius: 8px; border: 2px solid var(--primary-light); outline: none; cursor: pointer; background: white; font-weight: bold;}
+        .save-btn-group { display: flex; gap: 10px; margin-top: 15px; justify-content: center;}
+        .save-btn { padding: 10px 15px; font-size: 0.9rem; font-weight: bold; border-radius: 8px; cursor: pointer; border: 2px solid #cbd5e1; background: white; transition: all 0.2s;}
+        .save-btn:hover { background: #f1f5f9; border-color: var(--primary); }
+
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+        .shop-item { border: 2px solid #e2e8f0; border-radius: 15px; padding: 15px; text-align: center; background: #f8fafc; display: flex; flex-direction: column; justify-content: space-between;}
+        .shop-icon { font-size: 2.5rem; margin-bottom: 5px; }
+        .shop-price { font-weight: bold; color: var(--gold); font-size: 1.1rem; margin: 5px 0 15px 0; }
+        
+        #achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 20px; }
+        .achievement-card { background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 10px; padding: 10px; text-align: center; opacity: 0.4; filter: grayscale(100%); transition: all 0.3s; }
+        .achievement-card.unlocked { opacity: 1; filter: grayscale(0%); border-color: var(--gold); background: #fffbeb; }
+
+        /* Interfaz de Juego */
+        #game-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; z-index: 5; background: #e2e8f0; overflow: hidden;}
+        header { display: flex; justify-content: space-between; padding: 10px 20px; background: var(--card-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 1.1rem; font-weight: bold; align-items: center; z-index: 20; position: relative; gap: 15px; flex-wrap: wrap;}
+        .stat-group { display: flex; flex-direction: column; align-items: center; }
+        .stat-label { font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; }
+        .stat-value { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
+        .mistake-meter { display: flex; gap: 5px; margin-top: 2px; }
+        .mistake-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #cbd5e1; background: white; }
+        .mistake-dot.filled { background: var(--danger); border-color: var(--danger); box-shadow: 0 0 5px var(--danger);}
+        .inventory-hud { display: flex; gap: 10px; background: #f1f5f9; padding: 5px 15px; border-radius: 20px; border: 1px solid #cbd5e1; font-size: 0.9rem; align-items: center;}
+        
+        /* BARRA DE PODER */
+        .combo-power-container { width: 95%; max-width: 600px; height: 18px; background: #cbd5e1; border: 2px solid white; border-radius: 10px; overflow: hidden; position: relative; margin: 8px auto 5px auto; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); z-index: 20;}
+        #combo-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--warning), var(--danger)); transition: width 0.3s ease-in-out, background 0.3s; }
+        #combo-text { position: absolute; width: 100%; top: 0; left: 0; text-align: center; color: white; font-weight: bold; font-size: 0.8rem; line-height: 14px; text-shadow: 1px 1px 2px rgba(0,0,0,0.6); pointer-events: none; }
+
+        /* SISTEMA DE APAGÓN, EVENTOS Y MUNDOS DE AVENTURA */
+        #game-area-wrapper { flex-grow: 1; position: relative; overflow: hidden; background: #e2e8f0; width: 100%; perspective: 1000px; }
+        #game-area { width: 100%; height: 100%; position: absolute; background: linear-gradient(to bottom, #f8fafc, #e2e8f0); transform-origin: 50% 50%; z-index: auto; transition: background 2s;}
+        body.apagon #game-area-wrapper { background: #000 !important; }
+        body.apagon #game-area { background: #000 !important; filter: none; }
+        
+        /* Fondos de Mundos (Modo Aventura) */
+        body.mundo-1 #game-area { background: linear-gradient(to bottom, #dcfce7, #86efac); } /* Bosque */
+        body.mundo-2 #game-area { background: linear-gradient(to bottom, #fef08a, #fcd34d); } /* Desierto */
+        body.mundo-3 #game-area { background: linear-gradient(to bottom, #334155, #0f172a); } /* Caverna */
+        body.mundo-4 #game-area { background: linear-gradient(to bottom, #7f1d1d, #450a0a); } /* Volcán / Jefe Final */
+        body.mundo-5 #game-area { background: linear-gradient(to bottom, #0284c7, #082f49); } /* Océano */
+        body.mundo-6 #game-area { background: linear-gradient(to bottom, #c084fc, #4c1d95); } /* Dimensión */
+
+        /* El Abismo (Apagón): linterna central. La palabra solo se ve al cruzar el centro. */
+        body.apagon #game-area-wrapper::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, transparent 0 18%, rgba(0,0,0,0.35) 23%, rgba(0,0,0,0.96) 36%, #000 100%); pointer-events: none; z-index: 14; }
+        body.apagon #game-area-wrapper::before { content: ''; position: absolute; left: 50%; top: 50%; width: min(46vw, 430px); height: min(24vh, 180px); transform: translate(-50%, -50%); border-radius: 50%; box-shadow: 0 0 40px 18px rgba(255,255,210,0.18), inset 0 0 18px rgba(255,255,255,0.20); pointer-events: none; z-index: 15; mix-blend-mode: screen; }
+        body.apagon .falling-word { background: rgba(255, 255, 230, 0.98) !important; color: #111827 !important; border: 3px solid rgba(255,255,255,0.92); box-shadow: 0 0 22px rgba(255,255,190,0.75), 0 6px 18px rgba(0,0,0,0.35); text-shadow: none !important; }        
+        /* Modo Fiebre */
+        body.modo-fiebre #game-area-wrapper { box-shadow: 0 0 30px 10px #ff0055, inset 0 0 20px #ff0055 !important; border-color: #ff0055; animation: palpitarFiebre 0.5s infinite alternate; }
+        @keyframes palpitarFiebre { from { box-shadow: 0 0 20px 5px #ff0055, inset 0 0 10px #ff0055; } to { box-shadow: 0 0 40px 15px #ffea00, inset 0 0 20px #ffea00; } }
+
+        /* 🔥 FUEGO EXTREMO */
+        body.fuego #game-area { background: linear-gradient(to top, #450a0a, #991b1b, #ef4444, #f59e0b); background-size: 100% 300%; animation: fireStorm 0.42s ease-in-out infinite alternate; box-shadow: inset 0 0 70px 24px #ef4444; }
+        body.fuego .falling-word { background: rgba(255,255,255,0.96) !important; color: #7f1d1d !important; text-shadow: none !important; border: 3px solid #fed7aa; animation: quemarPalabra 0.24s infinite alternate; }
+        @keyframes fireStorm { 0% { background-position: 0% 100%; opacity: 0.88; transform: scale(1.025); } 100% { background-position: 0% 0%; opacity: 1; transform: scale(1); } }
+        @keyframes quemarPalabra { 0% { transform: translateX(-50%) translateY(-1px) skewX(1.4deg) scale(1.012); opacity: 0.96; } 100% { transform: translateX(-50%) translateY(1px) skewX(-1.4deg) scale(0.992); opacity: 1; } }
+
+        /* 🌊 AGUA EXTREMA */
+        body.agua #game-area { background: linear-gradient(180deg, #0284c7, #38bdf8, #0369a1, #e0f2fe); background-size: 100% 400%; animation: oceanWaves 1.5s ease-in-out infinite alternate; }
+        body.agua .falling-word { filter: blur(2.5px) opacity(0.82); background: rgba(224,242,254,0.55) !important; color: #082f49 !important; text-shadow: 0 0 8px rgba(255,255,255,0.55); animation: flotarPalabra 2s infinite ease-in-out alternate; }
+        @keyframes oceanWaves { 0% { background-position: 0% 0%; transform: skewY(2deg) scale(1.05); } 100% { background-position: 0% 100%; transform: skewY(-2deg) scale(1.05); } }
+        @keyframes flotarPalabra { 0% { transform: translateX(-65%) translateY(-5px) rotate(-6deg); } 100% { transform: translateX(-35%) translateY(5px) rotate(6deg); } }
+
+        /* 🌋 TERREMOTO EXTREMO */
+        body.terremoto #game-area { animation: rumbleScreen 0.12s infinite; }
+        body.terremoto .falling-word { animation: rumbleWord 0.12s infinite alternate; } 
+        @keyframes rumbleScreen { 
+            0% { transform: translate(3px, 1px); } 
+            25% { transform: translate(-3px, -2px); } 
+            50% { transform: translate(2px, -3px); } 
+            75% { transform: translate(-2px, 3px); } 
+            100% { transform: translate(0, 0); } 
+        }
+        @keyframes rumbleWord { 
+            0% { transform: translateX(-50%) translate(5px, 3px) rotate(0.65deg); } 
+            100% { transform: translateX(-50%) translate(-5px, -3px) rotate(-0.65deg); } 
+        }
+        body.remolino #game-area { background-size: 260% 260%; animation: whirlBackground 1.8s infinite linear; transform-origin: 50% 50% !important; }
+        body.remolino .falling-word { animation: remolinoPalabra 0.72s infinite linear; transform-origin: 50% 50%; }
+        @keyframes whirlBackground { from { background-position: 0% 50%; filter: hue-rotate(0deg) saturate(1.1); } to { background-position: 100% 50%; filter: hue-rotate(40deg) saturate(1.45); } }
+        @keyframes remolinoPalabra { 
+            0% { transform: translateX(-50%) rotate(0deg) translateX(0); }
+            25% { transform: translateX(-50%) rotate(90deg) translateX(18px); }
+            50% { transform: translateX(-50%) rotate(180deg) translateX(0); }
+            75% { transform: translateX(-50%) rotate(270deg) translateX(-18px); }
+            100% { transform: translateX(-50%) rotate(360deg) translateX(0); }
+        }
+        body.espejo #game-area { transform: none; box-shadow: inset 0 0 70px rgba(99,102,241,0.35); }
+        body.espejo .falling-word { transform: translateX(-50%) scaleX(-1); letter-spacing: 0.05em; background: rgba(255,255,255,0.96) !important; border: 3px solid rgba(99,102,241,0.45); }
+        body.fuego.terremoto .falling-word { animation: jefeInfernal 0.16s infinite alternate; }
+        @keyframes jefeInfernal {
+            0% { transform: translateX(-50%) translate(4px, 2px) skewX(1deg) rotate(0.35deg); }
+            100% { transform: translateX(-50%) translate(-4px, -2px) skewX(-1deg) rotate(-0.35deg); }
+        }
+        
+        /* PALABRAS Y OBJETOS */
+        .falling-word { position: absolute; transform: translateX(-50%); font-size: clamp(1.6rem, 6vw, 3.5rem); font-weight: 800; color: var(--text-main); padding: 10px 20px; background: rgba(255,255,255,0.97); border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); white-space: nowrap; z-index: 10; transition: font-size 0.3s, padding 0.3s; will-change: transform, opacity, top; }
+        .premium-word { background: linear-gradient(135deg, #fde047, #f59e0b) !important; color: white !important; border: 3px solid #fff; box-shadow: 0 0 20px rgba(245, 158, 11, 0.8) !important; }
+        .diamante-word { background: linear-gradient(135deg, #38bdf8, #0284c7) !important; color: white !important; border: 3px solid #e0f2fe; box-shadow: 0 0 20px rgba(2, 132, 199, 0.8) !important; }
+        .corazon-word { background: linear-gradient(135deg, #f43f5e, #be123c) !important; color: white !important; border: 3px solid #ffe4e6; }
+
+        body.viento .falling-word, .viento { animation: vientoAnim 1.15s infinite ease-in-out alternate; }
+        @keyframes vientoAnim { from { margin-left: -150px; } to { margin-left: 150px; } }
+        body.parpadeo .falling-word, .parpadeo { animation: blinkAnim 0.82s steps(1, end) infinite; }
+        body.parpadeo .falling-word *, .parpadeo * { animation: inherit; }
+        @keyframes blinkAnim { 
+            0%, 45% { opacity: 1; color: inherit; }
+            46%, 100% { opacity: 1; color: #ffffff !important; background: #ffffff !important; border-color: #ffffff !important; text-shadow: none !important; box-shadow: 0 0 28px rgba(255,255,255,0.95) !important; }
+        }
+        
+		.jefe-final { font-size: clamp(1.2rem, 4vw, 3rem) !important; width: 95%; max-width: 800px; text-align: center; white-space: normal !important; word-break: break-word; color: white; background: linear-gradient(135deg, var(--danger), #991b1b); border: 4px solid #7f1d1d; }        .typed-correct { color: var(--success); }
+        .missing-letter { color: var(--secondary); border-bottom: 3px solid var(--secondary); padding: 0 5px; }
+        
+        /* INPUT Y FEEDBACK */
+        #input-area { padding: 15px; background: var(--card-bg); display: flex; flex-direction: column; align-items: center; z-index: 20; position: relative; box-shadow: 0 -4px 10px rgba(0,0,0,0.05);}
+        #word-input { width: 100%; max-width: 600px; padding: 15px 25px; font-size: 2rem; border: 3px solid var(--primary-light); border-radius: 50px; text-align: center; outline: none; transition: all 0.2s; }
+        .input-error { background-color: #fee2e2 !important; border-color: var(--danger) !important; color: var(--danger) !important; }
+
+        .shake { animation: shake 0.2s; }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-10px);} 75% {transform: translateX(10px);} }
+        
+        .feedback-card { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 600px; width: 90%; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: linear-gradient(135deg, var(--gold), #d97706); color: white; padding: 15px 20px; border-radius: 10px; display: flex; align-items: center; gap: 15px; z-index: 9999; animation: slideInRight 0.3s forwards, slideOutRight 0.3s forwards 4s; pointer-events: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2);}
+        @keyframes slideInRight { from { transform: translateX(120%); } to { transform: translateX(0); } }
+        @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
+        .event-banner { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); font-size: 4rem; font-weight: bold; color: white; text-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 30; opacity: 0; animation: fadeInOut 2s forwards; pointer-events: none; text-align: center; width: 100%;}
+        @keyframes fadeInOut { 0% { opacity: 0; transform: translate(-50%, -20px); } 20% { opacity: 1; transform: translate(-50%, 0); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, 20px); } }
+        #anuncio-poder { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 40px; font-weight: bold; color: white; text-shadow: 3px 3px 0 #000; pointer-events: none; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <audio id="bgm" loop></audio>
+    <div id="toast-container"></div>
+    <input type="file" id="file-input" class="hidden" accept=".txt,.json">
+    
+    <div id="victory-screen" class="screen hidden" style="background: #0f172a; color: white; z-index: 100;">
+        <div style="font-size: 6rem; margin-bottom: 20px; filter: drop-shadow(0 0 20px #fbbf24);">👑</div>
+        <h1 style="font-size: 4rem; text-align: center; color: var(--gold); text-shadow: 0 0 20px rgba(251,191,36,0.5);">¡ENHORABUENA!</h1>
+        <p style="font-size: 1.5rem; color: #cbd5e1; margin-bottom: 20px; text-align: center;">Has derrotado al Jefe Supremo y completado la Aventura.</p>
+        <div style="font-size: 2.5rem; margin: 20px; color: var(--gold); font-weight: bold; background: rgba(255,255,255,0.1); padding: 20px 40px; border-radius: 20px; border: 2px solid var(--gold);">
+            RECOMPENSA: +<span id="victory-coins">0</span> 💰
+        </div>
+        <button class="btn btn-primary" style="font-size: 1.5rem; padding: 15px 40px;" onclick="showStartScreen()">Reclamar y Volver</button>
+    </div>
+
+    <div id="start-screen" class="screen">
+        <h1>Maniacgrafía</h1>
+        <p class="subtitle">Aventura ortográfica con guardado en Google Sheets · efectos v3 🌍</p>
+        <div class="dashboard">
+            <div class="player-profile">
+                <span style="font-size:1.35rem;">👤</span>
+                <input id="player-name-input" type="text" maxlength="32" placeholder="Nombre del alumno" autocomplete="off">
+                <input id="class-group-input" class="class-input" type="text" maxlength="16" placeholder="Clase" autocomplete="off">
+                <input id="student-code-input" class="code-input" type="text" maxlength="18" placeholder="Código" autocomplete="off">
+                <button class="small-save-btn" onclick="saveProfileName()" title="Cargar o crear este perfil en Sheets">💾</button>
+            </div>
+            <div class="coin-counter">💰 <span id="menu-coins">0</span></div>
+            <div class="progress-badge">🌍 Aventura: <span id="adventure-progress-display">Mundo 1</span></div>
+            <div class="cloud-status warn" id="cloud-status">☁️ Sheets sin configurar</div>
+            <button class="dash-btn" onclick="openPanel('shop-screen')">🛒 Tienda</button>
+            <button class="dash-btn" onclick="openPanel('achievements-screen'); renderAchievements();">🏆 Logros</button>
+            <button class="dash-btn" onclick="openPanel('settings-screen')">⚙️ Ajustes</button>
+        </div>
+        <p class="autosave-note">El progreso se guarda en Google Sheets cuando configures la URL del Apps Script. También queda una copia local de emergencia.</p>
+        <div class="mode-container">
+            <div class="mode-card aventura-card" onclick="startGame('aventura')"><h3 style="color:var(--gold);">🌍 Aventura</h3><p>Continúa desde tu último mundo guardado.</p></div>
+            <div class="mode-card" onclick="startGame('practica')"><h3 style="color:var(--primary);">🕹️ Práctica</h3><p>Infinito. 3 vidas.</p></div>
+            <div class="mode-card" onclick="startGame('supervivencia')"><h3 style="color:var(--text-main);">💀 Supervivencia</h3><p>1 vida. Acelerado.</p></div>
+            <div class="mode-card" onclick="startGame('hueco')"><h3 style="color:var(--success);">🧩 Letra Perdida</h3><p>Rellena el hueco.</p></div>
+            <div class="mode-card" onclick="startGame('pendulo')"><h3 style="color:var(--warning);">🎢 Montaña Rusa</h3><p>Velocidad persistente.</p></div>
+            <div class="mode-card" onclick="startGame('extremo')"><h3 style="color:var(--danger);">🔥 Extremo</h3><p>Dispara a la correcta.</p></div>
+        </div>
+    </div>
+
+    <div id="settings-screen" class="modal-wrapper hidden">
+        <div class="modal-panel" style="max-width: 500px;">
+            <h2 style="color: var(--primary); text-align:center; margin-bottom: 20px;">Ajustes y Datos</h2>
+            <div class="settings-group">
+                <div class="settings-row"><span>🎵 Música</span><label class="switch"><input type="checkbox" id="toggle-music" checked onchange="updateAudioSettings()"><span class="slider"></span></label></div>
+                <div class="settings-row"><span>🔊 Efectos</span><label class="switch"><input type="checkbox" id="toggle-sfx" checked onchange="updateAudioSettings()"><span class="slider"></span></label></div>
+            </div>
+            <div class="settings-group">
+                <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                    <span>📚 Área de Práctica Ortográfica:</span>
+                    <select id="word-bank-select" class="settings-select" style="width: 100%;" onchange="changeWordBank()">
+                        <option value="todos" selected>🎲 De todo un poco</option>
+                        <option value="bv">📖 Reglas de B y V</option>
+                        <option value="gj">📖 Reglas de G y J</option>
+                        <option value="czs">📖 Reglas de C, Z y S</option>
+                        <option value="acentuacion">📖 Reglas de Acentuación</option>
+                    </select>
+                </div>
+            </div>
+            <div class="settings-group" style="border-color: var(--primary-light); background: #e0e7ff;">
+                <h3 style="text-align: center; color: var(--primary); font-size: 1rem;">Gestión de Partida</h3>
+                <p style="font-size:0.9rem; color:var(--text-light); text-align:center; margin:8px 0;">Guardado automático en Google Sheets + copia local de emergencia. Exportar sirve como copia manual.</p>
+                <div class="save-btn-group">
+                    <button class="save-btn" onclick="saveProgress(true, { forceCloud: true })">☁️ Guardar ahora</button>
+                    <button class="save-btn" onclick="window.maniacTestEffects && window.maniacTestEffects(900)">🧪 Probar efectos</button>
+                    <button class="save-btn" onclick="exportSave()">📤 Exportar</button>
+                    <button class="save-btn" onclick="document.getElementById('file-input').click()">📥 Importar</button>
+                    <button class="save-btn" style="color: var(--danger); border-color: var(--danger);" onclick="resetSave()">🗑️ Borrar</button>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 25px;"><button class="btn btn-secondary" onclick="closePanel('settings-screen')">Volver</button></div>
+        </div>
+    </div>
+
+    <div id="shop-screen" class="modal-wrapper hidden">
+        <div class="modal-panel">
+            <h2 style="color: var(--primary); text-align:center;">Tienda de Ventajas</h2>
+            <p style="color: var(--text-light); text-align:center; margin-bottom: 20px;">Tienes <strong style="color:var(--gold);" id="shop-coins">0</strong> Monedas</p>
+            <div class="shop-grid">
+                <div class="shop-item"><div class="shop-icon">🛡️</div><h3>Escudo</h3><div class="shop-price">50 💰</div><button class="btn btn-primary" onclick="buyItem('shield', 50)">Comprar</button><p>Tienes: <span id="inv-shield">0</span></p></div>
+                <div class="shop-item"><div class="shop-icon">⏳</div><h3>Reloj Arena</h3><div class="shop-price">100 💰</div><button class="btn btn-primary" onclick="buyItem('freeze', 100)">Comprar</button><p>Tienes: <span id="inv-freeze">0</span></p></div>
+                <div class="shop-item"><div class="shop-icon">💣</div><h3>Bomba</h3><div class="shop-price">150 💰</div><button class="btn btn-primary" onclick="buyItem('bomb', 150)">Comprar</button><p>Tienes: <span id="inv-bomb">0</span></p></div>
+                <div class="shop-item"><div class="shop-icon">🔍</div><h3>Lupa</h3><div class="shop-price">75 💰</div><button class="btn btn-primary" onclick="buyItem('lupa', 75)">Comprar</button><p>Tienes: <span id="inv-lupa">0</span></p></div>
+                <div class="shop-item"><div class="shop-icon">🧹</div><h3>Escoba</h3><div class="shop-price">100 💰</div><button class="btn btn-primary" onclick="buyItem('escoba', 100)">Comprar</button><p>Tienes: <span id="inv-escoba">0</span></p></div>
+            </div>
+            <div style="text-align: center; margin-top: 25px;"><button class="btn btn-secondary" onclick="closePanel('shop-screen')">Volver</button></div>
+        </div>
+    </div>
+
+    <div id="achievements-screen" class="modal-wrapper hidden">
+        <div class="modal-panel">
+            <h2 style="color: var(--primary); text-align:center;">Sala de Trofeos (106 Logros)</h2>
+            <div id="achievements-grid"></div>
+            <div style="text-align: center; margin-top: 25px;"><button class="btn btn-secondary" onclick="closePanel('achievements-screen')">Volver</button></div>
+        </div>
+    </div>
+
+    <div id="game-ui" class="hidden">
+        <header id="game-header">
+            <button class="btn-danger" onclick="exitToMenu()">💾 Guardar y salir</button>
+            <div class="stat-group" id="world-hud" style="display:none;"><span class="stat-label">Mundo</span><span id="world-display" class="stat-value" style="color: var(--gold);">1</span></div>
+            <div class="stat-group"><span class="stat-label">Puntos</span><span id="score-display" class="stat-value">0</span></div>
+            <div class="stat-group" id="fever-hud"><span class="stat-label">Combo</span><span id="combo-display" class="stat-value" style="color: var(--warning);">x1</span></div>
+            <div class="inventory-hud">
+                <span>🛡️ <span id="hud-shield">0</span></span><span>⏳ [SHIFT] <span id="hud-freeze">0</span></span>
+                <span>💣 [ESP] <span id="hud-bomb">0</span></span><span>🔍 [CTRL] <span id="hud-lupa">0</span></span>
+                <span>🧹 [ALT] <span id="hud-escoba">0</span></span>
+            </div>
+            <div class="stat-group">
+                <span class="stat-label" style="color:var(--danger)">Vidas <span id="lives-display">❤️❤️❤️</span></span>
+                <div class="mistake-meter" id="mistake-meter"><div class="mistake-dot"></div><div class="mistake-dot"></div><div class="mistake-dot"></div></div>
+            </div>
+            <div class="stat-group"><span class="stat-label">Botín</span><span style="color:var(--gold); font-weight:bold;">+<span id="session-coins-display">0</span>💰</span></div>
+        </header>
+
+        <div class="combo-power-container">
+            <div id="combo-bar"></div>
+            <span id="combo-text">Poder Especial: 0/10</span>
+        </div>
+
+        <div id="game-area-wrapper">
+            <div id="anuncio-poder"></div>
+            <div id="game-area"></div>
+        </div>
+        <div id="input-area"><input type="text" id="word-input" autocomplete="off" spellcheck="false" placeholder="Escribe la palabra..."></div>
+    </div>
+
+    <div id="feedback-modal" class="modal-wrapper hidden">
+        <div class="feedback-card">
+            <h2 style="color: var(--danger);" id="feedback-title">¡Ups!</h2>
+            <div class="correct-form" id="feedback-correct" style="font-size:2rem; margin:10px 0; font-weight:bold;"></div>
+            <div class="explanation" id="feedback-explanation"></div>
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+                <button class="btn btn-primary" onclick="resumeGame()">Continuar (ENTER)</button>
+                <button class="btn btn-danger" onclick="exitToMenu()">Salir al Menú</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="end-screen" class="screen hidden">
+        <h1>¡Partida Terminada!</h1>
+        <div style="font-size: 2rem; margin: 20px; color: var(--gold); font-weight: bold;">Has ganado +<span id="end-coins">0</span> 💰</div>
+        <button class="btn btn-primary" onclick="showStartScreen()">Volver al Menú</button>
+    </div>
+
+    <script>
+        // ----------------------------------------------------
+        // 1. VARIABLES GLOBALES (Seguridad y Persistencia)
+        // ----------------------------------------------------
+        let userStats = { 
+            coins: 0, maxCombo: 0, premiumCaught: 0, diamondsCaught: 0, heartsCaught: 0, bossesDefeated: 0, itemsBought: 0, totalWords: 0, bombsUsed: 0, freezesUsed: 0, lupasUsed: 0, escobasUsed: 0,
+            musicToggles: 0, emptyBombsTriggered: 0, bossesBombed: 0, blindWords: 0, zeroCoinPurchases: 0, pacifistDeaths: 0, masochistCombos: 0, feverCount: 0, bonusCount: 0, livesLost: 0, bankChanges: 0,
+            playerName: 'Jugador', classGroup: '', studentCode: '', adventureWorld: 1, adventureCompleted: false, gamesPlayed: 0, bestScores: { practica: 0, supervivencia: 0, hueco: 0, pendulo: 0, extremo: 0, aventura: 0 }
+        };
+        let userInventory = { shield: 0, freeze: 0, bomb: 0, lupa: 0, escoba: 0 };
+        let achievements = [];
+
+        const ruleBanks = {
+            bv: [
+                ["escribir", "B/V", "Verbos terminados en -bir se escriben con B"], ["recibir", "B/V", "Verbos terminados en -bir se escriben con B"], ["prohibir", "B/V", "Verbos terminados en -bir se escriben con B"], ["sucumbir", "B/V", "Verbos terminados en -bir se escriben con B"], ["hervir", "B/V", "Excepción: hervir, servir y vivir se escriben con V"], ["servir", "B/V", "Excepción: hervir, servir y vivir se escriben con V"], ["vivir", "B/V", "Excepción: hervir, servir y vivir se escriben con V"], ["obvio", "B/V", "Después de la consonante B siempre va V"], ["subvención", "B/V", "Después de la consonante B siempre va V"], ["invierno", "B/V", "Después de la consonante N siempre va V"], ["enviar", "B/V", "Después de la consonante N siempre va V"], ["invitar", "B/V", "Después de la consonante N siempre va V"], ["advertir", "B/V", "Después de la consonante D siempre va V"], ["adverbio", "B/V", "Después de la consonante D siempre va V"], ["burbuja", "B/V", "Palabras que empiezan por bur- se escriben con B"], ["burla", "B/V", "Palabras que empiezan por bur- se escriben con B"], ["buscar", "B/V", "Palabras que empiezan por bus- se escriben con B"], ["busto", "B/V", "Palabras que empiezan por bus- se escriben con B"], ["butaca", "B/V", "Palabras que empiezan por bu- se escriben con B"], ["buque", "B/V", "Palabras que empiezan por bu- se escriben con B"], ["vagabundo", "B/V", "Adjetivos terminados en -bundo se escriben con B"], ["meditabunda", "B/V", "Adjetivos terminados en -bunda se escriben con B"], ["amabilidad", "B/V", "Palabras terminadas en -bilidad se escriben con B"], ["habilidad", "B/V", "Palabras terminadas en -bilidad se escriben con B"], ["movilidad", "B/V", "Excepción: movilidad y civilidad vienen de móvil y civil"], ["cantaba", "B/V", "Pretérito imperfecto de verbos en -ar siempre con B"], ["saltábamos", "B/V", "Pretérito imperfecto de verbos en -ar siempre con B"], ["soñabas", "B/V", "Pretérito imperfecto de verbos en -ar siempre con B"], ["iba", "B/V", "El pasado del verbo ir siempre se escribe con B"], ["íbamos", "B/V", "El pasado del verbo ir siempre se escribe con B"], ["bravo", "B/V", "Adjetivos llanos terminados en -avo se escriben con V"], ["esclavo", "B/V", "Adjetivos llanos terminados en -avo se escriben con V"], ["nueva", "B/V", "Adjetivos llanos terminados en -eva se escriben con V"], ["longevo", "B/V", "Adjetivos llanos terminados en -evo se escriben con V"], ["decisivo", "B/V", "Adjetivos llanos terminados en -ivo se escriben con V"], ["suave", "B/V", "Adjetivos llanos terminados en -ave se escriben con V"], ["biblioteca", "B/V", "El prefijo biblio- (libro) siempre va con B"], ["bibliografía", "B/V", "El prefijo biblio- (libro) siempre va con B"], ["biología", "B/V", "El prefijo bio- (vida) siempre va con B"], ["biósfera", "B/V", "El prefijo bio- (vida) siempre va con B"], ["ambiente", "B/V", "Antes de la letra B siempre se escribe M"], ["tambor", "B/V", "Antes de la letra B siempre se escribe M"], ["combate", "B/V", "Antes de la letra B siempre se escribe M"], ["olfatear", "B/V", "Se escribe V en las formas verbales de ir: voy, vas, va"], ["anduve", "B/V", "Pasado de andar, tener y estar se escribe con V"], ["tuvimos", "B/V", "Pasado de andar, tener y estar se escribe con V"], ["estuvieron", "B/V", "Pasado de andar, tener y estar se escribe con V"], ["carnívoro", "B/V", "Terminaciones en -ívoro/-ívora se escriben con V"], ["herbívoro", "B/V", "Terminaciones en -ívoro/-ívora se escriben con V"], ["insectívora", "B/V", "Terminaciones en -ívoro/-ívora se escriben con V"], ["evasión", "B/V", "Palabras que empiezan por eva- se escriben con V"], ["evento", "B/V", "Palabras que empiezan por eve- se escriben con V"], ["evitar", "B/V", "Palabras que empiezan por evi- se escriben con V"], ["evolución", "B/V", "Palabras que empiezan por evo- se escriben con V"], ["bisabuelo", "B/V", "Prefijos bi- y bis- (dos) se escriben con B"], ["bicicleta", "B/V", "Prefijos bi- y bis- (dos) se escriben con B"], ["bizcocho", "B/V", "Prefijo biz- (dos veces) se escribe con B"], ["abominable", "B/V", "Se escribe B antes de cualquier consonante (L o R)"], ["obstáculo", "B/V", "Se escribe B antes de cualquier consonante"], ["brazo", "B/V", "Se escribe B antes de la consonante R"], ["blanco", "B/V", "Se escribe B antes de la consonante L"], ["cable", "B/V", "Se escribe B antes de la consonante L"], ["brillo", "B/V", "Se escribe B antes de la consonante R"], ["subir", "B/V", "Verbos terminados en -bir con B"], ["atribuir", "B/V", "Verbos terminados en -buir se escriben con B"], ["distribuir", "B/V", "Verbos terminados en -buir se escriben con B"], ["contribuir", "B/V", "Verbos terminados en -buir se escriben con B"]
+            ],
+            gj: [
+                ["garaje", "G/J", "Palabras terminadas en -aje se escriben con J"], ["viaje", "G/J", "Palabras terminadas en -aje se escriben con J"], ["mensaje", "G/J", "Palabras terminadas en -aje se escriben con J"], ["homenaje", "G/J", "Palabras terminadas en -aje se escriben con J"], ["paisaje", "G/J", "Palabras terminadas en -aje se escriben con J"], ["equipaje", "G/J", "Palabras terminadas en -aje se escriben con J"], ["hereje", "G/J", "Palabras terminadas en -eje se escriben con J"], ["despeje", "G/J", "Palabras terminadas en -eje se escriben con J"], ["proteger", "G/J", "Verbos terminados en -ger se escriben con G"], ["recoger", "G/J", "Verbos terminados en -ger se escriben con G"], ["escoger", "G/J", "Verbos terminados en -ger se escriben con G"], ["corregir", "G/J", "Verbos terminados en -gir se escriben con G"], ["fingir", "G/J", "Verbos terminados en -gir se escriben con G"], ["surgir", "G/J", "Verbos terminados en -gir se escriben con G"], ["tejer", "G/J", "Excepción: tejer y crujir se escriben con J"], ["crujir", "G/J", "Excepción: tejer y crujir se escriben con J"], ["geografía", "G/J", "El prefijo geo- (tierra) siempre se escribe con G"], ["geología", "G/J", "El prefijo geo- (tierra) siempre se escribe con G"], ["geometría", "G/J", "El prefijo geo- (tierra) siempre se escribe con G"], ["relojería", "G/J", "Sustantivos terminados en -jería se escriben con J"], ["mensajería", "G/J", "Sustantivos terminados en -jería se escriben con J"], ["brujería", "G/J", "Sustantivos terminados en -jería se escriben con J"], ["consejería", "G/J", "Sustantivos terminados en -jería se escriben con J"], ["pasajero", "G/J", "Palabras terminadas en -jero se escriben con J"], ["cajero", "G/J", "Palabras terminadas en -jero se escriben con J"], ["tijera", "G/J", "Palabras terminadas en -jera se escriben con J"], ["granja", "G/J", "Palabras que terminan en -ja/-jo se escriben con J"], ["hijo", "G/J", "Palabras que terminan en -ja/-jo se escriben con J"], ["ligero", "G/J", "Excepción: ligero es de las pocas que terminan en -gero con G"], ["gestión", "G/J", "Palabras que empiezan por gest- se escriben con G"], ["gesticular", "G/J", "Palabras que empiezan por gest- se escriben con G"], ["gigante", "G/J", "Sonido G suave delante de A, O, U / fuerte delante de E, I"], ["girasol", "G/J", "G fuerte delante de E, I se escribe con G"], ["gente", "G/J", "G fuerte delante de E, I se escribe con G"], ["genio", "G/J", "G fuerte delante de E, I se escribe con G"], ["legislar", "G/J", "Palabras que contienen legi- se escriben con G"], ["legítimo", "G/J", "Palabras que contienen legi- se escriben con G"], ["colegio", "G/J", "Palabras terminadas en -gio/-gia se escriben con G"], ["magia", "G/J", "Palabras terminadas en -gio/-gia se escriben con G"], ["alergia", "G/J", "Palabras terminadas en -gio/-gia se escriben con G"], ["refugio", "G/J", "Palabras terminadas en -gio/-gia se escriben con G"], ["antología", "G/J", "Palabras terminadas en -logía (estudio) con G"], ["psicología", "G/J", "Palabras terminadas en -logía (estudio) con G"], ["origen", "G/J", "Palabras terminadas en -gen se escriben con G"], ["margen", "G/J", "Palabras terminadas en -gen se escriben con G"], ["imagen", "G/J", "Palabras terminadas en -gen se escriben con G"], ["ajeno", "G/J", "Excepción: ajeno y berenjena se escriben con J"], ["berenjena", "G/J", "Excepción: ajeno y berenjena se escriben con J"], ["ejercicio", "G/J", "Palabras que empiezan por eje- se escriben con J"], ["ejemplo", "G/J", "Palabras que empiezan por eje- se escriben con J"], ["ejército", "G/J", "Palabras que empiezan por eje- se escriben con J"], ["crujido", "G/J", "Derivado de crujir, mantiene la J"], ["protegido", "G/J", "Derivado de proteger, mantiene la G"], ["extranjero", "G/J", "Palabras terminadas en -jero se escriben con J"], ["granjero", "G/J", "Palabras terminadas en -jero se escriben con J"], ["objetivo", "G/J", "Palabras con el prefijo ob- seguido de J"], ["objeto", "G/J", "Palabras con el prefijo ob- seguido de J"], ["adjetivo", "G/J", "Palabras con el prefijo ad- seguido de J"], ["adjunto", "G/J", "Palabras con el prefijo ad- seguido de J"], ["canjear", "G/J", "Verbos terminados en -jear se escriben con J"], ["hojear", "G/J", "Verbos terminados en -jear se escriben con J"], ["cojear", "G/J", "Verbos terminados en -jear se escriben con J"], ["dije", "G/J", "Pasado de verbos terminados en -ducir (decir -> dije)"], ["conduje", "G/J", "Pasado de verbos terminados en -ducir (conducir) con J"], ["traduje", "G/J", "Pasado de verbos terminados en -ducir (traducir) con J"]
+            ],
+            czs: [
+                ["decisión", "C/Z/S", "Derivado de decidir (verbos en -dir pasan a -sión)"], ["división", "C/Z/S", "Derivado de dividir (verbos en -dir pasan a -sión)"], ["conclusión", "C/Z/S", "Derivado de concluir (verbos en -cluir pasan a -sión)"], ["exclusión", "C/Z/S", "Derivado de excluir (verbos en -cluir pasan a -sión)"], ["canción", "C/Z/S", "Palabras terminadas en -ción (derivadas de -to/-do)"], ["bendición", "C/Z/S", "Palabras terminadas en -ción (derivadas de -to/-do)"], ["salvación", "C/Z/S", "Palabras terminadas en -ción (derivadas de -to/-do)"], ["educación", "C/Z/S", "Palabras terminadas en -ción"], ["invasión", "C/Z/S", "Palabras terminadas en -sión (derivadas de -so/-sor)"], ["televisión", "C/Z/S", "Palabras terminadas en -sión (derivadas de -visor)"], ["expulsión", "C/Z/S", "Palabras terminadas en -sión (derivadas de -pulso)"], ["ascensión", "C/Z/S", "Palabras terminadas en -sión (derivadas de -censo)"], ["lápiz", "C/Z/S", "Se escribe Z al final de palabra"], ["lápices", "C/Z/S", "El plural de palabras con Z termina en -ces"], ["pez", "C/Z/S", "Se escribe Z al final de palabra"], ["peces", "C/Z/S", "El plural de palabras con Z termina en -ces"], ["luz", "C/Z/S", "Se escribe Z al final de palabra"], ["luces", "C/Z/S", "El plural de palabras con Z termina en -ces"], ["feliz", "C/Z/S", "Se escribe Z al final de palabra"], ["felices", "C/Z/S", "El plural de palabras con Z termina en -ces"], ["zorro", "C/Z/S", "Se usa Z ante las vocales A, O, U"], ["zapato", "C/Z/S", "Se usa Z ante las vocales A, O, U"], ["zumo", "C/Z/S", "Se usa Z ante las vocales A, O, U"], ["cielo", "C/Z/S", "Se usa C ante las vocales E, I"], ["cine", "C/Z/S", "Se usa C ante las vocales E, I"], ["cebra", "C/Z/S", "Se usa C ante las vocales E, I"], ["cacería", "C/Z/S", "Derivado de cazar (la Z cambia a C ante E/I)"], ["bellísimo", "C/Z/S", "El grado superlativo -ísimo siempre va con S"], ["rapidísimo", "C/Z/S", "El grado superlativo -ísimo siempre va con S"], ["carísimo", "C/Z/S", "El grado superlativo -ísimo siempre va con S"], ["honradez", "C/Z/S", "Sustantivos abstractos terminados en -ez con Z"], ["madurez", "C/Z/S", "Sustantivos abstractos terminados en -ez con Z"], ["estupidez", "C/Z/S", "Sustantivos abstractos terminados en -ez con Z"], ["belleza", "C/Z/S", "Sustantivos abstractos terminados en -eza con Z"], ["pobreza", "C/Z/S", "Sustantivos abstractos terminados en -eza con Z"], ["nobleza", "C/Z/S", "Sustantivos abstractos terminados en -eza con Z"], ["martillazo", "C/Z/S", "Aumentativos o golpes terminados en -azo con Z"], ["portazo", "C/Z/S", "Aumentativos o golpes terminados en -azo con Z"], ["pelotazo", "C/Z/S", "Aumentativos o golpes terminados en -azo con Z"], ["golazo", "C/Z/S", "Aumentativos o golpes terminados en -azo con Z"], ["ratoncito", "C/Z/S", "Diminutivos -cito/-cita se escriben con C"], ["nubecita", "C/Z/S", "Diminutivos -cito/-cita se escriben con C"], ["panecillo", "C/Z/S", "Diminutivos -cillo/-cilla se escriben con C"], ["casita", "C/Z/S", "Excepción: si la palabra base tiene S, el diminutivo mantiene la S"], ["besito", "C/Z/S", "Excepción: si la palabra base tiene S, el diminutivo mantiene la S"], ["comprensión", "C/Z/S", "Derivado de comprender (verbos en -der pasan a -sión)"], ["extensión", "C/Z/S", "Derivado de extender (verbos en -der pasan a -sión)"], ["explosión", "C/Z/S", "Palabras terminadas en -sión"], ["análisis", "C/Z/S", "Palabras terminadas en -sis se escriben con S"], ["tesis", "C/Z/S", "Palabras terminadas en -sis se escriben con S"], ["crisis", "C/Z/S", "Palabras terminadas en -sis se escriben con S"], ["parálisis", "C/Z/S", "Palabras terminadas en -sis se escriben con S"], ["comprensivo", "C/Z/S", "Adjetivos terminados en -sivo se escriben con S"], ["expulsivo", "C/Z/S", "Adjetivos terminados en -sivo se escriben con S"], ["masivo", "C/Z/S", "Adjetivos terminados en -sivo se escriben con S"], ["nocivo", "C/Z/S", "Excepción: nocivo y lascivo se escriben con C"], ["esperanza", "C/Z/S", "Sustantivos terminados en -anza se escriben con Z"], ["venganza", "C/Z/S", "Sustantivos terminados en -anza se escriben con Z"], ["confianza", "C/Z/S", "Sustantivos terminados en -anza se escriben con Z"], ["balanza", "C/Z/S", "Sustantivos terminados en -anza se escriben con Z"], ["gallego", "C/Z/S", "La letra C suena como K ante A, O, U"], ["casa", "C/Z/S", "La letra C suena como K ante A, O, U"], ["copa", "C/Z/S", "La letra C suena como K ante A, O, U"], ["cuna", "C/Z/S", "La letra C suena como K ante A, O, U"], ["queso", "C/Z/S", "Se usa QU para el sonido K ante E, I"], ["quiosco", "C/Z/S", "Se usa QU para el sonido K ante E, I"]
+            ],
+            acentuacion: [
+                ["murciélago", "Acentuación", "Esdrújula: el acento cae en la antepenúltima sílaba"], ["teléfono", "Acentuación", "Esdrújula: todas las esdrújulas se acentúan siempre"], ["música", "Acentuación", "Esdrújula: todas las esdrújulas se acentúan siempre"], ["pájaro", "Acentuación", "Esdrújula: todas las esdrújulas se acentúan siempre"], ["brújula", "Acentuación", "Esdrújula: el acento cae en la antepenúltima sílaba"], ["rápido", "Acentuación", "Esdrújula: todas las esdrújulas se acentúan siempre"], ["médico", "Acentuación", "Esdrújula: todas las esdrújulas se acentúan siempre"], ["último", "Acentuación", "Esdrújula: todas las esdrújulas se acentúan siempre"], ["cálido", "Acentuación", "Esdrújula: todas las esdrújulas se acentúan siempre"], ["camión", "Acentuación", "Aguda: acento en la última sílaba, termina en N"], ["corazón", "Acentuación", "Aguda: acento en la última sílaba, termina en N"], ["acción", "Acentuación", "Aguda: acento en la última sílaba, termina en N"], ["salón", "Acentuación", "Aguda: acento en la última sílaba, termina en N"], ["sofá", "Acentuación", "Aguda: acento en la última sílaba, termina en vocal"], ["mamá", "Acentuación", "Aguda: acento en la última sílaba, termina en vocal"], ["revés", "Acentuación", "Aguda: acento en la última sílaba, termina en S"], ["interés", "Acentuación", "Aguda: acento en la última sílaba, termina en S"], ["autobús", "Acentuación", "Aguda: acento en la última sílaba, termina en S"], ["feliz", "Acentuación", "Aguda: no lleva tilde porque termina en Z (no N ni S)"], ["papel", "Acentuación", "Aguda: no lleva tilde porque termina en L (no N ni S)"], ["reloj", "Acentuación", "Aguda: no lleva tilde porque termina en J (no N ni S)"], ["difícil", "Acentuación", "Llana: acento en la penúltima sílaba, no termina en N, S o vocal"], ["árbol", "Acentuación", "Llana: acento en la penúltima sílaba, termina en L"], ["lápiz", "Acentuación", "Llana: acento en la penúltima sílaba, termina en Z"], ["túnel", "Acentuación", "Llana: acento en la penúltima sílaba, termina en L"], ["azúcar", "Acentuación", "Llana: acento en la penúltima sílaba, termina en R"], ["césped", "Acentuación", "Llana: acento en la penúltima sílaba, termina en D"], ["carácter", "Acentuación", "Llana: acento en la penúltima sílaba, termina en R"], ["mártir", "Acentuación", "Llana: acento en la penúltima sílaba, termina en R"], ["joven", "Acentuación", "Llana: no lleva tilde porque termina en N"], ["examen", "Acentuación", "Llana: no lleva tilde porque termina en N"], ["crisis", "Acentuación", "Llana: no lleva tilde porque termina en S"], ["camino", "Acentuación", "Llana: no lleva tilde porque termina en vocal"], ["él", "Acentuación", "Tilde diacrítica: pronombre personal (Él vino)"], ["el", "Acentuación", "Tilde diacrítica: artículo (El perro)"], ["tú", "Acentuación", "Tilde diacrítica: pronombre personal (Tú sabes)"], ["tu", "Acentuación", "Tilde diacrítica: posesivo (Tu gato)"], ["mí", "Acentuación", "Tilde diacrítica: pronombre personal (A mí)"], ["mi", "Acentuación", "Tilde diacrítica: posesivo (Mi casa)"], ["té", "Acentuación", "Tilde diacrítica: sustantivo (Bebida)"], ["te", "Acentuación", "Tilde diacrítica: pronombre (Te quiero)"], ["sí", "Acentuación", "Tilde diacrítica: afirmación"], ["si", "Acentuación", "Tilde diacrítica: condicional (Si vienes...)"], ["más", "Acentuación", "Tilde diacrítica: cantidad"], ["mas", "Acentuación", "Tilde diacrítica: pero (conjunción adversativa)"], ["sé", "Acentuación", "Tilde diacrítica: verbo saber o ser"], ["se", "Acentuación", "Tilde diacrítica: pronombre"], ["dé", "Acentuación", "Tilde diacrítica: verbo dar"], ["de", "Acentuación", "Tilde diacrítica: preposición"], ["cuándo", "Acentuación", "Tilde diacrítica: interrogativo"], ["cómo", "Acentuación", "Tilde diacrítica: interrogativo"], ["dónde", "Acentuación", "Tilde diacrítica: interrogativo"], ["quién", "Acentuación", "Tilde diacrítica: interrogativo"], ["biología", "Acentuación", "Hiato: tilde en la vocal débil I para romper el diptongo"], ["día", "Acentuación", "Hiato: tilde en la vocal débil I para romper el diptongo"], ["río", "Acentuación", "Hiato: tilde en la vocal débil I para romper el diptongo"], ["baúl", "Acentuación", "Hiato: tilde en la vocal débil U para romper el diptongo"], ["raíz", "Acentuación", "Hiato: tilde en la vocal débil I para romper el diptongo"], ["caída", "Acentuación", "Hiato: tilde en la vocal débil I para romper el diptongo"], ["reír", "Acentuación", "Hiato: tilde en la vocal débil I para romper el diptongo"], ["púa", "Acentuación", "Hiato: tilde en la vocal débil U para romper el diptongo"]
+            ]
+        };
+        
+        let bancoActual = []; let wordDeck = [];
+        
+        function initWordBank() {
+            const sel = document.getElementById('word-bank-select').value; 
+            bancoActual = sel === 'todos' ? [...ruleBanks.bv, ...ruleBanks.gj, ...ruleBanks.czs, ...ruleBanks.acentuacion] : [...ruleBanks[sel]]; 
+            wordDeck = []; 
+        }
+
+        function changeWordBank() { initWordBank(); userStats.bankChanges++; checkAchievements(); saveProgress(); }
+        initWordBank();
+
+        const bossWords = [
+            "otorrinolaringólogo", "desoxirribonucleico", "electroencefalograma", "paralelepípedo", "anticonstitucionalmente", 
+            "esternocleidomastoideo", "idiosincrasia", "inconmensurable", "supercalifragilisticoespialidoso", 
+            "transustanciación", "inconstitucionalidad", "aerodeslizador", "caleidoscopio", "hipoalergénico", 
+            "metamorfosis", "fotosíntesis", "ovovivíparo", "espectrofotometría", "electrodoméstico", 
+            "circunferencia", "desproporcionadísimo", "onomatopeya", "extraterrestre", "incomprensibilidad"
+        ];
+        
+        function getNextWord() { if (wordDeck.length === 0) { wordDeck = bancoActual.map(w => ({ texto: w[0], categoria: w[1], explicacion: w[2] })).sort(() => Math.random() - 0.5); } return wordDeck.pop(); }
+
+        // --- SISTEMA DE GUARDADO POR ALUMNO + GOOGLE SHEETS ---
+        /*
+          PASO IMPRESCINDIBLE:
+          1) Crea el Apps Script con el archivo Maniacgrafia_AppsScript_Code.gs.
+          2) Despliégalo como Aplicación web.
+          3) Pega aquí la URL que termina en /exec.
+        */
+        const MANIAC_SHEETS_WEB_APP_URL = 'PEGA_AQUI_LA_URL_DE_TU_WEB_APP';
+        const CLOUD_SAVE_INTERVAL_MS = 8000;
+        const SAVE_PREFIX = 'maniacgrafia_save_v3_';
+        const LEGACY_SAVE_KEY = 'ortografiaMania_save';
+        const LAST_PROFILE_KEY = 'maniacgrafia_last_profile';
+        let currentProfileId = 'sin_clase__jugador';
+        let lastCloudSaveAt = 0;
+        let cloudSaveTimer = null;
+        let cloudLoadedProfileId = null;
+
+        function getCloudEndpoint() {
+            const fromQuery = new URLSearchParams(location.search).get('api') || new URLSearchParams(location.search).get('backend') || '';
+            if (new URLSearchParams(location.search).get('lenguarcade') === '1') return '';
+            if (/^https?:\/\//.test(fromQuery)) return fromQuery;
+            // Si el juego está servido directamente desde Apps Script, usa su propia URL /exec.
+            if (/script\.google\.com/.test(location.hostname) && /\/exec/.test(location.pathname)) return location.href.split('?')[0];
+            if (MANIAC_SHEETS_WEB_APP_URL && !MANIAC_SHEETS_WEB_APP_URL.includes('PEGA_AQUI') && /^https?:\/\//.test(MANIAC_SHEETS_WEB_APP_URL)) return MANIAC_SHEETS_WEB_APP_URL;
+            return '';
+        }
+        function isCloudConfigured() {
+            return !!getCloudEndpoint();
+        }
+        function setCloudStatus(text, kind = 'warn') {
+            const el = document.getElementById('cloud-status');
+            if (!el) return;
+            el.className = `cloud-status ${kind}`;
+            el.textContent = text;
+        }
+        function normalizeProfileName(name) {
+            return (name || 'Jugador').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'jugador';
+        }
+        function getStudentNameFromUI() {
+            const input = document.getElementById('player-name-input');
+            return (input && input.value.trim()) ? input.value.trim() : (userStats.playerName || 'Jugador');
+        }
+        function getClassGroupFromUI() {
+            const input = document.getElementById('class-group-input');
+            return (input && input.value.trim()) ? input.value.trim() : (userStats.classGroup || 'Sin clase');
+        }
+        function getStudentCodeFromUI() {
+            const input = document.getElementById('student-code-input');
+            return (input && input.value.trim()) ? input.value.trim() : (userStats.studentCode || '');
+        }
+        function makeProfileId(name, classGroup, studentCode = '') {
+            const code = normalizeProfileName(studentCode || '');
+            if (code && code !== 'jugador') return `codigo__${code}`;
+            return `${normalizeProfileName(classGroup || 'Sin clase')}__${normalizeProfileName(name || 'Jugador')}`;
+        }
+        function getCurrentSaveKey() { return SAVE_PREFIX + currentProfileId; }
+        function getWordsToBossForWorld(world) { return world <= 1 ? 10 : 10 + (world * 2); }
+        function getBestModeAndScore() {
+            const scores = userStats.bestScores || {};
+            let bestMode = '—'; let bestScore = 0;
+            Object.keys(scores).forEach(mode => { if (Number(scores[mode] || 0) > bestScore) { bestScore = Number(scores[mode] || 0); bestMode = mode; } });
+            return { bestMode, bestScore };
+        }
+        function buildSaveData() {
+            const bankSelect = document.getElementById('word-bank-select');
+            const classGroup = getClassGroupFromUI();
+            const studentName = getStudentNameFromUI();
+            const studentCode = getStudentCodeFromUI();
+            const achIds = achievements.filter(a => a.unlocked).map(a => a.id);
+            const best = getBestModeAndScore();
+            userStats.playerName = studentName;
+            userStats.classGroup = classGroup;
+            userStats.studentCode = studentCode;
+            return {
+                action: 'save',
+                app: 'Maniacgrafía',
+                version: 3,
+                savedAt: new Date().toISOString(),
+                profile: { id: currentProfileId, name: studentName, classGroup, studentCode },
+                stats: userStats,
+                inv: userInventory,
+                unlockedAch: achievements.map(a => a.unlocked),
+                unlockedAchIds: achIds,
+                settings: { musicEnabled, sfxEnabled, wordBank: bankSelect ? bankSelect.value : 'todos' },
+                summary: {
+                    studentName,
+                    classGroup,
+                    studentCode,
+                    coins: Number(userStats.coins || 0),
+                    totalWords: Number(userStats.totalWords || 0),
+                    gamesPlayed: Number(userStats.gamesPlayed || 0),
+                    maxCombo: Number(userStats.maxCombo || 0),
+                    adventureWorld: Math.min(12, Math.max(1, Number(userStats.adventureWorld || 1))),
+                    adventureCompleted: !!userStats.adventureCompleted,
+                    achievementsCount: achIds.length,
+                    bestMode: best.bestMode,
+                    bestScore: best.bestScore,
+                    lastMode: state && state.mode ? state.mode : '',
+                    lastScore: state && Number.isFinite(state.score) ? state.score : 0
+                }
+            };
+        }
+        function applySaveData(data) {
+            userStats = { ...userStats, ...(data.stats || {}) };
+            userStats.bestScores = { practica: 0, supervivencia: 0, hueco: 0, pendulo: 0, extremo: 0, aventura: 0, ...(userStats.bestScores || {}) };
+            userStats.adventureWorld = Math.min(12, Math.max(1, Number(userStats.adventureWorld || 1)));
+            userInventory = { ...userInventory, ...(data.inv || {}) };
+            achievements.forEach(a => a.unlocked = false);
+            if (Array.isArray(data.unlockedAch)) data.unlockedAch.forEach((isUnlocked, i) => { if (achievements[i]) achievements[i].unlocked = !!isUnlocked; });
+            if (Array.isArray(data.unlockedAchIds)) data.unlockedAchIds.forEach(id => { const ach = achievements.find(a => a.id === id); if (ach) ach.unlocked = true; });
+            if (data.profile && data.profile.name) userStats.playerName = data.profile.name;
+            if (data.profile && data.profile.classGroup) userStats.classGroup = data.profile.classGroup;
+            if (data.profile && data.profile.studentCode) userStats.studentCode = data.profile.studentCode;
+            if (data.settings) {
+                musicEnabled = data.settings.musicEnabled !== false;
+                sfxEnabled = data.settings.sfxEnabled !== false;
+                const musicToggle = document.getElementById('toggle-music');
+                const sfxToggle = document.getElementById('toggle-sfx');
+                if (musicToggle) musicToggle.checked = musicEnabled;
+                if (sfxToggle) sfxToggle.checked = sfxEnabled;
+                if ((data.settings.wordBank && ruleBanks[data.settings.wordBank]) || data.settings.wordBank === 'todos') {
+                    const bankSelect = document.getElementById('word-bank-select');
+                    if (bankSelect) bankSelect.value = data.settings.wordBank;
+                    initWordBank();
+                }
+            }
+            const input = document.getElementById('player-name-input');
+            if (input) input.value = userStats.playerName || 'Jugador';
+            const classInput = document.getElementById('class-group-input');
+            if (classInput) classInput.value = userStats.classGroup || '';
+            const codeInput = document.getElementById('student-code-input');
+            if (codeInput) codeInput.value = userStats.studentCode || '';
+        }
+        function saveLocalProgress() {
+            localStorage.setItem(getCurrentSaveKey(), JSON.stringify(buildSaveData()));
+            localStorage.setItem(LAST_PROFILE_KEY, currentProfileId);
+        }
+        function saveProgress(showNotice = false, options = {}) {
+            try {
+                saveLocalProgress();
+                if (showNotice && !isCloudConfigured()) showToast({icon: '💾', title: 'Progreso guardado en este navegador', desc: 'Configura Sheets para verlo en el panel del profesor.'});
+            } catch (e) {
+                console.error('No se pudo guardar la copia local.', e);
+                if (showNotice) alert('No se ha podido guardar en este navegador. Revisa si el almacenamiento está bloqueado.');
+            }
+            if (!options.localOnly) syncToCloud(!!options.forceCloud || showNotice, showNotice);
+        }
+        function syncToCloud(force = false, showNotice = false) {
+            if (!isCloudConfigured()) {
+                setCloudStatus('☁️ Sheets sin configurar', 'warn');
+                return;
+            }
+            const now = Date.now();
+            if (!force && now - lastCloudSaveAt < CLOUD_SAVE_INTERVAL_MS) {
+                clearTimeout(cloudSaveTimer);
+                cloudSaveTimer = setTimeout(() => syncToCloud(true, false), CLOUD_SAVE_INTERVAL_MS);
+                return;
+            }
+            lastCloudSaveAt = now;
+            const payload = buildSaveData();
+            setCloudStatus('☁️ Guardando...', 'sync');
+            fetch(getCloudEndpoint(), {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-store',
+                keepalive: true,
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                setCloudStatus('☁️ Enviado a Sheets', 'ok');
+                if (showNotice) showToast({icon: '☁️', title: 'Progreso enviado a Sheets', desc: `${payload.profile.name} · ${payload.profile.classGroup}${payload.profile.studentCode ? ' · ' + payload.profile.studentCode : ''}`});
+            }).catch(err => {
+                console.error('No se pudo enviar a Sheets.', err);
+                setCloudStatus('☁️ Error de conexión', 'warn');
+                if (showNotice) showToast({icon: '⚠️', title: 'No se pudo enviar a Sheets', desc: 'Queda guardado localmente como copia de emergencia.'});
+            });
+        }
+        function jsonpRequest(params, timeoutMs = 6000) {
+            return new Promise((resolve, reject) => {
+                if (!isCloudConfigured()) return reject(new Error('Sheets no configurado'));
+                const cb = 'maniac_cb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+                const script = document.createElement('script');
+                const cleanup = () => { delete window[cb]; if (script.parentNode) script.parentNode.removeChild(script); clearTimeout(timer); };
+                const timer = setTimeout(() => { cleanup(); reject(new Error('Tiempo de espera agotado')); }, timeoutMs);
+                window[cb] = (data) => { cleanup(); resolve(data); };
+                const url = new URL(getCloudEndpoint());
+                Object.entries({ ...params, callback: cb, t: Date.now() }).forEach(([k, v]) => url.searchParams.set(k, String(v)));
+                script.onerror = () => { cleanup(); reject(new Error('No se pudo conectar con Apps Script')); };
+                script.src = url.toString();
+                document.body.appendChild(script);
+            });
+        }
+        async function loadProfileFromCloud(profileId) {
+            const res = await jsonpRequest({ action: 'load', profileId });
+            if (res && res.ok && res.data) return res.data;
+            return null;
+        }
+        function loadProgress(profileId = null) {
+            const lastId = profileId || localStorage.getItem(LAST_PROFILE_KEY) || 'sin_clase__jugador';
+            currentProfileId = lastId.includes('__') ? lastId : makeProfileId('Jugador', 'Sin clase', '');
+            let savedData = localStorage.getItem(getCurrentSaveKey());
+            if (!savedData && currentProfileId.endsWith('__jugador')) savedData = localStorage.getItem(LEGACY_SAVE_KEY); // compatibilidad con partidas antiguas
+            if (savedData) {
+                try { applySaveData(JSON.parse(savedData)); }
+                catch (e) { console.error('Error cargando partida corrupta.', e); }
+            }
+            const input = document.getElementById('player-name-input');
+            if (input) input.value = userStats.playerName || 'Jugador';
+            const classInput = document.getElementById('class-group-input');
+            if (classInput) classInput.value = userStats.classGroup || '';
+            const codeInput = document.getElementById('student-code-input');
+            if (codeInput) codeInput.value = userStats.studentCode || '';
+            setCloudStatus(isCloudConfigured() ? '☁️ Sheets listo' : '☁️ Sheets sin configurar', isCloudConfigured() ? 'ok' : 'warn');
+        }
+        async function saveProfileName(showNotice = true) {
+            const typedName = getStudentNameFromUI();
+            const classGroup = getClassGroupFromUI();
+            const studentCode = getStudentCodeFromUI();
+            const newId = makeProfileId(typedName, classGroup, studentCode);
+            const profileChanged = currentProfileId !== newId;
+            currentProfileId = newId;
+
+            const existing = localStorage.getItem(getCurrentSaveKey());
+            if (existing) {
+                try { applySaveData(JSON.parse(existing)); }
+                catch (e) { console.error('No se pudo cargar el perfil local.', e); }
+            } else {
+                userStats.playerName = typedName;
+                userStats.classGroup = classGroup;
+                userStats.studentCode = studentCode;
+                userStats.adventureWorld = userStats.adventureWorld || 1;
+            }
+
+            userStats.playerName = typedName;
+            userStats.classGroup = classGroup;
+            userStats.studentCode = studentCode;
+            localStorage.setItem(LAST_PROFILE_KEY, currentProfileId);
+
+            if (isCloudConfigured() && (showNotice || profileChanged || cloudLoadedProfileId !== currentProfileId)) {
+                try {
+                    setCloudStatus('☁️ Buscando progreso...', 'sync');
+                    const cloudData = await loadProfileFromCloud(currentProfileId);
+                    if (cloudData) {
+                        applySaveData(cloudData);
+                        userStats.playerName = typedName;
+                        userStats.classGroup = classGroup;
+                        userStats.studentCode = studentCode;
+                        cloudLoadedProfileId = currentProfileId;
+                        saveProgress(false, { localOnly: true });
+                        setCloudStatus('☁️ Progreso cargado', 'ok');
+                        if (showNotice) showToast({icon: '☁️', title: 'Progreso cargado de Sheets', desc: `${typedName} · ${classGroup}${studentCode ? ' · ' + studentCode : ''}`});
+                    } else {
+                        setCloudStatus('☁️ Perfil nuevo', 'ok');
+                        saveProgress(false, { forceCloud: true });
+                        if (showNotice) showToast({icon: '✨', title: 'Perfil nuevo creado', desc: `${typedName} · ${classGroup}${studentCode ? ' · ' + studentCode : ''}`});
+                    }
+                } catch (e) {
+                    console.error('No se pudo cargar desde Sheets.', e);
+                    setCloudStatus('☁️ Usando copia local', 'warn');
+                    if (showNotice) showToast({icon: '⚠️', title: 'Sheets no respondió', desc: 'Se usará la copia local de emergencia.'});
+                    saveProgress(false, { forceCloud: false });
+                }
+            } else {
+                saveProgress(showNotice, { forceCloud: showNotice });
+            }
+            updateMenuUI();
+        }
+        function exportSave() {
+            saveProgress(false, { localOnly: true });
+            const data = localStorage.getItem(getCurrentSaveKey());
+            const blob = new Blob([data], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Maniacgrafia_${currentProfileId}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            showToast({icon: '💾', title: 'Partida exportada', desc: 'Revisa tus descargas.'});
+        }
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.profile && data.profile.id) currentProfileId = data.profile.id;
+                    else if (data.profile && data.profile.name) currentProfileId = makeProfileId(data.profile.name, data.profile.classGroup || 'Sin clase', data.profile.studentCode || '');
+                    applySaveData(data);
+                    saveProgress(true, { forceCloud: true }); updateMenuUI();
+                    showToast({icon: '📥', title: 'Partida importada', desc: 'Progreso restaurado.'});
+                } catch (err) { alert('El archivo no es válido o está corrupto.'); }
+            };
+            reader.readAsText(file); this.value = '';
+        });
+        function resetSave() { if(confirm('¿Borrar la copia local de este alumno? El registro de Sheets no se borra desde aquí.')) { localStorage.removeItem(getCurrentSaveKey()); location.reload(); } }
+
+        
+// --- AUDIO Y AJUSTES ---
+        let audioCtx = null; let musicEnabled = true; let sfxEnabled = true;
+        function updateAudioSettings() { musicEnabled = document.getElementById('toggle-music').checked; sfxEnabled = document.getElementById('toggle-sfx').checked; userStats.musicToggles++; checkAchievements(); saveProgress(); const bgm = document.getElementById('bgm'); if (!musicEnabled) { bgm.pause(); } else if (state.isPlaying) { bgm.play(); bgm.volume = 0.4; } }
+        function initAudio() { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } if(audioCtx.state === 'suspended') audioCtx.resume(); }
+        function playSFX(type) { if (!sfxEnabled || !audioCtx) return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); const now = audioCtx.currentTime; if (type === 'type') { osc.type = 'triangle'; osc.frequency.setValueAtTime(600, now); gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05); osc.start(now); osc.stop(now + 0.05); } else if (type === 'correct') { osc.type = 'sine'; osc.frequency.setValueAtTime(440, now); osc.frequency.exponentialRampToValueAtTime(880, now + 0.1); gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2); osc.start(now); osc.stop(now + 0.2); } else if (type === 'error') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2); gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2); osc.start(now); osc.stop(now + 0.2); } else if (type === 'boss') { osc.type = 'square'; osc.frequency.setValueAtTime(100, now); osc.frequency.linearRampToValueAtTime(50, now + 1); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 1); osc.start(now); osc.stop(now + 1); } else if (type === 'premium') { osc.type = 'sine'; osc.frequency.setValueAtTime(880, now); osc.frequency.linearRampToValueAtTime(1760, now + 0.3); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.3); osc.start(now); osc.stop(now + 0.3); } }
+
+        const musicTracks = { practica: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Bit%20Quest.mp3", supervivencia: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/8bit%20Dungeon%20Boss.mp3", hueco: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Pixelland.mp3", pendulo: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Blip%20Stream.mp3", extremo: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/RetroFuture%20Clean.mp3", aventura: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Adventure%20Meme.mp3" };
+
+        // --- SISTEMA DE PODER (COMBO) ---
+        let rachaPoder = 0; const rachaMetaPoder = 10; let poderDisponible = false; let multiplicadorPuntos = 1; let juegoPausadoPorBonus = false;
+
+        function actualizarBarraPoder(acierto) {
+            if (acierto) { if (rachaPoder < rachaMetaPoder) rachaPoder++; } else { if (!poderDisponible) rachaPoder = 0; }
+            let porcentaje = (rachaPoder / rachaMetaPoder) * 100;
+            const comboBar = document.getElementById("combo-bar"); const comboText = document.getElementById("combo-text");
+
+            if(comboBar && comboText) {
+                comboBar.style.width = porcentaje + "%";
+                if (rachaPoder === rachaMetaPoder && !poderDisponible) {
+                    poderDisponible = true; comboBar.style.background = "var(--success)"; comboBar.style.boxShadow = "0 0 15px var(--success)"; comboText.innerText = "¡PULSA ESPACIO!";
+                } else if (!poderDisponible) {
+                    comboBar.style.background = "linear-gradient(90deg, var(--warning), var(--danger))"; comboBar.style.boxShadow = "none"; comboText.innerText = `Poder Especial: ${rachaPoder}/${rachaMetaPoder}`;
+                }
+            }
+        }
+
+        function mostrarAnuncioPoder(texto) { const cartel = document.getElementById("anuncio-poder"); if(!cartel) return; cartel.innerHTML = texto; cartel.style.transform = "translate(-50%, -50%) scale(1)"; setTimeout(() => { cartel.style.transform = "translate(-50%, -50%) scale(0)"; }, 2000); }
+
+        function crearFondoFiebre() {
+            if (multiplicadorPuntos !== 3) return;
+            const areaJuego = document.getElementById("game-area-wrapper"); const x3 = document.createElement('div');
+            x3.innerText = "x3"; x3.style.position = "absolute"; x3.style.left = (Math.random() * 80 + 10) + "%"; x3.style.top = "-50px"; x3.style.fontSize = (Math.random() * 40 + 40) + "px"; x3.style.color = "rgba(255, 200, 0, 0.5)"; x3.style.fontWeight = "900"; x3.style.pointerEvents = "none"; x3.style.zIndex = "2"; x3.style.transition = "top 2s linear, opacity 2s";
+            areaJuego.appendChild(x3); setTimeout(() => { x3.style.top = "100%"; x3.style.opacity = "0"; }, 50); setTimeout(() => { if (x3.parentNode) x3.remove(); }, 2000);
+            if (multiplicadorPuntos === 3) setTimeout(crearFondoFiebre, 400);
+        }
+
+        function iniciarModoFiebre() { mostrarAnuncioPoder("🔥 ¡MODO FIEBRE!<br>PUNTOS x3 🔥"); document.body.classList.add('modo-fiebre'); multiplicadorPuntos = 3; state.currentFallSpeed = Math.min(4.0, state.currentFallSpeed + 0.5); userStats.feverCount++; checkAchievements(); saveProgress(); crearFondoFiebre(); setTimeout(() => { document.body.classList.remove('modo-fiebre'); multiplicadorPuntos = 1; state.currentFallSpeed = Math.max(1.0, state.currentFallSpeed - 0.5); mostrarAnuncioPoder("Se acabó la fiebre"); }, 10000); }
+
+        function iniciarFaseBonus() { mostrarAnuncioPoder("⭐ ¡FASE BONUS!<br>¡Haz clic rápido! ⭐"); juegoPausadoPorBonus = true; userStats.bonusCount++; checkAchievements(); saveProgress(); state.activeElements.forEach(item => { if(item.active) item.element.style.opacity = "0.2"; }); let generadorEstrellas = setInterval(crearEstrellaBonus, 300); setTimeout(() => { clearInterval(generadorEstrellas); juegoPausadoPorBonus = false; state.activeElements.forEach(item => { if(item.active) item.element.style.opacity = "1"; }); mostrarAnuncioPoder("Vuelta a la normalidad"); }, 6000); }
+
+        function crearEstrellaBonus() {
+            const areaJuego = document.getElementById("game-area-wrapper"); const estrella = document.createElement('div');
+            estrella.innerText = "⭐"; estrella.style.position = "absolute"; estrella.style.left = (10 + Math.random() * 80) + "%"; estrella.style.top = "-50px"; estrella.style.fontSize = "40px"; estrella.style.cursor = "pointer"; estrella.style.userSelect = "none"; estrella.style.transition = "top 1.5s linear"; estrella.style.zIndex = "100"; areaJuego.appendChild(estrella);
+            estrella.onmousedown = () => { state.score += 50; state.sessionStars++; if(state.sessionStars >= 10) unlockSecret('abs_13'); document.getElementById('score-display').textContent = state.score; estrella.innerText = "+50"; estrella.style.fontSize = "20px"; estrella.style.color = "var(--gold)"; playSFX('correct'); setTimeout(() => estrella.remove(), 200); };
+            setTimeout(() => { estrella.style.top = "110%"; }, 50); setTimeout(() => { if (estrella.parentNode) estrella.remove(); }, 1600);
+        }
+
+        function initAchievements() {
+            const data = [
+                { id: 'coin', icon: '💰', titles: ["Ahorrador", "Pudiente", "Capitalista", "Banquero", "Magnate"], reqs: [10, 100, 500, 1000, 5000], check: (r) => userStats.coins >= r, desc: "Acumula {r} monedas" },
+                { id: 'score', icon: '🏆', titles: ["Promesa", "Experto", "Gran Maestro", "Leyenda", "Dios Letras"], reqs: [500, 2500, 10000, 50000, 100000], check: (r) => state.score >= r, desc: "Logra {r} puntos" },
+                { id: 'combo', icon: '🔥', titles: ["Racha", "Imparable", "Frenesí", "Máquina", "Perfección"], reqs: [5, 15, 25, 40, 50], check: (r) => userStats.maxCombo >= r, desc: "Combo de x{r}" },
+                { id: 'boss', icon: '👹', titles: ["Cazador", "Gladiador", "Verdugo", "Héroe", "Titán"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.bossesDefeated >= r, desc: "Vence {r} Jefes" },
+                { id: 'loot', icon: '📦', titles: ["Suertudo", "Buscador", "Saqueador", "Cazatesoros", "Coleccionista"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.premiumCaught >= r, desc: "Coge {r} Botines" },
+                { id: 'diam', icon: '💎', titles: ["Brillo", "Joyero", "Minero", "Excavador", "Dueño"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.diamondsCaught >= r, desc: "Coge {r} Diamantes" },
+                { id: 'heal', icon: '❤️', titles: ["Sano", "Vigoroso", "Inmortal", "Curandero", "Médico"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.heartsCaught >= r, desc: "Coge {r} Corazones" },
+                { id: 'shop', icon: '🛒', titles: ["Cliente", "Consumidor", "Vip", "Accionista", "Dueño Tienda"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.itemsBought >= r, desc: "Compra {r} cosas" },
+                { id: 'word', icon: '📚', titles: ["Lector", "Estudiante", "Erudito", "Diccionario", "Enciclopedia"], reqs: [50, 100, 500, 1000, 5000], check: (r) => userStats.totalWords >= r, desc: "Acierta {r} palabras" },
+                { id: 'bomb', icon: '💣', titles: ["Pirotécnico", "Artificiero", "Rey Explosión", "Destructor", "Terror"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.bombsUsed >= r, desc: "Usa {r} bombas" },
+                { id: 'frez', icon: '⏳', titles: ["Pausado", "Relojero", "Viajero Temporal", "Controlador", "Señor Tiempo"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.freezesUsed >= r, desc: "Usa {r} relojes" },
+                { id: 'lupa', icon: '🔍', titles: ["Curioso", "Observador", "Detective", "Inspector", "Sherlock"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.lupasUsed >= r, desc: "Usa {r} lupas" },
+                { id: 'escb', icon: '🧹', titles: ["Limpiador", "Ordenado", "Conserje", "Impecable", "Purificador"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.escobasUsed >= r, desc: "Usa {r} escobas" },
+                { id: 'fevr', icon: '🌡️', titles: ["Caliente", "Fiebre", "Volcán", "Infierno", "Sol"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.feverCount >= r, desc: "Activa el Modo Fiebre {r} veces" },
+                { id: 'bons', icon: '✨', titles: ["Suerte", "Afortunado", "Lluvia Dorada", "Cazador de Estrellas", "Constelación"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.bonusCount >= r, desc: "Juega la Fase Bonus {r} veces" }
+            ];
+            data.forEach(cat => { cat.reqs.forEach((req, i) => { achievements.push({ id: `${cat.id}_${i}`, icon: cat.icon, title: cat.titles[i], desc: cat.desc.replace('{r}', req), check: () => cat.check(req), unlocked: false }); }); });
+
+            const absurdos = [
+                { id: 'abs_1', icon: '🕊️', title: 'El Pacifista', desc: 'Muere con 0 puntos.', check: () => userStats.pacifistDeaths > 0 },
+                { id: 'abs_2', icon: '🤡', title: 'Gatillo Fácil', desc: 'Intenta usar una bomba sin tener ninguna 5 veces.', check: () => userStats.emptyBombsTriggered >= 5 },
+                { id: 'abs_3', icon: '🎧', title: 'DJ Ortográfico', desc: 'Activa y desactiva la música 10 veces.', check: () => userStats.musicToggles >= 10 },
+                { id: 'abs_4', icon: '🏃‍♂️', title: 'Antijefes', desc: 'Usa una bomba justo cuando aparece un Jefe Final.', check: () => userStats.bossesBombed > 0 },
+                { id: 'abs_5', icon: '🦇', title: 'Murciélago', desc: 'Acierta una palabra de 8+ letras en el Apagón.', check: () => userStats.blindWords > 0 },
+                { id: 'abs_6', icon: '💸', title: 'Bancarrota', desc: 'Quédate con 0 monedas exactas tras comprar.', check: () => userStats.zeroCoinPurchases > 0 },
+                { id: 'abs_7', icon: '🥴', title: 'Masoquista', desc: 'Combo x5 durante Remolino, Terremoto o Espejo.', check: () => userStats.masochistCombos > 0 },
+                { id: 'abs_8', icon: '🩸', title: 'Primera Sangre', desc: 'Pierde tu primera vida.', check: () => userStats.livesLost >= 1 },
+                { id: 'abs_9', icon: '😎', title: 'El Intocable', desc: 'Combo x20 en modo Extremo.', check: () => state.mode === 'extremo' && state.combo >= 20 },
+                { id: 'abs_10', icon: '🤓', title: 'Rata de Biblioteca', desc: 'Cambia de banco de palabras 5 veces.', check: () => userStats.bankChanges >= 5 },
+                { id: 'abs_11', icon: '🧹', title: 'Miedo a la Oscuridad', desc: 'Usa una escoba estando a oscuras.', check: () => false }, 
+                { id: 'abs_12', icon: '🎒', title: 'Diógenes', desc: 'Acumula 10 objetos en tu inventario.', check: () => (userInventory.shield + userInventory.freeze + userInventory.bomb + userInventory.lupa + userInventory.escoba) >= 10 },
+                { id: 'abs_13', icon: '🌠', title: 'Lluvia de Estrellas', desc: 'Atrapa 10 estrellas en una sola fase bonus.', check: () => false }, 
+                { id: 'abs_14', icon: '🤑', title: 'Fiebre del Oro', desc: 'Gana 300 puntos en un solo Modo Fiebre.', check: () => false }, 
+                { id: 'abs_15', icon: '⚔️', title: 'La Orden 67', desc: 'Ejecuta la orden 67. (Escribe "67").', check: () => false }, 
+                { id: 'abs_16', icon: '🏥', title: 'Superviviente', desc: 'Recupera una vida estando a 1 toque de morir.', check: () => false }, 
+                { id: 'abs_17', icon: '💥', title: 'Kamikaze', desc: 'Usa una bomba teniendo la vida al máximo.', check: () => false }, 
+                { id: 'abs_18', icon: '⚡', title: 'Velocista', desc: 'Acierta una palabra nada más aparecer.', check: () => false }, 
+                { id: 'abs_19', icon: '🥶', title: 'Congelación Cerebral', desc: 'Falla justo después de usar el reloj de arena.', check: () => false }, 
+                { id: 'abs_20', icon: '👓', title: 'Miope', desc: 'Usa la lupa en una palabra de 3 letras o menos.', check: () => false }, 
+                { id: 'abs_21', icon: '✨', title: 'Impecable', desc: 'Usa 3 escobas en una misma partida.', check: () => false }, 
+                { id: 'abs_22', icon: '🚪', title: '¡Sácame de aquí!', desc: 'Huye al menú en los primeros 3 segundos.', check: () => false }, 
+                { id: 'abs_23', icon: '💀', title: 'Sin miedo', desc: 'Combo x15 en Supervivencia.', check: () => state.mode === 'supervivencia' && state.combo >= 15 },
+                { id: 'abs_24', icon: '💡', title: 'El Iluminado', desc: 'Vence a un jefe final a oscuras.', check: () => false },
+                { id: 'abs_25', icon: '⌨️', title: 'Teclado Roto', desc: 'Introduce 5 letras incorrectas seguidas.', check: () => false },
+                { id: 'abs_26', icon: '🥷', title: 'Ninja', desc: 'Escribe una palabra en menos de 1 segundo.', check: () => false },
+                { id: 'abs_27', icon: '🐢', title: 'Tortuga', desc: 'Tarda más de 10 segundos en escribir la palabra.', check: () => false },
+                { id: 'abs_28', icon: '🌍', title: 'Trotamundos', desc: 'Llega al Mundo 5 en el Modo Aventura.', check: () => false },
+                { id: 'abs_29', icon: '🌌', title: 'Guardián del Multiverso', desc: 'Alcanza el Mundo 10 en Aventura.', check: () => false },
+                { id: 'abs_30', icon: '🤪', title: 'Aporreando el teclado', desc: 'Escribe más de 15 letras en un error.', check: () => false },
+                { id: 'abs_31', icon: '👑', title: 'Dios de las Palabras', desc: 'Completa el Mundo 12 y vence al Jefe Supremo.', check: () => false }
+            ];
+            absurdos.forEach(ach => achievements.push({ ...ach, unlocked: false }));
+        }
+
+        function unlockSecret(id) { let ach = achievements.find(a => a.id === id); if (ach && !ach.unlocked) { ach.unlocked = true; showToast({ icon: ach.icon, title: "¡Logro Desbloqueado!", desc: ach.title }); saveProgress(); } }
+        
+        let state = { mode: 'practica', score: 0, combo: 1, lives: 3, mistakes: 0, sessionCoins: 0, sessionCorrect: 0, sessionErrors: 0, sessionMaxCombo: 1, activeWordObj: null, activeElements: [], isPlaying: false, fever: false, currentFallSpeed: 1.0, wordsToBoss: 15, isBossActive: false, currentEvent: null, blankIndex: -1, lastInputLen: 0, wordType: 'normal', failedKeystrokes: 0, worldLevel: 1 };
+        let gameLoopId, wordY = 0, lastTimestamp = 0; let wordStartTime = 0;
+
+        window.onload = () => {
+            initAchievements(); loadProgress(); 
+            document.getElementById('word-input').addEventListener('input', checkInput);
+            window.addEventListener('keydown', (e) => {
+                if (!state.isPlaying) { if(e.key === 'Enter' && !document.getElementById('feedback-modal').classList.contains('hidden')) resumeGame(); return; }
+                if (e.key === ' ') { e.preventDefault(); if (poderDisponible) { poderDisponible = false; rachaPoder = 0; actualizarBarraPoder(false); if (Math.random() < 0.5) iniciarModoFiebre(); else iniciarFaseBonus(); } else { useBomb(); } }
+                if (e.key === 'Shift') { e.preventDefault(); useFreeze(); }
+                if (e.key === 'Control') { e.preventDefault(); useLupa(); }
+                if (e.key === 'Alt') { e.preventDefault(); useEscoba(); }
+            });
+            updateMenuUI();
+            window.addEventListener('pagehide', () => { try { saveProgress(false, { forceCloud: true }); } catch(e) {} });
+        };
+
+        function checkAchievements() { let newlyUnlocked = false; achievements.forEach(ach => { if (!ach.unlocked && ach.check()) { ach.unlocked = true; newlyUnlocked = true; showToast({ icon: ach.icon, title: "¡Logro Desbloqueado!", desc: ach.title }); } }); if(newlyUnlocked) saveProgress(); }
+
+        function recordBestScore() { if (!userStats.bestScores) userStats.bestScores = {}; userStats.bestScores[state.mode] = Math.max(userStats.bestScores[state.mode] || 0, state.score || 0); }
+        function bankSessionCoins() { const earned = state.sessionCoins || 0; if (earned > 0) { userStats.coins += earned; state.sessionCoins = 0; } return earned; }
+        function saveAdventureProgress() { if (state.mode === 'aventura') { userStats.adventureWorld = Math.min(12, Math.max(userStats.adventureWorld || 1, state.worldLevel || 1)); saveProgress(); } }
+
+        async function startGame(mode) {
+            await saveProfileName(false);
+            initAudio(); const bgm = document.getElementById('bgm'); bgm.src = musicTracks[mode] || musicTracks['practica']; if (musicEnabled) { bgm.volume = 0.4; bgm.play(); }
+            state.mode = mode; state.score = 0; state.combo = 1; state.sessionCoins = 0; state.sessionCorrect = 0; state.sessionErrors = 0; state.sessionMaxCombo = 1; state.fever = false; state.isBossActive = false; state.mistakes = 0; state.lastInputLen = 0; state.failedKeystrokes = 0;
+            state.worldLevel = (mode === 'aventura') ? Math.min(12, Math.max(1, userStats.adventureWorld || 1)) : 1;
+            state.wordsToBoss = (mode === 'aventura') ? getWordsToBossForWorld(state.worldLevel) : 15;
+            state.currentFallSpeed = (mode === 'supervivencia') ? 1.5 : 1.0;
+            userStats.gamesPlayed = (userStats.gamesPlayed || 0) + 1;
+            rachaPoder = 0; poderDisponible = false; actualizarBarraPoder(false);
+            
+            state.startTime = performance.now(); state.sessionStars = 0; state.sessionFeverPoints = 0; state.escobasThisSession = 0;
+
+            document.body.className = ''; document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden')); document.getElementById('game-ui').classList.remove('hidden');
+            const input = document.getElementById('word-input'); input.value = ''; input.classList.remove('input-error');
+            
+            state.lives = (mode === 'supervivencia') ? 1 : 3; document.getElementById('mistake-meter').style.display = (mode === 'pendulo') ? 'none' : 'flex';
+            
+            if (mode === 'aventura') { document.getElementById('world-hud').style.display = 'flex'; cambiarMundo(); } 
+            else { document.getElementById('world-hud').style.display = 'none'; }
+
+            saveProgress(); updateHUD(); state.isPlaying = true; notifyLenguArcadeSessionStarted(); spawnWord(); lastTimestamp = performance.now(); requestAnimationFrame(gameLoop); setTimeout(() => input.focus(), 100);
+        }
+
+        // --- MODO AVENTURA: LÓGICA DE MUNDOS ---
+        function cambiarMundo() {
+            document.body.className = ''; 
+            
+            // EL MUNDO 12 ES EL FINAL ÉPICO
+            if (state.worldLevel === 12) {
+                document.body.classList.add('mundo-4'); // Entorno volcánico
+                document.getElementById('world-display').textContent = "FINAL";
+                mostrarAnuncioPoder("⚔️ ¡EL NÚCLEO! ⚔️<br>Guarida del Jefe Supremo");
+            } else {
+                let worldClass = 'mundo-' + (((state.worldLevel - 1) % 6) + 1); 
+                document.body.classList.add(worldClass);
+                document.getElementById('world-display').textContent = state.worldLevel;
+                
+                let nombresMundos = ["Bosque Tranquilo", "Desierto Espejismo", "Caverna Oscura", "Cumbre Volcánica", "Fosa del Malstrom", "Dimensión Mágica"];
+                let nombre = nombresMundos[(state.worldLevel - 1) % 6];
+                mostrarAnuncioPoder("🌍 ¡MUNDO " + state.worldLevel + "!<br>" + nombre);
+
+                if(state.worldLevel === 5) unlockSecret('abs_28');
+                if(state.worldLevel === 10) unlockSecret('abs_29');
+            }
+        }
+
+        function winAdventure() {
+            state.isPlaying = false; cancelAnimationFrame(gameLoopId); document.getElementById('bgm').pause(); clearEvents();
+            
+            let reward = 5000;
+            const sessionEarned = bankSessionCoins();
+            userStats.coins += reward;
+            userStats.adventureWorld = 12;
+            userStats.adventureCompleted = true;
+            recordBestScore();
+            unlockSecret('abs_31'); 
+            saveProgress();
+            notifyLenguArcadeResult('victory');
+            
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('victory-coins').textContent = reward + sessionEarned;
+            document.getElementById('victory-screen').classList.remove('hidden');
+        }
+
+        function exitToMenu() {
+            if (performance.now() - state.startTime < 3000) unlockSecret('abs_22');
+            recordBestScore(); bankSessionCoins(); saveAdventureProgress(); saveProgress(true);
+            notifyLenguArcadeResult('exit');
+            state.isPlaying = false; cancelAnimationFrame(gameLoopId); document.getElementById('bgm').pause(); clearEvents();
+            document.getElementById('game-ui').classList.add('hidden'); document.getElementById('feedback-modal').classList.add('hidden'); showStartScreen();
+        }
+
+        function triggerEvent() {
+            let events = ['apagon', 'viento', 'parpadeo', 'espejo', 'fuego', 'agua', 'remolino', 'terremoto']; 
+            if (state.mode === 'aventura') {
+                if (state.worldLevel === 12) return; // En el mundo 12 el evento es permanente (jefe)
+                let m = (state.worldLevel - 1) % 6;
+                if (m === 0) events = ['viento']; else if (m === 1) events = ['espejo', 'parpadeo']; else if (m === 2) events = ['apagon', 'terremoto']; else if (m === 3) events = ['fuego', 'terremoto']; else if (m === 4) events = ['agua', 'remolino']; else events = ['apagon', 'viento', 'parpadeo', 'espejo', 'fuego', 'agua', 'remolino', 'terremoto']; 
+            }
+
+            state.currentEvent = events[Math.floor(Math.random() * events.length)];
+            const titles = { 'apagon':'¡EL ABISMO!', 'viento':'¡VIENTO!', 'parpadeo':'¡CORTOCIRCUITO!', 'espejo':'¡ESPEJO!', 'fuego':'¡FUEGO!', 'agua':'¡INUNDACIÓN!', 'remolino':'¡REMOLINO!', 'terremoto':'¡TERREMOTO!' };
+            const banner = document.createElement('div'); banner.className = 'event-banner'; banner.textContent = titles[state.currentEvent] || '¡EVENTO!';
+            document.body.appendChild(banner); setTimeout(() => banner.remove(), 2000); document.body.classList.add(state.currentEvent);
+        }
+
+        function clearEvents() { 
+            if (state.worldLevel === 12 && state.isBossActive) return; // No limpiar en el jefe final
+            const ev = ['apagon', 'viento', 'parpadeo', 'espejo', 'fuego', 'agua', 'remolino', 'terremoto'];
+            ev.forEach(e => document.body.classList.remove(e));
+            state.currentEvent = null; 
+            if(state.fever) document.body.classList.add('fever'); 
+        }
+
+        function spawnBoss() {
+            state.isBossActive = true; state.bossWasApagon = (state.currentEvent === 'apagon');
+            playSFX('boss'); clearEvents(); state.mistakes = 0; updateHUD();
+            
+            let bossWordText = bossWords[Math.floor(Math.random()*bossWords.length)];
+            let titleBanner = '¡JEFE FINAL!';
+            
+            // LÓGICA DEL JEFE SUPREMO
+            if (state.mode === 'aventura' && state.worldLevel === 12) {
+                bossWordText = "hipopotomonstrosesquipedaliofobia";
+                state.activeWordObj = { texto: bossWordText, categoria: "DIOS ORTOGRÁFICO", explicacion: "¡EL JEFE SUPREMO! ¡NO FALLES!" };
+                titleBanner = '¡JEFE SUPREMO!';
+                document.body.classList.add('fuego');
+                document.body.classList.add('terremoto');
+            } else {
+                state.activeWordObj = { texto: bossWordText, categoria: "JEFE", explicacion: "¡Vence al jefe para avanzar!" };
+            }
+            
+            state.lastInputLen = 0; state.wordType = 'normal'; wordStartTime = performance.now();
+            
+            const banner = document.createElement('div'); banner.className = 'event-banner'; banner.style.color = 'var(--danger)'; banner.textContent = titleBanner;
+            document.body.appendChild(banner); setTimeout(() => banner.remove(), 2000);
+
+            const gameArea = document.getElementById('game-area'); gameArea.innerHTML = ''; wordY = -100; state.activeElements = [];
+            let el = document.createElement('div'); el.className = 'falling-word jefe-final'; el.innerHTML = state.activeWordObj.texto; el.style.left = '50%'; el.style.top = wordY + 'px';
+            gameArea.appendChild(el); state.activeElements.push({ element: el, text: state.activeWordObj.texto, isCorrect: true, active: true }); state.currentFallSpeed = 0.5;
+        }
+
+        function spawnWord() {
+            clearEvents(); state.mistakes = 0; state.lastInputLen = 0; updateHUD();
+            if (state.wordsToBoss <= 0) { spawnBoss(); return; }
+            
+            let chance = state.mode === 'aventura' ? (0.1 + (state.worldLevel * 0.05)) : 0.20;
+            if (Math.random() < chance && state.combo > 2) triggerEvent();
+
+            state.activeWordObj = getNextWord();
+            state.blankIndex = (state.mode === 'hueco') ? (state.activeWordObj.texto.search(/[bvghjllzcsxyáéíóú]/i) !== -1 ? state.activeWordObj.texto.search(/[bvghjllzcsxyáéíóú]/i) : 1) : -1;
+            
+            state.wordType = 'normal';
+            if (!state.isBossActive) { let r = Math.random(); if (r < 0.05) state.wordType = 'corazon'; else if (r < 0.10) state.wordType = 'diamante'; else if (r < 0.20) state.wordType = 'premium'; }
+
+            const gameArea = document.getElementById('game-area'); gameArea.innerHTML = ''; state.activeElements = []; wordY = -60; wordStartTime = performance.now();
+            let words = [state.activeWordObj.texto]; let positions = ['50%'];
+
+            if (state.mode === 'extremo') { words.push(state.activeWordObj.texto.replace(/b/g,'v').replace(/s/g,'c') + 'x', state.activeWordObj.texto.replace(/j/g,'g') + 'z'); positions = ['20%', '50%', '80%'].sort(() => Math.random() - 0.5); }
+            
+            words.forEach((w, idx) => {
+                let el = document.createElement('div'); el.className = 'falling-word';
+                if (['viento', 'parpadeo'].includes(state.currentEvent)) el.classList.add(state.currentEvent);
+                if (idx === 0) { if (state.wordType === 'premium') el.classList.add('premium-word'); if (state.wordType === 'diamante') el.classList.add('diamante-word'); if (state.wordType === 'corazon') el.classList.add('corazon-word'); }
+                el.style.left = positions[idx]; el.style.top = wordY + 'px';
+                if (state.mode === 'hueco' && idx === 0) el.innerHTML = w.substring(0, state.blankIndex) + '<span class="missing-letter">_</span>' + w.substring(state.blankIndex + 1); else el.innerHTML = w;
+                gameArea.appendChild(el); state.activeElements.push({ element: el, text: w, isCorrect: w === state.activeWordObj.texto, active: true });
+            });
+
+            if (state.mode !== 'pendulo') state.currentFallSpeed = ((state.mode === 'supervivencia') ? 1.5 : 1.0) + (state.combo * 0.05) + (state.mode==='aventura' ? state.worldLevel * 0.1 : 0);
+        }
+
+        function gameLoop(timestamp) {
+            if (!state.isPlaying) return;
+            if (juegoPausadoPorBonus) { lastTimestamp = timestamp; gameLoopId = requestAnimationFrame(gameLoop); return; }
+
+            const delta = timestamp - lastTimestamp; lastTimestamp = timestamp;
+            let actualSpeed = state.currentFallSpeed; if(state.fever && !state.isBossActive) actualSpeed *= 1.2;
+            
+            wordY += actualSpeed * (delta / 16.6);
+            state.activeElements.forEach(item => { if(item.active) item.element.style.top = wordY + 'px'; });
+            
+            if (wordY > document.getElementById('game-area-wrapper').clientHeight - 70) { handleDamage('fall'); return; }
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function renderInputFormatting(typed, target, correctItem) {
+            let html = "";
+            for(let i=0; i<target.length; i++) {
+                if (i < typed.length) html += `<span class="typed-correct">${target[i]}</span>`; else if (state.mode === 'hueco' && i === state.blankIndex) html += `<span class="missing-letter">_</span>`; else html += target[i];
+            }
+            correctItem.element.innerHTML = html;
+        }
+
+        function checkInput(e) {
+            if (!state.isPlaying) return;
+            const input = document.getElementById('word-input'); const typed = input.value.trim().toLowerCase();
+            const correctItem = state.activeElements.find(i => i.isCorrect); if (!correctItem) return; const target = correctItem.text.toLowerCase();
+
+            if (typed === '67' || typed === 'orden67') { unlockSecret('abs_15'); input.value=''; state.lastInputLen=0; return; }
+
+            if (typed === '') { input.classList.remove('input-error'); renderInputFormatting('', target, correctItem); state.lastInputLen = 0; return; }
+            if (target.startsWith(typed)) { 
+                playSFX('type'); input.classList.remove('input-error'); renderInputFormatting(typed, target, correctItem); 
+                state.failedKeystrokes = 0;
+                if (typed === target) processCorrectWord(correctItem); 
+            } else { 
+                if (typed.length > (state.lastInputLen || 0)) handleMistake(input); else input.classList.add('input-error'); 
+            }
+            state.lastInputLen = typed.length;
+        }
+
+        function handleMistake(input) {
+            playSFX('error'); state.combo = 1; state.sessionErrors++; state.failedKeystrokes++; input.classList.add('input-error', 'shake'); document.getElementById('game-area').style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+            
+            if (state.freezeActive) unlockSecret('abs_19');
+            if (state.failedKeystrokes >= 5) unlockSecret('abs_25');
+            if (input.value.length > 15 && !state.isBossActive) unlockSecret('abs_30');
+
+            setTimeout(() => { input.classList.remove('shake'); document.getElementById('game-area').style.backgroundColor = ''; }, 200);
+            actualizarBarraPoder(false);
+            if (state.mode === 'pendulo') { state.currentFallSpeed = Math.min(6.0, state.currentFallSpeed * 1.5); updateHUD(); } else { state.mistakes++; if (state.mistakes >= 3) handleDamage('typos'); else updateHUD(); }
+        }
+
+        function processCorrectWord(correctItem) {
+            let timeTaken = performance.now() - wordStartTime;
+            if (timeTaken < 1000) unlockSecret('abs_26');
+            if (timeTaken > 10000) unlockSecret('abs_27');
+
+            state.wordsToBoss--; state.combo++; state.sessionCorrect++; state.sessionMaxCombo = Math.max(state.sessionMaxCombo, state.combo); state.mistakes = 0; state.lastInputLen = 0; userStats.totalWords++;
+            
+            if (wordY < 0) unlockSecret('abs_18');
+            if (state.currentEvent === 'apagon' && state.activeWordObj.texto.length >= 8) { userStats.blindWords++; }
+            if (['remolino', 'terremoto', 'espejo'].includes(state.currentEvent) && state.combo >= 5) { userStats.masochistCombos++; }
+
+            if(state.combo > userStats.maxCombo) userStats.maxCombo = state.combo;
+            
+            // LÓGICA DE DERROTAR AL JEFE
+            if(state.isBossActive) { 
+                state.isBossActive = false; 
+                userStats.bossesDefeated++; 
+                if(state.bossWasApagon) unlockSecret('abs_24'); 
+                
+                if(state.mode === 'aventura') {
+                    if (state.worldLevel >= 12) {
+                        winAdventure(); // ¡VICTORIA FINAL!
+                        return;
+                    } else {
+                        state.worldLevel++;
+                        userStats.adventureWorld = Math.max(userStats.adventureWorld || 1, state.worldLevel);
+                        state.wordsToBoss = getWordsToBossForWorld(state.worldLevel);
+                        cambiarMundo();
+                        saveAdventureProgress();
+                    }
+                } else {
+                    state.wordsToBoss = 15;
+                }
+            } 
+            
+            if (state.mode === 'pendulo') state.currentFallSpeed = Math.max(0.6, state.currentFallSpeed * 0.85);
+
+            actualizarBarraPoder(true);
+
+            let pts = 10 * state.combo * (state.isBossActive ? 5 : 1) * (state.currentEvent ? 2 : 1) * multiplicadorPuntos; 
+            
+            if (multiplicadorPuntos === 3) { state.sessionFeverPoints += pts; if(state.sessionFeverPoints >= 300) unlockSecret('abs_14'); }
+
+            if (state.wordType === 'premium') { userStats.premiumCaught++; playSFX('premium'); const loot = ['shield', 'freeze', 'bomb', 'lupa', 'escoba'][Math.floor(Math.random()*5)]; userInventory[loot]++; showToast({icon: '📦', title: `¡Botín!`, desc: `+1 ${loot.toUpperCase()}`}); } 
+            else if (state.wordType === 'diamante') { userStats.diamondsCaught++; playSFX('premium'); state.sessionCoins += 25; showToast({icon: '💎', title: `¡Diamante!`, desc: `+25 Monedas`}); } 
+            else if (state.wordType === 'corazon') { userStats.heartsCaught++; playSFX('premium'); if (state.lives === 1 && state.mode !== 'supervivencia') unlockSecret('abs_16'); if (state.lives < 3 && state.mode !== 'supervivencia') { state.lives++; showToast({icon: '❤️', title: `¡Vida Recuperada!`}); } else { userInventory.shield++; showToast({icon: '🛡️', title: `¡Escudo Extra!`}); } } 
+            else { state.score += pts; state.sessionCoins++; playSFX('correct'); }
+
+            checkAchievements(); updateHUD(); saveProgress(); document.getElementById('word-input').value = ''; spawnWord();
+        }
+
+        function handleDamage(reason) {
+            state.combo = 1; playSFX('error'); state.fever = false; document.body.classList.remove('fever'); state.mistakes = 0; state.lastInputLen = 0;
+            actualizarBarraPoder(false);
+            if (userInventory.shield > 0) {
+                userInventory.shield--; updateHUD(); saveProgress(); 
+                if (reason === 'fall') { spawnWord(); lastTimestamp = performance.now(); requestAnimationFrame(gameLoop); } else { document.getElementById('word-input').value = ''; }
+            } else {
+                userStats.livesLost++; checkAchievements();
+                state.isPlaying = false; cancelAnimationFrame(gameLoopId); clearEvents(); state.lives--; updateHUD();
+                if (state.lives <= 0) endGame();
+                else {
+                    document.getElementById('feedback-title').textContent = reason === 'typos' ? "¡Demasiados Errores!" : "¡Impacto!";
+                    document.getElementById('feedback-correct').textContent = state.activeWordObj.texto;
+                    document.getElementById('feedback-explanation').innerHTML = `<p style="font-size:1.2rem; color:var(--primary); font-weight:bold;">${state.activeWordObj.categoria}</p><p>${state.activeWordObj.explicacion}</p>`;
+                    document.getElementById('feedback-modal').classList.remove('hidden'); document.getElementById('word-input').blur();
+                }
+            }
+        }
+
+        function resumeGame() { document.getElementById('feedback-modal').classList.add('hidden'); document.getElementById('word-input').value = ''; document.getElementById('word-input').focus(); state.lastInputLen = 0; spawnWord(); state.isPlaying = true; lastTimestamp = performance.now(); requestAnimationFrame(gameLoop); }
+
+        function updateHUD() {
+            document.getElementById('score-display').textContent = state.score; document.getElementById('combo-display').textContent = `x${state.combo}`;
+            document.getElementById('lives-display').textContent = '❤️'.repeat(Math.max(0, state.lives)); document.getElementById('session-coins-display').textContent = state.sessionCoins;
+            if(state.lives <= 0 && state.mode === 'supervivencia') document.getElementById('lives-display').textContent = '💀';
+            if (state.mode !== 'pendulo') { const dots = document.querySelectorAll('.mistake-dot'); dots.forEach((dot, index) => { if (index < state.mistakes) dot.classList.add('filled'); else dot.classList.remove('filled'); }); }
+            ['shield', 'freeze', 'bomb', 'lupa', 'escoba'].forEach(i => document.getElementById(`hud-${i}`).textContent = userInventory[i]);
+        }
+
+        function endGame() { 
+            state.isPlaying = false; cancelAnimationFrame(gameLoopId); document.getElementById('bgm').pause(); clearEvents();
+            const earned = bankSessionCoins();
+            recordBestScore(); saveAdventureProgress();
+            if(state.score === 0 && state.mode !== 'hueco') userStats.pacifistDeaths++;
+            checkAchievements(); saveProgress(); 
+            notifyLenguArcadeResult('game_over');
+            document.getElementById('game-ui').classList.add('hidden'); document.getElementById('end-screen').classList.remove('hidden'); document.getElementById('end-coins').textContent = earned; 
+        }
+
+        function showStartScreen() { updateMenuUI(); document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden')); document.getElementById('start-screen').classList.remove('hidden'); }
+        function openPanel(id) { updateMenuUI(); document.getElementById(id).classList.remove('hidden'); if(id === 'achievements-screen') renderAchievements(); }
+        function closePanel(id) { document.getElementById(id).classList.add('hidden'); }
+        function updateMenuUI() {
+            document.getElementById('menu-coins').textContent = userStats.coins;
+            document.getElementById('shop-coins').textContent = userStats.coins;
+            const nameInput = document.getElementById('player-name-input'); if (nameInput && document.activeElement !== nameInput) nameInput.value = userStats.playerName || 'Jugador';
+            const classInput = document.getElementById('class-group-input'); if (classInput && document.activeElement !== classInput) classInput.value = userStats.classGroup || '';
+            const codeInput = document.getElementById('student-code-input'); if (codeInput && document.activeElement !== codeInput) codeInput.value = userStats.studentCode || '';
+            const progress = document.getElementById('adventure-progress-display');
+            if (progress) progress.textContent = userStats.adventureCompleted ? 'Completada 👑' : `Mundo ${Math.min(12, Math.max(1, userStats.adventureWorld || 1))}`;
+            ['shield', 'freeze', 'bomb', 'lupa', 'escoba'].forEach(i => document.getElementById(`inv-${i}`).textContent = userInventory[i]);
+        }
+        
+        // --- HABILIDADES ---
+        function buyItem(item, price) { if (userStats.coins >= price) { userStats.coins -= price; userInventory[item]++; userStats.itemsBought++; if(userStats.coins === 0) userStats.zeroCoinPurchases++; checkAchievements(); updateMenuUI(); saveProgress(); } else alert("Sin monedas suficientes."); }
+        function showToast(ach) { const container = document.getElementById('toast-container'); const toast = document.createElement('div'); toast.className = 'toast'; toast.innerHTML = `<div style="font-size:2.5rem;">${ach.icon}</div><div><p style="font-weight:bold; font-size:1.1rem; margin-bottom: 2px;">${ach.title}</p><p style="font-size:0.9rem">${ach.desc || ''}</p></div>`; container.appendChild(toast); setTimeout(() => toast.remove(), 4000); }
+        function renderAchievements() { const grid = document.getElementById('achievements-grid'); grid.innerHTML = ''; achievements.forEach(ach => { grid.innerHTML += `<div class="achievement-card ${ach.unlocked ? 'unlocked' : ''}"><div style="font-size:2.5rem;">${ach.icon}</div><div style="font-weight:bold; font-size:1rem; margin: 5px 0;">${ach.title}</div><div style="font-size:0.75rem; color:var(--text-light);">${ach.desc}</div></div>`; }); }
+        
+        function useBomb() { if (userInventory.bomb > 0) { if (state.isBossActive) userStats.bossesBombed++; if (state.lives >= 3 && state.mode !== 'supervivencia') unlockSecret('abs_17'); userInventory.bomb--; userStats.bombsUsed++; checkAchievements(); document.getElementById('word-input').value=''; state.lastInputLen=0; spawnWord(); saveProgress(); } else { userStats.emptyBombsTriggered++; checkAchievements(); } }
+        function useFreeze() { if (userInventory.freeze > 0) { state.freezeActive = true; setTimeout(()=>state.freezeActive=false, 3000); userInventory.freeze--; userStats.freezesUsed++; checkAchievements(); saveProgress(); state.currentFallSpeed=0.2; setTimeout(()=>state.currentFallSpeed=(state.mode==='supervivencia'?1.5:1)+(state.combo*0.05)+(state.mode==='aventura'?state.worldLevel*0.1:0), 3000); } }
+        function useLupa() { if (userInventory.lupa > 0 && state.mode !== 'extremo') { if(state.activeWordObj && state.activeWordObj.texto.length <= 3) unlockSecret('abs_20'); userInventory.lupa--; userStats.lupasUsed++; checkAchievements(); saveProgress(); let w = state.activeWordObj.texto; document.getElementById('word-input').value = w.substring(0, Math.ceil(w.length/2)); checkInput(); } }
+        function useEscoba() { if (userInventory.escoba > 0 && state.currentEvent) { state.escobasThisSession++; if(state.escobasThisSession>=3) unlockSecret('abs_21'); if(state.currentEvent==='apagon') unlockSecret('abs_11'); userInventory.escoba--; userStats.escobasUsed++; checkAchievements(); saveProgress(); clearEvents(); updateHUD(); } }
+
+
+        // --- PRUEBA INTERNA DE EFECTOS ---
+        // Disponible en consola: window.maniacTestEffects()
+        // Recorre visualmente todos los efectos y el jefe final sin modificar el progreso real.
+        window.maniacTestEffects = function(delay = 700) {
+            const effects = ['viento', 'parpadeo', 'espejo', 'apagon', 'fuego', 'agua', 'remolino', 'terremoto'];
+            const sampleWords = ['murciélago', 'subvención', 'geometría', 'lápices', 'anticonstitucionalmente', 'hipopotomonstrosesquipedaliofobia'];
+            const oldPlaying = state.isPlaying;
+            const oldEvent = state.currentEvent;
+            const oldWord = state.activeWordObj;
+            const oldElements = state.activeElements;
+            const oldMode = state.mode;
+            state.isPlaying = false;
+            document.getElementById('game-ui').classList.remove('hidden');
+            document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
+            const gameArea = document.getElementById('game-area');
+            let step = 0;
+            const clearAll = () => ['apagon','viento','parpadeo','espejo','fuego','agua','remolino','terremoto','mundo-1','mundo-2','mundo-3','mundo-4','mundo-5','mundo-6'].forEach(c => document.body.classList.remove(c));
+            const showEffect = () => {
+                clearAll();
+                gameArea.innerHTML = '';
+                if (step >= effects.length + 1) {
+                    clearAll();
+                    gameArea.innerHTML = '';
+                    state.isPlaying = oldPlaying;
+                    state.currentEvent = oldEvent;
+                    state.activeWordObj = oldWord;
+                    state.activeElements = oldElements;
+                    state.mode = oldMode;
+                    showStartScreen();
+                    console.info('Prueba de efectos terminada.');
+                    return;
+                }
+                let effect = effects[step] || 'jefe-final';
+                if (effect === 'jefe-final') { document.body.classList.add('mundo-4','fuego','terremoto'); }
+                else { document.body.classList.add(effect); }
+                const el = document.createElement('div');
+                el.className = 'falling-word' + (effect === 'jefe-final' ? ' jefe-final' : '');
+                if (['viento','parpadeo'].includes(effect)) el.classList.add(effect);
+                el.textContent = sampleWords[step % sampleWords.length];
+                el.style.left = '50%';
+                el.style.top = '160px';
+                gameArea.appendChild(el);
+                console.info('Probando efecto:', effect);
+                step++;
+                setTimeout(showEffect, delay);
+            };
+            showEffect();
+        };
+    </script>
+    <style>
+        body.lenguarcade-embedded .player-profile input { pointer-events:none; opacity:.9; }
+        body.lenguarcade-embedded .player-profile .small-save-btn { display:none; }
+        body.lenguarcade-embedded #cloud-status { background:#ecfdf5; color:#047857; border-color:#a7f3d0; }
+    </style>
+    <script>
+        const LenguArcadeBridge = (() => {
+            const params = new URLSearchParams(location.search);
+            const enabled = params.get('lenguarcade') === '1' && window.parent !== window;
+            const channel = params.get('channel') || '';
+            let sessionActive = false;
+            let unlockedAtSessionStart = new Set();
+
+            function post(type, payload = {}) {
+                if (!enabled || !channel) return;
+                window.parent.postMessage({
+                    namespace: 'lenguarcade-game',
+                    channel,
+                    gameId: 'maniacgrafia',
+                    type,
+                    payload
+                }, '*');
+            }
+
+            function applyContext(context) {
+                const student = (context && context.student) || {};
+                if (context && context.save && typeof context.save === 'object') {
+                    applySaveData(context.save);
+                }
+                currentProfileId = 'lenguarcade__' + normalizeProfileName(student.studentId || student.email || 'alumno');
+                userStats.playerName = [student.nombre, student.apellidos].filter(Boolean).join(' ') || 'Jugador';
+                userStats.classGroup = student.clase || '';
+                userStats.studentCode = student.studentId || '';
+
+                const fields = [
+                    ['player-name-input', userStats.playerName],
+                    ['class-group-input', userStats.classGroup],
+                    ['student-code-input', userStats.studentCode]
+                ];
+                fields.forEach(([id, value]) => {
+                    const input = document.getElementById(id);
+                    if (!input) return;
+                    input.value = value;
+                    input.readOnly = true;
+                    input.tabIndex = -1;
+                });
+                document.body.classList.add('lenguarcade-embedded');
+                setCloudStatus('Conectado a LenguArcade', 'ok');
+                saveProgress(false, { localOnly:true });
+                updateMenuUI();
+                post('INITIALIZED', { profileId:currentProfileId });
+            }
+
+            function sessionStarted() {
+                if (!enabled) return;
+                sessionActive = true;
+                unlockedAtSessionStart = new Set(achievements.filter(a => a.unlocked).map(a => a.id));
+                post('SESSION_STARTED', { mode:state.mode });
+            }
+
+            function result(outcome) {
+                if (!enabled || !sessionActive) return;
+                sessionActive = false;
+                const newlyUnlocked = achievements
+                    .filter(a => a.unlocked && !unlockedAtSessionStart.has(a.id))
+                    .map(a => ({ id:a.id, title:a.title, description:a.desc || '' }));
+                const save = buildSaveData();
+                post('RESULT', {
+                    resultId:'maniacgrafia_' + Date.now() + '_' + Math.random().toString(36).slice(2),
+                    outcome,
+                    mode:state.mode,
+                    score:Number(state.score || 0),
+                    correct:Number(state.sessionCorrect || 0),
+                    errors:Number(state.sessionErrors || 0),
+                    maxCombo:Number(state.sessionMaxCombo || 1),
+                    adventureWorld:Number(userStats.adventureWorld || 1),
+                    adventureCompleted:!!userStats.adventureCompleted,
+                    achievements:newlyUnlocked,
+                    save
+                });
+            }
+
+            function onMessage(event) {
+                if (!enabled || event.source !== window.parent) return;
+                const message = event.data || {};
+                if (message.namespace !== 'lenguarcade-host' || message.channel !== channel) return;
+                if (message.type === 'INIT') applyContext(message.payload || {});
+                if (message.type === 'REQUEST_EXIT') {
+                    if (sessionActive) exitToMenu();
+                    else post('CLOSE_READY');
+                }
+            }
+
+            if (enabled) {
+                window.addEventListener('message', onMessage);
+                window.addEventListener('load', () => {
+                    document.body.classList.add('lenguarcade-embedded');
+                    post('READY', { version:4 });
+                });
+            }
+
+            return { sessionStarted, result };
+        })();
+
+        function notifyLenguArcadeSessionStarted() {
+            LenguArcadeBridge.sessionStarted();
+        }
+
+        function notifyLenguArcadeResult(outcome) {
+            LenguArcadeBridge.result(outcome);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel del profesor · Maniacgrafía</title>
+  <style>
+    :root{
+      --primary:#4338ca; --primary2:#6366f1; --secondary:#ec4899; --ok:#10b981; --warn:#f59e0b; --danger:#ef4444;
+      --bg:#f8fafc; --card:#ffffff; --text:#1e293b; --muted:#64748b; --line:#e2e8f0; --gold:#fbbf24;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+    header{padding:28px 22px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;box-shadow:0 8px 24px rgba(67,56,202,.25)}
+    .wrap{width:min(1180px,94vw);margin:0 auto} h1{margin:0;font-size:clamp(2rem,4vw,3.4rem);letter-spacing:-.04em} .subtitle{margin:8px 0 0;opacity:.9;font-size:1.05rem}
+    .setup{margin-top:16px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);font-size:.92rem;line-height:1.35}
+    main{padding:22px}.toolbar{display:grid;grid-template-columns:minmax(180px,.45fr) 1fr auto auto auto;gap:12px;align-items:center;margin:18px auto}.search{width:100%;padding:14px 16px;border:2px solid var(--line);border-radius:14px;font-size:1rem;outline:none;background:white}.search:focus{border-color:var(--primary2)}
+    button{border:0;border-radius:14px;padding:13px 16px;font-weight:800;cursor:pointer;background:var(--primary);color:white;box-shadow:0 6px 14px rgba(67,56,202,.18)}button.secondary{background:white;color:var(--primary);border:2px solid #c7d2fe;box-shadow:none}button:hover{transform:translateY(-1px)}
+    .status{font-weight:800;color:var(--muted);margin:10px 0 16px}.status.ok{color:#047857}.status.warn{color:#b45309}.status.err{color:#be123c}
+    .cards{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:14px;margin-bottom:18px}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 5px 18px rgba(15,23,42,.05)}.card b{display:block;font-size:2rem;color:var(--primary);line-height:1}.card span{font-size:.88rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+    .table-wrap{background:white;border:1px solid var(--line);border-radius:20px;box-shadow:0 8px 24px rgba(15,23,42,.06);overflow:hidden}table{width:100%;border-collapse:collapse}th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}th{background:#f1f5f9;color:#334155;font-size:.82rem;text-transform:uppercase;letter-spacing:.04em}tr:hover td{background:#fafafa}.name{font-weight:900;color:var(--primary)}.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 9px;font-weight:800;font-size:.82rem;background:#eef2ff;color:#3730a3}.pill.ok{background:#ecfdf5;color:#047857}.pill.warn{background:#fffbeb;color:#b45309}.muted{color:var(--muted)}
+    .details{border:2px solid #c7d2fe;background:#eef2ff;color:#3730a3;padding:8px 10px;border-radius:10px;font-weight:800;box-shadow:none}.empty{text-align:center;padding:40px;color:var(--muted);font-weight:700}.modal{position:fixed;inset:0;background:rgba(15,23,42,.68);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}.hidden{display:none!important}.panel{width:min(760px,96vw);max-height:88vh;overflow:auto;background:white;border-radius:24px;padding:24px;box-shadow:0 25px 80px rgba(15,23,42,.3)}.panel h2{margin:0 0 10px;color:var(--primary)}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.mini{padding:12px;border:1px solid var(--line);border-radius:14px;background:#f8fafc}.mini span{display:block;font-size:.78rem;color:var(--muted);font-weight:800;text-transform:uppercase}.mini b{font-size:1.15rem}.close{float:right;background:#fee2e2;color:#b91c1c;box-shadow:none}.logros{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.logros span{background:#fffbeb;color:#b45309;border:1px solid #fde68a;border-radius:999px;padding:5px 8px;font-size:.8rem;font-weight:800}
+    @media (max-width:850px){.toolbar{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,1fr)}table{font-size:.88rem}th:nth-child(4),td:nth-child(4),th:nth-child(7),td:nth-child(7){display:none}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Panel del profesor · Maniacgrafía</h1>
+      <p class="subtitle">Seguimiento de alumnos: progreso de aventura, palabras, monedas, puntuaciones y logros.</p>
+      <div class="setup"><strong>Antes de usar:</strong> si abres este panel desde Apps Script, la URL se detecta sola. Si lo pegas como HTML en Sites, pega la URL del Apps Script en <code>MANIAC_SHEETS_WEB_APP_URL</code>. Mantén la misma clave de profesor en <code>TEACHER_TOKEN</code>.</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="toolbar">
+      <input id="teacher-token" class="search" type="password" autocomplete="current-password" placeholder="Clave de profesor">
+      <input id="search" class="search" placeholder="Buscar por alumno, clase o modo..." oninput="render()">
+      <button onclick="loadData()">🔄 Actualizar</button>
+      <button class="secondary" onclick="exportCSV()">📤 CSV</button>
+      <button class="secondary" onclick="sortByRecent()">🕒 Recientes</button>
+    </div>
+    <div id="status" class="status warn">Pendiente de cargar datos.</div>
+
+    <section class="cards">
+      <div class="card"><b id="stat-students">0</b><span>Alumnos</span></div>
+      <div class="card"><b id="stat-words">0</b><span>Palabras totales</span></div>
+      <div class="card"><b id="stat-completed">0</b><span>Aventura completada</span></div>
+      <div class="card"><b id="stat-average">0</b><span>Mundo medio</span></div>
+    </section>
+
+    <section class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Alumno</th><th>Clase</th><th>Aventura</th><th>Palabras</th><th>Mejor puntuación</th><th>Monedas</th><th>Actualizado</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="rows"><tr><td colspan="8" class="empty">Pulsa “Actualizar” para cargar el progreso.</td></tr></tbody>
+      </table>
+    </section>
+  </main>
+
+  <div id="modal" class="modal hidden">
+    <div class="panel">
+      <button class="close" onclick="closeModal()">Cerrar</button>
+      <h2 id="detail-name">Alumno</h2>
+      <p class="muted" id="detail-subtitle"></p>
+      <div class="grid2" id="detail-grid"></div>
+      <h3>Logros desbloqueados</h3>
+      <div class="logros" id="detail-achievements"></div>
+    </div>
+  </div>
+
+  <script>
+    const MANIAC_SHEETS_WEB_APP_URL = 'PEGA_AQUI_LA_URL_DE_TU_WEB_APP';
+    let allRows = [];
+    let currentRows = [];
+
+    function getCloudEndpoint(){
+      const fromQuery = new URLSearchParams(location.search).get('api') || new URLSearchParams(location.search).get('backend') || '';
+      if(/^https?:\/\//.test(fromQuery)) return fromQuery;
+      if(/script\.google\.com/.test(location.hostname) && /\/exec/.test(location.pathname)) return location.href.split('?')[0];
+      if(MANIAC_SHEETS_WEB_APP_URL && !MANIAC_SHEETS_WEB_APP_URL.includes('PEGA_AQUI') && /^https?:\/\//.test(MANIAC_SHEETS_WEB_APP_URL)) return MANIAC_SHEETS_WEB_APP_URL;
+      return '';
+    }
+    function isConfigured(){ return !!getCloudEndpoint(); }
+    function setStatus(text, cls='warn'){ const el=document.getElementById('status'); el.textContent=text; el.className='status '+cls; }
+    function n(v){ return Number(v || 0); }
+    function fmtDate(value){ if(!value) return '—'; const d=new Date(value); if(isNaN(d)) return String(value); return d.toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'}); }
+    function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+    function jsonpRequest(params, timeoutMs = 9000){
+      return new Promise((resolve,reject)=>{
+        if(!isConfigured()) return reject(new Error('Falta configurar la URL del Apps Script.'));
+        const cb='panel_cb_'+Date.now()+'_'+Math.floor(Math.random()*100000);
+        const script=document.createElement('script');
+        const cleanup=()=>{ delete window[cb]; if(script.parentNode) script.parentNode.removeChild(script); clearTimeout(timer); };
+        const timer=setTimeout(()=>{ cleanup(); reject(new Error('Tiempo de espera agotado.')); }, timeoutMs);
+        window[cb]=(data)=>{ cleanup(); resolve(data); };
+        const url=new URL(getCloudEndpoint());
+        Object.entries({...params,callback:cb,t:Date.now()}).forEach(([k,v])=>url.searchParams.set(k,String(v)));
+        script.onerror=()=>{ cleanup(); reject(new Error('No se pudo conectar con Apps Script.')); };
+        script.src=url.toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    async function loadData(){
+      try{
+        const teacherToken=document.getElementById('teacher-token').value.trim() || sessionStorage.getItem('maniac_teacher_token') || '';
+        if(!teacherToken) throw new Error('Introduce la clave de profesor.');
+        sessionStorage.setItem('maniac_teacher_token', teacherToken);
+        setStatus('Cargando datos desde Google Sheets...', 'warn');
+        const res=await jsonpRequest({action:'list', token:teacherToken});
+        if(!res.ok) throw new Error(res.error || 'Respuesta no válida.');
+        allRows=res.rows || [];
+        sortByRecent(false);
+        setStatus(`Datos cargados: ${allRows.length} alumno(s).`, 'ok');
+      }catch(err){
+        console.error(err);
+        setStatus('Error: '+err.message, 'err');
+      }
+    }
+
+    function sortByRecent(shouldRender=true){
+      allRows.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
+      if(shouldRender) render(); else render();
+    }
+
+    function render(){
+      const q=document.getElementById('search').value.trim().toLowerCase();
+      currentRows=allRows.filter(r=>{
+        const hay=[r.studentName,r.classGroup,r.studentCode,r.bestMode,r.profileId].join(' ').toLowerCase();
+        return !q || hay.includes(q);
+      });
+      updateStats(currentRows);
+      const tbody=document.getElementById('rows');
+      if(!currentRows.length){ tbody.innerHTML='<tr><td colspan="8" class="empty">No hay resultados con ese filtro.</td></tr>'; return; }
+      tbody.innerHTML=currentRows.map((r,i)=>{
+        const completed = String(r.adventureCompleted).toLowerCase()==='true' || r.adventureCompleted===true;
+        const adv = completed ? '<span class="pill ok">👑 Completada</span>' : `<span class="pill">🌍 Mundo ${esc(r.adventureWorld || 1)}</span>`;
+        return `<tr>
+          <td><span class="name">${esc(r.studentName || 'Jugador')}</span></td>
+          <td>${esc(r.classGroup || 'Sin clase')}</td>
+          <td>${adv}</td>
+          <td>${n(r.totalWords)}</td>
+          <td><strong>${n(r.bestScore)}</strong> <span class="muted">${esc(r.bestMode || '')}</span></td>
+          <td>💰 ${n(r.coins)}</td>
+          <td>${fmtDate(r.updatedAt)}</td>
+          <td><button class="details" onclick="openDetails(${i})">Ver</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    function updateStats(rows){
+      const students=rows.length;
+      const words=rows.reduce((acc,r)=>acc+n(r.totalWords),0);
+      const completed=rows.filter(r=>String(r.adventureCompleted).toLowerCase()==='true' || r.adventureCompleted===true).length;
+      const avg=students ? (rows.reduce((acc,r)=>acc+n(r.adventureWorld||1),0)/students).toFixed(1) : '0';
+      document.getElementById('stat-students').textContent=students;
+      document.getElementById('stat-words').textContent=words;
+      document.getElementById('stat-completed').textContent=completed;
+      document.getElementById('stat-average').textContent=avg;
+    }
+
+    function openDetails(index){
+      const r=currentRows[index]; if(!r) return;
+      document.getElementById('detail-name').textContent=r.studentName || 'Jugador';
+      document.getElementById('detail-subtitle').textContent=`${r.classGroup || 'Sin clase'}${r.studentCode ? ' · Código: ' + r.studentCode : ''} · Última actualización: ${fmtDate(r.updatedAt)}`;
+      const bestScores=r.bestScores || {};
+      const items=tryParse(r.items, {});
+      const grid=[
+        ['Código de alumno', r.studentCode || (r.summary && r.summary.studentCode) || '—'],
+        ['Aventura', (String(r.adventureCompleted).toLowerCase()==='true'||r.adventureCompleted===true) ? 'Completada 👑' : `Mundo ${r.adventureWorld || 1}`],
+        ['Palabras superadas', n(r.totalWords)],
+        ['Partidas jugadas', n(r.gamesPlayed)],
+        ['Máximo combo', 'x'+n(r.maxCombo)],
+        ['Monedas', '💰 '+n(r.coins)],
+        ['Mejor modo', `${r.bestMode || '—'} · ${n(r.bestScore)} puntos`],
+        ['Práctica', n(bestScores.practica)],
+        ['Supervivencia', n(bestScores.supervivencia)],
+        ['Letra perdida', n(bestScores.hueco)],
+        ['Montaña rusa', n(bestScores.pendulo)],
+        ['Extremo', n(bestScores.extremo)],
+        ['Objetos', Object.entries(items).map(([k,v])=>`${k}: ${v}`).join(' · ') || '—']
+      ];
+      document.getElementById('detail-grid').innerHTML=grid.map(([a,b])=>`<div class="mini"><span>${esc(a)}</span><b>${esc(b)}</b></div>`).join('');
+      const ach=r.unlockedAchIds || [];
+      document.getElementById('detail-achievements').innerHTML=ach.length ? ach.map(id=>`<span>${esc(id)}</span>`).join('') : '<span>Sin logros registrados todavía</span>';
+      document.getElementById('modal').classList.remove('hidden');
+    }
+    function closeModal(){ document.getElementById('modal').classList.add('hidden'); }
+    function tryParse(text, fallback){ try{return typeof text==='string'?JSON.parse(text):(text||fallback);}catch(e){return fallback;} }
+
+    function exportCSV(){
+      const rows=currentRows.length?currentRows:allRows;
+      const headers=['Alumno','Clase','Código','Mundo','Aventura completada','Palabras','Partidas','Max combo','Mejor modo','Mejor puntuación','Monedas','Actualizado'];
+      const lines=[headers].concat(rows.map(r=>[
+        r.studentName,r.classGroup,r.studentCode || '',r.adventureWorld,r.adventureCompleted,r.totalWords,r.gamesPlayed,r.maxCombo,r.bestMode,r.bestScore,r.coins,r.updatedAt
+      ])).map(row=>row.map(v=>'"'+String(v ?? '').replace(/"/g,'""')+'"').join(','));
+      const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Maniacgrafia_progreso.csv'; document.body.appendChild(a); a.click(); a.remove();
+    }
+
+    if(isConfigured()) setStatus('Introduce la clave de profesor y pulsa Actualizar.', 'warn'); else setStatus('Falta configurar MANIAC_SHEETS_WEB_APP_URL en este HTML.', 'warn');
+  </script>
+</body>
+</html>
