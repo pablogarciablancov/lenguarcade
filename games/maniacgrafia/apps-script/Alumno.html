@@ -58,6 +58,14 @@
         .world-selector-btn { border:2px solid #c7d2fe; border-radius:14px; padding:13px 8px; background:#eef2ff; color:#312e81; font-weight:900; cursor:pointer; }
         .world-selector-btn:hover { border-color:var(--gold); transform:translateY(-2px); }
         .world-selector-btn small { display:block; margin-top:4px; color:var(--text-light); font-weight:700; }
+        .adventure-run-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:18px 0 22px; }
+        .adventure-run-btn { border:3px solid var(--gold); border-radius:16px; padding:16px 12px; background:linear-gradient(135deg,#fffbeb,#fef3c7); color:#78350f; font-weight:900; cursor:pointer; }
+        .adventure-run-btn strong, .adventure-run-btn small { display:block; }
+        .adventure-run-btn strong { font-size:1.05rem; }
+        .adventure-run-btn small { margin-top:5px; color:#92400e; }
+        .adventure-run-btn.crazy { border-color:var(--danger); background:linear-gradient(135deg,#450a0a,#991b1b); color:white; }
+        .adventure-run-btn.crazy small { color:#fecaca; }
+        .adventure-run-btn:hover { transform:translateY(-2px); box-shadow:0 8px 18px rgba(0,0,0,.16); }
         
         /* Modales */
         .modal-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); display: flex; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(5px); }
@@ -84,7 +92,7 @@
         .shop-price { font-weight: bold; color: var(--gold); font-size: 1.1rem; margin: 5px 0 15px 0; }
         
         #achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 20px; }
-        .achievement-card { background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 10px; padding: 10px; text-align: center; opacity: 0.4; filter: grayscale(100%); transition: all 0.3s; }
+        .achievement-card { min-width:0; overflow:hidden; overflow-wrap:anywhere; word-break:break-word; background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 10px; padding: 10px; text-align: center; opacity: 0.4; filter: grayscale(100%); transition: all 0.3s; }
         .achievement-card.unlocked { opacity: 1; filter: grayscale(0%); border-color: var(--gold); background: #fffbeb; }
 
         /* Interfaz de Juego */
@@ -193,7 +201,7 @@
         /* INPUT Y FEEDBACK */
         #input-area { padding: 15px; background: var(--card-bg); display: flex; flex-direction: column; align-items: center; z-index: 20; position: relative; box-shadow: 0 -4px 10px rgba(0,0,0,0.05);}
         #word-input { width: 100%; max-width: 600px; padding: 15px 25px; font-size: 2rem; border: 3px solid var(--primary-light); border-radius: 50px; text-align: center; outline: none; transition: all 0.2s; user-select:none; -webkit-user-select:none; }
-        @media(max-width:700px){.world-selector-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        @media(max-width:700px){.world-selector-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.adventure-run-options{grid-template-columns:1fr}}
         .input-error { background-color: #fee2e2 !important; border-color: var(--danger) !important; color: var(--danger) !important; }
 
         .shake { animation: shake 0.2s; }
@@ -289,7 +297,18 @@
 
     <div id="world-selector-screen" class="modal-wrapper hidden">
         <div class="modal-panel" style="max-width:720px;">
-            <h2 style="color:var(--gold); text-align:center;">Elige un mundo para batir tu récord</h2>
+            <h2 style="color:var(--gold); text-align:center;">¿Qué aventura quieres jugar?</h2>
+            <div class="adventure-run-options">
+                <button class="adventure-run-btn" onclick="startFullAdventureReplay(false)">
+                    <strong>🔄 Repetir la aventura</strong>
+                    <small>Vuelve al Mundo 1 con la velocidad normal.</small>
+                </button>
+                <button class="adventure-run-btn crazy" onclick="startFullAdventureReplay(true)">
+                    <strong>🔥 ¿Estás loco?</strong>
+                    <small>Los 12 mundos, pero las palabras caen mucho más rápido.</small>
+                </button>
+            </div>
+            <h3 style="color:var(--primary); text-align:center;">O elige un mundo para batir tu récord</h3>
             <p style="color:var(--text-light); text-align:center; margin-top:8px;">Supera su jefe y mejora tu mejor puntuación.</p>
             <div class="world-selector-grid" id="world-selector-grid"></div>
             <div style="text-align:center; margin-top:22px;"><button class="btn btn-secondary" onclick="closePanel('world-selector-screen')">Volver</button></div>
@@ -379,6 +398,8 @@
             playerName: 'Jugador', classGroup: '', studentCode: '', adventureWorld: 1, adventureCompleted: false, gamesPlayed: 0,
             adventureWorldBestScores: {}, worldReplays: 0, worldsReplayed: [], replaySelections: {}, perfectWorldReplays: 0, replayBestImprovements: 0,
             pasteAttempts: 0, zoomAttempts: 0, timeoutWithText: 0, bossWordsDefeated: [],
+            adventureReplayStarts: 0, adventureReplaysCompleted: 0, crazyAdventureStarts: 0, crazyAdventuresCompleted: 0,
+            crazyTimeouts: 0, crazyFreezesUsed: 0, crazyBossesBombed: 0, crazyBossesDefeated: 0, crazyMaxCombo: 0,
             bestScores: { practica: 0, supervivencia: 0, hueco: 0, pendulo: 0, extremo: 0, aventura: 0 }
         };
         let userInventory = { shield: 0, freeze: 0, bomb: 0, lupa: 0, escoba: 0 };
@@ -795,7 +816,7 @@
                 { id: 'lupa', icon: '🔍', titles: ["Curioso", "Observador", "Detective", "Inspector", "Sherlock"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.lupasUsed >= r, desc: "Usa {r} lupas" },
                 { id: 'escb', icon: '🧹', titles: ["Limpiador", "Ordenado", "Conserje", "Impecable", "Purificador"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.escobasUsed >= r, desc: "Usa {r} escobas" },
                 { id: 'fevr', icon: '🌡️', titles: ["Caliente", "Fiebre", "Volcán", "Infierno", "Sol"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.feverCount >= r, desc: "Activa el Modo Fiebre {r} veces" },
-                { id: 'bons', icon: '✨', titles: ["Suerte", "Afortunado", "Lluvia Dorada", "Cazador de Estrellas", "Constelación"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.bonusCount >= r, desc: "Juega la Fase Bonus {r} veces" }
+                { id: 'bons', icon: '✨', titles: ["Suerte", "Afortunado", "Chaparrón de Estrellas", "Cazador de Estrellas", "Constelación"], reqs: [1, 5, 10, 25, 50], check: (r) => userStats.bonusCount >= r, desc: "Juega la Fase Bonus {r} veces" }
             ];
             data.forEach(cat => { cat.reqs.forEach((req, i) => { achievements.push({ id: `${cat.id}_${i}`, icon: cat.icon, title: cat.titles[i], desc: cat.desc.replace('{r}', req), check: () => cat.check(req), unlocked: false }); }); });
 
@@ -845,14 +866,24 @@
                 { id: 'abs_43', icon: '🎰', title: 'Mundo Siete, Naturalmente', desc: 'Elige el Mundo 7 porque el siete siempre parece importante.', check: () => (userStats.worldsReplayed || []).includes(7) },
                 { id: 'abs_44', icon: '📊', title: 'Doce Columnas en una Hoja Mental', desc: 'Registra una puntuación en cada mundo.', check: () => Object.keys(userStats.adventureWorldBestScores || {}).filter(key => Number(userStats.adventureWorldBestScores[key] || 0) > 0).length >= 12 },
                 { id: 'abs_45', icon: '🧠', title: 'Jefe con Apellidos', desc: 'Derrota hipopotomonstrosesquipedaliofobia.', check: () => (userStats.bossWordsDefeated || []).includes('hipopotomonstrosesquipedaliofobia') },
-                { id: 'abs_46', icon: '🏠', title: 'Aquí Se Está Mejor', desc: 'Repite 10 mundos en vez de empezar otro juego.', check: () => Number(userStats.worldReplays || 0) >= 10 }
+                { id: 'abs_46', icon: '🏠', title: 'Aquí Se Está Mejor', desc: 'Repite 10 mundos en vez de empezar otro juego.', check: () => Number(userStats.worldReplays || 0) >= 10 },
+                { id: 'abs_47', icon: '🔄', title: 'Déjà Vu con Mapa', desc: 'Empieza otra vez la aventura completa.', secret: true, check: () => Number(userStats.adventureReplayStarts || 0) >= 1 },
+                { id: 'abs_48', icon: '🔥', title: '¿Estás Loco?', desc: 'Entra voluntariamente en la aventura acelerada.', secret: true, check: () => Number(userStats.crazyAdventureStarts || 0) >= 1 },
+                { id: 'abs_49', icon: '🧯', title: 'La Respuesta Era Sí', desc: 'Completa los 12 mundos en el modo ¿Estás loco?.', secret: true, check: () => Number(userStats.crazyAdventuresCompleted || 0) >= 1 },
+                { id: 'abs_50', icon: '⏳', title: 'Freno de Emergencia', desc: 'Usa un reloj de arena en el modo ¿Estás loco?.', secret: true, check: () => Number(userStats.crazyFreezesUsed || 0) >= 1 },
+                { id: 'abs_51', icon: '💣', title: 'Diplomacia Explosiva', desc: 'Lanza una bomba contra un jefe en el modo ¿Estás loco?.', secret: true, check: () => Number(userStats.crazyBossesBombed || 0) >= 1 },
+                { id: 'abs_52', icon: '🪂', title: 'Caer Más Rápido No Ayudaba', desc: 'Deja caer una palabra en el modo ¿Estás loco?.', secret: true, check: () => Number(userStats.crazyTimeouts || 0) >= 1 },
+                { id: 'abs_53', icon: '⌨️', title: 'El Teclado Pidió Vacaciones', desc: 'Alcanza un combo x15 en el modo ¿Estás loco?.', secret: true, check: () => Number(userStats.crazyMaxCombo || 0) >= 15 },
+                { id: 'abs_54', icon: '👹', title: 'Doce Reuniones que Pudieron ser un Correo', desc: 'Derrota 12 jefes en aventuras aceleradas.', secret: true, check: () => Number(userStats.crazyBossesDefeated || 0) >= 12 },
+                { id: 'abs_55', icon: '🧾', title: 'Reincidente Certificado', desc: 'Empieza tres veces el modo ¿Estás loco?.', secret: true, check: () => Number(userStats.crazyAdventureStarts || 0) >= 3 },
+                { id: 'abs_56', icon: '🎬', title: 'La Secuela Era Necesaria', desc: 'Completa por segunda vez la aventura normal.', secret: true, check: () => Number(userStats.adventureReplaysCompleted || 0) >= 1 }
             ];
             absurdos.forEach(ach => achievements.push({ ...ach, unlocked: false }));
         }
 
         function unlockSecret(id) { let ach = achievements.find(a => a.id === id); if (ach && !ach.unlocked) { ach.unlocked = true; showToast({ icon: ach.icon, title: "¡Logro Desbloqueado!", desc: ach.title }); saveProgress(); } }
         
-        let state = { mode: 'practica', score: 0, combo: 1, lives: 3, mistakes: 0, sessionCoins: 0, sessionCorrect: 0, sessionErrors: 0, sessionMaxCombo: 1, activeWordObj: null, activeElements: [], isPlaying: false, fever: false, currentFallSpeed: 1.0, wordsToBoss: 15, isBossActive: false, currentEvent: null, blankIndex: -1, lastInputLen: 0, wordType: 'normal', failedKeystrokes: 0, worldLevel: 1, fallProgress: 0, fallStartY: -60, adventureReplay: false, worldScoreStart: 0, usedBossWords: [] };
+        let state = { mode: 'practica', score: 0, combo: 1, lives: 3, mistakes: 0, sessionCoins: 0, sessionCorrect: 0, sessionErrors: 0, sessionMaxCombo: 1, activeWordObj: null, activeElements: [], isPlaying: false, fever: false, currentFallSpeed: 1.0, wordsToBoss: 15, isBossActive: false, currentEvent: null, blankIndex: -1, lastInputLen: 0, wordType: 'normal', failedKeystrokes: 0, worldLevel: 1, fallProgress: 0, fallStartY: -60, adventureReplay: false, adventureCampaignReplay: false, crazyAdventure: false, worldScoreStart: 0, usedBossWords: [] };
         let gameLoopId, wordY = 0, lastTimestamp = 0; let wordStartTime = 0;
 
         function registerBlockedPaste(event) {
@@ -918,6 +949,14 @@
             else startGame('aventura');
         }
 
+        function startFullAdventureReplay(crazy = false) {
+            closePanel('world-selector-screen');
+            userStats.adventureReplayStarts = Number(userStats.adventureReplayStarts || 0) + 1;
+            if (crazy) userStats.crazyAdventureStarts = Number(userStats.crazyAdventureStarts || 0) + 1;
+            checkAchievements();
+            startGame('aventura', null, crazy ? 'crazy' : 'replay');
+        }
+
         function openAdventureWorldSelector() {
             const grid = document.getElementById('world-selector-grid');
             grid.innerHTML = '';
@@ -965,14 +1004,30 @@
             document.getElementById('end-screen').classList.remove('hidden');
         }
 
-        async function startGame(mode, selectedWorld = null) {
+        function getStandardFallSpeed() {
+            let speed = (state.mode === 'supervivencia') ? 1.5 : 1.0;
+            if (state.mode === 'aventura') speed += state.worldLevel * 0.1;
+            if (state.crazyAdventure) speed *= 1.65;
+            return speed + (state.combo * 0.05);
+        }
+
+        function getActiveFallSpeed() {
+            if (state.isBossActive) return state.crazyAdventure ? 0.95 : 0.5;
+            return getStandardFallSpeed();
+        }
+
+        async function startGame(mode, selectedWorld = null, adventureRun = '') {
             await saveProfileName(false);
             initAudio(); const bgm = document.getElementById('bgm'); bgm.src = musicTracks[mode] || musicTracks['practica']; if (musicEnabled) { bgm.volume = 0.4; bgm.play(); }
             state.mode = mode; state.score = 0; state.combo = 1; state.sessionCoins = 0; state.sessionCorrect = 0; state.sessionErrors = 0; state.sessionMaxCombo = 1; state.fever = false; state.isBossActive = false; state.mistakes = 0; state.lastInputLen = 0; state.failedKeystrokes = 0;
             state.adventureReplay = mode === 'aventura' && userStats.adventureCompleted && selectedWorld != null;
-            state.worldLevel = (mode === 'aventura') ? Math.min(12, Math.max(1, state.adventureReplay ? selectedWorld : (userStats.adventureWorld || 1))) : 1;
+            state.adventureCampaignReplay = mode === 'aventura' && ['replay', 'crazy'].includes(adventureRun);
+            state.crazyAdventure = mode === 'aventura' && adventureRun === 'crazy';
+            state.worldLevel = (mode === 'aventura')
+                ? Math.min(12, Math.max(1, state.adventureReplay ? selectedWorld : (state.adventureCampaignReplay ? 1 : (userStats.adventureWorld || 1))))
+                : 1;
             state.wordsToBoss = (mode === 'aventura') ? getWordsToBossForWorld(state.worldLevel) : 15;
-            state.currentFallSpeed = (mode === 'supervivencia') ? 1.5 : 1.0;
+            state.currentFallSpeed = getStandardFallSpeed();
             state.worldScoreStart = 0; state.usedBossWords = [];
             if (state.adventureReplay) {
                 userStats.worldReplays = Number(userStats.worldReplays || 0) + 1;
@@ -1013,12 +1068,12 @@
             // EL MUNDO 12 ES EL FINAL ÉPICO
             if (state.worldLevel === 12) {
                 document.body.classList.add('mundo-4'); // Entorno volcánico
-                document.getElementById('world-display').textContent = "FINAL";
+                document.getElementById('world-display').textContent = state.crazyAdventure ? "FINAL 🔥" : "FINAL";
                 mostrarAnuncioPoder("⚔️ ¡EL NÚCLEO! ⚔️<br>Guarida del Jefe Supremo");
             } else {
                 let worldClass = 'mundo-' + (((state.worldLevel - 1) % 6) + 1); 
                 document.body.classList.add(worldClass);
-                document.getElementById('world-display').textContent = state.worldLevel;
+                document.getElementById('world-display').textContent = state.crazyAdventure ? `${state.worldLevel} 🔥` : state.worldLevel;
                 
                 let nombresMundos = ["Bosque Tranquilo", "Desierto Espejismo", "Caverna Oscura", "Cumbre Volcánica", "Fosa del Malstrom", "Dimensión Mágica"];
                 let nombre = nombresMundos[(state.worldLevel - 1) % 6];
@@ -1032,13 +1087,16 @@
         function winAdventure() {
             state.isPlaying = false; cancelAnimationFrame(gameLoopId); document.getElementById('bgm').pause(); clearEvents();
             
-            let reward = 5000;
+            let reward = state.crazyAdventure ? 7500 : 5000;
             const sessionEarned = bankSessionCoins();
             userStats.coins += reward;
             userStats.adventureWorld = 12;
             userStats.adventureCompleted = true;
+            if (state.crazyAdventure) userStats.crazyAdventuresCompleted = Number(userStats.crazyAdventuresCompleted || 0) + 1;
+            else if (state.adventureCampaignReplay) userStats.adventureReplaysCompleted = Number(userStats.adventureReplaysCompleted || 0) + 1;
             recordBestScore();
             unlockSecret('abs_31'); 
+            checkAchievements();
             saveProgress();
             notifyLenguArcadeResult('victory');
             
@@ -1111,7 +1169,7 @@
 
             const gameArea = document.getElementById('game-area'); gameArea.innerHTML = ''; wordY = -100; state.fallStartY = -100; state.fallProgress = 0; state.activeElements = [];
             let el = document.createElement('div'); el.className = 'falling-word jefe-final'; el.innerHTML = state.activeWordObj.texto; el.style.left = '50%'; el.style.top = wordY + 'px';
-            gameArea.appendChild(el); state.activeElements.push({ element: el, text: state.activeWordObj.texto, isCorrect: true, active: true }); state.currentFallSpeed = 0.5;
+            gameArea.appendChild(el); state.activeElements.push({ element: el, text: state.activeWordObj.texto, isCorrect: true, active: true }); state.currentFallSpeed = getActiveFallSpeed();
         }
 
         function spawnWord() {
@@ -1141,7 +1199,7 @@
                 gameArea.appendChild(el); state.activeElements.push({ element: el, text: w, isCorrect: w === state.activeWordObj.texto, active: true });
             });
 
-            if (state.mode !== 'pendulo') state.currentFallSpeed = ((state.mode === 'supervivencia') ? 1.5 : 1.0) + (state.combo * 0.05) + (state.mode==='aventura' ? state.worldLevel * 0.1 : 0);
+            if (state.mode !== 'pendulo') state.currentFallSpeed = getStandardFallSpeed();
         }
 
         function gameLoop(timestamp) {
@@ -1206,6 +1264,7 @@
             if (timeTaken > 10000) unlockSecret('abs_27');
 
             state.wordsToBoss--; state.combo++; state.sessionCorrect++; state.sessionMaxCombo = Math.max(state.sessionMaxCombo, state.combo); state.mistakes = 0; state.lastInputLen = 0; userStats.totalWords++;
+            if (state.crazyAdventure) userStats.crazyMaxCombo = Math.max(Number(userStats.crazyMaxCombo || 0), state.combo);
             
             if (wordY < 0) unlockSecret('abs_18');
             if (state.currentEvent === 'apagon' && state.activeWordObj.texto.length >= 8) { userStats.blindWords++; }
@@ -1217,6 +1276,7 @@
             if(defeatedBoss) {
                 state.isBossActive = false; 
                 userStats.bossesDefeated++; 
+                if (state.crazyAdventure) userStats.crazyBossesDefeated = Number(userStats.crazyBossesDefeated || 0) + 1;
                 userStats.bossWordsDefeated = Array.from(new Set([...(userStats.bossWordsDefeated || []), state.activeWordObj.texto]));
                 if(state.bossWasApagon) unlockSecret('abs_24'); 
                 
@@ -1265,6 +1325,7 @@
             const input = document.getElementById('word-input');
             if (reason === 'fall') {
                 if (input.value.trim()) userStats.timeoutWithText = Number(userStats.timeoutWithText || 0) + 1;
+                if (state.crazyAdventure) userStats.crazyTimeouts = Number(userStats.crazyTimeouts || 0) + 1;
                 input.value = '';
                 input.classList.remove('input-error');
                 checkAchievements();
@@ -1320,7 +1381,7 @@
             const adventureDescription = document.getElementById('adventure-mode-description');
             if (adventureDescription) {
                 adventureDescription.textContent = userStats.adventureCompleted
-                    ? 'Elige cualquier mundo y supera tu mejor puntuación.'
+                    ? 'Repite la aventura, prueba ¿Estás loco? o supera récords por mundo.'
                     : 'Continúa desde tu último mundo guardado.';
             }
             ['shield', 'freeze', 'bomb', 'lupa', 'escoba'].forEach(i => document.getElementById(`inv-${i}`).textContent = userInventory[i]);
@@ -1336,12 +1397,13 @@
             const grid = document.getElementById('achievements-grid');
             grid.innerHTML = '';
             achievements.forEach(ach => {
-                grid.innerHTML += `<div class="achievement-card ${ach.unlocked ? 'unlocked' : ''}"><div style="font-size:2.5rem;">${ach.icon}</div><div style="font-weight:bold; font-size:1rem; margin: 5px 0;">${ach.title}</div><div style="font-size:0.75rem; color:var(--text-light);">${ach.desc}</div></div>`;
+                const hidden = ach.secret && !ach.unlocked;
+                grid.innerHTML += `<div class="achievement-card ${ach.unlocked ? 'unlocked' : ''}"><div style="font-size:2.5rem;">${hidden ? '❓' : ach.icon}</div><div style="font-weight:bold; font-size:1rem; margin: 5px 0;">${hidden ? 'Logro oculto' : ach.title}</div><div style="font-size:0.75rem; color:var(--text-light);">${hidden ? '???' : ach.desc}</div></div>`;
             });
         }
         
-        function useBomb() { if (userInventory.bomb > 0) { if (state.isBossActive) userStats.bossesBombed++; if (state.lives >= 3 && state.mode !== 'supervivencia') unlockSecret('abs_17'); userInventory.bomb--; userStats.bombsUsed++; checkAchievements(); document.getElementById('word-input').value=''; state.lastInputLen=0; spawnWord(); saveProgress(); } else { userStats.emptyBombsTriggered++; checkAchievements(); } }
-        function useFreeze() { if (userInventory.freeze > 0) { state.freezeActive = true; setTimeout(()=>state.freezeActive=false, 3000); userInventory.freeze--; userStats.freezesUsed++; checkAchievements(); saveProgress(); state.currentFallSpeed=0.2; setTimeout(()=>state.currentFallSpeed=(state.mode==='supervivencia'?1.5:1)+(state.combo*0.05)+(state.mode==='aventura'?state.worldLevel*0.1:0), 3000); } }
+        function useBomb() { if (userInventory.bomb > 0) { if (state.isBossActive) { userStats.bossesBombed++; if (state.crazyAdventure) userStats.crazyBossesBombed = Number(userStats.crazyBossesBombed || 0) + 1; } if (state.lives >= 3 && state.mode !== 'supervivencia') unlockSecret('abs_17'); userInventory.bomb--; userStats.bombsUsed++; checkAchievements(); document.getElementById('word-input').value=''; state.lastInputLen=0; spawnWord(); saveProgress(); } else { userStats.emptyBombsTriggered++; checkAchievements(); } }
+        function useFreeze() { if (userInventory.freeze > 0) { state.freezeActive = true; setTimeout(()=>state.freezeActive=false, 3000); userInventory.freeze--; userStats.freezesUsed++; if (state.crazyAdventure) userStats.crazyFreezesUsed = Number(userStats.crazyFreezesUsed || 0) + 1; checkAchievements(); saveProgress(); state.currentFallSpeed=0.2; setTimeout(()=>state.currentFallSpeed=getActiveFallSpeed(), 3000); } }
         function useLupa() { if (userInventory.lupa > 0 && state.mode !== 'extremo') { if(state.activeWordObj && state.activeWordObj.texto.length <= 3) unlockSecret('abs_20'); userInventory.lupa--; userStats.lupasUsed++; checkAchievements(); saveProgress(); let w = state.activeWordObj.texto; document.getElementById('word-input').value = w.substring(0, Math.ceil(w.length/2)); checkInput(); } }
         function useEscoba() { if (userInventory.escoba > 0 && state.currentEvent) { state.escobasThisSession++; if(state.escobasThisSession>=3) unlockSecret('abs_21'); if(state.currentEvent==='apagon') unlockSecret('abs_11'); userInventory.escoba--; userStats.escobasUsed++; checkAchievements(); saveProgress(); clearEvents(); updateHUD(); } }
 
