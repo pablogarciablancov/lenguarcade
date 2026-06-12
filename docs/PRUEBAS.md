@@ -1,5 +1,18 @@
 # Plan de pruebas
 
+## Supabase y Classroom
+
+1. Ejecutar `npm.cmd run check` y confirmar la comprobacion del esquema.
+2. Crear un proyecto de Supabase de prueba y ejecutar la migracion SQL.
+3. Confirmar en Supabase que RLS esta activado en todas las tablas publicas.
+4. Confirmar que `private.profile_secrets` no es accesible con la clave publica.
+5. Ejecutar `testClassroomAccess_` desde el editor de Apps Script.
+6. Aceptar una sola vez los permisos de lectura solicitados.
+7. Confirmar que devuelve los cursos activos del profesor.
+8. Ejecutar `previewClassroomRoster_('ID_DEL_CURSO')`.
+9. Confirmar que solo lee el curso y los alumnos y que no crea tareas ni notas.
+10. No activar el envio de notas hasta vincular una tarea concreta de Classroom.
+
 ## Acceso institucional
 
 1. Abrir `/exec?page=alumno` en una ventana privada.

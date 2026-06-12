@@ -61,6 +61,12 @@ Scrabble incorpora integración multijugador presencial: el jugador principal us
 
 El protocolo reutilizable para los siguientes juegos se describe en `docs/INTEGRACION_JUEGOS.md`.
 
+La siguiente evolucion del backend esta preparada en `supabase/`: Supabase
+almacenara el progreso con baja latencia y Google Classroom aportara cursos,
+alumnos y la sincronizacion de notas por tarea. La migracion sera gradual y
+Sheets seguira funcionando hasta validar los datos nuevos. El plan completo se
+describe en `docs/SUPABASE_CLASSROOM.md`.
+
 Los comandos de publicación suben el código, crean una versión inmutable y actualizan el despliegue web estable correspondiente.
 
 La carpeta `.codex/rules/` permite a Codex ejecutar estos comandos concretos sin solicitar permisos repetidos cuando el repositorio está abierto como proyecto confiable.

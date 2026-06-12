@@ -1,5 +1,20 @@
 # Registro de cambios
 
+## 2026-06-12 - Base de migracion a Supabase y Classroom
+
+- Se anadio el esquema inicial de Supabase para perfiles, clases, matriculas,
+  juegos, progreso, eventos, logros, partidas, errores y cola de notas.
+- Todas las tablas de datos tienen RLS y el PIN queda en un esquema privado.
+- Los checkpoints del alumno se separan del progreso evaluable para evitar que
+  una manipulacion del navegador termine convertida en nota.
+- Se preparo la vinculacion entre juegos, tareas de Classroom y entregas.
+- Se anadio el servicio avanzado de Classroom y dos diagnosticos privados que
+  solo leen cursos y alumnos.
+- Se preparo una Edge Function para conservar el acceso por correo y PIN sin
+  exponer hashes ni claves privadas al navegador.
+- La version publica sigue usando Sheets y no se han migrado datos reales.
+- No se ha activado todavia ningun envio de notas.
+
 ## 2026-06-11 - Selector modal de avatar y paisaje
 
 - Las galerías completas del perfil se sustituyeron por un selector compacto con flechas.

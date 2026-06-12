@@ -1,2 +1,6 @@
 node_modules/
 .apps-script-backups/
+.env
+.env.*
+!.env.example
+.supabase/
