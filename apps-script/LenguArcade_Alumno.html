@@ -616,13 +616,10 @@ applyAvatarProfileV2(currentDashboard);
 <script>
 let secureSessionVerified=false;
 const studentCallServerBase=callServer;
-const dashboardPrefetchToken=token;
-const dashboardPrefetchPromise=token?studentCallServerBase('getStudentDashboardByToken',[token]):null;
+const sessionVerificationToken=token;
+const sessionVerificationPromise=token?studentCallServerBase('verifyStudentSession',[token]):null;
 callServer=function(fn,args){
-  const request=fn==='getStudentDashboardByToken'&&dashboardPrefetchPromise
-    ? dashboardPrefetchPromise
-    : studentCallServerBase(fn,args);
-  return request.then(result=>{
+  return studentCallServerBase(fn,args).then(result=>{
     if(fn==='getStudentDashboardByToken')secureSessionVerified=true;
     return result;
   });
@@ -751,6 +748,7 @@ renderDashboard=function(dashboard){
 };
 
 mountSecureStudentLogin();
+if(!token)hideLoader();
 </script>
 <style>
 .gameRunner{position:fixed;inset:0;z-index:120;display:none;flex-direction:column;background:#050712}
@@ -853,12 +851,12 @@ async function authenticateGameOpponent(){
   try{
     const response=await callServer('loginGameOpponent',[token,email,pin,runner.game.gameId]);
     if(response.student.studentId===currentDashboard.student.studentId)throw new Error('El contrincante debe ser otro alumno.');
-    const opponentGame=(response.dashboard.games||[]).find(game=>game.gameId===runner.game.gameId);
+    const opponentGame=response.game||{gameId:runner.game.gameId,progress:{}};
     runner.opponent={
       token:response.token,
       student:response.student,
-      dashboard:response.dashboard,
-      game:opponentGame||{gameId:runner.game.gameId,progress:{}}
+      dashboard:null,
+      game:opponentGame
     };
     closeGameOpponentLogin();
     sendToActiveGame('OPPONENT_AUTHENTICATED',{
@@ -902,16 +900,21 @@ function prepareEmbeddedGame(game){
   url.searchParams.set('lenguarcade','1');
   url.searchParams.set('channel',channel);
   const iframe=$('gameRunnerFrame');
-  activeGameRunner={game,channel,iframe,gameWindow:null,sessionActive:false,closeRequested:false,pendingResult:null,saving:false,checkpointing:false,opponent:null,opponentAuthBusy:false,initialized:false,visible:false,retries:0};
+  activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,pendingResult:null,saving:false,checkpointing:false,opponent:null,opponentAuthBusy:false,initialized:false,visible:false,loading:false,retries:0};
   $('gameRunnerTitle').textContent=game.nombre;
   $('gameRunnerStatus').textContent='Conectando con tu perfil...';
   $('gameRunnerBootText').textContent='Cargando datos del perfil...';
   $('gameRunnerBoot').classList.remove('hidden');
   $('gameRunnerRetry').classList.add('hidden');
   $('gameRunnerSaving').classList.add('hidden');
-  iframe.src=url.toString();
-  activeGameRunner.connectionTimer=setTimeout(retryGameConnection,4500);
   return activeGameRunner;
+}
+
+function startEmbeddedGameLoad(runner){
+  if(!runner||runner!==activeGameRunner||runner.loading||runner.initialized)return;
+  runner.loading=true;
+  runner.iframe.src=runner.url;
+  runner.connectionTimer=setTimeout(retryGameConnection,4500);
 }
 
 function openEmbeddedGame(game){
@@ -921,6 +924,7 @@ function openEmbeddedGame(game){
   $('gameRunner').classList.add('open');
   document.body.style.overflow='hidden';
   $('gameRunnerStatus').textContent=runner.initialized?'Perfil conectado.':'Conectando con tu perfil...';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>startEmbeddedGameLoad(runner)));
 }
 
 function retryGameConnection(){
@@ -932,18 +936,13 @@ function retryGameConnection(){
     return;
   }
   runner.retries++;
+  runner.loading=true;
   $('gameRunnerStatus').textContent='Reintentando conexión...';
   runner.iframe.src=runner.iframe.src;
   runner.connectionTimer=setTimeout(retryGameConnection,4500);
 }
 
-function preloadIntegratedGame(){
-  if(!secureSessionVerified||activeGameRunner||!currentDashboard)return;
-  const game=(currentDashboard.games||[]).find(item=>item.integration==='embedded'&&item.url&&!item.locked);
-  if(game)prepareEmbeddedGame(game);
-}
-
-function destroyGameRunner(preloadAfter=false){
+function destroyGameRunner(){
   if(!$('gameRunner'))return;
   if(activeGameRunner?.connectionTimer)clearTimeout(activeGameRunner.connectionTimer);
   $('gameRunner').classList.remove('open');
@@ -953,7 +952,6 @@ function destroyGameRunner(preloadAfter=false){
   closeGameOpponentLogin();
   document.body.style.overflow='';
   activeGameRunner=null;
-  if(preloadAfter)setTimeout(preloadIntegratedGame,500);
 }
 
 function requestCloseGameRunner(){
@@ -1156,20 +1154,14 @@ openGame=function(gameId){
 
 mountGameRunner();
 $('logoutBtn').addEventListener('click',()=>destroyGameRunner(false));
-const renderDashboardWithGamePreload=renderDashboard;
-renderDashboard=function(dashboard){
-  renderDashboardWithGamePreload(dashboard);
-  setTimeout(preloadIntegratedGame,0);
-};
-if(dashboardPrefetchPromise){
-  dashboardPrefetchPromise.then(dashboard=>{
-    if(!token||token!==dashboardPrefetchToken)return;
+if(sessionVerificationPromise){
+  sessionVerificationPromise.then(()=>{
+    if(!token||token!==sessionVerificationToken)return;
     secureSessionVerified=true;
-    currentDashboard=dashboard;
-    saveCache('LA_DASHBOARD_CACHE',dashboard);
-    renderDashboard(dashboard);
-    revealStudentApp();
-    hideLoader();
+    if(currentDashboard){
+      revealStudentApp();
+      hideLoader();
+    }
   }).catch(()=>{});
 }
 </script>

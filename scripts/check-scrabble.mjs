@@ -33,12 +33,23 @@ for (const required of [
 ]) {
   if (!html.includes(required)) errors.push(`Falta el componente de Scrabble: ${required}`);
 }
+if (/@import\s+url\(['"]https:\/\/fonts\.googleapis\.com/.test(html) ||
+    /const AUDIO_(?:CLACK|BGM)\s*=\s*new Audio/.test(html) ||
+    !html.includes("AUDIO_BGM.preload = 'none'")) {
+  errors.push("Scrabble debe cargar fuentes y audio sin bloquear su apertura.");
+}
 
 const centralServer = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Code.gs"), "utf8");
 const centralStudent = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Alumno.html"), "utf8");
 
 if (!/function loginGameOpponent\(primaryToken,\s*email,\s*pin,\s*gameId\)[\s\S]*?requireSession_\(primaryToken,\s*'student'\)/.test(centralServer)) {
   errors.push("El acceso del contrincante debe exigir la sesión del jugador principal.");
+}
+const opponentLoginSource = centralServer.match(/function loginGameOpponent\([^)]*\)\s*\{([\s\S]*?)\n\}/);
+if (!opponentLoginSource ||
+    !opponentLoginSource[1].includes("getStudentGameRecord_") ||
+    opponentLoginSource[1].includes("getStudentDashboardCore_")) {
+  errors.push("El acceso del contrincante debe cargar solo su partida, no todo su panel.");
 }
 if (!/function saveGameCheckpoint\(payload\)[\s\S]*?requireSession_\(payload\.sessionToken,\s*'student'\)/.test(centralServer)) {
   errors.push("Los puntos de control de Scrabble deben exigir una sesión de alumno.");

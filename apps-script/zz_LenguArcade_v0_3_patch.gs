@@ -36,7 +36,6 @@ function setupLenguArcadeV03_() {
 }
 
 function getPublicMetaV03() {
-  ensureSheets_();
   return cachedJsonV03_('public_meta_v04', function(){
     return {
       ok:true,

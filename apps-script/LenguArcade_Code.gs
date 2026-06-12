@@ -96,7 +96,6 @@ function getStudentsByClass(classCode) {
 }
 
 function loginStudent(email, pin) {
-  ensureSheets_();
   const cleanEmail = normalizeStudentLoginEmail_(email);
   const cleanPin = String(pin || '').trim();
   const throttle = getStudentLoginThrottle_(cleanEmail);
@@ -122,12 +121,10 @@ function loginStudent(email, pin) {
 
   clearStudentLoginFailures_(cleanEmail);
   const token = createSession_('student', student.studentId);
-  touchStudent_(student.studentId);
   return { ok:true, token:token, student:safeStudent_(student), dashboard:getStudentDashboardCore_(student.studentId) };
 }
 
 function loginGameOpponent(primaryToken, email, pin, gameId) {
-  ensureSheets_();
   const primaryStudentId = requireSession_(primaryToken, 'student');
   const cleanEmail = normalizeStudentLoginEmail_(email);
   const cleanPin = String(pin || '').trim();
@@ -146,11 +143,16 @@ function loginGameOpponent(primaryToken, email, pin, gameId) {
     Utilities.sleep(300);
     throw new Error('Correo o PIN incorrectos, o el contrincante coincide con el jugador principal.');
   }
-  if (!findGame_(gameId)) throw new Error('Juego no reconocido.');
+  const game = findGame_(gameId);
+  if (!game) throw new Error('Juego no reconocido.');
   clearStudentLoginFailures_(cleanEmail);
   const opponentToken = createSession_('student', student.studentId);
-  touchStudent_(student.studentId);
-  return { ok:true, token:opponentToken, student:safeStudent_(student), dashboard:getStudentDashboardCore_(student.studentId) };
+  return {
+    ok:true,
+    token:opponentToken,
+    student:safeStudent_(student),
+    game:getStudentGameRecord_(student, game)
+  };
 }
 
 function loginTeacher(password) {
@@ -163,8 +165,11 @@ function loginTeacher(password) {
 
 function getStudentDashboardByToken(token) {
   const studentId = requireSession_(token, 'student');
-  touchStudent_(studentId);
   return getStudentDashboardCore_(studentId);
+}
+
+function verifyStudentSession(token) {
+  return { ok:true, studentId:requireSession_(token, 'student') };
 }
 
 function getStudentDashboard_(identifier) {
@@ -306,10 +311,13 @@ function calculateStudentGradeForTeacher_(studentId, gameId) {
 }
 
 function getStudentDashboardCore_(studentId) {
-  const student = findStudent_(studentId);
+  const students = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS));
+  const student = students.find(s => String(s.studentId) === String(studentId));
   if (!student) throw new Error('Alumno no encontrado.');
   const games = getActiveGames_().map(decorateGameIntegration_);
   const progressRows = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.PROGRESO)).filter(r => String(r.studentId) === String(student.studentId)).map(normalizeProgressRow_);
+  const events = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.EVENTOS));
+  const achievements = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.LOGROS));
   const byGame = {};
   progressRows.forEach(r => byGame[r.gameId] = r);
   const gameCards = games.map(g => {
@@ -321,12 +329,23 @@ function getStudentDashboardCore_(studentId) {
     student:safeStudent_(student),
     general:buildGeneralProgress_(student, progressRows, games),
     games:gameCards,
-    events: rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.EVENTOS)).filter(e => String(e.studentId) === String(student.studentId)).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0,8),
-    achievements: rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.LOGROS)).filter(a => String(a.studentId) === String(student.studentId)).slice(-6).reverse(),
-    ranking: buildClassRanking_(student.clase, 5),
+    events:events.filter(e => String(e.studentId) === String(student.studentId)).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0,8),
+    achievements:achievements.filter(a => String(a.studentId) === String(student.studentId)).slice(-6).reverse(),
+    ranking:buildClassRankingFromStudents_(students, student.clase, 5),
     missions: buildStudentMissions_(student, byGame),
-    grade: calculateStudentGrade_(student.studentId, null)
+    grade:calculateGradeFromRowsV03_(progressRows, false)
   };
+}
+
+function getStudentGameRecord_(student, game) {
+  const progress = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.PROGRESO))
+    .find(row => String(row.studentId) === String(student.studentId) && String(row.gameId) === String(game.gameId));
+  const normalized = progress ? normalizeProgressRow_(progress) : emptyProgressForGame_(student, game);
+  return Object.assign({}, decorateGameIntegration_(game), {
+    progress:normalized,
+    locked:String(game.estado).toLowerCase() === 'proximamente',
+    buttonLabel:normalized.sessions > 0 ? 'Continuar' : 'Jugar'
+  });
 }
 
 function getTeacherDashboardCore_(filters) {
@@ -367,16 +386,30 @@ function getTeacherDashboardCore_(filters) {
   };
 }
 
+var LA_DB_INSTANCE_ = null;
+
 function getDb_() {
-  if (LA_CONFIG.SPREADSHEET_ID) return SpreadsheetApp.openById(LA_CONFIG.SPREADSHEET_ID);
+  if (LA_DB_INSTANCE_) return LA_DB_INSTANCE_;
+  if (LA_CONFIG.SPREADSHEET_ID) {
+    LA_DB_INSTANCE_ = SpreadsheetApp.openById(LA_CONFIG.SPREADSHEET_ID);
+    return LA_DB_INSTANCE_;
+  }
   const props = PropertiesService.getScriptProperties();
   const saved = props.getProperty('LA_SPREADSHEET_ID');
-  if (saved) return SpreadsheetApp.openById(saved);
+  if (saved) {
+    LA_DB_INSTANCE_ = SpreadsheetApp.openById(saved);
+    return LA_DB_INSTANCE_;
+  }
   const active = SpreadsheetApp.getActiveSpreadsheet();
-  if (active) { props.setProperty('LA_SPREADSHEET_ID', active.getId()); return active; }
+  if (active) {
+    props.setProperty('LA_SPREADSHEET_ID', active.getId());
+    LA_DB_INSTANCE_ = active;
+    return LA_DB_INSTANCE_;
+  }
   const ss = SpreadsheetApp.create(LA_CONFIG.DB_NAME);
   props.setProperty('LA_SPREADSHEET_ID', ss.getId());
-  return ss;
+  LA_DB_INSTANCE_ = ss;
+  return LA_DB_INSTANCE_;
 }
 
 function ensureSheets_() {
@@ -499,6 +532,7 @@ function buildGeneralProgress_(student, progressRows, games) { const xp = progre
 function emptyProgressForGame_(student, game) { return { studentId:student.studentId, email:student.email, nombre:student.nombre + ' ' + student.apellidos, clase:student.clase, gameId:game.gameId, gameName:game.nombre, xp:0, nivel:1, percentage:0, accuracy:0, attempts:0, successes:0, errors:0, streak:0, sessions:0, achievementsCount:0, missionsCompleted:0, plumas:0, lastActivity:'', rawJson:'{}', updatedAt:'' }; }
 function normalizeProgressRow_(r) { ['xp','nivel','percentage','accuracy','attempts','successes','errors','streak','sessions','achievementsCount','missionsCompleted','plumas'].forEach(k => r[k] = Number(r[k] || 0)); return r; }
 function buildClassRanking_(classCode, limit) { return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS)).filter(s => s.clase === classCode).map(s => ({ studentId:s.studentId, nombre:s.nombre + ' ' + s.apellidos, xp:Number(s.xpGeneral || 0), level:Number(s.nivelGeneral || 1), plumas:Number(s.plumas || 0) })).sort((a,b) => b.xp - a.xp).slice(0, limit || 10); }
+function buildClassRankingFromStudents_(students, classCode, limit) { return (students || []).filter(s => s.clase === classCode).map(s => ({ studentId:s.studentId, nombre:s.nombre + ' ' + s.apellidos, xp:Number(s.xpGeneral || 0), level:Number(s.nivelGeneral || 1), plumas:Number(s.plumas || 0) })).sort((a,b) => b.xp - a.xp).slice(0, limit || 10); }
 function buildStudentMissions_(student, byGame) { const progress = Object.values(byGame); const sessions = progress.reduce((a,p) => a + Number(p.sessions || 0), 0); const variety = progress.filter(p => Number(p.sessions || 0) > 0).length; const acc = progress.reduce((m,p) => Math.max(m, Number(p.accuracy || 0)), 0); return [ {title:'Primer aterrizaje', progress:Math.min(sessions,1), target:1, completed:sessions>=1}, {title:'Explorador de LenguArcade', progress:Math.min(variety,3), target:3, completed:variety>=3}, {title:'Cazador de errores', progress:Math.min(acc,80), target:80, completed:acc>=80} ]; }
 function calculateStudentGrade_(studentId, gameId) { const rows = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.PROGRESO)).filter(r => String(r.studentId) === String(studentId)).filter(r => !gameId || r.gameId === gameId).map(normalizeProgressRow_); if (!rows.length) return { score:0, breakdown:{ progreso:0, dominio:0, misiones:0, constancia:0, variedad:0, logros:0 } }; const xpScore = clamp_(average_(rows.map(r => Math.min(10, Number(r.xp || 0) / 80))),0,10); const accuracyScore = clamp_((average_(rows.map(r => r.accuracy)) || 0) / 10,0,10); const missionScore = clamp_(average_(rows.map(r => Number(r.missionsCompleted || 0))) * 2.5,0,10); const constancyScore = clamp_(average_(rows.map(r => Number(r.sessions || 0))) * 2,0,10); const varietyScore = gameId ? 10 : clamp_(rows.filter(r => Number(r.sessions || 0)>0).length * 1.7,0,10); const achievementScore = clamp_(average_(rows.map(r => Number(r.achievementsCount || 0))) * 2.5,0,10); return { score:round1_(xpScore*.25 + accuracyScore*.25 + missionScore*.20 + constancyScore*.15 + varietyScore*.10 + achievementScore*.05), breakdown:{ progreso:round1_(xpScore), dominio:round1_(accuracyScore), misiones:round1_(missionScore), constancia:round1_(constancyScore), variedad:round1_(varietyScore), logros:round1_(achievementScore) } }; }
 function summarizeErrors_(errors) { const map = {}; errors.forEach(e => { const k = (e.skill || 'general') + ' - ' + (e.errorType || 'error'); map[k] = (map[k] || 0) + Number(e.count || 1); }); return Object.keys(map).map(k => ({ label:k, count:map[k] })).sort((a,b) => b.count - a.count).slice(0,8); }

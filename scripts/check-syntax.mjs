@@ -130,8 +130,20 @@ if (!studentHtml.includes("GAME_BRIDGE_NAMESPACE='lenguarcade-game'") ||
     !studentHtml.includes("message.gameId!==runner.game.gameId") ||
     !studentHtml.includes("processedGameResults.has(result.resultId)") ||
     !studentHtml.includes("sessionToken:token") ||
-    !studentHtml.includes("preloadIntegratedGame")) {
+    !studentHtml.includes("startEmbeddedGameLoad") ||
+    !studentHtml.includes("sessionVerificationPromise")) {
   errors.push("La integración de juegos debe validar el canal y guardar el progreso desde la sesión de LenguArcade.");
+}
+if (studentHtml.includes("setTimeout(preloadIntegratedGame") ||
+    studentHtml.includes("renderDashboardWithGamePreload")) {
+  errors.push("La vista del alumno no debe cargar un juego completo antes de que el alumno lo abra.");
+}
+if (!/function verifyStudentSession\(token\)\s*\{[^}]*requireSession_\(token,\s*'student'\)/.test(serverSource) ||
+    /function getStudentDashboardByToken\(token\)\s*\{[^}]*touchStudent_/.test(serverSource)) {
+  errors.push("La reanudacion de sesion debe validarse sin escribir en Sheets ni construir el panel completo.");
+}
+if (/function getPublicMetaV03\(\)\s*\{\s*ensureSheets_/.test(serverSource)) {
+  errors.push("La carga publica no debe revisar todas las hojas en cada visita.");
 }
 if (!serverSource.includes("AKfycbxgtB6NP9zVvkkEZjodyGhSQbZmFifeFdMf8uDr0QsXoWsp_AxZdb7OFxtS5vKM-VruPw") ||
     !serverSource.includes("decorateGameIntegration_")) {
