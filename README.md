@@ -52,9 +52,12 @@ npm.cmd install
 npm.cmd run apps:status
 npm.cmd run apps:publish -- "descripcion del cambio"
 npm.cmd run maniac:publish -- "descripcion del cambio"
+npm.cmd run scrabble:publish -- "descripcion del cambio"
 ```
 
 Maniacgrafía es el primer juego integrado: se abre dentro de LenguArcade, recibe la identidad del alumno autenticado y devuelve el resultado de la partida al progreso central. El token de sesión nunca se entrega al juego.
+
+Scrabble incorpora integración multijugador presencial: el jugador principal usa su sesión abierta y el contrincante se identifica en un modal seguro de LenguArcade. El portal conserva ambos tokens, guarda partidas en curso y registra puntuaciones y logros por separado.
 
 El protocolo reutilizable para los siguientes juegos se describe en `docs/INTEGRACION_JUEGOS.md`.
 

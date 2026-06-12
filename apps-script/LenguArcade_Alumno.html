@@ -761,6 +761,11 @@ mountSecureStudentLogin();
 .gameRunnerBar button{width:auto;margin:0;padding:9px 13px}
 .gameRunnerFrame{width:100%;flex:1;border:0;background:#f8fafc}
 .gameRunnerSaving{position:absolute;right:18px;bottom:18px;padding:10px 14px;border-radius:14px;background:rgba(5,7,18,.9);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:12px;box-shadow:var(--shadow)}
+.gameOpponentAuth{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(5,7,18,.82);backdrop-filter:blur(10px)}
+.gameOpponentAuth.open{display:flex}
+.gameOpponentCard{width:min(480px,96vw);padding:24px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:var(--shadow)}
+.gameOpponentCard h2{margin:0 0 6px}.gameOpponentCard p{color:var(--muted);margin:0 0 18px}
+.gameOpponentActions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.gameOpponentStatus{min-height:20px;margin-top:12px;color:var(--muted);font-size:13px}
 .gameRunnerBoot{position:absolute;inset:58px 0 0;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,rgba(124,77,255,.2),transparent 35%),#070b19;color:#fff;transition:opacity .2s ease;pointer-events:none}
 .gameRunnerBoot.hidden{opacity:0;display:grid!important;visibility:hidden}
 .gameRunnerBootCard{text-align:center;padding:28px}.gameRunnerBootLogo{width:82px;height:82px;margin:0 auto 16px;border-radius:22px;background:#0b1020 url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-logo.png') center/74px no-repeat;box-shadow:0 18px 45px rgba(0,0,0,.35)}
@@ -785,11 +790,27 @@ function mountGameRunner(){
       <iframe class="gameRunnerFrame" id="gameRunnerFrame" title="Juego de LenguArcade" allow="autoplay; fullscreen"></iframe>
       <div class="gameRunnerBoot" id="gameRunnerBoot"><div class="gameRunnerBootCard"><div class="gameRunnerBootLogo"></div><strong>Preparando el juego</strong><span id="gameRunnerBootText">Cargando datos del perfil...</span></div></div>
       <div class="gameRunnerSaving hidden" id="gameRunnerSaving">Guardando progreso...</div>
+    </section>
+    <section class="gameOpponentAuth" id="gameOpponentAuth" aria-label="Acceso del contrincante">
+      <div class="gameOpponentCard">
+        <h2>Conectar contrincante</h2>
+        <p>El segundo jugador entra con su correo institucional y PIN. Sus credenciales se gestionan en LenguArcade y nunca se entregan al juego.</p>
+        <div class="field"><label>Correo del alumno</label><input id="gameOpponentEmail" type="email" autocomplete="username" placeholder="alumno@alumno.fomento.edu"></div>
+        <div class="field" style="margin-top:10px"><label>PIN</label><input id="gameOpponentPin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN"></div>
+        <div class="gameOpponentActions" style="margin-top:16px">
+          <button type="button" class="ghost" id="gameOpponentCancel">Cancelar</button>
+          <button type="button" id="gameOpponentLogin">Conectar</button>
+        </div>
+        <div class="gameOpponentStatus" id="gameOpponentStatus"></div>
+      </div>
     </section>`);
   $('gameRunnerClose').onclick=requestCloseGameRunner;
   $('gameRunnerRetry').onclick=()=>{
     if(activeGameRunner?.pendingResult)persistGameResult(activeGameRunner.pendingResult);
   };
+  $('gameOpponentCancel').onclick=closeGameOpponentLogin;
+  $('gameOpponentLogin').onclick=authenticateGameOpponent;
+  $('gameOpponentPin').addEventListener('keydown',event=>{if(event.key==='Enter')authenticateGameOpponent()});
 }
 
 function createGameChannel(){
@@ -804,6 +825,55 @@ function parseStoredGameSave(game){
   }catch(error){
     console.warn('No se pudo leer la partida guardada de Maniacgrafía.',error);
     return null;
+  }
+}
+
+function openGameOpponentLogin(){
+  if(!activeGameRunner)return;
+  $('gameOpponentEmail').value='';
+  $('gameOpponentPin').value='';
+  $('gameOpponentStatus').textContent='';
+  $('gameOpponentAuth').classList.add('open');
+  setTimeout(()=>$('gameOpponentEmail').focus(),50);
+}
+
+function closeGameOpponentLogin(){
+  $('gameOpponentAuth')?.classList.remove('open');
+  if($('gameOpponentPin'))$('gameOpponentPin').value='';
+}
+
+async function authenticateGameOpponent(){
+  const runner=activeGameRunner;
+  if(!runner||runner.opponentAuthBusy)return;
+  const email=$('gameOpponentEmail').value.trim();
+  const pin=$('gameOpponentPin').value;
+  runner.opponentAuthBusy=true;
+  $('gameOpponentLogin').disabled=true;
+  $('gameOpponentStatus').textContent='Comprobando sesión...';
+  try{
+    const response=await callServer('loginGameOpponent',[token,email,pin,runner.game.gameId]);
+    if(response.student.studentId===currentDashboard.student.studentId)throw new Error('El contrincante debe ser otro alumno.');
+    const opponentGame=(response.dashboard.games||[]).find(game=>game.gameId===runner.game.gameId);
+    runner.opponent={
+      token:response.token,
+      student:response.student,
+      dashboard:response.dashboard,
+      game:opponentGame||{gameId:runner.game.gameId,progress:{}}
+    };
+    closeGameOpponentLogin();
+    sendToActiveGame('OPPONENT_AUTHENTICATED',{
+      student:response.student,
+      save:parseStoredGameSave(runner.opponent.game)
+    });
+    $('gameRunnerStatus').textContent='Los dos jugadores están conectados.';
+  }catch(error){
+    const message=error.message||String(error);
+    $('gameOpponentStatus').textContent=message;
+    sendToActiveGame('OPPONENT_AUTH_FAILED',{message});
+  }finally{
+    if(activeGameRunner===runner)runner.opponentAuthBusy=false;
+    $('gameOpponentLogin').disabled=false;
+    $('gameOpponentPin').value='';
   }
 }
 
@@ -832,7 +902,7 @@ function prepareEmbeddedGame(game){
   url.searchParams.set('lenguarcade','1');
   url.searchParams.set('channel',channel);
   const iframe=$('gameRunnerFrame');
-  activeGameRunner={game,channel,iframe,gameWindow:null,sessionActive:false,closeRequested:false,pendingResult:null,saving:false,initialized:false,visible:false,retries:0};
+  activeGameRunner={game,channel,iframe,gameWindow:null,sessionActive:false,closeRequested:false,pendingResult:null,saving:false,checkpointing:false,opponent:null,opponentAuthBusy:false,initialized:false,visible:false,retries:0};
   $('gameRunnerTitle').textContent=game.nombre;
   $('gameRunnerStatus').textContent='Conectando con tu perfil...';
   $('gameRunnerBootText').textContent='Cargando datos del perfil...';
@@ -880,6 +950,7 @@ function destroyGameRunner(preloadAfter=false){
   $('gameRunnerFrame').src='about:blank';
   $('gameRunnerRetry').classList.add('hidden');
   $('gameRunnerSaving').classList.add('hidden');
+  closeGameOpponentLogin();
   document.body.style.overflow='';
   activeGameRunner=null;
   if(preloadAfter)setTimeout(preloadIntegratedGame,500);
@@ -887,7 +958,7 @@ function destroyGameRunner(preloadAfter=false){
 
 function requestCloseGameRunner(){
   if(!activeGameRunner)return destroyGameRunner();
-  if(activeGameRunner.saving){
+  if(activeGameRunner.saving||activeGameRunner.checkpointing){
     activeGameRunner.closeRequested=true;
     $('gameRunnerStatus').textContent='Terminando de guardar antes de salir...';
     return;
@@ -901,8 +972,8 @@ function requestCloseGameRunner(){
   destroyGameRunner(true);
 }
 
-function buildCentralProgress(result){
-  const old=activeGameRunner?.game?.progress||{};
+function buildCentralProgress(result,gameRecord){
+  const old=gameRecord?.progress||{};
   const correct=Math.max(0,Number(result.correct||0));
   const errors=Math.max(0,Number(result.errors||0));
   const sessionAttempts=correct+errors;
@@ -911,10 +982,14 @@ function buildCentralProgress(result){
   const totalErrors=Number(old.errors||0)+errors;
   const accuracy=attempts?Math.round(successes/attempts*100):Number(old.accuracy||0);
   const world=Math.max(1,Math.min(12,Number(result.adventureWorld||1)));
-  const percentage=result.adventureCompleted?100:Math.max(Number(old.percentage||0),Math.round((world-1)/11*100));
+  const lifetimeGames=Number(result.save?.lifetime?.games||0);
+  const percentage=gameRecord?.gameId==='scrabble'
+    ? Math.max(Number(old.percentage||0),Math.min(100,lifetimeGames*5))
+    : (result.adventureCompleted?100:Math.max(Number(old.percentage||0),Math.round((world-1)/11*100)));
   const achievementBonus=(result.achievements||[]).length*20;
   const victoryBonus=result.outcome==='victory'?100:0;
-  const xpDelta=Math.min(300,Math.max(0,Math.round(Number(result.score||0)/25)+correct*4+achievementBonus+victoryBonus));
+  const scoreDivisor=gameRecord?.gameId==='scrabble'?5:25;
+  const xpDelta=Math.min(300,Math.max(0,Math.round(Number(result.score||0)/scoreDivisor)+correct*4+achievementBonus+victoryBonus));
   const plumasDelta=Math.min(20,Math.max(0,Math.floor(correct/5)+(result.outcome==='victory'?5:0)));
   return {
     xpDelta,
@@ -928,6 +1003,37 @@ function buildCentralProgress(result){
   };
 }
 
+function getGameParticipantContext(runner,participant){
+  if(participant.role==='opponent'){
+    if(!runner.opponent)throw new Error('La sesión del contrincante ya no está disponible.');
+    return {sessionToken:runner.opponent.token,game:runner.opponent.game,isPrimary:false};
+  }
+  return {sessionToken:token,game:runner.game,isPrimary:true};
+}
+
+function buildGameProgressPayload(runner,result,participant,context){
+  return {
+    resultId:String(result.resultId||'')+'__'+String(participant.role||'primary'),
+    sessionToken:context.sessionToken,
+    gameId:runner.game.gameId,
+    eventType:runner.game.gameId+'_'+String(participant.outcome||result.outcome||'finished'),
+    progress:buildCentralProgress(participant,context.game),
+    achievements:participant.achievements||[],
+    rawGameData:{
+      source:runner.game.gameId+'-bridge-v2',
+      save:participant.save||null,
+      matchId:result.matchId||'',
+      lastSession:{
+        outcome:participant.outcome||result.outcome,
+        score:participant.score,
+        correct:participant.correct,
+        errors:participant.errors,
+        maxCombo:participant.maxCombo
+      }
+    }
+  };
+}
+
 async function persistGameResult(result){
   const runner=activeGameRunner;
   if(!runner||runner.saving)return;
@@ -937,26 +1043,21 @@ async function persistGameResult(result){
   $('gameRunnerSaving').classList.remove('hidden');
   $('gameRunnerStatus').textContent='Guardando el resultado en LenguArcade...';
   try{
-    const response=await callServer('saveProgress',[{
-      sessionToken:token,
-      gameId:runner.game.gameId,
-      eventType:runner.game.gameId+'_'+String(result.outcome||'finished'),
-      progress:buildCentralProgress(result),
-      achievements:result.achievements||[],
-      rawGameData:{
-        source:runner.game.gameId+'-bridge-v1',
-        save:result.save||null,
-        lastSession:{
-          outcome:result.outcome,
-          mode:result.mode,
-          score:result.score,
-          correct:result.correct,
-          errors:result.errors,
-          maxCombo:result.maxCombo
-        }
+    const participants=Array.isArray(result.players)&&result.players.length
+      ? result.players
+      : [{...result,role:'primary'}];
+    let primaryResponse=null;
+    for(const participant of participants){
+      const context=getGameParticipantContext(runner,participant);
+      const response=await callServer('saveProgress',[buildGameProgressPayload(runner,result,participant,context)]);
+      if(context.isPrimary)primaryResponse=response;
+      else{
+        runner.opponent.dashboard=response.dashboard;
+        runner.opponent.game=(response.dashboard.games||[]).find(game=>game.gameId===runner.game.gameId)||runner.opponent.game;
       }
-    }]);
-    currentDashboard=response.dashboard;
+    }
+    if(!primaryResponse)throw new Error('No se recibió el resultado del jugador principal.');
+    currentDashboard=primaryResponse.dashboard;
     saveCache('LA_DASHBOARD_CACHE',currentDashboard);
     renderDashboard(currentDashboard);
     runner.game=(currentDashboard.games||[]).find(game=>game.gameId===runner.game.gameId)||runner.game;
@@ -971,6 +1072,40 @@ async function persistGameResult(result){
     sendToActiveGame('SAVE_FAILED',{message:error.message||String(error)});
   }finally{
     if(activeGameRunner===runner)runner.saving=false;
+    $('gameRunnerSaving').classList.add('hidden');
+  }
+}
+
+async function persistGameCheckpoint(checkpoint){
+  const runner=activeGameRunner;
+  if(!runner||runner.checkpointing)return;
+  const participants=Array.isArray(checkpoint.players)?checkpoint.players:[];
+  if(!participants.length)return;
+  runner.checkpointing=true;
+  $('gameRunnerSaving').classList.remove('hidden');
+  $('gameRunnerStatus').textContent='Guardando partida...';
+  try{
+    for(const participant of participants){
+      const context=getGameParticipantContext(runner,participant);
+      await callServer('saveGameCheckpoint',[{
+        sessionToken:context.sessionToken,
+        gameId:runner.game.gameId,
+        rawGameData:{
+          source:runner.game.gameId+'-checkpoint-v1',
+          save:participant.save||null,
+          matchId:checkpoint.matchId||''
+        },
+        achievements:participant.achievements||[]
+      }]);
+    }
+    $('gameRunnerStatus').textContent='Partida guardada.';
+    sendToActiveGame('CHECKPOINT_CONFIRMED',{checkpointId:checkpoint.checkpointId});
+    if(runner.closeRequested)setTimeout(()=>destroyGameRunner(true),250);
+  }catch(error){
+    $('gameRunnerStatus').textContent='No se pudo guardar la partida.';
+    sendToActiveGame('CHECKPOINT_FAILED',{checkpointId:checkpoint.checkpointId,message:error.message||String(error)});
+  }finally{
+    if(activeGameRunner===runner)runner.checkpointing=false;
     $('gameRunnerSaving').classList.add('hidden');
   }
 }
@@ -1000,6 +1135,8 @@ window.addEventListener('message',event=>{
     runner.sessionActive=true;
     $('gameRunnerStatus').textContent='Partida en curso.';
   }
+  if(message.type==='REQUEST_OPPONENT_AUTH')openGameOpponentLogin();
+  if(message.type==='CHECKPOINT')persistGameCheckpoint(message.payload||{});
   if(message.type==='RESULT'){
     const result=message.payload||{};
     if(!result.resultId||processedGameResults.has(result.resultId))return;

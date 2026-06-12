@@ -33,6 +33,10 @@ const LA_GAME_INTEGRATIONS = {
   maniacgrafia: {
     url: 'https://script.google.com/macros/s/AKfycbxgtB6NP9zVvkkEZjodyGhSQbZmFifeFdMf8uDr0QsXoWsp_AxZdb7OFxtS5vKM-VruPw/exec?view=alumno',
     integration: 'embedded'
+  },
+  scrabble: {
+    url: 'https://script.google.com/macros/s/AKfycbxcVJ1I8jFuhbwjjPPzGFcCdku_LDnXKeZEmnpNYwYo9beCEyNHN8ElzWnXxxjyJFJb/exec',
+    integration: 'embedded'
   }
 };
 
@@ -122,6 +126,33 @@ function loginStudent(email, pin) {
   return { ok:true, token:token, student:safeStudent_(student), dashboard:getStudentDashboardCore_(student.studentId) };
 }
 
+function loginGameOpponent(primaryToken, email, pin, gameId) {
+  ensureSheets_();
+  const primaryStudentId = requireSession_(primaryToken, 'student');
+  const cleanEmail = normalizeStudentLoginEmail_(email);
+  const cleanPin = String(pin || '').trim();
+  const throttle = getStudentLoginThrottle_(cleanEmail);
+  if (throttle.blockedUntil > Date.now()) {
+    throw new Error('Demasiados intentos. Espera unos minutos antes de volver a probar.');
+  }
+  const student = findStudentByEmail_(cleanEmail);
+  const valid = student &&
+    isTrue_(student.activo) &&
+    String(student.studentId) !== String(primaryStudentId) &&
+    /^\d{4,8}$/.test(cleanPin) &&
+    String(student.pin || '') === cleanPin;
+  if (!valid) {
+    registerStudentLoginFailure_(cleanEmail, throttle);
+    Utilities.sleep(300);
+    throw new Error('Correo o PIN incorrectos, o el contrincante coincide con el jugador principal.');
+  }
+  if (!findGame_(gameId)) throw new Error('Juego no reconocido.');
+  clearStudentLoginFailures_(cleanEmail);
+  const opponentToken = createSession_('student', student.studentId);
+  touchStudent_(student.studentId);
+  return { ok:true, token:opponentToken, student:safeStudent_(student), dashboard:getStudentDashboardCore_(student.studentId) };
+}
+
 function loginTeacher(password) {
   ensureSheets_();
   const expected = getConfigValue_('TEACHER_PASSWORD');
@@ -158,6 +189,15 @@ function saveProgress(payload) {
     if (!payload.gameId) throw new Error('saveProgress necesita gameId.');
     const student = findStudent_(payload.studentId || payload.email || payload.studentEmail);
     if (!student) throw new Error('Alumno no encontrado.');
+    const resultId = String(payload.resultId || '').trim().slice(0, 180);
+    if (resultId) {
+      const previousEvent = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.EVENTOS)).find(event =>
+        String(event.eventId) === resultId && String(event.studentId) === String(student.studentId)
+      );
+      if (previousEvent) {
+        return { ok:true, duplicate:true, message:'Resultado ya guardado', dashboard:getStudentDashboardCore_(student.studentId) };
+      }
+    }
     const game = findGame_(payload.gameId) || { gameId:payload.gameId, nombre:payload.gameId };
     const progress = payload.progress || {};
     const now = nowIso_();
@@ -195,7 +235,7 @@ function saveProgress(payload) {
       plumas:newPlumas, lastActivity:now, rawJson:JSON.stringify(payload.rawGameData || payload), updatedAt:now
     };
     upsertByKeys_(sheet, ['studentId','gameId'], record);
-    appendObject_(getSheet_(LA_CONFIG.SHEETS.EVENTOS), { eventId:Utilities.getUuid(), timestamp:now, studentId:student.studentId, email:student.email, nombre:record.nombre, clase:student.clase, gameId:game.gameId, eventType:payload.eventType || 'progress_saved', xpDelta:xpDelta, plumasDelta:plumasDelta, accuracy:record.accuracy, detailsJson:JSON.stringify(payload.details || {}) });
+    appendObject_(getSheet_(LA_CONFIG.SHEETS.EVENTOS), { eventId:resultId || Utilities.getUuid(), timestamp:now, studentId:student.studentId, email:student.email, nombre:record.nombre, clase:student.clase, gameId:game.gameId, eventType:payload.eventType || 'progress_saved', xpDelta:xpDelta, plumasDelta:plumasDelta, accuracy:record.accuracy, detailsJson:JSON.stringify(payload.details || {}) });
     appendObject_(getSheet_(LA_CONFIG.SHEETS.RAW), { timestamp:now, studentId:student.studentId, email:student.email, gameId:game.gameId, payloadJson:JSON.stringify(payload) });
     newAchievements.forEach(a => appendObject_(achievementSheet, { achievementId:typeof a === 'string' ? a : (a.id || a.achievementId || Utilities.getUuid()), studentId:student.studentId, email:student.email, gameId:game.gameId, title:typeof a === 'string' ? a : (a.title || a.name || 'Logro'), description:typeof a === 'string' ? '' : (a.description || ''), xpReward:typeof a === 'string' ? 0 : Number(a.xpReward || 0), unlockedAt:now }));
     if (payload.errors && payload.errors.length) payload.errors.forEach(er => appendObject_(getSheet_(LA_CONFIG.SHEETS.ERRORES), { timestamp:now, studentId:student.studentId, email:student.email, gameId:game.gameId, skill:er.skill || '', errorType:er.type || er.errorType || '', count:Number(er.count || 1), detailsJson:JSON.stringify(er) }));
@@ -205,6 +245,59 @@ function saveProgress(payload) {
     logBackendError_('saveProgress', err, payload);
     throw err;
   }
+}
+
+function saveGameCheckpoint(payload) {
+  ensureSheets_();
+  payload = payload || {};
+  const sessionStudentId = requireSession_(payload.sessionToken, 'student');
+  if (payload.studentId && String(payload.studentId) !== String(sessionStudentId)) throw new Error('La sesion no corresponde a ese alumno.');
+  if (!payload.gameId) throw new Error('saveGameCheckpoint necesita gameId.');
+  const student = findStudent_(sessionStudentId);
+  if (!student) throw new Error('Alumno no encontrado.');
+  const game = findGame_(payload.gameId) || { gameId:payload.gameId, nombre:payload.gameId };
+  const sheet = getSheet_(LA_CONFIG.SHEETS.PROGRESO);
+  const rows = rowsToObjects_(sheet);
+  const idx = rows.findIndex(r => String(r.studentId) === String(student.studentId) && String(r.gameId) === String(game.gameId));
+  const old = idx >= 0 ? normalizeProgressRow_(rows[idx]) : emptyProgressForGame_(student, game);
+  const now = nowIso_();
+  const achievementSheet = getSheet_(LA_CONFIG.SHEETS.LOGROS);
+  const existingAchievementIds = {};
+  rowsToObjects_(achievementSheet)
+    .filter(achievement => String(achievement.studentId) === String(student.studentId) && String(achievement.gameId) === String(game.gameId))
+    .forEach(achievement => {
+      const id = String(achievement.achievementId || '');
+      if (id) existingAchievementIds[id] = true;
+    });
+  (payload.achievements || []).forEach(achievement => {
+    const id = String(typeof achievement === 'string' ? achievement : (achievement.id || achievement.achievementId || ''));
+    if (!id || existingAchievementIds[id]) return;
+    existingAchievementIds[id] = true;
+    appendObject_(achievementSheet, {
+      achievementId:id,
+      studentId:student.studentId,
+      email:student.email,
+      gameId:game.gameId,
+      title:typeof achievement === 'string' ? achievement : (achievement.title || achievement.name || 'Logro'),
+      description:typeof achievement === 'string' ? '' : (achievement.description || ''),
+      xpReward:typeof achievement === 'string' ? 0 : Number(achievement.xpReward || 0),
+      unlockedAt:now
+    });
+  });
+  const record = Object.assign({}, old, {
+    studentId:student.studentId,
+    email:student.email,
+    nombre:student.nombre + ' ' + student.apellidos,
+    clase:student.clase,
+    gameId:game.gameId,
+    gameName:game.nombre,
+    achievementsCount:Object.keys(existingAchievementIds).length,
+    lastActivity:now,
+    rawJson:JSON.stringify(payload.rawGameData || payload),
+    updatedAt:now
+  });
+  upsertByKeys_(sheet, ['studentId','gameId'], record);
+  return { ok:true, saved:true, updatedAt:now };
 }
 
 function calculateStudentGradeForTeacher_(studentId, gameId) {
