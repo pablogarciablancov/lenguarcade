@@ -56,6 +56,10 @@ for (const required of [
   if (!centralStudent.includes(required)) errors.push(`Falta la integración multijugador central: ${required}`);
 }
 
+if (!/\.gameOpponentAuth\{[^}]*z-index:(?:1[3-9]\d|[2-9]\d{2,})[^}]*\}/.test(centralStudent)) {
+  errors.push("La ventana del contrincante debe mostrarse por encima del juego.");
+}
+
 if (errors.length) {
   throw new Error(`Comprobaciones de Scrabble fallidas:\n- ${errors.join("\n- ")}`);
 }
