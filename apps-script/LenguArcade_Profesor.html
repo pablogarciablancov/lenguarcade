@@ -20,5 +20,117 @@
 const ASSET_BASE='https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/games/';const BANNERS={battlegrafia:'battlegrafia-banner.jpg',maniacgrafia:'maniacgrafia-banner.jpg',narratoria:'narratoria-banner.jpg',versopolis:'versopolis-banner.jpg',scrabble:'scrabble-banner.jpg',conjuga_apuesta:'conjuga-apuesta-banner.jpg',verb_battle:'verb-battle-banner.jpg'};
 let token=localStorage.getItem('LA_TEACHER_TOKEN')||'',meta=null,busy=false,currentTeacher=null,loaderTimer=null,loaderValue=0;const $=id=>document.getElementById(id);function bannerUrl(id){return ASSET_BASE+(BANNERS[id]||'maniacgrafia-banner.svg')}function callServer(fn,args){return new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn].apply(null,args||[]);});}function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}function setStatus(t){$('status').textContent=t;$('loginStatus').textContent=t;}function showLoader(text,start){$('loader').classList.add('open');loaderValue=start||8;updateLoader(text||'Cargando...',loaderValue);clearInterval(loaderTimer);loaderTimer=setInterval(()=>{loaderValue=Math.min(92,loaderValue+Math.ceil((94-loaderValue)/12));updateLoader(null,loaderValue)},450)}function updateLoader(text,pct){if(text)$('loaderText').textContent=text;$('loaderPct').textContent=Math.round(pct)+'%';$('loaderFill').style.width=Math.round(pct)+'%'}function hideLoader(){clearInterval(loaderTimer);updateLoader('Listo.',100);setTimeout(()=>$('loader').classList.remove('open'),180)}function setBusy(v,t){busy=v;if(v)showLoader(t||'Cargando...',20);else hideLoader();document.querySelectorAll('button').forEach(b=>b.disabled=v);if(t)setStatus(t)}function jump(id,btn){document.getElementById(id)?.scrollIntoView({block:'start'});document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active')}function toggleTheme(){document.body.classList.toggle('light');localStorage.setItem('LA_TEACHER_THEME',document.body.classList.contains('light')?'light':'dark')}function logout(){localStorage.removeItem('LA_TEACHER_TOKEN');token='';$('loginCard').classList.remove('hidden');$('appContent').classList.add('hidden');setStatus('Sesión cerrada.')}async function boot(){if(localStorage.getItem('LA_TEACHER_THEME')==='light')document.body.classList.add('light');bind();showLoader('Preparando interfaz...',8);try{meta=await callServer('getPublicMetaV03');$('version').textContent='v'+(meta.version||'0.4');renderFilters();if(token){$('loginCard').classList.add('hidden');$('appContent').classList.remove('hidden');await loadTeacher();}}catch(e){setStatus('Error inicial: '+(e.message||e));}finally{hideLoader()}}function bind(){document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>jump(b.dataset.target,b)));$('themeBtn').onclick=toggleTheme;$('logoutBtn').onclick=logout;$('loginBtn').onclick=loginTeacher;$('refreshBtn').onclick=loadTeacher;$('studentModalClose').onclick=()=>$('studentModal').classList.remove('open')}function renderFilters(){$('classSelect').innerHTML='<option value="">Todas</option>'+meta.classes.map(c=>`<option value="${esc(c.classCode)}">${esc(c.nombreVisible)}</option>`).join('');$('gameSelect').innerHTML='<option value="">Todos</option>'+meta.games.map(g=>`<option value="${esc(g.gameId)}">${esc(g.nombre)}</option>`).join('');}async function loginTeacher(){if(busy)return;setBusy(true,'Entrando...');try{const r=await callServer('loginTeacher',[$('teacherPass').value]);token=r.token;localStorage.setItem('LA_TEACHER_TOKEN',token);$('loginCard').classList.add('hidden');$('appContent').classList.remove('hidden');await loadTeacher();}catch(e){setStatus('No se ha podido entrar: '+(e.message||e));}finally{setBusy(false)}}async function loadTeacher(){if(busy)return;setBusy(true,'Cargando panel...');try{const d=await callServer('getTeacherDashboardV03',[{classCode:$('classSelect').value,gameId:$('gameSelect').value},token]);currentTeacher=d;renderTeacher(d);setStatus('Panel cargado.');}catch(e){setStatus('Error del panel: '+(e.message||e));if(String(e.message||e).includes('Sesión'))logout();}finally{setBusy(false)}}function renderTeacher(d){const s=d.summary;['studentsTotal','activeStudents','sessionsToday','gamesAvailable','achievementsTotal','averageGrade'].forEach(k=>$(k).textContent=s[k]);$('studentsBody').innerHTML=d.students.map(st=>`<tr class="studentRow" onclick="openStudentDetail('${esc(st.studentId)}')"><td><strong>${esc(st.nombre)}</strong><br><span class="sub">${esc(st.email)}</span></td><td>${esc(st.clase)}</td><td>${esc(st.pin||'')}</td><td>${st.xp}</td><td>${st.level}</td><td>${st.sessions}</td><td>${st.gamesPlayed}</td><td>${st.accuracy}%</td><td><strong>${st.grade}</strong></td></tr>`).join('');$('popularGames').innerHTML=d.popularGames.map(g=>`<div class="gameMini" style="--img:url('${bannerUrl(g.gameId)}')"><div><strong>${esc(g.icono)} ${esc(g.nombre)}</strong><span>${g.sessions} sesiones</span><div class="bar" style="margin-top:8px"><div class="fill" style="width:${g.percent}%"></div></div></div></div>`).join('');$('errors').innerHTML=d.errorSummary.map(e=>`<div class="box"><strong>${esc(e.label)}</strong><br><span class="sub">${e.count} apariciones</span></div>`).join('')||'<div class="sub">Sin errores registrados todavía.</div>';$('recommendations').innerHTML=d.recommendations.map(r=>`<div class="box">${esc(r)}</div>`).join('');renderFocus(d)}function renderFocus(d){const f=d.focus;if(!f){$('focus').innerHTML='<div class="sub">Sin datos.</div>';return}$('focus').innerHTML=`<h3>${esc(f.nombre)}</h3><div class="sub">${esc(f.email)} · ${esc(f.clase)}</div><div class="kpis" style="grid-template-columns:repeat(3,1fr);margin-top:12px"><div class="kpi"><span>XP</span><b>${f.xp}</b></div><div class="kpi"><span>Nivel</span><b>${f.level}</b></div><div class="kpi"><span>Nota</span><b>${f.grade}</b></div></div>`+(d.focusProgress||[]).map(p=>`<div class="box"><div class="boxHead"><strong>${esc(p.gameName)}</strong><span>${p.percentage}%</span></div><div class="bar" style="margin-top:8px"><div class="fill" style="width:${p.percentage}%"></div></div></div>`).join('')}function openStudentDetail(studentId){if(!currentTeacher)return;const st=currentTeacher.students.find(s=>s.studentId===studentId);if(!st)return;const rows=(currentTeacher.focus&&currentTeacher.focus.studentId===studentId)?currentTeacher.focusProgress:[];$('studentModalTitle').textContent=st.nombre;$('studentModalMail').textContent=st.email+' · '+st.clase+' · PIN: '+(st.pin||'');$('studentDetailStats').innerHTML=[['XP',st.xp],['Nivel',st.level],['Sesiones',st.sessions],['Nota',st.grade],['Juegos',st.gamesPlayed],['Precisión',st.accuracy+'%'],['Última actividad',st.lastActivity||'—'],['Clase',st.clase]].map(x=>`<div class="detailItem"><span class="sub">${esc(x[0])}</span><b>${esc(x[1])}</b></div>`).join('');let progress=rows;if(!progress.length)progress=[];$('studentDetailProgress').innerHTML=progress.length?progress.map(p=>`<div class="box"><div class="boxHead"><strong>${esc(p.gameName)}</strong><span>${p.percentage}%</span></div><div class="sub">XP: ${p.xp} · Sesiones: ${p.sessions} · Precisión: ${p.accuracy}%</div><div class="bar" style="margin-top:8px"><div class="fill" style="width:${p.percentage}%"></div></div></div>`).join(''):'<div class="sub">De momento solo se muestra progreso detallado del alumno en foco. En la siguiente mejora cargaré el detalle completo de cualquier alumno seleccionado.</div>';$('studentModal').classList.add('open')}boot();
 </script>
+<style>
+.studentDetailSection{margin-top:20px}.studentDetailSection h2{margin-bottom:10px}
+.detailTimeline{display:grid;gap:8px}.detailTimeline .box{margin:0}
+.detailMeta{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.detailMeta time{white-space:nowrap;color:var(--muted);font-size:12px}
+.detailLoading{grid-column:1/-1;padding:24px;text-align:center;color:var(--muted)}
+.studentDetailGrid .detailItem:nth-child(7) b{font-size:15px;line-height:1.4;overflow-wrap:anywhere}
+@media(max-width:760px){.detailMeta{display:block}.detailMeta time{display:block;margin-top:5px;white-space:normal}}
+</style>
+<script>
+function formatTeacherDate(value){
+  if(!value)return 'Sin actividad registrada';
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime()))return String(value);
+  return new Intl.DateTimeFormat('es-ES',{
+    timeZone:'Europe/Madrid',
+    weekday:'long',
+    day:'numeric',
+    month:'long',
+    year:'numeric',
+    hour:'2-digit',
+    minute:'2-digit'
+  }).format(date);
+}
+
+function ensureStudentDetailSections(){
+  const dialog=$('studentModal')?.querySelector('.dialog');
+  if(!dialog||$('studentDetailActivity'))return;
+  dialog.insertAdjacentHTML('beforeend',`
+    <section class="studentDetailSection">
+      <h2>Actividad reciente</h2>
+      <div class="detailTimeline" id="studentDetailActivity"></div>
+    </section>
+    <section class="studentDetailSection">
+      <h2>Logros desbloqueados</h2>
+      <div class="detailTimeline" id="studentDetailAchievements"></div>
+    </section>
+    <section class="studentDetailSection">
+      <h2>Errores registrados</h2>
+      <div class="detailTimeline" id="studentDetailErrors"></div>
+    </section>`);
+}
+
+function renderTeacherStudentDetail(detail){
+  const st=detail.student;
+  const general=detail.general||{};
+  $('studentModalTitle').textContent=st.nombre;
+  $('studentModalMail').textContent=st.email+' · '+st.clase+' · PIN: '+(st.pin||'');
+  $('studentDetailStats').innerHTML=[
+    ['XP',general.xp||0],
+    ['Nivel',general.level||1],
+    ['Sesiones',general.sessions||0],
+    ['Nota',detail.grade?.score||0],
+    ['Juegos',general.gamesPlayed||0],
+    ['Precisión',(general.accuracy||0)+'%'],
+    ['Última actividad',formatTeacherDate(detail.lastActivity)],
+    ['Clase',st.clase]
+  ].map(item=>`<div class="detailItem"><span class="sub">${esc(item[0])}</span><b>${esc(item[1])}</b></div>`).join('');
+
+  $('studentDetailProgress').innerHTML=(detail.progress||[]).map(progress=>`
+    <div class="box">
+      <div class="boxHead"><strong>${esc(progress.icono||'🎮')} ${esc(progress.gameName||progress.gameId)}</strong><span>${Number(progress.percentage||0)}%</span></div>
+      <div class="sub">XP: ${Number(progress.xp||0)} · Sesiones: ${Number(progress.sessions||0)} · Precisión: ${Number(progress.accuracy||0)}%</div>
+      <div class="sub">Última actividad: ${esc(formatTeacherDate(progress.lastActivity))}</div>
+      <div class="bar" style="margin-top:8px"><div class="fill" style="width:${Number(progress.percentage||0)}%"></div></div>
+    </div>`).join('')||'<div class="sub">Todavía no hay progreso registrado.</div>';
+
+  $('studentDetailActivity').innerHTML=(detail.events||[]).map(event=>`
+    <div class="box detailMeta"><div><strong>${esc(event.gameId||'LenguArcade')}</strong><div class="sub">${esc(event.eventType||'Actividad')} · +${Number(event.xpDelta||0)} XP</div></div><time>${esc(formatTeacherDate(event.timestamp))}</time></div>`).join('')||'<div class="sub">Sin actividad reciente.</div>';
+  $('studentDetailAchievements').innerHTML=(detail.achievements||[]).map(achievement=>`
+    <div class="box detailMeta"><div><strong>${esc(achievement.title||'Logro')}</strong><div class="sub">${esc(achievement.description||achievement.gameId||'')}</div></div><time>${esc(formatTeacherDate(achievement.unlockedAt))}</time></div>`).join('')||'<div class="sub">Todavía no ha desbloqueado logros.</div>';
+  $('studentDetailErrors').innerHTML=(detail.errors||[]).map(error=>`
+    <div class="box detailMeta"><div><strong>${esc(error.skill||error.gameId||'General')}</strong><div class="sub">${esc(error.errorType||'Error')} · ${Number(error.count||1)} aparición(es)</div></div><time>${esc(formatTeacherDate(error.timestamp))}</time></div>`).join('')||'<div class="sub">Sin errores registrados.</div>';
+  $('focus').innerHTML=`
+    <h3>${esc(st.nombre)}</h3>
+    <div class="sub">${esc(st.email)} · ${esc(st.clase)}</div>
+    <div class="kpis" style="grid-template-columns:repeat(3,1fr);margin-top:12px">
+      <div class="kpi"><span>XP</span><b>${Number(general.xp||0)}</b></div>
+      <div class="kpi"><span>Nivel</span><b>${Number(general.level||1)}</b></div>
+      <div class="kpi"><span>Nota</span><b>${Number(detail.grade?.score||0)}</b></div>
+    </div>
+    <div class="sub" style="margin-top:10px">Última actividad: ${esc(formatTeacherDate(detail.lastActivity))}</div>`;
+}
+
+let teacherStudentDetailRequest=0;
+openStudentDetail=async function(studentId){
+  if(!currentTeacher||busy)return;
+  const summary=currentTeacher.students.find(student=>student.studentId===studentId);
+  if(!summary)return;
+  ensureStudentDetailSections();
+  $('studentModalTitle').textContent=summary.nombre;
+  $('studentModalMail').textContent='Cargando ficha completa...';
+  $('studentDetailStats').innerHTML='<div class="detailLoading">Cargando datos del alumno...</div>';
+  $('studentDetailProgress').innerHTML='<div class="detailLoading">Cargando progreso por juego...</div>';
+  $('studentDetailActivity').innerHTML='';
+  $('studentDetailAchievements').innerHTML='';
+  $('studentDetailErrors').innerHTML='';
+  $('studentModal').classList.add('open');
+  const requestId=++teacherStudentDetailRequest;
+  try{
+    const detail=await callServer('getTeacherStudentDetail',[studentId,token]);
+    if(requestId!==teacherStudentDetailRequest)return;
+    renderTeacherStudentDetail(detail);
+  }catch(error){
+    if(requestId!==teacherStudentDetailRequest)return;
+    $('studentDetailStats').innerHTML=`<div class="detailLoading">${esc(error.message||String(error))}</div>`;
+    $('studentDetailProgress').innerHTML='';
+  }
+};
+
+ensureStudentDetailSections();
+</script>
 </body>
 </html>

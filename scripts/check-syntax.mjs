@@ -86,6 +86,14 @@ if (
 ) {
   errors.push("El panel público del profesor expone credenciales o mantenimiento.");
 }
+if (!/function getTeacherStudentDetail\(studentId,\s*token\)\s*\{[\s\S]*?requireSession_\(token,\s*'teacher'\)/.test(serverSource) ||
+    !professorHtml.includes("callServer('getTeacherStudentDetail'") ||
+    !professorHtml.includes("timeZone:'Europe/Madrid'") ||
+    !professorHtml.includes('id="studentDetailActivity"') ||
+    !professorHtml.includes('id="studentDetailAchievements"') ||
+    !professorHtml.includes('id="studentDetailErrors"')) {
+  errors.push("El panel del profesor debe cargar de forma segura el detalle completo del alumno y mostrar fechas legibles.");
+}
 if (!/function saveProgress\(payload\)[\s\S]*?requireSession_\(payload\.sessionToken,\s*'student'\)/.test(serverSource)) {
   errors.push("saveProgress debe exigir una sesión de alumno.");
 }

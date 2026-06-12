@@ -184,6 +184,101 @@ function getTeacherDashboard(filters, token) {
   return getTeacherDashboardCore_(filters || {});
 }
 
+function getTeacherStudentDetail(studentId, token) {
+  requireSession_(token, 'teacher');
+  const students = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS));
+  const student = students.find(row => String(row.studentId) === String(studentId));
+  if (!student) throw new Error('Alumno no encontrado.');
+
+  const games = getActiveGames_().map(decorateGameIntegration_);
+  const progressRows = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.PROGRESO))
+    .filter(row => String(row.studentId) === String(student.studentId))
+    .map(normalizeProgressRow_);
+  const progressByGame = {};
+  progressRows.forEach(row => progressByGame[row.gameId] = row);
+  const progress = games.map(game => {
+    const row = progressByGame[game.gameId] || emptyProgressForGame_(student, game);
+    return {
+      gameId:game.gameId,
+      gameName:game.nombre || row.gameName || game.gameId,
+      icono:game.icono || '',
+      color:game.color || '',
+      xp:Number(row.xp || 0),
+      nivel:Number(row.nivel || 1),
+      percentage:Number(row.percentage || 0),
+      accuracy:Number(row.accuracy || 0),
+      attempts:Number(row.attempts || 0),
+      successes:Number(row.successes || 0),
+      errors:Number(row.errors || 0),
+      streak:Number(row.streak || 0),
+      sessions:Number(row.sessions || 0),
+      achievementsCount:Number(row.achievementsCount || 0),
+      missionsCompleted:Number(row.missionsCompleted || 0),
+      plumas:Number(row.plumas || 0),
+      lastActivity:row.lastActivity || ''
+    };
+  });
+  const events = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.EVENTOS))
+    .filter(row => String(row.studentId) === String(student.studentId))
+    .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp))
+    .slice(0, 20)
+    .map(row => ({
+      timestamp:row.timestamp,
+      gameId:row.gameId,
+      eventType:row.eventType,
+      xpDelta:Number(row.xpDelta || 0),
+      plumasDelta:Number(row.plumasDelta || 0),
+      accuracy:Number(row.accuracy || 0)
+    }));
+  const achievements = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.LOGROS))
+    .filter(row => String(row.studentId) === String(student.studentId))
+    .sort((a,b) => new Date(b.unlockedAt) - new Date(a.unlockedAt))
+    .slice(0, 20)
+    .map(row => ({
+      achievementId:row.achievementId,
+      gameId:row.gameId,
+      title:row.title,
+      description:row.description,
+      xpReward:Number(row.xpReward || 0),
+      unlockedAt:row.unlockedAt
+    }));
+  const errors = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ERRORES))
+    .filter(row => String(row.studentId) === String(student.studentId))
+    .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp))
+    .slice(0, 20)
+    .map(row => ({
+      timestamp:row.timestamp,
+      gameId:row.gameId,
+      skill:row.skill,
+      errorType:row.errorType,
+      count:Number(row.count || 1)
+    }));
+  const general = buildGeneralProgress_(student, progressRows, games);
+  const lastActivity = [
+    student.ultimaSesion,
+    events.length ? events[0].timestamp : '',
+    ...progressRows.map(row => row.lastActivity)
+  ].filter(Boolean).sort().pop() || '';
+
+  return {
+    ok:true,
+    student:{
+      studentId:student.studentId,
+      nombre:student.nombre + ' ' + student.apellidos,
+      email:student.email,
+      clase:student.clase,
+      pin:student.pin || ''
+    },
+    general:general,
+    grade:calculateGradeFromRowsV03_(progressRows, false),
+    lastActivity:lastActivity,
+    progress:progress,
+    events:events,
+    achievements:achievements,
+    errors:errors
+  };
+}
+
 function saveProgress(payload) {
   ensureSheets_();
   try {
