@@ -57,7 +57,7 @@ alumnos y borradores de calificaciones desde el panel del profesor.
 Tras publicar por primera vez el servicio de Classroom:
 
 1. Abre el editor de Apps Script.
-2. Ejecuta `testClassroomAccess_`.
+2. Ejecuta `autorizarClassroom`.
 3. Acepta los permisos solicitados por Google.
 4. Usa `Sincronizar alumnado` desde el panel del profesor.
 

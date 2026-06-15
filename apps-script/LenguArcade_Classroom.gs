@@ -5,6 +5,17 @@
  * google.script.run ni desde las paginas publicas de LenguArcade.
  */
 
+function autorizarClassroom() {
+  const activeEmail = String(Session.getActiveUser().getEmail() || '').toLowerCase();
+  const ownerEmail = String(Session.getEffectiveUser().getEmail() || '').toLowerCase();
+  if (!activeEmail || !ownerEmail || activeEmail !== ownerEmail) {
+    throw new Error('Esta funcion solo puede ejecutarla el propietario desde el editor de Apps Script.');
+  }
+  const result = testClassroomAccess_();
+  console.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
 function testClassroomAccess_() {
   const response = Classroom.Courses.list({
     teacherId:'me',

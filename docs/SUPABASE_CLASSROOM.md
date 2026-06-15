@@ -28,7 +28,7 @@ prueba devolvera un error y habra que pedirle que autorice esos permisos.
 
 1. Publicar o subir el proyecto con el servicio avanzado configurado.
 2. Abrir el editor de Apps Script.
-3. Seleccionar `testClassroomAccess_`.
+3. Seleccionar `autorizarClassroom`.
 4. Ejecutarla y aceptar la autorizacion solicitada.
 5. Comprobar que devuelve los cursos activos donde la cuenta es profesora.
 6. Abrir el panel del profesor y pulsar `Sincronizar alumnado`.
