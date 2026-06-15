@@ -18,7 +18,7 @@
     table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted)}tr.studentRow{cursor:pointer}tr.studentRow:hover td{background:rgba(124,77,255,.12)}.bar{height:9px;background:rgba(255,255,255,.13);border-radius:999px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,var(--secondary),var(--primary),var(--danger))}
     .box{border:1px solid var(--line);border-radius:16px;padding:11px;background:rgba(0,0,0,.15);margin-bottom:9px}.boxHead{display:flex;justify-content:space-between;gap:12px}.gameMini{position:relative;overflow:hidden;min-height:92px;border-radius:18px;border:1px solid var(--line);margin-bottom:10px;background-image:linear-gradient(90deg,rgba(0,0,0,.68),rgba(0,0,0,.18)),var(--img);background-size:cover;background-position:center;padding:12px;display:flex;align-items:flex-end}.gameMini strong{font-size:16px;text-shadow:0 2px 10px #000}.gameMini span{display:block;color:#e5edff;font-size:12px;text-shadow:0 2px 8px #000}.status{white-space:pre-wrap;color:var(--muted);font-size:13px}.hidden{display:none!important}
     .loader,.modal{position:fixed;inset:0;background:rgba(5,7,18,.76);backdrop-filter:blur(10px);z-index:50;display:none;align-items:center;justify-content:center;padding:20px}.loader.open,.modal.open{display:flex}.loaderBox,.dialog{width:min(560px,96vw);background:var(--surface);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);padding:24px}.loaderTitle{font-size:22px;font-weight:900}.loaderBar{height:14px;background:rgba(255,255,255,.13);border-radius:999px;overflow:hidden;margin:18px 0 8px}.loaderFill{height:100%;width:35%;background:linear-gradient(90deg,var(--secondary),var(--accent),var(--primary));animation:loading 1.1s ease-in-out infinite alternate}.dialog{width:min(850px,96vw);max-height:86vh;overflow:auto}.dialogHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.closeX{width:auto;background:rgba(255,255,255,.08);border:1px solid var(--line);box-shadow:none;color:var(--text)}
-    .studentDetailGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.detailItem{border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.15);padding:12px}.detailItem b{display:block;font-size:22px;overflow-wrap:anywhere}.progressList{display:grid;grid-template-columns:1fr 1fr;gap:10px}.studentDetailSection{margin-top:20px}.detailTimeline{display:grid;gap:8px}.detailMeta{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.detailMeta time{white-space:nowrap;color:var(--muted);font-size:12px}.credentials{max-height:220px;overflow:auto;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.18);font:12px ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap}
+    .studentDetailGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.detailItem{border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.15);padding:12px}.detailItem b{display:block;font-size:22px;overflow-wrap:anywhere}.progressList{display:grid;grid-template-columns:1fr 1fr;gap:10px}.studentDetailSection{margin-top:20px}.detailTimeline{display:grid;gap:8px}.detailMeta{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.detailMeta time{white-space:nowrap;color:var(--muted);font-size:12px}.credentials{max-height:220px;overflow:auto;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.18);font:12px ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap}.coursePicker{display:grid;gap:9px;margin:18px 0}.courseChoice{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(0,0,0,.14);cursor:pointer}.courseChoice input{width:18px;height:18px;margin:2px 0}.courseChoice strong,.courseChoice span{display:block}.courseChoice span{color:var(--muted);font-size:12px;margin-top:3px}
     @keyframes loading{to{width:88%;transform:translateX(12%)}}@media(max-width:1160px){body{overflow:auto}.app{height:auto;grid-template-columns:1fr}.nav{display:flex;gap:8px;overflow:auto}.nav button{white-space:nowrap}.layout,.cols{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}.railFooter{grid-template-columns:1fr 1fr}}@media(max-width:760px){.top{flex-direction:column;align-items:flex-start}.kpis,.loginGrid,.filters,.studentDetailGrid,.progressList{grid-template-columns:1fr}table{min-width:820px}.detailMeta{display:block}.detailMeta time{display:block;margin-top:5px;white-space:normal}}
   </style>
 </head>
@@ -114,6 +114,11 @@
     <section class="studentDetailSection"><h2>Actividad reciente</h2><div class="detailTimeline" id="studentDetailActivity"></div></section>
     <section class="studentDetailSection"><h2>Logros desbloqueados</h2><div class="detailTimeline" id="studentDetailAchievements"></div></section>
     <section class="studentDetailSection"><h2>Errores registrados</h2><div class="detailTimeline" id="studentDetailErrors"></div></section>
+  </div></div>
+  <div class="modal" id="classroomModal"><div class="dialog">
+    <div class="dialogHead"><div><h2>Selecciona los cursos</h2><div class="sub">Solo se importarán los cursos marcados.</div></div><button type="button" class="closeX" id="classroomModalClose">Cerrar</button></div>
+    <div class="coursePicker" id="classroomCoursePicker"></div>
+    <div class="buttonRow"><button type="button" id="classroomImportBtn">Importar cursos seleccionados</button></div>
   </div></div>
 
   <script>
@@ -217,10 +222,27 @@
       $('studentDetailErrors').innerHTML=(detail.errors||[]).map(row=>`<div class="box detailMeta"><div><strong>${esc(row.skill||row.gameId)}</strong><div class="sub">${esc(row.errorType)} · ${row.count} apariciones</div></div><time>${esc(formatDate(row.timestamp))}</time></div>`).join('')||'<div class="sub">Sin errores registrados.</div>';
     }
 
-    async function syncClassroom(){
-      if(busy)return;setBusy(true,'Leyendo Google Classroom...');
+    async function openClassroomPicker(){
+      if(busy)return;setBusy(true,'Leyendo tus cursos de Classroom...');
       try{
-        const result=await appsCall('syncClassroomRoster',[await ensureSession()]);
+        const result=await appsCall('listClassroomCoursesForSync',[await ensureSession()]);
+        $('classroomCoursePicker').innerHTML=(result.courses||[]).map(course=>{
+          const suggested=/lengua castellana/i.test(course.name);
+          return `<label class="courseChoice"><input type="checkbox" value="${esc(course.id)}" ${suggested?'checked':''}><span><strong>${esc(course.name)}</strong><span>${esc(course.section||'Sin sección')}</span></span></label>`;
+        }).join('')||'<div class="sub">No se han encontrado cursos activos.</div>';
+        $('classroomModal').classList.add('open');
+        setStatus('Selecciona los cursos que pertenecen a LenguArcade.');
+      }catch(error){setStatus('No se pudieron cargar los cursos: '+(error.message||error));}
+      finally{setBusy(false);}
+    }
+    async function syncSelectedClassroomCourses(){
+      if(busy)return;
+      const selected=[...document.querySelectorAll('#classroomCoursePicker input:checked')].map(input=>input.value);
+      if(!selected.length){setStatus('Selecciona al menos un curso.');return;}
+      $('classroomModal').classList.remove('open');
+      setBusy(true,'Importando alumnado desde Classroom...');
+      try{
+        const result=await appsCall('syncClassroomRoster',[await ensureSession(),selected]);
         const skipped=(result.skippedCourses||[]);
         setStatus(`Classroom sincronizado: ${result.coursesSeen||0} cursos y ${result.studentsSeen||0} alumnos.`+(skipped.length?` ${skipped.length} curso(s) sin permiso de roster.`:''));
         if((result.newCredentials||[]).length){
@@ -247,7 +269,7 @@
     function bind(){
       document.querySelectorAll('.nav button').forEach(button=>button.onclick=()=>{document.getElementById(button.dataset.target)?.scrollIntoView({block:'start'});document.querySelectorAll('.nav button').forEach(item=>item.classList.remove('active'));button.classList.add('active');});
       $('themeBtn').onclick=()=>{document.body.classList.toggle('light');localStorage.setItem('LA_TEACHER_THEME',document.body.classList.contains('light')?'light':'dark');};
-      $('logoutBtn').onclick=logout;$('loginBtn').onclick=loginTeacher;$('teacherPass').onkeydown=event=>{if(event.key==='Enter')loginTeacher();};$('refreshBtn').onclick=()=>loadTeacher();$('classSelect').onchange=()=>loadTeacher();$('gameSelect').onchange=()=>loadTeacher();$('studentModalClose').onclick=()=>$('studentModal').classList.remove('open');$('classroomSyncBtn').onclick=syncClassroom;$('classroomGradesBtn').onclick=syncGrades;
+      $('logoutBtn').onclick=logout;$('loginBtn').onclick=loginTeacher;$('teacherPass').onkeydown=event=>{if(event.key==='Enter')loginTeacher();};$('refreshBtn').onclick=()=>loadTeacher();$('classSelect').onchange=()=>loadTeacher();$('gameSelect').onchange=()=>loadTeacher();$('studentModalClose').onclick=()=>$('studentModal').classList.remove('open');$('classroomModalClose').onclick=()=>$('classroomModal').classList.remove('open');$('classroomSyncBtn').onclick=openClassroomPicker;$('classroomImportBtn').onclick=syncSelectedClassroomCourses;$('classroomGradesBtn').onclick=syncGrades;
     }
     async function boot(){
       if(localStorage.getItem('LA_TEACHER_THEME')==='light')document.body.classList.add('light');

@@ -135,8 +135,31 @@ function callSupabaseClassroomBridge_(accessToken, payload) {
   return data;
 }
 
-function syncClassroomRoster(accessToken) {
+function listClassroomCoursesForSync(accessToken) {
   callSupabaseClassroomBridge_(accessToken, { action:'verify' });
+  const response = Classroom.Courses.list({
+    teacherId:'me',
+    courseStates:['ACTIVE'],
+    pageSize:100
+  });
+  return {
+    ok:true,
+    courses:(response.courses || []).map(course => ({
+      id:String(course.id || ''),
+      name:String(course.name || ''),
+      section:String(course.section || ''),
+      alternateLink:String(course.alternateLink || '')
+    }))
+  };
+}
+
+function syncClassroomRoster(accessToken, selectedCourseIds) {
+  callSupabaseClassroomBridge_(accessToken, { action:'verify' });
+  const selected = {};
+  (selectedCourseIds || []).forEach(id => selected[String(id || '')] = true);
+  if (!Object.keys(selected).length) {
+    throw new Error('Selecciona al menos un curso de Classroom.');
+  }
   const response = Classroom.Courses.list({
     teacherId:'me',
     courseStates:['ACTIVE'],
@@ -144,7 +167,7 @@ function syncClassroomRoster(accessToken) {
   });
   const skippedCourses = [];
   const courses = [];
-  (response.courses || []).forEach(course => {
+  (response.courses || []).filter(course => selected[String(course.id || '')]).forEach(course => {
     try {
       courses.push({
         id:String(course.id || ''),
