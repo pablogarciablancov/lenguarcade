@@ -11,6 +11,14 @@ const pinLogin = fs.readFileSync(
   path.resolve("supabase", "functions", "pin-login", "index.ts"),
   "utf8",
 );
+const teacherMigration = fs.readFileSync(
+  path.resolve("supabase", "migrations", "202606140006_teacher_access.sql"),
+  "utf8",
+);
+const teacherLogin = fs.readFileSync(
+  path.resolve("supabase", "functions", "teacher-login", "index.ts"),
+  "utf8",
+);
 const errors = [];
 
 for (const table of [
@@ -71,6 +79,17 @@ if (!pinLogin.includes('Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")') ||
 }
 if (pinLogin.includes("SUPABASE_SERVICE_ROLE_KEY=")) {
   errors.push("La Edge Function contiene una clave service_role incrustada.");
+}
+if (!teacherMigration.includes("create table private.teacher_secrets") ||
+    !teacherMigration.includes("function public.establish_teacher_session") ||
+    !teacherMigration.includes("extensions.crypt") ||
+    !teacherMigration.includes("to service_role")) {
+  errors.push("La autenticacion del profesor debe usar un hash privado y un RPC de service_role.");
+}
+if (!teacherLogin.includes('userClient.auth.getUser()') ||
+    !teacherLogin.includes('admin.rpc("establish_teacher_session"') ||
+    teacherLogin.includes("SUPABASE_SERVICE_ROLE_KEY=")) {
+  errors.push("La Edge Function del profesor debe validar Auth sin incrustar secretos.");
 }
 
 if (errors.length) {

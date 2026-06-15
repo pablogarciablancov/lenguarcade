@@ -60,3 +60,135 @@ function listAllClassroomStudents_(courseId) {
   } while (pageToken);
   return students;
 }
+
+const LA_SUPABASE_URL_ = 'https://spqcztbuwcbmsengeluz.supabase.co';
+const LA_SUPABASE_PUBLIC_KEY_ = 'sb_publishable_zScSYh0tbpXLcY_5iyzsqQ_wepkdqKe';
+
+function callSupabaseClassroomBridge_(accessToken, payload) {
+  const cleanToken = String(accessToken || '').trim();
+  if (!cleanToken) throw new Error('La sesion del profesor no es valida.');
+  const response = UrlFetchApp.fetch(LA_SUPABASE_URL_ + '/functions/v1/classroom-sync', {
+    method:'post',
+    contentType:'application/json',
+    headers:{
+      apikey:LA_SUPABASE_PUBLIC_KEY_,
+      Authorization:'Bearer ' + cleanToken
+    },
+    payload:JSON.stringify(payload || {}),
+    muteHttpExceptions:true
+  });
+  const text = response.getContentText();
+  let data = {};
+  try { data = JSON.parse(text || '{}'); } catch (error) {}
+  if (response.getResponseCode() < 200 || response.getResponseCode() >= 300) {
+    throw new Error(data.error || 'Supabase no ha aceptado la sincronizacion.');
+  }
+  return data;
+}
+
+function syncClassroomRoster(accessToken) {
+  callSupabaseClassroomBridge_(accessToken, { action:'verify' });
+  const response = Classroom.Courses.list({
+    teacherId:'me',
+    courseStates:['ACTIVE'],
+    pageSize:100
+  });
+  const courses = (response.courses || []).map(course => ({
+    id:String(course.id || ''),
+    name:String(course.name || ''),
+    section:String(course.section || ''),
+    courseState:String(course.courseState || ''),
+    alternateLink:String(course.alternateLink || ''),
+    students:listAllClassroomStudents_(course.id).map(student => ({
+      classroomUserId:String(student.userId || ''),
+      firstName:String(student.profile && student.profile.name && student.profile.name.givenName || ''),
+      lastName:String(student.profile && student.profile.name && student.profile.name.familyName || ''),
+      email:String(student.profile && student.profile.emailAddress || '').trim().toLowerCase()
+    }))
+  }));
+  return callSupabaseClassroomBridge_(accessToken, {
+    action:'sync',
+    snapshot:{
+      generatedAt:new Date().toISOString(),
+      teacherEmail:Session.getEffectiveUser().getEmail(),
+      courses:courses
+    }
+  });
+}
+
+function syncClassroomGradesAsDraft(accessToken) {
+  callSupabaseClassroomBridge_(accessToken, { action:'verify' });
+  const exportData = callSupabaseClassroomBridge_(accessToken, { action:'grade-export' });
+  const results = [];
+  (exportData.courses || []).forEach(course => {
+    const courseId = String(course.classroomCourseId || '');
+    if (!courseId) return;
+    const title = 'LenguArcade - Progreso general';
+    const courseWork = findOrCreateLenguArcadeCourseWork_(courseId, title);
+    const submissions = listAllClassroomSubmissions_(courseId, courseWork.id);
+    const submissionByUser = {};
+    submissions.forEach(submission => {
+      submissionByUser[String(submission.userId || '')] = submission;
+    });
+    let updated = 0;
+    (course.students || []).forEach(student => {
+      const submission = submissionByUser[String(student.classroomUserId || '')];
+      if (!submission) return;
+      Classroom.Courses.CourseWork.StudentSubmissions.patch(
+        { draftGrade:Number(student.score || 0) },
+        courseId,
+        courseWork.id,
+        submission.id,
+        { updateMask:'draftGrade' }
+      );
+      updated += 1;
+    });
+    results.push({
+      courseId:courseId,
+      courseName:course.name,
+      courseWorkId:String(courseWork.id || ''),
+      updated:updated
+    });
+  });
+  return { ok:true, courses:results, updated:results.reduce((sum, row) => sum + row.updated, 0) };
+}
+
+function findOrCreateLenguArcadeCourseWork_(courseId, title) {
+  const marker = '[LenguArcade sync v1]';
+  let pageToken = '';
+  do {
+    const options = { pageSize:100 };
+    if (pageToken) options.pageToken = pageToken;
+    const response = Classroom.Courses.CourseWork.list(courseId, options);
+    const found = (response.courseWork || []).find(item =>
+      String(item.title || '') === title &&
+      String(item.description || '').indexOf(marker) === 0
+    );
+    if (found) return found;
+    pageToken = String(response.nextPageToken || '');
+  } while (pageToken);
+  return Classroom.Courses.CourseWork.create({
+    title:title,
+    description:marker + '\nCalificacion global calculada a partir del progreso registrado en LenguArcade.',
+    workType:'ASSIGNMENT',
+    state:'PUBLISHED',
+    maxPoints:10
+  }, courseId);
+}
+
+function listAllClassroomSubmissions_(courseId, courseWorkId) {
+  const submissions = [];
+  let pageToken = '';
+  do {
+    const options = { pageSize:100 };
+    if (pageToken) options.pageToken = pageToken;
+    const response = Classroom.Courses.CourseWork.StudentSubmissions.list(
+      courseId,
+      courseWorkId,
+      options
+    );
+    Array.prototype.push.apply(submissions, response.studentSubmissions || []);
+    pageToken = String(response.nextPageToken || '');
+  } while (pageToken);
+  return submissions;
+}

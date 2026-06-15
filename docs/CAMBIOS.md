@@ -1,5 +1,20 @@
 # Registro de cambios
 
+## 2026-06-15 - Supabase activo y puente de Classroom
+
+- Se migro la base inicial a Supabase: perfiles, progreso, partidas, eventos,
+  logros, misiones y clases.
+- El acceso de alumnos usa correo institucional y PIN cifrado.
+- El panel del profesor usa una sesion segura y carga resumen y fichas completas
+  directamente desde Supabase.
+- Se anadio renovacion automatica de sesiones para partidas largas.
+- Se mantiene una copia secundaria en Sheets durante la transicion.
+- Se incorporo la sincronizacion de cursos y alumnos desde Google Classroom.
+- Se incorporo el envio explicito de calificaciones como borrador a una tarea
+  propia de LenguArcade.
+- Se anadieron scripts de migracion y pruebas reales de los flujos de alumno y
+  profesor.
+
 ## 2026-06-12 - Base de migracion a Supabase y Classroom
 
 - Se anadio el esquema inicial de Supabase para perfiles, clases, matriculas,

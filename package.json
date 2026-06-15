@@ -14,6 +14,7 @@
     "scrabble:publish": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/publish-scrabble.ps1"
   },
   "devDependencies": {
-    "@google/clasp": "3.3.0"
+    "@google/clasp": "3.3.0",
+    "supabase": "^2.106.0"
   }
 }

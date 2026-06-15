@@ -61,11 +61,16 @@ Scrabble incorpora integración multijugador presencial: el jugador principal us
 
 El protocolo reutilizable para los siguientes juegos se describe en `docs/INTEGRACION_JUEGOS.md`.
 
-La siguiente evolucion del backend esta preparada en `supabase/`: Supabase
-almacenara el progreso con baja latencia y Google Classroom aportara cursos,
-alumnos y la sincronizacion de notas por tarea. La migracion sera gradual y
-Sheets seguira funcionando hasta validar los datos nuevos. El plan completo se
-describe en `docs/SUPABASE_CLASSROOM.md`.
+Supabase es el backend principal del portal de alumno y del panel del profesor:
+guarda sesiones, progreso, partidas, logros y errores con baja latencia. Durante
+la transicion, las escrituras del alumno se copian tambien en Sheets como
+respaldo.
+
+Google Classroom se conecta desde el panel del profesor mediante Apps Script:
+permite importar cursos y alumnos y enviar la nota global a una tarea de
+LenguArcade como borrador. La primera sincronizacion requiere que el propietario
+autorice los permisos de Classroom. La arquitectura y las instrucciones estan
+en `docs/SUPABASE_CLASSROOM.md`.
 
 Los comandos de publicación suben el código, crean una versión inmutable y actualizan el despliegue web estable correspondiente.
 

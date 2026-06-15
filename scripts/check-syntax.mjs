@@ -86,8 +86,13 @@ if (
 ) {
   errors.push("El panel público del profesor expone credenciales o mantenimiento.");
 }
-if (!/function getTeacherStudentDetail\(studentId,\s*token\)\s*\{[\s\S]*?requireSession_\(token,\s*'teacher'\)/.test(serverSource) ||
-    !professorHtml.includes("callServer('getTeacherStudentDetail'") ||
+const legacyTeacherDetailIsProtected =
+  /function getTeacherStudentDetail\(studentId,\s*token\)\s*\{[\s\S]*?requireSession_\(token,\s*'teacher'\)/.test(serverSource);
+const supabaseTeacherDetailIsProtected =
+  professorHtml.includes("edge('teacher-student-detail'") &&
+  professorHtml.includes("ensureSession()") &&
+  professorHtml.includes("LA_TEACHER_SUPABASE_SESSION");
+if ((!legacyTeacherDetailIsProtected && !supabaseTeacherDetailIsProtected) ||
     !professorHtml.includes("timeZone:'Europe/Madrid'") ||
     !professorHtml.includes('id="studentDetailActivity"') ||
     !professorHtml.includes('id="studentDetailAchievements"') ||

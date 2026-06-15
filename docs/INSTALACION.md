@@ -49,11 +49,19 @@ La decisión técnica del proyecto es usar un único Google Sheets central para 
 LenguArcade_DB
 ```
 
-La version publicada sigue usando este Sheets central. La migracion prevista
-usa Supabase como base de datos principal y Google Classroom como fuente de
-cursos y alumnos. Sheets se mantendra durante la transicion como copia y
-herramienta de exportacion. Consulta `docs/SUPABASE_CLASSROOM.md` antes de
-activar la migracion.
+La version publicada usa Supabase como base de datos principal. El portal del
+alumno mantiene temporalmente una copia de respaldo en este Sheets para poder
+comparar resultados durante la transicion. Google Classroom aporta cursos,
+alumnos y borradores de calificaciones desde el panel del profesor.
+
+Tras publicar por primera vez el servicio de Classroom:
+
+1. Abre el editor de Apps Script.
+2. Ejecuta `testClassroomAccess_`.
+3. Acepta los permisos solicitados por Google.
+4. Usa `Sincronizar alumnado` desde el panel del profesor.
+
+Consulta `docs/SUPABASE_CLASSROOM.md` para el funcionamiento completo.
 
 ## Alumnos de prueba
 

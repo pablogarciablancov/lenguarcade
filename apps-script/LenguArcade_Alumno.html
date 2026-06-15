@@ -616,13 +616,217 @@ applyAvatarProfileV2(currentDashboard);
 <script>
 let secureSessionVerified=false;
 const studentCallServerBase=callServer;
+const LA_SUPABASE_URL='https://spqcztbuwcbmsengeluz.supabase.co';
+const LA_SUPABASE_KEY='sb_publishable_zScSYh0tbpXLcY_5iyzsqQ_wepkdqKe';
+const LA_SUPABASE_SESSION_KEY='LA_SUPABASE_SESSION';
+const LA_LEGACY_SESSION_KEY='LA_LEGACY_STUDENT_TOKEN';
+let supabaseBackend=false;
+let legacySessionToken=localStorage.getItem(LA_LEGACY_SESSION_KEY)||'';
+const legacyTokenBySupabaseToken=new Map();
+
+function supabaseErrorMessage(code,status){
+  if(code==='invalid_credentials'||status===401)return 'Correo o PIN incorrectos.';
+  if(code==='temporarily_blocked'||status===429)return 'Demasiados intentos. Espera unos minutos.';
+  if(code==='session_expired')return 'La sesiÃ³n ha caducado. Vuelve a entrar.';
+  if(code==='wrong_current_pin')return 'El PIN actual no es correcto.';
+  if(code==='invalid_pin_format')return 'El PIN debe tener entre 4 y 8 nÃºmeros.';
+  if(code==='invalid_avatar')return 'La configuraciÃ³n del avatar no es vÃ¡lida.';
+  return 'No se ha podido conectar con LenguArcade.';
+}
+
+async function supabaseRequest(path,options={},accessToken=''){
+  const headers=Object.assign({
+    apikey:LA_SUPABASE_KEY,
+    'Content-Type':'application/json'
+  },options.headers||{});
+  headers.Authorization='Bearer '+(accessToken||LA_SUPABASE_KEY);
+  let response;
+  try{
+    response=await fetch(LA_SUPABASE_URL+path,Object.assign({},options,{headers}));
+  }catch(error){
+    error.isNetworkError=true;
+    throw error;
+  }
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok){
+    const error=new Error(supabaseErrorMessage(data.error||data.code,response.status));
+    error.status=response.status;
+    error.code=data.error||data.code||'supabase_error';
+    throw error;
+  }
+  return data;
+}
+
+function saveSupabaseSession(auth){
+  const session={
+    access_token:auth.access_token,
+    refresh_token:auth.refresh_token,
+    expires_at:Number(auth.expires_at||Math.floor(Date.now()/1000)+Number(auth.expires_in||3600))
+  };
+  localStorage.setItem(LA_SUPABASE_SESSION_KEY,JSON.stringify(session));
+  return session;
+}
+
+function readSupabaseSession(){
+  try{
+    const value=JSON.parse(localStorage.getItem(LA_SUPABASE_SESSION_KEY)||'null');
+    return value&&value.access_token&&value.refresh_token?value:null;
+  }catch(error){
+    return null;
+  }
+}
+
+async function createSupabaseAnonymousSession(){
+  return supabaseRequest('/auth/v1/signup',{
+    method:'POST',
+    body:JSON.stringify({data:{}})
+  });
+}
+
+async function refreshSupabaseSession(session){
+  const auth=await supabaseRequest('/auth/v1/token?grant_type=refresh_token',{
+    method:'POST',
+    body:JSON.stringify({refresh_token:session.refresh_token})
+  });
+  return saveSupabaseSession(auth);
+}
+
+async function ensureSupabaseAccessToken(accessToken){
+  if(!supabaseBackend||!accessToken||accessToken!==token)return accessToken;
+  let session=readSupabaseSession();
+  if(!session)return accessToken;
+  if(Number(session.expires_at||0)*1000>=Date.now()+45000)return accessToken;
+  const oldToken=token;
+  session=await refreshSupabaseSession(session);
+  token=session.access_token;
+  const legacyToken=legacyTokenFor(oldToken);
+  if(legacyToken)legacyTokenBySupabaseToken.set(token,legacyToken);
+  return token;
+}
+
+async function callSupabaseFunction(name,payload,accessToken){
+  accessToken=await ensureSupabaseAccessToken(accessToken||token);
+  return supabaseRequest('/functions/v1/'+name,{
+    method:'POST',
+    body:JSON.stringify(payload||{})
+  },accessToken||token);
+}
+
+async function loadSupabaseDashboard(accessToken){
+  return callSupabaseFunction('student-dashboard',{},accessToken);
+}
+
+async function loginSupabaseStudent(email,pinValue,persist){
+  const auth=await createSupabaseAnonymousSession();
+  const loginResult=await callSupabaseFunction('pin-login',{email,pin:pinValue},auth.access_token);
+  const dashboard=await loadSupabaseDashboard(auth.access_token);
+  if(persist)saveSupabaseSession(auth);
+  return {ok:true,source:'supabase',token:auth.access_token,refreshToken:auth.refresh_token,student:loginResult.profile,dashboard};
+}
+
+function connectLegacyStudentInBackground(email,pinValue,accessToken){
+  studentCallServerBase('loginStudent',[email,pinValue]).then(result=>{
+    legacySessionToken=result.token;
+    localStorage.setItem(LA_LEGACY_SESSION_KEY,legacySessionToken);
+    legacyTokenBySupabaseToken.set(accessToken,legacySessionToken);
+  }).catch(error=>console.warn('La copia de respaldo en Sheets no pudo iniciar sesiÃ³n.',error));
+}
+
+function legacyTokenFor(accessToken){
+  return legacyTokenBySupabaseToken.get(accessToken)||(accessToken===token?legacySessionToken:'');
+}
+
+function copyProgressToSheets(fn,originalPayload,accessToken){
+  const legacyToken=legacyTokenFor(accessToken);
+  if(!legacyToken)return;
+  const payload=Object.assign({},originalPayload,{sessionToken:legacyToken});
+  studentCallServerBase(fn,[payload]).catch(error=>console.warn('No se pudo actualizar la copia de respaldo en Sheets.',error));
+}
+
+async function restoreSupabaseStudentSession(){
+  let session=readSupabaseSession();
+  if(!session)return false;
+  try{
+    if(Number(session.expires_at||0)*1000<Date.now()+45000)session=await refreshSupabaseSession(session);
+    token=session.access_token;
+    supabaseBackend=true;
+    if(legacySessionToken)legacyTokenBySupabaseToken.set(token,legacySessionToken);
+    const dashboard=await loadSupabaseDashboard(token);
+    secureSessionVerified=true;
+    currentDashboard=dashboard;
+    saveCache('LA_DASHBOARD_CACHE',dashboard);
+    renderDashboard(dashboard);
+    revealStudentApp();
+    setStatus('SesiÃ³n recuperada desde Supabase.');
+    return true;
+  }catch(error){
+    localStorage.removeItem(LA_SUPABASE_SESSION_KEY);
+    token='';
+    supabaseBackend=false;
+    secureSessionVerified=false;
+    setSecureLoginStatus('La sesiÃ³n ha caducado. Introduce de nuevo tu PIN.');
+    return false;
+  }
+}
+
 const sessionVerificationToken=token;
 const sessionVerificationPromise=token?studentCallServerBase('verifyStudentSession',[token]):null;
-callServer=function(fn,args){
-  return studentCallServerBase(fn,args).then(result=>{
-    if(fn==='getStudentDashboardByToken')secureSessionVerified=true;
-    return result;
-  });
+callServer=async function(fn,args){
+  args=args||[];
+  if(supabaseBackend){
+    if(fn==='verifyStudentSession')return {ok:true,studentId:currentDashboard?.student?.studentId||''};
+    if(fn==='getStudentDashboardByToken'){
+      const accessToken=await ensureSupabaseAccessToken(args[0]||token);
+      return loadSupabaseDashboard(accessToken);
+    }
+    if(fn==='saveProgress'){
+      const originalPayload=Object.assign({},args[0]||{});
+      const payload=Object.assign({},originalPayload);
+      const accessToken=await ensureSupabaseAccessToken(payload.sessionToken||token);
+      delete payload.sessionToken;
+      const saved=await callSupabaseFunction('save-progress',payload,accessToken);
+      copyProgressToSheets('saveProgress',originalPayload,accessToken);
+      const dashboard=await loadSupabaseDashboard(accessToken);
+      return Object.assign({},saved,{dashboard});
+    }
+    if(fn==='saveGameCheckpoint'){
+      const originalPayload=Object.assign({},args[0]||{});
+      const payload=Object.assign({},originalPayload,{checkpoint:true});
+      const accessToken=await ensureSupabaseAccessToken(payload.sessionToken||token);
+      delete payload.sessionToken;
+      const saved=await callSupabaseFunction('save-progress',payload,accessToken);
+      copyProgressToSheets('saveGameCheckpoint',originalPayload,accessToken);
+      return saved;
+    }
+    if(fn==='updateStudentAvatar'){
+      const accessToken=await ensureSupabaseAccessToken(args[0]||token);
+      const updated=await callSupabaseFunction('student-profile',{action:'updateAvatar',avatar:args[1]},accessToken);
+      const legacyToken=legacyTokenFor(accessToken);
+      if(legacyToken)studentCallServerBase('updateStudentAvatar',[legacyToken,args[1]]).catch(()=>{});
+      const dashboard=await loadSupabaseDashboard(accessToken);
+      return Object.assign({},updated,{dashboard});
+    }
+    if(fn==='changeStudentPinV03'){
+      const accessToken=await ensureSupabaseAccessToken(args[0]||token);
+      const changed=await callSupabaseFunction('student-profile',{action:'changePin',oldPin:args[1],newPin:args[2]},accessToken);
+      const legacyToken=legacyTokenFor(accessToken);
+      if(legacyToken)studentCallServerBase('changeStudentPinV03',[legacyToken,args[1],args[2]]).catch(()=>{});
+      return changed;
+    }
+    if(fn==='loginGameOpponent'){
+      const opponent=await loginSupabaseStudent(args[1],args[2],false);
+      const game=(opponent.dashboard.games||[]).find(item=>item.gameId===args[3])||null;
+      if(legacySessionToken){
+        studentCallServerBase('loginGameOpponent',[legacySessionToken,args[1],args[2],args[3]]).then(result=>{
+          legacyTokenBySupabaseToken.set(opponent.token,result.token);
+        }).catch(()=>{});
+      }
+      return {ok:true,token:opponent.token,student:opponent.dashboard.student,game};
+    }
+  }
+  const result=await studentCallServerBase(fn,args);
+  if(fn==='getStudentDashboardByToken')secureSessionVerified=true;
+  return result;
 };
 
 renderClasses=function(){};
@@ -707,10 +911,24 @@ async function secureStudentLogin(){
   button.disabled=true;
   setSecureLoginStatus('Comprobando tus datos...');
   try{
-    const result=await callServer('loginStudent',[email,pinValue]);
+    let result;
+    try{
+      result=await loginSupabaseStudent(email,pinValue,true);
+    }catch(error){
+      if(error.status&&error.status<500)throw error;
+      result=await studentCallServerBase('loginStudent',[email,pinValue]);
+    }
     secureSessionVerified=true;
     token=result.token;
-    localStorage.setItem('LA_STUDENT_TOKEN',token);
+    supabaseBackend=result.source==='supabase';
+    if(supabaseBackend){
+      localStorage.removeItem('LA_STUDENT_TOKEN');
+      connectLegacyStudentInBackground(email,pinValue,token);
+    }else{
+      legacySessionToken=token;
+      localStorage.setItem('LA_STUDENT_TOKEN',token);
+      localStorage.setItem(LA_LEGACY_SESSION_KEY,token);
+    }
     currentDashboard=result.dashboard;
     saveCache('LA_DASHBOARD_CACHE',currentDashboard);
     renderDashboard(currentDashboard);
@@ -725,9 +943,18 @@ async function secureStudentLogin(){
 }
 
 function secureStudentLogout(){
+  if(supabaseBackend&&token){
+    callSupabaseFunction('student-profile',{action:'logout'},token).catch(()=>{});
+    supabaseRequest('/auth/v1/logout',{method:'POST'},token).catch(()=>{});
+  }
   localStorage.removeItem('LA_STUDENT_TOKEN');
+  localStorage.removeItem(LA_SUPABASE_SESSION_KEY);
+  localStorage.removeItem(LA_LEGACY_SESSION_KEY);
   localStorage.removeItem('LA_DASHBOARD_CACHE');
   token='';
+  supabaseBackend=false;
+  legacySessionToken='';
+  legacyTokenBySupabaseToken.clear();
   currentDashboard=null;
   secureSessionVerified=false;
   document.body.classList.add('authPending');
@@ -748,7 +975,11 @@ renderDashboard=function(dashboard){
 };
 
 mountSecureStudentLogin();
-if(!token)hideLoader();
+if(!token){
+  const storedSupabaseSession=readSupabaseSession();
+  if(storedSupabaseSession)setSecureLoginStatus('Recuperando tu sesiÃ³n...');
+  restoreSupabaseStudentSession().finally(()=>hideLoader());
+}
 </script>
 <style>
 .gameRunner{position:fixed;inset:0;z-index:120;display:none;flex-direction:column;background:#050712}
@@ -818,7 +1049,8 @@ function createGameChannel(){
 
 function parseStoredGameSave(game){
   try{
-    const raw=JSON.parse(game?.progress?.rawJson||'{}');
+    const stored=game?.progress?.rawJson||{};
+    const raw=typeof stored==='string'?JSON.parse(stored||'{}'):stored;
     return raw.save || raw.rawGameData?.save || null;
   }catch(error){
     console.warn('No se pudo leer la partida guardada de Maniacgrafía.',error);
