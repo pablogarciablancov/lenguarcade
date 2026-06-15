@@ -12,8 +12,29 @@ function autorizarClassroom() {
     throw new Error('Esta funcion solo puede ejecutarla el propietario desde el editor de Apps Script.');
   }
   const result = testClassroomAccess_();
-  console.log(JSON.stringify(result, null, 2));
-  return result;
+  const firstCourse = result.courses[0] || null;
+  const checks = {
+    classroomCourses:true,
+    classroomStudents:false,
+    classroomCourseWork:false,
+    externalRequest:false
+  };
+  if (firstCourse) {
+    Classroom.Courses.Students.list(firstCourse.id, { pageSize:1 });
+    checks.classroomStudents = true;
+    Classroom.Courses.CourseWork.list(firstCourse.id, { pageSize:1 });
+    checks.classroomCourseWork = true;
+  }
+  const health = UrlFetchApp.fetch(LA_SUPABASE_URL_ + '/auth/v1/health', {
+    method:'get',
+    headers:{ apikey:LA_SUPABASE_PUBLIC_KEY_ },
+    muteHttpExceptions:true
+  });
+  checks.externalRequest = health.getResponseCode() >= 200 &&
+    health.getResponseCode() < 500;
+  const authorized = Object.assign({}, result, { checks:checks });
+  console.log(JSON.stringify(authorized, null, 2));
+  return authorized;
 }
 
 function testClassroomAccess_() {
