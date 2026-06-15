@@ -221,7 +221,8 @@
       if(busy)return;setBusy(true,'Leyendo Google Classroom...');
       try{
         const result=await appsCall('syncClassroomRoster',[await ensureSession()]);
-        setStatus(`Classroom sincronizado: ${result.coursesSeen||0} cursos y ${result.studentsSeen||0} alumnos.`);
+        const skipped=(result.skippedCourses||[]);
+        setStatus(`Classroom sincronizado: ${result.coursesSeen||0} cursos y ${result.studentsSeen||0} alumnos.`+(skipped.length?` ${skipped.length} curso(s) sin permiso de roster.`:''));
         if((result.newCredentials||[]).length){
           $('classroomCredentials').textContent='PIN inicial de alumnos nuevos. Guarda esta lista ahora; no se volverá a mostrar:\n\n'+result.newCredentials.map(row=>row.email+'  '+row.pin).join('\n');
           $('classroomCredentials').classList.remove('hidden');

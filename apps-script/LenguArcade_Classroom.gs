@@ -12,19 +12,36 @@ function autorizarClassroom() {
     throw new Error('Esta funcion solo puede ejecutarla el propietario desde el editor de Apps Script.');
   }
   const result = testClassroomAccess_();
-  const firstCourse = result.courses[0] || null;
   const checks = {
     classroomCourses:true,
-    classroomStudents:false,
-    classroomCourseWork:false,
+    classroomStudents:[],
+    classroomCourseWork:[],
     externalRequest:false
   };
-  if (firstCourse) {
-    Classroom.Courses.Students.list(firstCourse.id, { pageSize:1 });
-    checks.classroomStudents = true;
-    Classroom.Courses.CourseWork.list(firstCourse.id, { pageSize:1 });
-    checks.classroomCourseWork = true;
-  }
+  result.courses.forEach(course => {
+    try {
+      Classroom.Courses.Students.list(course.id, { pageSize:1 });
+      checks.classroomStudents.push({ id:course.id, name:course.name, ok:true });
+    } catch (error) {
+      checks.classroomStudents.push({
+        id:course.id,
+        name:course.name,
+        ok:false,
+        error:String(error && error.message || error)
+      });
+    }
+    try {
+      Classroom.Courses.CourseWork.list(course.id, { pageSize:1 });
+      checks.classroomCourseWork.push({ id:course.id, name:course.name, ok:true });
+    } catch (error) {
+      checks.classroomCourseWork.push({
+        id:course.id,
+        name:course.name,
+        ok:false,
+        error:String(error && error.message || error)
+      });
+    }
+  });
   const health = UrlFetchApp.fetch(LA_SUPABASE_URL_ + '/auth/v1/health', {
     method:'get',
     headers:{ apikey:LA_SUPABASE_PUBLIC_KEY_ },
@@ -125,20 +142,32 @@ function syncClassroomRoster(accessToken) {
     courseStates:['ACTIVE'],
     pageSize:100
   });
-  const courses = (response.courses || []).map(course => ({
-    id:String(course.id || ''),
-    name:String(course.name || ''),
-    section:String(course.section || ''),
-    courseState:String(course.courseState || ''),
-    alternateLink:String(course.alternateLink || ''),
-    students:listAllClassroomStudents_(course.id).map(student => ({
-      classroomUserId:String(student.userId || ''),
-      firstName:String(student.profile && student.profile.name && student.profile.name.givenName || ''),
-      lastName:String(student.profile && student.profile.name && student.profile.name.familyName || ''),
-      email:String(student.profile && student.profile.emailAddress || '').trim().toLowerCase()
-    }))
-  }));
-  return callSupabaseClassroomBridge_(accessToken, {
+  const skippedCourses = [];
+  const courses = [];
+  (response.courses || []).forEach(course => {
+    try {
+      courses.push({
+        id:String(course.id || ''),
+        name:String(course.name || ''),
+        section:String(course.section || ''),
+        courseState:String(course.courseState || ''),
+        alternateLink:String(course.alternateLink || ''),
+        students:listAllClassroomStudents_(course.id).map(student => ({
+          classroomUserId:String(student.userId || ''),
+          firstName:String(student.profile && student.profile.name && student.profile.name.givenName || ''),
+          lastName:String(student.profile && student.profile.name && student.profile.name.familyName || ''),
+          email:String(student.profile && student.profile.emailAddress || '').trim().toLowerCase()
+        }))
+      });
+    } catch (error) {
+      skippedCourses.push({
+        id:String(course.id || ''),
+        name:String(course.name || ''),
+        error:String(error && error.message || error)
+      });
+    }
+  });
+  const synced = callSupabaseClassroomBridge_(accessToken, {
     action:'sync',
     snapshot:{
       generatedAt:new Date().toISOString(),
@@ -146,6 +175,8 @@ function syncClassroomRoster(accessToken) {
       courses:courses
     }
   });
+  synced.skippedCourses = skippedCourses;
+  return synced;
 }
 
 function syncClassroomGradesAsDraft(accessToken) {
