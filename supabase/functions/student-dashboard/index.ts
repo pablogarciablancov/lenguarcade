@@ -17,6 +17,10 @@ const integrations: Record<string, { url:string; integration:string }> = {
     url:"https://script.google.com/macros/s/AKfycbxcVJ1I8jFuhbwjjPPzGFcCdku_LDnXKeZEmnpNYwYo9beCEyNHN8ElzWnXxxjyJFJb/exec",
     integration:"embedded",
   },
+  narratoria:{
+    url:"https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec?page=narratoria",
+    integration:"embedded",
+  },
 };
 
 Deno.serve(async (request) => {

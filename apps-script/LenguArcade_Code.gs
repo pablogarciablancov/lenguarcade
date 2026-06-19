@@ -37,6 +37,10 @@ const LA_GAME_INTEGRATIONS = {
   scrabble: {
     url: 'https://script.google.com/macros/s/AKfycbxcVJ1I8jFuhbwjjPPzGFcCdku_LDnXKeZEmnpNYwYo9beCEyNHN8ElzWnXxxjyJFJb/exec',
     integration: 'embedded'
+  },
+  narratoria: {
+    url: 'https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec?page=narratoria',
+    integration: 'embedded'
   }
 };
 
@@ -57,9 +61,18 @@ const LA_HEADERS = {
 
 function doGet(e) {
   const page = String((e && e.parameter && e.parameter.page) || 'alumno').toLowerCase();
-  const file = page === 'profesor' || page === 'teacher' ? 'LenguArcade_Profesor' : 'LenguArcade_Alumno';
+  const file = page === 'profesor' || page === 'teacher'
+    ? 'LenguArcade_Profesor'
+    : page === 'narratoria'
+      ? 'Narratoria_Alumno'
+      : 'LenguArcade_Alumno';
+  const title = page === 'profesor' || page === 'teacher'
+    ? 'LenguArcade - Profesor'
+    : page === 'narratoria'
+      ? 'Narratoria'
+      : 'LenguArcade - Alumno';
   return HtmlService.createHtmlOutputFromFile(file)
-    .setTitle(page === 'profesor' ? 'LenguArcade - Profesor' : 'LenguArcade - Alumno')
+    .setTitle(title)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
