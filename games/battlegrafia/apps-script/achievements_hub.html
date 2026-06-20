@@ -1,0 +1,366 @@
+<script>
+// js/app/achievements_hub.js
+(function(){
+
+  const STATE = {
+    category: "all",   // id de categoría
+    filter: "all",     // all | unlocked | locked | hidden
+    search: ""
+  };
+
+  function safeJSON(key){
+  try{ return JSON.parse(localStorage.getItem(key) || "null"); }catch(e){ return null; }
+}
+
+function openAchievementsScreen(){
+  showAppScreen('hub-achievements');
+
+  const total = (window.BG_ACHIEVEMENTS_CATALOG || []).length;
+  const summary = document.getElementById("hub-achievements-summary");
+  const grid = document.getElementById("hub-achievements-grid");
+
+  if(!isLoggedIn()){
+    if(summary) summary.innerHTML = `Inicia sesión para ver tus logros. Progreso: <strong>0</strong> / <strong>${total}</strong>`;
+    if(grid) grid.innerHTML = "";
+    return;
+  }
+
+  window.BG_UI?.renderAchievementsHub?.();
+}
+
+
+function findLikelyPlayerObject(obj){
+  if(!obj || typeof obj !== "object") return null;
+
+  // casos típicos
+  if(obj.player && typeof obj.player === "object") return obj.player;
+  if(obj.stats && typeof obj.stats === "object" && obj.inventory) return obj;
+
+  // si parece un player “plano”
+  const hasGold = ("gold" in obj) || ("oro" in obj);
+  const hasXp = ("xp" in obj) || ("exp" in obj) || ("level" in obj);
+  const hasInv = ("items" in obj) || ("inventory" in obj) || ("bag" in obj);
+  const hasAch = ("achievements" in obj) || ("achUnlocked" in obj) || ("unlockedAchievements" in obj);
+
+  if((hasGold || hasXp || hasInv) && hasAch) return obj;
+
+  return null;
+}
+
+function getPlayer(){
+  // 1) Si el motor expone player en memoria, mejor (siempre es “el actual”)
+  try{
+    if(window.BG?.getPlayer) {
+      const p = window.BG.getPlayer();
+      if(p) return p;
+    }
+    if(window.BG?.player) return window.BG.player;
+  }catch(e){}
+
+  // 2) Intento por slots (tú ya tienes estas keys)
+  const activeSlot = localStorage.getItem("battlegrafia_active_slot_v1");
+  const slots = safeJSON("battlegrafia_save_slots_v1");
+
+  if(activeSlot && slots){
+    // a) slots como objeto {slotId: {...}}
+    if(slots[activeSlot]){
+      const candidate = findLikelyPlayerObject(slots[activeSlot]) || slots[activeSlot];
+      if(candidate) return candidate;
+    }
+    // b) slots como array
+    if(Array.isArray(slots)){
+      const found = slots.find(s => (s && (s.id === activeSlot || s.slotId === activeSlot)));
+      const candidate = findLikelyPlayerObject(found) || found;
+      if(candidate) return candidate;
+    }
+  }
+
+  // 3) Último recurso: escanear localStorage y coger el objeto que tenga achievements
+  for(const k of Object.keys(localStorage)){
+    const v = safeJSON(k);
+    const candidate = findLikelyPlayerObject(v);
+    if(candidate) return candidate;
+  }
+
+  // 4) fallback vacío
+  return {};
+}
+
+
+function safeJSON(key){
+  try{ return JSON.parse(localStorage.getItem(key) || "null"); }catch(e){ return null; }
+}
+
+function getActiveSlotId(){
+  return localStorage.getItem("battlegrafia_active_slot_v1") || "";
+}
+
+function getActiveSlotData(){
+  const slotId = getActiveSlotId();
+  const slots = safeJSON("battlegrafia_save_slots_v1");
+
+  if(!slotId || !slots) return null;
+
+  // slots como objeto
+  if(slots && typeof slots === "object" && !Array.isArray(slots) && slots[slotId]){
+    return slots[slotId];
+  }
+
+  // slots como array
+  if(Array.isArray(slots)){
+    return slots.find(s => s && (s.id === slotId || s.slotId === slotId)) || null;
+  }
+
+  return null;
+}
+
+function extractUnlockedIdsFromSlot(slotData){
+  // aquí buscamos achievements dentro del slot sin adivinar demasiado
+  const candidates = [
+    slotData?.player,
+    slotData?.data,
+    slotData,
+  ].filter(Boolean);
+
+  for(const obj of candidates){
+    // 1) formato típico: achievements: ["a001","a002"...]
+    if(Array.isArray(obj?.achievements)) return new Set(obj.achievements);
+
+    // 2) achievements: {unlocked:[...]}
+    if(Array.isArray(obj?.achievements?.unlocked)) return new Set(obj.achievements.unlocked);
+
+    // 3) mapa: achievements: {a001:true, a002:true}
+    if(obj?.achievements && typeof obj.achievements === "object" && !Array.isArray(obj.achievements)){
+      const ids = Object.keys(obj.achievements).filter(id => /^a\d{3}$/i.test(id) && !!obj.achievements[id]);
+      if(ids.length) return new Set(ids);
+    }
+
+    // 4) alternativas comunes
+    if(Array.isArray(obj?.unlockedAchievements)) return new Set(obj.unlockedAchievements);
+    if(Array.isArray(obj?.achievementsUnlocked)) return new Set(obj.achievementsUnlocked);
+    if(obj?.achUnlocked && typeof obj.achUnlocked === "object"){
+      const ids = Object.keys(obj.achUnlocked).filter(id => obj.achUnlocked[id]);
+      if(ids.length) return new Set(ids);
+    }
+  }
+
+  return new Set();
+}
+
+function getUnlockedSet(){
+  // 1) Fuente de verdad si el motor la expone
+  if(typeof window.BG_getUnlockedAchievementIds === "function"){
+    try{ return new Set(window.BG_getUnlockedAchievementIds() || []); }catch(e){}
+  }
+
+  // 2) Player en memoria
+  try{
+    const p = getPlayer();
+    if(Array.isArray(p?.achievements?.unlocked)) return new Set(p.achievements.unlocked);
+    if(Array.isArray(p?.unlockedAchievements)) return new Set(p.unlockedAchievements);
+    if(Array.isArray(p?.achievements)) return new Set(p.achievements);
+  }catch(e){}
+
+  // 3) Slot activo
+  const slotData = getActiveSlotData();
+  if(slotData) return extractUnlockedIdsFromSlot(slotData);
+
+  return new Set();
+}
+
+
+
+
+  function detectCategory(a){
+    // Si quieres categorías manuales, luego lo cambiamos a a.category
+    const t = a.type;
+
+    // Reglas rápidas por "key/event/check"
+    const k = (a.key || "").toLowerCase();
+    const ev = (a.event || "").toLowerCase();
+    const ck = (a.check || "").toLowerCase();
+    const text = `${a.title} ${a.desc}`.toLowerCase();
+
+    // Modos
+    if(ev.includes("practice") || ev.includes("strategy") || ev.includes("mastery") || ev.includes("survival") || text.includes("modo ")) return "modes";
+
+    // Diario / reglas / historia
+    if(k.includes("diary") || ev.includes("diary") || k.includes("rules") || ev.includes("study") || k.includes("history") || text.includes("reglas")) return "study";
+
+    // Economía / tienda / inventario / objetos / oro
+    if(k.includes("gold") || k.includes("shop") || k.includes("items") || ev.includes("shop") || ev.includes("inventory") || text.includes("oro") || text.includes("tienda")) return "economy";
+
+    // Colección / monstruos
+    if(k.includes("monsters") || ev.includes("monster") || text.includes("monstru")) return "collection";
+
+    // Rachas / perfectas / streak
+    if(k.includes("streak") || ev.includes("streak") || text.includes("racha") || k.includes("perfect")) return "streaks";
+
+    // Tiempo / sesiones / días
+    if(k.includes("days") || k.includes("sessions") || ev.includes("play_") || text.includes("minuto") || text.includes("sesión")) return "time";
+
+    // Exploración / pantallas / mapa / tabs
+    if(k.includes("visits") || ev.includes("tabs") || k.includes("screen") || text.includes("visita") || text.includes("pestañas") || text.includes("mapa")) return "explore";
+
+    // Combate (por defecto si no encaja)
+    if(t === "event" || t === "count" || t === "meta") return "combat";
+
+    return "other";
+  }
+
+  function buildCategories(catalog){
+    // Orden y etiquetas
+    const base = [
+      { id:"all", label:"Todos" },
+      { id:"combat", label:"Combate" },
+      { id:"streaks", label:"Rachas" },
+      { id:"economy", label:"Economía" },
+      { id:"collection", label:"Colección" },
+      { id:"study", label:"Estudio" },
+      { id:"explore", label:"Explorar" },
+      { id:"time", label:"Tiempo" },
+      { id:"modes", label:"Modos" },
+      { id:"other", label:"Otros" },
+    ];
+
+    // Solo mostrar categorías que tengan contenido
+    const counts = {};
+    catalog.forEach(a=>{
+      const c = detectCategory(a);
+      counts[c] = (counts[c] || 0) + 1;
+    });
+
+    return base.filter(x => x.id === "all" || counts[x.id] > 0);
+  }
+
+  function renderTabs(categories){
+    const host = document.getElementById("hub-ach-tabs");
+    if(!host) return;
+
+    host.innerHTML = "";
+    categories.forEach(cat=>{
+      const b = document.createElement("button");
+      b.className = "ach-tab" + (STATE.category === cat.id ? " is-active" : "");
+      b.textContent = cat.label;
+      b.addEventListener("click", ()=>{
+        STATE.category = cat.id;
+        renderAchievementsHub();
+      });
+      host.appendChild(b);
+    });
+  }
+
+  function bindFilters(){
+    const group = document.getElementById("hub-ach-filter-group");
+    if(group){
+      group.querySelectorAll(".ach-filter").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          group.querySelectorAll(".ach-filter").forEach(b=>b.classList.remove("is-active"));
+          btn.classList.add("is-active");
+          STATE.filter = btn.getAttribute("data-filter") || "all";
+          renderAchievementsHub();
+        });
+      });
+    }
+
+    const search = document.getElementById("hub-ach-search");
+    if(search){
+      search.addEventListener("input", ()=>{
+        STATE.search = (search.value || "").trim().toLowerCase();
+        renderAchievementsHub();
+      });
+    }
+  }
+
+  function passFilter(a, unlocked){
+  if(STATE.filter === "unlocked") return unlocked;
+  if(STATE.filter === "locked") return !unlocked;
+
+  // "hidden" debe significar: secretos YA desbloqueados (no “ver secretos bloqueados”)
+  if(STATE.filter === "hidden") return !!a.hidden && unlocked;
+
+  return true;
+}
+
+
+  function passCategory(a){
+    if(STATE.category === "all") return true;
+    return detectCategory(a) === STATE.category;
+  }
+
+  function passSearch(a){
+    if(!STATE.search) return true;
+    const t = `${a.title} ${a.desc}`.toLowerCase();
+    return t.includes(STATE.search);
+  }
+
+  function renderAchievementsHub(){
+  const grid = document.getElementById("hub-achievements-grid");
+  const summary = document.getElementById("hub-achievements-summary");
+  if(!grid) return;
+
+  const catalog = window.BG_ACHIEVEMENTS_CATALOG || [];
+  const unlockedSet = getUnlockedSet();
+
+  // Tabs + filtros (solo la primera vez, pero es barato)
+  const categories = buildCategories(catalog);
+  renderTabs(categories);
+  bindFilters();
+
+  // Filtrado
+  let shown = 0;
+  let unlockedCount = 0;
+
+  grid.innerHTML = "";
+
+  catalog.forEach(a=>{
+    const unlocked = unlockedSet.has(a.id);
+    if(unlocked) unlockedCount++;
+
+    // ❌ Ya NO ocultamos secretos bloqueados: deben verse (con ???)
+
+    if(!passCategory(a)) return;
+    if(!passFilter(a, unlocked)) return;
+    if(!passSearch(a)) return;
+
+    shown++;
+
+    const card = document.createElement("div");
+    card.className = "ach-card" + (unlocked ? " unlocked" : "");
+
+    const icon = a.icon || (unlocked ? "🏆" : "🔒");
+    const titlePrefix = unlocked ? "" : "🔒 ";
+
+    // Si es secreto y está bloqueado: no enseñamos descripción
+    const descText = (!unlocked && a.hidden) ? "???" : (a.desc || "");
+
+    // Texto de estado
+    const metaText = unlocked
+      ? "Desbloqueado ✅"
+      : (a.hidden ? "Bloqueado · Secreto 🤫" : "Bloqueado");
+
+    card.innerHTML = `
+      <div class="ach-top">
+        <div class="ach-icon">${icon}</div>
+        <div>
+          <div class="ach-title">${titlePrefix}${a.title}</div>
+          <div class="ach-desc">${descText}</div>
+        </div>
+      </div>
+      <div class="ach-meta">${metaText}</div>
+    `;
+
+    grid.appendChild(card);
+  });
+
+  if(summary){
+    summary.innerHTML = `Progreso: <strong>${unlockedCount}</strong> / <strong>${catalog.length}</strong> · Mostrando: <strong>${shown}</strong>`;
+  }
+}
+
+
+  window.BG_UI = window.BG_UI || {};
+  window.BG_UI.renderAchievementsHub = renderAchievementsHub;
+
+})();
+</script>

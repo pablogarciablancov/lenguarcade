@@ -30,6 +30,11 @@ const LA_CONFIG = {
 };
 
 const LA_GAME_INTEGRATIONS = {
+  battlegrafia: {
+    url: 'https://script.google.com/macros/s/AKfycbwJRO4_CkEYp6tLtmaYohUD6dSEtAiit3OTW2669yo75DpY5IR6yGdeBv-kWor22zxEyA/exec',
+    integration: 'embedded',
+    estado: 'beta'
+  },
   maniacgrafia: {
     url: 'https://script.google.com/macros/s/AKfycbxgtB6NP9zVvkkEZjodyGhSQbZmFifeFdMf8uDr0QsXoWsp_AxZdb7OFxtS5vKM-VruPw/exec?view=alumno',
     integration: 'embedded'
@@ -449,9 +454,10 @@ function getStudentGameRecord_(student, game) {
   const progress = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.PROGRESO))
     .find(row => String(row.studentId) === String(student.studentId) && String(row.gameId) === String(game.gameId));
   const normalized = progress ? normalizeProgressRow_(progress) : emptyProgressForGame_(student, game);
-  return Object.assign({}, decorateGameIntegration_(game), {
+  const decorated = decorateGameIntegration_(game);
+  return Object.assign({}, decorated, {
     progress:normalized,
-    locked:String(game.estado).toLowerCase() === 'proximamente',
+    locked:String(decorated.estado).toLowerCase() === 'proximamente',
     buttonLabel:normalized.sessions > 0 ? 'Continuar' : 'Jugar'
   });
 }
@@ -574,7 +580,7 @@ function seedGames_() {
   const sh = getSheet_(LA_CONFIG.SHEETS.JUEGOS);
   if (sh.getLastRow() > 1) return;
   const games = [
-    ['battlegrafia','Battlegrafia','La aventura de las palabras','RPG','ortografia,gramatica,verbos','proximamente',1,'#f59e0b','🐉','','RPG de Lengua. Integracion avanzada pendiente.','dragon'],
+    ['battlegrafia','Battlegrafia','La aventura de las palabras','RPG','ortografia,gramatica,verbos','beta',1,'#f59e0b','🐉','https://script.google.com/macros/s/AKfycbwJRO4_CkEYp6tLtmaYohUD6dSEtAiit3OTW2669yo75DpY5IR6yGdeBv-kWor22zxEyA/exec','RPG de Lengua. Combate contra errores, desbloquea criaturas y guarda progreso en LenguArcade.','dragon'],
     ['maniacgrafia','Maniacgrafia','Atrapa las palabras','Ortografia','ortografia,acentuacion','beta',2,'#d946ef','⚡','','Corrige palabras trampa y mejora tu precision.','neon'],
     ['narratoria','Narratoria','Escribe. Crea. Cuenta.','Escritura','narracion,creatividad,redaccion','beta',3,'#f59e0b','📚','','Construye relatos con cartas, fases y objetivos.','paper'],
     ['versopolis','Versopolis','La ciudad de la poesia','Poesia','poesia,literatura,creatividad','beta',4,'#8b5cf6','✒️','','Crea poemas y completa travesias poeticas.','city'],

@@ -1,0 +1,56 @@
+<script>
+  // ==========================================
+  // BATTLEGRAFÍA · CEREBRO DE IMÁGENES (V3 Segura)
+  // ==========================================
+  
+  window.BG = window.BG || {};
+  
+  // 1. TU RUTA MAESTRA (¡Recuerda poner la tuya!)
+  const GITHUB_BASE_URL = "https://pablogarciablancov.github.io/BATTLEGRAFIA-FINAL/";
+  
+  // 2. FUNCIÓN LLAVE MAESTRA (La que usa la tienda)
+  window.BG.getAssetUrl = function(relativePath) {
+    if (!relativePath) return "";
+    if (relativePath.startsWith('http')) return relativePath;
+    const cleanedPath = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath;
+    return GITHUB_BASE_URL + "img/" + cleanedPath;
+  };
+
+  // 3. EL RASTREADOR AUTOMÁTICO PROFUNDO
+  function parchearRutasAutomaticamente(obj) {
+    if (!obj || typeof obj !== 'object') return;
+    for (let key in obj) {
+       if (typeof obj[key] === 'string' && obj[key].startsWith('img/')) {
+           obj[key] = GITHUB_BASE_URL + obj[key];
+       } else if (typeof obj[key] === 'object') {
+           parchearRutasAutomaticamente(obj[key]); 
+       }
+    }
+  }
+
+  // 4. ACTIVACIÓN SEGURA AL CARGAR LA PÁGINA
+  window.addEventListener('DOMContentLoaded', () => {
+     // A. Buscamos las variables por nombre (texto) para evitar bloqueos
+     const nombresVariablesGlobales = [
+        'BG_MONSTER_CATALOG',
+        'MONSTER_CATALOG',
+        'COLLECTION',
+        'SHOP_ITEMS',
+        'ITEM_DEFS',
+        'player' // Ahora es seguro porque es un texto
+     ];
+
+     nombresVariablesGlobales.forEach(nombreVariable => {
+        // Si la variable existe en la memoria, la parcheamos
+        if (window[nombreVariable]) {
+            parchearRutasAutomaticamente(window[nombreVariable]);
+        }
+     });
+
+     // B. Parcheamos imágenes directas del HTML
+     document.querySelectorAll('img[src^="img/"]').forEach(img => {
+        const rutaOriginal = img.getAttribute('src');
+        img.src = GITHUB_BASE_URL + rutaOriginal;
+     });
+  });
+</script>

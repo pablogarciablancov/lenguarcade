@@ -602,7 +602,7 @@ grant insert, update on public.game_saves to authenticated;
 
 insert into public.games (id, name, subtitle, category, status, sort_order, color, icon)
 values
-  ('battlegrafia', 'Battlegrafia', 'La aventura de las palabras', 'RPG', 'coming_soon', 1, '#f59e0b', 'dragon'),
+  ('battlegrafia', 'Battlegrafia', 'La aventura de las palabras', 'RPG', 'beta', 1, '#f59e0b', 'dragon'),
   ('maniacgrafia', 'Maniacgrafia', 'Atrapa las palabras', 'Ortografia', 'beta', 2, '#d946ef', 'bolt'),
   ('narratoria', 'Narratoria', 'Escribe. Crea. Cuenta.', 'Escritura', 'beta', 3, '#f59e0b', 'book'),
   ('versopolis', 'Versopolis', 'La ciudad de la poesia', 'Poesia', 'beta', 4, '#8b5cf6', 'pen'),

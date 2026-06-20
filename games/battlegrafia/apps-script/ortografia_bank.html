@@ -1,0 +1,762 @@
+<script>
+  // BANCO · ORTOGRAFÍA
+  // Al quitar el "function()", esta variable ahora es GLOBAL y todo el juego la puede ver.
+  
+  const phrase_bank = {
+    // =========================================================
+    // MAPA 1
+    // =========================================================
+ h_ghoul: [
+  { wrong:"Haber si vienes mañana.", correct:"A ver si vienes mañana." },
+  { wrong:"No a llegado nadie.", correct:"No ha llegado nadie." },
+  { wrong:"E terminado el trabajo.", correct:"He terminado el trabajo." },
+  { wrong:"Tiene que haber echo los deberes.", correct:"Tiene que haber hecho los deberes." },
+  { wrong:"No se a que hora empieza.", correct:"No sé a qué hora empieza." },
+
+  { wrong:"Aun no e hablado con el profesor.", correct:"Aún no he hablado con el profesor." },
+  { wrong:"No a habido problemas hoy.", correct:"No ha habido problemas hoy." },
+  { wrong:"Haber si mañana estudias mas.", correct:"A ver si mañana estudias más." },
+  { wrong:"No se donde ai que firmar.", correct:"No sé dónde hay que firmar." },
+  { wrong:"Iba a acer la tarea pero se me olvido.", correct:"Iba a hacer la tarea, pero se me olvidó." },
+
+  { wrong:"Haber si as entendido el ejercicio.", correct:"A ver si has entendido el ejercicio." },
+  { wrong:"No a venido nadie porque a llovido.", correct:"No ha venido nadie porque ha llovido." },
+  { wrong:"Aun no e echo los deberes de hoy.", correct:"Aún no he hecho los deberes de hoy." },
+  { wrong:"No se a quien ai que avisar.", correct:"No sé a quién hay que avisar." },
+  { wrong:"Iba a acerlo ayer pero no pude.", correct:"Iba a hacerlo ayer, pero no pude." },
+
+  { wrong:"Haber si asi as aprendido.", correct:"A ver si así has aprendido." },
+  { wrong:"No a habido ningun error segun dicen.", correct:"No ha habido ningún error según dicen." },
+  { wrong:"Aun no se a decidido que hacer.", correct:"Aún no se ha decidido qué hacer." },
+  { wrong:"E dicho que iba a acerlo hoy.", correct:"He dicho que iba a hacerlo hoy." },
+  { wrong:"Haber si mañana a venido todo el mundo.", correct:"A ver si mañana ha venido todo el mundo." }
+],
+
+   vampiro_v: [
+  { wrong:"El baso esta roto.", correct:"El vaso está roto." },
+  { wrong:"La baca esta en el campo.", correct:"La vaca está en el campo." },
+  { wrong:"Tubo que salir antes.", correct:"Tuvo que salir antes." },
+  { wrong:"Voy a baciar la papelera.", correct:"Voy a vaciar la papelera." },
+  { wrong:"La bida es dura.", correct:"La vida es dura." },
+
+  { wrong:"A ver si bienes mañana.", correct:"A ver si vienes mañana." },
+  { wrong:"Grabo un video corto.", correct:"Grabó un vídeo corto." },
+  { wrong:"El boto fue decisibo.", correct:"El voto fue decisivo." },
+  { wrong:"La baca mujió muy fuerte.", correct:"La vaca mujió muy fuerte." },
+  { wrong:"No bas a salir hoy.", correct:"No vas a salir hoy." },
+
+  { wrong:"El baso se rompio ayer.", correct:"El vaso se rompió ayer." },
+  { wrong:"Tubo una respuesta rapida.", correct:"Tuvo una respuesta rápida." },
+  { wrong:"La bida no es facil.", correct:"La vida no es fácil." },
+  { wrong:"Si no estudias no bas aprobar.", correct:"Si no estudias no vas a aprobar." },
+  { wrong:"El video se grabo ayer.", correct:"El vídeo se grabó ayer." },
+
+  { wrong:"La baca bebio agua.", correct:"La vaca bebió agua." },
+  { wrong:"Su voto tubo consecuencias.", correct:"Su voto tuvo consecuencias." },
+  { wrong:"No vienes porque no quieres.", correct:"No vienes porque no quieres." },
+  { wrong:"El liquido del baso se derramó por error.", correct:"El líquido del vaso se derramó por error." },
+  { wrong:"La bida depende de tus decisiones.", correct:"La vida depende de tus decisiones." }
+],
+
+   gargantua_gj: [
+  { wrong:"El viaje fue muy jeneral.", correct:"El viaje fue muy general." },
+  { wrong:"La jente llego temprano.", correct:"La gente llegó temprano." },
+  { wrong:"Ese tema es jenial.", correct:"Ese tema es genial." },
+  { wrong:"La jeneralizacion fue excesiva.", correct:"La generalización fue excesiva." },
+  { wrong:"El profesor dio una jran explicacion.", correct:"El profesor dio una gran explicación." },
+
+  { wrong:"La jestion del tiempo fue mala.", correct:"La gestión del tiempo fue mala." },
+  { wrong:"El trabajo tubo una jran dificultad.", correct:"El trabajo tuvo una gran dificultad." },
+  { wrong:"La jente no comprendio el mensage.", correct:"La gente no comprendió el mensaje." },
+  { wrong:"Fue una decision muy jeneral.", correct:"Fue una decisión muy general." },
+  { wrong:"El error fue jravisimo.", correct:"El error fue gravísimo." },
+
+  { wrong:"La jestion adecuada mejora el resultado.", correct:"La gestión adecuada mejora el resultado." },
+  { wrong:"La jente reacciono tarde.", correct:"La gente reaccionó tarde." },
+  { wrong:"El problema tenia un orijen claro.", correct:"El problema tenía un origen claro." },
+  { wrong:"La jeneralizacion confundio al lector.", correct:"La generalización confundió al lector." },
+  { wrong:"El argumento era jrandioso pero impreciso.", correct:"El argumento era grandioso pero impreciso." },
+
+  { wrong:"La jente interpreto mal el texto.", correct:"La gente interpretó mal el texto." },
+  { wrong:"El orijen del fallo no se detecto.", correct:"El origen del fallo no se detectó." },
+  { wrong:"La jestion del proyecto fue compleja.", correct:"La gestión del proyecto fue compleja." },
+  { wrong:"El error jeneral afecto al resultado.", correct:"El error general afectó al resultado." },
+  { wrong:"La conclusion fue jeneral y poco clara.", correct:"La conclusión fue general y poco clara." }
+],
+   espectro_agudo: [
+  { wrong:"El camion salio tarde.", correct:"El camión salió tarde." },
+  { wrong:"El avion despego rapido.", correct:"El avión despegó rápido." },
+  { wrong:"El balon entro en la porteria.", correct:"El balón entró en la portería." },
+  { wrong:"El profesor explico la leccion.", correct:"El profesor explicó la lección." },
+  { wrong:"El ladron huyo por la puerta.", correct:"El ladrón huyó por la puerta." },
+
+  { wrong:"El leon rugio en la selva.", correct:"El león rugió en la selva." },
+  { wrong:"El campeon levanto la copa.", correct:"El campeón levantó la copa." },
+  { wrong:"El autobus llego tarde.", correct:"El autobús llegó tarde." },
+  { wrong:"El corazon latia rapido.", correct:"El corazón latía rápido." },
+  { wrong:"El actor recibio un premio.", correct:"El actor recibió un premio." },
+
+  { wrong:"El dragon volo sobre el castillo.", correct:"El dragón voló sobre el castillo." },
+  { wrong:"El campeon celebro el gol.", correct:"El campeón celebró el gol." },
+  { wrong:"El leon corrio hacia la presa.", correct:"El león corrió hacia la presa." },
+  { wrong:"El avion aterrizo tarde.", correct:"El avión aterrizó tarde." },
+  { wrong:"El jugador marco un gol.", correct:"El jugador marcó un gol." },
+
+  { wrong:"El ladron entro por la ventana.", correct:"El ladrón entró por la ventana." },
+  { wrong:"El camion freno de repente.", correct:"El camión frenó de repente." },
+  { wrong:"El campeon gano la final.", correct:"El campeón ganó la final." },
+  { wrong:"El leon salto sobre la roca.", correct:"El león saltó sobre la roca." },
+  { wrong:"El avion giro hacia el sur.", correct:"El avión giró hacia el sur." }
+],
+   serpiente_comata: [
+  { wrong:"El arbol perdio muchas hojas.", correct:"El árbol perdió muchas hojas." },
+  { wrong:"El lapiz esta roto.", correct:"El lápiz está roto." },
+  { wrong:"El examen es facil.", correct:"El examen es fácil." },
+  { wrong:"El sofa parece comodo.", correct:"El sofá parece cómodo." },
+  { wrong:"El angel cuido al niño.", correct:"El ángel cuidó al niño." },
+
+  { wrong:"El tunel era muy largo.", correct:"El túnel era muy largo." },
+  { wrong:"El album es muy bonito.", correct:"El álbum es muy bonito." },
+  { wrong:"El arbol esta en el patio.", correct:"El árbol está en el patio." },
+  { wrong:"El caracter del niño cambio.", correct:"El carácter del niño cambió." },
+  { wrong:"El azucar esta en la mesa.", correct:"El azúcar está en la mesa." },
+
+  { wrong:"El lapiz se rompio.", correct:"El lápiz se rompió." },
+  { wrong:"El album estaba cerrado.", correct:"El álbum estaba cerrado." },
+  { wrong:"El arbol crecio mucho.", correct:"El árbol creció mucho." },
+  { wrong:"El angel volo alto.", correct:"El ángel voló alto." },
+  { wrong:"El tunel parecia oscuro.", correct:"El túnel parecía oscuro." },
+
+  { wrong:"El sofa estaba viejo.", correct:"El sofá estaba viejo." },
+  { wrong:"El caracter fuerte ayudo.", correct:"El carácter fuerte ayudó." },
+  { wrong:"El azucar se derramo.", correct:"El azúcar se derramó." },
+  { wrong:"El arbol cayo ayer.", correct:"El árbol cayó ayer." },
+  { wrong:"El album quedo en casa.", correct:"El álbum quedó en casa." }
+],
+    lexikon: [
+  { wrong:"Haber si as estudiado.", correct:"A ver si has estudiado." },
+  { wrong:"No a habido ningun problema.", correct:"No ha habido ningún problema." },
+  { wrong:"El lapiz esta roto.", correct:"El lápiz está roto." },
+  { wrong:"Juan Pedro y Maria llegaron tarde.", correct:"Juan, Pedro y María llegaron tarde." },
+  { wrong:"E echo el examen fatal.", correct:"He hecho el examen fatal." },
+
+  { wrong:"La baca del coche llego ayer.", correct:"La baca del coche llegó ayer." },
+  { wrong:"No se por que no vino.", correct:"No sé por qué no vino." },
+  { wrong:"Aun no se a terminado.", correct:"Aún no se ha terminado." },
+  { wrong:"El texto es largo confuso.", correct:"El texto es largo, confuso." },
+  { wrong:"Haber si algun dia mejoras.", correct:"A ver si algún día mejoras." },
+
+  { wrong:"No a venido nadie porque a llovido.", correct:"No ha venido nadie porque ha llovido." },
+  { wrong:"Iba a acerlo ayer.", correct:"Iba a hacerlo ayer." },
+  { wrong:"No se donde ai que firmar.", correct:"No sé dónde hay que firmar." },
+  { wrong:"Aun no e dicho nada.", correct:"Aún no he dicho nada." },
+  { wrong:"La bida es dura.", correct:"La vida es dura." },
+
+  { wrong:"El examen tubo errores.", correct:"El examen tuvo errores." },
+  { wrong:"Si no estudias no bas aprobar.", correct:"Si no estudias no vas a aprobar." },
+  { wrong:"No se cuando a llegado.", correct:"No sé cuándo ha llegado." },
+  { wrong:"Haber si mañana a venido.", correct:"A ver si mañana ha venido." },
+  { wrong:"Todo esta mal escrito.", correct:"Todo está mal escrito." }
+],
+    diacritik: [
+  { wrong:"El arbol es alto.", correct:"El árbol es alto." },
+  { wrong:"Mi papa trabaja aqui.", correct:"Mi papá trabaja aquí." },
+  { wrong:"El sofa esta roto.", correct:"El sofá está roto." },
+  { wrong:"No se que paso.", correct:"No sé qué pasó." },
+  { wrong:"El cafe esta frio.", correct:"El café está frío." },
+
+  { wrong:"Aun no termino el examen.", correct:"Aún no terminó el examen." },
+  { wrong:"El camion salio tarde.", correct:"El camión salió tarde." },
+  { wrong:"El balon es mio.", correct:"El balón es mío." },
+  { wrong:"No se como hacerlo.", correct:"No sé cómo hacerlo." },
+  { wrong:"El arbol perdio hojas.", correct:"El árbol perdió hojas." },
+
+  { wrong:"No se cuando vendra.", correct:"No sé cuándo vendrá." },
+  { wrong:"El heroe gano facil.", correct:"El héroe ganó fácil." },
+  { wrong:"El menu estaba frio.", correct:"El menú estaba frío." },
+  { wrong:"No se quien vino.", correct:"No sé quién vino." },
+  { wrong:"El avion despego rapido.", correct:"El avión despegó rápido." },
+
+  { wrong:"No se donde esta.", correct:"No sé dónde está." },
+  { wrong:"La cancion sono bien.", correct:"La canción sonó bien." },
+  { wrong:"No se por que lo hizo.", correct:"No sé por qué lo hizo." },
+  { wrong:"El numero es impar.", correct:"El número es impar." },
+  { wrong:"No se cuanto falta.", correct:"No sé cuánto falta." }
+],
+    oxiton: [
+  { wrong:"El examen es facil.", correct:"El examen es fácil." },
+  { wrong:"La pared esta azul.", correct:"La pared es azul." },
+  { wrong:"El papel esta limpio.", correct:"El papel está limpio." },
+  { wrong:"La ciudad parecia grande.", correct:"La ciudad parecía grande." },
+  { wrong:"El animal corrio rapido.", correct:"El animal corrió rápido." },
+
+  { wrong:"La decision fue final.", correct:"La decisión fue final." },
+  { wrong:"El reloj es dijital.", correct:"El reloj es digital." },
+  { wrong:"Ése color es amarillo.", correct:"El color es amarillo." },
+  { wrong:"La solucion fué facil.", correct:"La solución fue fácil." },
+  { wrong:"La cancion termino.", correct:"La canción terminó." },
+
+  { wrong:"El problema parecia simple.", correct:"El problema parecía simple." },
+  { wrong:"La expresion es comun.", correct:"La expresión es común." },
+  { wrong:"El corazon latia tán rapido.", correct:"El corazón latía tan rápido." },
+  { wrong:"La ocasion fue unica.", correct:"La ocasión fue única." },
+  { wrong:"La razon es clara.", correct:"La razón es clara." },
+
+  { wrong:"La explicacion fue logica.", correct:"La explicación fue lógica." },
+  { wrong:"La reunion termino tarde.", correct:"La reunión terminó tarde." },
+  { wrong:"La intencion era buena.", correct:"La intención era buena." },
+  { wrong:"La emocion fue intensa.", correct:"La emoción fue intensa." },
+  { wrong:"La situacion es dificil.", correct:"La situación es difícil." }
+],
+    llanor: [
+  { wrong:"El dia estaba tranquilo.", correct:"El día estaba tranquilo." },
+  { wrong:"Todo parecia normal.", correct:"Todo parecía normal." },
+  { wrong:"El camino seguia recto.", correct:"El camino seguía recto." },
+  { wrong:"La tarde pasaba lenta.", correct:"La tarde pasaba lenta." },
+  { wrong:"El cielo estaba gris.", correct:"El cielo estaba gris." },
+
+  { wrong:"La mañana fue larga.", correct:"La mañana fue larga." },
+  { wrong:"El paisaje parecia infinito.", correct:"El paisaje parecía infinito." },
+  { wrong:"La llanura se extendia.", correct:"La llanura se extendía." },
+  { wrong:"El viento soplava suave.", correct:"El viento soplaba suave." },
+  { wrong:"Nada cambiava nunca.", correct:"Nada cambiaba nunca." },
+
+  { wrong:"Aquél terreno era uniforme.", correct:"Aquel terreno era uniforme." },
+  { wrong:"Todo seguia igual.", correct:"Todo seguía igual." },
+  { wrong:"El dia no abanzaba.", correct:"El día no avanzaba." },
+  { wrong:"La escena parecia estatica.", correct:"La escena parecía estática." },
+  { wrong:"El tiempo pasaba léntamente.", correct:"El tiempo pasaba lentamente." },
+
+  { wrong:"No habia variacion.", correct:"No había variación." },
+  { wrong:"La ruta no cambiava.", correct:"La ruta no cambiaba." },
+  { wrong:"Nada rompia la calma.", correct:"Nada rompía la calma." },
+  { wrong:"Todo era demasiado yano.", correct:"Todo era demasiado llano." },
+  { wrong:"La historia no avanzaba.", correct:"La historia no avanzaba." }
+],
+    puntor: [
+  { wrong:"Al terminar el ejercicio salimos al patio.", correct:"Al terminar el ejercicio, salimos al patio." },
+  { wrong:"Si estudias bien apruebas seguro.", correct:"Si estudias bien, apruebas seguro." },
+  { wrong:"Antes de cenar recoge la mesa.", correct:"Antes de cenar, recoge la mesa." },
+  { wrong:"Cuando llegues a casa llama.", correct:"Cuando llegues a casa, llama." },
+  { wrong:"Después de clase iremos al gimnasio.", correct:"Después de clase, iremos al gimnasio." },
+
+  { wrong:"Aunque quieras hacerlo no puedes.", correct:"Aunque quieras hacerlo, no puedes." },
+  { wrong:"Mientras hablas piensa bien.", correct:"Mientras hablas, piensa bien." },
+  { wrong:"Si no vienes hoy avisa.", correct:"Si no vienes hoy, avisa." },
+  { wrong:"Antes de empezar el examen respira.", correct:"Antes de empezar el examen, respira." },
+  { wrong:"Al salir de casa cierra bien.", correct:"Al salir de casa, cierra bien." },
+
+  { wrong:"Cuando termine la película nos vamos.", correct:"Cuando termine la película, nos vamos." },
+  { wrong:"Si llueve mañana no salimos.", correct:"Si llueve mañana, no salimos." },
+  { wrong:"Después de comer estudia un rato.", correct:"Después de comer, estudia un rato." },
+  { wrong:"Aunque parezca fácil es complicado.", correct:"Aunque parezca fácil, es complicado." },
+  { wrong:"Antes de dormir apaga la luz.", correct:"Antes de dormir, apaga la luz." },
+
+  { wrong:"Cuando acabe el partido celebramos.", correct:"Cuando acabe el partido, celebramos." },
+  { wrong:"Si terminas pronto avísame.", correct:"Si terminas pronto, avísame." },
+  { wrong:"Después de pensarlo bien aceptó.", correct:"Después de pensarlo bien, aceptó." },
+  { wrong:"Aunque no lo creas funciona.", correct:"Aunque no lo creas, funciona." },
+  { wrong:"Al llegar al colegio entra en silencio.", correct:"Al llegar al colegio, entra en silencio." }
+],
+    kalkor: [
+  { wrong:"El quilo pesa mucho.", correct:"El kilo pesa mucho." },
+  { wrong:"La kasa es grande.", correct:"La casa es grande." },
+  { wrong:"El kuaderno esta roto.", correct:"El cuaderno está roto." },
+  { wrong:"La kosa es facil.", correct:"La cosa es fácil." },
+  { wrong:"El keso esta rico.", correct:"El queso está rico." },
+
+  { wrong:"La komida esta fria.", correct:"La comida está fría." },
+  { wrong:"El kamino es largo.", correct:"El camino es largo." },
+  { wrong:"La kaja esta llena.", correct:"La caja está llena." },
+  { wrong:"El koche no arranca.", correct:"El coche no arranca." },
+  { wrong:"La kulpa no fue mia.", correct:"La culpa no fue mía." },
+
+  { wrong:"El parke esta cerrado.", correct:"El parque está cerrado." },
+  { wrong:"La makina funciona.", correct:"La máquina funciona." },
+  { wrong:"La kesion fue corta.", correct:"La cuestión fue corta." },
+  { wrong:"El kolegio abre pronto.", correct:"El colegio abre pronto." },
+  { wrong:"La konclusion es clara.", correct:"La conclusión es clara." },
+
+  { wrong:"El kambio fue necesario.", correct:"El cambio fue necesario." },
+  { wrong:"La kalidad importa.", correct:"La calidad importa." },
+  { wrong:"La komunikacion fallo.", correct:"La comunicación falló." },
+  { wrong:"El kuadro es nuevo.", correct:"El cuadro es nuevo." },
+  { wrong:"La konsecuencia fue grave.", correct:"La consecuencia fue grave." }
+],
+    paper: [
+  { wrong:"Al terminar el examen salimos tranquilos.", correct:"Al terminar el examen, salimos tranquilos." },
+  { wrong:"Si no estudias hoy suspendes mañana.", correct:"Si no estudias hoy, suspendes mañana." },
+  { wrong:"Cuando llegues a casa revisa el trabajo.", correct:"Cuando llegues a casa, revisa el trabajo." },
+  { wrong:"Antes de empezar la prueba respira hondo.", correct:"Antes de empezar la prueba, respira hondo." },
+  { wrong:"Después de leer el texto responde.", correct:"Después de leer el texto, responde." },
+
+  { wrong:"Aunque parezca sencillo el ejercicio es largo.", correct:"Aunque parezca sencillo, el ejercicio es largo." },
+  { wrong:"Mientras escribes piensa lo que dices.", correct:"Mientras escribes, piensa lo que dices." },
+  { wrong:"Si terminas pronto avisa al profesor.", correct:"Si terminas pronto, avisa al profesor." },
+  { wrong:"Al salir de clase guarda silencio.", correct:"Al salir de clase, guarda silencio." },
+  { wrong:"Cuando acabe la explicación pregunta.", correct:"Cuando acabe la explicación, pregunta." },
+
+  { wrong:"Después de corregir el texto entrégalo.", correct:"Después de corregir el texto, entrégalo." },
+  { wrong:"Si no entiendes el ejercicio pregunta.", correct:"Si no entiendes el ejercicio, pregunta." },
+  { wrong:"Antes de dormir apaga la luz.", correct:"Antes de dormir, apaga la luz." },
+  { wrong:"Cuando termine la actividad recogemos.", correct:"Cuando termine la actividad, recogemos." },
+  { wrong:"Aunque tengas prisa hazlo bien.", correct:"Aunque tengas prisa, hazlo bien." },
+
+  { wrong:"Al llegar al aula siéntate en silencio.", correct:"Al llegar al aula, siéntate en silencio." },
+  { wrong:"Después de pensarlo bien acepta.", correct:"Después de pensarlo bien, acepta." },
+  { wrong:"Si quieres mejorar revisa el texto.", correct:"Si quieres mejorar, revisa el texto." },
+  { wrong:"Antes de entregar el trabajo comprueba todo.", correct:"Antes de entregar el trabajo, comprueba todo." },
+  { wrong:"Cuando leas con atención entenderás mejor.", correct:"Cuando leas con atención, entenderás mejor." }
+],
+    esdrulia: [
+  { wrong:"El examen fue dificil.", correct:"El examen fue difícil." },
+  { wrong:"El cristal es fragil.", correct:"El cristal es frágil." },
+  { wrong:"La decision fue inutil.", correct:"La decisión fue inútil." },
+  { wrong:"La señal es debil.", correct:"La señal es débil." },
+  { wrong:"El resultado fue facil.", correct:"El resultado fue fácil." },
+
+  { wrong:"La situacion es volatil.", correct:"La situación es volátil." },
+  { wrong:"El error es agil.", correct:"El error es ágil." },
+  { wrong:"La solucion parece esteril.", correct:"La solución parece estéril." },
+  { wrong:"El argumento es infantil.", correct:"El argumento es infantil." },
+  { wrong:"El sonido es sutil.", correct:"El sonido es sutil." },
+
+  { wrong:"La reaccion fue inutil y torpe.", correct:"La reacción fue inútil y torpe." },
+  { wrong:"El material es fragil y caro.", correct:"El material es frágil y caro." },
+  { wrong:"La respuesta es facil pero incorrecta.", correct:"La respuesta es fácil pero incorrecta." },
+  { wrong:"El equilibrio es inestable y volatil.", correct:"El equilibrio es inestable y volátil." },
+  { wrong:"El cristal resulto debil.", correct:"El cristal resultó débil." },
+
+  { wrong:"El razonamiento parece inutil y fragil.", correct:"El razonamiento parece inútil y frágil." },
+  { wrong:"La explicacion fue dificil y confusa.", correct:"La explicación fue difícil y confusa." },
+  { wrong:"El resultado final es inutil.", correct:"El resultado final es inútil." },
+  { wrong:"La estructura es fragil.", correct:"La estructura es frágil." },
+  { wrong:"El metodo es facil pero incompleto.", correct:"El método es fácil pero incompleto." }
+],
+   muxlor: [
+  { wrong:"El exito fue inmediato.", correct:"El éxito fue inmediato." },
+  { wrong:"La explicacion es extensa.", correct:"La explicación es extensa." },
+  { wrong:"El examen exige esfuerzo.", correct:"El examen exige esfuerzo." },
+  { wrong:"La expresion fue clara.", correct:"La expresión fue clara." },
+  { wrong:"El experimento fallo.", correct:"El experimento falló." },
+
+  { wrong:"La experiencia fue extrana.", correct:"La experiencia fue extraña." },
+  { wrong:"El texto es exesivo.", correct:"El texto es excesivo." },
+  { wrong:"La exposicion termino tarde.", correct:"La exposición terminó tarde." },
+  { wrong:"El ejemplo no es exacto.", correct:"El ejemplo no es exacto." },
+  { wrong:"La excurcion fue larga.", correct:"La excursión fue larga." },
+
+  { wrong:"El exito no fue casual.", correct:"El éxito no fue casual." },
+  { wrong:"La expresion escrita es confusa.", correct:"La expresión escrita es confusa." },
+  { wrong:"El exceso de palabras cansa.", correct:"El exceso de palabras cansa." },
+  { wrong:"La experiencia explica el error.", correct:"La experiencia explica el error." },
+  { wrong:"El examen exije precision.", correct:"El examen exige precisión." },
+
+  { wrong:"La exposicion fue extensa y exesiva.", correct:"La exposición fue extensa y excesiva." },
+  { wrong:"El exito depende del esfuerzo.", correct:"El éxito depende del esfuerzo." },
+  { wrong:"La excurcion explico el tema.", correct:"La excursión explicó el tema." },
+  { wrong:"El texto exige revision.", correct:"El texto exige revisión." },
+  { wrong:"La expresion final fue exacta.", correct:"La expresión final fue exacta." }
+],
+   prosodion: [
+  { wrong:"Leelo despacio.", correct:"Léelo despacio." },
+  { wrong:"Dilo mas claro.", correct:"Dilo más claro." },
+  { wrong:"Habla rapido.", correct:"Habla rápido." },
+  { wrong:"Explica mejor esto.", correct:"Explica mejor esto." },
+  { wrong:"Lee bien el texto.", correct:"Lee bien el texto." },
+
+  { wrong:"Pronuncia correctamente.", correct:"Pronuncia correctamente." },
+  { wrong:"Sube mas la voz.", correct:"Sube más la voz." },
+  { wrong:"Baja el tono ahora.", correct:"Baja el tono ahora." },
+  { wrong:"Marca bien las pausas.", correct:"Marca bien las pausas." },
+  { wrong:"Respira antes de hablar.", correct:"Respira antes de hablar." },
+
+  { wrong:"Leelo con mas entonacion.", correct:"Léelo con más entonación." },
+  { wrong:"Explica el texto mas despacio.", correct:"Explica el texto más despacio." },
+  { wrong:"Pronuncia bien cada palabra.", correct:"Pronuncia bien cada palabra." },
+  { wrong:"No aceleres al final.", correct:"No aceleres al final." },
+  { wrong:"Cuida el ritmo al leer.", correct:"Cuida el ritmo al leer." },
+
+  { wrong:"La lectura fue monotona.", correct:"La lectura fue monótona." },
+  { wrong:"El discurso sono plano.", correct:"El discurso sonó plano." },
+  { wrong:"No marco bien las pausas.", correct:"No marcó bien las pausas." },
+  { wrong:"La entonacion fue incorrecta.", correct:"La entonación fue incorrecta." },
+  { wrong:"El mensaje perdio fuerza.", correct:"El mensaje perdió fuerza." }
+],
+    zarruk: [
+  { wrong:"El zapato es asul.", correct:"El zapato es azul." },
+  { wrong:"La seresa es dulce.", correct:"La cereza es dulce." },
+  { wrong:"El zumo esta frio.", correct:"El zumo está frío." },
+  { wrong:"La cabeza pesa mucho.", correct:"La cabeza pesa mucho." },
+  { wrong:"El asucar se disolvio.", correct:"El azúcar se disolvió." },
+
+  { wrong:"La cerveza esta fria.", correct:"La cerveza está fría." },
+  { wrong:"El lapiz es grisaseo.", correct:"El lápiz es grisáceo." },
+  { wrong:"La zanahoria es sabrosa.", correct:"La zanahoria es sabrosa." },
+  { wrong:"El brazo se canso.", correct:"El brazo se cansó." },
+  { wrong:"La decision fue sensata.", correct:"La decisión fue sensata." },
+
+  { wrong:"La cabeza le dolia mucho.", correct:"La cabeza le dolía mucho." },
+  { wrong:"El asucar estaba derramado.", correct:"El azúcar estaba derramado." },
+  { wrong:"La cerveza se calento.", correct:"La cerveza se calentó." },
+  { wrong:"El brazo se resintio.", correct:"El brazo se resintió." },
+  { wrong:"La sensacion fue extraña.", correct:"La sensación fue extraña." },
+
+  { wrong:"El grisaseo no combina bien.", correct:"El grisáceo no combina bien." },
+  { wrong:"La desicion fue acertada.", correct:"La decisión fue acertada." },
+  { wrong:"El zapato se ensucio.", correct:"El zapato se ensució." },
+  { wrong:"El zumo se acido.", correct:"El zumo se acidó." },
+  { wrong:"La cerbeza estaba fria.", correct:"La cerveza estaba fría." }
+],
+    minotauro: [
+  { wrong:"El camino no tenia salida clara.", correct:"El camino no tenía salida clara." },
+  { wrong:"La explicacion daba muchas vueltas.", correct:"La explicación daba muchas vueltas." },
+  { wrong:"El texto parecia repetirse.", correct:"El texto parecía repetirse." },
+  { wrong:"No se encontraba la direccion correcta.", correct:"No se encontraba la dirección correcta." },
+  { wrong:"La idea se perdia facilmente.", correct:"La idea se perdía fácilmente." },
+
+  { wrong:"El lector no sabia por donde seguir.", correct:"El lector no sabía por dónde seguir." },
+  { wrong:"La estructura estaba mal organizada.", correct:"La estructura estaba mal organizada." },
+  { wrong:"El argumento no avanzaba nunca.", correct:"El argumento no avanzaba nunca." },
+  { wrong:"La conclusion no quedaba clara.", correct:"La conclusión no quedaba clara." },
+  { wrong:"El texto volvia siempre al inicio.", correct:"El texto volvía siempre al inicio." },
+
+  { wrong:"No habia una salida evidente.", correct:"No había una salida evidente." },
+  { wrong:"La lectura se hacia pesada.", correct:"La lectura se hacía pesada." },
+  { wrong:"El recorrido parecia infinito.", correct:"El recorrido parecía infinito." },
+  { wrong:"El razonamiento no tenia fin.", correct:"El razonamiento no tenía fin." },
+  { wrong:"La idea principal se perdia.", correct:"La idea principal se perdía." },
+
+  { wrong:"El texto estaba lleno de repeticiones inutiles.", correct:"El texto estaba lleno de repeticiones inútiles." },
+  { wrong:"No se entendia bien el desarrollo.", correct:"No se entendía bien el desarrollo." },
+  { wrong:"La explicacion resultaba confusa.", correct:"La explicación resultaba confusa." },
+  { wrong:"El lector se cansaba facilmente.", correct:"El lector se cansaba fácilmente." },
+  { wrong:"La conclusion parecia no llegar nunca.", correct:"La conclusión parecía no llegar nunca." }
+],
+    torvax: [
+  { wrong:"El texto no a sido revisado.", correct:"El texto no ha sido revisado." },
+  { wrong:"La explicacion es dificil de seguir.", correct:"La explicación es difícil de seguir." },
+  { wrong:"No se a entendido bien.", correct:"No se ha entendido bien." },
+  { wrong:"El lector tubo muchos problemas.", correct:"El lector tuvo muchos problemas." },
+  { wrong:"La estructura parecia fragil.", correct:"La estructura parecía frágil." },
+
+  { wrong:"No a quedado clara la idea.", correct:"No ha quedado clara la idea." },
+  { wrong:"El mensaje se perdio rapidamente.", correct:"El mensaje se perdió rápidamente." },
+  { wrong:"La redaccion tenia muchos fallos.", correct:"La redacción tenía muchos fallos." },
+  { wrong:"No se a explicado correctamente.", correct:"No se ha explicado correctamente." },
+  { wrong:"El texto resulta confuso y pesado.", correct:"El texto resulta confuso y pesado." },
+
+  { wrong:"No a sabido organizar el contenido.", correct:"No ha sabido organizar el contenido." },
+  { wrong:"La explicacion carecia de orden.", correct:"La explicación carecía de orden." },
+  { wrong:"El lector no savia que pensar.", correct:"El lector no sabía qué pensar." },
+  { wrong:"El texto estaba mal echo.", correct:"El texto estaba mal hecho." },
+  { wrong:"No se a revisado el escrito.", correct:"No se ha revisado el escrito." },
+
+  { wrong:"La lectura se asia interminable.", correct:"La lectura se hacía interminable." },
+  { wrong:"El argumento no tubo coherencia.", correct:"El argumento no tuvo coherencia." },
+  { wrong:"No se entendia el mensaje final.", correct:"No se entendía el mensaje final." },
+  { wrong:"El contenido parecia desordenado.", correct:"El contenido parecía desordenado." },
+  { wrong:"La conclusion no fue clara.", correct:"La conclusión no fue clara." }
+],
+    caoskrin: [
+  { wrong:"El texto no a quedado claro.", correct:"El texto no ha quedado claro." },
+  { wrong:"La idea parecia confusa.", correct:"La idea parecía confusa." },
+  { wrong:"No se entendia bien.", correct:"No se entendía bien." },
+  { wrong:"La explicacion fue dificil.", correct:"La explicación fue difícil." },
+  { wrong:"El mensaje tubo errores.", correct:"El mensaje tuvo errores." },
+
+  { wrong:"No a sabido ordenar las ideas.", correct:"No ha sabido ordenar las ideas." },
+  { wrong:"La redaccion era caotica.", correct:"La redacción era caótica." },
+  { wrong:"El texto estaba mal echo.", correct:"El texto estaba mal hecho." },
+  { wrong:"No se a revisado nada.", correct:"No se ha revisado nada." },
+  { wrong:"La estructura parecia rota.", correct:"La estructura parecía rota." },
+
+  { wrong:"El lector se perdio rapidamente.", correct:"El lector se perdió rápidamente." },
+  { wrong:"No a habido coherencia.", correct:"No ha habido coherencia." },
+  { wrong:"El contenido se mesclo todo.", correct:"El contenido se mezcló todo." },
+  { wrong:"La idea no se desarrollo.", correct:"La idea no se desarrolló." },
+  { wrong:"El argumento fallo.", correct:"El argumento falló." },
+
+  { wrong:"La conclusion fue confusa.", correct:"La conclusión fue confusa." },
+  { wrong:"El texto parecia improvisado.", correct:"El texto parecía improvisado." },
+  { wrong:"No se entendia el final.", correct:"No se entendía el final." },
+  { wrong:"La redaccion tubo fallos graves.", correct:"La redacción tuvo fallos graves." },
+  { wrong:"Nada quedo bien organizado.", correct:"Nada quedó bien organizado." }
+],
+    hiatikus: [
+  { wrong:"El pais es pequeño.", correct:"El país es pequeño." },
+  { wrong:"La caida fue rapida.", correct:"La caída fue rápida." },
+  { wrong:"El baul estaba cerrado.", correct:"El baúl estaba cerrado." },
+  { wrong:"El poeta escribia versos.", correct:"El poeta escribía versos." },
+  { wrong:"La reunion fue larga.", correct:"La reunión fue larga." },
+
+  { wrong:"El teatro se lleno pronto.", correct:"El teatro se llenó pronto." },
+  { wrong:"La alegria era evidente.", correct:"La alegría era evidente." },
+  { wrong:"El rio estaba seco.", correct:"El río estaba seco." },
+  { wrong:"La actuacion termino tarde.", correct:"La actuación terminó tarde." },
+  { wrong:"El vehiculo freno a tiempo.", correct:"El vehículo frenó a tiempo." },
+
+  { wrong:"El maiz estaba verde.", correct:"El maíz estaba verde." },
+  { wrong:"El heroe caia lentamente.", correct:"El héroe caía lentamente." },
+  { wrong:"La linea se rompio.", correct:"La línea se rompió." },
+  { wrong:"El baul se abrio solo.", correct:"El baúl se abrió solo." },
+  { wrong:"El ruido se oia lejos.", correct:"El ruido se oía lejos." },
+
+  { wrong:"La caida parecia peligrosa.", correct:"La caída parecía peligrosa." },
+  { wrong:"El pais crecia rapido.", correct:"El país crecía rápido." },
+  { wrong:"La alegria se notaba.", correct:"La alegría se notaba." },
+  { wrong:"El rio fluia fuerte.", correct:"El río fluía fuerte." },
+  { wrong:"La reunion termino mal.", correct:"La reunión terminó mal." }
+],
+    momia: [
+  { wrong:"El texto parecia antiguo.", correct:"El texto parecía antiguo." },
+  { wrong:"Las palabras sonaban raras.", correct:"Las palabras sonaban raras." },
+  { wrong:"La expresion era vieja.", correct:"La expresión era vieja." },
+  { wrong:"El estilo resultaba extraño.", correct:"El estilo resultaba extraño." },
+  { wrong:"El lenguaje estaba pasado.", correct:"El lenguaje estaba pasado." },
+
+  { wrong:"La forma no se usaba ya.", correct:"La forma no se usaba ya." },
+  { wrong:"El mensaje perdio fuerza.", correct:"El mensaje perdió fuerza." },
+  { wrong:"La redaccion era pobre.", correct:"La redacción era pobre." },
+  { wrong:"El texto parecia obsoleto.", correct:"El texto parecía obsoleto." },
+  { wrong:"La lectura fue pesada.", correct:"La lectura fue pesada." },
+
+  { wrong:"Las frases estaban mal escritas.", correct:"Las frases estaban mal escritas." },
+  { wrong:"El vocabulario era limitado.", correct:"El vocabulario era limitado." },
+  { wrong:"La expresion no encajaba.", correct:"La expresión no encajaba." },
+  { wrong:"El mensaje se quedo atras.", correct:"El mensaje se quedó atrás." },
+  { wrong:"El estilo no evoluciono.", correct:"El estilo no evolucionó." },
+
+  { wrong:"El texto no se actualizo.", correct:"El texto no se actualizó." },
+  { wrong:"La redaccion parecia vieja.", correct:"La redacción parecía vieja." },
+  { wrong:"El contenido estaba anticuado.", correct:"El contenido estaba anticuado." },
+  { wrong:"El mensaje se quedo corto.", correct:"El mensaje se quedó corto." },
+  { wrong:"La expresion era pobre.", correct:"La expresión era pobre." }
+],
+    rugiton: [
+  { wrong:"Hablo muy fuerte ayer.", correct:"Habló muy fuerte ayer." },
+  { wrong:"Grito sin parar.", correct:"Gritó sin parar." },
+  { wrong:"No modulo la voz.", correct:"No moduló la voz." },
+  { wrong:"Todo lo dijo mal.", correct:"Todo lo dijo mal." },
+  { wrong:"No respeto los turnos.", correct:"No respetó los turnos." },
+
+  { wrong:"Elevo mucho el tono.", correct:"Elevó mucho el tono." },
+  { wrong:"No bajo la intensidad.", correct:"No bajó la intensidad." },
+  { wrong:"El discurso sono agresivo.", correct:"El discurso sonó agresivo." },
+  { wrong:"La explicacion fue brusca.", correct:"La explicación fue brusca." },
+  { wrong:"El mensaje perdio claridad.", correct:"El mensaje perdió claridad." },
+
+  { wrong:"No controlo el volumen.", correct:"No controló el volumen." },
+  { wrong:"Hablo sin pensar.", correct:"Habló sin pensar." },
+  { wrong:"La entonacion fue mala.", correct:"La entonación fue mala." },
+  { wrong:"No cuido el ritmo.", correct:"No cuidó el ritmo." },
+  { wrong:"El discurso acabo mal.", correct:"El discurso acabó mal." },
+
+  { wrong:"La exposicion fue tensa.", correct:"La exposición fue tensa." },
+  { wrong:"No uso pausas.", correct:"No usó pausas." },
+  { wrong:"La voz sono forzada.", correct:"La voz sonó forzada." },
+  { wrong:"No midio su tono.", correct:"No midió su tono." },
+  { wrong:"El mensaje se distorsiono.", correct:"El mensaje se distorsionó." }
+],
+    zombie: [
+  { wrong:"El examen estuvo facil.", correct:"El examen estuvo fácil." },
+  { wrong:"La cancion sono bien.", correct:"La canción sonó bien." },
+  { wrong:"El alumno no reviso.", correct:"El alumno no revisó." },
+  { wrong:"La redaccion tenia errores.", correct:"La redacción tenía errores." },
+  { wrong:"El texto parecia correcto.", correct:"El texto parecía correcto." },
+
+  { wrong:"No corrigio nada.", correct:"No corrigió nada." },
+  { wrong:"El mensaje se entendio mal.", correct:"El mensaje se entendió mal." },
+  { wrong:"El ejercicio fue facil.", correct:"El ejercicio fue fácil." },
+  { wrong:"La explicacion no ayudo.", correct:"La explicación no ayudó." },
+  { wrong:"El trabajo quedo regular.", correct:"El trabajo quedó regular." },
+
+  { wrong:"No reviso el texto.", correct:"No revisó el texto." },
+  { wrong:"La conclusion fue pobre.", correct:"La conclusión fue pobre." },
+  { wrong:"El alumno volvio a fallar.", correct:"El alumno volvió a fallar." },
+  { wrong:"El error aparecio otra vez.", correct:"El error apareció otra vez." },
+  { wrong:"La falta se repitio.", correct:"La falta se repitió." },
+
+  { wrong:"El fallo volvio a salir.", correct:"El fallo volvió a salir." },
+  { wrong:"No aprendio del error.", correct:"No aprendió del error." },
+  { wrong:"El texto termino igual.", correct:"El texto terminó igual." },
+  { wrong:"La redaccion volvio a fallar.", correct:"La redacción volvió a fallar." },
+  { wrong:"El examen salio mal.", correct:"El examen salió mal." }
+],
+    sintaxion: [
+  { wrong:"El orden de palabras no a sido correcto.", correct:"El orden de palabras no ha sido correcto." },
+  { wrong:"La frase parecia mal construida.", correct:"La frase parecía mal construida." },
+  { wrong:"No se a entendido bien la estructura.", correct:"No se ha entendido bien la estructura." },
+  { wrong:"El sujeto no estaba claro.", correct:"El sujeto no estaba claro." },
+  { wrong:"La oracion tenia errores.", correct:"La oración tenía errores." },
+
+  { wrong:"El verbo no concordaba bien.", correct:"El verbo no concordaba bien." },
+  { wrong:"La frase se entendia mal.", correct:"La frase se entendía mal." },
+  { wrong:"No a quedado claro el sentido.", correct:"No ha quedado claro el sentido." },
+  { wrong:"La estructura parecia incorrecta.", correct:"La estructura parecía incorrecta." },
+  { wrong:"La oracion no se comprendia.", correct:"La oración no se comprendía." },
+
+  { wrong:"El mensaje estaba mal organizado.", correct:"El mensaje estaba mal organizado." },
+  { wrong:"No se a revisado la sintaxis.", correct:"No se ha revisado la sintaxis." },
+  { wrong:"La frase resulto confusa.", correct:"La frase resultó confusa." },
+  { wrong:"La oracion final fallo.", correct:"La oración final falló." },
+  { wrong:"No se entendia la idea.", correct:"No se entendía la idea." },
+
+  { wrong:"La estructura no a sido cuidada.", correct:"La estructura no ha sido cuidada." },
+  { wrong:"La oracion parecia forzada.", correct:"La oración parecía forzada." },
+  { wrong:"El mensaje se interpreto mal.", correct:"El mensaje se interpretó mal." },
+  { wrong:"No se a corregido el orden.", correct:"No se ha corregido el orden." },
+  { wrong:"La frase final no quedo clara.", correct:"La frase final no quedó clara." }
+],
+    gravikus: [
+  { wrong:"El texto no a sido revisado bien.", correct:"El texto no ha sido revisado bien." },
+  { wrong:"La explicacion resulta dificil.", correct:"La explicación resulta difícil." },
+  { wrong:"El mensaje parecia demasiado largo.", correct:"El mensaje parecía demasiado largo." },
+  { wrong:"No se a eliminado nada.", correct:"No se ha eliminado nada." },
+  { wrong:"El lector tubo problemas al leer.", correct:"El lector tuvo problemas al leer." },
+
+  { wrong:"La redaccion es pesada y lenta.", correct:"La redacción es pesada y lenta." },
+  { wrong:"No a quedado clara la idea.", correct:"No ha quedado clara la idea." },
+  { wrong:"El texto estaba mal echo.", correct:"El texto estaba mal hecho." },
+  { wrong:"La explicacion se asia eterna.", correct:"La explicación se hacía eterna." },
+  { wrong:"No se a resumido el contenido.", correct:"No se ha resumido el contenido." },
+
+  { wrong:"El argumento parecia fragil.", correct:"El argumento parecía frágil." },
+  { wrong:"La lectura se volvia cansada.", correct:"La lectura se volvía cansada." },
+  { wrong:"No a sabido sintetizar.", correct:"No ha sabido sintetizar." },
+  { wrong:"El mensaje tubo demasiados rodeos.", correct:"El mensaje tuvo demasiados rodeos." },
+  { wrong:"La conclusion no fue clara.", correct:"La conclusión no fue clara." },
+
+  { wrong:"El texto no a mejorado nada.", correct:"El texto no ha mejorado nada." },
+  { wrong:"La explicacion tenia exceso de palabras.", correct:"La explicación tenía exceso de palabras." },
+  { wrong:"No se a recortado lo suficiente.", correct:"No se ha recortado lo suficiente." },
+  { wrong:"El lector acabo agotado.", correct:"El lector acabó agotado." },
+  { wrong:"La redaccion final resulto pesada.", correct:"La redacción final resultó pesada." }
+],
+   jarkon: [
+  { wrong:"El arbol estaba seco.", correct:"El árbol estaba seco." },
+  { wrong:"El examen fue facil.", correct:"El examen fue fácil." },
+  { wrong:"La casa es grande.", correct:"La casa es grande." },
+  { wrong:"El camino era largo.", correct:"El camino era largo." },
+  { wrong:"La noche estaba oscura.", correct:"La noche estaba oscura." },
+
+  { wrong:"El perro corrio rapido.", correct:"El perro corrió rápido." },
+  { wrong:"La mañana fue fria.", correct:"La mañana fue fría." },
+  { wrong:"El coche se paro.", correct:"El coche se paró." },
+  { wrong:"La clase termino tarde.", correct:"La clase terminó tarde." },
+  { wrong:"El niño jugo fuera.", correct:"El niño jugó fuera." },
+
+  { wrong:"La decision fue clara.", correct:"La decisión fue clara." },
+  { wrong:"El avion despego.", correct:"El avión despegó." },
+  { wrong:"La cancion sono bien.", correct:"La canción sonó bien." },
+  { wrong:"El numero era impar.", correct:"El número era impar." },
+  { wrong:"El cafe estaba frio.", correct:"El café estaba frío." },
+
+  { wrong:"El arbol perdio hojas.", correct:"El árbol perdió hojas." },
+  { wrong:"El heroe gano facil.", correct:"El héroe ganó fácil." },
+  { wrong:"La reunion acabo pronto.", correct:"La reunión acabó pronto." },
+  { wrong:"El menu parecia simple.", correct:"El menú parecía simple." },
+  { wrong:"El sofa estaba roto.", correct:"El sofá estaba roto." }
+],
+   ortograf: [
+  { wrong:"Haber si llegamos a tiempo.", correct:"A ver si llegamos a tiempo." },
+  { wrong:"No a venido nadie.", correct:"No ha venido nadie." },
+  { wrong:"E terminado el ejercicio.", correct:"He terminado el ejercicio." },
+  { wrong:"Tiene que haber echo los deberes.", correct:"Tiene que haber hecho los deberes." },
+  { wrong:"No se a que hora empieza.", correct:"No sé a qué hora empieza." },
+
+  { wrong:"Aun no e hablado con ella.", correct:"Aún no he hablado con ella." },
+  { wrong:"No a habido problemas.", correct:"No ha habido problemas." },
+  { wrong:"La baca estaba suelta.", correct:"La vaca estaba suelta." },
+  { wrong:"El baso se rompio.", correct:"El vaso se rompió." },
+  { wrong:"Tubo que salir antes.", correct:"Tuvo que salir antes." },
+
+  { wrong:"No se por que no vino.", correct:"No sé por qué no vino." },
+  { wrong:"Haber si as entendido.", correct:"A ver si has entendido." },
+  { wrong:"A salido todo mal.", correct:"Ha salido todo mal." },
+  { wrong:"E dicho que vendria.", correct:"He dicho que vendría." },
+  { wrong:"No ay nadie aqui.", correct:"No hay nadie aquí." },
+
+  { wrong:"Haber si mañana a venido.", correct:"A ver si mañana ha venido." },
+  { wrong:"No se donde ai que ir.", correct:"No sé dónde hay que ir." },
+  { wrong:"Iba a acerlo hoy.", correct:"Iba a hacerlo hoy." },
+  { wrong:"Aun no se a terminado.", correct:"Aún no se ha terminado." },
+  { wrong:"La bida es complicada.", correct:"La vida es complicada." }
+],
+    siseus: [
+  { wrong:"El texto se repetia mucho.", correct:"El texto se repetía mucho." },
+  { wrong:"La explicacion no avanzaba.", correct:"La explicación no avanzaba." },
+  { wrong:"El argumento volvia atras.", correct:"El argumento volvía atrás." },
+  { wrong:"No se llegaba al final.", correct:"No se llegaba al final." },
+  { wrong:"La lectura se hacia larga.", correct:"La lectura se hacía larga." },
+
+  { wrong:"El mensaje parecia circular.", correct:"El mensaje parecía circular." },
+  { wrong:"No a cambiado nada.", correct:"No ha cambiado nada." },
+  { wrong:"La idea volvia a empezar.", correct:"La idea volvía a empezar." },
+  { wrong:"El texto no terminaba nunca.", correct:"El texto no terminaba nunca." },
+  { wrong:"La conclusion no llegaba.", correct:"La conclusión no llegaba." },
+
+  { wrong:"La explicacion se repetia otra vez.", correct:"La explicación se repetía otra vez." },
+  { wrong:"El lector se cansaba rapido.", correct:"El lector se cansaba rápido." },
+  { wrong:"No a habido progreso.", correct:"No ha habido progreso." },
+  { wrong:"El razonamiento giraba en circulos.", correct:"El razonamiento giraba en círculos." },
+  { wrong:"La lectura parecia eterna.", correct:"La lectura parecía eterna." },
+
+  { wrong:"El texto volvia al inicio.", correct:"El texto volvía al inicio." },
+  { wrong:"No se a cerrado la idea.", correct:"No se ha cerrado la idea." },
+  { wrong:"La explicacion seguia igual.", correct:"La explicación seguía igual." },
+  { wrong:"El argumento no avanzo.", correct:"El argumento no avanzó." },
+  { wrong:"La conclusion se repetia.", correct:"La conclusión se repetía." }
+],
+    ciclope: [
+  { wrong:"El arbol esta seco.", correct:"El árbol está seco." },
+  { wrong:"El lapiz no escribe.", correct:"El lápiz no escribe." },
+  { wrong:"El examen termino mal.", correct:"El examen terminó mal." },
+  { wrong:"La cancion sono rara.", correct:"La canción sonó rara." },
+  { wrong:"El numero no es correcto.", correct:"El número no es correcto." },
+
+  { wrong:"El arbol perdio hojas.", correct:"El árbol perdió hojas." },
+  { wrong:"El heroe no gano.", correct:"El héroe no ganó." },
+  { wrong:"La reunion acabo pronto.", correct:"La reunión acabó pronto." },
+  { wrong:"El avion despego tarde.", correct:"El avión despegó tarde." },
+  { wrong:"El cafe estaba frio.", correct:"El café estaba frío." },
+
+  { wrong:"El sofa se rompio.", correct:"El sofá se rompió." },
+  { wrong:"El camion salio rapido.", correct:"El camión salió rápido." },
+  { wrong:"El menu parecia caro.", correct:"El menú parecía caro." },
+  { wrong:"La decision fue dificil.", correct:"La decisión fue difícil." },
+  { wrong:"El examen fue facil.", correct:"El examen fue fácil." },
+
+  { wrong:"El arbol cayo ayer.", correct:"El árbol cayó ayer." },
+  { wrong:"La cancion termino mal.", correct:"La canción terminó mal." },
+  { wrong:"El numero aumento.", correct:"El número aumentó." },
+  { wrong:"El avion aterrizo.", correct:"El avión aterrizó." },
+  { wrong:"El heroe perdio.", correct:"El héroe perdió." }
+],
+    don_pablo: [
+  { wrong:"La kamisa por dentro.", correct:"La camisa, por dentro." },
+  { wrong:"La corbata bien puesta.", correct:"La corbata, bien puesta." },
+  { wrong:"En silencio, nos sentamos.", correct:"En silencio, nos sentamos." },
+  { wrong:"No me pidas perdon, demuestra que estas arrepentido.", correct:"No me pidas perdón, demuestra que estás arrepentido" },
+  { wrong:"No me dés las gracias, demuestra que estas agradecido.", correct:"No me des las gracias, demuestra que estás agradecido." },
+
+  { wrong:"No a sabido detectar los errores.", correct:"No ha sabido detectar los errores." },
+  { wrong:"El alumno no se a esforzado.", correct:"El alumno no se ha esforzado." },
+  { wrong:"La conclusion no fue clara.", correct:"La conclusión no fue clara." },
+  { wrong:"El ejercicio estaba mal echo.", correct:"El ejercicio estaba mal hecho." },
+  { wrong:"No se a corregido nada.", correct:"No se ha corregido nada." },
+
+  { wrong:"El examen tenia faltas graves.", correct:"El examen tenía faltas graves." },
+  { wrong:"No se entendia el contenido.", correct:"No se entendía el contenido." },
+  { wrong:"La explicacion carecia de orden.", correct:"La explicación carecía de orden." },
+  { wrong:"El texto parecia bien pero no lo estaba.", correct:"El texto parecía bien, pero no lo estaba." },
+  { wrong:"No a quedado nada claro.", correct:"No ha quedado nada claro." },
+
+  { wrong:"El alumno no reviso el texto.", correct:"El alumno no revisó el texto." },
+  { wrong:"La redaccion final tenia errores.", correct:"La redacción final tenía errores." },
+  { wrong:"No se a cuidado la ortografia.", correct:"No se ha cuidado la ortografía." },
+  { wrong:"El trabajo estaba mal presentado.", correct:"El trabajo estaba mal presentado." },
+  { wrong:"La correccion fue necesaria.", correct:"La corrección fue necesaria." }
+	],
+};
+</script>

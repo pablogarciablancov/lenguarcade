@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Battlegrafía · Guardianes de la Pluma</title>
+  
+  <?!= include('styles'); ?>
+</head>
+<body class="layout-flex">
+
+<div id="login-screen" class="app-screen is-active">
+  <div class="pixel-panel">
+    <div class="panel-header">REGISTRO DE AVENTUREROS</div>
+    
+    <div class="panel-body">
+      <label>Correo Institucional:</label>
+      <input type="email" id="login-email-real" class="pixel-input" placeholder="usuario@alumno.fomento.edu">
+      
+      <label>PIN de Acceso (mín. 4 caracteres):</label>
+      <input type="password" id="login-pass-real" class="pixel-input" placeholder="****">
+      
+      <p id="login-error-msg" class="error-text">Acceso denegado</p>
+      
+      <div class="login-actions">
+        <button id="btn-entrar-real" class="btn-pixel primary">ENTRAR AL REINO</button>
+        <button id="btn-modo-demo" class="btn-pixel secondary">MODO DEMO (SIN GUARDAR)</button>
+      </div>
+    </div>
+    
+    <div class="panel-footer">Válido para @fomento.edu y @alumno.fomento.edu</div>
+  </div>
+
+  <button id="intro-continue" style="display:none;">Start</button>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btnEntrar = document.getElementById('btn-entrar-real');
+  const btnDemo = document.getElementById('btn-modo-demo');
+  const errorMsg = document.getElementById('login-error-msg');
+
+  // Si por algún motivo no carga el HTML, nos detenemos para no dar errores rojos
+  if (!btnEntrar) return;
+
+  // LÓGICA DE ENTRADA REAL
+  btnEntrar.addEventListener('click', () => {
+    const inputEmail = document.getElementById('login-email-real');
+    const inputPass = document.getElementById('login-pass-real');
+    
+    if (!inputEmail || !inputPass) {
+       console.error("Error: No se encuentran los campos de texto en el HTML.");
+       return;
+    }
+
+    const email = inputEmail.value.trim().toLowerCase();
+    const pass = inputPass.value.trim();
+
+    // Validaciones locales
+    const esFomento = email.endsWith('@fomento.edu') || email.endsWith('@alumno.fomento.edu');
+    const passOk = pass.length >= 4;
+
+    if (!esFomento) {
+      errorMsg.innerText = "Usa tu correo @fomento o @alumno.fomento";
+      errorMsg.style.display = 'block';
+      return;
+    }
+    if (!passOk) {
+      errorMsg.innerText = "El PIN debe tener al menos 4 caracteres";
+      errorMsg.style.display = 'block';
+      return;
+    }
+
+    // Feedback visual
+    btnEntrar.innerText = "VERIFICANDO...";
+    btnEntrar.style.opacity = "0.7";
+    btnEntrar.disabled = true;
+    errorMsg.style.display = 'none';
+
+    // Conexión con Excel
+    google.script.run
+      .withSuccessHandler((respuesta) => {
+         btnEntrar.innerText = "ENTRAR AL REINO";
+         btnEntrar.style.opacity = "1";
+         btnEntrar.disabled = false;
+         
+         if (respuesta === "OK" || respuesta === "OK_NUEVO") {
+           localStorage.setItem('bg_user_email', email);
+           localStorage.setItem('bg_is_demo', 'false');
+           
+           if (respuesta === "OK_NUEVO") alert("¡PIN registrado con éxito!");
+           acceder(); 
+           
+         } else if (respuesta === "ERROR_PIN") {
+           errorMsg.innerText = "PIN incorrecto. Inténtalo de nuevo.";
+           errorMsg.style.display = 'block';
+         } else {
+           errorMsg.innerText = "Error: " + respuesta;
+           errorMsg.style.display = 'block';
+         }
+      })
+      .withFailureHandler((err) => {
+         console.error("Fallo de conexión:", err);
+         btnEntrar.innerText = "ENTRAR AL REINO";
+         btnEntrar.style.opacity = "1";
+         btnEntrar.disabled = false;
+         errorMsg.innerText = "Error de conexión con el servidor.";
+         errorMsg.style.display = 'block';
+      })
+      .verificarCredenciales(email, pass);
+  });
+
+  // LÓGICA DE MODO DEMO
+  btnDemo.addEventListener('click', () => {
+    localStorage.setItem('bg_user_email', 'invitado@demo.com');
+    localStorage.setItem('bg_is_demo', 'true');
+    acceder();
+  });
+
+  function acceder() {
+    const loginScreen = document.getElementById('login-screen');
+    loginScreen.style.display = 'none'; 
+    loginScreen.classList.remove('is-active');
+    
+    const ghostBtn = document.getElementById('intro-continue');
+    if (ghostBtn) ghostBtn.click();
+    
+    document.activeElement.blur();
+  }
+});
+</script>
+
+
+    <div id="main-menu" class="app-screen main-menu">
+      <div class="menu-panel" role="menu" aria-label="Menú principal">
+        <div class="menu-header">
+          <div>
+            <div class="menu-title">BATTLEGRAFÍA</div>
+            <div class="menu-sub">Elige una opción</div>
+          </div>
+        </div>
+        <div class="menu-grid">
+          <button id="menu-account" class="menu-btn"><div class="menu-btn-title">Cuenta</div></button>
+          <button id="menu-start" class="menu-btn"><div class="menu-btn-title">Comenzar</div></button>
+          <button id="menu-collection" class="menu-btn"><div class="menu-btn-title">Colección</div></button>
+          <button id="menu-shop" class="menu-btn"><div class="menu-btn-title">Tienda</div></button>
+          <button id="menu-achievements" class="menu-btn"><div class="menu-btn-title">Logros</div></button>
+          <button id="menu-credits" class="menu-btn"><div class="menu-btn-title">Créditos</div></button>
+        </div>
+        <div id="hub-backpack" class="hub-backpack" aria-label="Mochila"></div>
+        <div class="menu-footer">
+          <span id="hub-status" class="hint">Pulsa <strong>Comenzar</strong> para jugar.</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="start-choice" class="app-screen">
+      <div class="menu-panel hub-panel">
+        <div class="menu-bg" aria-hidden="true"></div>
+        <div class="screen-card">
+          <div class="screen-head">
+            <div class="screen-title">Comenzar</div>
+            <button id="start-choice-back" class="btn secondary">Atrás</button>
+          </div>
+          <div class="screen-sub">Elige si quieres empezar desde cero o continuar una partida guardada.</div>
+
+          <div style="margin-top:14px; display:grid; gap:12px;">
+            <button id="start-choice-new" class="btn primary" style="padding:14px 16px; font-size:16px;">Nueva partida</button>
+            <button id="start-choice-continue" class="btn secondary" style="padding:14px 16px; font-size:16px;">Continuar partida</button>
+          </div>
+          <div id="start-choice-hint" class="hint" style="margin-top:12px; opacity:.85;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="mode-screen" class="app-screen">
+      <div class="menu-bg" aria-hidden="true"></div>
+      <div class="mode-content">
+        <div class="mode-header">
+          <div class="mode-title">Elige modo</div>
+          <button id="mode-back" class="btn secondary">Atrás</button>
+        </div>
+        <div class="mode-grid">
+          <button class="mode-card" data-mode="adventure">
+            <img class="mode-img" src="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/menus/menu_aventura.webp" onerror="this.style.display='none'">
+            <div class="mode-name">Aventura</div>
+            <div class="mode-rule">Campaña lineal: mapa, descanso, tienda y objetos.</div>
+          </button>
+          <button class="mode-card" data-mode="survival">
+            <img class="mode-img" src="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/menus/menu_supervivencia.webp" onerror="this.style.display='none'">
+            <div class="mode-name">Supervivencia</div>
+            <div class="mode-rule">Como Aventura, pero sin campamento, sin tienda y sin objetos.</div>
+          </button>
+          <button class="mode-card" data-mode="practice">
+            <img class="mode-img" src="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/menus/menu_practica.webp" onerror="this.style.display='none'">
+            <div class="mode-name">Práctica</div>
+            <div class="mode-rule">Combates contra monstruos desbloqueados. Sin oro/EXP/objetos/habilidad.</div>
+          </button>
+          <button class="mode-card" data-mode="dominio">
+            <img class="mode-img" src="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/menus/menu_dominio.webp" onerror="this.style.display='none'">
+            <div class="mode-name">Dominio</div>
+            <div class="mode-rule">Derrota al monstruo con 5 perfectas seguidas.</div>
+          </button>
+          <button class="mode-card" data-mode="strategy">
+            <img class="mode-img" src="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/menus/menu_estrategia.webp" onerror="this.style.display='none'">
+            <div class="mode-name">Estrategia</div>
+            <div class="mode-rule">Elige monstruos, tiempo y un loadout real de objetos. Sin tienda dentro.</div>
+          </button>
+        </div>
+        <div class="mode-footer"><span class="hint" id="mode-hint">Elige un modo para empezar.</span></div>
+      </div>
+    </div>
+
+    <div id="hub-account" class="app-screen">
+      <div class="menu-panel hub-panel">
+        <div class="menu-bg" aria-hidden="true"></div>
+        <div class="screen-card">
+          <div class="screen-head">
+            <div class="screen-title">Cuenta</div>
+            <button id="hub-account-back" class="btn secondary">Atrás</button>
+          </div>
+          <div class="screen-sub">
+            Estás jugando dentro del entorno seguro de tu colegio. Tu progreso, nivel y colección se guardan automáticamente.
+          </div>
+
+          <div style="margin-top:20px; padding: 16px; background: rgba(74, 222, 128, 0.08); border: 1px solid var(--success); border-radius: 12px; text-align: center;">
+            <div style="color: var(--success); font-weight: bold; margin-bottom: 8px; font-size: 1.1rem;">✅ Identidad verificada</div>
+            <div id="hub-account-email" style="font-size: 1.2rem; font-weight: bold; color: white;">Detectando tu correo...</div>
+          </div>
+          
+          <div class="hint" style="margin-top:16px; text-align:center;">
+            (El inicio de sesión es automático)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="hub-achievements" class="app-screen">
+      <div class="menu-panel hub-panel">
+        <div class="screen-card">
+          <div class="screen-head">
+            <div class="screen-title">Logros</div>
+            <button id="hub-achievements-back" class="btn secondary">Atrás</button>
+          </div>
+          <div id="hub-achievements-summary" class="screen-sub"></div>
+          <div class="ach-controls">
+            <div class="ach-tabs" id="hub-ach-tabs"></div>
+            <div class="ach-filters">
+              <div class="ach-filter-group" id="hub-ach-filter-group">
+                <button class="ach-filter is-active" data-filter="all">Todos</button>
+                <button class="ach-filter" data-filter="unlocked">Desbloqueados</button>
+                <button class="ach-filter" data-filter="locked">Bloqueados</button>
+                <button class="ach-filter" data-filter="hidden">Secretos</button>
+              </div>
+              <input id="hub-ach-search" class="ach-search" type="text" placeholder="Buscar logro..." />
+            </div>
+          </div>
+          <div id="hub-achievements-grid" class="ach-grid-hub"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="hub-shop" class="app-screen">
+      <div class="menu-panel hub-panel">
+        <div class="menu-bg" aria-hidden="true"></div>
+        <div class="screen-card">
+          <div class="screen-head">
+            <div class="screen-title">Tienda</div>
+            <button id="hub-shop-back" class="btn secondary">Atrás</button>
+          </div>
+          <div class="screen-sub">Compra objetos (si hay sesión). El inventario se comparte con los modos que permiten objetos.</div>
+          <div id="hub-shop-list" class="shop-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="hub-collection" class="app-screen">
+      <div class="menu-panel hub-panel">
+        <div class="menu-bg" aria-hidden="true"></div>
+        <div class="screen-card">
+          <div class="screen-head">
+            <div class="screen-title">Colección</div>
+            <button id="hub-collection-back" class="btn secondary">Atrás</button>
+          </div>
+          <div class="screen-sub">Monstruos desbloqueados al vencerlos. En demo no se guarda colección.</div>
+          <div id="hub-collection-grid" class="collection-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="hub-credits" class="app-screen">
+      <div class="menu-panel hub-panel">
+        <div class="menu-bg" aria-hidden="true"></div>
+        <div class="screen-card">
+          <div class="screen-head">
+            <div class="screen-title">Créditos</div>
+            <button id="hub-credits-back" class="btn secondary">Atrás</button>
+          </div>
+          <div class="screen-sub">Battlegrafía es un RPG educativo para practicar ortografía, morfología y escritura.</div>
+          <div class="screen-sub" style="opacity:.85">© 2026 Pablo García — Uso educativo.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-shell">
+
+    <div id="start-screen" class="start-screen" style="display:none">
+      <div class="start-panel">
+        <div class="start-title">Battlegrafía</div>
+        <div class="start-sub">La ortografía te da poder. Corrige para ganar experiencia, oro, objetos y criaturas.</div>
+
+        <div id="continue-block" style="display:none;">
+          <div class="start-section-title">Partida guardada encontrada</div>
+          <p class="start-sub" style="margin-bottom:.4rem;">Puedes continuar tu aventura o empezar una nueva desde cero.</p>
+          <div class="start-buttons" style="justify-content:flex-start;margin-bottom:.6rem;">
+            <button id="continue-btn">Continuar partida</button>
+            <button id="new-from-saved-btn" class="ghost">Nueva aventura</button>
+          </div>
+          <hr style="border:none;border-top:1px solid #1f2937;margin:.4rem 0;">
+        </div>
+
+        <div class="start-section-title">Crear nuevo héroe</div>
+        <div class="input-row">
+          <label for="player-name">Nombre del héroe (tu nombre o apodo):</label>
+          <input id="player-name" type="text" maxlength="20" placeholder="Ej.: Maga de la Til-de, Don Esdrújulo...">
+        </div>
+
+        <div class="start-section-title">Elige contenidos</div>
+        <div class="input-row">
+          <label for="content-select">¿Qué quieres practicar en esta partida?</label>
+          <select id="content-select">
+            <option value="ortografia" selected>Ortografía</option>
+            <option value="morfologia">Morfología</option>
+            <option value="verbos">Verbos</option>
+			<option value="literatura">Literatura</option>
+            <option value="sintaxis">Sintaxis</option>
+            <option value="semantica">Semántica</option>
+            <option value="mix">Un poco de todo</option>
+          </select>
+        </div>
+
+        <div class="start-section-title">Elige tu estilo de héroe</div>
+        <div class="avatar-grid" id="avatar-grid">
+          <div class="avatar-option" data-id="mago" data-emoji="🧙‍♂️">
+            <img src="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/heros/sprite_hero_mago.webp" alt="Mago de la tilde" class="avatar-thumb">
+            <span>Mago de la tilde</span>
+          </div>
+          <div class="avatar-option" data-id="guerrero" data-emoji="🗡️">
+            <img src="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/heros/sprite_hero_guerrero.webp" alt="Guerrero de la coma" class="avatar-thumb">
+            <span>Guerrero de la coma</span>
+          </div>
+          <div class="avatar-option" data-id="ninja" data-emoji="🥷">
+            <img src="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/heros/sprite_hero_ninja.webp" alt="Ninja del acento" class="avatar-thumb">
+            <span>Ninja del acento</span>
+          </div>
+          <div class="avatar-option" data-id="robot" data-emoji="🤖">
+            <img src="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/heros/sprite_hero_robot.webp" alt="Corrector mecánico" class="avatar-thumb">
+            <span>Corrector mecánico</span>
+          </div>
+        </div>
+
+        <div class="hero-details" id="hero-details">
+          <div class="hero-details-title">Detalles del héroe</div>
+          <div class="hero-details-body" id="hero-details-body">
+            Elige un héroe para ver sus características.
+          </div>
+        </div>
+
+        <div class="start-buttons">
+          <button id="start-new-btn">Empezar aventura</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-title">
+      <span>Battlegrafía</span> · Guardianes de la Pluma
+    </div>
+
+    <div class="top-nav">
+      <button id="nav-home" class="nav-btn secondary" title="Volver al menú principal">Menú</button>
+      <button id="nav-battle" class="nav-btn nav-active">Batalla</button>
+      <button id="nav-camp" class="nav-btn secondary">Campamento</button>
+      <button id="nav-map" class="nav-btn secondary">Mapa</button>
+      <button id="nav-diary" class="nav-btn secondary">Diario</button>
+      <button id="nav-history" class="nav-btn secondary">Historia</button>
+      <button id="nav-inventory" class="nav-btn secondary">Inventario</button>
+      <span id="saveIndicator" class="save-indicator" aria-live="polite"></span>
+      <span id="runInfo" class="run-info" aria-live="polite"></span>
+    </div>
+
+    <div class="layout">
+      <div class="battle-column">
+
+        <div id="battle-screen" class="battle-screen">
+          <canvas id="battle-fx" class="battle-fx is-hidden" aria-hidden="true"></canvas>
+          <div id="battle-fx-dom" class="fx-layer" aria-hidden="true"></div>
+          <div class="battle-top">
+            <div class="entity-box hero-box">
+              <div id="hero-name-label" class="entity-name">Héroe de Battlegrafía</div>
+              <div class="entity-tag">Alumno</div>
+              <div class="hp-bar-wrap">
+                <div id="player-hp-bar" class="hp-bar-fill" style="width:100%"></div>
+              </div>
+              <div id="player-hp-text" class="hp-text">100 / 100</div>
+            </div>
+            <div class="entity-box monster-box">
+              <div id="monster-name" class="entity-name">H-Ghoul</div>
+              <div id="monster-type" class="entity-tag">Errores con H / Haber - A ver</div>
+              <div class="hp-bar-wrap">
+                <div id="monster-hp-bar" class="hp-bar-fill" style="width:100%"></div>
+              </div>
+              <div id="monster-hp-text" class="hp-text">100 / 100</div>
+            </div>
+          </div>
+
+          <div class="battle-sprites-row">
+            <div class="hero-visual">
+              <div class="sprite-frame">
+                <img id="hero-sprite-img" src="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/heros/sprite_hero_mago.webp" alt="Héroe">
+              </div>
+            </div>
+            <div class="monster-visual">
+              <div class="sprite-frame">
+                <img id="monster-sprite-img" src="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/monsters/sprite_h_ghoul.webp" alt="Monstruo">
+              </div>
+            </div>
+          </div>
+
+          <div class="speech">
+            <div class="speech-label">Monstruo dice (con faltas):</div>
+            <div id="wrong-phrase" class="speech-text">Haber si puedes corregirme...</div>
+          </div>
+        </div>
+
+        <div id="camp-screen" class="camp-screen" style="display:none;">
+          <div class="camp-container">
+            <div class="camp-title-main">Campamento · Hogueras de Ortographia</div>
+            <div class="camp-sub">
+              Aquí puedes descansar, gastar tu oro en objetos útiles y prepararte para las próximas batallas.
+            </div>
+
+            <div class="camp-rest">
+              <div class="camp-fire-visual">🔥</div>
+              <div class="camp-rest-info">
+                <div class="camp-rest-info-title">Descanso junto a la hoguera</div>
+                <div class="camp-rest-text">
+                  Siéntate junto al fuego, repasa tus errores y recupera toda tu vida. Es caro, pero más caro es caer en combate.
+                </div>
+                <button id="camp-rest-btn">Descansar (100 de oro)</button>
+                <div class="camp-rest-stats">
+                  Vida actual: <span id="camp-hp-info">0 / 0</span><br>
+                  Oro disponible: <span id="camp-gold-info">0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="camp-box camp-shop">
+              <div class="camp-box-title">Tienda del escriba</div>
+              <div class="camp-text">
+                Compra objetos que te den ventajas reales: más vida, curaciones, pistas o pociones de combate. Todo preparado para las próximas batallas.
+              </div>
+              <div id="shop-list" class="shop-grid"></div>
+            </div>
+
+            <div id="camp-message" class="camp-message">
+              <span class="hint">Consejo: alterna batallas y campamento para que el héroe no caiga agotado.</span>
+            </div>
+
+            <div class="camp-footer">
+              Cada alumno puede jugar en su propio dispositivo: la partida se guarda automáticamente en este navegador.
+            </div>
+          </div>
+        </div>
+
+        <div id="map-screen" class="map-screen" style="display:none;">
+          <div class="map-header" id="map-header">Mapa de Ortographia</div>
+          <div class="map-sub" id="map-sub">
+            Cada monstruo custodia un tramo del camino. Los iconos muestran tu progreso: superado, actual o bloqueado.
+          </div>
+          <div class="map-world-row">
+            <div class="map-world-label">Zona:</div>
+            <select id="map-world-select" class="map-world-select"></select>
+          </div>
+          <div class="map-canvas" id="map-canvas"></div>
+          <div class="map-stages" id="map-stages"></div>
+          <div class="map-legend">
+            <span><span class="map-dot cleared"></span> Superado</span>
+            <span><span class="map-dot current"></span> Actual</span>
+            <span><span class="map-dot"></span> Bloqueado</span>
+          </div>
+        </div>
+
+        <div id="diary-screen" class="diary-screen" style="display:none;">
+          <div class="screen-inner">
+            <div class="diary-header">Diario de aventura</div>
+            <div class="diary-sub">
+              Aquí se registran las frases que has combatido, tus respuestas y cómo ha ido cada batalla. A la izquierda verás tus datos clave, a la derecha el relato detallado.
+            </div>
+
+            <div class="diary-layout">
+              <div class="diary-panel">
+                <div class="diary-panel-header">
+                  <div class="diary-icon">📊</div>
+                  <div>
+                    <div class="diary-panel-title">Resumen de progreso</div>
+                    <div class="diary-panel-sub">Aciertos, errores, porcentaje de éxito y otros datos de tus batallas.</div>
+                  </div>
+                </div>
+                <div id="diary-summary" class="diary-summary"></div>
+              </div>
+
+              <div class="diary-panel">
+                <div class="diary-panel-header">
+                  <div class="diary-icon">📓</div>
+                  <div>
+                    <div class="diary-panel-title">Entradas del diario</div>
+                    <div class="diary-panel-sub">Cada frase combatida, qué escribiste tú y qué ocurrió con el monstruo.</div>
+                  </div>
+                </div>
+                <div id="diary-entries" class="diary-list"></div>
+              </div>
+
+              <div class="diary-panel full">
+                <div class="diary-panel-header">
+                  <div class="diary-icon">⚔️</div>
+                  <div>
+                    <div class="diary-panel-title">Feed del registro de batalla</div>
+                    <div class="diary-panel-sub">Las últimas acciones y mensajes del combate (lo más reciente arriba).</div>
+                  </div>
+                </div>
+                <div id="battle-feed" class="feed-list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="history-screen" class="history-screen" style="display:none;">
+          <div class="screen-inner">
+            <div class="history-header">Historia de la aventura</div>
+            <div class="history-sub">
+              Cada monstruo forma parte de una gran historia. Aquí verás una galería de scenes: al principio están bloqueadas y,
+              cuando venzas a los monstruos, se desbloquearán con el momento clave de la batalla.
+            </div>
+            <div id="history-gallery" class="history-gallery"></div>
+          </div>
+        </div>
+
+        <div id="inventory-screen" class="inventory-screen" style="display:none;">
+          <div class="inventory-container">
+            <div class="box-title">Inventario y colección</div>
+            <div class="inventory-sub">Consulta aquí tus objetos, cartas y criaturas derrotadas.</div>
+
+            <div class="inventory-layout">
+              <div class="inventory-column">
+                <div class="box-title">Objetos</div>
+                <div id="items-list"></div>
+              </div>
+              <div class="inventory-column">
+                <div class="box-title">Cartas</div>
+                <div id="cards-list"></div>
+              </div>
+            </div>
+
+            <div class="inventory-section">
+              <div class="box-title">Criaturas derrotadas</div>
+              <div id="monster-collection" class="collection-row"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="panel-right">
+        <div class="hero-panel" id="hero-panel">
+          <div class="box-title">Héroe</div>
+          <div class="hero-top">
+            <div class="hero-avatar" id="hero-avatar">
+              <img src="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/heros/sprite_hero_mago.webp" alt="Héroe" class="hero-avatar-mini">
+            </div>
+            <div class="hero-info">
+              <div class="hero-name" id="hero-name-display">Sin nombre</div>
+              <div class="hero-meta" id="hero-meta">Nivel 1 · 0 monstruos derrotados</div>
+              <div class="xp-bar-wrap">
+                <div id="xp-bar-fill" class="xp-bar-fill" style="width:0%;"></div>
+              </div>
+              <div class="hero-xp-text" id="xp-text">EXP 0 / 100</div>
+              <div class="xp-bar-wrap ability-wrap">
+                <div id="ability-bar-fill" class="xp-bar-fill ability-bar" style="width:0%;"></div>
+              </div>
+              <div class="hero-xp-text" id="ability-text">Habilidad 0 / 100</div>
+            </div>
+          </div>
+          <div class="hero-stats">
+            <span id="hero-gold">Oro: 0</span>
+            <span id="hero-cards-count">Cartas: 0</span>
+          </div>
+        </div>
+
+        <div class="input-box" id="input-panel">
+          <div class="box-title">Corrige la frase</div>
+          <textarea id="answer" placeholder="Reescribe aquí la frase completamente corregida..."></textarea>
+          <div class="buttons-row">
+            <button id="attack-btn">Atacar corrigiendo</button>
+
+            <select id="battle-item-select" style="padding:.4rem; background:#020617; color:#f9fafb; border:2px solid #000; font-size:.8rem;">
+              <option value="">Usar objeto…</option>
+            </select>
+            <button id="use-item-btn" class="secondary">Usar</button>
+
+            <button id="ability-btn" class="secondary">Habilidad del héroe</button>
+          </div>
+        </div>
+
+        <div class="log-box" id="log-panel">
+          <div class="log-title">Registro de batalla</div>
+          <div id="log" class="log-text">Corrige la frase del monstruo y pulsa “Atacar”.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<footer class="copyright">
+  © 2026 Pablo García — Battlegrafía
+  <br>
+  Uso educativo exclusivo. Prohibida su reproducción total o parcial sin autorización expresa del autor.
+</footer>
+
+  <div id="monster-modal" class="modal" aria-hidden="true">
+  <div class="modal-backdrop" data-close="1"></div>
+
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="monster-modal-title">
+    <div class="modal-head">
+      <div class="modal-title" id="monster-modal-title">Monstruo</div>
+      <button id="monster-modal-close" class="btn secondary">Cerrar</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="monster-profile">
+        <div class="monster-profile-left">
+          <div class="monster-sprite-big">
+            <img id="monster-modal-sprite" src="" alt="">
+          </div>
+
+          <div id="monster-modal-state" class="monster-state">—</div>
+        </div>
+
+        <div class="monster-profile-right">
+          <div class="monster-field">
+            <div class="monster-label">Regla</div>
+            <div id="monster-modal-rule" class="monster-value">—</div>
+          </div>
+
+          <div class="monster-field">
+            <div class="monster-label">Descripción</div>
+            <div id="monster-modal-desc" class="monster-value" style="opacity:.92">Por añadir.</div>
+          </div>
+
+          <div class="monster-field">
+            <div class="monster-label">Cómo desbloquear</div>
+            <div id="monster-modal-unlock" class="monster-value" style="opacity:.92">Derrota a este monstruo en Modo Aventura.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="monster-examples">
+        <div class="monster-label">Ejemplos (próximamente)</div>
+        <div class="monster-value" style="opacity:.8">
+          Aquí podremos poner 2–3 frases de ejemplo o mini-retos ligados a la regla.
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+  const btnEntrar = document.getElementById('btn-entrar-real');
+  const btnDemo = document.getElementById('btn-modo-demo');
+
+  // MODO DEMO
+  btnDemo.addEventListener('click', () => {
+    localStorage.setItem('bg_user_email', 'invitado@demo.com');
+    localStorage.setItem('bg_is_demo', 'true'); // ¡IMPORTANTE!
+    accederAlJuego();
+  });
+
+  function accederAlJuego() {
+    document.getElementById('login-screen').classList.remove('is-active');
+    // Forzamos la aparición del menú principal
+    const menu = document.getElementById('start-choice');
+    if(menu) menu.classList.add('is-active');
+  }
+});
+</script>
+
+
+<script>
+  // Unificamos la identidad en un solo sitio
+  window.BG = window.BG || {};
+  window.BG.getUserEmail = function() {
+    return localStorage.getItem('bg_user_email') || 'Invitado';
+  };
+  window.BG.isLoggedIn = function() { return !!localStorage.getItem('bg_user_email'); };
+  window.BG.hasAccountOnline = function() { return navigator.onLine && window.BG.isLoggedIn(); };
+</script>
+
+  <?!= include('utils'); ?>
+
+  <?!= include('ortografia_bank'); ?>
+  <?!= include('morfologia_bank'); ?>
+  <?!= include('verbos_bank'); ?>
+  <?!= include('literatura_bank'); ?>
+  <?!= include('sintaxis_bank'); ?>
+  <?!= include('semantica_bank'); ?>
+  <?!= include('matematicas_bank'); ?>
+
+  <?!= include('monsters_catalog'); ?>
+
+  <?!= include('game'); ?>
+
+  <?!= include('menu'); ?>
+
+  <?!= include('collection'); ?>
+
+  <?!= include('achievements_hub'); ?>
+
+  <?!= include('lenguarcade_bridge'); ?>
+
+</body>
+</html>

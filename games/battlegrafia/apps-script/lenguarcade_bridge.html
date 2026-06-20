@@ -1,0 +1,395 @@
+<script>
+(function(){
+  'use strict';
+
+  const GAME_ID = 'battlegrafia';
+  const GAME_NS = 'lenguarcade-game';
+  const HOST_NS = 'lenguarcade-host';
+  const params = new URLSearchParams(window.location.search || '');
+  const embedded = params.get('lenguarcade') === '1' || params.get('la') === '1';
+  const channel = params.get('channel') || '';
+  if(!embedded) return;
+  window.__LENGUARCADE_EMBEDDED = true;
+
+  let initialized = false;
+  let installingSave = false;
+  let profile = null;
+  let initialSave = null;
+  let sessionStarted = false;
+  let checkpointTimer = null;
+  let readyTimer = null;
+
+  function post(type, payload){
+    try{
+      window.parent.postMessage({
+        namespace:GAME_NS,
+        channel,
+        gameId:GAME_ID,
+        type,
+        payload:payload || {}
+      }, '*');
+    }catch(error){}
+  }
+
+  function copy(value){
+    try{ return JSON.parse(JSON.stringify(value)); }catch(error){ return value; }
+  }
+
+  function safeId(value){
+    return String(value || 'player').toLowerCase().replace(/[^a-z0-9_-]+/g, '_').slice(0, 48) || 'player';
+  }
+
+  function getModeId(save){
+    const fromSave = save && (save.modeId || save.__modeId || save.runModeId || save.bgModeId);
+    try{ return String(fromSave || localStorage.getItem('bg_modeId') || 'adventure'); }
+    catch(error){ return String(fromSave || 'adventure'); }
+  }
+
+  function getPlayer(){
+    try{
+      if(window.BG && typeof window.BG.getPlayer === 'function'){
+        const player = window.BG.getPlayer();
+        if(player) return player;
+      }
+    }catch(error){}
+    try{ if(window.player) return window.player; }catch(error){}
+    return null;
+  }
+
+  function normalizeIncomingSave(save){
+    if(!save || typeof save !== 'object') return null;
+    const candidate = save.data || save.player || save.save || save.state || save;
+    if(!candidate || typeof candidate !== 'object') return null;
+    const normalized = copy(candidate);
+    normalized.modeId = getModeId(normalized);
+    normalized.__lenguarcadeImportedAt = new Date().toISOString();
+    return normalized;
+  }
+
+  function installSave(save){
+    const normalized = normalizeIncomingSave(save);
+    if(!normalized) return false;
+    const modeId = getModeId(normalized);
+    const slotId = 'lenguarcade_' + safeId(profile && (profile.studentId || profile.email));
+    const slot = {
+      id:slotId,
+      name:normalized.name || (profile ? ((profile.nombre || '') + ' ' + (profile.apellidos || '')).trim() : '') || 'LenguArcade',
+      updatedAt:Date.now(),
+      data:normalized
+    };
+    installingSave = true;
+    try{
+      localStorage.setItem('bg_modeId', modeId);
+      localStorage.setItem('battlegrafia_active_slot_v1_' + modeId, slotId);
+      localStorage.setItem('battlegrafia_save_slots_v1_' + modeId, JSON.stringify([slot]));
+      localStorage.setItem('battlegrafia_player_pixel_historia_v6_' + modeId, JSON.stringify(normalized));
+      return true;
+    }catch(error){
+      return false;
+    }finally{
+      installingSave = false;
+    }
+  }
+
+  function setEmbeddedClasses(){
+    document.documentElement.classList.add('lenguarcade-embedded');
+    if(document.body) document.body.classList.add('lenguarcade-embedded');
+  }
+
+  function injectCss(){
+    if(document.getElementById('lenguarcade-battlegrafia-bridge-css')) return;
+    const style = document.createElement('style');
+    style.id = 'lenguarcade-battlegrafia-bridge-css';
+    style.textContent = [
+      'html.lenguarcade-embedded #login-screen{display:none!important}',
+      'html.lenguarcade-embedded #menu-account,html.lenguarcade-embedded #nav-account,html.lenguarcade-embedded #nav-teacher{display:none!important}',
+      'html.lenguarcade-embedded #authOverlay,html.lenguarcade-embedded #teacherPanel{display:none!important}',
+      'html.lenguarcade-embedded .copyright{display:none!important}'
+    ].join('\n');
+    document.head.appendChild(style);
+  }
+
+  function overrideIdentity(){
+    const email = profile && profile.email ? String(profile.email).toLowerCase() : 'lenguarcade@alumno.fomento.edu';
+    try{
+      localStorage.setItem('bg_user_email', email);
+      localStorage.setItem('bg_is_demo', 'false');
+      localStorage.setItem('bg_logged_in', '1');
+    }catch(error){}
+    window.BG_SESSION = { loggedIn:true, email };
+    window.BG = window.BG || {};
+    window.BG.getUserEmail = function(){ return email; };
+    window.BG.isLoggedIn = function(){ return true; };
+    window.BG.hasAccountOnline = function(){ return true; };
+    window.BG.isDemo = function(){ return false; };
+  }
+
+  function openMainMenu(){
+    try{
+      const login = document.getElementById('login-screen');
+      if(login){
+        login.classList.remove('is-active');
+        login.style.display = 'none';
+      }
+      const active = Array.from(document.querySelectorAll('.app-screen.is-active')).filter(screen => screen.id !== 'login-screen');
+      if(!active.length){
+        const intro = document.getElementById('intro-continue');
+        if(intro) intro.click();
+      }
+      const status = document.getElementById('hub-status');
+      if(status && profile){
+        status.textContent = 'Perfil conectado desde LenguArcade: ' + (profile.nombre || profile.email || 'jugador') + '.';
+      }
+    }catch(error){}
+  }
+
+  function applyProfile(){
+    setEmbeddedClasses();
+    injectCss();
+    overrideIdentity();
+    openMainMenu();
+  }
+
+  function achievementCatalogById(){
+    const map = {};
+    try{
+      (window.BG_ACHIEVEMENTS_CATALOG || []).forEach(item => {
+        if(item && item.id) map[item.id] = item;
+      });
+    }catch(error){}
+    return map;
+  }
+
+  function achievementIdsFromSave(save){
+    const ids = new Set();
+    const ach = save && save.achievements;
+    if(Array.isArray(ach)) ach.forEach(id => ids.add(String(id)));
+    if(Array.isArray(ach && ach.unlocked)) ach.unlocked.forEach(id => ids.add(String(id)));
+    if(ach && typeof ach === 'object' && !Array.isArray(ach)){
+      Object.keys(ach).forEach(id => {
+        if(ach[id] === true) ids.add(String(id));
+      });
+    }
+    if(Array.isArray(save && save.unlockedAchievements)) save.unlockedAchievements.forEach(id => ids.add(String(id)));
+    return Array.from(ids).filter(Boolean).slice(0, 250);
+  }
+
+  function extractAchievements(save){
+    const catalog = achievementCatalogById();
+    return achievementIdsFromSave(save || {}).map(id => {
+      const item = catalog[id] || {};
+      return {
+        id,
+        title:item.title || id,
+        description:item.desc || item.description || '',
+        xpReward:Number(item.xpReward || item.xp || 10),
+        hidden:Boolean(item.hidden)
+      };
+    });
+  }
+
+  function buildSave(){
+    const player = copy(getPlayer() || initialSave || {});
+    if(!player || typeof player !== 'object') return null;
+    const modeId = getModeId(player);
+    player.modeId = modeId;
+    player.__modeId = modeId;
+    player.__lenguarcadeSavedAt = new Date().toISOString();
+    try{ player.totalMonsters = (window.BG_MONSTER_CATALOG || []).length || player.totalMonsters || 0; }catch(error){}
+    return player;
+  }
+
+  function sessionStats(save){
+    save = save || {};
+    const diary = Array.isArray(save.diary) ? save.diary : [];
+    const correctFromDiary = diary.filter(row => row && row.isPerfect).length;
+    const wrongFromDiary = diary.length ? Math.max(0, diary.length - correctFromDiary) : 0;
+    const correct = Number(save.stats_correct || save.correct || correctFromDiary || 0);
+    const errors = Number(save.stats_wrong || save.errors || wrongFromDiary || 0);
+    const defeated = Array.isArray(save.defeatedMonsters)
+      ? save.defeatedMonsters.length
+      : Number(save.monstersDefeated || 0);
+    const total = Math.max(0, Number(save.totalMonsters || (window.BG_MONSTER_CATALOG || []).length || 0));
+    const percentage = total ? Math.min(100, Math.round((defeated / total) * 100)) : Math.min(100, Number(save.percentage || 0));
+    const score = Math.max(0,
+      correct * 12 +
+      defeated * 35 +
+      Number(save.level || 1) * 25 +
+      Math.min(300, Number(save.gold || 0))
+    );
+    return { correct, errors, defeated, total, percentage, score };
+  }
+
+  function buildResult(outcome){
+    const save = buildSave() || {};
+    const stats = sessionStats(save);
+    const adventureWorld = Math.max(1, Math.min(12, Math.round((stats.percentage / 100) * 11) + 1));
+    return {
+      resultId:'battlegrafia_' + Date.now() + '_' + Math.random().toString(36).slice(2),
+      outcome,
+      score:stats.score,
+      correct:stats.correct,
+      errors:stats.errors,
+      maxCombo:Number(save.achievements && save.achievements.progress && save.achievements.progress.winStreak || 0),
+      adventureWorld,
+      adventureCompleted:outcome === 'victory' && stats.total > 0 && stats.defeated >= stats.total,
+      percentage:stats.percentage,
+      defeatedMonsters:stats.defeated,
+      totalMonsters:stats.total,
+      modeId:getModeId(save),
+      save,
+      achievements:extractAchievements(save)
+    };
+  }
+
+  function markSessionStarted(){
+    if(sessionStarted) return;
+    sessionStarted = true;
+    post('SESSION_STARTED', { modeId:getModeId(buildSave() || {}) });
+  }
+
+  function postCheckpoint(reason){
+    if(!initialized || installingSave) return;
+    const save = buildSave();
+    if(!save) return;
+    post('CHECKPOINT', {
+      checkpointId:'battlegrafia_checkpoint_' + Date.now() + '_' + Math.random().toString(36).slice(2),
+      matchId:'battlegrafia_' + safeId(profile && (profile.studentId || profile.email)),
+      reason:reason || 'autosave',
+      players:[{
+        role:'primary',
+        outcome:'checkpoint',
+        save,
+        achievements:extractAchievements(save)
+      }]
+    });
+  }
+
+  function scheduleCheckpoint(reason){
+    if(!initialized || installingSave) return;
+    clearTimeout(checkpointTimer);
+    checkpointTimer = setTimeout(() => postCheckpoint(reason), 900);
+  }
+
+  function sendResult(outcome){
+    if(!initialized) return;
+    markSessionStarted();
+    scheduleCheckpoint('before_result');
+    setTimeout(() => post('RESULT', buildResult(outcome)), 80);
+  }
+
+  function wrapLocalStorage(){
+    const previous = localStorage.setItem;
+    if(previous.__lenguarcadeBridgeWrapped) return;
+    const wrapped = function(key, value){
+      const result = previous.apply(this, arguments);
+      try{
+        if(!installingSave && String(key || '').indexOf('battlegrafia_') === 0){
+          markSessionStarted();
+          scheduleCheckpoint('local_save');
+        }
+      }catch(error){}
+      return result;
+    };
+    wrapped.__lenguarcadeBridgeWrapped = true;
+    localStorage.setItem = wrapped;
+  }
+
+  function wrapEndOverlay(){
+    if(typeof window.showEndOverlay !== 'function' || window.showEndOverlay.__lenguarcadeBridgeWrapped) return;
+    const original = window.showEndOverlay;
+    window.showEndOverlay = function(type, opts){
+      const result = original.apply(this, arguments);
+      if(type === 'win') sendResult('victory');
+      if(type === 'lose') sendResult('defeat');
+      return result;
+    };
+    window.showEndOverlay.__lenguarcadeBridgeWrapped = true;
+  }
+
+  function wrapStartHooks(){
+    if(window.BG && typeof window.BG._startNewGame === 'function' && !window.BG._startNewGame.__lenguarcadeBridgeWrapped){
+      const originalStart = window.BG._startNewGame;
+      window.BG._startNewGame = function(){
+        markSessionStarted();
+        return originalStart.apply(this, arguments);
+      };
+      window.BG._startNewGame.__lenguarcadeBridgeWrapped = true;
+    }
+    if(window.BG && typeof window.BG._triggerContinue === 'function' && !window.BG._triggerContinue.__lenguarcadeBridgeWrapped){
+      const originalContinue = window.BG._triggerContinue;
+      window.BG._triggerContinue = function(){
+        markSessionStarted();
+        return originalContinue.apply(this, arguments);
+      };
+      window.BG._triggerContinue.__lenguarcadeBridgeWrapped = true;
+    }
+  }
+
+  function installHooks(){
+    wrapLocalStorage();
+    wrapEndOverlay();
+    wrapStartHooks();
+  }
+
+  document.addEventListener('click', event => {
+    const target = event.target && event.target.closest ? event.target.closest('button') : null;
+    if(!target) return;
+    const id = target.id || '';
+    if(id === 'start-new-btn' || id === 'start-choice-new' || id === 'start-choice-continue' || id === 'continue-btn'){
+      markSessionStarted();
+    }
+  }, true);
+
+  window.addEventListener('message', event => {
+    const message = event.data || {};
+    if(message.namespace !== HOST_NS || message.channel !== channel) return;
+    if(message.type === 'INIT'){
+      profile = message.payload && message.payload.student || {};
+      initialSave = message.payload && message.payload.save || null;
+      applyProfile();
+      if(initialSave) installSave(initialSave);
+      initialized = true;
+      installHooks();
+      post('INITIALIZED', {
+        profileId:profile.studentId || profile.email || '',
+        restored:!!initialSave
+      });
+      return;
+    }
+    if(message.type === 'REQUEST_EXIT'){
+      const save = buildSave();
+      if(save) postCheckpoint('exit');
+      else post('CLOSE_READY');
+      return;
+    }
+    if(message.type === 'SAVE_CONFIRMED'){
+      scheduleCheckpoint('save_confirmed');
+    }
+  });
+
+  function announceReady(){
+    setEmbeddedClasses();
+    injectCss();
+    post('READY', { protocol:2, version:'battlegrafia-lenguarcade-v1' });
+  }
+
+  function startReadyLoop(){
+    announceReady();
+    readyTimer = setInterval(() => {
+      if(initialized){
+        clearInterval(readyTimer);
+        return;
+      }
+      announceReady();
+    }, 1000);
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', startReadyLoop);
+  }else{
+    startReadyLoop();
+  }
+  setInterval(installHooks, 1200);
+})();
+</script>

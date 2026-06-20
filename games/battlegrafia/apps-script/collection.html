@@ -1,0 +1,143 @@
+<script>
+// js/app/collection.js
+(function(){
+
+function getDefeatedSet(){
+  // La colección se desbloquea SOLO derrotando monstruos en Modo Aventura.
+  // En el sistema modular y multi-modo, el progreso de Aventura vive en ranuras
+  // separadas: battlegrafia_save_slots_v1_adventure (y fallback legacy).
+  try{
+    // Si no hay sesión/online, no mostramos colección (coincide con la regla del juego)
+    if(window.BG?.hasAccountOnline && !window.BG.hasAccountOnline()) return new Set();
+
+    const SLOTS_KEY = "battlegrafia_save_slots_v1_adventure";
+    const ACTIVE_KEY = "battlegrafia_active_slot_v1_adventure";
+    const LEGACY_KEY = "battlegrafia_player_pixel_historia_v6_adventure";
+
+    const rawSlots = localStorage.getItem(SLOTS_KEY);
+    const slots = rawSlots ? JSON.parse(rawSlots) : [];
+    const activeId = localStorage.getItem(ACTIVE_KEY);
+
+    let data = null;
+    if(Array.isArray(slots) && slots.length){
+      if(activeId){
+        const active = slots.find(s=>s && s.id === activeId);
+        data = active?.data || null;
+      }
+      if(!data) data = slots[0]?.data || null;
+    }
+
+    if(!data){
+      const rawLegacy = localStorage.getItem(LEGACY_KEY);
+      if(rawLegacy) data = JSON.parse(rawLegacy);
+    }
+
+    const arr = data?.defeatedMonsters || [];
+    return new Set(Array.isArray(arr) ? arr : []);
+  }catch(e){
+    return new Set();
+  }
+}
+
+
+  function renderCollection(){
+    const grid = document.getElementById("hub-collection-grid");
+    if(!grid) return;
+
+    const catalog = window.BG_MONSTER_CATALOG || [];
+    const defeated = getDefeatedSet();
+
+    grid.innerHTML = "";
+
+    catalog.forEach(m => {
+      const isUnlocked = defeated.has(m.id) || defeated.has(m.id.replace(/^sprite_/, ""));
+
+
+      const card = document.createElement("div");
+      card.className = "mon-card" + (isUnlocked ? "" : " locked");
+
+      card.innerHTML = `
+        <div class="mon-sprite-wrap">
+          ${isUnlocked ? `<div class="mon-badge">✓</div>` : ``}
+          <img src="${m.sprite}" alt="${m.name}"
+               onerror="this.onerror=null; this.style.opacity='0.2'; this.title='No se encontró: ${m.sprite}'">
+        </div>
+        <div class="mon-name">${m.name}</div>
+        <div class="mon-rule">${m.rule || "Regla por definir"}</div>
+      `;
+	  
+card.addEventListener("click", () => {
+  openMonsterModal(m, isUnlocked);
+});
+
+      grid.appendChild(card);
+    });
+  }
+
+function openMonsterModal(monster, isUnlocked){
+  const modal = document.getElementById("monster-modal");
+  if(!modal) return;
+
+  const title = document.getElementById("monster-modal-title");
+  const sprite = document.getElementById("monster-modal-sprite");
+  const state = document.getElementById("monster-modal-state");
+  const rule = document.getElementById("monster-modal-rule");
+  const desc = document.getElementById("monster-modal-desc");
+  const unlock = document.getElementById("monster-modal-unlock");
+
+  title.textContent = monster.name;
+
+  sprite.src = monster.sprite;
+  sprite.alt = monster.name;
+
+  if(isUnlocked){
+    state.textContent = "Derrotado ✅";
+    sprite.style.filter = "";
+    sprite.style.opacity = "1";
+    unlock.textContent = "Ya lo has derrotado en Modo Aventura.";
+  }else{
+    state.textContent = "Bloqueado 🔒";
+    sprite.style.filter = "brightness(0) saturate(0) contrast(1.2)";
+    sprite.style.opacity = "0.85";
+    unlock.textContent = "Derrota a este monstruo en Modo Aventura para desbloquearlo.";
+  }
+
+  rule.textContent = monster.rule || "Por asignar";
+  desc.textContent = monster.desc || "Por añadir.";
+
+  modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+
+  // Exponer para que el menú lo llame cuando entras a Colección
+  window.BG_UI = window.BG_UI || {};
+  window.BG_UI.renderCollection = renderCollection;
+
+function bindMonsterModal(){
+  const modal = document.getElementById("monster-modal");
+  if(!modal) return;
+
+  document.getElementById("monster-modal-close")?.addEventListener("click", () => {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+  });
+
+  modal.querySelector(".modal-backdrop")?.addEventListener("click", () => {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape" && modal.classList.contains("is-open")){
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", bindMonsterModal);
+
+
+})();
+</script>

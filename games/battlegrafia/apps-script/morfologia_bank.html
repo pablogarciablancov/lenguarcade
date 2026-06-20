@@ -1,0 +1,884 @@
+<script>
+(() => {
+  'use strict';
+  window.BG_CONTENT_BANKS = window.BG_CONTENT_BANKS || {};
+  // Banco de MORFOLOGÍA: añade aquí tus frases por monstruo (mismo formato que ortografía).
+  window.BG_CONTENT_BANKS.morfologia = window.BG_CONTENT_BANKS.morfologia || {};
+})();
+// js/data/morfologia_bank.js
+(function () {
+  "use strict";
+
+  /**
+   * BANCO · MORFOLOGÍA
+   * - 20 preguntas por monstruo
+   * - Formato estricto: { wrong:"PREGUNTA", correct:"RESPUESTA" }
+   * - Cantidades en letras (uno/dos/tres...)
+   * - Variantes permitidas con "|", p.ej. "uno|un|una", "sí|si"
+   * - Acentrahel y Rayafer: MONSTRUOS OCULTOS (pero con banco listo)
+   */
+
+  const MORFOLOGIA_BANK = {
+    // =========================================================
+    // MAPA 1
+    // =========================================================
+    h_ghoul: [
+      { wrong: "¿Lexema de «arboleda»?", correct: "arbol-" },
+      { wrong: "¿Lexema de «panadero»?", correct: "pan-" },
+      { wrong: "¿Lexema de «niñera»?", correct: "niñ-" },
+      { wrong: "¿Lexema de «pescador»?", correct: "pesc-" },
+      { wrong: "¿Lexema de «tendencia»?", correct: "tend-" },
+
+      { wrong: "En «deshacer», ¿prefijo?", correct: "des-" },
+      { wrong: "En «rehacer», ¿prefijo?", correct: "re-" },
+      { wrong: "En «injusto», ¿prefijo?", correct: "in-" },
+      { wrong: "En «panadero», ¿sufijo?", correct: "-ero" },
+      { wrong: "En «casita», ¿sufijo?", correct: "-ita" },
+
+      { wrong: "¿Prefijo va antes o después del lexema?", correct: "antes" },
+      { wrong: "¿Sufijo va antes o después del lexema?", correct: "después" },
+      { wrong: "¿Cuántos lexemas tiene una palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Cuántos lexemas tiene una palabra compuesta? (letras)", correct: "dos" },
+      { wrong: "¿«sacapuntas» es simple o compuesta?", correct: "compuesta" },
+
+      { wrong: "¿«des-» es prefijo o sufijo?", correct: "prefijo" },
+      { wrong: "¿«-ero» es prefijo o sufijo?", correct: "sufijo" },
+      { wrong: "¿Un prefijo puede aparecer solo? (sí/no)", correct: "no" },
+      { wrong: "¿Un sufijo puede aparecer solo? (sí/no)", correct: "no" },
+      { wrong: "¿«pararrayos» es simple o compuesta?", correct: "compuesta" },
+    ],
+
+    vampiro_v: [
+      { wrong: "¿Lexema de «librería»?", correct: "libr-" },
+      { wrong: "¿Lexema de «floristería»?", correct: "flor-" },
+      { wrong: "¿Lexema de «escritor»?", correct: "escrit-" },
+      { wrong: "¿Lexema de «pintura»?", correct: "pint-" },
+      { wrong: "¿Lexema de «central»?", correct: "centr-" },
+
+      { wrong: "En «prehistoria», ¿prefijo?", correct: "pre-" },
+      { wrong: "En «submarino», ¿prefijo?", correct: "sub-" },
+      { wrong: "En «antivirus», ¿prefijo?", correct: "anti-" },
+      { wrong: "En «jugador», ¿sufijo?", correct: "-dor" },
+      { wrong: "En «bondad», ¿sufijo?", correct: "-dad" },
+
+      { wrong: "¿Derivación = añadir prefijo/sufijo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Composición = unir lexemas? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«baloncesto» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿Lexemas en «baloncesto»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+
+      { wrong: "¿«-dor» es derivativo o flexivo?", correct: "derivativo" },
+      { wrong: "¿«-s» de plural es derivativo o flexivo?", correct: "flexivo" },
+      { wrong: "¿«re-» indica repetición o negación?", correct: "repetición" },
+      { wrong: "¿«in-» indica negación o repetición?", correct: "negación" },
+      { wrong: "¿«desleal» tiene prefijo? (sí/no)", correct: "sí|si" },
+    ],
+
+    gargantua_gj: [
+      { wrong: "¿Lexema de «portafolios»?", correct: "porta-" },
+      { wrong: "¿Lexema de «parachoques»?", correct: "para-" },
+      { wrong: "¿Lexema de «saltamontes»?", correct: "salta-" },
+      { wrong: "¿Lexema de «parabrisas»?", correct: "para-" },
+      { wrong: "¿Lexema de «lavavajillas»?", correct: "lava-" },
+
+      { wrong: "¿«portafolios» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿«parachoques» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿Lexemas en «parachoques»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en «saltamontes»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en «lavavajillas»? (letras)", correct: "dos" },
+
+      { wrong: "¿Composición = unir lexemas? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Una compuesta tiene dos lexemas? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Una simple tiene un lexema? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«sacacorchos» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿Lexemas en «sacacorchos»? (letras)", correct: "dos" },
+
+      { wrong: "¿«deshacer» es derivación o composición?", correct: "derivación" },
+      { wrong: "¿«pararrayos» es derivación o composición?", correct: "composición" },
+      { wrong: "En «inmortal», ¿prefijo?", correct: "in-" },
+      { wrong: "En «peligroso», ¿sufijo?", correct: "-oso" },
+      { wrong: "¿«-oso» es derivativo o flexivo?", correct: "derivativo" },
+    ],
+
+    espectro_agudo: [
+      { wrong: "¿Lexema de «casita»?", correct: "cas-" },
+      { wrong: "¿Lexema de «cabezón»?", correct: "cabez-" },
+      { wrong: "¿Lexema de «cafetera»?", correct: "caf-" },
+      { wrong: "¿Lexema de «arboleda»?", correct: "arbol-" },
+      { wrong: "¿Lexema de «florecilla»?", correct: "flor-" },
+
+      { wrong: "En «casita», ¿sufijo?", correct: "-ita" },
+      { wrong: "En «cabezón», ¿sufijo?", correct: "-ón" },
+      { wrong: "En «cafetera», ¿sufijo?", correct: "-era" },
+      { wrong: "En «arboleda», ¿sufijo?", correct: "-eda" },
+      { wrong: "En «florecilla», ¿sufijo?", correct: "-illa" },
+
+      { wrong: "¿«-ito/-ita» indica diminutivo o aumentativo?", correct: "diminutivo" },
+      { wrong: "¿«-ón» indica diminutivo o aumentativo?", correct: "aumentativo" },
+      { wrong: "¿«-ucho» indica despectivo o diminutivo?", correct: "despectivo" },
+      { wrong: "¿«-illo/-illa» indica diminutivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Sufijos apreciativos son derivativos? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿«-ita» es derivativo o flexivo?", correct: "derivativo" },
+      { wrong: "¿«-s» plural es derivativo o flexivo?", correct: "flexivo" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+      { wrong: "¿«pueblucho» es derivada? (sí/no)", correct: "sí|si" },
+    ],
+
+    serpiente_comata: [
+      { wrong: "¿«sacapuntas» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿«pararrayos» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿«baloncesto» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿«sacacorchos» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿«saltamontes» es simple o compuesta?", correct: "compuesta" },
+
+      { wrong: "¿Lexemas en «sacapuntas»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en «pararrayos»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en «baloncesto»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en «sacacorchos»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en «saltamontes»? (letras)", correct: "dos" },
+
+      { wrong: "¿Composición = unir lexemas? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Derivación = prefijo/sufijo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+      { wrong: "¿«deshacer» es derivación o composición?", correct: "derivación" },
+
+      { wrong: "¿«pararrayos» es derivación o composición?", correct: "composición" },
+      { wrong: "¿Un prefijo va antes del lexema? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Un sufijo va después del lexema? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Un prefijo puede aparecer solo? (sí/no)", correct: "no" },
+      { wrong: "¿Un sufijo puede aparecer solo? (sí/no)", correct: "no" },
+    ],
+
+    // JEFE (mezcla Mapa 1)
+    lexikon: [
+      { wrong: "¿Lexema de «arboleda»?", correct: "arbol-" },
+      { wrong: "¿Lexema de «panadero»?", correct: "pan-" },
+      { wrong: "En «deshacer», ¿prefijo?", correct: "des-" },
+      { wrong: "En «rehacer», ¿prefijo?", correct: "re-" },
+      { wrong: "En «panadero», ¿sufijo?", correct: "-ero" },
+
+      { wrong: "En «casita», ¿sufijo?", correct: "-ita" },
+      { wrong: "¿«sacapuntas» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿Lexemas en «sacapuntas»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+
+      { wrong: "¿Prefijo va antes o después del lexema?", correct: "antes" },
+      { wrong: "¿Sufijo va antes o después del lexema?", correct: "después" },
+      { wrong: "¿«-ero» es derivativo o flexivo?", correct: "derivativo" },
+      { wrong: "¿«-s» plural es derivativo o flexivo?", correct: "flexivo" },
+      { wrong: "¿«re-» indica repetición o negación?", correct: "repetición" },
+
+      { wrong: "¿«in-» indica negación o repetición?", correct: "negación" },
+      { wrong: "¿Derivación = prefijo/sufijo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Composición = unir lexemas? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Un prefijo puede aparecer solo? (sí/no)", correct: "no" },
+      { wrong: "¿Un sufijo puede aparecer solo? (sí/no)", correct: "no" },
+    ],
+
+    // =========================================================
+    // MAPA 2 (flexión + categorías básicas)
+    // =========================================================
+    diacritik: [
+      { wrong: "En «niña», «-a» indica: género o número?", correct: "género" },
+      { wrong: "En «niños», «-s» indica: género o número?", correct: "número" },
+      { wrong: "Plural de «mesa»: morfema «-s» o «-es»?", correct: "-s" },
+      { wrong: "Plural de «lápiz»: morfema «-s» o «-es»?", correct: "-es" },
+      { wrong: "En «altísimo», morfema de grado?", correct: "-ísimo" },
+
+      { wrong: "¿«-s» (plural) es flexivo o derivativo?", correct: "flexivo" },
+      { wrong: "¿«-a» (género) es flexivo o derivativo?", correct: "flexivo" },
+      { wrong: "¿«-ísimo» (grado) es flexivo o derivativo?", correct: "flexivo" },
+      { wrong: "En «cantamos», persona: primera/segunda/tercera?", correct: "primera" },
+      { wrong: "En «cantamos», número: singular/plural?", correct: "plural" },
+
+      { wrong: "En «canté», tiempo: pasado/futuro?", correct: "pasado" },
+      { wrong: "En «cantaré», tiempo: pasado/futuro?", correct: "futuro" },
+      { wrong: "En «cantaba», tiempo: imperfecto/futuro?", correct: "imperfecto" },
+      { wrong: "En «cantaría», tiempo: condicional/futuro?", correct: "condicional" },
+      { wrong: "Vocal temática de «cantar»?", correct: "-a-" },
+
+      { wrong: "Vocal temática de «comer»?", correct: "-e-" },
+      { wrong: "Vocal temática de «vivir»?", correct: "-i-" },
+      { wrong: "¿«muy» es adverbio o adjetivo?", correct: "adverbio" },
+      { wrong: "¿«bonito» es adjetivo o verbo?", correct: "adjetivo" },
+      { wrong: "¿«con» es preposición o conjunción?", correct: "preposición" },
+    ],
+
+    oxiton: [
+      { wrong: "En «niño», «-o» indica: género o número?", correct: "género" },
+      { wrong: "En «niñas», «-s» indica: género o número?", correct: "número" },
+      { wrong: "Plural de «profesor»: morfema «-s» o «-es»?", correct: "-es" },
+      { wrong: "Plural de «casa»: morfema «-s» o «-es»?", correct: "-s" },
+      { wrong: "En «superrápido», grado: superlativo? (sí/no)", correct: "sí|si" },
+
+      { wrong: "En «cantaste», persona: primera/segunda/tercera?", correct: "segunda" },
+      { wrong: "En «cantó», persona: primera/segunda/tercera?", correct: "tercera" },
+      { wrong: "En «canto», persona: primera/segunda/tercera?", correct: "primera" },
+      { wrong: "En «cantaron», número: singular/plural?", correct: "plural" },
+      { wrong: "En «cantáis», persona: primera/segunda/tercera?", correct: "segunda" },
+
+      { wrong: "¿«el» es determinante o pronombre?", correct: "determinante" },
+      { wrong: "¿«él» es determinante o pronombre?", correct: "pronombre" },
+      { wrong: "¿«y» es conjunción? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«pero» es conjunción? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«mi» (de posesión) es determinante? (sí/no)", correct: "sí|si" },
+
+      { wrong: "Gerundio de «comer»?", correct: "comiendo" },
+      { wrong: "Participio de «vivir»?", correct: "vivido" },
+      { wrong: "Infinitivo de «cantaba»?", correct: "cantar" },
+      { wrong: "¿El verbo es palabra variable? (sí/no)", correct: "sí|si" },
+      { wrong: "¿La preposición es palabra variable? (sí/no)", correct: "no" },
+    ],
+
+    llanor: [
+      { wrong: "En «alta», morfema de género?", correct: "-a" },
+      { wrong: "En «alto», morfema de género?", correct: "-o" },
+      { wrong: "En «niñas», morfema de número?", correct: "-s" },
+      { wrong: "En «papeles», morfema de número?", correct: "-es" },
+      { wrong: "En «buenísimas», morfema de grado?", correct: "-ísima" },
+
+      { wrong: "¿Género es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Número es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Grado es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "En «cantan», persona?", correct: "tercera" },
+      { wrong: "En «cantamos», persona?", correct: "primera" },
+
+      { wrong: "En «cantáis», persona?", correct: "segunda" },
+      { wrong: "En «canté», tiempo?", correct: "pasado" },
+      { wrong: "En «cantaré», tiempo?", correct: "futuro" },
+      { wrong: "En «cantaba», tiempo?", correct: "imperfecto" },
+      { wrong: "En «cantaría», tiempo?", correct: "condicional" },
+
+      { wrong: "¿«rápidamente» es adverbio? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«feliz» es adjetivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«perro» es sustantivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«correr» es verbo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«desde» es preposición? (sí/no)", correct: "sí|si" },
+    ],
+
+    puntor: [
+      { wrong: "Infinitivo de «canté»?", correct: "cantar" },
+      { wrong: "Infinitivo de «comimos»?", correct: "comer" },
+      { wrong: "Infinitivo de «vivieron»?", correct: "vivir" },
+      { wrong: "¿«cantando» es gerundio? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«cantado» es participio? (sí/no)", correct: "sí|si" },
+
+      { wrong: "Gerundio de «cantar»?", correct: "cantando" },
+      { wrong: "Gerundio de «vivir»?", correct: "viviendo" },
+      { wrong: "Participio de «cantar»?", correct: "cantado" },
+      { wrong: "Participio de «comer»?", correct: "comido" },
+      { wrong: "Participio de «vivir»?", correct: "vivido" },
+
+      { wrong: "En «canto», número?", correct: "singular" },
+      { wrong: "En «cantamos», número?", correct: "plural" },
+      { wrong: "En «cantaste», persona?", correct: "segunda" },
+      { wrong: "En «cantó», persona?", correct: "tercera" },
+      { wrong: "En «canto», persona?", correct: "primera" },
+
+      { wrong: "¿Desinencia verbal es flexiva? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Tiempo verbal es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Persona verbal es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Modo verbal es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿El gerundio termina en «-ando/-iendo»? (sí/no)", correct: "sí|si" },
+    ],
+
+    kalkor: [
+      { wrong: "¿«las» (en «las casas») es determinante?", correct: "sí|si" },
+      { wrong: "¿«casas» (en «las casas») es sustantivo?", correct: "sí|si" },
+      { wrong: "¿«muy» es adverbio?", correct: "sí|si" },
+      { wrong: "¿«bonito» es adjetivo?", correct: "sí|si" },
+      { wrong: "¿«corre» es verbo?", correct: "sí|si" },
+
+      { wrong: "¿«con» es preposición?", correct: "sí|si" },
+      { wrong: "¿«y» es conjunción?", correct: "sí|si" },
+      { wrong: "¿«pero» es conjunción?", correct: "sí|si" },
+      { wrong: "¿«ayer» suele ser adverbio?", correct: "sí|si" },
+      { wrong: "¿«rápido» puede ser adjetivo?", correct: "sí|si" },
+
+      { wrong: "¿Sustantivo es palabra variable? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Adjetivo es palabra variable? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Verbo es palabra variable? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Preposición es palabra invariable? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Conjunción es palabra invariable? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿Artículo es determinante? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Pronombre sustituye al sustantivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Adverbio modifica a verbo/adjetivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Interjección expresa emoción? (sí/no)", correct: "sí|si" },
+      { wrong: "¿La categoría «verbo» es variable? (sí/no)", correct: "sí|si" },
+    ],
+
+    // JEFE (mezcla Mapa 2)
+    paper: [
+      { wrong: "En «niña», «-a» indica: género o número?", correct: "género" },
+      { wrong: "En «niños», «-s» indica: género o número?", correct: "número" },
+      { wrong: "Plural de «lápiz»: morfema «-s» o «-es»?", correct: "-es" },
+      { wrong: "En «altísimo», morfema de grado?", correct: "-ísimo" },
+      { wrong: "En «cantamos», persona?", correct: "primera" },
+
+      { wrong: "En «cantamos», número?", correct: "plural" },
+      { wrong: "En «canté», tiempo?", correct: "pasado" },
+      { wrong: "En «cantaré», tiempo?", correct: "futuro" },
+      { wrong: "Vocal temática de «cantar»?", correct: "-a-" },
+      { wrong: "Vocal temática de «comer»?", correct: "-e-" },
+
+      { wrong: "Vocal temática de «vivir»?", correct: "-i-" },
+      { wrong: "¿«las» es determinante?", correct: "sí|si" },
+      { wrong: "¿«casas» es sustantivo?", correct: "sí|si" },
+      { wrong: "¿«con» es preposición?", correct: "sí|si" },
+      { wrong: "¿«pero» es conjunción?", correct: "sí|si" },
+
+      { wrong: "Gerundio de «comer»?", correct: "comiendo" },
+      { wrong: "Participio de «vivir»?", correct: "vivido" },
+      { wrong: "¿«-s» plural es flexivo?", correct: "sí|si" },
+      { wrong: "¿Verbo es palabra variable? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Preposición es palabra variable? (sí/no)", correct: "no" },
+    ],
+
+    // =========================================================
+    // MAPA 3 (apreciativos, interfijos, composición/parasíntesis)
+    // =========================================================
+    esdrulia: [
+      { wrong: "En «casita», ¿sufijo?", correct: "-ita" },
+      { wrong: "En «librito», ¿sufijo?", correct: "-ito" },
+      { wrong: "En «florecilla», ¿sufijo?", correct: "-illa" },
+      { wrong: "En «cabezón», ¿sufijo?", correct: "-ón" },
+      { wrong: "En «golpazo», ¿sufijo?", correct: "-azo" },
+
+      { wrong: "¿«-ito/-ita» indica diminutivo?", correct: "sí|si" },
+      { wrong: "¿«-ón» indica aumentativo?", correct: "sí|si" },
+      { wrong: "¿«-ucho» indica despectivo?", correct: "sí|si" },
+      { wrong: "¿«-azo» indica aumentativo?", correct: "sí|si" },
+      { wrong: "¿Apreciativos son derivativos? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿«-ito» es derivativo o flexivo?", correct: "derivativo" },
+      { wrong: "¿«-ón» es derivativo o flexivo?", correct: "derivativo" },
+      { wrong: "¿«-s» plural es derivativo o flexivo?", correct: "flexivo" },
+      { wrong: "¿«casita» es derivada? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«cabezón» es derivada? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿Lexema de «casita»?", correct: "cas-" },
+      { wrong: "¿Lexema de «florecilla»?", correct: "flor-" },
+      { wrong: "¿Lexema de «cabezón»?", correct: "cabez-" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+    ],
+
+    muxlor: [
+      { wrong: "¿Lexema de «cafecito»?", correct: "caf-" },
+      { wrong: "¿Lexema de «panecillo»?", correct: "pan-" },
+      { wrong: "En «cafecito», ¿sufijo?", correct: "-ito" },
+      { wrong: "En «panecillo», ¿sufijo?", correct: "-illo" },
+      { wrong: "En «cafecito», ¿interfijo?", correct: "-ec-" },
+
+      { wrong: "En «panecillo», ¿interfijo?", correct: "-ec-" },
+      { wrong: "¿Interfijo va entre lexema y sufijo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Interfijo puede ir solo? (sí/no)", correct: "no" },
+      { wrong: "¿Interfijo es flexivo? (sí/no)", correct: "no" },
+      { wrong: "¿Interfijo es derivativo? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿«cafecito» es derivada? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«panecillo» es derivada? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-ito» es derivativo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-s» plural es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-ec-» es interfijo? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+      { wrong: "¿«sacapuntas» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿«enrojecer» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «enrojecer», estructura: ¿prefijo y sufijo?", correct: "prefijo y sufijo" },
+    ],
+
+    prosodion: [
+      { wrong: "¿«sacapuntas» es composición? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«pararrayos» es composición? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«baloncesto» es composición? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«sordomudo» es compuesta? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«pelirrojo» es compuesta? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿Lexemas en «sacapuntas»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en «pararrayos»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en «baloncesto»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en «sordomudo»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en «pelirrojo»? (letras)", correct: "dos" },
+
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+      { wrong: "¿«deshacer» es derivación? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«deshacer» tiene prefijo? (sí/no)", correct: "sí|si" },
+      { wrong: "En «deshacer», ¿prefijo?", correct: "des-" },
+
+      { wrong: "¿Parasíntesis = prefijo y sufijo a la vez? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«enrojecer» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «enrojecer», estructura:", correct: "prefijo y sufijo" },
+      { wrong: "¿«aterrizar» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «aterrizar», estructura:", correct: "prefijo y sufijo" },
+    ],
+
+    zarruk: [
+      { wrong: "¿«biología» es composición culta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «biología», elemento inicial?", correct: "bio-" },
+      { wrong: "En «biología», elemento final?", correct: "-logía" },
+      { wrong: "¿«geografía» es composición culta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «geografía», elemento inicial?", correct: "geo-" },
+
+      { wrong: "En «geografía», elemento final?", correct: "-grafía" },
+      { wrong: "¿«teléfono» es composición culta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «teléfono», elemento inicial?", correct: "tele-" },
+      { wrong: "En «teléfono», elemento final?", correct: "-fono" },
+      { wrong: "En «microscopio», elemento final?", correct: "-scopio" },
+
+      { wrong: "¿«micro-» significa pequeño? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«macro-» significa grande? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«tele-» significa a distancia? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-logía» significa estudio? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-fono» se relaciona con sonido? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿«-grafía» se relaciona con escritura? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Composición culta es un tipo de composición? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«teléfono» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿Lexemas/elementos en «teléfono»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+    ],
+
+    minotauro: [
+      { wrong: "¿«enrojecer» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «enrojecer», estructura:", correct: "prefijo y sufijo" },
+      { wrong: "¿«aterrizar» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «aterrizar», estructura:", correct: "prefijo y sufijo" },
+      { wrong: "¿«ensuciar» es parasintética? (sí/no)", correct: "sí|si" },
+
+      { wrong: "En «ensuciar», estructura:", correct: "prefijo y sufijo" },
+      { wrong: "¿«empequeñecer» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «empequeñecer», estructura:", correct: "prefijo y sufijo" },
+      { wrong: "¿Parasíntesis = prefijo y sufijo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Una parasintética es derivada? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿Un prefijo puede aparecer solo? (sí/no)", correct: "no" },
+      { wrong: "¿Un sufijo puede aparecer solo? (sí/no)", correct: "no" },
+      { wrong: "¿Un prefijo va antes del lexema? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Un sufijo va después del lexema? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "En «deshacer», ¿prefijo?", correct: "des-" },
+      { wrong: "En «panadero», ¿sufijo?", correct: "-ero" },
+      { wrong: "¿«pararrayos» es compuesta? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«deshacer» es derivación? (sí/no)", correct: "sí|si" },
+    ],
+
+    // JEFE (mezcla Mapa 3)
+    torvax: [
+      { wrong: "En «casita», ¿sufijo?", correct: "-ita" },
+      { wrong: "En «cafecito», ¿interfijo?", correct: "-ec-" },
+      { wrong: "¿«sacapuntas» es compuesta? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«enrojecer» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «enrojecer», estructura:", correct: "prefijo y sufijo" },
+
+      { wrong: "¿«biología» es composición culta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «biología», elemento inicial?", correct: "bio-" },
+      { wrong: "En «biología», elemento final?", correct: "-logía" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+
+      { wrong: "¿«-s» plural es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Apreciativos son derivativos? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Interfijo puede ir solo? (sí/no)", correct: "no" },
+      { wrong: "¿Composición = unir lexemas? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Parasíntesis = prefijo y sufijo? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿«pueblucho» es derivada? (sí/no)", correct: "sí|si" },
+      { wrong: "En «peligroso», ¿sufijo?", correct: "-oso" },
+      { wrong: "¿«-oso» es derivativo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Un prefijo puede aparecer solo? (sí/no)", correct: "no" },
+      { wrong: "¿Un sufijo puede aparecer solo? (sí/no)", correct: "no" },
+    ],
+
+    // =========================================================
+    // MAPA 4 (sufijos nominalizadores/verbalizadores/adjetivadores + repaso)
+    // =========================================================
+    caoskrin: [
+      { wrong: "En «información», sufijo nominalizador?", correct: "-ción" },
+      { wrong: "En «nacimiento», sufijo nominalizador?", correct: "-miento" },
+      { wrong: "En «bondad», sufijo nominalizador?", correct: "-dad" },
+      { wrong: "En «modernizar», sufijo verbalizador?", correct: "-izar" },
+      { wrong: "En «pasear», sufijo verbalizador?", correct: "-ear" },
+
+      { wrong: "En «lluvioso», sufijo adjetivador?", correct: "-oso" },
+      { wrong: "En «nacional», sufijo adjetivador?", correct: "-al" },
+      { wrong: "En «agradable», sufijo adjetivador?", correct: "-able" },
+      { wrong: "¿«-ción» es derivativo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-miento» es derivativo? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿«-dad» es derivativo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-izar» es derivativo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-ear» es derivativo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-oso» es derivativo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-able» es derivativo? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿Nominalizador forma sustantivos? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Verbalizador forma verbos? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Adjetivador forma adjetivos? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«información» es derivada? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«modernizar» es derivada? (sí/no)", correct: "sí|si" },
+    ],
+
+    hiatikus: [
+      { wrong: "¿Lexema de «información»?", correct: "inform-" },
+      { wrong: "¿Lexema de «nacimiento»?", correct: "nac-" },
+      { wrong: "¿Lexema de «modernizar»?", correct: "modern-" },
+      { wrong: "¿Lexema de «pasear»?", correct: "pase-" },
+      { wrong: "¿Lexema de «agradable»?", correct: "agrad-" },
+
+      { wrong: "En «información», sufijo?", correct: "-ción" },
+      { wrong: "En «nacimiento», sufijo?", correct: "-miento" },
+      { wrong: "En «modernizar», sufijo?", correct: "-izar" },
+      { wrong: "En «pasear», sufijo?", correct: "-ear" },
+      { wrong: "En «agradable», sufijo?", correct: "-able" },
+
+      { wrong: "¿«-ción» es derivativo o flexivo?", correct: "derivativo" },
+      { wrong: "¿«-miento» es derivativo o flexivo?", correct: "derivativo" },
+      { wrong: "¿«-izar» es derivativo o flexivo?", correct: "derivativo" },
+      { wrong: "¿«-ear» es derivativo o flexivo?", correct: "derivativo" },
+      { wrong: "¿«-able» es derivativo o flexivo?", correct: "derivativo" },
+
+      { wrong: "¿«nacional» lleva sufijo «-al»? (sí/no)", correct: "sí|si" },
+      { wrong: "En «nacional», sufijo?", correct: "-al" },
+      { wrong: "¿«lluvioso» lleva sufijo «-oso»? (sí/no)", correct: "sí|si" },
+      { wrong: "En «lluvioso», sufijo?", correct: "-oso" },
+      { wrong: "¿«-al» es adjetivador? (sí/no)", correct: "sí|si" },
+    ],
+
+    momia: [
+      { wrong: "¿«información» es derivada? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«nacimiento» es derivada? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«bondad» es derivada? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«modernizar» es derivada? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«agradable» es derivada? (sí/no)", correct: "sí|si" },
+
+      { wrong: "En «información», sufijo?", correct: "-ción" },
+      { wrong: "En «nacimiento», sufijo?", correct: "-miento" },
+      { wrong: "En «bondad», sufijo?", correct: "-dad" },
+      { wrong: "En «modernizar», sufijo?", correct: "-izar" },
+      { wrong: "En «pasear», sufijo?", correct: "-ear" },
+
+      { wrong: "En «lluvioso», sufijo?", correct: "-oso" },
+      { wrong: "En «nacional», sufijo?", correct: "-al" },
+      { wrong: "En «agradable», sufijo?", correct: "-able" },
+      { wrong: "¿Sufijos «-ción/-miento/-dad» son nominalizadores? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Sufijos «-izar/-ear» son verbalizadores? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿Sufijos «-oso/-al/-able» son adjetivadores? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-ción» es derivativo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-s» plural es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+    ],
+
+    rugiton: [
+      { wrong: "En «cantamos», persona?", correct: "primera" },
+      { wrong: "En «cantáis», persona?", correct: "segunda" },
+      { wrong: "En «cantan», persona?", correct: "tercera" },
+      { wrong: "En «canté», tiempo?", correct: "pasado" },
+      { wrong: "En «cantaré», tiempo?", correct: "futuro" },
+
+      { wrong: "En «cantaba», tiempo?", correct: "imperfecto" },
+      { wrong: "En «cantaría», tiempo?", correct: "condicional" },
+      { wrong: "Gerundio de «cantar»?", correct: "cantando" },
+      { wrong: "Participio de «comer»?", correct: "comido" },
+      { wrong: "Participio de «vivir»?", correct: "vivido" },
+
+      { wrong: "¿Desinencia verbal es flexiva? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Tiempo verbal es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Persona verbal es flexiva? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Número verbal es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Modo verbal es flexivo? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿«modernizar» lleva sufijo «-izar»? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«pasear» lleva sufijo «-ear»? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-izar» es derivativo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+    ],
+
+    zombie_cz: [
+      { wrong: "¿Lexema de «información»?", correct: "inform-" },
+      { wrong: "¿Lexema de «nacimiento»?", correct: "nac-" },
+      { wrong: "¿Lexema de «bondad»?", correct: "bond-" },
+      { wrong: "En «información», sufijo?", correct: "-ción" },
+      { wrong: "En «nacimiento», sufijo?", correct: "-miento" },
+
+      { wrong: "En «bondad», sufijo?", correct: "-dad" },
+      { wrong: "En «modernizar», sufijo?", correct: "-izar" },
+      { wrong: "En «pasear», sufijo?", correct: "-ear" },
+      { wrong: "En «lluvioso», sufijo?", correct: "-oso" },
+      { wrong: "En «agradable», sufijo?", correct: "-able" },
+
+      { wrong: "¿«-ción» es nominalizador? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-izar» es verbalizador? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-oso» es adjetivador? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«información» es derivada? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«pasear» es derivada? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿«-s» plural es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "En «mesas», morfema de plural?", correct: "-s" },
+      { wrong: "En «lápices», morfema de plural?", correct: "-es" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+    ],
+
+    // JEFE (mezcla Mapa 4)
+    sintaxion: [
+      { wrong: "En «información», sufijo?", correct: "-ción" },
+      { wrong: "En «nacimiento», sufijo?", correct: "-miento" },
+      { wrong: "En «bondad», sufijo?", correct: "-dad" },
+      { wrong: "En «modernizar», sufijo?", correct: "-izar" },
+      { wrong: "En «pasear», sufijo?", correct: "-ear" },
+
+      { wrong: "En «lluvioso», sufijo?", correct: "-oso" },
+      { wrong: "En «nacional», sufijo?", correct: "-al" },
+      { wrong: "En «agradable», sufijo?", correct: "-able" },
+      { wrong: "¿Nominalizador forma sustantivos? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Verbalizador forma verbos? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿Adjetivador forma adjetivos? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-ción» es derivativo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-s» plural es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "En «cantamos», persona?", correct: "primera" },
+      { wrong: "En «cantaré», tiempo?", correct: "futuro" },
+
+      { wrong: "Gerundio de «comer»?", correct: "comiendo" },
+      { wrong: "Participio de «vivir»?", correct: "vivido" },
+      { wrong: "¿«sacapuntas» es compuesta? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+    ],
+
+    // =========================================================
+    // MAPA 5 (repaso alto + cultismos + parasíntesis)
+    // =========================================================
+    gravikus: [
+      { wrong: "¿«biología» es composición culta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «biología», elemento inicial?", correct: "bio-" },
+      { wrong: "En «biología», elemento final?", correct: "-logía" },
+      { wrong: "¿«geografía» es composición culta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «geografía», elemento inicial?", correct: "geo-" },
+
+      { wrong: "En «geografía», elemento final?", correct: "-grafía" },
+      { wrong: "¿«teléfono» es composición culta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «teléfono», elemento inicial?", correct: "tele-" },
+      { wrong: "En «teléfono», elemento final?", correct: "-fono" },
+      { wrong: "En «microscopio», elemento final?", correct: "-scopio" },
+
+      { wrong: "¿«tele-» significa a distancia? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«bio-» se relaciona con vida? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«geo-» se relaciona con tierra? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-logía» significa estudio? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-fono» se relaciona con sonido? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿«enrojecer» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «enrojecer», estructura:", correct: "prefijo y sufijo" },
+      { wrong: "¿«aterrizar» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «aterrizar», estructura:", correct: "prefijo y sufijo" },
+      { wrong: "¿«sacapuntas» es compuesta? (sí/no)", correct: "sí|si" },
+    ],
+
+    jarkon: [
+      { wrong: "En «cantamos», persona?", correct: "primera" },
+      { wrong: "En «cantáis», persona?", correct: "segunda" },
+      { wrong: "En «cantan», persona?", correct: "tercera" },
+      { wrong: "En «canté», tiempo?", correct: "pasado" },
+      { wrong: "En «cantaré», tiempo?", correct: "futuro" },
+
+      { wrong: "Vocal temática de «cantar»?", correct: "-a-" },
+      { wrong: "Vocal temática de «comer»?", correct: "-e-" },
+      { wrong: "Vocal temática de «vivir»?", correct: "-i-" },
+      { wrong: "Gerundio de «vivir»?", correct: "viviendo" },
+      { wrong: "Participio de «comer»?", correct: "comido" },
+
+      { wrong: "¿«-s» plural es flexivo? (sí/no)", correct: "sí|si" },
+      { wrong: "En «lápices», morfema de plural?", correct: "-es" },
+      { wrong: "En «mesas», morfema de plural?", correct: "-s" },
+      { wrong: "En «niña», morfema de género?", correct: "-a" },
+      { wrong: "En «niño», morfema de género?", correct: "-o" },
+
+      { wrong: "¿«muy» es adverbio? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«bonito» es adjetivo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«con» es preposición? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«pero» es conjunción? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Interjección es invariable? (sí/no)", correct: "sí|si" },
+    ],
+
+    ortograf: [
+      { wrong: "¿Lexema de «arboleda»?", correct: "arbol-" },
+      { wrong: "¿Lexema de «librería»?", correct: "libr-" },
+      { wrong: "¿Lexema de «nacimiento»?", correct: "nac-" },
+      { wrong: "En «deshacer», ¿prefijo?", correct: "des-" },
+      { wrong: "En «releer», ¿prefijo?", correct: "re-" },
+
+      { wrong: "En «información», ¿sufijo?", correct: "-ción" },
+      { wrong: "En «modernizar», ¿sufijo?", correct: "-izar" },
+      { wrong: "En «lluvioso», ¿sufijo?", correct: "-oso" },
+      { wrong: "¿«pararrayos» es compuesta? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Lexemas en «pararrayos»? (letras)", correct: "dos" },
+
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+      { wrong: "¿«enrojecer» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «enrojecer», estructura:", correct: "prefijo y sufijo" },
+      { wrong: "¿«biología» es comp. culta? (sí/no)", correct: "sí|si" },
+
+      { wrong: "En «biología», elemento inicial?", correct: "bio-" },
+      { wrong: "En «biología», elemento final?", correct: "-logía" },
+      { wrong: "¿Un prefijo puede aparecer solo? (sí/no)", correct: "no" },
+      { wrong: "¿Un sufijo puede aparecer solo? (sí/no)", correct: "no" },
+      { wrong: "¿«-s» plural es flexivo? (sí/no)", correct: "sí|si" },
+    ],
+
+    siseus: [
+      { wrong: "¿«sacapuntas» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿«pararrayos» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿«baloncesto» es simple o compuesta?", correct: "compuesta" },
+      { wrong: "¿Lexemas en «sacapuntas»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en «pararrayos»? (letras)", correct: "dos" },
+
+      { wrong: "¿Lexemas en «baloncesto»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+      { wrong: "¿Composición = unir lexemas? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Derivación = prefijo/sufijo? (sí/no)", correct: "sí|si" },
+
+      { wrong: "En «deshacer», ¿prefijo?", correct: "des-" },
+      { wrong: "En «panadero», ¿sufijo?", correct: "-ero" },
+      { wrong: "En «información», ¿sufijo?", correct: "-ción" },
+      { wrong: "En «modernizar», ¿sufijo?", correct: "-izar" },
+      { wrong: "En «agradable», ¿sufijo?", correct: "-able" },
+
+      { wrong: "¿«enrojecer» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «enrojecer», estructura:", correct: "prefijo y sufijo" },
+      { wrong: "¿«biología» es comp. culta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «biología», elemento inicial?", correct: "bio-" },
+      { wrong: "En «biología», elemento final?", correct: "-logía" },
+    ],
+
+    ciclope: [
+      { wrong: "¿Lexema de «arboleda»?", correct: "arbol-" },
+      { wrong: "¿Lexema de «información»?", correct: "inform-" },
+      { wrong: "¿Lexema de «nacimiento»?", correct: "nac-" },
+      { wrong: "En «arboleda», ¿sufijo?", correct: "-eda" },
+      { wrong: "En «información», ¿sufijo?", correct: "-ción" },
+
+      { wrong: "En «nacimiento», ¿sufijo?", correct: "-miento" },
+      { wrong: "En «deshacer», ¿prefijo?", correct: "des-" },
+      { wrong: "En «rehacer», ¿prefijo?", correct: "re-" },
+      { wrong: "En «peligroso», ¿sufijo?", correct: "-oso" },
+      { wrong: "En «agradable», ¿sufijo?", correct: "-able" },
+
+      { wrong: "¿«sacapuntas» es compuesta? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Lexemas en «sacapuntas»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿«biología» es comp. culta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «biología», elemento final?", correct: "-logía" },
+
+      { wrong: "¿«enrojecer» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «enrojecer», estructura:", correct: "prefijo y sufijo" },
+      { wrong: "En «cantamos», persona?", correct: "primera" },
+      { wrong: "Gerundio de «comer»?", correct: "comiendo" },
+      { wrong: "Participio de «vivir»?", correct: "vivido" },
+    ],
+
+    // JEFE Mapa 5
+    don_pablo: [
+      { wrong: "¿Lexema de «arboleda»?", correct: "arbol-" },
+      { wrong: "En «deshacer», ¿prefijo?", correct: "des-" },
+      { wrong: "En «panadero», ¿sufijo?", correct: "-ero" },
+      { wrong: "En «información», ¿sufijo?", correct: "-ción" },
+      { wrong: "En «modernizar», ¿sufijo?", correct: "-izar" },
+
+      { wrong: "En «lluvioso», ¿sufijo?", correct: "-oso" },
+      { wrong: "¿«sacapuntas» es compuesta? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Lexemas en «sacapuntas»? (letras)", correct: "dos" },
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿«biología» es comp. culta? (sí/no)", correct: "sí|si" },
+
+      { wrong: "En «biología», elemento inicial?", correct: "bio-" },
+      { wrong: "En «biología», elemento final?", correct: "-logía" },
+      { wrong: "¿«enrojecer» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «enrojecer», estructura:", correct: "prefijo y sufijo" },
+      { wrong: "En «cantamos», persona?", correct: "primera" },
+
+      { wrong: "En «canté», tiempo?", correct: "pasado" },
+      { wrong: "En «cantaré», tiempo?", correct: "futuro" },
+      { wrong: "Gerundio de «cantar»?", correct: "cantando" },
+      { wrong: "Participio de «comer»?", correct: "comido" },
+      { wrong: "¿Un sufijo puede aparecer solo? (sí/no)", correct: "no" },
+    ],
+
+    // =========================================================
+    // OCULTOS (NO salen en ruta normal)
+    // =========================================================
+    // 🕶️ Acentrahel (oculto)
+    acentrahel: [
+      { wrong: "¿Lexema de «empequeñecer»?", correct: "pequeñ-" },
+      { wrong: "¿«empequeñecer» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «empequeñecer», estructura:", correct: "prefijo y sufijo" },
+      { wrong: "¿«ensuciar» es parasintética? (sí/no)", correct: "sí|si" },
+      { wrong: "En «ensuciar», estructura:", correct: "prefijo y sufijo" },
+
+      { wrong: "¿«microscopio» es comp. culta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «microscopio», elemento inicial?", correct: "micro-" },
+      { wrong: "En «microscopio», elemento final?", correct: "-scopio" },
+      { wrong: "¿«-scopio» se relaciona con observar? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-logía» se relaciona con estudio? (sí/no)", correct: "sí|si" },
+
+      { wrong: "En «informatización», sufijo principal?", correct: "-ción" },
+      { wrong: "¿«informatización» es derivada? (sí/no)", correct: "sí|si" },
+      { wrong: "En «nacionalización», sufijo principal?", correct: "-ción" },
+      { wrong: "En «nacionalización», sufijo verbalizador previo?", correct: "-izar" },
+      { wrong: "¿«-izar» es derivativo? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿Lexemas en «parabrisas»? (letras)", correct: "dos" },
+      { wrong: "¿«parabrisas» es compuesta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «cafetera», sufijo?", correct: "-era" },
+      { wrong: "En «cafecito», interfijo?", correct: "-ec-" },
+      { wrong: "¿Interfijo puede ir solo? (sí/no)", correct: "no" },
+    ],
+
+    // 🕶️ Rayafer (oculto)
+    rayafer: [
+      { wrong: "¿Lexema de «descentralización»?", correct: "centr-" },
+      { wrong: "En «descentralización», prefijo inicial?", correct: "des-" },
+      { wrong: "En «descentralización», sufijo final?", correct: "-ción" },
+      { wrong: "¿«descentralización» es derivada? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«-ción» es nominalizador? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿«hipermercado» es compuesta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «hipermercado», prefijo?", correct: "hiper-" },
+      { wrong: "¿«hiper-» indica exceso? (sí/no)", correct: "sí|si" },
+      { wrong: "¿«antihéroe» lleva prefijo? (sí/no)", correct: "sí|si" },
+      { wrong: "En «antihéroe», prefijo?", correct: "anti-" },
+
+      { wrong: "¿«televisión» es comp. culta? (sí/no)", correct: "sí|si" },
+      { wrong: "En «televisión», elemento inicial?", correct: "tele-" },
+      { wrong: "¿«tele-» significa a distancia? (sí/no)", correct: "sí|si" },
+      { wrong: "En «televisión», sufijo nominalizador?", correct: "-ión" },
+      { wrong: "¿«-ión» es nominalizador? (sí/no)", correct: "sí|si" },
+
+      { wrong: "¿Lexemas en palabra simple? (letras)", correct: "uno|un|una" },
+      { wrong: "¿Lexemas en palabra compuesta? (letras)", correct: "dos" },
+      { wrong: "¿«sacacorchos» es compuesta? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Parasíntesis = prefijo y sufijo? (sí/no)", correct: "sí|si" },
+      { wrong: "¿Un sufijo puede aparecer solo? (sí/no)", correct: "no" },
+    ],
+  };
+
+  // Export
+  window.BG_CONTENT_BANKS = window.BG_CONTENT_BANKS || {};
+  window.BG_CONTENT_BANKS.morfologia = MORFOLOGIA_BANK;
+})();
+</script>

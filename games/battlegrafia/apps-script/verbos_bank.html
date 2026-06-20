@@ -1,0 +1,858 @@
+<script>  
+(() => {
+  'use strict';
+  window.BG_CONTENT_BANKS = window.BG_CONTENT_BANKS || {};
+  // Banco de VERBOS: añade aquí tus frases por monstruo (mismo formato que ortografía).
+  window.BG_CONTENT_BANKS.verbos = window.BG_CONTENT_BANKS.verbos || {};
+})();
+// js/data/verbos_bank.js
+(function () {
+  "use strict";
+  /**
+   * BANCO · VERBOS
+   * - 20 preguntas por monstruo
+   * - Formato estricto: { wrong:"PREGUNTA", correct:"RESPUESTA" }
+   * - Respuesta con pronombre personal incluido cuando proceda
+   */
+
+  const VERBOS_BANK = {
+    // =========================================================
+    // MAPA 1 · REGULARES BÁSICOS
+    // =========================================================
+    h_ghoul: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo cantar", correct:"Yo canto" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo cantar", correct:"Tú cantas" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo cantar", correct:"Él canta" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo cantar", correct:"Nosotros cantamos" },
+      { wrong:"2.ª persona del plural del presente de indicativo del verbo cantar", correct:"Vosotros cantáis" },
+
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo comer", correct:"Yo como" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo comer", correct:"Tú comes" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo comer", correct:"Él come" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo comer", correct:"Nosotros comemos" },
+      { wrong:"2.ª persona del plural del presente de indicativo del verbo comer", correct:"Vosotros coméis" },
+
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo vivir", correct:"Yo vivo" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo vivir", correct:"Tú vives" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo vivir", correct:"Él vive" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo vivir", correct:"Nosotros vivimos" },
+      { wrong:"2.ª persona del plural del presente de indicativo del verbo vivir", correct:"Vosotros vivís" },
+
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo cantar", correct:"Ellos cantan" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo comer", correct:"Ellos comen" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo vivir", correct:"Ellos viven" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo saltar", correct:"Yo salto" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo escribir", correct:"Yo escribo" }
+    ],
+
+    vampiro_v: [
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo cantar", correct:"Yo canté" },
+      { wrong:"2.ª persona del singular del pretérito perfecto simple del verbo cantar", correct:"Tú cantaste" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo cantar", correct:"Él cantó" },
+      { wrong:"1.ª persona del plural del pretérito perfecto simple del verbo cantar", correct:"Nosotros cantamos" },
+      { wrong:"2.ª persona del plural del pretérito perfecto simple del verbo cantar", correct:"Vosotros cantasteis" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo comer", correct:"Yo comí" },
+      { wrong:"2.ª persona del singular del pretérito perfecto simple del verbo comer", correct:"Tú comiste" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo comer", correct:"Él comió" },
+      { wrong:"1.ª persona del plural del pretérito perfecto simple del verbo comer", correct:"Nosotros comimos" },
+      { wrong:"2.ª persona del plural del pretérito perfecto simple del verbo comer", correct:"Vosotros comisteis" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo vivir", correct:"Yo viví" },
+      { wrong:"2.ª persona del singular del pretérito perfecto simple del verbo vivir", correct:"Tú viviste" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo vivir", correct:"Él vivió" },
+      { wrong:"1.ª persona del plural del pretérito perfecto simple del verbo vivir", correct:"Nosotros vivimos" },
+      { wrong:"2.ª persona del plural del pretérito perfecto simple del verbo vivir", correct:"Vosotros vivisteis" },
+
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo cantar", correct:"Ellos cantaron" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo comer", correct:"Ellos comieron" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo vivir", correct:"Ellos vivieron" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo saltar", correct:"Yo salté" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo escribir", correct:"Yo escribí" }
+    ],
+
+    gargantua_gj: [
+      { wrong:"1.ª persona del singular del pretérito imperfecto de indicativo del verbo cantar", correct:"Yo cantaba" },
+      { wrong:"2.ª persona del singular del pretérito imperfecto de indicativo del verbo cantar", correct:"Tú cantabas" },
+      { wrong:"3.ª persona del singular del pretérito imperfecto de indicativo del verbo cantar", correct:"Él cantaba" },
+      { wrong:"1.ª persona del plural del pretérito imperfecto de indicativo del verbo cantar", correct:"Nosotros cantábamos" },
+      { wrong:"3.ª persona del plural del pretérito imperfecto de indicativo del verbo cantar", correct:"Ellos cantaban" },
+
+      { wrong:"1.ª persona del singular del pretérito imperfecto de indicativo del verbo comer", correct:"Yo comía" },
+      { wrong:"2.ª persona del singular del pretérito imperfecto de indicativo del verbo comer", correct:"Tú comías" },
+      { wrong:"3.ª persona del singular del pretérito imperfecto de indicativo del verbo comer", correct:"Él comía" },
+      { wrong:"1.ª persona del plural del pretérito imperfecto de indicativo del verbo comer", correct:"Nosotros comíamos" },
+      { wrong:"3.ª persona del plural del pretérito imperfecto de indicativo del verbo comer", correct:"Ellos comían" },
+
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo cantar", correct:"Yo cantaré" },
+      { wrong:"2.ª persona del singular del futuro simple de indicativo del verbo cantar", correct:"Tú cantarás" },
+      { wrong:"3.ª persona del singular del futuro simple de indicativo del verbo cantar", correct:"Él cantará" },
+      { wrong:"1.ª persona del plural del futuro simple de indicativo del verbo cantar", correct:"Nosotros cantaremos" },
+      { wrong:"3.ª persona del plural del futuro simple de indicativo del verbo cantar", correct:"Ellos cantarán" },
+
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo comer", correct:"Yo comeré" },
+      { wrong:"3.ª persona del singular del futuro simple de indicativo del verbo comer", correct:"Él comerá" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo vivir", correct:"Yo viviré" },
+      { wrong:"3.ª persona del singular del futuro simple de indicativo del verbo vivir", correct:"Él vivirá" },
+      { wrong:"3.ª persona del plural del futuro simple de indicativo del verbo vivir", correct:"Ellos vivirán" }
+    ],
+
+    espectro_agudo: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo tener", correct:"Yo tengo" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo tener", correct:"Tú tienes" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo tener", correct:"Él tiene" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo tener", correct:"Nosotros tenemos" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo tener", correct:"Ellos tienen" },
+
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo hacer", correct:"Yo hago" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo hacer", correct:"Tú haces" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo hacer", correct:"Él hace" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo hacer", correct:"Nosotros hacemos" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo hacer", correct:"Ellos hacen" },
+
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo venir", correct:"Yo vengo" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo venir", correct:"Tú vienes" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo venir", correct:"Él viene" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo venir", correct:"Nosotros venimos" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo venir", correct:"Ellos vienen" },
+
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo decir", correct:"Yo digo" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo decir", correct:"Tú dices" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo decir", correct:"Él dice" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo decir", correct:"Nosotros decimos" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo decir", correct:"Ellos dicen" }
+    ],
+
+    serpiente_comata: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo ser", correct:"Yo soy" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo ser", correct:"Tú eres" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo ser", correct:"Él es" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo ser", correct:"Nosotros somos" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo ser", correct:"Ellos son" },
+
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo ir", correct:"Yo voy" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo ir", correct:"Tú vas" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo ir", correct:"Él va" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo ir", correct:"Nosotros vamos" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo ir", correct:"Ellos van" },
+
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo estar", correct:"Yo estoy" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo estar", correct:"Tú estás" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo estar", correct:"Él está" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo estar", correct:"Nosotros estamos" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo estar", correct:"Ellos están" },
+
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo haber", correct:"Yo he" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo haber", correct:"Tú has" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo haber", correct:"Él ha" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo haber", correct:"Nosotros hemos" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo haber", correct:"Ellos han" }
+    ],
+
+    lexikon: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo comer", correct:"Yo como" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo vivir", correct:"Ellos viven" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo cantar", correct:"Yo canté" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo comer", correct:"Él comió" },
+      { wrong:"1.ª persona del singular del pretérito imperfecto de indicativo del verbo vivir", correct:"Yo vivía" },
+
+      { wrong:"3.ª persona del plural del futuro simple de indicativo del verbo cantar", correct:"Ellos cantarán" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo tener", correct:"Yo tengo" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo venir", correct:"Él viene" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo hacer", correct:"Yo hago" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo decir", correct:"Ellos dicen" },
+
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo ser", correct:"Yo soy" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo ir", correct:"Él va" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo estar", correct:"Nosotros estamos" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo haber", correct:"Ellos han" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo comer", correct:"Tú comes" },
+
+      { wrong:"2.ª persona del singular del pretérito perfecto simple del verbo vivir", correct:"Tú viviste" },
+      { wrong:"1.ª persona del plural del futuro simple de indicativo del verbo comer", correct:"Nosotros comeremos" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo ser", correct:"Él es" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo estar", correct:"Tú estás" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo decir", correct:"Yo digo" }
+    ],
+	    // =========================================================
+    // MAPA 2 · VERBOS AVANZADOS
+    // =========================================================
+    diacritik: [
+      { wrong:"1.ª persona del singular del pretérito imperfecto de subjuntivo del verbo cantar", correct:"Yo cantara" },
+      { wrong:"2.ª persona del singular del pretérito imperfecto de subjuntivo del verbo cantar", correct:"Tú cantaras" },
+      { wrong:"3.ª persona del singular del pretérito imperfecto de subjuntivo del verbo cantar", correct:"Él cantara" },
+      { wrong:"1.ª persona del plural del pretérito imperfecto de subjuntivo del verbo cantar", correct:"Nosotros cantáramos" },
+      { wrong:"3.ª persona del plural del pretérito imperfecto de subjuntivo del verbo cantar", correct:"Ellos cantaran" },
+
+      { wrong:"1.ª persona del singular del pretérito imperfecto de subjuntivo del verbo comer", correct:"Yo comiera" },
+      { wrong:"2.ª persona del singular del pretérito imperfecto de subjuntivo del verbo comer", correct:"Tú comieras" },
+      { wrong:"3.ª persona del singular del pretérito imperfecto de subjuntivo del verbo comer", correct:"Él comiera" },
+      { wrong:"1.ª persona del plural del pretérito imperfecto de subjuntivo del verbo comer", correct:"Nosotros comiéramos" },
+      { wrong:"3.ª persona del plural del pretérito imperfecto de subjuntivo del verbo comer", correct:"Ellos comieran" },
+
+      { wrong:"1.ª persona del singular del pretérito imperfecto de subjuntivo del verbo vivir", correct:"Yo viviera" },
+      { wrong:"2.ª persona del singular del pretérito imperfecto de subjuntivo del verbo vivir", correct:"Tú vivieras" },
+      { wrong:"3.ª persona del singular del pretérito imperfecto de subjuntivo del verbo vivir", correct:"Él viviera" },
+      { wrong:"1.ª persona del plural del pretérito imperfecto de subjuntivo del verbo vivir", correct:"Nosotros viviéramos" },
+      { wrong:"3.ª persona del plural del pretérito imperfecto de subjuntivo del verbo vivir", correct:"Ellos vivieran" },
+
+      { wrong:"1.ª persona del singular del pretérito imperfecto de subjuntivo del verbo tener", correct:"Yo tuviera" },
+      { wrong:"3.ª persona del singular del pretérito imperfecto de subjuntivo del verbo hacer", correct:"Él hiciera" },
+      { wrong:"1.ª persona del singular del pretérito imperfecto de subjuntivo del verbo venir", correct:"Yo viniera" },
+      { wrong:"3.ª persona del plural del pretérito imperfecto de subjuntivo del verbo decir", correct:"Ellos dijeran" },
+      { wrong:"1.ª persona del plural del pretérito imperfecto de subjuntivo del verbo estar", correct:"Nosotros estuviéramos" }
+    ],
+
+    oxiton: [
+      { wrong:"2.ª persona del singular del imperativo del verbo cantar", correct:"Tú canta" },
+      { wrong:"2.ª persona del plural del imperativo del verbo cantar", correct:"Vosotros cantad" },
+      { wrong:"2.ª persona del singular del imperativo del verbo comer", correct:"Tú come" },
+      { wrong:"2.ª persona del plural del imperativo del verbo comer", correct:"Vosotros comed" },
+      { wrong:"2.ª persona del singular del imperativo del verbo vivir", correct:"Tú vive" },
+
+      { wrong:"2.ª persona del plural del imperativo del verbo vivir", correct:"Vosotros vivid" },
+      { wrong:"2.ª persona del singular del imperativo del verbo poner", correct:"Tú pon" },
+      { wrong:"2.ª persona del plural del imperativo del verbo poner", correct:"Vosotros poned" },
+      { wrong:"2.ª persona del singular del imperativo del verbo salir", correct:"Tú sal" },
+      { wrong:"2.ª persona del plural del imperativo del verbo salir", correct:"Vosotros salid" },
+
+      { wrong:"2.ª persona del singular del imperativo del verbo tener", correct:"Tú ten" },
+      { wrong:"2.ª persona del plural del imperativo del verbo tener", correct:"Vosotros tened" },
+      { wrong:"2.ª persona del singular del imperativo del verbo venir", correct:"Tú ven" },
+      { wrong:"2.ª persona del plural del imperativo del verbo venir", correct:"Vosotros venid" },
+      { wrong:"2.ª persona del singular del imperativo del verbo hacer", correct:"Tú haz" },
+
+      { wrong:"2.ª persona del plural del imperativo del verbo hacer", correct:"Vosotros haced" },
+      { wrong:"2.ª persona del singular del imperativo del verbo decir", correct:"Tú di" },
+      { wrong:"2.ª persona del plural del imperativo del verbo decir", correct:"Vosotros decid" },
+      { wrong:"2.ª persona del singular del imperativo del verbo ir", correct:"Tú ve" },
+      { wrong:"2.ª persona del plural del imperativo del verbo ir", correct:"Vosotros id" }
+    ],
+
+    llanor: [
+      { wrong:"Gerundio del verbo cantar", correct:"Cantando" },
+      { wrong:"Participio del verbo cantar", correct:"Cantado" },
+      { wrong:"Infinitivo del verbo cantar", correct:"Cantar" },
+      { wrong:"Gerundio del verbo comer", correct:"Comiendo" },
+      { wrong:"Participio del verbo comer", correct:"Comido" },
+
+      { wrong:"Infinitivo del verbo comer", correct:"Comer" },
+      { wrong:"Gerundio del verbo vivir", correct:"Viviendo" },
+      { wrong:"Participio del verbo vivir", correct:"Vivido" },
+      { wrong:"Infinitivo del verbo vivir", correct:"Vivir" },
+      { wrong:"Gerundio del verbo leer", correct:"Leyendo" },
+
+      { wrong:"Participio del verbo escribir", correct:"Escrito" },
+      { wrong:"Participio del verbo abrir", correct:"Abierto" },
+      { wrong:"Participio del verbo romper", correct:"Roto" },
+      { wrong:"Participio del verbo hacer", correct:"Hecho" },
+      { wrong:"Participio del verbo decir", correct:"Dicho" },
+
+      { wrong:"Gerundio del verbo oír", correct:"Oyendo" },
+      { wrong:"Gerundio del verbo huir", correct:"Huyendo" },
+      { wrong:"Participio del verbo ver", correct:"Visto" },
+      { wrong:"Participio del verbo volver", correct:"Vuelto" },
+      { wrong:"Participio del verbo poner", correct:"Puesto" }
+    ],
+
+    puntor: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo poner", correct:"Yo pongo" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo poner", correct:"Yo puse" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo poner", correct:"Yo pondré" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo traer", correct:"Yo traigo" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo traer", correct:"Yo traje" },
+
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo traer", correct:"Yo traeré" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo saber", correct:"Yo sé" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo saber", correct:"Yo supe" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo saber", correct:"Yo sabré" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo caber", correct:"Yo quepo" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo caber", correct:"Yo cupe" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo caber", correct:"Yo cabré" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo oír", correct:"Yo oigo" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo oír", correct:"Yo oí" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo oír", correct:"Yo oiré" },
+
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo huir", correct:"Yo huyo" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo huir", correct:"Yo huí" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo huir", correct:"Yo huiré" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo valer", correct:"Yo valgo" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo valer", correct:"Yo valdré" }
+    ],
+
+    kalkor: [
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo poner", correct:"Ellos pusieron" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo traer", correct:"Ellos trajeron" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo decir", correct:"Ellos dijeron" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo hacer", correct:"Ellos hicieron" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo venir", correct:"Ellos vinieron" },
+
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo tener", correct:"Ellos tuvieron" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo estar", correct:"Ellos estuvieron" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo poner", correct:"Él puso" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo traer", correct:"Él trajo" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo decir", correct:"Él dijo" },
+
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo hacer", correct:"Él hizo" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo venir", correct:"Él vino" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo tener", correct:"Él tuvo" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo estar", correct:"Él estuvo" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo andar", correct:"Yo anduve" },
+
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo andar", correct:"Ellos anduvieron" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo poder", correct:"Yo pude" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo poder", correct:"Ellos pudieron" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo querer", correct:"Yo quise" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo querer", correct:"Ellos quisieron" }
+    ],
+
+    paper: [
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo cantar", correct:"Yo cante" },
+      { wrong:"2.ª persona del singular del presente de subjuntivo del verbo cantar", correct:"Tú cantes" },
+      { wrong:"3.ª persona del singular del presente de subjuntivo del verbo cantar", correct:"Él cante" },
+      { wrong:"1.ª persona del plural del presente de subjuntivo del verbo cantar", correct:"Nosotros cantemos" },
+      { wrong:"3.ª persona del plural del presente de subjuntivo del verbo cantar", correct:"Ellos canten" },
+
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo comer", correct:"Yo coma" },
+      { wrong:"2.ª persona del singular del presente de subjuntivo del verbo comer", correct:"Tú comas" },
+      { wrong:"3.ª persona del singular del presente de subjuntivo del verbo comer", correct:"Él coma" },
+      { wrong:"1.ª persona del plural del presente de subjuntivo del verbo comer", correct:"Nosotros comamos" },
+      { wrong:"3.ª persona del plural del presente de subjuntivo del verbo comer", correct:"Ellos coman" },
+
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo vivir", correct:"Yo viva" },
+      { wrong:"2.ª persona del singular del presente de subjuntivo del verbo vivir", correct:"Tú vivas" },
+      { wrong:"3.ª persona del singular del presente de subjuntivo del verbo vivir", correct:"Él viva" },
+      { wrong:"1.ª persona del plural del presente de subjuntivo del verbo vivir", correct:"Nosotros vivamos" },
+      { wrong:"3.ª persona del plural del presente de subjuntivo del verbo vivir", correct:"Ellos vivan" },
+
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo tener", correct:"Yo tenga" },
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo venir", correct:"Yo venga" },
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo hacer", correct:"Yo haga" },
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo decir", correct:"Yo diga" },
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo estar", correct:"Yo esté" }
+    ],
+
+    // JEFE · mezcla avanzada
+    torvax: [
+      { wrong:"1.ª persona del singular del pretérito imperfecto de subjuntivo del verbo comer", correct:"Yo comiera" },
+      { wrong:"1.ª persona del plural del pretérito imperfecto de subjuntivo del verbo vivir", correct:"Nosotros viviéramos" },
+      { wrong:"2.ª persona del singular del imperativo del verbo poner", correct:"Tú pon" },
+      { wrong:"2.ª persona del singular del imperativo del verbo hacer", correct:"Tú haz" },
+      { wrong:"2.ª persona del singular del imperativo del verbo decir", correct:"Tú di" },
+
+      { wrong:"Gerundio del verbo oír", correct:"Oyendo" },
+      { wrong:"Gerundio del verbo huir", correct:"Huyendo" },
+      { wrong:"Participio del verbo poner", correct:"Puesto" },
+      { wrong:"Participio del verbo ver", correct:"Visto" },
+      { wrong:"Participio del verbo hacer", correct:"Hecho" },
+
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo caber", correct:"Yo quepo" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo saber", correct:"Yo supe" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo valer", correct:"Yo valdré" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo traer", correct:"Ellos trajeron" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo decir", correct:"Él dijo" },
+
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo tener", correct:"Yo tenga" },
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo venir", correct:"Yo venga" },
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo hacer", correct:"Yo haga" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo oír", correct:"Yo oigo" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo huir", correct:"Yo huyo" }
+    ],
+	    // =========================================================
+    // MAPA 3 · FORMAS COMPUESTAS
+    // =========================================================
+    esdrulia: [
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo cantar", correct:"Yo he cantado" },
+      { wrong:"2.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo cantar", correct:"Tú has cantado" },
+      { wrong:"3.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo cantar", correct:"Él ha cantado" },
+      { wrong:"1.ª persona del plural del pretérito perfecto compuesto de indicativo del verbo cantar", correct:"Nosotros hemos cantado" },
+      { wrong:"3.ª persona del plural del pretérito perfecto compuesto de indicativo del verbo cantar", correct:"Ellos han cantado" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo comer", correct:"Yo he comido" },
+      { wrong:"2.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo comer", correct:"Tú has comido" },
+      { wrong:"3.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo comer", correct:"Él ha comido" },
+      { wrong:"1.ª persona del plural del pretérito perfecto compuesto de indicativo del verbo comer", correct:"Nosotros hemos comido" },
+      { wrong:"3.ª persona del plural del pretérito perfecto compuesto de indicativo del verbo comer", correct:"Ellos han comido" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo vivir", correct:"Yo he vivido" },
+      { wrong:"2.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo vivir", correct:"Tú has vivido" },
+      { wrong:"3.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo vivir", correct:"Él ha vivido" },
+      { wrong:"1.ª persona del plural del pretérito perfecto compuesto de indicativo del verbo vivir", correct:"Nosotros hemos vivido" },
+      { wrong:"3.ª persona del plural del pretérito perfecto compuesto de indicativo del verbo vivir", correct:"Ellos han vivido" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo hacer", correct:"Yo he hecho" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo decir", correct:"Yo he dicho" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo ver", correct:"Yo he visto" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo poner", correct:"Yo he puesto" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo volver", correct:"Yo he vuelto" }
+    ],
+
+    muxlor: [
+      { wrong:"1.ª persona del singular del pluscuamperfecto de indicativo del verbo cantar", correct:"Yo había cantado" },
+      { wrong:"2.ª persona del singular del pluscuamperfecto de indicativo del verbo cantar", correct:"Tú habías cantado" },
+      { wrong:"3.ª persona del singular del pluscuamperfecto de indicativo del verbo cantar", correct:"Él había cantado" },
+      { wrong:"1.ª persona del plural del pluscuamperfecto de indicativo del verbo cantar", correct:"Nosotros habíamos cantado" },
+      { wrong:"3.ª persona del plural del pluscuamperfecto de indicativo del verbo cantar", correct:"Ellos habían cantado" },
+
+      { wrong:"1.ª persona del singular del pluscuamperfecto de indicativo del verbo comer", correct:"Yo había comido" },
+      { wrong:"2.ª persona del singular del pluscuamperfecto de indicativo del verbo comer", correct:"Tú habías comido" },
+      { wrong:"3.ª persona del singular del pluscuamperfecto de indicativo del verbo comer", correct:"Él había comido" },
+      { wrong:"1.ª persona del plural del pluscuamperfecto de indicativo del verbo comer", correct:"Nosotros habíamos comido" },
+      { wrong:"3.ª persona del plural del pluscuamperfecto de indicativo del verbo comer", correct:"Ellos habían comido" },
+
+      { wrong:"1.ª persona del singular del pluscuamperfecto de indicativo del verbo vivir", correct:"Yo había vivido" },
+      { wrong:"2.ª persona del singular del pluscuamperfecto de indicativo del verbo vivir", correct:"Tú habías vivido" },
+      { wrong:"3.ª persona del singular del pluscuamperfecto de indicativo del verbo vivir", correct:"Él había vivido" },
+      { wrong:"1.ª persona del plural del pluscuamperfecto de indicativo del verbo vivir", correct:"Nosotros habíamos vivido" },
+      { wrong:"3.ª persona del plural del pluscuamperfecto de indicativo del verbo vivir", correct:"Ellos habían vivido" },
+
+      { wrong:"1.ª persona del singular del pluscuamperfecto de indicativo del verbo hacer", correct:"Yo había hecho" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de indicativo del verbo decir", correct:"Yo había dicho" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de indicativo del verbo ver", correct:"Yo había visto" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de indicativo del verbo poner", correct:"Yo había puesto" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de indicativo del verbo volver", correct:"Yo había vuelto" }
+    ],
+
+    prosodion: [
+      { wrong:"1.ª persona del singular del pretérito anterior del verbo cantar", correct:"Yo hube cantado" },
+      { wrong:"2.ª persona del singular del pretérito anterior del verbo cantar", correct:"Tú hubiste cantado" },
+      { wrong:"3.ª persona del singular del pretérito anterior del verbo cantar", correct:"Él hubo cantado" },
+      { wrong:"1.ª persona del plural del pretérito anterior del verbo cantar", correct:"Nosotros hubimos cantado" },
+      { wrong:"3.ª persona del plural del pretérito anterior del verbo cantar", correct:"Ellos hubieron cantado" },
+
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo comer", correct:"Yo habré comido" },
+      { wrong:"2.ª persona del singular del futuro compuesto de indicativo del verbo comer", correct:"Tú habrás comido" },
+      { wrong:"3.ª persona del singular del futuro compuesto de indicativo del verbo comer", correct:"Él habrá comido" },
+      { wrong:"1.ª persona del plural del futuro compuesto de indicativo del verbo comer", correct:"Nosotros habremos comido" },
+      { wrong:"3.ª persona del plural del futuro compuesto de indicativo del verbo comer", correct:"Ellos habrán comido" },
+
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo vivir", correct:"Yo habré vivido" },
+      { wrong:"2.ª persona del singular del futuro compuesto de indicativo del verbo vivir", correct:"Tú habrás vivido" },
+      { wrong:"3.ª persona del singular del futuro compuesto de indicativo del verbo vivir", correct:"Él habrá vivido" },
+      { wrong:"1.ª persona del plural del futuro compuesto de indicativo del verbo vivir", correct:"Nosotros habremos vivido" },
+      { wrong:"3.ª persona del plural del futuro compuesto de indicativo del verbo vivir", correct:"Ellos habrán vivido" },
+
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo hacer", correct:"Yo habré hecho" },
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo decir", correct:"Yo habré dicho" },
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo ver", correct:"Yo habré visto" },
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo poner", correct:"Yo habré puesto" },
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo volver", correct:"Yo habré vuelto" }
+    ],
+
+    zarruk: [
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo cantar", correct:"Yo habría cantado" },
+      { wrong:"2.ª persona del singular del condicional compuesto del verbo cantar", correct:"Tú habrías cantado" },
+      { wrong:"3.ª persona del singular del condicional compuesto del verbo cantar", correct:"Él habría cantado" },
+      { wrong:"1.ª persona del plural del condicional compuesto del verbo cantar", correct:"Nosotros habríamos cantado" },
+      { wrong:"3.ª persona del plural del condicional compuesto del verbo cantar", correct:"Ellos habrían cantado" },
+
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo comer", correct:"Yo habría comido" },
+      { wrong:"2.ª persona del singular del condicional compuesto del verbo comer", correct:"Tú habrías comido" },
+      { wrong:"3.ª persona del singular del condicional compuesto del verbo comer", correct:"Él habría comido" },
+      { wrong:"1.ª persona del plural del condicional compuesto del verbo comer", correct:"Nosotros habríamos comido" },
+      { wrong:"3.ª persona del plural del condicional compuesto del verbo comer", correct:"Ellos habrían comido" },
+
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo vivir", correct:"Yo habría vivido" },
+      { wrong:"2.ª persona del singular del condicional compuesto del verbo vivir", correct:"Tú habrías vivido" },
+      { wrong:"3.ª persona del singular del condicional compuesto del verbo vivir", correct:"Él habría vivido" },
+      { wrong:"1.ª persona del plural del condicional compuesto del verbo vivir", correct:"Nosotros habríamos vivido" },
+      { wrong:"3.ª persona del plural del condicional compuesto del verbo vivir", correct:"Ellos habrían vivido" },
+
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo hacer", correct:"Yo habría hecho" },
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo decir", correct:"Yo habría dicho" },
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo ver", correct:"Yo habría visto" },
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo poner", correct:"Yo habría puesto" },
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo volver", correct:"Yo habría vuelto" }
+    ],
+
+    minotauro: [
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo cantar", correct:"Yo haya cantado" },
+      { wrong:"2.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo cantar", correct:"Tú hayas cantado" },
+      { wrong:"3.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo cantar", correct:"Él haya cantado" },
+      { wrong:"1.ª persona del plural del pretérito perfecto compuesto de subjuntivo del verbo cantar", correct:"Nosotros hayamos cantado" },
+      { wrong:"3.ª persona del plural del pretérito perfecto compuesto de subjuntivo del verbo cantar", correct:"Ellos hayan cantado" },
+
+      { wrong:"1.ª persona del singular del pluscuamperfecto de subjuntivo del verbo comer", correct:"Yo hubiera comido" },
+      { wrong:"2.ª persona del singular del pluscuamperfecto de subjuntivo del verbo comer", correct:"Tú hubieras comido" },
+      { wrong:"3.ª persona del singular del pluscuamperfecto de subjuntivo del verbo comer", correct:"Él hubiera comido" },
+      { wrong:"1.ª persona del plural del pluscuamperfecto de subjuntivo del verbo comer", correct:"Nosotros hubiéramos comido" },
+      { wrong:"3.ª persona del plural del pluscuamperfecto de subjuntivo del verbo comer", correct:"Ellos hubieran comido" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo vivir", correct:"Yo haya vivido" },
+      { wrong:"2.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo vivir", correct:"Tú hayas vivido" },
+      { wrong:"3.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo vivir", correct:"Él haya vivido" },
+      { wrong:"1.ª persona del plural del pretérito perfecto compuesto de subjuntivo del verbo vivir", correct:"Nosotros hayamos vivido" },
+      { wrong:"3.ª persona del plural del pretérito perfecto compuesto de subjuntivo del verbo vivir", correct:"Ellos hayan vivido" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo hacer", correct:"Yo haya hecho" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de subjuntivo del verbo decir", correct:"Yo hubiera dicho" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo ver", correct:"Yo haya visto" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de subjuntivo del verbo poner", correct:"Yo hubiera puesto" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo volver", correct:"Yo haya vuelto" }
+    ],
+
+    // JEFE · mezcla de formas compuestas
+    torvax_compuesto: [
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo comer", correct:"Yo he comido" },
+      { wrong:"3.ª persona del plural del pretérito perfecto compuesto de indicativo del verbo vivir", correct:"Ellos han vivido" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de indicativo del verbo cantar", correct:"Yo había cantado" },
+      { wrong:"1.ª persona del plural del pluscuamperfecto de indicativo del verbo comer", correct:"Nosotros habíamos comido" },
+      { wrong:"3.ª persona del singular del futuro compuesto de indicativo del verbo vivir", correct:"Él habrá vivido" },
+
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo cantar", correct:"Yo habría cantado" },
+      { wrong:"3.ª persona del plural del condicional compuesto del verbo comer", correct:"Ellos habrían comido" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo vivir", correct:"Yo haya vivido" },
+      { wrong:"1.ª persona del plural del pluscuamperfecto de subjuntivo del verbo comer", correct:"Nosotros hubiéramos comido" },
+      { wrong:"1.ª persona del singular del pretérito anterior del verbo cantar", correct:"Yo hube cantado" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo hacer", correct:"Yo he hecho" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de indicativo del verbo decir", correct:"Yo había dicho" },
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo ver", correct:"Yo habré visto" },
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo poner", correct:"Yo habría puesto" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo volver", correct:"Yo haya vuelto" },
+
+      { wrong:"3.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo decir", correct:"Él ha dicho" },
+      { wrong:"3.ª persona del singular del pluscuamperfecto de indicativo del verbo hacer", correct:"Él había hecho" },
+      { wrong:"3.ª persona del plural del futuro compuesto de indicativo del verbo poner", correct:"Ellos habrán puesto" },
+      { wrong:"3.ª persona del singular del pluscuamperfecto de subjuntivo del verbo ver", correct:"Él hubiera visto" },
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo volver", correct:"Yo habría vuelto" }
+    ],
+	    // =========================================================
+    // MAPA 4 · MEZCLA GENERAL
+    // =========================================================
+    caoskrin: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo comer", correct:"Yo como" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo vivir", correct:"Ellos viven" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo cantar", correct:"Yo canté" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo comer", correct:"Él comió" },
+      { wrong:"1.ª persona del plural del pretérito imperfecto de indicativo del verbo vivir", correct:"Nosotros vivíamos" },
+
+      { wrong:"3.ª persona del singular del futuro simple de indicativo del verbo cantar", correct:"Él cantará" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo tener", correct:"Yo tengo" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo venir", correct:"Él viene" },
+      { wrong:"2.ª persona del singular del imperativo del verbo hacer", correct:"Tú haz" },
+      { wrong:"2.ª persona del singular del imperativo del verbo decir", correct:"Tú di" },
+
+      { wrong:"Gerundio del verbo oír", correct:"Oyendo" },
+      { wrong:"Participio del verbo poner", correct:"Puesto" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo ver", correct:"Yo he visto" },
+      { wrong:"3.ª persona del plural del pluscuamperfecto de indicativo del verbo hacer", correct:"Ellos habían hecho" },
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo volver", correct:"Yo habría vuelto" },
+
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo tener", correct:"Yo tenga" },
+      { wrong:"3.ª persona del plural del presente de subjuntivo del verbo decir", correct:"Ellos digan" },
+      { wrong:"1.ª persona del singular del pretérito imperfecto de subjuntivo del verbo venir", correct:"Yo viniera" },
+      { wrong:"3.ª persona del singular del futuro compuesto de indicativo del verbo comer", correct:"Él habrá comido" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo vivir", correct:"Yo haya vivido" }
+    ],
+
+    hiatikus: [
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo cantar", correct:"Tú cantas" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo comer", correct:"Nosotros comemos" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo ser", correct:"Él es" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo ir", correct:"Yo voy" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo estar", correct:"Ellos están" },
+
+      { wrong:"2.ª persona del singular del pretérito perfecto simple del verbo vivir", correct:"Tú viviste" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo poner", correct:"Yo puse" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo traer", correct:"Ellos trajeron" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo saber", correct:"Yo sabré" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo caber", correct:"Yo quepo" },
+
+      { wrong:"Participio del verbo hacer", correct:"Hecho" },
+      { wrong:"Participio del verbo decir", correct:"Dicho" },
+      { wrong:"Participio del verbo volver", correct:"Vuelto" },
+      { wrong:"Gerundio del verbo huir", correct:"Huyendo" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de indicativo del verbo cantar", correct:"Yo había cantado" },
+
+      { wrong:"3.ª persona del singular del futuro compuesto de indicativo del verbo poner", correct:"Él habrá puesto" },
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo hacer", correct:"Yo habría hecho" },
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo venir", correct:"Yo venga" },
+      { wrong:"3.ª persona del singular del pretérito imperfecto de subjuntivo del verbo decir", correct:"Él dijera" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo ver", correct:"Yo haya visto" }
+    ],
+
+    momia: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo decir", correct:"Yo digo" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo tener", correct:"Tú tienes" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo venir", correct:"Ellos vienen" },
+      { wrong:"1.ª persona del singular del pretérito imperfecto de indicativo del verbo comer", correct:"Yo comía" },
+      { wrong:"3.ª persona del plural del futuro simple de indicativo del verbo vivir", correct:"Ellos vivirán" },
+
+      { wrong:"2.ª persona del singular del imperativo del verbo venir", correct:"Tú ven" },
+      { wrong:"2.ª persona del singular del imperativo del verbo poner", correct:"Tú pon" },
+      { wrong:"Gerundio del verbo leer", correct:"Leyendo" },
+      { wrong:"Participio del verbo abrir", correct:"Abierto" },
+      { wrong:"Participio del verbo ver", correct:"Visto" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo hacer", correct:"Yo he hecho" },
+      { wrong:"3.ª persona del plural del pluscuamperfecto de indicativo del verbo decir", correct:"Ellos habían dicho" },
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo volver", correct:"Yo habré vuelto" },
+      { wrong:"3.ª persona del singular del condicional compuesto del verbo poner", correct:"Él habría puesto" },
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo hacer", correct:"Yo haga" },
+
+      { wrong:"3.ª persona del plural del presente de subjuntivo del verbo tener", correct:"Ellos tengan" },
+      { wrong:"1.ª persona del singular del pretérito imperfecto de subjuntivo del verbo estar", correct:"Yo estuviera" },
+      { wrong:"3.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo vivir", correct:"Él haya vivido" },
+      { wrong:"1.ª persona del plural del pluscuamperfecto de subjuntivo del verbo comer", correct:"Nosotros hubiéramos comido" },
+      { wrong:"1.ª persona del singular del pretérito anterior del verbo cantar", correct:"Yo hube cantado" }
+    ],
+
+    rugiton: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo hacer", correct:"Yo hago" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo oír", correct:"Yo oigo" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo huir", correct:"Yo huyo" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo estar", correct:"Él está" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo haber", correct:"Nosotros hemos" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo saber", correct:"Yo supe" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo poder", correct:"Ellos pudieron" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo querer", correct:"Yo quise" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo valer", correct:"Yo valdré" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo poner", correct:"Yo pondré" },
+
+      { wrong:"2.ª persona del plural del imperativo del verbo decir", correct:"Vosotros decid" },
+      { wrong:"2.ª persona del plural del imperativo del verbo ir", correct:"Vosotros id" },
+      { wrong:"Gerundio del verbo vivir", correct:"Viviendo" },
+      { wrong:"Participio del verbo romper", correct:"Roto" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo poner", correct:"Yo he puesto" },
+
+      { wrong:"3.ª persona del plural del pluscuamperfecto de indicativo del verbo ver", correct:"Ellos habían visto" },
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo decir", correct:"Yo habría dicho" },
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo estar", correct:"Yo esté" },
+      { wrong:"3.ª persona del singular del pretérito imperfecto de subjuntivo del verbo hacer", correct:"Él hiciera" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo poner", correct:"Yo haya puesto" }
+    ],
+
+    zombie_cz: [
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo comer", correct:"Él come" },
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo vivir", correct:"Tú vives" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo ser", correct:"Nosotros somos" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo ir", correct:"Ellos van" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo venir", correct:"Yo vengo" },
+
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo traer", correct:"Él trajo" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo decir", correct:"Él dijo" },
+      { wrong:"1.ª persona del singular del pretérito imperfecto de indicativo del verbo cantar", correct:"Yo cantaba" },
+      { wrong:"3.ª persona del singular del futuro simple de indicativo del verbo comer", correct:"Él comerá" },
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo decir", correct:"Yo diga" },
+
+      { wrong:"1.ª persona del singular del pretérito imperfecto de subjuntivo del verbo tener", correct:"Yo tuviera" },
+      { wrong:"2.ª persona del singular del imperativo del verbo salir", correct:"Tú sal" },
+      { wrong:"Participio del verbo escribir", correct:"Escrito" },
+      { wrong:"Participio del verbo ver", correct:"Visto" },
+      { wrong:"Gerundio del verbo cantar", correct:"Cantando" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo decir", correct:"Yo he dicho" },
+      { wrong:"3.ª persona del plural del pluscuamperfecto de indicativo del verbo poner", correct:"Ellos habían puesto" },
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo hacer", correct:"Yo habré hecho" },
+      { wrong:"3.ª persona del singular del condicional compuesto del verbo volver", correct:"Él habría vuelto" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de subjuntivo del verbo ver", correct:"Yo hubiera visto" }
+    ],
+
+    // JEFE MAPA 4 · mezcla alta pero aún legible
+    sintaxion: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo caber", correct:"Yo quepo" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo decir", correct:"Ellos dicen" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo poner", correct:"Yo puse" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo hacer", correct:"Él hizo" },
+      { wrong:"1.ª persona del plural del pretérito imperfecto de indicativo del verbo comer", correct:"Nosotros comíamos" },
+
+      { wrong:"3.ª persona del plural del futuro simple de indicativo del verbo valer", correct:"Ellos valdrán" },
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo venir", correct:"Yo venga" },
+      { wrong:"3.ª persona del singular del presente de subjuntivo del verbo estar", correct:"Él esté" },
+      { wrong:"1.ª persona del singular del pretérito imperfecto de subjuntivo del verbo hacer", correct:"Yo hiciera" },
+      { wrong:"1.ª persona del plural del pretérito imperfecto de subjuntivo del verbo vivir", correct:"Nosotros viviéramos" },
+
+      { wrong:"2.ª persona del singular del imperativo del verbo tener", correct:"Tú ten" },
+      { wrong:"2.ª persona del plural del imperativo del verbo ir", correct:"Vosotros id" },
+      { wrong:"Gerundio del verbo oír", correct:"Oyendo" },
+      { wrong:"Participio del verbo volver", correct:"Vuelto" },
+      { wrong:"Participio del verbo hacer", correct:"Hecho" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo poner", correct:"Yo he puesto" },
+      { wrong:"3.ª persona del plural del pluscuamperfecto de indicativo del verbo decir", correct:"Ellos habían dicho" },
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo ver", correct:"Yo habré visto" },
+      { wrong:"3.ª persona del singular del condicional compuesto del verbo hacer", correct:"Él habría hecho" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de subjuntivo del verbo poner", correct:"Yo hubiera puesto" }
+    ],
+
+    // =========================================================
+    // MAPA 5 · MEZCLA TOTAL
+    // =========================================================
+    gravikus: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo ser", correct:"Yo soy" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo haber", correct:"Ellos han" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo caber", correct:"Yo cupe" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo andar", correct:"Ellos anduvieron" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo poner", correct:"Yo pondré" },
+
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo hacer", correct:"Yo haga" },
+      { wrong:"3.ª persona del singular del pretérito imperfecto de subjuntivo del verbo venir", correct:"Él viniera" },
+      { wrong:"2.ª persona del singular del imperativo del verbo ir", correct:"Tú ve" },
+      { wrong:"Participio del verbo decir", correct:"Dicho" },
+      { wrong:"Gerundio del verbo leer", correct:"Leyendo" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo hacer", correct:"Yo he hecho" },
+      { wrong:"3.ª persona del singular del pluscuamperfecto de indicativo del verbo ver", correct:"Él había visto" },
+      { wrong:"1.ª persona del plural del futuro compuesto de indicativo del verbo vivir", correct:"Nosotros habremos vivido" },
+      { wrong:"3.ª persona del plural del condicional compuesto del verbo poner", correct:"Ellos habrían puesto" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo decir", correct:"Yo haya dicho" },
+
+      { wrong:"1.ª persona del plural del pluscuamperfecto de subjuntivo del verbo hacer", correct:"Nosotros hubiéramos hecho" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo oír", correct:"Él oye" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo valer", correct:"Yo valgo" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo querer", correct:"Él quiso" },
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo volver", correct:"Yo habría vuelto" }
+    ],
+
+    jarkon: [
+      { wrong:"2.ª persona del singular del presente de indicativo del verbo decir", correct:"Tú dices" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo estar", correct:"Nosotros estamos" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo ir", correct:"Él va" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo saber", correct:"Yo supe" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo poder", correct:"Ellos pudieron" },
+
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo caber", correct:"Yo cabré" },
+      { wrong:"3.ª persona del singular del presente de subjuntivo del verbo tener", correct:"Él tenga" },
+      { wrong:"1.ª persona del singular del pretérito imperfecto de subjuntivo del verbo estar", correct:"Yo estuviera" },
+      { wrong:"2.ª persona del plural del imperativo del verbo hacer", correct:"Vosotros haced" },
+      { wrong:"Participio del verbo abrir", correct:"Abierto" },
+
+      { wrong:"Gerundio del verbo huir", correct:"Huyendo" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo volver", correct:"Yo he vuelto" },
+      { wrong:"3.ª persona del plural del pluscuamperfecto de indicativo del verbo poner", correct:"Ellos habían puesto" },
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo comer", correct:"Yo habré comido" },
+      { wrong:"3.ª persona del singular del condicional compuesto del verbo decir", correct:"Él habría dicho" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo ver", correct:"Yo haya visto" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de subjuntivo del verbo volver", correct:"Yo hubiera vuelto" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo traer", correct:"Él trae" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo oír", correct:"Yo oigo" },
+      { wrong:"3.ª persona del plural del futuro simple de indicativo del verbo valer", correct:"Ellos valdrán" }
+    ],
+
+    ortograf: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo hacer", correct:"Yo hago" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo venir", correct:"Ellos vienen" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo traer", correct:"Yo traje" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo decir", correct:"Él dijo" },
+      { wrong:"1.ª persona del singular del pretérito imperfecto de indicativo del verbo vivir", correct:"Yo vivía" },
+
+      { wrong:"3.ª persona del singular del futuro simple de indicativo del verbo comer", correct:"Él comerá" },
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo estar", correct:"Yo esté" },
+      { wrong:"3.ª persona del plural del presente de subjuntivo del verbo hacer", correct:"Ellos hagan" },
+      { wrong:"1.ª persona del singular del pretérito imperfecto de subjuntivo del verbo decir", correct:"Yo dijera" },
+      { wrong:"2.ª persona del singular del imperativo del verbo salir", correct:"Tú sal" },
+
+      { wrong:"Participio del verbo ver", correct:"Visto" },
+      { wrong:"Participio del verbo poner", correct:"Puesto" },
+      { wrong:"Gerundio del verbo oír", correct:"Oyendo" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo decir", correct:"Yo he dicho" },
+      { wrong:"3.ª persona del plural del pluscuamperfecto de indicativo del verbo hacer", correct:"Ellos habían hecho" },
+
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo poner", correct:"Yo habré puesto" },
+      { wrong:"3.ª persona del singular del condicional compuesto del verbo ver", correct:"Él habría visto" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo hacer", correct:"Yo haya hecho" },
+      { wrong:"1.ª persona del plural del pluscuamperfecto de subjuntivo del verbo vivir", correct:"Nosotros hubiéramos vivido" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo caber", correct:"Yo quepo" }
+    ],
+
+    siseus: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo ir", correct:"Yo voy" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo ser", correct:"Él es" },
+      { wrong:"1.ª persona del plural del presente de indicativo del verbo haber", correct:"Nosotros hemos" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo poder", correct:"Yo pude" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo querer", correct:"Ellos quisieron" },
+
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo saber", correct:"Yo sabré" },
+      { wrong:"3.ª persona del plural del presente de subjuntivo del verbo venir", correct:"Ellos vengan" },
+      { wrong:"1.ª persona del plural del pretérito imperfecto de subjuntivo del verbo estar", correct:"Nosotros estuviéramos" },
+      { wrong:"2.ª persona del singular del imperativo del verbo decir", correct:"Tú di" },
+      { wrong:"Participio del verbo romper", correct:"Roto" },
+
+      { wrong:"Gerundio del verbo huir", correct:"Huyendo" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo ver", correct:"Yo he visto" },
+      { wrong:"3.ª persona del singular del pluscuamperfecto de indicativo del verbo poner", correct:"Él había puesto" },
+      { wrong:"1.ª persona del singular del futuro compuesto de indicativo del verbo volver", correct:"Yo habré vuelto" },
+      { wrong:"3.ª persona del plural del condicional compuesto del verbo hacer", correct:"Ellos habrían hecho" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo poner", correct:"Yo haya puesto" },
+      { wrong:"1.ª persona del singular del pluscuamperfecto de subjuntivo del verbo decir", correct:"Yo hubiera dicho" },
+      { wrong:"3.ª persona del singular del presente de indicativo del verbo oír", correct:"Él oye" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo valer", correct:"Yo valgo" },
+      { wrong:"3.ª persona del singular del pretérito anterior del verbo cantar", correct:"Él hubo cantado" }
+    ],
+
+    ciclope: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo tener", correct:"Yo tengo" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo decir", correct:"Ellos dicen" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo poner", correct:"Yo puse" },
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo traer", correct:"Ellos trajeron" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo valer", correct:"Yo valdré" },
+
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo hacer", correct:"Yo haga" },
+      { wrong:"3.ª persona del singular del pretérito imperfecto de subjuntivo del verbo tener", correct:"Él tuviera" },
+      { wrong:"2.ª persona del plural del imperativo del verbo ir", correct:"Vosotros id" },
+      { wrong:"Participio del verbo volver", correct:"Vuelto" },
+      { wrong:"Gerundio del verbo oír", correct:"Oyendo" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo hacer", correct:"Yo he hecho" },
+      { wrong:"3.ª persona del singular del pluscuamperfecto de indicativo del verbo decir", correct:"Él había dicho" },
+      { wrong:"1.ª persona del plural del futuro compuesto de indicativo del verbo vivir", correct:"Nosotros habremos vivido" },
+      { wrong:"3.ª persona del plural del condicional compuesto del verbo ver", correct:"Ellos habrían visto" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo volver", correct:"Yo haya vuelto" },
+
+      { wrong:"1.ª persona del plural del pluscuamperfecto de subjuntivo del verbo poner", correct:"Nosotros hubiéramos puesto" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo caber", correct:"Yo quepo" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo oír", correct:"Yo oigo" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo querer", correct:"Él quiso" },
+      { wrong:"1.ª persona del singular del pretérito anterior del verbo hacer", correct:"Yo hube hecho" }
+    ],
+
+    // JEFE FINAL · dificultad claramente superior
+    don_pablo: [
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo caber", correct:"Yo quepo" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo oír", correct:"Yo oigo" },
+      { wrong:"1.ª persona del singular del presente de indicativo del verbo valer", correct:"Yo valgo" },
+      { wrong:"3.ª persona del plural del presente de indicativo del verbo decir", correct:"Ellos dicen" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo saber", correct:"Yo supe" },
+
+      { wrong:"3.ª persona del plural del pretérito perfecto simple del verbo traer", correct:"Ellos trajeron" },
+      { wrong:"1.ª persona del singular del pretérito perfecto simple del verbo poner", correct:"Yo puse" },
+      { wrong:"3.ª persona del singular del pretérito perfecto simple del verbo querer", correct:"Él quiso" },
+      { wrong:"1.ª persona del singular del futuro simple de indicativo del verbo poner", correct:"Yo pondré" },
+      { wrong:"3.ª persona del plural del futuro simple de indicativo del verbo valer", correct:"Ellos valdrán" },
+
+      { wrong:"1.ª persona del singular del presente de subjuntivo del verbo venir", correct:"Yo venga" },
+      { wrong:"3.ª persona del singular del presente de subjuntivo del verbo estar", correct:"Él esté" },
+      { wrong:"1.ª persona del plural del pretérito imperfecto de subjuntivo del verbo hacer", correct:"Nosotros hiciéramos" },
+      { wrong:"3.ª persona del singular del pretérito imperfecto de subjuntivo del verbo decir", correct:"Él dijera" },
+      { wrong:"2.ª persona del plural del imperativo del verbo decir", correct:"Vosotros decid" },
+    { wrong:"Gerundio del verbo oír", correct:"Oyendo" },
+      { wrong:"Gerundio del verbo huir", correct:"Huyendo" },
+      { wrong:"Participio del verbo hacer", correct:"Hecho" },
+      { wrong:"Participio del verbo poner", correct:"Puesto" },
+      { wrong:"Participio del verbo volver", correct:"Vuelto" },
+
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de indicativo del verbo hacer", correct:"Yo he hecho" },
+      { wrong:"3.ª persona del plural del pluscuamperfecto de indicativo del verbo decir", correct:"Ellos habían dicho" },
+      { wrong:"1.ª persona del plural del futuro compuesto de indicativo del verbo vivir", correct:"Nosotros habremos vivido" },
+      { wrong:"3.ª persona del singular del condicional compuesto del verbo poner", correct:"Él habría puesto" },
+      { wrong:"1.ª persona del singular del pretérito perfecto compuesto de subjuntivo del verbo volver", correct:"Yo haya vuelto" },
+
+      { wrong:"1.ª persona del plural del pluscuamperfecto de subjuntivo del verbo hacer", correct:"Nosotros hubiéramos hecho" },
+      { wrong:"3.ª persona del singular del pluscuamperfecto de subjuntivo del verbo ver", correct:"Él hubiera visto" },
+      { wrong:"1.ª persona del singular del pretérito anterior del verbo decir", correct:"Yo hube dicho" },
+      { wrong:"3.ª persona del plural del futuro compuesto de indicativo del verbo poner", correct:"Ellos habrán puesto" },
+      { wrong:"1.ª persona del singular del condicional compuesto del verbo volver", correct:"Yo habría vuelto" }
+    ],	
+	
+  };
+
+   // Export
+  window.BG_CONTENT_BANKS = window.BG_CONTENT_BANKS || {};
+  window.BG_CONTENT_BANKS.verbos = VERBOS_BANK;
+})();
+</script>

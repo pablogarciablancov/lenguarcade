@@ -1,0 +1,57 @@
+<script>  
+// js/data/monsters_catalog.js
+(function(){
+  // 1. Definimos la Ruta Maestra de tu GitHub (¡Cambia esto por tu enlace real!)
+  const GITHUB_BASE = "https://pablogarciablancov.github.io/BATTLEGRAFIA-FINAL/img/";
+
+
+  // 2. Definimos los monstruos solo con el final de la ruta
+  const rawCatalog = [
+    { id:"acentrahel", name:"Acentrahel", sprite:"monsters/acentrahel.webp", rule:"Acentuación general" },
+    { id:"caoskrin", name:"Caoskrin", sprite:"monsters/caoskrin.webp", rule:"Ortografía general" },
+    { id:"diacritik", name:"Diacritik", sprite:"monsters/diacritik.webp", rule:"Tilde diacrítica" },
+    { id:"donpablo", name:"Don Pablo", sprite:"monsters/donpablo.webp", rule:"Jefe Final" },
+    { id:"esdrulia", name:"Esdrulia", sprite:"monsters/esdrulia.webp", rule:"Tildes: esdrújulas" },
+    { id:"gravikus", name:"Gravikus", sprite:"monsters/gravikus.webp", rule:"Tildes: llanas (graves)" },
+    { id:"hiatikus", name:"Hiátikus", sprite:"monsters/hiatikus.webp", rule:"Hiatos" },
+    { id:"jarkon", name:"Jarkon", sprite:"monsters/jarkon.webp", rule:"Ortografía general" },
+    { id:"kalkor", name:"Kalkor", sprite:"monsters/kalkor.webp", rule:"Ortografía general" },
+    { id:"lexikon", name:"Lexikon", sprite:"monsters/lexikon.webp", rule:"Léxico / vocabulario" },
+
+    { id:"llanor", name:"Llanor", sprite:"monsters/llanor.webp", rule:"Tildes: llanas (graves)" },
+    { id:"momia", name:"Momia", sprite:"monsters/momia.webp", rule:"Ortografía general" },
+    { id:"muxlor", name:"Muxlor", sprite:"monsters/muxlor.webp", rule:"Ortografía general" },
+    { id:"ortograf", name:"Ortograf", sprite:"monsters/ortograf.webp", rule:"Ortografía general" },
+    { id:"oxiton", name:"Oxíton", sprite:"monsters/oxiton.webp", rule:"Tildes: agudas (oxítonas)" },
+    { id:"paper", name:"Paper", sprite:"monsters/paper.webp", rule:"Ortografía general" },
+    { id:"prosodion", name:"Prosodion", sprite:"monsters/prosodion.webp", rule:"Prosodia" },
+    { id:"puntor", name:"Puntor", sprite:"monsters/puntor.webp", rule:"Punto y punto y coma" },
+    { id:"rayafer", name:"Rayafer", sprite:"monsters/rayafer.webp", rule:"Raya (—) y guion (-)" },
+    { id:"rugiton", name:"Rugiton", sprite:"monsters/rugiton.webp", rule:"Ortografía general" },
+
+    { id:"sintaxion", name:"Sintaxion", sprite:"monsters/sintaxion.webp", rule:"Sintaxis" },
+    { id:"siseus", name:"Siseus", sprite:"monsters/siseus.webp", rule:"Ortografía general" },
+
+    { id:"sprite_ciclope_ojo", name:"Cíclope Ojo", sprite:"monsters/sprite_ciclope_ojo.webp", rule:"Ortografía general" },
+    { id:"espectro_agudo", name:"Espectro Agudo", sprite:"monsters/sprite_espectro_agudo.webp", rule:"Tildes: agudas / acentuación" },
+    { id:"gargantua_gj", name:"Gargántua G/J", sprite:"monsters/sprite_gargantua_gj.webp", rule:"G/J" },
+    { id:"h_ghoul", name:"H-Ghoul", sprite:"monsters/sprite_h_ghoul.webp", rule:"Uso de H" },
+    { id:"sprite_minotauro", name:"Minotauro", sprite:"monsters/sprite_minotauro.webp", rule:"Ortografía general" },
+    { id:"sprite_serpiente_comata", name:"Serpiente Comata", sprite:"monsters/sprite_serpiente_comata.webp", rule:"Coma (uso y colocación)" },
+    { id:"vampiro_v", name:"Vampiro V", sprite:"monsters/sprite_vampiro_v.webp", rule:"B/V" },
+    { id:"zombie_cz", name:"Zombi C/Z", sprite:"monsters/sprite_zombie_cz.webp", rule:"C/Z" },
+
+    { id:"torvax", name:"Torvax", sprite:"monsters/torvax.webp", rule:"Ortografía general" },
+    { id:"zarruk", name:"Zarruk", sprite:"monsters/zarruk.webp", rule:"Ortografía general" },
+  ];
+
+// 3. El código le pega automáticamente el GITHUB_BASE a todos los sprites
+  window.BG_MONSTER_CATALOG = rawCatalog.map(monster => {
+    return {
+      ...monster,
+      sprite: GITHUB_BASE + monster.sprite
+    };
+  });
+
+})();
+</script>

@@ -9,6 +9,10 @@ function average(values: number[]) {
 }
 
 const integrations: Record<string, { url:string; integration:string }> = {
+  battlegrafia:{
+    url:"https://script.google.com/macros/s/AKfycbwJRO4_CkEYp6tLtmaYohUD6dSEtAiit3OTW2669yo75DpY5IR6yGdeBv-kWor22zxEyA/exec",
+    integration:"embedded",
+  },
   maniacgrafia:{
     url:"https://script.google.com/macros/s/AKfycbxgtB6NP9zVvkkEZjodyGhSQbZmFifeFdMf8uDr0QsXoWsp_AxZdb7OFxtS5vKM-VruPw/exec?view=alumno",
     integration:"embedded",
@@ -95,6 +99,10 @@ Deno.serve(async (request) => {
     const classroom = Array.isArray(classroomRelation) ? classroomRelation[0] : classroomRelation || null;
 
     const games = (gamesResult.data || []).map(game => {
+      const integration = integrations[game.id] || null;
+      const estado = integration && String(game.status || "").toLowerCase().includes("coming")
+        ? "beta"
+        : game.status;
       const row = progressByGame.get(game.id) || {
         game_id:game.id,
         xp:0,
@@ -117,14 +125,14 @@ Deno.serve(async (request) => {
         nombre:game.name,
         subtitulo:game.subtitle,
         categoria:game.category,
-        estado:game.status,
+        estado,
         orden:game.sort_order,
         color:game.color,
         icono:game.icon,
         url:game.url,
         banner:game.banner,
-        ...(integrations[game.id] || {}),
-        locked:String(game.status || "").toLowerCase().includes("coming"),
+        ...(integration || {}),
+        locked:!integration && String(estado || "").toLowerCase().includes("coming"),
         buttonLabel:Number(row.sessions || 0) > 0 ? "Continuar" : "Jugar",
         progress:{
           studentId:profile.id,

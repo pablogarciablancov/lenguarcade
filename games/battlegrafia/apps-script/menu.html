@@ -1,0 +1,366 @@
+<script>  
+(() => {
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+
+  // Fuente de verdad: juego (BG.hasAccountOnline). Fallback: BG_SESSION/localStorage.
+  function hasAccountOnline(){
+    try{
+      if(window.BG && typeof window.BG.hasAccountOnline === 'function') return !!window.BG.hasAccountOnline();
+      if(window.BG && typeof window.BG.isLoggedIn === 'function') return !!window.BG.isLoggedIn();
+    }catch(e){}
+
+    const logged = !!(window.BG_SESSION && window.BG_SESSION.loggedIn);
+    const online = (typeof navigator !== 'undefined') ? !!navigator.onLine : true;
+    return logged && online;
+  }
+
+  function getUserEmail(){
+    try{ if(window.BG && typeof window.BG.getUserEmail === 'function') return window.BG.getUserEmail() || ''; }catch(e){}
+    if(window.BG_SESSION?.email) return window.BG_SESSION.email;
+    return localStorage.getItem('bg_user_email') || '';
+  }
+
+  let appScreens = [];
+  let gameShell = null;
+
+  function refreshRefs(){
+    appScreens = Array.from(document.querySelectorAll('.app-screen'));
+    gameShell = document.querySelector('.game-shell');
+  }
+
+  function showAppScreen(id){
+    refreshRefs();
+    appScreens.forEach(s => s.classList.remove('is-active'));
+    const t = $(id);
+    if(t) t.classList.add('is-active');
+
+    // El HUB oculta el shell del juego
+    if(gameShell) gameShell.style.display = (id === 'start-screen' ? 'block' : 'none');
+
+    // Cuando volvemos al menú principal, refrescar mochila (oro + objetos)
+    if(id === 'main-menu'){
+      try{ window.BG_UI?.renderHubBackpack?.(); }catch(e){}
+    }
+  }
+
+  function showStartScreen(){
+  refreshRefs();
+  // Ocultar app-screens
+  appScreens.forEach(s => s.classList.remove('is-active'));
+  // Mostrar shell y start-screen
+  if(gameShell) gameShell.style.display = 'block';
+  const start = $('start-screen');
+  if(start) start.style.display = 'flex';
+
+  // --- NEW: ajustar UI según intención (new/continue) ---
+  try{
+    const continueBlock = $('continue-block');
+    const panel = document.querySelector('#start-screen .start-panel');
+    const warningId = 'start-overwrite-warning';
+
+    // modo actual (para el texto y para detectar si hay guardado)
+    const modeId = (() => {
+      try{ return localStorage.getItem('bg_modeId') || 'adventure'; }catch(e){ return 'adventure'; }
+    })();
+
+    const hasSaveForMode = (() => {
+      try{
+        if(window.BG && typeof window.BG.hasLocalSaveForMode === 'function'){
+          return !!window.BG.hasLocalSaveForMode(modeId);
+        }
+      }catch(e){}
+      // fallback: si el bloque estaba visible, asumimos que había guardado
+      return !!(continueBlock && continueBlock.style.display !== 'none');
+    })();
+
+    // helper para warning
+    const setWarning = (text) => {
+      if(!panel) return;
+      let w = document.getElementById(warningId);
+      if(!w){
+        w = document.createElement('div');
+        w.id = warningId;
+        w.className = 'hint start-overwrite-warning';
+
+        const startSub = panel.querySelector('.start-sub');
+        if(startSub && startSub.parentNode){
+          startSub.parentNode.insertBefore(w, startSub.nextSibling);
+        }else{
+          panel.insertBefore(w, panel.firstChild);
+        }
+      }
+      if(!text){
+        w.style.display = 'none';
+        return;
+      }
+      w.innerHTML = text;
+      w.style.display = 'block';
+    };
+
+    if(startIntent === 'new'){
+      // Nueva partida: NO mostrar continuar
+      if(continueBlock) continueBlock.style.display = 'none';
+
+      // Si existe guardado, avisamos de sobrescritura (como pedías)
+      if(hasSaveForMode){
+        setWarning(`⚠️ <strong>Ojo:</strong> hay una partida guardada en este modo (<strong>${modeId}</strong>). Si empiezas una nueva aventura, se sobrescribirá.`);
+      }else{
+        setWarning('');
+      }
+    }else{
+      // Continuar: dejamos el bloque si hay guardado
+      if(continueBlock) continueBlock.style.display = hasSaveForMode ? 'block' : 'none';
+      setWarning('');
+    }
+  }catch(e){}
+}
+
+
+  function showModeMenu(){
+      // En modo "continuar", ocultar modos sin guardado
+      try{
+        if(startIntent === 'continue'){
+          document.querySelectorAll('[data-mode]').forEach(el=>{
+            const mode = el.getAttribute('data-mode');
+            const has = (window.BG && typeof window.BG.hasLocalSaveForMode === 'function')
+              ? window.BG.hasLocalSaveForMode(mode)
+              : true;
+            el.style.display = has ? '' : 'none';
+          });
+        }else{
+          // Nueva partida: mostrar todos
+          document.querySelectorAll('[data-mode]').forEach(el=>{ el.style.display=''; });
+        }
+      }catch(e){}
+
+    if(gameShell) gameShell.style.display = 'none';
+    showAppScreen('mode-screen');
+  }
+
+  // Intento de inicio: 'new' | 'continue'
+  let startIntent = 'new';
+  let newModeChosen = false;
+
+
+  function openAccountScreen(){
+    showAppScreen('hub-account');
+
+    const loggedIn = hasAccountOnline();
+    const boxOut = $('hub-account-loggedout');
+    const boxIn  = $('hub-account-loggedin');
+    const emailEl = $('hub-account-email');
+    const status = $('hub-account-status');
+
+    if(boxOut) boxOut.style.display = loggedIn ? 'none' : 'block';
+    if(boxIn)  boxIn.style.display  = loggedIn ? 'block' : 'none';
+    if(emailEl) emailEl.textContent = loggedIn ? (getUserEmail() || '(cuenta)') : '';
+
+    if(status){
+      status.textContent = loggedIn
+        ? 'Sesión activa. Tu progreso se guarda en la nube.'
+        : 'Modo demo: puedes jugar, pero no se guardará progreso.';
+    }
+  }
+
+  function openAchievementsScreen(){
+    showAppScreen('hub-achievements');
+
+    if(!hasAccountOnline()){
+      const summary = $('hub-achievements-summary');
+      const grid = $('hub-achievements-grid');
+      const total = (window.BG_ACHIEVEMENTS_CATALOG||[]).length;
+      if(summary) summary.innerHTML = `Modo demo: inicia sesión (y con Internet) para ver tus logros. Progreso: <strong>0</strong> / <strong>${total}</strong>`;
+      if(grid) grid.innerHTML = '';
+      return;
+    }
+
+    window.BG_UI?.renderAchievementsHub?.();
+  }
+
+  function openShopScreen(){
+  showAppScreen('hub-shop');
+  // ✅ Arrancar tienda siempre en el “home” del mercader
+  window.BG_UI?.setHubShopView?.('home');
+  window.BG_UI?.renderHubShop?.();
+}
+
+
+  function openCollectionScreen(){
+    showAppScreen('hub-collection');
+
+    if(!hasAccountOnline()){
+      const grid = $('hub-collection-grid');
+      if(grid) grid.innerHTML = `<div class="hint">Modo demo: inicia sesión (y con Internet) para ver tu colección.</div>`;
+      return;
+    }
+
+    window.BG_UI?.renderCollection?.();
+  }
+
+  function openCreditsScreen(){
+    showAppScreen('hub-credits');
+  }
+
+  // Arranque
+  document.addEventListener('DOMContentLoaded', () => {
+    refreshRefs();
+
+    // Inicializa el motor
+    if(window.BG && typeof window.BG.boot === 'function') {
+      window.BG.boot();
+    }
+
+    // Mostrar solo intro al cargar
+    if(gameShell) gameShell.style.display = 'none';
+
+    $('intro-continue')?.addEventListener('click', () => {
+      showAppScreen('main-menu');
+      try{ window.BG_UI?.renderHubBackpack?.(); }catch(e){}
+    });
+
+    // HUB -> pantallas propias
+    $('menu-account')?.addEventListener('click', openAccountScreen);
+    $('menu-achievements')?.addEventListener('click', openAchievementsScreen);
+    $('menu-shop')?.addEventListener('click', openShopScreen);
+    $('menu-collection')?.addEventListener('click', openCollectionScreen);
+    $('menu-credits')?.addEventListener('click', openCreditsScreen);
+
+    // Back buttons HUB
+    $('hub-account-back')?.addEventListener('click', () => showAppScreen('main-menu'));
+    $('hub-achievements-back')?.addEventListener('click', () => showAppScreen('main-menu'));
+    $('hub-shop-back')?.addEventListener('click', () => showAppScreen('main-menu'));
+    $('hub-collection-back')?.addEventListener('click', () => showAppScreen('main-menu'));
+    $('hub-credits-back')?.addEventListener('click', () => showAppScreen('main-menu'));
+
+    // Account: abrir overlay del motor
+    $('hub-account-open')?.addEventListener('click', () => {
+      const btn = $('nav-account');
+      if(btn) btn.click();
+    });
+
+    $('hub-account-logout')?.addEventListener('click', () => {
+      const doLogout = $('authDoLogout');
+      if(doLogout) doLogout.click();
+
+      // Refresca la pantalla de cuenta tras el logout (cuando el motor actualice BG_SESSION)
+      setTimeout(() => {
+        const scr = document.getElementById('hub-account');
+        if(scr && scr.classList.contains('is-active')) openAccountScreen();
+      }, 120);
+    });
+
+    // Si cambia la sesión (login/logout), refrescar pantalla Cuenta si está abierta
+    window.addEventListener('bg:auth', () => {
+      const scr = document.getElementById('hub-account');
+      if(scr && scr.classList.contains('is-active')) openAccountScreen();
+
+      // Refrescar mochila si estamos en el menú principal
+      const mm = document.getElementById('main-menu');
+      if(mm && mm.classList.contains('is-active')){
+        try{ window.BG_UI?.renderHubBackpack?.(); }catch(e){}
+      }
+    });
+
+    // Comenzar: primero elegir NUEVA / CONTINUAR
+    $('menu-start')?.addEventListener('click', () => {
+      startIntent = 'new';
+      const hint = $('start-choice-hint');
+      if(hint) hint.textContent = '';
+      showAppScreen('start-choice');
+    });
+
+    $('start-choice-back')?.addEventListener('click', () => showAppScreen('main-menu'));
+    $('start-choice-new')?.addEventListener('click', () => {
+      startIntent = 'new';
+      newModeChosen = false;
+      document.querySelectorAll("[data-mode]").forEach(b=>{ b.style.display=""; });
+      const hint = $('start-choice-hint');
+      if(hint) hint.textContent = 'Elige un modo para tu nueva partida.';
+      showModeMenu();
+    });
+    $('start-choice-continue')?.addEventListener('click', () => {
+      startIntent = 'continue';
+      newModeChosen = false;
+      const hint = $('start-choice-hint');
+      if(hint) hint.textContent = 'Elige un modo con partida guardada.';
+      const cont = (window.BG && typeof window.BG.listContinuableModes==='function') ? window.BG.listContinuableModes() : ['adventure','survival'];
+      document.querySelectorAll("[data-mode]").forEach(b=>{
+        const m = b.getAttribute("data-mode");
+        b.style.display = cont.includes(m) ? "" : "none";
+      });
+      if(!cont.length){
+        try{ if(typeof window.showToast==='function') window.showToast('No tienes ninguna partida guardada todavía.'); else alert('No tienes ninguna partida guardada todavía.'); }catch(e){}
+        return;
+      }
+      showModeMenu();
+    });
+
+    // Intercept Start button on hero screen
+    const startBtn = $('start-new-btn');
+    if(startBtn){
+      startBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        if(startIntent === "new"){
+          if(!newModeChosen){
+            try{ if(typeof window.showToast==="function") window.showToast("Elige modo primero."); else alert("Elige modo primero."); }catch(err){}
+            showModeMenu();
+            return;
+          }
+          if(window.BG && typeof window.BG._startNewGame === "function") window.BG._startNewGame();
+          else console.warn("No existe BG._startNewGame");
+          return;
+        }
+
+        showModeMenu();
+      }, true);
+    }
+
+
+    // Selector de modo
+    document.querySelectorAll('[data-mode]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.getAttribute('data-mode');
+        try{ localStorage.setItem('bg_modeId', mode); }catch(e){}
+
+        // Continuar solo aplica a modos con guardado
+        if(startIntent === 'continue'){
+          const canContinue = (mode === 'adventure' || mode === 'survival');
+          if(!canContinue){
+            try{
+              if(typeof window.showToast === 'function') window.showToast('Este modo no tiene continuar. Elige Aventura o Supervivencia.');
+              else alert('Este modo no tiene continuar. Elige Aventura o Supervivencia.');
+            }catch(e){}
+            return;
+          }
+        }
+
+        if(window.BG){
+          if(gameShell) gameShell.style.display = 'block';
+          appScreens.forEach(s => s.classList.remove('is-active'));
+
+          if(startIntent === "new"){
+            newModeChosen = true;
+            // Mode chosen -> now choose hero
+            showStartScreen();
+          }else{
+            // Continue: load saved game for this mode
+            if(typeof window.BG._triggerContinue === "function") window.BG._triggerContinue();
+            else console.warn("No existe BG._triggerContinue");
+          }
+        }else{
+          console.warn('No existe BG._startNewGame');
+        }
+      });
+    });
+
+    $('mode-back')?.addEventListener('click', () => {
+      if(startIntent === 'continue') showAppScreen('start-choice');
+      else showAppScreen('start-choice');
+    });
+  });
+})();
+</script>

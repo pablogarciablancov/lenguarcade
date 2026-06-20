@@ -1323,6 +1323,40 @@ function buildCentralProgress(result,gameRecord){
       streak:Math.max(Number(old.streak||0),Math.round(grade*10),Number(result.streak||0))
     };
   }
+  if(gameRecord?.gameId==='battlegrafia'){
+    const save=result.save||{};
+    const previousRaw=old.rawJson&&typeof old.rawJson==='object'?old.rawJson:{};
+    const previousSave=previousRaw.save||previousRaw.rawGameData?.save||{};
+    const correct=Math.max(0,Number(result.correct||save.stats_correct||0));
+    const errors=Math.max(0,Number(result.errors||save.stats_wrong||0));
+    const attempts=Math.max(Number(old.attempts||0),correct+errors);
+    const successes=Math.max(Number(old.successes||0),correct);
+    const totalErrors=Math.max(Number(old.errors||0),errors);
+    const accuracy=attempts?Math.round(successes/attempts*100):Number(old.accuracy||0);
+    const defeated=Math.max(0,Number(result.defeatedMonsters||(Array.isArray(save.defeatedMonsters)?save.defeatedMonsters.length:save.monstersDefeated)||0));
+    const previousDefeated=Math.max(0,Number(Array.isArray(previousSave.defeatedMonsters)?previousSave.defeatedMonsters.length:previousSave.monstersDefeated||0));
+    const previousCorrect=Math.max(0,Number(previousSave.stats_correct||0));
+    const defeatedDelta=Math.max(0,defeated-previousDefeated);
+    const correctDelta=Math.max(0,correct-previousCorrect);
+    const totalMonsters=Math.max(0,Number(result.totalMonsters||save.totalMonsters||0));
+    const rawPercentage=Number(result.percentage||0);
+    const percentage=result.adventureCompleted?100:Math.max(Number(old.percentage||0),totalMonsters?Math.round(defeated/totalMonsters*100):rawPercentage);
+    const achievementBonus=(result.achievements||[]).length*18;
+    const victoryBonus=result.outcome==='victory'?80:0;
+    const survivalBonus=result.outcome==='defeat'?15:0;
+    const xpDelta=Math.min(450,Math.max(0,correctDelta*6+defeatedDelta*35+achievementBonus+victoryBonus+survivalBonus));
+    const plumasDelta=Math.min(25,Math.max(0,Math.floor(correctDelta/8)+defeatedDelta+(result.outcome==='victory'?5:0)));
+    return {
+      xpDelta,
+      plumasDelta,
+      percentage,
+      accuracy,
+      attempts,
+      successes,
+      errors:totalErrors,
+      streak:Math.max(Number(old.streak||0),Number(result.maxCombo||0),defeated)
+    };
+  }
   const correct=Math.max(0,Number(result.correct||0));
   const errors=Math.max(0,Number(result.errors||0));
   const sessionAttempts=correct+errors;
