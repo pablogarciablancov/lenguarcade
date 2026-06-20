@@ -49,11 +49,35 @@
     .field{display:flex;flex-direction:column;gap:7px;margin-top:10px}
     .field label{font-size:.82rem;color:#fde68a;font-weight:800}
     select{border:1px solid var(--line);background:#130b20;color:var(--text);border-radius:14px;padding:11px}
-    .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-    .card{background:linear-gradient(180deg,#2a1b43,#190f29);border:1px solid var(--line);border-radius:20px;padding:14px;min-height:132px;position:relative;overflow:hidden}
-    .card:before{content:"";position:absolute;inset:auto -20px -30px auto;width:95px;height:95px;border-radius:999px;background:rgba(251,191,36,.12)}
-    .card small{display:inline-flex;border:1px solid rgba(251,191,36,.28);color:#fde68a;border-radius:999px;padding:4px 8px;text-transform:uppercase;font-weight:900;font-size:.68rem;letter-spacing:.08em;margin-bottom:10px}
-    .card p{line-height:1.35;position:relative}
+    .deckHeader{display:flex;justify-content:space-between;align-items:end;gap:12px;background:linear-gradient(135deg,rgba(251,191,36,.16),rgba(124,58,237,.20));border:1px solid rgba(251,191,36,.24);border-radius:22px;padding:14px 16px}
+    .deckHeader strong{display:block;font-size:1.25rem;color:#fff7ed}
+    .deckHeader span{display:inline-flex;align-items:center;gap:7px;color:#fde68a;font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;font-weight:900}
+    .deckHint{max-width:360px;color:#e9d5ff;font-size:.9rem;text-align:right}
+    .cards{display:grid;grid-template-columns:repeat(6,minmax(138px,1fr));gap:14px;align-items:stretch;perspective:1000px}
+    .storyCard{--accent:#d8b46a;--glow:rgba(216,180,106,.24);position:relative;min-height:238px;border-radius:22px;padding:12px;background:
+      linear-gradient(155deg,rgba(255,255,255,.16),rgba(255,255,255,0) 32%),
+      radial-gradient(circle at 18% 12%,var(--glow),transparent 35%),
+      linear-gradient(180deg,#382647,#171020 68%,#0e0815);
+      border:2px solid color-mix(in srgb,var(--accent),#3b275b 35%);
+      box-shadow:0 18px 42px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.05) inset,0 0 34px var(--glow);
+      overflow:hidden;display:flex;flex-direction:column;gap:10px;isolation:isolate;transform:translateZ(0);transition:transform .18s ease,box-shadow .18s ease}
+    .storyCard:hover{transform:translateY(-4px);box-shadow:0 24px 52px rgba(0,0,0,.42),0 0 38px var(--glow)}
+    .storyCard:before{content:"";position:absolute;inset:8px;border-radius:17px;border:1px solid rgba(255,255,255,.14);box-shadow:0 0 0 2px rgba(0,0,0,.22) inset;z-index:-1}
+    .storyCard:after{content:"";position:absolute;inset:auto -42px -48px auto;width:130px;height:130px;border-radius:999px;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 66%);z-index:-1}
+    .storyCard.rarity-comun{--accent:#d6b98a;--glow:rgba(214,185,138,.18)}
+    .storyCard.rarity-inusual{--accent:#60a5fa;--glow:rgba(96,165,250,.24)}
+    .storyCard.rarity-epica{--accent:#c084fc;--glow:rgba(192,132,252,.28)}
+    .storyCard.rarity-legendaria{--accent:#fbbf24;--glow:rgba(251,191,36,.34)}
+    .cardTop{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:34px}
+    .cardType{font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;font-weight:1000;color:#fff7ed;text-shadow:0 2px 12px rgba(0,0,0,.45)}
+    .rarity{border:1px solid color-mix(in srgb,var(--accent),#fff 18%);color:#211103;background:linear-gradient(135deg,var(--accent),#fff2b2);border-radius:999px;padding:4px 7px;font-size:.62rem;font-weight:1000;text-transform:uppercase;white-space:nowrap}
+    .cardArt{height:74px;border-radius:17px;border:1px solid rgba(255,255,255,.18);display:grid;place-items:center;background:
+      radial-gradient(circle at 50% 22%,rgba(255,255,255,.22),transparent 26%),
+      linear-gradient(135deg,color-mix(in srgb,var(--accent),#5b21b6 36%),#160b22);
+      box-shadow:0 12px 24px rgba(0,0,0,.28),0 0 0 1px rgba(255,255,255,.06) inset}
+    .cardIcon{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;background:rgba(14,8,21,.45);border:1px solid rgba(255,255,255,.18);font-size:28px;box-shadow:0 10px 26px rgba(0,0,0,.25)}
+    .cardText{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-family:Georgia,"Times New Roman",serif;font-size:.98rem;line-height:1.3;color:#fff7ed;text-shadow:0 2px 14px rgba(0,0,0,.42);padding:4px 2px}
+    .cardFooter{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#fde68a;font-size:.68rem;text-transform:uppercase;letter-spacing:.10em;font-weight:900;border-top:1px solid rgba(255,255,255,.12);padding-top:8px}
     .phaseBar{display:flex;gap:9px;flex-wrap:wrap}
     .phase{border:1px solid var(--line);background:#160e25;border-radius:999px;padding:9px 12px;color:var(--muted);font-weight:800}
     .phase.active{background:linear-gradient(135deg,#7c3aed,#f97316);color:#fff}
@@ -78,8 +102,9 @@
     .toast.open{display:block}
     .hidden{display:none!important}
     body.lenguarcade-embedded .standaloneOnly{display:none!important}
-    @media(max-width:980px){.app{grid-template-columns:1fr}.side{position:static;height:auto}.workspace{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}}
-    @media(max-width:650px){.cards,.rubric{grid-template-columns:1fr}.app{padding:10px}.panel{border-radius:20px}}
+    @media(max-width:1180px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:980px){.app{grid-template-columns:1fr}.side{position:static;height:auto}.workspace{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.deckHint{text-align:left}}
+    @media(max-width:650px){.cards,.rubric{grid-template-columns:1fr}.deckHeader{align-items:flex-start;flex-direction:column}.app{padding:10px}.panel{border-radius:20px}}
   </style>
 </head>
 <body>
@@ -126,7 +151,11 @@
       <section>
         <div class="phaseBar" id="phaseBar"></div>
       </section>
-      <section class="cards" id="cards"></section>
+      <section class="deckHeader">
+        <div><span>Baraja narrativa</span><strong>Cartas de tu historia</strong></div>
+        <p class="deckHint">Usa las seis cartas para construir el relato. La rareza no da nota sola: importa que aparezcan dentro del texto.</p>
+      </section>
+      <section class="cards" id="cards" aria-label="Cartas de la historia"></section>
       <section class="workspace">
         <div class="panel editor">
           <div class="mission">
@@ -222,6 +251,15 @@ const POOLS={
   ]
 };
 const RARITIES=['comun','comun','inusual','inusual','epica','legendaria'];
+const CARD_META={
+  protagonista:{label:'Protagonista',icon:'&#128100;',seal:'I'},
+  deseo:{label:'Deseo',icon:'&#10022;',seal:'II'},
+  obstaculo:{label:'Obstaculo',icon:'&#9888;',seal:'III'},
+  lugar:{label:'Lugar',icon:'&#9968;',seal:'IV'},
+  objeto:{label:'Objeto',icon:'&#128142;',seal:'V'},
+  giro:{label:'Giro',icon:'&#8635;',seal:'VI'}
+};
+const RARITY_LABELS={comun:'Comun',inusual:'Inusual',epica:'Epica',legendaria:'Legendaria'};
 const ACHIEVEMENTS={
   a_first:{title:'Primeras lineas',description:'Escribe tu primera fase.'},
   a_story_1:{title:'Historia completa',description:'Finaliza una historia.'},
@@ -251,6 +289,13 @@ function now(){return new Date().toISOString()}
 function pick(list){return list[Math.floor(Math.random()*list.length)]}
 function esc(text){return String(text==null?'':text).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 function normalize(text){return String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+function normalizeRarity(value){
+  const text=normalize(value||'comun');
+  if(text.includes('legend'))return 'legendaria';
+  if(text.includes('epic'))return 'epica';
+  if(text.includes('inus'))return 'inusual';
+  return 'comun';
+}
 function words(text){return (String(text||'').trim().match(/\b[\wáéíóúüñÁÉÍÓÚÜÑ]+\b/g)||[]).length}
 function storyText(){return (state?.texts||[]).filter(Boolean).join('\n\n')}
 function totalWords(){return words(storyText())}
@@ -346,9 +391,17 @@ function render(){
     return '<button type="button" class="phase '+(index===state.currentPhase?'active ':'')+(done?'done':'')+'" data-phase="'+index+'">'+(index+1)+'. '+esc(phase.name)+'</button>';
   }).join('');
   document.querySelectorAll('.phase').forEach(btn=>btn.onclick=()=>goPhase(Number(btn.dataset.phase)));
-  $('cards').innerHTML=Object.entries(state.cards||{}).map(([key,value])=>
-    '<article class="card"><small>'+esc(key)+' · '+esc(state.rarities?.[key]||'comun')+'</small><p>'+esc(value)+'</p></article>'
-  ).join('');
+  $('cards').innerHTML=Object.keys(CARD_META).map(key=>{
+    const meta=CARD_META[key]||{label:key,icon:'&#10022;',seal:''};
+    const rarity=normalizeRarity(state.rarities?.[key]||'comun');
+    const value=(state.cards&&state.cards[key])||'Carta pendiente';
+    return '<article class="storyCard rarity-'+rarity+'">'+
+      '<div class="cardTop"><span class="cardType">'+esc(meta.label)+'</span><span class="rarity">'+esc(RARITY_LABELS[rarity]||rarity)+'</span></div>'+
+      '<div class="cardArt"><div class="cardIcon">'+meta.icon+'</div></div>'+
+      '<div class="cardText">'+esc(value)+'</div>'+
+      '<div class="cardFooter"><span>Narratoria</span><span>'+esc(meta.seal)+'</span></div>'+
+    '</article>';
+  }).join('');
   const phase=PHASES[state.currentPhase];
   $('phaseTitle').textContent=(state.currentPhase+1)+'. '+phase.name;
   $('missionText').textContent=state.mission;
