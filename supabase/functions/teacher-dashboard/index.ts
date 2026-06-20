@@ -8,6 +8,12 @@ function average(values: number[]) {
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 }
 
+function randomPin() {
+  const bytes = new Uint32Array(1);
+  crypto.getRandomValues(bytes);
+  return String(100000 + (bytes[0] % 900000));
+}
+
 function gradeFor(rows: Array<Record<string, unknown>>) {
   const attempts = rows.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
   const successes = rows.reduce((sum, row) => sum + Number(row.successes || 0), 0);
@@ -23,6 +29,77 @@ function gradeFor(rows: Array<Record<string, unknown>>) {
   ) * 10) / 10;
 }
 
+async function resetPinsForFilter(admin: any, organizationId: string, classCode: string) {
+  const classroomsResult = await admin.from("classrooms")
+    .select("id,name,legacy_class_code")
+    .eq("organization_id", organizationId)
+    .eq("active", true);
+  if (classroomsResult.error) throw classroomsResult.error;
+
+  const classrooms = classroomsResult.data || [];
+  const classroomById = new Map(classrooms.map((row: Record<string, unknown>) => [row.id, row]));
+  let selectedProfileIds: string[] | null = null;
+  const selectedClassrooms = classCode
+    ? classrooms.filter((row: Record<string, unknown>) => row.legacy_class_code === classCode || row.id === classCode)
+    : classrooms;
+  if (classCode && !selectedClassrooms.length) {
+    return { ok:false, error:"class_not_found" };
+  }
+
+  const enrollmentByProfile = new Map<string, Record<string, unknown>>();
+  if (selectedClassrooms.length) {
+    let enrollmentQuery = admin.from("classroom_enrollments")
+      .select("classroom_id,profile_id")
+      .eq("active", true);
+    if (classCode) {
+      enrollmentQuery = enrollmentQuery.in("classroom_id", selectedClassrooms.map((row: Record<string, unknown>) => row.id));
+    }
+    const enrollmentsResult = await enrollmentQuery;
+    if (enrollmentsResult.error) throw enrollmentsResult.error;
+    for (const row of enrollmentsResult.data || []) {
+      if (!classroomById.has(row.classroom_id)) continue;
+      if (!enrollmentByProfile.has(row.profile_id)) {
+        enrollmentByProfile.set(row.profile_id, classroomById.get(row.classroom_id) || {});
+      }
+    }
+    if (classCode) selectedProfileIds = [...enrollmentByProfile.keys()];
+  }
+
+  let profilesQuery = admin.from("profiles")
+    .select("id,email,first_name,last_name")
+    .eq("organization_id", organizationId)
+    .eq("role", "student")
+    .eq("active", true)
+    .order("last_name")
+    .order("first_name");
+  if (selectedProfileIds) {
+    if (!selectedProfileIds.length) return { ok:true, action:"resetPins", count:0, credentials:[] };
+    profilesQuery = profilesQuery.in("id", selectedProfileIds);
+  }
+  const profilesResult = await profilesQuery;
+  if (profilesResult.error) throw profilesResult.error;
+
+  const credentials = [];
+  for (const profile of profilesResult.data || []) {
+    const pin = randomPin();
+    const { error } = await admin.rpc("set_profile_pin", {
+      target_profile_id:profile.id,
+      plain_pin:pin,
+    });
+    if (error) throw error;
+    const classroom = enrollmentByProfile.get(profile.id);
+    credentials.push({
+      studentId:profile.id,
+      email:profile.email,
+      nombre:`${profile.first_name || ""} ${profile.last_name || ""}`.trim(),
+      clase:classroom?.legacy_class_code || classroom?.name || "",
+      pin,
+    });
+  }
+
+  return { ok:true, action:"resetPins", count:credentials.length, credentials };
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers:corsHeaders });
   if (request.method !== "POST") return jsonResponse({ ok:false, error:"method_not_allowed" }, 405);
@@ -32,6 +109,14 @@ Deno.serve(async (request) => {
     const body = await request.json().catch(() => ({}));
     const classCode = String(body.classCode || "");
     const gameId = String(body.gameId || "");
+    const action = String(body.action || "");
+    if (action === "resetPins") {
+      if (String(body.confirmText || "") !== "RESET PIN") {
+        return jsonResponse({ ok:false, error:"confirmation_required" }, 400);
+      }
+      const resetResult = await resetPinsForFilter(admin, organizationId, classCode);
+      return jsonResponse(resetResult, resetResult.ok === false ? 404 : 200);
+    }
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 

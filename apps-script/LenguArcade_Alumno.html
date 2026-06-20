@@ -53,6 +53,13 @@ body.avatarEditorOpen{overflow:hidden}
 @media(max-width:1160px){.profileSettings{grid-template-columns:250px 1fr}.activityPanel{grid-column:1/-1}}
 @media(max-width:720px){.profileSettings{grid-template-columns:1fr}.avatarBuilder{max-width:300px}.activityPanel{grid-column:auto}.avatarEditorDialog{padding:18px}.avatarEditorStage{width:min(270px,68vw)}.avatarSelectorRow{grid-template-columns:48px minmax(0,1fr) 48px;gap:8px}.avatarEditorActions{grid-template-columns:1fr 1fr}.avatarEditorActions .saveAvatarModalBtn{grid-column:1/-1;grid-row:1}}
 </style>
+<style>
+.teacherAccess{margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12)}
+.teacherToggle{background:transparent!important;border:1px solid rgba(255,255,255,.18);box-shadow:none}
+.teacherPanel{display:none;margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:16px;background:rgba(0,0,0,.16)}
+.teacherPanel.open{display:block}
+.teacherPanel p{margin:0 0 10px;color:var(--muted);font-size:12px;line-height:1.45}
+</style>
 </head>
 <body class="authPending">
 <div class="loader open" id="loader"><div class="loaderBox"><div class="loaderTitle">Cargando LenguArcade</div><div class="sub" id="loaderText">Preparando interfaz...</div><div class="loaderBar"><div class="loaderFill" id="loaderFill"></div></div><div><span class="loaderPct" id="loaderPct">0%</span> <span class="sub">estimado</span></div></div></div>
@@ -625,7 +632,7 @@ let legacySessionToken=localStorage.getItem(LA_LEGACY_SESSION_KEY)||'';
 const legacyTokenBySupabaseToken=new Map();
 
 function supabaseErrorMessage(code,status){
-  if(code==='invalid_credentials'||status===401)return 'Correo o PIN incorrectos.';
+  if(code==='invalid_credentials'||status===401)return 'Credenciales incorrectas.';
   if(code==='temporarily_blocked'||status===429)return 'Demasiados intentos. Espera unos minutos.';
   if(code==='session_expired')return 'La sesiÃ³n ha caducado. Vuelve a entrar.';
   if(code==='wrong_current_pin')return 'El PIN actual no es correcto.';
@@ -722,6 +729,14 @@ async function loginSupabaseStudent(email,pinValue,persist){
   const dashboard=await loadSupabaseDashboard(auth.access_token);
   if(persist)saveSupabaseSession(auth);
   return {ok:true,source:'supabase',token:auth.access_token,refreshToken:auth.refresh_token,student:loginResult.profile,dashboard};
+}
+
+async function loginSupabaseTeacher(password,persist){
+  const auth=await createSupabaseAnonymousSession();
+  const loginResult=await callSupabaseFunction('teacher-login',{password},auth.access_token);
+  const dashboard=await loadSupabaseDashboard(auth.access_token);
+  if(persist)saveSupabaseSession(auth);
+  return {ok:true,source:'supabase',teacherMode:true,token:auth.access_token,refreshToken:auth.refresh_token,student:loginResult.profile,dashboard};
 }
 
 function connectLegacyStudentInBackground(email,pinValue,accessToken){
@@ -829,6 +844,29 @@ callServer=async function(fn,args){
   return result;
 };
 
+changePin=async function(){
+  if(!token)return;
+  const oldPin=$('oldPin').value.trim();
+  const newPin=$('newPin').value.trim();
+  if(!/^\d{4,8}$/.test(oldPin)||!/^\d{4,8}$/.test(newPin)){
+    $('pinStatus').textContent='El PIN debe tener entre 4 y 8 números.';
+    return;
+  }
+  $('savePinBtn').disabled=true;
+  $('pinStatus').textContent='Guardando...';
+  try{
+    const r=await callServer('changeStudentPinV03',[token,oldPin,newPin]);
+    $('oldPin').value='';
+    $('newPin').value='';
+    $('pinStatus').textContent=r.message||'PIN actualizado correctamente.';
+  }catch(error){
+    $('pinStatus').textContent=error.message||String(error);
+  }finally{
+    $('savePinBtn').disabled=false;
+  }
+};
+$('savePinBtn').onclick=changePin;
+
 renderClasses=function(){};
 loadStudentsForClass=async function(){};
 renderStudents=function(){};
@@ -863,6 +901,17 @@ function mountSecureStudentLogin(){
         </div>
         <button type="button" data-secure-login>Entrar en LenguArcade</button>
         <div class="status authStatus" data-auth-status>Introduce tus datos para continuar.</div>
+        <div class="teacherAccess">
+          <button type="button" class="teacherToggle" data-teacher-toggle>Entrar como profesor</button>
+          <div class="teacherPanel" data-teacher-panel>
+            <p>Modo profe jugador: usa tu clave de profesor y entrarás al arcade con tu propio perfil para probar y competir.</p>
+            <div class="field">
+              <label>Clave de profesor</label>
+              <input name="teacherPassword" type="password" autocomplete="current-password" placeholder="Clave de profesor">
+            </div>
+            <button type="button" data-teacher-login>Entrar como profe jugador</button>
+          </div>
+        </div>
         <div class="authSecurity"><span>✓</span><span>No mostramos listas de clases ni de alumnos. Si has iniciado sesión con una cuenta escolar de Google, también comprobamos que coincida con el correo introducido.</span></div>
       </section>
     </div>`;
@@ -877,10 +926,17 @@ function mountSecureStudentLogin(){
   const email=secureLoginElement('[name="studentEmail"]');
   const pinInput=secureLoginElement('[name="studentPin"]');
   const button=secureLoginElement('[data-secure-login]');
+  const teacherToggle=secureLoginElement('[data-teacher-toggle]');
+  const teacherPanel=secureLoginElement('[data-teacher-panel]');
+  const teacherPassword=secureLoginElement('[name="teacherPassword"]');
+  const teacherButton=secureLoginElement('[data-teacher-login]');
   const submit=()=>secureStudentLogin();
   button.onclick=submit;
+  teacherToggle.onclick=()=>teacherPanel.classList.toggle('open');
+  teacherButton.onclick=()=>secureTeacherLogin();
   email.addEventListener('keydown',event=>{if(event.key==='Enter')pinInput.focus();});
   pinInput.addEventListener('keydown',event=>{if(event.key==='Enter')submit();});
+  teacherPassword.addEventListener('keydown',event=>{if(event.key==='Enter')secureTeacherLogin();});
   setTimeout(()=>email.focus(),0);
 }
 
@@ -892,6 +948,41 @@ function setSecureLoginStatus(message){
 function revealStudentApp(){
   document.body.classList.remove('authPending');
   $('loginCard').classList.add('hidden');
+}
+
+async function secureTeacherLogin(){
+  if(busy)return;
+  const passwordInput=secureLoginElement('[name="teacherPassword"]');
+  const button=secureLoginElement('[data-teacher-login]');
+  const password=String(passwordInput.value||'');
+  if(password.length<8){
+    setSecureLoginStatus('Introduce la clave completa de profesor.');
+    return;
+  }
+  busy=true;
+  button.disabled=true;
+  setSecureLoginStatus('Entrando como profe jugador...');
+  try{
+    const result=await loginSupabaseTeacher(password,true);
+    secureSessionVerified=true;
+    token=result.token;
+    supabaseBackend=true;
+    legacySessionToken='';
+    localStorage.removeItem('LA_STUDENT_TOKEN');
+    localStorage.removeItem(LA_LEGACY_SESSION_KEY);
+    currentDashboard=result.dashboard;
+    saveCache('LA_DASHBOARD_CACHE',currentDashboard);
+    passwordInput.value='';
+    renderDashboard(currentDashboard);
+    revealStudentApp();
+    setStatus('Modo profesor jugador activado.');
+  }catch(error){
+    secureSessionVerified=false;
+    setSecureLoginStatus(error.message||'No se ha podido iniciar sesión como profesor.');
+  }finally{
+    busy=false;
+    button.disabled=false;
+  }
 }
 
 async function secureStudentLogin(){
@@ -971,6 +1062,9 @@ $('logoutBtn').onclick=secureStudentLogout;
 const renderDashboardWithSecureAccess=renderDashboard;
 renderDashboard=function(dashboard){
   renderDashboardWithSecureAccess(dashboard);
+  const isTeacherMode=dashboard?.student?.role&&dashboard.student.role!=='student';
+  $('openPinBtn').classList.toggle('hidden',!!isTeacherMode);
+  if(isTeacherMode)$('studentMail').textContent=dashboard.student.email+' · Modo profesor jugador';
   if(secureSessionVerified)revealStudentApp();
 };
 

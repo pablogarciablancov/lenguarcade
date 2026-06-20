@@ -39,7 +39,7 @@ Deno.serve(async (request) => {
       missionsResult,
     ] = await Promise.all([
       admin.from("profiles")
-        .select("id,email,first_name,last_name,avatar,last_login_at")
+        .select("id,email,first_name,last_name,avatar,last_login_at,role")
         .eq("id", profileId)
         .single(),
       admin.from("games")
@@ -184,7 +184,8 @@ Deno.serve(async (request) => {
         nombre:profile.first_name,
         apellidos:profile.last_name,
         email:profile.email,
-        clase:classroom?.legacy_class_code || classroom?.name || "",
+        clase:profile.role === "student" ? (classroom?.legacy_class_code || classroom?.name || "") : "Profesor",
+        role:profile.role,
         avatar:profile.avatar || {},
         xpGeneral:xp,
         nivelGeneral:level,
