@@ -5,11 +5,10 @@
   const GAME_ID = 'battlegrafia';
   const GAME_NS = 'lenguarcade-game';
   const HOST_NS = 'lenguarcade-host';
-  const params = new URLSearchParams(window.location.search || '');
-  const embedded = params.get('lenguarcade') === '1' || params.get('la') === '1';
-  const channel = params.get('channel') || '';
-  if(!embedded) return;
-  window.__LENGUARCADE_EMBEDDED = true;
+  const fallbackParams = Object.fromEntries(new URLSearchParams(window.location.search || '').entries());
+  let embedded = false;
+  let channel = '';
+  let bridgeStarted = false;
 
   let initialized = false;
   let installingSave = false;
@@ -33,6 +32,7 @@
   }
 
   function post(type, payload){
+    if(!embedded || !channel) return;
     const message = {
       namespace:GAME_NS,
       channel,
@@ -399,11 +399,27 @@
     }, 1000);
   }
 
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', startReadyLoop);
-  }else{
-    startReadyLoop();
+  function startBridge(rawParams){
+    if(bridgeStarted) return;
+    const params = rawParams || fallbackParams || {};
+    embedded = String(params.lenguarcade || params.la || '') === '1';
+    channel = String(params.channel || '');
+    if(!embedded || !channel) return;
+    bridgeStarted = true;
+    window.__LENGUARCADE_EMBEDDED = true;
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', startReadyLoop);
+    }else{
+      startReadyLoop();
+    }
+    setInterval(installHooks, 1200);
   }
-  setInterval(installHooks, 1200);
+
+  if(window.google && google.script && google.script.url){
+    google.script.url.getLocation(locationData => startBridge((locationData && locationData.parameter) || {}));
+    setTimeout(() => startBridge(fallbackParams), 1200);
+  }else{
+    startBridge(fallbackParams);
+  }
 })();
 </script>

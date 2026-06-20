@@ -151,6 +151,9 @@ if (studentHtml.includes("setTimeout(preloadIntegratedGame") ||
     studentHtml.includes("renderDashboardWithGamePreload")) {
   errors.push("La vista del alumno no debe cargar un juego completo antes de que el alumno lo abra.");
 }
+if (studentHtml.includes("Simular progreso") || studentHtml.includes("id=\"demoBtn\"")) {
+  errors.push("La vista del alumno no debe mostrar el boton de simular progreso.");
+}
 if (!/function verifyStudentSession\(token\)\s*\{[^}]*requireSession_\(token,\s*'student'\)/.test(serverSource) ||
     /function getStudentDashboardByToken\(token\)\s*\{[^}]*touchStudent_/.test(serverSource)) {
   errors.push("La reanudacion de sesion debe validarse sin escribir en Sheets ni construir el panel completo.");

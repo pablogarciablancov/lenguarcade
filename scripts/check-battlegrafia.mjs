@@ -35,6 +35,7 @@ for (const required of [
   "lenguarcade-game",
   "lenguarcade-host",
   "postToAncestors",
+  "google.script.url.getLocation",
   "CHECKPOINT",
   "RESULT",
   "INITIALIZED",
@@ -55,7 +56,8 @@ if (!centralServer.includes("battlegrafia") ||
 
 if (!centralStudent.includes("gameRecord?.gameId==='battlegrafia'") ||
     !centralStudent.includes("defeatedMonsters") ||
-    !centralStudent.includes("totalMonsters")) {
+    !centralStudent.includes("totalMonsters") ||
+    !centralStudent.includes("LA_EMBEDDED_GAME_OVERRIDES")) {
   errors.push("El runner de alumno debe calcular el progreso especifico de BattleGrafia.");
 }
 
