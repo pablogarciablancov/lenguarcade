@@ -1276,7 +1276,13 @@ function startEmbeddedGameLoad(runner){
   if(!runner||runner!==activeGameRunner||runner.loading||runner.initialized)return;
   runner.loading=true;
   runner.iframe.src=runner.url;
-  runner.connectionTimer=setTimeout(retryGameConnection,4500);
+  runner.connectionTimer=setTimeout(retryGameConnection,getEmbeddedGameConnectionDelay(runner.game));
+}
+
+function getEmbeddedGameConnectionDelay(game){
+  const gameId=String(game?.gameId||'').toLowerCase();
+  if(gameId==='battlegrafia')return 12000;
+  return 6500;
 }
 
 function openEmbeddedGame(game){
@@ -1301,7 +1307,7 @@ function retryGameConnection(){
   runner.loading=true;
   $('gameRunnerStatus').textContent='Reintentando conexión...';
   runner.iframe.src=runner.iframe.src;
-  runner.connectionTimer=setTimeout(retryGameConnection,4500);
+  runner.connectionTimer=setTimeout(retryGameConnection,getEmbeddedGameConnectionDelay(runner.game));
 }
 
 function destroyGameRunner(){

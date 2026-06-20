@@ -3,7 +3,8 @@ function doGet() {
   return HtmlService.createTemplateFromFile('index')
       .evaluate()
       .setTitle('Battlegrafía - Gremio de Aventureros')
-      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 function include(filename) {

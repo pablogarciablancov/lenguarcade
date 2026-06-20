@@ -19,6 +19,7 @@ for (const name of ["code.js", "index.html", "game.html", "menu.html", "lenguarc
 }
 
 const indexHtml = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const codeSource = fs.readFileSync(path.join(root, "code.js"), "utf8");
 const bridgeHtml = fs.readFileSync(path.join(root, "lenguarcade_bridge.html"), "utf8");
 const centralServer = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Code.gs"), "utf8");
 const centralStudent = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Alumno.html"), "utf8");
@@ -30,11 +31,16 @@ for (const required of [
   if (!indexHtml.includes(required)) errors.push(`Falta la inclusion de BattleGrafia: ${required}`);
 }
 
+if (!codeSource.includes("setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)")) {
+  errors.push("BattleGrafia debe permitir iframe con HtmlService.XFrameOptionsMode.ALLOWALL.");
+}
+
 for (const required of [
   "const GAME_ID = 'battlegrafia'",
   "lenguarcade-game",
   "lenguarcade-host",
   "postToAncestors",
+  "startBridgeFromAppsScriptUrl",
   "google.script.url.getLocation",
   "CHECKPOINT",
   "RESULT",
@@ -59,6 +65,12 @@ if (!centralStudent.includes("gameRecord?.gameId==='battlegrafia'") ||
     !centralStudent.includes("totalMonsters") ||
     !centralStudent.includes("LA_EMBEDDED_GAME_OVERRIDES")) {
   errors.push("El runner de alumno debe calcular el progreso especifico de BattleGrafia.");
+}
+
+if (!centralStudent.includes("getEmbeddedGameConnectionDelay") ||
+    !centralStudent.includes("gameId==='battlegrafia'") ||
+    !centralStudent.includes("return 12000")) {
+  errors.push("LenguArcade_Alumno.html debe dar mas margen de conexion a BattleGrafia.");
 }
 
 if (!supabaseDashboard.includes("battlegrafia") ||

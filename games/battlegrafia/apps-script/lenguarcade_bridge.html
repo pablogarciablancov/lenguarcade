@@ -415,11 +415,23 @@
     setInterval(installHooks, 1200);
   }
 
-  if(window.google && google.script && google.script.url){
-    google.script.url.getLocation(locationData => startBridge((locationData && locationData.parameter) || {}));
-    setTimeout(() => startBridge(fallbackParams), 1200);
-  }else{
-    startBridge(fallbackParams);
+  function startBridgeFromAppsScriptUrl(deadline){
+    if(bridgeStarted) return;
+    const limit = deadline || Date.now() + 5000;
+    try{
+      if(window.google && google.script && google.script.url && typeof google.script.url.getLocation === 'function'){
+        google.script.url.getLocation(locationData => startBridge((locationData && locationData.parameter) || {}));
+        setTimeout(() => startBridge(fallbackParams), 1500);
+        return;
+      }
+    }catch(error){}
+    if(Date.now() < limit){
+      setTimeout(() => startBridgeFromAppsScriptUrl(limit), 80);
+    }else{
+      startBridge(fallbackParams);
+    }
   }
+
+  startBridgeFromAppsScriptUrl();
 })();
 </script>
