@@ -19,15 +19,29 @@
   let checkpointTimer = null;
   let readyTimer = null;
 
+  function postToAncestors(message){
+    let target = window;
+    for(let depth = 0; depth < 5; depth += 1){
+      try{
+        if(!target.parent || target.parent === target) break;
+        target = target.parent;
+        target.postMessage(message, '*');
+      }catch(error){
+        break;
+      }
+    }
+  }
+
   function post(type, payload){
+    const message = {
+      namespace:GAME_NS,
+      channel,
+      gameId:GAME_ID,
+      type,
+      payload:payload || {}
+    };
     try{
-      window.parent.postMessage({
-        namespace:GAME_NS,
-        channel,
-        gameId:GAME_ID,
-        type,
-        payload:payload || {}
-      }, '*');
+      postToAncestors(message);
     }catch(error){}
   }
 

@@ -34,6 +34,7 @@ for (const required of [
   "const GAME_ID = 'battlegrafia'",
   "lenguarcade-game",
   "lenguarcade-host",
+  "postToAncestors",
   "CHECKPOINT",
   "RESULT",
   "INITIALIZED",
