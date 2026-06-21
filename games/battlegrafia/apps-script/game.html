@@ -15,8 +15,12 @@ const STORAGE_KEY = "battlegrafia_player_pixel_historia_v6";
 
 // --- FUNCIONES DE CONEXIÓN CON EXCEL (ÚNICAS) ---
 
+function isLenguArcadeEmbeddedMode(){
+  return !!(window.__LENGUARCADE_EMBEDDED || window.__LENGUARCADE_SLOT_ID || window.__LENGUARCADE_PROFILE_KEY);
+}
+
 async function remoteSaveNow() {
-  if(window.__LENGUARCADE_EMBEDDED) return false;
+  if(isLenguArcadeEmbeddedMode()) return false;
   if(localStorage.getItem('bg_is_demo') === 'true') return false; 
   if(!window.player) return false;
   
@@ -42,6 +46,7 @@ async function remoteSaveNow() {
 }
 
 async function remoteLoad() {
+  if(isLenguArcadeEmbeddedMode()) return null;
   const email = localStorage.getItem("bg_user_email") || "alumno_incognito@fomento.edu";
   const slot = getRemoteSlotForMode();
 
@@ -95,6 +100,7 @@ setTimeout(() => {
 
 // NUEVO INICIO: IDENTIFICACIÓN ROBUSTA
 function inicializarUsuarioGAS() {
+  if(isLenguArcadeEmbeddedMode()) return;
   // Buscamos si el alumno ya introdujo su nombre antes
   let email = localStorage.getItem("bg_user_email");
   
@@ -447,6 +453,9 @@ function hasSupabaseConfig(){
 
       const hasLocal = (()=> {
         try{
+          if(isLenguArcadeEmbeddedMode()){
+            return !!(typeof getSaveSlots === "function" && getSaveSlots().length);
+          }
           const saved = localStorage.getItem(storageKeyForMode(STORAGE_KEY));
           return !!(saved || (typeof getSaveSlots === "function" && getSaveSlots().length));
         }catch(e){ return false; }
@@ -475,6 +484,7 @@ function isOnlineNow(){
 }
 
 function syncHubSession(session){
+  if(isLenguArcadeEmbeddedMode()) return;
   const loggedIn = !!(session && session.user);
   const email = session?.user?.email || null;
 
@@ -537,6 +547,7 @@ window.BG.listContinuableModes = function(){
 
 (function initHubSessionFromSb(){
   try{
+    if(isLenguArcadeEmbeddedMode()) return;
     if(!sb || !sb.auth) return;
     sb.auth.getSession().then(({ data }) => syncHubSession(data?.session));
     sb.auth.onAuthStateChange((_event, session) => syncHubSession(session));
@@ -604,8 +615,12 @@ document.addEventListener("DOMContentLoaded", ()=>{
       checkOnlineGate();
     }catch(e){}
     
-    // Inicia Google Apps Script
-    inicializarUsuarioGAS(); 
+    // En LenguArcade, la identidad y el guardado vienen del host, no del login propio del juego.
+    const startOwnSession = () => {
+      if(!isLenguArcadeEmbeddedMode()) inicializarUsuarioGAS();
+    };
+    if(window.__LENGUARCADE_BRIDGE_SCRIPT) setTimeout(startOwnSession, 1200);
+    else startOwnSession();
   });
 
 
@@ -2351,13 +2366,15 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
       const advSlotsRaw = localStorage.getItem(`${STORAGE_SLOTS_KEY}_adventure`);
       const advSlots = advSlotsRaw ? JSON.parse(advSlotsRaw) : [];
       const advActive = localStorage.getItem(`${ACTIVE_SLOT_KEY}_adventure`);
-      const slot = Array.isArray(advSlots) ? advSlots.find(s=>s.id===advActive) : null;
+      const requiredSlotId = window.__LENGUARCADE_SLOT_ID || "";
+      const slot = Array.isArray(advSlots) ? advSlots.find(s=>s.id===(requiredSlotId || advActive)) : null;
       const arr = slot?.data?.defeatedMonsters;
       if(Array.isArray(arr)) return new Set(arr);
     }catch(e){}
 
     // Fallback: último guardado "legacy"
     try{
+      if(isLenguArcadeEmbeddedMode()) return new Set();
       const raw = localStorage.getItem(storageKeyForMode(STORAGE_KEY));
       const obj = raw ? JSON.parse(raw) : null;
       const arr = obj?.defeatedMonsters;
@@ -6208,7 +6225,7 @@ if(currentMonsterHp <= 0 || forceWinByStreak){
 
   function initStartScreen(){
     // Mostrar splash SIEMPRE al arrancar
-    const saved = loadSavedPlayer();
+    const saved = loadSavedPlayerLocal();
 
     const _slots = (function(){ try{ migrateLegacySaveIfNeeded(); return getSaveSlots(); }catch(e){ return []; } })();
 

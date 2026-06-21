@@ -3,6 +3,42 @@
   'use strict';
 
   const $ = (id) => document.getElementById(id);
+  let noticeTimer = null;
+
+  function ensureGameNotice(){
+    let box = document.getElementById('bg-game-notice');
+    if(box) return box;
+    box = document.createElement('div');
+    box.id = 'bg-game-notice';
+    box.setAttribute('role', 'status');
+    box.style.cssText = [
+      'position:fixed',
+      'left:50%',
+      'top:22px',
+      'transform:translateX(-50%)',
+      'z-index:999999',
+      'max-width:min(520px,calc(100vw - 32px))',
+      'padding:14px 18px',
+      'border:3px solid #000',
+      'border-radius:14px',
+      'background:#111827',
+      'color:#f9fafb',
+      'box-shadow:0 8px 0 #000,0 18px 40px rgba(0,0,0,.45)',
+      'font-weight:800',
+      'text-align:center',
+      'display:none'
+    ].join(';');
+    document.body.appendChild(box);
+    return box;
+  }
+
+  window.showToast = window.showToast || function(message){
+    const box = ensureGameNotice();
+    box.textContent = String(message || '');
+    box.style.display = 'block';
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(() => { box.style.display = 'none'; }, 2600);
+  };
 
   // Fuente de verdad: juego (BG.hasAccountOnline). Fallback: BG_SESSION/localStorage.
   function hasAccountOnline(){
@@ -291,7 +327,7 @@
         b.style.display = cont.includes(m) ? "" : "none";
       });
       if(!cont.length){
-        try{ if(typeof window.showToast==='function') window.showToast('No tienes ninguna partida guardada todavía.'); else alert('No tienes ninguna partida guardada todavía.'); }catch(e){}
+        try{ window.showToast('No tienes ninguna partida guardada todavia.'); }catch(e){}
         return;
       }
       showModeMenu();
@@ -306,7 +342,7 @@
 
         if(startIntent === "new"){
           if(!newModeChosen){
-            try{ if(typeof window.showToast==="function") window.showToast("Elige modo primero."); else alert("Elige modo primero."); }catch(err){}
+            try{ window.showToast("Elige modo primero."); }catch(err){}
             showModeMenu();
             return;
           }
@@ -331,8 +367,7 @@
           const canContinue = (mode === 'adventure' || mode === 'survival');
           if(!canContinue){
             try{
-              if(typeof window.showToast === 'function') window.showToast('Este modo no tiene continuar. Elige Aventura o Supervivencia.');
-              else alert('Este modo no tiene continuar. Elige Aventura o Supervivencia.');
+              window.showToast('Este modo no tiene continuar. Elige Aventura o Supervivencia.');
             }catch(e){}
             return;
           }

@@ -31,6 +31,10 @@ for (const required of [
   if (!indexHtml.includes(required)) errors.push(`Falta la inclusion de BattleGrafia: ${required}`);
 }
 
+if (indexHtml.indexOf("include('lenguarcade_bridge')") > indexHtml.indexOf("include('game')")) {
+  errors.push("El puente de LenguArcade debe cargarse antes que game.html en BattleGrafia.");
+}
+
 if (!codeSource.includes("setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)")) {
   errors.push("BattleGrafia debe permitir iframe con HtmlService.XFrameOptionsMode.ALLOWALL.");
 }
@@ -47,8 +51,11 @@ for (const required of [
   "INITIALIZED",
   "metrics:stats",
   "accuracy:stats.accuracy",
+  "__LENGUARCADE_BRIDGE_SCRIPT",
   "__LENGUARCADE_SLOT_ID",
   "isolateLocalSlotsForProfile",
+  "clearRuntimePlayer",
+  "refreshVisibleProfile",
   "__lenguarcadeProfileKey",
   "battlegrafia_save_slots_v1_",
   "showEndOverlay",
@@ -83,8 +90,19 @@ if (!centralStudent.includes("getEmbeddedGameConnectionDelay") ||
 const gameHtml = fs.readFileSync(path.join(root, "game.html"), "utf8");
 if (!gameHtml.includes("__LENGUARCADE_SLOT_ID") ||
     !gameHtml.includes("requiredSlotId") ||
-    !gameHtml.includes("window.__LENGUARCADE_SLOT_ID")) {
+    !gameHtml.includes("window.__LENGUARCADE_SLOT_ID") ||
+    !gameHtml.includes("function isLenguArcadeEmbeddedMode()") ||
+    !gameHtml.includes("if(isLenguArcadeEmbeddedMode()) return null;") ||
+    !gameHtml.includes("const saved = loadSavedPlayerLocal();") ||
+    !gameHtml.includes("if(isLenguArcadeEmbeddedMode()) return;")) {
   errors.push("BattleGrafia debe aislar los guardados locales por alumno cuando se abre desde LenguArcade.");
+}
+
+const menuHtml = fs.readFileSync(path.join(root, "menu.html"), "utf8");
+if (!menuHtml.includes("bg-game-notice") ||
+    menuHtml.includes("alert('No tienes ninguna partida guardada") ||
+    menuHtml.includes('alert("Elige modo primero')) {
+  errors.push("BattleGrafia debe mostrar avisos de menu dentro del juego, no con alertas del navegador.");
 }
 
 if (!supabaseDashboard.includes("battlegrafia") ||

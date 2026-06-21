@@ -2,6 +2,8 @@
 (function(){
   'use strict';
 
+  window.__LENGUARCADE_BRIDGE_SCRIPT = true;
+
   const GAME_ID = 'battlegrafia';
   const GAME_NS = 'lenguarcade-game';
   const HOST_NS = 'lenguarcade-host';
@@ -107,6 +109,20 @@
       window.BG = window.BG || {};
       window.BG.getPlayer = function(){ return window.player || null; };
     }catch(error){}
+    try{ window.BG_UI?.renderHubBackpack?.(); }catch(error){}
+    try{ if(typeof window.actualizarMochilaHub === 'function') window.actualizarMochilaHub(); }catch(error){}
+    try{ if(typeof window.refrescarPantallasSecundarias === 'function') window.refrescarPantallasSecundarias(); }catch(error){}
+  }
+
+  function refreshVisibleProfile(){
+    try{
+      const input = document.getElementById('player-name');
+      if(input && !input.value) input.value = profileDisplayName();
+    }catch(error){}
+    try{
+      const emailEl = document.getElementById('hub-account-email');
+      if(emailEl && profile) emailEl.textContent = profile.email || profileDisplayName();
+    }catch(error){}
   }
 
   function getModeId(save){
@@ -160,6 +176,11 @@
       localStorage.setItem('battlegrafia_player_pixel_historia_v6_' + modeId, JSON.stringify(normalized));
       window.__LENGUARCADE_SLOT_ID = slotId;
       window.__LENGUARCADE_PROFILE_KEY = profileKey();
+      window.player = normalized;
+      window.BG = window.BG || {};
+      window.BG.getPlayer = function(){ return window.player || null; };
+      try{ window.BG_UI?.renderHubBackpack?.(); }catch(error){}
+      try{ if(typeof window.actualizarMochilaHub === 'function') window.actualizarMochilaHub(); }catch(error){}
       return true;
     }catch(error){
       return false;
@@ -226,6 +247,7 @@
       if(status && profile){
         status.textContent = 'Perfil conectado desde LenguArcade: ' + (profile.nombre || profile.email || 'jugador') + '.';
       }
+      refreshVisibleProfile();
     }catch(error){}
   }
 
