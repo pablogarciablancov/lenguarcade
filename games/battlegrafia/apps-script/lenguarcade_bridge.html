@@ -53,6 +53,62 @@
     return String(value || 'player').toLowerCase().replace(/[^a-z0-9_-]+/g, '_').slice(0, 48) || 'player';
   }
 
+  function profileKey(){
+    return safeId(profile && (profile.studentId || profile.email));
+  }
+
+  function profileSlotId(){
+    return 'lenguarcade_' + profileKey();
+  }
+
+  function profileDisplayName(){
+    if(!profile) return 'LenguArcade';
+    return ((profile.nombre || '') + ' ' + (profile.apellidos || '')).trim() || profile.email || 'LenguArcade';
+  }
+
+  function readJson(value, fallback){
+    try{ return value ? JSON.parse(value) : fallback; }catch(error){ return fallback; }
+  }
+
+  function knownModes(){
+    const modes = new Set(['adventure','survival','practice','dominio','strategy']);
+    try{
+      for(let i = 0; i < localStorage.length; i += 1){
+        const key = localStorage.key(i) || '';
+        const match = key.match(/^battlegrafia_save_slots_v1_(.+)$/);
+        if(match && match[1]) modes.add(match[1]);
+      }
+    }catch(error){}
+    return Array.from(modes);
+  }
+
+  function isolateLocalSlotsForProfile(){
+    const slotId = profileSlotId();
+    window.__LENGUARCADE_SLOT_ID = slotId;
+    window.__LENGUARCADE_PROFILE_KEY = profileKey();
+    try{ localStorage.setItem('bg_lenguarcade_profile_slot', slotId); }catch(error){}
+    knownModes().forEach(modeId => {
+      try{
+        const slotsKey = 'battlegrafia_save_slots_v1_' + modeId;
+        const activeKey = 'battlegrafia_active_slot_v1_' + modeId;
+        const legacyKey = 'battlegrafia_player_pixel_historia_v6_' + modeId;
+        const slots = readJson(localStorage.getItem(slotsKey), []);
+        const ownSlots = Array.isArray(slots) ? slots.filter(slot => slot && slot.id === slotId && slot.data) : [];
+        localStorage.setItem(activeKey, slotId);
+        localStorage.setItem(slotsKey, JSON.stringify(ownSlots));
+        if(!ownSlots.length) localStorage.removeItem(legacyKey);
+      }catch(error){}
+    });
+  }
+
+  function clearRuntimePlayer(){
+    try{ window.player = null; }catch(error){}
+    try{
+      window.BG = window.BG || {};
+      window.BG.getPlayer = function(){ return window.player || null; };
+    }catch(error){}
+  }
+
   function getModeId(save){
     const fromSave = save && (save.modeId || save.__modeId || save.runModeId || save.bgModeId);
     try{ return String(fromSave || localStorage.getItem('bg_modeId') || 'adventure'); }
@@ -74,8 +130,13 @@
     if(!save || typeof save !== 'object') return null;
     const candidate = save.data || save.player || save.save || save.state || save;
     if(!candidate || typeof candidate !== 'object') return null;
+    if(candidate.__lenguarcadeProfileKey && candidate.__lenguarcadeProfileKey !== profileKey()) return null;
+    if(candidate.__lenguarcadeProfileEmail && profile && profile.email &&
+        String(candidate.__lenguarcadeProfileEmail).toLowerCase() !== String(profile.email).toLowerCase()) return null;
     const normalized = copy(candidate);
     normalized.modeId = getModeId(normalized);
+    normalized.__lenguarcadeProfileKey = profileKey();
+    normalized.__lenguarcadeProfileSlot = profileSlotId();
     normalized.__lenguarcadeImportedAt = new Date().toISOString();
     return normalized;
   }
@@ -84,10 +145,10 @@
     const normalized = normalizeIncomingSave(save);
     if(!normalized) return false;
     const modeId = getModeId(normalized);
-    const slotId = 'lenguarcade_' + safeId(profile && (profile.studentId || profile.email));
+    const slotId = profileSlotId();
     const slot = {
       id:slotId,
-      name:normalized.name || (profile ? ((profile.nombre || '') + ' ' + (profile.apellidos || '')).trim() : '') || 'LenguArcade',
+      name:normalized.name || profileDisplayName(),
       updatedAt:Date.now(),
       data:normalized
     };
@@ -97,6 +158,8 @@
       localStorage.setItem('battlegrafia_active_slot_v1_' + modeId, slotId);
       localStorage.setItem('battlegrafia_save_slots_v1_' + modeId, JSON.stringify([slot]));
       localStorage.setItem('battlegrafia_player_pixel_historia_v6_' + modeId, JSON.stringify(normalized));
+      window.__LENGUARCADE_SLOT_ID = slotId;
+      window.__LENGUARCADE_PROFILE_KEY = profileKey();
       return true;
     }catch(error){
       return false;
@@ -214,9 +277,14 @@
   function buildSave(){
     const player = copy(getPlayer() || initialSave || {});
     if(!player || typeof player !== 'object') return null;
+    const currentProfileKey = profileKey();
+    if(player.__lenguarcadeProfileKey && player.__lenguarcadeProfileKey !== currentProfileKey) return null;
     const modeId = getModeId(player);
     player.modeId = modeId;
     player.__modeId = modeId;
+    player.__lenguarcadeProfileKey = currentProfileKey;
+    player.__lenguarcadeProfileSlot = profileSlotId();
+    player.__lenguarcadeProfileEmail = profile && profile.email || '';
     player.__lenguarcadeSavedAt = new Date().toISOString();
     try{ player.totalMonsters = (window.BG_MONSTER_CATALOG || []).length || player.totalMonsters || 0; }catch(error){}
     return player;
@@ -402,8 +470,10 @@
     if(message.type === 'INIT'){
       profile = message.payload && message.payload.student || {};
       initialSave = message.payload && message.payload.save || null;
+      isolateLocalSlotsForProfile();
       applyProfile();
       if(initialSave) installSave(initialSave);
+      else clearRuntimePlayer();
       initialized = true;
       installHooks();
       post('INITIALIZED', {

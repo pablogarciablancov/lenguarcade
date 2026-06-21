@@ -47,6 +47,9 @@ for (const required of [
   "INITIALIZED",
   "metrics:stats",
   "accuracy:stats.accuracy",
+  "__LENGUARCADE_SLOT_ID",
+  "isolateLocalSlotsForProfile",
+  "__lenguarcadeProfileKey",
   "battlegrafia_save_slots_v1_",
   "showEndOverlay",
   "profile.studentId",
@@ -75,6 +78,13 @@ if (!centralStudent.includes("getEmbeddedGameConnectionDelay") ||
     !centralStudent.includes("gameId==='battlegrafia'") ||
     !centralStudent.includes("return 12000")) {
   errors.push("LenguArcade_Alumno.html debe dar mas margen de conexion a BattleGrafia.");
+}
+
+const gameHtml = fs.readFileSync(path.join(root, "game.html"), "utf8");
+if (!gameHtml.includes("__LENGUARCADE_SLOT_ID") ||
+    !gameHtml.includes("requiredSlotId") ||
+    !gameHtml.includes("window.__LENGUARCADE_SLOT_ID")) {
+  errors.push("BattleGrafia debe aislar los guardados locales por alumno cuando se abre desde LenguArcade.");
 }
 
 if (!supabaseDashboard.includes("battlegrafia") ||

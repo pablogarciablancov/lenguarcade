@@ -525,6 +525,8 @@ window.BG.hasSaveForMode = function(modeId){
   try{
     const raw = localStorage.getItem(`${STORAGE_SLOTS_KEY}_${modeId}`);
     const slots = raw ? JSON.parse(raw) : [];
+    const requiredSlotId = window.__LENGUARCADE_SLOT_ID || "";
+    if(requiredSlotId) return Array.isArray(slots) && slots.some(s => s && s.id === requiredSlotId && s.data);
     return Array.isArray(slots) && slots.length > 0;
   }catch(e){ return false; }
 };
@@ -864,7 +866,9 @@ function storageKeyForMode(baseKey){
     try{
       const raw = localStorage.getItem(storageKeyForMode(STORAGE_SLOTS_KEY));
       const slots = raw ? JSON.parse(raw) : [];
-      return Array.isArray(slots) ? slots : [];
+      if(!Array.isArray(slots)) return [];
+      const requiredSlotId = window.__LENGUARCADE_SLOT_ID || "";
+      return requiredSlotId ? slots.filter(s => s && s.id === requiredSlotId) : slots;
     }catch(e){ return []; }
   }
   function setSaveSlots(slots){
@@ -874,6 +878,8 @@ function storageKeyForMode(baseKey){
     try{
       const raw = localStorage.getItem(`${STORAGE_SLOTS_KEY}_${modeId}`);
       const slots = raw ? JSON.parse(raw) : [];
+      const requiredSlotId = window.__LENGUARCADE_SLOT_ID || "";
+      if(requiredSlotId) return Array.isArray(slots) && slots.some(s => s && s.id === requiredSlotId && s.data);
       if(Array.isArray(slots) && slots.length) return true;
       // fallback legacy per-mode key
       const legacy = localStorage.getItem(`${STORAGE_KEY}_${modeId}`);
@@ -888,6 +894,7 @@ function getActiveSlotId(){
     try{ if(id) localStorage.setItem(storageKeyForMode(ACTIVE_SLOT_KEY), id); }catch(e){}
   }
   function makeSlotId(){
+    try{ if(window.__LENGUARCADE_SLOT_ID) return window.__LENGUARCADE_SLOT_ID; }catch(e){}
     return "slot_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
   }
   function upsertSlot(slot){
@@ -899,6 +906,7 @@ function getActiveSlotId(){
     return slots;
   }
   function migrateLegacySaveIfNeeded(){
+    try{ if(window.__LENGUARCADE_SLOT_ID) return; }catch(e){}
     // Importar el guardado legacy SOLO en Aventura (para no clonar progreso en otros modos)
     if(getSelectedModeId() !== "adventure") return;
     const slots = getSaveSlots();
@@ -2944,6 +2952,7 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
       migrateLegacySaveIfNeeded();
 
       let parsed = null;
+      const requiredSlotId = window.__LENGUARCADE_SLOT_ID || "";
 
       // 1) Intentar ranura activa
       const slotId = getActiveSlotId();
@@ -2952,9 +2961,16 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
         const slot = slots.find(s => s.id === slotId);
         if(slot && slot.data) parsed = slot.data;
       }
+      if(!parsed && requiredSlotId){
+        const slot = slots.find(s => s.id === requiredSlotId);
+        if(slot && slot.data){
+          parsed = slot.data;
+          setActiveSlotId(requiredSlotId);
+        }
+      }
 
       // 2) Si no hay ranura activa válida, cargar la más reciente
-      if(!parsed && slots.length){
+      if(!parsed && slots.length && !requiredSlotId){
         const slot = slots[0];
         if(slot && slot.data){
           parsed = slot.data;
@@ -2964,6 +2980,7 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
 
       // 3) Compatibilidad: guardado antiguo (si no hay ranuras)
       if(!parsed){
+        if(requiredSlotId) return null;
         const raw = localStorage.getItem(storageKeyForMode(STORAGE_KEY));
         if(!raw) return null;
         parsed = JSON.parse(raw);
