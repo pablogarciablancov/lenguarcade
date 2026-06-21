@@ -45,6 +45,8 @@ for (const required of [
   "CHECKPOINT",
   "RESULT",
   "INITIALIZED",
+  "metrics:stats",
+  "accuracy:stats.accuracy",
   "battlegrafia_save_slots_v1_",
   "showEndOverlay",
   "profile.studentId",
@@ -63,6 +65,8 @@ if (!centralServer.includes("battlegrafia") ||
 if (!centralStudent.includes("gameRecord?.gameId==='battlegrafia'") ||
     !centralStudent.includes("defeatedMonsters") ||
     !centralStudent.includes("totalMonsters") ||
+    !centralStudent.includes("buildEvaluableSnapshot") ||
+    !centralStudent.includes("lenguarcade-save-v3") ||
     !centralStudent.includes("LA_EMBEDDED_GAME_OVERRIDES")) {
   errors.push("El runner de alumno debe calcular el progreso especifico de BattleGrafia.");
 }

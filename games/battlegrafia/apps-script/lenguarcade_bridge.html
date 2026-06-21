@@ -115,6 +115,15 @@
     const style = document.createElement('style');
     style.id = 'lenguarcade-battlegrafia-bridge-css';
     style.textContent = [
+      'html.lenguarcade-embedded,html.lenguarcade-embedded body{width:100%;min-height:100%;overflow:auto!important;background:#050712!important}',
+      'html.lenguarcade-embedded body{padding:0!important;align-items:stretch!important}',
+      'html.lenguarcade-embedded #gameRoot{min-height:100vh!important;width:100%!important}',
+      'html.lenguarcade-embedded .app-screen{position:relative!important;min-height:100vh!important;overflow:auto!important;padding:18px!important}',
+      'html.lenguarcade-embedded .main-menu{align-items:flex-start!important}',
+      'html.lenguarcade-embedded .menu-panel{width:min(940px,100%)!important;margin:0 auto!important}',
+      'html.lenguarcade-embedded .game-shell{max-width:1180px!important;width:calc(100% - 16px)!important;margin:8px auto!important;min-height:calc(100vh - 16px)!important}',
+      'html.lenguarcade-embedded .layout{grid-template-columns:minmax(0,1.8fr) minmax(260px,.9fr)!important}',
+      '@media(max-width:1050px){html.lenguarcade-embedded .layout{grid-template-columns:1fr!important}html.lenguarcade-embedded .panel-right{display:flex!important}}',
       'html.lenguarcade-embedded #login-screen{display:none!important}',
       'html.lenguarcade-embedded #menu-account,html.lenguarcade-embedded #nav-account,html.lenguarcade-embedded #nav-teacher{display:none!important}',
       'html.lenguarcade-embedded #authOverlay,html.lenguarcade-embedded #teacherPanel{display:none!important}',
@@ -220,6 +229,8 @@
     const wrongFromDiary = diary.length ? Math.max(0, diary.length - correctFromDiary) : 0;
     const correct = Number(save.stats_correct || save.correct || correctFromDiary || 0);
     const errors = Number(save.stats_wrong || save.errors || wrongFromDiary || 0);
+    const attempts = correct + errors;
+    const accuracy = attempts ? Math.round((correct / attempts) * 100) : 0;
     const defeated = Array.isArray(save.defeatedMonsters)
       ? save.defeatedMonsters.length
       : Number(save.monstersDefeated || 0);
@@ -231,7 +242,21 @@
       Number(save.level || 1) * 25 +
       Math.min(300, Number(save.gold || 0))
     );
-    return { correct, errors, defeated, total, percentage, score };
+    return {
+      correct,
+      errors,
+      attempts,
+      accuracy,
+      grade:Math.round((accuracy / 10) * 10) / 10,
+      defeated,
+      total,
+      percentage,
+      score,
+      modeId:getModeId(save),
+      currentMonsterIndex:Number(save.currentMonsterIndex || 0),
+      currentMonsterId:String(save.currentMonsterId || ''),
+      currentMonsterHp:Number(save.currentMonsterHp || 0)
+    };
   }
 
   function buildResult(outcome){
@@ -244,6 +269,9 @@
       score:stats.score,
       correct:stats.correct,
       errors:stats.errors,
+      attempts:stats.attempts,
+      accuracy:stats.accuracy,
+      grade:stats.grade,
       maxCombo:Number(save.achievements && save.achievements.progress && save.achievements.progress.winStreak || 0),
       adventureWorld,
       adventureCompleted:outcome === 'victory' && stats.total > 0 && stats.defeated >= stats.total,
@@ -251,6 +279,7 @@
       defeatedMonsters:stats.defeated,
       totalMonsters:stats.total,
       modeId:getModeId(save),
+      metrics:stats,
       save,
       achievements:extractAchievements(save)
     };
@@ -266,6 +295,7 @@
     if(!initialized || installingSave) return;
     const save = buildSave();
     if(!save) return;
+    const stats = sessionStats(save);
     post('CHECKPOINT', {
       checkpointId:'battlegrafia_checkpoint_' + Date.now() + '_' + Math.random().toString(36).slice(2),
       matchId:'battlegrafia_' + safeId(profile && (profile.studentId || profile.email)),
@@ -273,6 +303,17 @@
       players:[{
         role:'primary',
         outcome:'checkpoint',
+        score:stats.score,
+        correct:stats.correct,
+        errors:stats.errors,
+        attempts:stats.attempts,
+        accuracy:stats.accuracy,
+        grade:stats.grade,
+        percentage:stats.percentage,
+        defeatedMonsters:stats.defeated,
+        totalMonsters:stats.total,
+        modeId:stats.modeId,
+        metrics:stats,
         save,
         achievements:extractAchievements(save)
       }]

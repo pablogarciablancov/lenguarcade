@@ -233,7 +233,8 @@ function getTeacherStudentDetail(studentId, token) {
       achievementsCount:Number(row.achievementsCount || 0),
       missionsCompleted:Number(row.missionsCompleted || 0),
       plumas:Number(row.plumas || 0),
-      lastActivity:row.lastActivity || ''
+      lastActivity:row.lastActivity || '',
+      rawJson:row.rawJson || ''
     };
   });
   const events = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.EVENTOS))
@@ -341,6 +342,8 @@ function saveProgress(payload) {
       existingAchievementIds[id] = true;
       return true;
     });
+    const shouldCountSession = payload.countSession === false || payload.sessionAlreadyCounted ? false : true;
+    const shouldWriteEvent = payload.writeEvent === false ? false : shouldCountSession;
     const record = {
       studentId:student.studentId, email:student.email, nombre:student.nombre + ' ' + student.apellidos, clase:student.clase,
       gameId:game.gameId, gameName:game.nombre, xp:newXp,
@@ -348,12 +351,14 @@ function saveProgress(payload) {
       percentage:clamp_(Number(progress.percentage || progress.percent || old.percentage || 0), 0, 100),
       accuracy:clamp_(Number(progress.accuracy || old.accuracy || 0), 0, 100),
       attempts:Number(progress.attempts || old.attempts || 0), successes:Number(progress.successes || old.successes || 0), errors:Number(progress.errors || old.errors || 0),
-      streak:Number(progress.streak || old.streak || 0), sessions:Number(old.sessions || 0) + 1,
+      streak:Number(progress.streak || old.streak || 0), sessions:Number(old.sessions || 0) + (shouldCountSession ? 1 : 0),
       achievementsCount:Object.keys(existingAchievementIds).length, missionsCompleted:Number(progress.missionsCompleted || old.missionsCompleted || 0),
       plumas:newPlumas, lastActivity:now, rawJson:JSON.stringify(payload.rawGameData || payload), updatedAt:now
     };
     upsertByKeys_(sheet, ['studentId','gameId'], record);
-    appendObject_(getSheet_(LA_CONFIG.SHEETS.EVENTOS), { eventId:resultId || Utilities.getUuid(), timestamp:now, studentId:student.studentId, email:student.email, nombre:record.nombre, clase:student.clase, gameId:game.gameId, eventType:payload.eventType || 'progress_saved', xpDelta:xpDelta, plumasDelta:plumasDelta, accuracy:record.accuracy, detailsJson:JSON.stringify(payload.details || {}) });
+    if (shouldWriteEvent) {
+      appendObject_(getSheet_(LA_CONFIG.SHEETS.EVENTOS), { eventId:resultId || Utilities.getUuid(), timestamp:now, studentId:student.studentId, email:student.email, nombre:record.nombre, clase:student.clase, gameId:game.gameId, eventType:payload.eventType || 'progress_saved', xpDelta:xpDelta, plumasDelta:plumasDelta, accuracy:record.accuracy, detailsJson:JSON.stringify(payload.details || {}) });
+    }
     appendObject_(getSheet_(LA_CONFIG.SHEETS.RAW), { timestamp:now, studentId:student.studentId, email:student.email, gameId:game.gameId, payloadJson:JSON.stringify(payload) });
     newAchievements.forEach(a => appendObject_(achievementSheet, { achievementId:typeof a === 'string' ? a : (a.id || a.achievementId || Utilities.getUuid()), studentId:student.studentId, email:student.email, gameId:game.gameId, title:typeof a === 'string' ? a : (a.title || a.name || 'Logro'), description:typeof a === 'string' ? '' : (a.description || ''), xpReward:typeof a === 'string' ? 0 : Number(a.xpReward || 0), unlockedAt:now }));
     if (payload.errors && payload.errors.length) payload.errors.forEach(er => appendObject_(getSheet_(LA_CONFIG.SHEETS.ERRORES), { timestamp:now, studentId:student.studentId, email:student.email, gameId:game.gameId, skill:er.skill || '', errorType:er.type || er.errorType || '', count:Number(er.count || 1), detailsJson:JSON.stringify(er) }));
@@ -402,6 +407,12 @@ function saveGameCheckpoint(payload) {
       unlockedAt:now
     });
   });
+  const progress = payload.progress || {};
+  const shouldCountSession = payload.countSession === true;
+  const newXp = Number(progress.xp != null ? progress.xp : old.xp + Number(progress.xpDelta || 0));
+  const xpDelta = Math.max(0, newXp - Number(old.xp || 0));
+  const newPlumas = Number(progress.plumas != null ? progress.plumas : old.plumas + Number(progress.plumasDelta || 0));
+  const plumasDelta = Math.max(0, newPlumas - Number(old.plumas || 0));
   const record = Object.assign({}, old, {
     studentId:student.studentId,
     email:student.email,
@@ -409,13 +420,42 @@ function saveGameCheckpoint(payload) {
     clase:student.clase,
     gameId:game.gameId,
     gameName:game.nombre,
+    xp:newXp,
+    nivel:Number(progress.level || progress.nivel || old.nivel || Math.floor(newXp / 250) + 1),
+    percentage:clamp_(Number(progress.percentage || progress.percent || old.percentage || 0), 0, 100),
+    accuracy:clamp_(Number(progress.accuracy || old.accuracy || 0), 0, 100),
+    attempts:Number(progress.attempts || old.attempts || 0),
+    successes:Number(progress.successes || old.successes || 0),
+    errors:Number(progress.errors || old.errors || 0),
+    streak:Number(progress.streak || old.streak || 0),
+    sessions:Number(old.sessions || 0) + (shouldCountSession ? 1 : 0),
+    missionsCompleted:Number(progress.missionsCompleted || old.missionsCompleted || 0),
+    plumas:newPlumas,
     achievementsCount:Object.keys(existingAchievementIds).length,
     lastActivity:now,
     rawJson:JSON.stringify(payload.rawGameData || payload),
     updatedAt:now
   });
   upsertByKeys_(sheet, ['studentId','gameId'], record);
-  return { ok:true, saved:true, updatedAt:now };
+  if (shouldCountSession) {
+    appendObject_(getSheet_(LA_CONFIG.SHEETS.EVENTOS), {
+      eventId:String(payload.resultId || payload.checkpointId || '') || Utilities.getUuid(),
+      timestamp:now,
+      studentId:student.studentId,
+      email:student.email,
+      nombre:record.nombre,
+      clase:student.clase,
+      gameId:game.gameId,
+      eventType:payload.eventType || 'checkpoint_saved',
+      xpDelta:xpDelta,
+      plumasDelta:plumasDelta,
+      accuracy:record.accuracy,
+      detailsJson:JSON.stringify(payload.details || {})
+    });
+  }
+  appendObject_(getSheet_(LA_CONFIG.SHEETS.RAW), { timestamp:now, studentId:student.studentId, email:student.email, gameId:game.gameId, payloadJson:JSON.stringify(payload) });
+  recalculateStudentGeneral_(student.studentId);
+  return { ok:true, saved:true, updatedAt:now, record:record };
 }
 
 function calculateStudentGradeForTeacher_(studentId, gameId) {

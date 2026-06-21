@@ -83,6 +83,7 @@ Deno.serve(async (request) => {
         missionsCompleted:Number(row.missions_completed || 0),
         plumas:Number(row.feathers || 0),
         lastActivity:row.last_activity_at || "",
+        rawJson:row.raw_data || {},
       };
     });
     const lastActivity = [

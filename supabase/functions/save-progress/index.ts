@@ -64,6 +64,9 @@ Deno.serve(async (request) => {
     const achievements = Array.isArray(body.achievements)
       ? body.achievements.map(cleanAchievement).filter(item => item.id)
       : [];
+    const shouldCountSession = body.countSession === true ||
+      (!body.checkpoint && body.countSession !== false && !body.sessionAlreadyCounted);
+    const shouldWriteEvent = body.writeEvent === false ? false : shouldCountSession;
 
     if (achievements.length) {
       await admin.from("achievement_definitions").upsert(
@@ -103,7 +106,7 @@ Deno.serve(async (request) => {
       successes:Math.max(Number(old?.successes || 0), Math.round(boundedNumber(progress.successes, 0, 100000000, Number(old?.successes || 0)))),
       errors:Math.max(Number(old?.errors || 0), Math.round(boundedNumber(progress.errors, 0, 100000000, Number(old?.errors || 0)))),
       streak:Math.max(Number(old?.streak || 0), Math.round(boundedNumber(progress.streak, 0, 1000000, Number(old?.streak || 0)))),
-      sessions:Number(old?.sessions || 0) + (body.checkpoint ? 0 : 1),
+      sessions:Number(old?.sessions || 0) + (shouldCountSession ? 1 : 0),
       achievements_count:Number(achievementCount || 0),
       missions_completed:Math.max(Number(old?.missions_completed || 0), Math.round(boundedNumber(progress.missionsCompleted, 0, 100000, Number(old?.missions_completed || 0)))),
       feathers:newFeathers,
@@ -114,7 +117,7 @@ Deno.serve(async (request) => {
       .upsert(record, { onConflict:"profile_id,game_id" });
     if (progressError) throw progressError;
 
-    if (!body.checkpoint) {
+    if (shouldWriteEvent) {
       const { error:eventError } = await admin.from("game_events").insert({
         result_id:resultId || crypto.randomUUID(),
         profile_id:profileId,

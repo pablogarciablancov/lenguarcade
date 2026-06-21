@@ -1177,15 +1177,131 @@ function createGameChannel(){
   return Date.now().toString(36)+'_'+Math.random().toString(36).slice(2);
 }
 
+function numberBetween(value,min,max,fallback=0){
+  const numeric=Number(value);
+  if(!Number.isFinite(numeric))return fallback;
+  return Math.max(min,Math.min(max,numeric));
+}
+
+function readProgressRawJson(value){
+  try{
+    if(!value)return {};
+    if(typeof value==='string')return JSON.parse(value||'{}');
+    if(typeof value==='object')return value;
+  }catch(error){}
+  return {};
+}
+
 function parseStoredGameSave(game){
   try{
-    const stored=game?.progress?.rawJson||{};
-    const raw=typeof stored==='string'?JSON.parse(stored||'{}'):stored;
-    return raw.save || raw.rawGameData?.save || null;
+    const raw=readProgressRawJson(game?.progress?.rawJson||game?.progress?.raw_data||{});
+    const candidates=[
+      raw.save,
+      raw.rawGameData?.save,
+      raw.checkpoint?.save,
+      raw.payload?.save,
+      raw.data?.save,
+      raw.state,
+      raw.player
+    ];
+    for(const candidate of candidates){
+      if(candidate&&typeof candidate==='object'&&Object.keys(candidate).length)return candidate;
+    }
+    if(raw&&typeof raw==='object'&&(raw.stats_correct!=null||raw.currentMonsterIndex!=null||Array.isArray(raw.defeatedMonsters)))return raw;
+    return null;
   }catch(error){
     console.warn('No se pudo leer la partida guardada de Maniacgrafía.',error);
     return null;
   }
+}
+
+function buildEvaluableSnapshot(result){
+  const save=result?.save||{};
+  const base=result?.metrics||{};
+  const correct=Math.max(0,Number(result?.correct??base.correct??save.stats_correct??save.correct??0));
+  const errors=Math.max(0,Number(result?.errors??base.errors??save.stats_wrong??save.errors??0));
+  const attempts=Math.max(correct+errors,Number(result?.attempts??base.attempts??0));
+  const fallbackAccuracy=Number(result?.accuracy??base.accuracy??save.accuracy??0);
+  const accuracy=attempts?Math.round((correct/attempts)*100):numberBetween(fallbackAccuracy,0,100,0);
+  const totalMonsters=Math.max(0,Number(result?.totalMonsters??base.totalMonsters??save.totalMonsters??0));
+  const defeatedMonsters=Math.max(0,Number(
+    result?.defeatedMonsters??base.defeatedMonsters??
+    (Array.isArray(save.defeatedMonsters)?save.defeatedMonsters.length:save.monstersDefeated)??0
+  ));
+  const percentage=numberBetween(
+    result?.percentage??base.percentage??(totalMonsters?Math.round((defeatedMonsters/totalMonsters)*100):save.percentage),
+    0,100,0
+  );
+  const grade=Math.round((accuracy/10)*10)/10;
+  return {
+    schema:'lenguarcade-evaluable-v1',
+    correct,
+    errors,
+    attempts,
+    accuracy,
+    grade,
+    percentage,
+    defeatedMonsters,
+    totalMonsters,
+    score:Math.max(0,Number(result?.score??base.score??0)),
+    modeId:String(result?.modeId??base.modeId??save.modeId??save.__modeId??'adventure'),
+    currentMonsterIndex:Number(save.currentMonsterIndex??base.currentMonsterIndex??0),
+    currentMonsterId:String(save.currentMonsterId??base.currentMonsterId??''),
+    currentMonsterHp:Number(save.currentMonsterHp??base.currentMonsterHp??0),
+    savedAt:new Date().toISOString()
+  };
+}
+
+function normalizeGameProgressRecord(record,game){
+  const old=game?.progress||{};
+  const source=record||{};
+  return {
+    studentId:source.studentId||source.profile_id||old.studentId||currentDashboard?.student?.studentId||'',
+    gameId:source.gameId||source.game_id||game?.gameId||old.gameId||'',
+    gameName:source.gameName||source.game_name||game?.nombre||old.gameName||'',
+    xp:Number(source.xp??old.xp??0),
+    nivel:Number(source.nivel??source.level??old.nivel??1),
+    percentage:Number(source.percentage??old.percentage??0),
+    accuracy:Number(source.accuracy??old.accuracy??0),
+    attempts:Number(source.attempts??old.attempts??0),
+    successes:Number(source.successes??old.successes??0),
+    errors:Number(source.errors??old.errors??0),
+    streak:Number(source.streak??old.streak??0),
+    sessions:Number(source.sessions??old.sessions??0),
+    achievementsCount:Number(source.achievementsCount??source.achievements_count??old.achievementsCount??0),
+    missionsCompleted:Number(source.missionsCompleted??source.missions_completed??old.missionsCompleted??0),
+    plumas:Number(source.plumas??source.feathers??old.plumas??0),
+    lastActivity:source.lastActivity||source.last_activity_at||source.updatedAt||old.lastActivity||'',
+    rawJson:source.rawJson||source.raw_data||source.rawData||old.rawJson||{}
+  };
+}
+
+function applySavedGameRecordToDashboard(runner,record,isPrimary){
+  if(!runner||!record)return;
+  const target=isPrimary?runner.game:runner.opponent?.game;
+  if(!target)return;
+  const progress=normalizeGameProgressRecord(record,target);
+  target.progress=Object.assign({},target.progress||{},progress);
+  target.buttonLabel='Continuar';
+  if(isPrimary&&currentDashboard?.games){
+    const index=currentDashboard.games.findIndex(game=>game.gameId===progress.gameId);
+    if(index>=0){
+      currentDashboard.games[index]=normalizeEmbeddedGame(Object.assign({},currentDashboard.games[index],{progress,buttonLabel:'Continuar'}));
+      runner.game=currentDashboard.games[index];
+      saveCache('LA_DASHBOARD_CACHE',currentDashboard);
+      renderDashboard(currentDashboard);
+    }
+  }
+}
+
+function runnerSessionAlreadyCounted(runner,isPrimary){
+  return isPrimary?!!runner.primarySessionCounted:!!runner.opponentSessionCounted;
+}
+
+function markRunnerSessionCounted(runner,isPrimary){
+  if(!runner)return;
+  if(isPrimary)runner.primarySessionCounted=true;
+  else runner.opponentSessionCounted=true;
 }
 
 function openGameOpponentLogin(){
@@ -1262,7 +1378,7 @@ function prepareEmbeddedGame(game){
   url.searchParams.set('lenguarcade','1');
   url.searchParams.set('channel',channel);
   const iframe=$('gameRunnerFrame');
-  activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,pendingResult:null,saving:false,checkpointing:false,opponent:null,opponentAuthBusy:false,initialized:false,visible:false,loading:false,retries:0};
+  activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,pendingResult:null,saving:false,checkpointing:false,opponent:null,opponentAuthBusy:false,initialized:false,visible:false,loading:false,retries:0,primarySessionCounted:false,opponentSessionCounted:false};
   $('gameRunnerTitle').textContent=game.nombre;
   $('gameRunnerStatus').textContent='Conectando con tu perfil...';
   $('gameRunnerBootText').textContent='Cargando datos del perfil...';
@@ -1367,7 +1483,7 @@ function buildCentralProgress(result,gameRecord){
   }
   if(gameRecord?.gameId==='battlegrafia'){
     const save=result.save||{};
-    const previousRaw=old.rawJson&&typeof old.rawJson==='object'?old.rawJson:{};
+    const previousRaw=readProgressRawJson(old.rawJson);
     const previousSave=previousRaw.save||previousRaw.rawGameData?.save||{};
     const correct=Math.max(0,Number(result.correct||save.stats_correct||0));
     const errors=Math.max(0,Number(result.errors||save.stats_wrong||0));
@@ -1437,22 +1553,36 @@ function getGameParticipantContext(runner,participant){
 }
 
 function buildGameProgressPayload(runner,result,participant,context){
+  const metrics=buildEvaluableSnapshot(participant);
+  const alreadyCounted=runnerSessionAlreadyCounted(runner,context.isPrimary);
   return {
     resultId:String(result.resultId||'')+'__'+String(participant.role||'primary'),
     sessionToken:context.sessionToken,
     gameId:runner.game.gameId,
     eventType:runner.game.gameId+'_'+String(participant.outcome||result.outcome||'finished'),
+    countSession:!alreadyCounted,
+    sessionAlreadyCounted:alreadyCounted,
     progress:buildCentralProgress(participant,context.game),
     achievements:participant.achievements||[],
+    details:{
+      metrics,
+      role:participant.role||'primary',
+      outcome:participant.outcome||result.outcome||'finished'
+    },
     rawGameData:{
-      source:runner.game.gameId+'-bridge-v2',
+      schema:'lenguarcade-result-v3',
+      source:runner.game.gameId+'-bridge-v3',
       save:participant.save||null,
+      metrics,
       matchId:result.matchId||'',
       lastSession:{
         outcome:participant.outcome||result.outcome,
         score:participant.score,
         correct:participant.correct,
         errors:participant.errors,
+        attempts:metrics.attempts,
+        accuracy:metrics.accuracy,
+        grade:metrics.grade,
         maxCombo:participant.maxCombo
       }
     }
@@ -1474,7 +1604,10 @@ async function persistGameResult(result){
     let primaryResponse=null;
     for(const participant of participants){
       const context=getGameParticipantContext(runner,participant);
-      const response=await callServer('saveProgress',[buildGameProgressPayload(runner,result,participant,context)]);
+      const payload=buildGameProgressPayload(runner,result,participant,context);
+      const response=await callServer('saveProgress',[payload]);
+      if(payload.countSession)markRunnerSessionCounted(runner,context.isPrimary);
+      if(response?.record)applySavedGameRecordToDashboard(runner,response.record,context.isPrimary);
       if(context.isPrimary)primaryResponse=response;
       else{
         runner.opponent.dashboard=response.dashboard;
@@ -1482,10 +1615,14 @@ async function persistGameResult(result){
       }
     }
     if(!primaryResponse)throw new Error('No se recibió el resultado del jugador principal.');
-    currentDashboard=primaryResponse.dashboard;
-    saveCache('LA_DASHBOARD_CACHE',currentDashboard);
-    renderDashboard(currentDashboard);
-    runner.game=(currentDashboard.games||[]).find(game=>game.gameId===runner.game.gameId)||runner.game;
+    if(primaryResponse.dashboard){
+      currentDashboard=primaryResponse.dashboard;
+      saveCache('LA_DASHBOARD_CACHE',currentDashboard);
+      renderDashboard(currentDashboard);
+      runner.game=(currentDashboard.games||[]).find(game=>game.gameId===runner.game.gameId)||runner.game;
+    }else if(primaryResponse.record){
+      applySavedGameRecordToDashboard(runner,primaryResponse.record,true);
+    }
     runner.pendingResult=null;
     $('gameRunnerStatus').textContent='Progreso guardado.';
     sendToActiveGame('SAVE_CONFIRMED',{resultId:result.resultId});
@@ -1512,16 +1649,39 @@ async function persistGameCheckpoint(checkpoint){
   try{
     for(const participant of participants){
       const context=getGameParticipantContext(runner,participant);
-      await callServer('saveGameCheckpoint',[{
+      const metrics=buildEvaluableSnapshot(participant);
+      const alreadyCounted=runnerSessionAlreadyCounted(runner,context.isPrimary);
+      const payload={
+        resultId:String(checkpoint.checkpointId||createGameChannel())+'__'+String(participant.role||'primary'),
+        checkpointId:checkpoint.checkpointId||'',
         sessionToken:context.sessionToken,
         gameId:runner.game.gameId,
+        eventType:runner.game.gameId+'_checkpoint',
+        countSession:!alreadyCounted,
+        sessionAlreadyCounted:alreadyCounted,
+        progress:buildCentralProgress(participant,context.game),
         rawGameData:{
-          source:runner.game.gameId+'-checkpoint-v1',
+          schema:'lenguarcade-save-v3',
+          source:runner.game.gameId+'-checkpoint-v3',
           save:participant.save||null,
-          matchId:checkpoint.matchId||''
+          metrics,
+          matchId:checkpoint.matchId||'',
+          checkpoint:{
+            id:checkpoint.checkpointId||'',
+            reason:checkpoint.reason||'autosave',
+            at:new Date().toISOString()
+          }
         },
-        achievements:participant.achievements||[]
-      }]);
+        achievements:participant.achievements||[],
+        details:{
+          metrics,
+          role:participant.role||'primary',
+          checkpointReason:checkpoint.reason||'autosave'
+        }
+      };
+      const response=await callServer('saveGameCheckpoint',[payload]);
+      if(payload.countSession)markRunnerSessionCounted(runner,context.isPrimary);
+      if(response?.record)applySavedGameRecordToDashboard(runner,response.record,context.isPrimary);
     }
     $('gameRunnerStatus').textContent='Partida guardada.';
     sendToActiveGame('CHECKPOINT_CONFIRMED',{checkpointId:checkpoint.checkpointId});
