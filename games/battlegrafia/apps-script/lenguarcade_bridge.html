@@ -68,6 +68,12 @@
     return ((profile.nombre || '') + ' ' + (profile.apellidos || '')).trim() || profile.email || 'LenguArcade';
   }
 
+  function exposeProfileMarkers(){
+    window.__LENGUARCADE_PROFILE_READY = !!profile;
+    window.__LENGUARCADE_PROFILE_LABEL = profileDisplayName();
+    window.__LENGUARCADE_PROFILE_EMAIL = profile && profile.email ? String(profile.email).toLowerCase() : '';
+  }
+
   function readJson(value, fallback){
     try{ return value ? JSON.parse(value) : fallback; }catch(error){ return fallback; }
   }
@@ -104,6 +110,7 @@
   }
 
   function clearRuntimePlayer(){
+    exposeProfileMarkers();
     try{ window.player = null; }catch(error){}
     try{
       window.BG = window.BG || {};
@@ -176,6 +183,7 @@
       localStorage.setItem('battlegrafia_player_pixel_historia_v6_' + modeId, JSON.stringify(normalized));
       window.__LENGUARCADE_SLOT_ID = slotId;
       window.__LENGUARCADE_PROFILE_KEY = profileKey();
+      exposeProfileMarkers();
       window.player = normalized;
       window.BG = window.BG || {};
       window.BG.getPlayer = function(){ return window.player || null; };
@@ -254,6 +262,7 @@
   function applyProfile(){
     setEmbeddedClasses();
     injectCss();
+    exposeProfileMarkers();
     overrideIdentity();
     openMainMenu();
   }
@@ -540,6 +549,7 @@
     if(!embedded || !channel) return;
     bridgeStarted = true;
     window.__LENGUARCADE_EMBEDDED = true;
+    window.__LENGUARCADE_PROFILE_READY = false;
     if(document.readyState === 'loading'){
       document.addEventListener('DOMContentLoaded', startReadyLoop);
     }else{

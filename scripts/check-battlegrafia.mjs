@@ -52,6 +52,9 @@ for (const required of [
   "metrics:stats",
   "accuracy:stats.accuracy",
   "__LENGUARCADE_BRIDGE_SCRIPT",
+  "__LENGUARCADE_PROFILE_READY",
+  "__LENGUARCADE_PROFILE_LABEL",
+  "exposeProfileMarkers",
   "__LENGUARCADE_SLOT_ID",
   "isolateLocalSlotsForProfile",
   "clearRuntimePlayer",
@@ -94,7 +97,10 @@ if (!gameHtml.includes("__LENGUARCADE_SLOT_ID") ||
     !gameHtml.includes("function isLenguArcadeEmbeddedMode()") ||
     !gameHtml.includes("if(isLenguArcadeEmbeddedMode()) return null;") ||
     !gameHtml.includes("const saved = loadSavedPlayerLocal();") ||
-    !gameHtml.includes("if(isLenguArcadeEmbeddedMode()) return;")) {
+    !gameHtml.includes("if(isLenguArcadeEmbeddedMode()) return;") ||
+    !gameHtml.includes("getSafeHubPlayer") ||
+    !gameHtml.includes("Conectando con tu perfil de LenguArcade") ||
+    gameHtml.includes("pgarciab")) {
   errors.push("BattleGrafia debe aislar los guardados locales por alumno cuando se abre desde LenguArcade.");
 }
 

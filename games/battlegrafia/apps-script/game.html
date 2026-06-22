@@ -4673,6 +4673,29 @@ function renderHubShop(){
 window.BG_UI = window.BG_UI || {};
 window.BG_UI.renderHubShop = renderHubShop;
 
+function getSafeHubPlayer(){
+  try{
+    if(window.BG && typeof window.BG.getPlayer === 'function'){
+      const fromBg = window.BG.getPlayer();
+      if(fromBg) return fromBg;
+    }
+  }catch(e){}
+  try{ if(typeof player !== 'undefined' && player) return player; }catch(e){}
+  try{ if(window.player) return window.player; }catch(e){}
+  return null;
+}
+
+function getSafeHubProfileLabel(activePlayer){
+  try{ if(window.__LENGUARCADE_PROFILE_LABEL) return String(window.__LENGUARCADE_PROFILE_LABEL); }catch(e){}
+  const name = activePlayer && (activePlayer.name || activePlayer.nombre || activePlayer.displayName);
+  if(name) return String(name);
+  try{
+    const email = window.BG && typeof window.BG.getUserEmail === 'function' ? window.BG.getUserEmail() : (window.BG_SESSION && window.BG_SESSION.email);
+    if(email) return String(email).split('@')[0];
+  }catch(e){}
+  return 'Héroe';
+}
+
 // ===== Mochila (HUB: oro + objetos) =====
 function getHubBackpackMount(){ return document.getElementById('hub-backpack'); }
 
@@ -4680,28 +4703,35 @@ function renderHubBackpack(){
   const mount = getHubBackpackMount();
   if(!mount) return;
 
+  if(window.__LENGUARCADE_EMBEDDED && !window.__LENGUARCADE_PROFILE_READY){
+    mount.innerHTML = `<div style="color:#9ca3af; text-align:center; padding:18px;">Conectando con tu perfil de LenguArcade...</div>`;
+    return;
+  }
+
   if(!(window.BG && typeof window.BG.hasAccountOnline === 'function' && window.BG.hasAccountOnline())){
     mount.innerHTML = `<div style="color:#9ca3af; text-align:center;">Modo demo: inicia sesión.</div>`;
     return;
   }
-  if(!player){
-    mount.innerHTML = `<div style="color:#9ca3af; text-align:center;">Cargando mochila…</div>`;
-    return;
-  }
 
-  const gold = Number(player.gold) || 0;
-  const items = Array.isArray(player.items) ? player.items.slice() : [];
+  const activePlayer = getSafeHubPlayer();
+  const label = getSafeHubProfileLabel(activePlayer);
+  const levelValue = Number(activePlayer && (activePlayer.level || activePlayer.nivel));
+  const levelLabel = levelValue > 0 ? String(levelValue) : '-';
+  const gold = Number(activePlayer && activePlayer.gold) || 0;
+  const rawItems = Array.isArray(activePlayer && activePlayer.items) ? activePlayer.items.slice() : [];
   const counts = {};
-  for(const it of items){ counts[it] = (counts[it]||0) + 1; }
+  for(const it of rawItems){
+    const itemName = typeof it === 'string' ? it : (it && (it.name || it.id || it.title)) || 'Objeto';
+    counts[itemName] = (counts[itemName]||0) + 1;
+  }
   const names = Object.keys(counts).sort((a,b)=>a.localeCompare(b,'es'));
 
-  // El mismo mapa de emojis
   const emojiMap = {
-    "Poción de tinta": "🧪", "Escudo gramatical": "🛡️", "Poción debilitante": "📉",
-    "Tinta corrosiva": "☠️", "Expansor de tildes": "🔍", "Eco Agudo": "🔔",
-    "Pluma Arcana": "🪶", "Orbe de la Ortografía Perfecta": "🔮", "Libro Viviente": "📖",
-    "Corona del Corrector Supremo": "👑", "Fragmento De Diccionario": "📜",
-    "Venda rápida": "🩹", "Cuaderno de descanso": "📒", "Botas Del Corregidor": "👢"
+    "Pocion de tinta": "*", "Escudo gramatical": "#", "Pocion debilitante": "-",
+    "Tinta corrosiva": "!", "Expansor de tildes": "+", "Eco Agudo": "~",
+    "Pluma Arcana": "^", "Orbe de la Ortografia Perfecta": "o", "Libro Viviente": "[]",
+    "Corona del Corrector Supremo": "W", "Fragmento De Diccionario": "{}",
+    "Venda rapida": "+", "Cuaderno de descanso": "=", "Botas Del Corregidor": ">"
   };
 
   let chipsHtml = "";
@@ -4724,12 +4754,10 @@ function renderHubBackpack(){
     chipsHtml = `<div style="grid-column: 1 / -1; text-align: center; color: #6b7280; padding: 20px; font-style: italic;">Tu inventario está vacío.</div>`;
   }
 
-  // Estructura principal con diseño oscuro forzado en línea
   mount.innerHTML = `
     <div style="background: #0f172a; border: 2px solid #1e293b; border-radius: 12px; padding: 20px; width: 100%; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-      
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 15px; margin-bottom: 15px;">
-        <span style="color: #f8fafc; font-size: 1.1rem; font-weight: 500;">pgarciab · Nivel ?</span>
+        <span style="color: #f8fafc; font-size: 1.1rem; font-weight: 500;">${label} · Nivel ${levelLabel}</span>
         <div style="display: flex; align-items: center; gap: 8px; color: #fbbf24; font-size: 1.4rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
           💰 <span>${gold} Oro</span>
         </div>
@@ -4740,7 +4768,6 @@ function renderHubBackpack(){
       </div>
 
       ${chipsHtml}
-
     </div>
   `;
 }
