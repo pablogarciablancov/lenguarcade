@@ -34,6 +34,15 @@ function doGet(e) {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
+/**
+ * Devuelve la URL real /exec de la Web App.
+ * Importante: en Apps Script la página se ejecuta dentro de un iframe de googleusercontent.
+ * Cambiar window.location.search dentro del iframe puede romper la URL interna y dejar la pantalla en blanco.
+ */
+function getWebAppUrl() {
+  return ScriptApp.getService().getUrl();
+}
+
 function getCurrentGoogleAccount() {
   const email = getActiveUserEmail_();
   return {
