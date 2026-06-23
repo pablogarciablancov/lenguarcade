@@ -5,10 +5,11 @@
  * - Profesores: @fomento.edu
  *
  * Pantallas:
- * - /exec                 -> alumno con Google
+ * - /exec                 -> alumno original + login Google
  * - /exec?page=profesor   -> panel de profesor original
+ * - /exec?page=alumno-google -> pantalla provisional Google, solo como respaldo
  * - /exec?page=profesor-google -> panel provisional Google, solo como respaldo
- * - /exec?legacy=1        -> alumno antiguo
+ * - /exec?legacy=1        -> alumno original sin parche Google
  */
 
 const LA_GOOGLE_AUTH_CONFIG = {
@@ -22,27 +23,50 @@ function doGet(e) {
   const params = (e && e.parameter) ? e.parameter : {};
   const page = String(params.page || params.p || 'alumno').toLowerCase();
   const legacy = String(params.legacy || '').trim() === '1';
-  let file = 'LenguArcade_Alumno_Google';
+  let file = 'LenguArcade_Alumno';
   let title = 'LenguArcade';
+  let patchAlumnoGoogle = !legacy;
 
   if (legacy) {
     file = page === 'profesor' ? 'LenguArcade_Profesor' : 'LenguArcade_Alumno';
     title = page === 'profesor' ? 'LenguArcade - Profesor' : 'LenguArcade - Alumno';
+    patchAlumnoGoogle = false;
   } else if (page === 'profesor' || page === 'profe' || page === 'teacher') {
     // Importante: el panel bueno es el original, con Supabase, Classroom y el diseño oscuro.
     file = 'LenguArcade_Profesor';
     title = 'LenguArcade - Profesor';
+    patchAlumnoGoogle = false;
+  } else if (page === 'alumno-google' || page === 'student-google') {
+    // Respaldo: pantalla simple de Apps Script, no se usa como entrada principal.
+    file = 'LenguArcade_Alumno_Google';
+    title = 'LenguArcade - Alumno Google';
+    patchAlumnoGoogle = false;
   } else if (page === 'profesor-google' || page === 'teacher-google') {
     // Respaldo: panel simple de Apps Script, no se usa como entrada principal.
     file = 'LenguArcade_Profesor_Google';
     title = 'LenguArcade - Profesor Google';
+    patchAlumnoGoogle = false;
   } else if (page === 'narratoria') {
     file = 'Narratoria_Alumno';
     title = 'Narratoria';
+    patchAlumnoGoogle = false;
   }
 
-  return HtmlService
-    .createHtmlOutputFromFile(file)
+  return buildLenguArcadeHtmlOutput_(file, title, patchAlumnoGoogle);
+}
+
+function buildLenguArcadeHtmlOutput_(file, title, patchAlumnoGoogle) {
+  let output = HtmlService.createHtmlOutputFromFile(file);
+  if (patchAlumnoGoogle) {
+    const patch = getAlumnoOriginalGoogleLoginPatch_();
+    const content = output.getContent();
+    output = HtmlService.createHtmlOutput(
+      content.indexOf('</body>') !== -1
+        ? content.replace('</body>', patch + '\n</body>')
+        : content + patch
+    );
+  }
+  return output
     .setTitle(title)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
@@ -54,6 +78,137 @@ function doGet(e) {
  */
 function getWebAppUrl() {
   return ScriptApp.getService().getUrl();
+}
+
+/**
+ * Parche cliente para que la pantalla ORIGINAL de alumno conserve toda su plataforma
+ * y cambie solo el método de entrada: Google del colegio en vez de correo + PIN.
+ */
+function getAlumnoOriginalGoogleLoginPatch_() {
+  return `
+<script>
+(function(){
+  function q(id){return document.getElementById(id);}
+  function baseCall(fn,args){
+    const runner=(typeof studentCallServerBase==='function')?studentCallServerBase:callServer;
+    return runner(fn,args||[]);
+  }
+  function authStatus(message){
+    const status=document.querySelector('#loginCard [data-google-auth-status]')||q('status');
+    if(status)status.textContent=message;
+  }
+  function disable(selector,value){
+    const button=document.querySelector('#loginCard '+selector);
+    if(button)button.disabled=!!value;
+  }
+  async function goToProfesorPanel(){
+    try{
+      authStatus('Abriendo panel del profesor...');
+      const url=await baseCall('getWebAppUrl');
+      window.top.location.href=url+'?page=profesor';
+    }catch(error){
+      authStatus('No se ha podido abrir el panel: '+(error.message||error));
+    }
+  }
+  function finishGoogleStudentLogin(result,message){
+    if(!result||!result.token||!result.dashboard)throw new Error('El servidor no ha devuelto una sesión válida.');
+    secureSessionVerified=true;
+    token=result.token;
+    currentDashboard=result.dashboard;
+    try{supabaseBackend=false;}catch(error){}
+    try{legacySessionToken=token;}catch(error){}
+    localStorage.setItem('LA_STUDENT_TOKEN',token);
+    try{localStorage.setItem(LA_LEGACY_SESSION_KEY,token);}catch(error){}
+    try{localStorage.removeItem(LA_SUPABASE_SESSION_KEY);}catch(error){}
+    saveCache('LA_DASHBOARD_CACHE',currentDashboard);
+    renderDashboard(currentDashboard);
+    revealStudentApp();
+    setStatus(message||'Sesión iniciada con Google.');
+  }
+  window.secureStudentLogin=async function(){
+    if(busy)return;
+    busy=true;
+    disable('[data-google-student-login]',true);
+    authStatus('Comprobando tu cuenta de Google del colegio...');
+    try{
+      const result=await baseCall('loginWithGoogleAccount',['student']);
+      finishGoogleStudentLogin(result,'Sesión iniciada con Google del colegio.');
+    }catch(error){
+      authStatus(error.message||'No se ha podido iniciar sesión con Google.');
+    }finally{
+      busy=false;
+      disable('[data-google-student-login]',false);
+    }
+  };
+  window.secureTeacherLogin=async function(){
+    if(busy)return;
+    busy=true;
+    disable('[data-google-teacher-player-login]',true);
+    authStatus('Creando o recuperando tu perfil de profe-jugador...');
+    try{
+      const result=await baseCall('loginTeacherAsStudentWithGoogle');
+      finishGoogleStudentLogin(result,'Modo profe-jugador activado.');
+    }catch(error){
+      authStatus(error.message||'No se ha podido entrar como profe-jugador.');
+    }finally{
+      busy=false;
+      disable('[data-google-teacher-player-login]',false);
+    }
+  };
+  window.mountGoogleStudentLogin=function(){
+    const card=q('loginCard');
+    if(!card)return;
+    document.body.classList.add('authPending');
+    card.classList.remove('hidden');
+    card.innerHTML=
+      '<div class="authShell">'+
+        '<section class="authWelcome">'+
+          '<div class="authWelcomeLogo" aria-hidden="true"></div>'+
+          '<h1><span class="grad">LenguArcade</span></h1>'+
+          '<p>Tu universo de juegos de Lengua. Entra con la cuenta Google del colegio para guardar tu progreso, tus logros y tu personaje.</p>'+
+        '</section>'+
+        '<section class="authForm" aria-labelledby="googleLoginTitle">'+
+          '<div class="sub">ACCESO DE ALUMNOS</div>'+
+          '<h2 id="googleLoginTitle">Entra en tu cuenta</h2>'+
+          '<p class="sub">Usa tu cuenta institucional de Google. No tienes que elegir clase, alumno ni PIN.</p>'+
+          '<span class="authDomain">@alumno.fomento.edu</span>'+
+          '<button type="button" data-google-student-login>Entrar con Google del colegio</button>'+
+          '<div class="teacherAccess">'+
+            '<button type="button" class="teacherToggle" data-teacher-toggle>Soy profesor</button>'+
+            '<div class="teacherPanel" data-teacher-panel>'+
+              '<p>Como profesor puedes abrir el panel docente o entrar como jugador con tu propio progreso dentro de LenguArcade.</p>'+
+              '<button type="button" data-google-teacher-player-login>Entrar como profe-jugador</button>'+
+              '<button type="button" class="teacherToggle" data-open-teacher-panel style="margin-top:10px">Abrir panel del profesor</button>'+
+            '</div>'+
+          '</div>'+
+          '<div class="status authStatus" id="status" data-google-auth-status>Elige cómo quieres entrar.</div>'+
+          '<span id="version" hidden></span>'+
+          '<div class="authSecurity"><span>✓</span><span>La sesión se valida con la cuenta Google activa del colegio. Los alumnos entran con @alumno.fomento.edu y los profesores con @fomento.edu.</span></div>'+
+        '</section>'+
+      '</div>';
+    const studentButton=card.querySelector('[data-google-student-login]');
+    const teacherToggle=card.querySelector('[data-teacher-toggle]');
+    const teacherPanel=card.querySelector('[data-teacher-panel]');
+    const teacherPlayerButton=card.querySelector('[data-google-teacher-player-login]');
+    const teacherPanelButton=card.querySelector('[data-open-teacher-panel]');
+    if(studentButton)studentButton.onclick=window.secureStudentLogin;
+    if(teacherToggle&&teacherPanel)teacherToggle.onclick=function(){teacherPanel.classList.toggle('open');};
+    if(teacherPlayerButton)teacherPlayerButton.onclick=window.secureTeacherLogin;
+    if(teacherPanelButton)teacherPanelButton.onclick=goToProfesorPanel;
+  };
+  try{
+    if(token&&currentDashboard){
+      secureSessionVerified=true;
+      revealStudentApp();
+    }else{
+      mountGoogleStudentLogin();
+    }
+  }catch(error){
+    console.error('No se pudo montar el login Google de LenguArcade.',error);
+    authStatus(error.message||String(error));
+  }
+})();
+</script>`;
 }
 
 function getCurrentGoogleAccount() {
