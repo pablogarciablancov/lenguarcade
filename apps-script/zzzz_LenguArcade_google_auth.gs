@@ -4,13 +4,18 @@
  * - Alumnos: @alumno.fomento.edu
  * - Profesores: @fomento.edu
  *
- * Las pantallas antiguas siguen disponibles con ?legacy=1.
+ * Pantallas:
+ * - /exec                 -> alumno con Google
+ * - /exec?page=profesor   -> panel de profesor original
+ * - /exec?page=profesor-google -> panel provisional Google, solo como respaldo
+ * - /exec?legacy=1        -> alumno antiguo
  */
 
 const LA_GOOGLE_AUTH_CONFIG = {
   STUDENT_DOMAIN: '@alumno.fomento.edu',
   TEACHER_DOMAIN: '@fomento.edu',
-  TEACHER_ALLOWED_CONFIG_KEY: 'TEACHER_ALLOWED_EMAILS'
+  TEACHER_ALLOWED_CONFIG_KEY: 'TEACHER_ALLOWED_EMAILS',
+  TEACHER_PLAYER_CLASS: 'PROFES'
 };
 
 function doGet(e) {
@@ -24,8 +29,16 @@ function doGet(e) {
     file = page === 'profesor' ? 'LenguArcade_Profesor' : 'LenguArcade_Alumno';
     title = page === 'profesor' ? 'LenguArcade - Profesor' : 'LenguArcade - Alumno';
   } else if (page === 'profesor' || page === 'profe' || page === 'teacher') {
-    file = 'LenguArcade_Profesor_Google';
+    // Importante: el panel bueno es el original, con Supabase, Classroom y el diseño oscuro.
+    file = 'LenguArcade_Profesor';
     title = 'LenguArcade - Profesor';
+  } else if (page === 'profesor-google' || page === 'teacher-google') {
+    // Respaldo: panel simple de Apps Script, no se usa como entrada principal.
+    file = 'LenguArcade_Profesor_Google';
+    title = 'LenguArcade - Profesor Google';
+  } else if (page === 'narratoria') {
+    file = 'Narratoria_Alumno';
+    title = 'Narratoria';
   }
 
   return HtmlService
@@ -55,8 +68,26 @@ function getCurrentGoogleAccount() {
   };
 }
 
-function loginWithGoogleAccount() {
+/**
+ * mode:
+ * - undefined / auto: alumno si @alumno, profesor si @fomento
+ * - student: alumno real o profesor-jugador
+ * - teacher: profesor
+ */
+function loginWithGoogleAccount(mode) {
   const email = requireActiveGoogleEmail_();
+  const cleanMode = String(mode || 'auto').toLowerCase();
+
+  if (cleanMode === 'student' || cleanMode === 'alumno' || cleanMode === 'player') {
+    if (isStudentGoogleEmail_(email)) return loginStudentWithGoogle();
+    if (isTeacherGoogleEmail_(email)) return loginTeacherAsStudentWithGoogle();
+    throw new Error('Para jugar debes usar una cuenta del colegio: @alumno.fomento.edu o @fomento.edu.');
+  }
+
+  if (cleanMode === 'teacher' || cleanMode === 'profesor' || cleanMode === 'profe') {
+    return loginTeacherWithGoogle();
+  }
+
   if (isStudentGoogleEmail_(email)) return loginStudentWithGoogle();
   if (isTeacherGoogleEmail_(email)) return loginTeacherWithGoogle();
   throw new Error('Usa una cuenta del colegio: @alumno.fomento.edu para alumnos o @fomento.edu para profesores.');
@@ -67,7 +98,7 @@ function loginStudentWithGoogle() {
   const email = requireActiveGoogleEmail_();
 
   if (!isStudentGoogleEmail_(email)) {
-    throw new Error('Para entrar como alumno debes usar tu cuenta @alumno.fomento.edu.');
+    throw new Error('Para entrar como alumno debes usar tu cuenta @alumno.fomento.edu. Si eres profesor y quieres jugar, usa el botón "Entrar como profe-jugador".');
   }
 
   const student = findStudentByEmail_(email);
@@ -83,6 +114,31 @@ function loginStudentWithGoogle() {
   return {
     ok: true,
     role: 'student',
+    token,
+    activeUserEmail: email,
+    student: safeStudent_(student),
+    dashboard: getStudentDashboardCore_(student.studentId)
+  };
+}
+
+function loginTeacherAsStudentWithGoogle() {
+  ensureSheets_();
+  const email = requireActiveGoogleEmail_();
+
+  if (!isTeacherGoogleEmail_(email)) {
+    throw new Error('Esta entrada es solo para profesores con cuenta @fomento.edu.');
+  }
+  if (!isTeacherAllowed_(email)) {
+    throw new Error('Esta cuenta de profesor no está autorizada: ' + email + '. Añádela en Config > TEACHER_ALLOWED_EMAILS o deja ese campo vacío para permitir @fomento.edu.');
+  }
+
+  const student = ensureTeacherPlayerStudent_(email);
+  touchStudent_(student.studentId);
+  const token = createSession_('student', student.studentId);
+  return {
+    ok: true,
+    role: 'student',
+    teacherPlayer: true,
     token,
     activeUserEmail: email,
     student: safeStudent_(student),
@@ -109,6 +165,59 @@ function loginTeacherWithGoogle() {
     email,
     version: LA_CONFIG.VERSION
   };
+}
+
+function ensureTeacherPlayerStudent_(email) {
+  const clean = String(email || '').trim().toLowerCase();
+  let student = findStudentByEmail_(clean);
+  if (student) {
+    if (!isTrue_(student.activo)) updateStudent_(student.studentId, { activo:true });
+    return findStudentByEmail_(clean) || student;
+  }
+
+  ensureTeacherPlayerClass_();
+  const local = clean.split('@')[0] || 'profesor';
+  const readable = local
+    .replace(/[._-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const studentId = 'profe_' + normalizeSlug_(local).slice(0, 80);
+  const now = nowIso_();
+  const row = {
+    studentId,
+    nombre:'Profe',
+    apellidos:readable || clean,
+    email:clean,
+    pin:'',
+    curso:'PROF',
+    linea:'DOC',
+    clase:LA_GOOGLE_AUTH_CONFIG.TEACHER_PLAYER_CLASS,
+    avatar:'avatar_01',
+    activo:true,
+    xpGeneral:0,
+    nivelGeneral:1,
+    plumas:0,
+    fechaAlta:now,
+    ultimaSesion:now
+  };
+  appendObject_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS), row);
+  clearCacheV03_ && clearCacheV03_();
+  return findStudentByEmail_(clean) || row;
+}
+
+function ensureTeacherPlayerClass_() {
+  const classCode = LA_GOOGLE_AUTH_CONFIG.TEACHER_PLAYER_CLASS;
+  const sheet = getSheet_(LA_CONFIG.SHEETS.CLASES);
+  const exists = rowsToObjects_(sheet).some(row => String(row.classCode || '') === classCode);
+  if (exists) return;
+  appendObject_(sheet, {
+    classCode,
+    curso:'Profesores',
+    linea:'Jugador',
+    nombreVisible:'Profesores · modo jugador',
+    activa:true,
+    updatedAt:nowIso_()
+  });
 }
 
 function requireActiveGoogleEmail_() {
