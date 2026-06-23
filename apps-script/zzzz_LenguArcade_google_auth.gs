@@ -201,7 +201,7 @@ function ensureTeacherPlayerStudent_(email) {
     ultimaSesion:now
   };
   appendObject_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS), row);
-  clearCacheV03_ && clearCacheV03_();
+  if (typeof clearCacheV03_ === 'function') clearCacheV03_();
   return findStudentByEmail_(clean) || row;
 }
 
