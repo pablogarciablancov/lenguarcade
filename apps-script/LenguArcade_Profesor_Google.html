@@ -7,7 +7,7 @@
   <title>LenguArcade - Profesor</title>
   <link rel="icon" href="https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-favicon.png" type="image/png">
   <style>
-    :root{--bg:#f4f7fb;--surface:#fff;--card:#fff;--text:#17203a;--muted:#64748b;--line:#dde5f0;--primary:#5e35b1;--secondary:#0288d1;--accent:#f9a825;--danger:#d32f2f;--ok:#12805c;--shadow:0 18px 42px rgba(50,70,120,.14);--radius:22px}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,Roboto,system-ui,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#eef3ff,#fbfdff);color:var(--text)}.login{min-height:100vh;display:grid;place-items:center;padding:22px}.loginCard,.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.loginCard{width:min(760px,100%);padding:34px;display:grid;grid-template-columns:120px 1fr;gap:24px;align-items:center}.logo{width:112px;height:112px;border-radius:28px;background:#09102a url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-logo.png') center/100px no-repeat}.title{font-size:38px;line-height:1;margin:0;background:linear-gradient(90deg,#f9a825,#d32f2f,#0288d1);-webkit-background-clip:text;color:transparent}.sub{color:var(--muted);font-size:13px;line-height:1.45}.domain{display:inline-block;margin-top:12px;padding:7px 10px;border-radius:999px;background:#e8f3ff;border:1px solid #b6d9f4;color:#075985;font-size:12px;font-weight:900}button{border:0;border-radius:15px;padding:12px 14px;background:linear-gradient(135deg,var(--secondary),var(--primary));color:#fff;font-weight:900;cursor:pointer;box-shadow:0 10px 22px rgba(2,8,23,.16)}button:disabled{opacity:.55;cursor:not-allowed}.ghost{background:#fff;color:var(--primary);border:1px solid var(--line);box-shadow:none}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.status{white-space:pre-wrap;color:var(--muted);font-size:13px;min-height:24px}.app{max-width:1440px;margin:0 auto;padding:18px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.card{padding:18px;margin-bottom:18px}h1,h2{margin:0}h2{font-size:19px}.filters{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr)) auto;gap:10px;align-items:end;margin-top:14px}.field label{display:block;font-size:12px;color:var(--muted);font-weight:800;margin-bottom:5px}select,input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--text)}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.kpi{border:1px solid var(--line);border-radius:18px;padding:14px;background:linear-gradient(180deg,#fff,#f8fbff)}.kpi span{display:block;color:var(--muted);font-size:12px}.kpi b{display:block;font-size:28px;margin-top:4px}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:18px}table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:#f8fbff}tr:hover td{background:#f8fbff}.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:900}.detail{display:grid;grid-template-columns:1fr 1fr;gap:14px}.row{display:flex;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px;background:#fff}.hidden{display:none!important}@media(max-width:900px){.loginCard{grid-template-columns:1fr}.filters,.kpis,.detail{grid-template-columns:1fr}.top{display:block}.actions{margin-bottom:8px}}
+    :root{--bg:#f4f7fb;--surface:#fff;--card:#fff;--text:#17203a;--muted:#64748b;--line:#dde5f0;--primary:#5e35b1;--secondary:#0288d1;--accent:#f9a825;--danger:#d32f2f;--ok:#12805c;--shadow:0 18px 42px rgba(50,70,120,.14);--radius:22px}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,Roboto,system-ui,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#eef3ff,#fbfdff);color:var(--text)}.login{min-height:100vh;display:grid;place-items:center;padding:22px}.loginCard,.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.loginCard{width:min(760px,100%);padding:34px;display:grid;grid-template-columns:120px 1fr;gap:24px;align-items:center}.logo{width:112px;height:112px;border-radius:28px;background:#09102a url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-logo.png') center/100px no-repeat}.title{font-size:38px;line-height:1;margin:0;background:linear-gradient(90deg,#f9a825,#d32f2f,#0288d1);-webkit-background-clip:text;color:transparent}.sub{color:var(--muted);font-size:13px;line-height:1.45}.domain{display:inline-block;margin-top:12px;padding:7px 10px;border-radius:999px;background:#e8f3ff;border:1px solid #b6d9f4;color:#075985;font-size:12px;font-weight:900}button{border:0;border-radius:15px;padding:12px 14px;background:linear-gradient(135deg,var(--secondary),var(--primary));color:#fff;font-weight:900;cursor:pointer;box-shadow:0 10px 22px rgba(2,8,23,.16)}button:disabled{opacity:.55;cursor:not-allowed}.ghost{background:#fff;color:var(--primary);border:1px solid var(--line);box-shadow:none}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.status{white-space:pre-wrap;color:var(--muted);font-size:13px;min-height:24px;margin-top:10px}.app{max-width:1440px;margin:0 auto;padding:18px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.card{padding:18px;margin-bottom:18px}h1,h2{margin:0}h2{font-size:19px}.filters{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr)) auto;gap:10px;align-items:end;margin-top:14px}.field label{display:block;font-size:12px;color:var(--muted);font-weight:800;margin-bottom:5px}select,input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--text)}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.kpi{border:1px solid var(--line);border-radius:18px;padding:14px;background:linear-gradient(180deg,#fff,#f8fbff)}.kpi span{display:block;color:var(--muted);font-size:12px}.kpi b{display:block;font-size:28px;margin-top:4px}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:18px}table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:#f8fbff}tr:hover td{background:#f8fbff}.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:900}.detail{display:grid;grid-template-columns:1fr 1fr;gap:14px}.row{display:flex;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px;background:#fff}.hidden{display:none!important}@media(max-width:900px){.loginCard{grid-template-columns:1fr}.filters,.kpis,.detail{grid-template-columns:1fr}.top{display:block}.actions{margin-bottom:8px}}
   </style>
 </head>
 <body>
@@ -36,24 +36,67 @@
 let teacherToken=localStorage.getItem('LA_TEACHER_GOOGLE_TOKEN')||'';
 let dashboard=null;
 const $=id=>document.getElementById(id);
-function callServer(fn,args){return new Promise((resolve,reject)=>google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn].apply(null,args||[]));}
+function msg(e){return e&&e.message?e.message:String(e||'Error desconocido');}
+function callServer(fn,args){return new Promise((resolve,reject)=>{try{if(!window.google||!google.script||!google.script.run)throw new Error('Esta pantalla debe abrirse desde la URL /exec de Apps Script.');google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn].apply(null,args||[]);}catch(error){reject(error);}});}
 function esc(s){return String(s==null?'':s).replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
 function status(t){$('appStatus').textContent=t||'';}
 function loginStatus(t){$('loginStatus').textContent=t||'';}
 function showApp(){ $('loginView').classList.add('hidden'); $('appView').classList.remove('hidden'); }
 function showLogin(){ $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
-function bind(){ $('loginBtn').onclick=login; $('studentLink').onclick=()=>{window.location.search='';}; $('logoutBtn').onclick=logout; $('reloadBtn').onclick=loadDashboard; $('applyBtn').onclick=loadDashboard; $('searchFilter').addEventListener('keydown',e=>{if(e.key==='Enter')loadDashboard();}); }
-async function boot(){ bind(); if(teacherToken){ try{ showApp(); await loadDashboard(); }catch(e){ localStorage.removeItem('LA_TEACHER_GOOGLE_TOKEN'); teacherToken=''; showLogin(); loginStatus('Sesión caducada. Vuelve a entrar.'); } } }
-async function login(){ $('loginBtn').disabled=true; loginStatus('Comprobando cuenta Google...'); try{ const res=await callServer('loginTeacherWithGoogle'); teacherToken=res.token; localStorage.setItem('LA_TEACHER_GOOGLE_TOKEN',teacherToken); $('teacherEmail').textContent=res.email; showApp(); await loadDashboard(); }catch(e){ loginStatus(e.message||String(e)); }finally{ $('loginBtn').disabled=false; } }
+async function goToPage(page){
+  loginStatus(page==='profesor'?'Abriendo panel de profesor...':'Abriendo pantalla de alumno...');
+  try{
+    const url=await callServer('getWebAppUrl');
+    if(!url) throw new Error('No he podido obtener la URL de la Web App.');
+    window.top.location.href=url+(page?'?page='+encodeURIComponent(page):'');
+  }catch(e){
+    loginStatus('No he podido cambiar de pantalla: '+msg(e)+'\nPrueba usando la URL /exec para alumnos o /exec?page=profesor para profesor.');
+  }
+}
+function bind(){
+  $('loginBtn').onclick=login;
+  $('studentLink').onclick=()=>goToPage('');
+  $('logoutBtn').onclick=logout;
+  $('reloadBtn').onclick=loadDashboard;
+  $('applyBtn').onclick=loadDashboard;
+  $('searchFilter').addEventListener('keydown',e=>{if(e.key==='Enter')loadDashboard();});
+}
+async function boot(){
+  bind();
+  if(teacherToken){
+    showApp();
+    try{ await loadDashboard(); }
+    catch(e){ localStorage.removeItem('LA_TEACHER_GOOGLE_TOKEN'); teacherToken=''; showLogin(); loginStatus('Sesión caducada. Vuelve a entrar. '+msg(e)); }
+  }
+}
+async function login(){
+  $('loginBtn').disabled=true;
+  loginStatus('Comprobando cuenta Google...');
+  try{
+    const res=await callServer('loginTeacherWithGoogle');
+    teacherToken=res.token;
+    localStorage.setItem('LA_TEACHER_GOOGLE_TOKEN',teacherToken);
+    $('teacherEmail').textContent=res.email||'';
+    showApp();
+    try{ await loadDashboard(); }
+    catch(loadError){ status('Has entrado como profesor, pero no he podido cargar el panel: '+msg(loadError)); }
+  }catch(e){
+    showLogin();
+    loginStatus(msg(e));
+  }finally{
+    $('loginBtn').disabled=false;
+  }
+}
 function logout(){ localStorage.removeItem('LA_TEACHER_GOOGLE_TOKEN'); teacherToken=''; dashboard=null; showLogin(); loginStatus('Sesión cerrada.'); }
 function filters(){ return {classCode:$('classFilter').value||'',gameId:$('gameFilter').value||'',search:$('searchFilter').value||'',sort:$('sortFilter').value||'xp'}; }
 async function loadDashboard(){ if(!teacherToken)return; status('Cargando panel...'); const data=await callServer('getTeacherDashboardV03',[teacherToken,filters()]); dashboard=data; renderDashboard(data); status('Actualizado.'); }
-function renderDashboard(d){ $('teacherEmail').textContent=(d.teacher&&d.teacher.email)||$('teacherEmail').textContent; renderFilters(d); renderKpis(d.summary||{}); renderStudents(d.students||[]); }
+function renderDashboard(d){ if(!d) throw new Error('No se ha recibido dashboard del profesor.'); $('teacherEmail').textContent=(d.teacher&&d.teacher.email)||$('teacherEmail').textContent; renderFilters(d); renderKpis(d.summary||{}); renderStudents(d.students||[]); }
 function renderFilters(d){ const cls=$('classFilter'),game=$('gameFilter'); const currentClass=cls.value,currentGame=game.value; cls.innerHTML='<option value="">Todas</option>'+((d.classes||[]).map(c=>'<option value="'+esc(c.classCode)+'">'+esc(c.nombreVisible||c.classCode)+'</option>').join('')); game.innerHTML='<option value="">Todos</option>'+((d.games||[]).map(g=>'<option value="'+esc(g.gameId)+'">'+esc(g.nombre||g.gameId)+'</option>').join('')); cls.value=currentClass; game.value=currentGame; }
 function renderKpis(s){ $('kpis').innerHTML=[['Alumnos',s.totalStudents||0],['XP total',s.totalXp||0],['Media',s.avgGrade||0],['Actividad hoy',s.todayEvents||0]].map(x=>'<div class="kpi"><span>'+esc(x[0])+'</span><b>'+esc(x[1])+'</b></div>').join(''); }
-function renderStudents(rows){ $('studentRows').innerHTML=rows.map(s=>'<tr><td><strong>'+esc(s.nombreCompleto||((s.nombre||'')+' '+(s.apellidos||'')))+'</strong></td><td><span class="pill">'+esc(s.clase||'')+'</span></td><td>'+esc(s.email||'')+'</td><td>'+esc(s.xp||0)+'</td><td>'+esc(s.level||0)+'</td><td>'+esc(s.plumas||0)+'</td><td>'+esc(s.grade||0)+'</td><td>'+esc(s.lastActivity||'')+'</td><td><button class="ghost" type="button" onclick="openDetail(\''+esc(s.studentId)+'\')">Ver</button></td></tr>').join('') || '<tr><td colspan="9">Sin alumnos para estos filtros.</td></tr>'; }
-async function openDetail(studentId){ status('Cargando detalle...'); try{ const d=await callServer('getTeacherStudentDetail',[teacherToken,studentId]); $('detailCard').classList.remove('hidden'); $('detailTitle').textContent='Detalle de '+((d.student&&d.student.nombreCompleto)||studentId); $('detailBody').innerHTML='<div><h3>Juegos</h3>'+rows((d.games||[]).map(g=>({l:g.nombre||g.gameId,r:(g.progress&&g.progress.percentage||0)+'%'})))+'</div><div><h3>Actividad</h3>'+rows((d.events||[]).slice(0,12).map(e=>({l:(e.gameId||'')+' · '+(e.eventType||''),r:e.timestamp||''})))+'</div>'; status('Detalle cargado.'); }catch(e){ status(e.message||String(e)); } }
+function renderStudents(rows){ $('studentRows').innerHTML=rows.map(s=>'<tr><td><strong>'+esc(s.nombreCompleto||((s.nombre||'')+' '+(s.apellidos||'')))+'</strong></td><td><span class="pill">'+esc(s.clase||'')+'</span></td><td>'+esc(s.email||'')+'</td><td>'+esc(s.xp||0)+'</td><td>'+esc(s.level||0)+'</td><td>'+esc(s.plumas||0)+'</td><td>'+esc(s.grade||0)+'</td><td>'+esc(s.lastActivity||'')+'</td><td><button class="ghost" type="button" data-student="'+esc(s.studentId)+'">Ver</button></td></tr>').join('') || '<tr><td colspan="9">Sin alumnos para estos filtros.</td></tr>'; document.querySelectorAll('[data-student]').forEach(btn=>btn.onclick=()=>openDetail(btn.getAttribute('data-student'))); }
+async function openDetail(studentId){ status('Cargando detalle...'); try{ const d=await callServer('getTeacherStudentDetail',[teacherToken,studentId]); $('detailCard').classList.remove('hidden'); $('detailTitle').textContent='Detalle de '+((d.student&&d.student.nombreCompleto)||studentId); $('detailBody').innerHTML='<div><h3>Juegos</h3>'+rows((d.games||[]).map(g=>({l:g.nombre||g.gameId,r:(g.progress&&g.progress.percentage||0)+'%'})))+'</div><div><h3>Actividad</h3>'+rows((d.events||[]).slice(0,12).map(e=>({l:(e.gameId||'')+' · '+(e.eventType||''),r:e.timestamp||''})))+'</div>'; status('Detalle cargado.'); }catch(e){ status(msg(e)); } }
 function rows(items){ return items.length?items.map(x=>'<div class="row"><span>'+esc(x.l)+'</span><strong>'+esc(x.r)+'</strong></div>').join(''):'<div class="sub">Sin datos.</div>'; }
+window.addEventListener('error',e=>loginStatus('Error de pantalla: '+(e.message||e.error||e)));
 boot();
 </script>
 </body>
