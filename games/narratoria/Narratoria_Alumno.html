@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Narratoria · Redirigiendo</title>
+  <meta http-equiv="refresh" content="0; url=./index.html">
+  <style>
+    html,body{margin:0;min-height:100%;display:grid;place-items:center;background:#0b1020;color:#f5f7ff;font-family:system-ui,Segoe UI,Arial,sans-serif}
+    .box{max-width:520px;padding:28px;border-radius:24px;background:#17213d;border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 46px rgba(0,0,0,.34)}
+    a{color:#ffd54f;font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Cargando Narratoria…</h1>
+    <p>Actualizando la entrada del juego.</p>
+    <p><a id="manualLink" href="./index.html">Abrir Narratoria</a></p>
+  </div>
+  <script>
+    (function(){
+      var target = './index.html' + window.location.search + window.location.hash;
+      var link = document.getElementById('manualLink');
+      if(link) link.href = target;
+      window.location.replace(target);
+    })();
+  </script>
+</body>
+</html>
