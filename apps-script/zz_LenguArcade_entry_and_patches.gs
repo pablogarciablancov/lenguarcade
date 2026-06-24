@@ -1,19 +1,21 @@
 /**
- * LenguArcade - acceso con cuenta Google del colegio.
+ * LenguArcade - entrada, login Google y parches de integración.
  *
- * - Alumnos: @alumno.fomento.edu
- * - Profesores: @fomento.edu
+ * Archivo único para evitar acumular varios zzz/zzzz en Apps Script.
  *
- * Pantallas principales:
- * - /exec                 -> alumno original + login Google
+ * Pantallas:
+ * - /exec                -> alumno original + login Google
  * - /exec?page=profesor   -> panel de profesor original
  * - /exec?legacy=1        -> alumno original sin parche Google
  *
+ * Google:
+ * - Alumnos: @alumno.fomento.edu
+ * - Profesores: @fomento.edu
+ *
  * Juegos:
- * - Los juegos deben vivir en GitHub Pages y abrirse desde el catálogo de LenguArcade.
+ * - Los juegos deben vivir en GitHub Pages y abrirse desde el catélogo de LenguArcade.
  * - /exec?page=narratoria redirige a games/narratoria/ en GitHub Pages para evitar servir juegos desde Apps Script.
  */
-
 const LA_GOOGLE_AUTH_CONFIG = {
   STUDENT_DOMAIN: '@alumno.fomento.edu',
   TEACHER_DOMAIN: '@fomento.edu',
@@ -52,7 +54,11 @@ function doGet(e) {
 function buildLenguArcadeHtmlOutput_(file, title, patchAlumnoGoogle) {
   let output = HtmlService.createHtmlOutputFromFile(file);
   if (patchAlumnoGoogle) {
-    const patch = getAlumnoOriginalGoogleLoginPatch_();
+    const patch =
+      getAlumnoOriginalGoogleLoginPatch_() +
+      '\n' +
+      getBattlegrafiaLenguArcadeProfilePatch_();
+
     const content = output.getContent();
     output = HtmlService.createHtmlOutput(
       content.indexOf('</body>') !== -1
@@ -60,6 +66,7 @@ function buildLenguArcadeHtmlOutput_(file, title, patchAlumnoGoogle) {
         : content + patch
     );
   }
+
   return output
     .setTitle(title)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
@@ -70,6 +77,7 @@ function buildExternalRedirectHtmlOutput_(url, title) {
   const safeTitle = String(title || 'LenguArcade').replace(/[&<>"']/g, function(ch) {
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];
   });
+
   return HtmlService.createHtmlOutput(
     '<!doctype html><html><head><base target="_top"><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
@@ -77,7 +85,9 @@ function buildExternalRedirectHtmlOutput_(url, title) {
     '<style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,Segoe UI,Arial,sans-serif;background:#0b1020;color:#f5f7ff}.box{max-width:520px;padding:28px;border-radius:24px;background:#17213d;box-shadow:0 18px 46px rgba(0,0,0,.34)}a{color:#7dd3fc}</style>' +
     '</head><body><div class="box"><h1>Cargando ' + safeTitle + '...</h1><p>Abriendo el juego desde GitHub Pages.</p><p><a href="' + safeUrl + '">Abrir manualmente</a></p></div>' +
     '<script>window.top.location.href="' + safeUrl + '";<\/script></body></html>'
-  ).setTitle(safeTitle).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  )
+    .setTitle(safeTitle)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 function getGithubGameUrl_(gameId) {
@@ -87,13 +97,16 @@ function getGithubGameUrl_(gameId) {
 
 function normalizeDashboardGameUrlsForGithub_(dashboard) {
   if (!dashboard || !Array.isArray(dashboard.games)) return dashboard;
+
   dashboard.games = dashboard.games.map(function(game) {
     if (!game || String(game.gameId || '').toLowerCase() !== 'narratoria') return game;
+
     const copy = Object.assign({}, game);
     copy.url = getGithubGameUrl_('narratoria');
     copy.embedUrl = getGithubGameUrl_('narratoria');
     return copy;
   });
+
   return dashboard;
 }
 
@@ -242,9 +255,168 @@ function getAlumnoOriginalGoogleLoginPatch_() {
       mountGoogleStudentLogin();
     }
   }catch(error){
-    console.error('No se pudo montar el login Google de LenguArcade.',error);
+    console.error('No se pudo montar el login Google de LenguArcade',error);
     authStatus(error.message||String(error));
   }
+})();
+</script>`;
+}
+
+/**
+ * Parche mínimo para Battlegrafía dentro de LenguArcade.
+ *
+ * Objetivo:
+ * - No tocar la web original del alumno.
+ * - No tocar Narratoria ni otros juegos.
+ * - Mantener el puente embebido de LenguArcade, pero reforzar el perfil que recibe Battlegrafía.
+ */
+function getBattlegrafiaLenguArcadeProfilePatch_() {
+  return `
+<script>
+(function(){
+  if(window.__LA_BATTLEGRAFIA_PROFILE_PATCH__) return;
+  window.__LA_BATTLEGRAFIA_PROFILE_PATCH__ = true;
+
+  function cleanText(value){
+    return String(value == null ? '' : value).trim();
+  }
+
+  function isBattlegrafiaGame(game){
+    return String(game && game.gameId || '').toLowerCase() === 'battlegrafia';
+  }
+
+  function getProfileSource(explicit){
+    return explicit ||
+      (window.currentDashboard && window.currentDashboard.student) ||
+      (typeof currentDashboard !== 'undefined' && currentDashboard && currentDashboard.student) ||
+      {};
+  }
+
+  function buildLenguArcadeProfile(explicitStudent){
+    const source = getProfileSource(explicitStudent);
+    const nombre = cleanText(source.nombre || source.firstName || source.given_name || source.givenName);
+    const apellidos = cleanText(source.apellidos || source.lastName || source.family_name || source.familyName);
+    const email = cleanText(source.email || source.mail || source.userEmail).toLowerCase();
+    const localPart = email ? email.split('@')[0] : '';
+    const explicitName = cleanText(source.name || source.fullName || source.displayName || source.playerName);
+    const fullName = cleanText(explicitName || [nombre, apellidos].filter(Boolean).join(' ') || localPart || 'Jugador');
+    const studentId = cleanText(source.studentId || source.student_id || source.id || source.profileId || localPart || '');
+    const clase = cleanText(source.clase || source.classCode || source.className || source.group || source.course || '');
+    const isTeacherPlayer = !!(
+      source.teacherPlayer ||
+      source.isTeacherPlayer ||
+      clase === 'PROFES' ||
+      (email && /@fomento\\.edu$/i.test(email) && !/@alumno\\.fomento\\.edu$/i.test(email))
+    );
+
+    return Object.assign({}, source, {
+      schema: 'lenguarcade-profile-v1',
+      source: 'LenguArcade',
+      role: isTeacherPlayer ? 'teacher-player' : (source.role || 'student'),
+      teacherPlayer: isTeacherPlayer,
+      isTeacherPlayer: isTeacherPlayer,
+      studentId: studentId,
+      student_id: studentId,
+      profileId: studentId,
+      id: studentId,
+      email: email,
+      mail: email,
+      userEmail: email,
+      nombre: nombre || fullName,
+      apellidos: apellidos,
+      name: fullName,
+      fullName: fullName,
+      displayName: fullName,
+      playerName: fullName,
+      username: localPart,
+      clase: clase,
+      classCode: clase,
+      className: clase,
+      group: clase,
+      course: source.curso || source.course || clase
+    });
+  }
+
+  function enrichInitPayload(payload){
+    const next = Object.assign({}, payload || {});
+    const profile = buildLenguArcadeProfile(next.student || next.profile || next.user);
+
+    next.student = Object.assign({}, profile, next.student || {});
+    next.profile = Object.assign({}, profile, next.profile || {});
+    next.user = Object.assign({}, profile, next.user || {});
+    next.player = Object.assign({}, profile, next.player || {});
+    next.lenguarcadeProfile = profile;
+
+    if(next.save && typeof next.save === 'object'){
+      next.save.__lenguarcadeProfile = profile;
+      next.save.lenguarcadeProfile = profile;
+      if(!next.save.studentId) next.save.studentId = profile.studentId;
+      if(!next.save.profileId) next.save.profileId = profile.profileId;
+      if(!next.save.email) next.save.email = profile.email;
+      if(!next.save.playerName) next.save.playerName = profile.playerName;
+      if(!next.save.name) next.save.name = profile.playerName;
+      if(!next.save.clase) next.save.clase = profile.clase;
+      if(!next.save.classCode) next.save.classCode = profile.classCode;
+    }
+
+    return next;
+  }
+
+  function addBattlegrafiaProfileToUrl(runner){
+    try{
+      if(!runner || !isBattlegrafiaGame(runner.game) || !runner.url) return runner;
+      const profile = buildLenguArcadeProfile();
+      const url = new URL(runner.url);
+      url.searchParams.set('laProfile', '1');
+      url.searchParams.set('studentId', profile.studentId || '');
+      url.searchParams.set('profileId', profile.profileId || '');
+      url.searchParams.set('studentName', profile.playerName || '');
+      url.searchParams.set('playerName', profile.playerName || '');
+      url.searchParams.set('studentEmail', profile.email || '');
+      url.searchParams.set('classCode', profile.classCode || '');
+      url.searchParams.set('teacherPlayer', profile.isTeacherPlayer ? '1' : '0');
+      runner.url = url.toString();
+    }catch(error){
+      console.warn('No se pudo añadir el perfil de LenguArcade a la URL de Battlegrafía.', error);
+    }
+    return runner;
+  }
+
+  function installPatch(){
+    if(typeof sendToActiveGame === 'function' && !sendToActiveGame.__battlegrafiaProfilePatched){
+      const originalSendToActiveGame = sendToActiveGame;
+      const patchedSendToActiveGame = function(type, payload){
+        let nextPayload = payload || {};
+        try{
+          const runner = (typeof activeGameRunner !== 'undefined') ? activeGameRunner : null;
+          if(type === 'INIT' && runner && isBattlegrafiaGame(runner.game)){
+            nextPayload = enrichInitPayload(nextPayload);
+          }
+        }catch(error){
+          console.warn('No se pudo normalizar el perfil para Battlegrafía.', error);
+        }
+        return originalSendToActiveGame(type, nextPayload);
+      };
+      patchedSendToActiveGame.__battlegrafiaProfilePatched = true;
+      sendToActiveGame = patchedSendToActiveGame;
+      window.sendToActiveGame = patchedSendToActiveGame;
+    }
+
+    if(typeof prepareEmbeddedGame === 'function' && !prepareEmbeddedGame.__battlegrafiaProfilePatched){
+      const originalPrepareEmbeddedGame = prepareEmbeddedGame;
+      const patchedPrepareEmbeddedGame = function(game){
+        const runner = originalPrepareEmbeddedGame(game);
+        return addBattlegrafiaProfileToUrl(runner);
+      };
+      patchedPrepareEmbeddedGame.__battlegrafiaProfilePatched = true;
+      prepareEmbeddedGame = patchedPrepareEmbeddedGame;
+      window.prepareEmbeddedGame = patchedPrepareEmbeddedGame;
+    }
+  }
+
+  installPatch();
+  setTimeout(installPatch, 0);
+  setTimeout(installPatch, 250);
 })();
 </script>`;
 }
@@ -322,7 +494,7 @@ function loginTeacherAsStudentWithGoogle() {
     throw new Error('Esta entrada es solo para profesores con cuenta @fomento.edu.');
   }
   if (!isTeacherAllowed_(email)) {
-    throw new Error('Esta cuenta de profesor no está autorizada: ' + email + '. Añádela en Config > TEACHER_ALLOWED_EMAILS o deja ese campo vacío para permitir @fomento.edu.');
+    throw new Error('Esta cuenta de profesor no está autorizada: ' + email + '. Añadela en Config > TEACHER_ALLOWED_EMAILS o deja ese campo vacío para permitir @fomento.edu.');
   }
 
   const student = ensureTeacherPlayerStudent_(email);
@@ -347,7 +519,7 @@ function loginTeacherWithGoogle() {
     throw new Error('Para entrar como profesor debes usar una cuenta @fomento.edu.');
   }
   if (!isTeacherAllowed_(email)) {
-    throw new Error('Esta cuenta de profesor no está autorizada para ver el panel: ' + email + '. Añádela en Config > TEACHER_ALLOWED_EMAILS o deja ese campo vacío para permitir @fomento.edu.');
+    throw new Error('Esta cuenta de profesor no está autorizada para ver el panel: ' + email + '. Añadela en Config > TEACHER_ALLOWED_EMAILS o deja ese campo vacío para permitir @fomento.edu.');
   }
 
   const token = createSession_('teacher', email);
@@ -403,6 +575,7 @@ function ensureTeacherPlayerClass_() {
   const sheet = getSheet_(LA_CONFIG.SHEETS.CLASES);
   const exists = rowsToObjects_(sheet).some(row => String(row.classCode || '') === classCode);
   if (exists) return;
+
   appendObject_(sheet, {
     classCode,
     curso:'Profesores',
