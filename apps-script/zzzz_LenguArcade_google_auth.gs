@@ -4,25 +4,33 @@
  * - Alumnos: @alumno.fomento.edu
  * - Profesores: @fomento.edu
  *
- * Pantallas:
+ * Pantallas principales:
  * - /exec                 -> alumno original + login Google
  * - /exec?page=profesor   -> panel de profesor original
- * - /exec?page=alumno-google -> pantalla provisional Google, solo como respaldo
- * - /exec?page=profesor-google -> panel provisional Google, solo como respaldo
  * - /exec?legacy=1        -> alumno original sin parche Google
+ *
+ * Juegos:
+ * - Los juegos deben vivir en GitHub Pages y abrirse desde el catálogo de LenguArcade.
+ * - /exec?page=narratoria redirige a games/narratoria/ en GitHub Pages para evitar servir juegos desde Apps Script.
  */
 
 const LA_GOOGLE_AUTH_CONFIG = {
   STUDENT_DOMAIN: '@alumno.fomento.edu',
   TEACHER_DOMAIN: '@fomento.edu',
   TEACHER_ALLOWED_CONFIG_KEY: 'TEACHER_ALLOWED_EMAILS',
-  TEACHER_PLAYER_CLASS: 'PROFES'
+  TEACHER_PLAYER_CLASS: 'PROFES',
+  GITHUB_PAGES_GAMES_BASE: 'https://pablogarciablancov.github.io/lenguarcade/games/'
 };
 
 function doGet(e) {
   const params = (e && e.parameter) ? e.parameter : {};
   const page = String(params.page || params.p || 'alumno').toLowerCase();
   const legacy = String(params.legacy || '').trim() === '1';
+
+  if (page === 'narratoria') {
+    return buildExternalRedirectHtmlOutput_(getGithubGameUrl_('narratoria'), 'Narratoria');
+  }
+
   let file = 'LenguArcade_Alumno';
   let title = 'LenguArcade';
   let patchAlumnoGoogle = !legacy;
@@ -35,20 +43,6 @@ function doGet(e) {
     // Importante: el panel bueno es el original, con Supabase, Classroom y el diseño oscuro.
     file = 'LenguArcade_Profesor';
     title = 'LenguArcade - Profesor';
-    patchAlumnoGoogle = false;
-  } else if (page === 'alumno-google' || page === 'student-google') {
-    // Respaldo: pantalla simple de Apps Script, no se usa como entrada principal.
-    file = 'LenguArcade_Alumno_Google';
-    title = 'LenguArcade - Alumno Google';
-    patchAlumnoGoogle = false;
-  } else if (page === 'profesor-google' || page === 'teacher-google') {
-    // Respaldo: panel simple de Apps Script, no se usa como entrada principal.
-    file = 'LenguArcade_Profesor_Google';
-    title = 'LenguArcade - Profesor Google';
-    patchAlumnoGoogle = false;
-  } else if (page === 'narratoria') {
-    file = 'Narratoria_Alumno';
-    title = 'Narratoria';
     patchAlumnoGoogle = false;
   }
 
@@ -69,6 +63,38 @@ function buildLenguArcadeHtmlOutput_(file, title, patchAlumnoGoogle) {
   return output
     .setTitle(title)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function buildExternalRedirectHtmlOutput_(url, title) {
+  const safeUrl = String(url || '').replace(/"/g, '%22');
+  const safeTitle = String(title || 'LenguArcade').replace(/[&<>"']/g, function(ch) {
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];
+  });
+  return HtmlService.createHtmlOutput(
+    '<!doctype html><html><head><base target="_top"><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<title>' + safeTitle + '</title>' +
+    '<style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,Segoe UI,Arial,sans-serif;background:#0b1020;color:#f5f7ff}.box{max-width:520px;padding:28px;border-radius:24px;background:#17213d;box-shadow:0 18px 46px rgba(0,0,0,.34)}a{color:#7dd3fc}</style>' +
+    '</head><body><div class="box"><h1>Cargando ' + safeTitle + '...</h1><p>Abriendo el juego desde GitHub Pages.</p><p><a href="' + safeUrl + '">Abrir manualmente</a></p></div>' +
+    '<script>window.top.location.href="' + safeUrl + '";<\/script></body></html>'
+  ).setTitle(safeTitle).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function getGithubGameUrl_(gameId) {
+  const cleanGameId = String(gameId || '').replace(/^\/+|\/+$/g, '');
+  return LA_GOOGLE_AUTH_CONFIG.GITHUB_PAGES_GAMES_BASE + cleanGameId + '/';
+}
+
+function normalizeDashboardGameUrlsForGithub_(dashboard) {
+  if (!dashboard || !Array.isArray(dashboard.games)) return dashboard;
+  dashboard.games = dashboard.games.map(function(game) {
+    if (!game || String(game.gameId || '').toLowerCase() !== 'narratoria') return game;
+    const copy = Object.assign({}, game);
+    copy.url = getGithubGameUrl_('narratoria');
+    copy.embedUrl = getGithubGameUrl_('narratoria');
+    return copy;
+  });
+  return dashboard;
 }
 
 /**
@@ -110,11 +136,22 @@ function getAlumnoOriginalGoogleLoginPatch_() {
       authStatus('No se ha podido abrir el panel: '+(error.message||error));
     }
   }
+  function normalizeNarratoriaUrl(dashboard){
+    if(!dashboard||!Array.isArray(dashboard.games))return dashboard;
+    dashboard.games=dashboard.games.map(function(game){
+      if(!game||String(game.gameId||'').toLowerCase()!=='narratoria')return game;
+      const copy=Object.assign({},game);
+      copy.url='https://pablogarciablancov.github.io/lenguarcade/games/narratoria/';
+      copy.embedUrl=copy.url;
+      return copy;
+    });
+    return dashboard;
+  }
   function finishGoogleStudentLogin(result,message){
     if(!result||!result.token||!result.dashboard)throw new Error('El servidor no ha devuelto una sesión válida.');
     secureSessionVerified=true;
     token=result.token;
-    currentDashboard=result.dashboard;
+    currentDashboard=normalizeNarratoriaUrl(result.dashboard);
     try{supabaseBackend=false;}catch(error){}
     try{legacySessionToken=token;}catch(error){}
     localStorage.setItem('LA_STUDENT_TOKEN',token);
@@ -198,6 +235,7 @@ function getAlumnoOriginalGoogleLoginPatch_() {
   };
   try{
     if(token&&currentDashboard){
+      currentDashboard=normalizeNarratoriaUrl(currentDashboard);
       secureSessionVerified=true;
       revealStudentApp();
     }else{
@@ -272,7 +310,7 @@ function loginStudentWithGoogle() {
     token,
     activeUserEmail: email,
     student: safeStudent_(student),
-    dashboard: getStudentDashboardCore_(student.studentId)
+    dashboard: normalizeDashboardGameUrlsForGithub_(getStudentDashboardCore_(student.studentId))
   };
 }
 
@@ -297,7 +335,7 @@ function loginTeacherAsStudentWithGoogle() {
     token,
     activeUserEmail: email,
     student: safeStudent_(student),
-    dashboard: getStudentDashboardCore_(student.studentId)
+    dashboard: normalizeDashboardGameUrlsForGithub_(getStudentDashboardCore_(student.studentId))
   };
 }
 
