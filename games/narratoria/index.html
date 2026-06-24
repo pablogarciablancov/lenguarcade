@@ -5,25 +5,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Narratoria · LenguArcade</title>
   <style>
-    :root{color-scheme:dark;--bg:#0b1020;--card:#17213d;--text:#f5f7ff;--muted:#aeb9d6;--accent:#ffd54f}
     *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 20% 10%,#263b82,var(--bg) 46%,#050712);color:var(--text);font-family:system-ui,Segoe UI,Arial,sans-serif;padding:20px}
-    main{width:min(520px,100%);padding:28px;border-radius:24px;background:var(--card);box-shadow:0 18px 46px rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.12)}
-    h1{margin:0 0 8px;font-size:28px}p{color:var(--muted);line-height:1.5}a{color:var(--accent);font-weight:800}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020;color:#f5f7ff;font-family:system-ui,Segoe UI,Arial,sans-serif}
+    #loading{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 20% 10%,#263b82,#0b1020 46%,#050712);z-index:2;padding:20px;text-align:center}
+    .box{width:min(520px,100%);padding:28px;border-radius:24px;background:#17213d;box-shadow:0 18px 46px rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.12)}
+    h1{margin:0 0 8px;font-size:28px}p{color:#aeb9d6;line-height:1.5}a{color:#ffd54f;font-weight:800}
+    iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#1a1a1a;z-index:1}
+    body.ready #loading{display:none}
   </style>
 </head>
 <body>
-  <main>
-    <h1>Cargando Narratoria…</h1>
-    <p>Te estamos llevando al juego dentro de LenguArcade.</p>
-    <p><a id="manualLink" href="./Narratoria_Alumno.html">Abrir Narratoria manualmente</a></p>
-  </main>
+  <div id="loading">
+    <div class="box">
+      <h1>Cargando Narratoria…</h1>
+      <p>Conectando el perfil de LenguArcade con el juego.</p>
+      <p><a id="manualLink" href="./Narratoria_Alumno.html">Abrir Narratoria manualmente</a></p>
+    </div>
+  </div>
+
+  <iframe id="gameFrame" title="Narratoria" allow="clipboard-read; clipboard-write"></iframe>
+
   <script>
     (function(){
-      const target = './Narratoria_Alumno.html' + window.location.search + window.location.hash;
+      const params = new URLSearchParams(window.location.search);
+      const channel = String(params.get('channel') || '');
+      const frame = document.getElementById('gameFrame');
       const manual = document.getElementById('manualLink');
-      if (manual) manual.href = target;
-      window.location.replace(target);
+      const gameUrl = './Narratoria_Alumno.html' + window.location.search + window.location.hash;
+      let hostWindow = null;
+      let gameReady = false;
+      let queuedHostMessages = [];
+
+      if (manual) manual.href = gameUrl;
+      frame.src = gameUrl;
+
+      function isLenguArcadeHostMessage(message){
+        return message && message.namespace === 'lenguarcade-host' && (!channel || message.channel === channel);
+      }
+
+      function isLenguArcadeGameMessage(message){
+        return message && message.namespace === 'lenguarcade-game' && (!channel || message.channel === channel);
+      }
+
+      function postToGame(message){
+        if (!frame.contentWindow) return;
+        frame.contentWindow.postMessage(message, '*');
+      }
+
+      function postToHost(message){
+        const target = hostWindow || window.parent;
+        if (target && target !== window) target.postMessage(message, '*');
+      }
+
+      function flushHostQueue(){
+        if (!gameReady) return;
+        const pending = queuedHostMessages.slice();
+        queuedHostMessages = [];
+        pending.forEach(postToGame);
+      }
+
+      window.addEventListener('message', function(event){
+        const message = event.data || {};
+
+        if (isLenguArcadeHostMessage(message)) {
+          hostWindow = event.source || window.parent;
+          if (gameReady) postToGame(message);
+          else queuedHostMessages.push(message);
+          return;
+        }
+
+        if (isLenguArcadeGameMessage(message)) {
+          if (message.type === 'READY' || message.type === 'INITIALIZED') {
+            gameReady = true;
+            document.body.classList.add('ready');
+            flushHostQueue();
+          }
+          postToHost(message);
+        }
+      });
+
+      frame.addEventListener('load', function(){
+        // Si Narratoria tarda en anunciarse, mantenemos visible la pantalla de carga.
+        setTimeout(function(){
+          if (!gameReady && frame.contentWindow) {
+            // Algunos navegadores pueden perder el primer INIT si el iframe estaba redirigiendo/cargando.
+            flushHostQueue();
+          }
+        }, 350);
+      });
     })();
   </script>
 </body>
