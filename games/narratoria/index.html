@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="0; url=./Narratoria_Alumno.html">
   <title>Narratoria · LenguArcade</title>
   <style>
     :root{color-scheme:dark;--bg:#0b1020;--card:#17213d;--text:#f5f7ff;--muted:#aeb9d6;--accent:#ffd54f}
@@ -17,8 +16,15 @@
   <main>
     <h1>Cargando Narratoria…</h1>
     <p>Te estamos llevando al juego dentro de LenguArcade.</p>
-    <p><a href="./Narratoria_Alumno.html">Abrir Narratoria manualmente</a></p>
+    <p><a id="manualLink" href="./Narratoria_Alumno.html">Abrir Narratoria manualmente</a></p>
   </main>
-  <script>window.location.replace('./Narratoria_Alumno.html');</script>
+  <script>
+    (function(){
+      const target = './Narratoria_Alumno.html' + window.location.search + window.location.hash;
+      const manual = document.getElementById('manualLink');
+      if (manual) manual.href = target;
+      window.location.replace(target);
+    })();
+  </script>
 </body>
 </html>
