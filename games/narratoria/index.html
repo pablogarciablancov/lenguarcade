@@ -1,99 +1,2578 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Narratoria · LenguArcade</title>
-  <style>
-    *{box-sizing:border-box}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020;color:#f5f7ff;font-family:system-ui,Segoe UI,Arial,sans-serif}
-    #loading{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 20% 10%,#263b82,#0b1020 46%,#050712);z-index:2;padding:20px;text-align:center}
-    .box{width:min(520px,100%);padding:28px;border-radius:24px;background:#17213d;box-shadow:0 18px 46px rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.12)}
-    h1{margin:0 0 8px;font-size:28px}p{color:#aeb9d6;line-height:1.5}a{color:#ffd54f;font-weight:800}
-    iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#1a1a1a;z-index:1}
-    body.ready #loading{display:none}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Narratoria · Alumno</title>
+    <style>
+
+        :root {
+            --bg-dark: #1a1a1a;
+            --parchment: #fdf5e6;
+            --parchment-dark: #e0c99f;
+            --ink: #2b1d0e;
+            --ink-light: #5d4037;
+            --gold: #d4af37;
+            --gold-dark: #8a6d1f;
+            --gold-bright: #ffd700;
+            --rarity-común: #cfd8dc;
+            --rarity-inusual: #2d6a4f;
+            --rarity-épica: #8d5a99;
+            --rarity-legendaria: #ffd740;
+            --danger: #961c1c;
+            --success: #2d6a4f;
+            --partial: #f57f17;
+            --xp-color: #3a86ff;
+
+
+            --color-prota: #1e555c;
+            --color-deseo: #b08253;
+            --color-obs: #e07a5f;
+            --color-lugar: #2a9d8f;
+            --color-obj: #8d5a99;
+            --color-giro: #264653;
+
+            --font-title: 'Georgia', serif;
+            --font-text: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+            --font-ui: 'Verdana', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at center, #2e2118 0%, #110d0a 100%);
+            color: var(--ink);
+            font-family: var(--font-text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1, h2, h3, h4 { font-family: var(--font-title); font-weight: normal; }
+
+
+        #game-container {
+            background: linear-gradient(135deg, var(--parchment) 0%, #f4e4bc 100%);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8), inset 0 0 50px rgba(139, 69, 19, 0.1);
+            border: 4px solid #5d4037;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 1200px;
+            min-height: 85vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        #player-hud {
+            position: absolute; top: 15px; right: 20px; display: flex; gap: 15px;
+            font-family: var(--font-ui); font-size: 0.9rem; font-weight: bold;
+            background: rgba(255, 255, 255, 0.95); padding: 8px 20px; border-radius: 30px;
+            border: 2px solid var(--gold); z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer; transition: 0.2s;
+        }
+        #player-hud:hover { transform: scale(1.05); }
+        .hud-item { display: flex; align-items: center; gap: 5px; }
+        .hud-xp { color: var(--xp-color); text-shadow: 1px 1px 0px rgba(0,0,0,0.1); }
+        .hud-tinteros { color: #8e24aa; }
+
+
+        .screen { display: none; flex-direction: column; padding: 40px; height: 100%; flex-grow: 1; animation: fadeIn 0.4s ease-out; overflow-y: auto; z-index: 1; margin-top: 20px; }
+        .screen.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+
+        .title-main { text-align: center; font-size: 4rem; color: var(--ink); text-shadow: 2px 2px 0px var(--gold); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 3px; }
+        .subtitle { text-align: center; font-size: 1.5rem; color: var(--ink-light); font-style: italic; margin-bottom: 40px; }
+        .btn { background: var(--ink); color: var(--parchment); border: 2px solid var(--gold); padding: 12px 25px; font-family: var(--font-title); font-size: 1.1rem; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3); text-transform: uppercase; letter-spacing: 1px;}
+        .btn:hover:not(:disabled) { background: var(--gold); color: var(--ink); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: transparent; color: var(--ink); border-color: var(--ink); }
+        .btn-secondary:hover:not(:disabled) { background: var(--ink); color: var(--parchment); }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 450px; }
+
+        .difficulty-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+        .btn-diff { background: rgba(255,255,255,0.6); color: var(--ink); border: 2px solid var(--ink-light); padding: 10px 20px; border-radius: 6px; cursor: pointer; font-family: var(--font-ui); font-weight: bold; transition: 0.3s; }
+        .btn-diff:hover { transform: translateY(-2px); }
+        .btn-diff.selected { background: var(--gold); color: var(--ink); border-color: var(--ink); box-shadow: 0 0 15px rgba(212, 175, 55, 0.6); }
+
+        .mission-box { background: var(--ink); color: var(--parchment); padding: 15px 25px; border-radius: 8px; text-align: center; font-family: var(--font-ui); font-size: 1.2rem; border: 2px solid var(--gold); margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+
+        .mission-reminder {
+            background: linear-gradient(135deg, #fff9e6 0%, #f7e3aa 100%);
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            font-family: var(--font-ui);
+        }
+        .mission-reminder .mission-label {
+            display: block;
+            color: var(--ink-light);
+            font-size: 0.72rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .mission-reminder strong {
+            display: block;
+            color: var(--ink);
+            font-family: var(--font-title);
+            font-size: 1.05rem;
+            line-height: 1.35;
+        }
+        .phase-mission-line {
+            background: rgba(212,175,55,0.18);
+            border: 1px solid rgba(93,64,55,0.22);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            font-family: var(--font-ui);
+            line-height: 1.45;
+        }
+        .phase-mission-line strong { color: var(--ink); }
+
+        .progress-container { display: flex; justify-content: space-between; margin-bottom: 25px; position: relative; padding: 0 10px; }
+        .progress-container::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: rgba(139,69,19,0.3); z-index: -1; }
+        .progress-step { background: var(--parchment); border: 2px solid rgba(139,69,19,0.4); padding: 6px 18px; border-radius: 20px; font-family: var(--font-ui); font-size: 0.85rem; font-weight: bold; color: var(--ink-light); transition: all 0.3s; }
+        .progress-step.active { border-color: var(--gold); background: #fff9e6; color: var(--ink); transform: scale(1.1); box-shadow: 0 0 10px rgba(212,175,55,0.5); }
+        .progress-step.completed { border-color: var(--success); background: #e8f5e9; color: var(--success); }
+
+
+        .tcg-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 240px);
+            gap: 20px;
+            margin: 0 auto 30px auto;
+            justify-content: center;
+        }
+
+        @media (max-width: 850px) { .tcg-grid { grid-template-columns: repeat(2, 240px); } }
+        @media (max-width: 550px) { .tcg-grid { grid-template-columns: 240px; } }
+
+        .tcg-card {
+            width: 240px;
+            height: 360px;
+            perspective: 1000px;
+            background: transparent;
+        }
+
+        .tcg-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .tcg-card:hover .tcg-card-inner { transform: translateY(-5px) scale(1.02); }
+        .tcg-card.flipped .tcg-card-inner { transform: rotateY(180deg); }
+
+        .tcg-card-front, .tcg-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 12px;
+            border: 4px solid var(--gold-dark);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+
+        .tcg-card-back {
+            background: radial-gradient(circle at center, #4a3320 0%, #1a100a 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .tcg-card-back::after { content: ''; position: absolute; inset: 8px; border: 1px dashed rgba(212, 175, 55, 0.4); border-radius: 8px; }
+        .back-logo { font-size: 3.5rem; color: var(--gold); margin-bottom: 10px; }
+
+
+        .tcg-card-front {
+            transform: rotateY(180deg);
+            background-color: #fdfaf3;
+            display: flex; flex-direction: column;
+        }
+
+        .tcg-header {
+            padding: 10px; color: #fff; font-family: var(--font-title); font-size: 1rem;
+            text-transform: uppercase; letter-spacing: 1px; text-align: center;
+        }
+
+        .tcg-art-area {
+            flex-grow: 1; display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden; border-bottom: 2px solid rgba(139, 69, 19, 0.2);
+        }
+
+
+        .tcg-art-bg {
+            position: absolute; width: 140px; height: 140px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            box-shadow: 0 0 30px rgba(255,255,255,0.5);
+            z-index: 1;
+        }
+
+        .tcg-icon-large {
+            font-size: 5rem; z-index: 2; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+        }
+
+        .tcg-body {
+            padding: 15px 10px; text-align: center; height: 110px;
+            display: flex; flex-direction: column; justify-content: center; background: #fff;
+        }
+        .tcg-value { font-size: 1.1rem; font-family: var(--font-title); font-weight: bold; color: var(--ink); line-height: 1.3;}
+
+        .tcg-footer {
+            padding: 8px; text-align: center; font-size: 0.7rem; background: #f0eae1;
+            display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed #ccc;
+        }
+        .tcg-rarity { font-family: var(--font-ui); font-weight: bold; text-transform: uppercase; padding: 3px 6px; border-radius: 4px; color: #fff; }
+
+
+        .theme-protagonista .tcg-header { background: var(--color-prota); } .theme-protagonista .tcg-art-area { background: linear-gradient(to bottom, #2b6a73, #1e555c); }
+        .theme-deseo .tcg-header { background: var(--color-deseo); } .theme-deseo .tcg-art-area { background: linear-gradient(to bottom, #d6a16d, #b08253); }
+        .theme-obstaculo .tcg-header { background: var(--color-obs); } .theme-obstaculo .tcg-art-area { background: linear-gradient(to bottom, #e88d75, #e07a5f); }
+        .theme-lugar .tcg-header { background: var(--color-lugar); } .theme-lugar .tcg-art-area { background: linear-gradient(to bottom, #42b5a6, #2a9d8f); }
+        .theme-objeto .tcg-header { background: var(--color-obj); } .theme-objeto .tcg-art-area { background: linear-gradient(to bottom, #a670b3, #8d5a99); }
+        .theme-giro .tcg-header { background: var(--color-giro); } .theme-giro .tcg-art-area { background: linear-gradient(to bottom, #396475, #264653); }
+
+
+        .rarity-común .tcg-card-front { border-color: var(--rarity-común); } .rarity-común .tcg-rarity { background: var(--rarity-común); color:#333;}
+        .rarity-inusual .tcg-card-front { border-color: var(--rarity-inusual); } .rarity-inusual .tcg-rarity { background: var(--rarity-inusual); }
+        .rarity-épica .tcg-card-front { border-color: var(--rarity-épica); box-shadow: 0 0 15px rgba(171,71,188,0.5); } .rarity-épica .tcg-rarity { background: var(--rarity-épica); }
+        .rarity-legendaria .tcg-card-front { border-color: var(--rarity-legendaria); box-shadow: 0 0 20px rgba(255,202,40,0.6); } .rarity-legendaria .tcg-rarity { background: var(--rarity-legendaria); color:#000;}
+
+
+        .writing-layout { display: grid; grid-template-columns: 280px 1fr; gap: 30px; }
+        @media (max-width: 900px) { .writing-layout { grid-template-columns: 1fr; } }
+        .side-panel { background: rgba(255, 255, 255, 0.5); border: 2px solid rgba(139, 69, 19, 0.2); padding: 20px; border-radius: 12px; font-family: var(--font-ui); }
+        .side-panel h3 { font-family: var(--font-title); font-size: 1.2rem; margin-bottom: 15px; border-bottom: 2px solid var(--gold); padding-bottom: 5px;}
+        .objective-list { list-style: none; margin-bottom: 25px; }
+        .objective-item { display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 0.9rem; line-height: 1.4; font-weight: bold; }
+        .obj-icon { margin-right: 10px; font-size: 1.1rem; text-align: center; }
+        .status-none { color: #555; } .status-partial { color: var(--partial); } .status-ok { color: var(--success); }
+
+        .mini-card { background: #fff; border: 1px solid var(--gold-dark); border-left: 5px solid var(--gold); padding: 10px; margin-bottom: 10px; border-radius: 6px; font-size: 0.9rem; font-family: var(--font-text); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .mini-card strong { display: block; font-size: 0.7rem; text-transform: uppercase; color: var(--ink-light); font-family: var(--font-ui); margin-bottom: 3px; }
+
+        .inventory-panel { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+        .inv-btn { background: #fff; border: 2px solid var(--gold); border-radius: 6px; padding: 8px; font-size: 0.9rem; cursor: pointer; flex-grow: 1; font-weight: bold; font-family: var(--font-ui); transition: 0.2s; }
+        .inv-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); background: #fff9e6; }
+        .inv-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .phase-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--ink-light); padding-bottom: 10px; }
+        .word-counter { font-family: var(--font-ui); font-size: 0.9rem; font-weight: bold; background: var(--ink); color: #fff; padding: 6px 12px; border-radius: 20px; }
+        .instruction-box { background: rgba(255,255,255,0.7); padding: 15px; border-left: 5px solid var(--ink); margin-bottom: 15px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        textarea { width: 100%; flex-grow: 1; min-height: 280px; background: rgba(255, 255, 255, 0.85); border: 2px solid var(--ink-light); padding: 20px; font-family: var(--font-text); font-size: 1.25rem; line-height: 1.6; color: var(--ink); border-radius: 8px; resize: vertical; margin-bottom: 15px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05); }
+        textarea:focus { outline: none; border-color: var(--gold-dark); box-shadow: inset 0 2px 10px rgba(0,0,0,0.1), 0 0 8px rgba(212, 175, 55, 0.6); }
+        .navigation-bar { display: flex; justify-content: space-between; align-items: center; }
+
+
+        .shop-grid, .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 20px; }
+        .shop-item { background: rgba(255,255,255,0.6); border: 2px dashed var(--gold-dark); border-radius: 12px; padding: 25px; text-align: center; transition: 0.3s; }
+        .shop-item:hover { background: #fff; transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .profile-stat-box { background: #fff; padding: 20px; border-radius: 12px; text-align: center; border: 2px solid var(--gold); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .profile-stat-value { font-size: 3rem; font-weight: bold; color: var(--ink); font-family: var(--font-title); }
+        .profile-stat-label { font-size: 0.9rem; text-transform: uppercase; color: var(--ink-light); font-family: var(--font-ui); font-weight: bold; margin-top: 5px; }
+
+        .evaluation-sheet { background: #fff; border: 3px solid var(--gold-dark); border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; }
+        .final-score-display { font-size: 6rem; font-weight: bold; color: var(--ink); text-shadow: 3px 3px 0px var(--gold); margin-bottom: 20px; font-family: var(--font-title); line-height: 1; }
+        .eval-feedback-text { text-align: left; background: rgba(139, 69, 19, 0.05); padding: 25px; border-radius: 8px; font-family: var(--font-ui); font-size: 1.05rem; line-height: 1.6; margin-bottom: 25px; border: 1px solid rgba(139,69,19,0.1); }
+        .eval-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; font-family: var(--font-ui); }
+        .rubric-table { width: 100%; border-collapse: collapse; margin: 15px 0; background: #fff; border-radius: 8px; overflow: hidden; }
+        .rubric-table th, .rubric-table td { padding: 10px; border-bottom: 1px solid #eadfc9; text-align: left; font-family: var(--font-ui); font-size: 0.9rem; }
+        .rubric-table th { background: var(--ink); color: var(--parchment); text-transform: uppercase; font-size: 0.75rem; }
+        .rubric-note { background: #fff8dc; border-left: 5px solid var(--gold); padding: 12px 14px; border-radius: 8px; margin: 12px 0; font-family: var(--font-ui); }
+        .rubric-warning { background: #fde8e8; border-left: 5px solid var(--danger); padding: 12px 14px; border-radius: 8px; margin: 12px 0; font-family: var(--font-ui); }
+        .rubric-ok { background: #e8f5e9; border-left: 5px solid var(--success); padding: 12px 14px; border-radius: 8px; margin: 12px 0; font-family: var(--font-ui); }
+        .rubric-list { margin: 8px 0 0 22px; }
+        .rubric-list li { margin-bottom: 6px; }
+
+        .eval-item { background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px; border-left: 5px solid var(--gold); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .final-story-container { background: #fff; border: 2px solid var(--parchment-dark); padding: 40px; max-height: 400px; overflow-y: auto; margin-bottom: 25px; border-radius: 8px; box-shadow: inset 0 0 15px rgba(0,0,0,0.05); text-align: left; font-size: 1.15rem; line-height: 1.8; }
+
+        .achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; max-height: 60vh; overflow-y: auto; padding: 10px; }
+        .achievement { display: flex; align-items: center; background: rgba(255,255,255,0.6); border: 2px solid #ccc; padding: 15px; border-radius: 10px; opacity: 0.5; filter: grayscale(100%); transition: all 0.3s; }
+        .achievement.unlocked { opacity: 1; filter: grayscale(0%); border-color: var(--gold); background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transform: scale(1.02); }
+        .achievement-icon { font-size: 2.5rem; margin-right: 15px; }
+
+
+
+        .student-panel {
+            width: 100%; max-width: 560px; background: rgba(255,255,255,0.72);
+            border: 2px solid rgba(138,109,31,0.55); border-radius: 14px;
+            padding: 18px; margin: 0 auto 26px auto; box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+            font-family: var(--font-ui);
+        }
+        .student-panel-title { font-family: var(--font-title); font-size: 1.25rem; margin-bottom: 10px; color: var(--ink); }
+        .student-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 12px; }
+        @media (max-width: 650px) { .student-grid { grid-template-columns: 1fr; } }
+        .form-row label { display: block; font-size: 0.78rem; font-weight: bold; text-transform: uppercase; color: var(--ink-light); margin-bottom: 5px; }
+        .text-input {
+            width: 100%; border: 2px solid rgba(93,64,55,0.45); border-radius: 8px;
+            padding: 11px 12px; font-family: var(--font-ui); font-size: 0.95rem; color: var(--ink);
+            background: #fffdf8;
+        }
+        .text-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,175,55,0.18); }
+        .sync-status { margin-top: 10px; font-size: 0.8rem; color: var(--ink-light); display: flex; align-items: center; gap: 6px; }
+        .sync-status strong { color: var(--ink); }
+
+
+
+
+        .manual-save-note {
+            margin-top: 10px; padding: 10px 12px; border-radius: 8px;
+            background: rgba(45,106,79,0.08); border: 1px solid rgba(45,106,79,0.22);
+            font-family: var(--font-ui); font-size: 0.82rem; color: var(--ink-light);
+        }
+        .story-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; margin-top: 22px; }
+        .story-card {
+            background: rgba(255,255,255,0.75); border: 2px solid rgba(138,109,31,0.35);
+            border-radius: 14px; padding: 18px; box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+            font-family: var(--font-ui);
+        }
+        .story-card h3 { font-size: 1.25rem; margin-bottom: 8px; color: var(--ink); font-family: var(--font-title); }
+        .story-meta { font-size: 0.84rem; color: var(--ink-light); line-height: 1.55; margin-bottom: 12px; }
+        .story-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 14px; }
+        .story-badge { padding: 4px 8px; border-radius: 999px; background: #fff; border: 1px solid rgba(93,64,55,0.25); font-size: 0.74rem; font-weight: bold; }
+        .story-badge.finished { background: #e8f5e9; color: var(--success); border-color: rgba(45,106,79,0.35); }
+        .story-badge.draft { background: #fff8e1; color: #8a5a00; border-color: rgba(212,175,55,0.5); }
+        .story-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+        .story-actions .btn { font-size: 0.78rem; padding: 8px 10px; letter-spacing: 0; }
+        .empty-state { text-align: center; padding: 35px; border: 2px dashed rgba(93,64,55,0.25); border-radius: 14px; background: rgba(255,255,255,0.45); font-family: var(--font-ui); color: var(--ink-light); }
+        .teacher-small { font-family: var(--font-ui); font-size: 0.82rem; color: var(--ink-light); }
+
+        #toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
+        .toast { background: var(--ink); color: #fff; padding: 15px 25px; border-radius: 30px; font-family: var(--font-ui); font-weight: bold; box-shadow: 0 6px 20px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; animation: popIn 0.3s forwards, popOut 0.5s 3.5s forwards; }
+        @keyframes popIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popOut { to { opacity: 0; transform: translateY(-20px); } }
+    </style>
 </head>
 <body>
-  <div id="loading">
-    <div class="box">
-      <h1>Cargando Narratoria…</h1>
-      <p>Conectando el perfil de LenguArcade con el juego.</p>
-      <p><a id="manualLink" href="./Narratoria_Alumno.html">Abrir Narratoria manualmente</a></p>
+
+    <div id="game-container">
+        <div id="player-hud" onclick="ui.showScreen('screen-profile'); ui.renderProfile();" title="Ver Perfil">
+            <div class="hud-item">📜 Nvl <span id="hud-level">1</span></div>
+            <div class="hud-item hud-xp"><span id="hud-xp">0</span> XP</div>
+            <div class="hud-item hud-tinteros">✒️ <span id="hud-tinteros">0</span></div>
+        </div>
+
+        <section id="screen-home" class="screen active">
+            <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <h1 class="title-main">Narratoria</h1>
+                <p class="subtitle">Crónicas del Reino Inacabado</p>
+
+                <div id="lenguarcade-profile-banner" class="lenguarcade-profile-banner">
+                    <strong>Cargando datos del perfil desde LenguArcade...</strong>
+                    <span>No tienes que escribir nombre ni curso: tu progreso se guardara automaticamente.</span>
+                </div>
+                <div class="student-panel">
+                    <div class="student-panel-title">Datos del escriba</div>
+                    <div class="student-grid">
+                        <div class="form-row">
+                            <label for="student-name">Nombre y apellidos</label>
+                            <input class="text-input" id="student-name" type="text" autocomplete="name" placeholder="Ej. Pablo García" oninput="game.saveStudentProfile()">
+                        </div>
+                        <div class="form-row">
+                            <label for="student-group">Curso / grupo</label>
+                            <input class="text-input" id="student-group" type="text" placeholder="Ej. 2º ESO A" oninput="game.saveStudentProfile()">
+                        </div>
+                    </div>
+                    <div class="sync-status" id="sheets-status">🟡 Registro en LenguArcade pendiente de configurar.</div>
+                    <div class="manual-save-note">El progreso se envía a LenguArcade solo cuando pulses <strong>Guardar historia y salir</strong> o cuando termines la historia.</div>
+                </div>
+                <div style="text-align: center; margin-bottom: 30px; font-family: var(--font-ui);">
+                    <p style="margin-bottom: 15px; font-weight: bold; font-size: 1.1rem;">Selecciona tu rango para comenzar:</p>
+                    <div class="difficulty-selector">
+                        <div class="btn-diff selected" onclick="game.selectDifficulty('aprendiz', 30, this)">Aprendiz (Mín 30 palabras)</div>
+                        <div class="btn-diff" onclick="game.selectDifficulty('cronista', 50, this)">Cronista (Mín 50 palabras)</div>
+                        <div class="btn-diff" onclick="game.selectDifficulty('maestro', 80, this)">Maestro (Mín 80 palabras)</div>
+                    </div>
+                </div>
+                <div class="btn-grid">
+                    <button class="btn" style="grid-column: span 2; font-size: 1.4rem; padding: 15px;" onclick="game.startNewGame()">Empezar Nueva Historia</button>
+                    <button class="btn" id="btn-continue" style="grid-column: span 2; display: none; background: var(--success); border-color: var(--success);" onclick="game.continueGame()">Continuar Historia Guardada</button>
+                    <button class="btn btn-secondary" style="grid-column: span 2;" onclick="ui.showScreen('screen-stories'); ui.renderStories();">Mis historias</button>
+                    <button class="btn btn-secondary" onclick="ui.showScreen('screen-shop'); ui.renderShop();">Tienda del Gremio</button>
+                    <button class="btn btn-secondary" onclick="ui.showScreen('screen-achievements'); ui.renderAchievements();">Muro de Logros</button>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="screen-stories" class="screen">
+            <h2 style="text-align: center; font-size: 3rem; margin-bottom: 10px;">Mis historias</h2>
+            <p style="text-align: center; font-size: 1.1rem; margin-bottom: 10px; font-family: var(--font-ui); color: var(--ink-light);">
+                Aquí aparecen las historias guardadas por el alumno. Se cargan desde este navegador y, si hay conexión, también desde LenguArcade.
+            </p>
+            <div class="sync-status" id="stories-sync-status">Pulsa actualizar para cargar tus historias.</div>
+            <div id="stories-container" class="story-list"></div>
+            <div style="text-align: center; margin-top: 30px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+                <button class="btn" onclick="game.startNewGame()">Nueva historia</button>
+                <button class="btn btn-secondary" onclick="ui.renderStories()">Actualizar historias</button>
+                <button class="btn btn-secondary" onclick="ui.showScreen('screen-home')">Volver al Menú</button>
+            </div>
+        </section>
+
+        <section id="screen-cards" class="screen">
+            <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 20px;">El Destino ha hablado</h2>
+            <div class="mission-box">
+                <span style="color: var(--gold); text-transform: uppercase; font-size: 0.9rem; display: block; margin-bottom: 5px;">Misión Narrativa</span>
+                <strong id="ui-mission-text" style="font-size: 1.3rem;"></strong>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div class="inventory-panel" id="cards-inventory" style="justify-content: center; max-width: 400px; margin: 0 auto;"></div>
+            </div>
+
+            <div class="tcg-grid" id="cards-container"></div>
+
+            <div style="text-align: center;">
+                <button class="btn" style="font-size: 1.3rem; padding: 15px 40px;" onclick="game.goToPhase(0)">Comenzar a escribir</button>
+            </div>
+        </section>
+
+        <section id="screen-writing" class="screen">
+            <div class="progress-container" id="progress-bar"></div>
+            <div class="writing-layout">
+                <aside class="side-panel">
+                    <div class="mission-reminder">
+                        <span class="mission-label">Misión objetivo</span>
+                        <strong id="ui-writing-mission"></strong>
+                    </div>
+                    <h3>Objetivos</h3><ul class="objective-list" id="objective-list"></ul>
+                    <h3>Tus Cartas</h3><div id="mini-cards-container"></div>
+                    <h3 style="margin-top: 20px;">Inventario</h3>
+                    <div class="inventory-panel" id="writing-inventory"></div>
+                    <div style="margin-top: 30px; text-align: center;">
+                        <button class="btn btn-secondary" style="padding: 10px 20px; font-size: 0.9rem;" onclick="game.saveAndExit()">Guardar historia y salir</button>
+                    </div>
+                </aside>
+                <main style="display: flex; flex-direction: column;">
+                    <div class="phase-header"><h2 id="ui-phase-title" style="font-size: 2.2rem; color: var(--ink);"></h2><div class="word-counter" id="ui-word-count"></div></div>
+                    <div class="instruction-box">
+                        <div class="phase-mission-line"><strong>Misión global:</strong> <span id="ui-writing-mission-inline"></span></div>
+                        <p class="instruction-text" id="ui-phase-instruction"></p>
+                        <p class="tip-text" id="ui-phase-tip" style="font-style: italic; color: var(--ink-light); margin-top: 5px;"></p>
+                    </div>
+                    <textarea id="editor" placeholder="Escribe aquí tu crónica..." oninput="ui.updateWordCount()"></textarea>
+                    <div class="navigation-bar">
+                        <button class="btn btn-secondary" id="btn-prev" onclick="game.prevPhase()">« Fase Anterior</button>
+                        <button class="btn" id="btn-eval" onclick="game.evaluatePhase()" style="background: var(--ink);">Evaluar Fase Actual</button>
+                        <button class="btn" id="btn-next" onclick="game.nextPhase()" style="display: none; background: var(--success); border-color: var(--success);"></button>
+                    </div>
+                </main>
+            </div>
+        </section>
+
+        <section id="screen-final" class="screen">
+            <h2 style="text-align: center; font-size: 3rem; margin-bottom: 20px;">Veredicto del Archivero</h2>
+            <div class="evaluation-sheet">
+                <div class="final-score-display" id="final-score-display">0/10</div>
+                <div class="eval-feedback-text" id="eval-feedback-text"></div>
+
+                <div class="eval-grid">
+                    <div class="eval-item"><div class="eval-label">Palabras Totales</div><div class="eval-value" id="eval-words" style="font-weight: bold;">0</div></div>
+                    <div class="eval-item"><div class="eval-label">XP Ganada</div><div class="eval-value" id="eval-xp-gained" style="color: var(--xp-color); font-weight: bold;">+0 XP</div></div>
+                    <div class="eval-item"><div class="eval-label">Tinteros Obtenidos</div><div class="eval-value" id="eval-ink-gained" style="color: #8e24aa; font-weight: bold;">+0 ✒️</div></div>
+                </div>
+            </div>
+            <div class="final-story-container" id="final-story-content"></div>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn" onclick="navigator.clipboard.writeText(state.texts.join('\n\n')).then(()=&gt;ui.showToast('¡Texto copiado al portapapeles!', '📋'))">Copiar Texto</button>
+                <button class="btn btn-secondary" onclick="ui.showScreen('screen-home')">Volver al Menú Principal</button>
+            </div>
+        </section>
+
+        <section id="screen-achievements" class="screen"><h2 style="text-align: center; font-size: 3rem; margin-bottom: 10px;">Muro de los Escribas</h2><p style="text-align: center; font-size: 1.2rem; margin-bottom: 20px;">Descubre los 50 secretos del Reino Inacabado.</p><div class="achievements-grid" id="achievements-container"></div><div style="text-align: center; margin-top: 30px;"><button class="btn" onclick="ui.showScreen('screen-home')">Volver al Menú</button></div></section>
+        <section id="screen-shop" class="screen"><h2 style="text-align: center; font-size: 3rem; margin-bottom: 10px;">Tienda del Gremio</h2><p style="text-align: center; font-size: 1.2rem; font-style: italic; margin-bottom: 20px;">Gasta tus tinteros (✒️) para comprar ayudas narrativas.</p><div style="text-align: center; margin-bottom: 30px; font-size: 1.5rem; background: #fff; padding: 15px; border-radius: 8px; border: 2px solid var(--gold); display: inline-block; align-self: center;">Tus Tinteros: <strong style="color: #8e24aa;"><span id="shop-tinteros">0</span> ✒️</strong></div><div class="shop-grid" id="shop-container"></div><div style="text-align: center; margin-top: 30px;"><button class="btn" onclick="ui.showScreen('screen-home')">Volver al Menú</button></div></section>
+        <section id="screen-profile" class="screen"><h2 style="text-align: center; font-size: 3rem; margin-bottom: 30px;">Tu Perfil de Escriba</h2><div class="profile-grid"><div class="profile-stat-box"><div class="profile-stat-label">Nivel Actual</div><div class="profile-stat-value" id="prof-level">1</div></div><div class="profile-stat-box"><div class="profile-stat-label">Historias Completadas</div><div class="profile-stat-value" id="prof-stories">0</div></div><div class="profile-stat-box"><div class="profile-stat-label">Palabras Escritas</div><div class="profile-stat-value" id="prof-words">0</div></div><div class="profile-stat-box"><div class="profile-stat-label">XP Acumulada</div><div class="profile-stat-value" id="prof-xp" style="color: var(--xp-color);">0</div></div></div><div style="text-align: center; margin-top: 40px;"><button class="btn" onclick="ui.showScreen('screen-home')">Volver al Menú</button></div></section>
     </div>
-  </div>
 
-  <iframe id="gameFrame" title="Narratoria" allow="clipboard-read; clipboard-write"></iframe>
+    <div id="toast-container"></div>
 
-  <script>
-    (function(){
-      const params = new URLSearchParams(window.location.search);
-      const channel = String(params.get('channel') || '');
-      const frame = document.getElementById('gameFrame');
-      const manual = document.getElementById('manualLink');
-      const gameUrl = './Narratoria_Alumno.html' + window.location.search + window.location.hash;
-      let hostWindow = null;
-      let gameReady = false;
-      let queuedHostMessages = [];
+    <script>
 
-      if (manual) manual.href = gameUrl;
-      frame.src = gameUrl;
 
-      function isLenguArcadeHostMessage(message){
-        return message && message.namespace === 'lenguarcade-host' && (!channel || message.channel === channel);
-      }
+        const STORAGE_KEY = "narratoria_v15_rubrica_apps_script";
+        const ARCHIVE_STORAGE_KEY = "narratoria_v15_story_archive";
+        const LEGACY_STORAGE_KEY = "narratoria_v14_apps_script";
 
-      function isLenguArcadeGameMessage(message){
-        return message && message.namespace === 'lenguarcade-game' && (!channel || message.channel === channel);
-      }
 
-      function postToGame(message){
-        if (!frame.contentWindow) return;
-        frame.contentWindow.postMessage(message, '*');
-      }
 
-      function postToHost(message){
-        const target = hostWindow || window.parent;
-        if (target && target !== window) target.postMessage(message, '*');
-      }
+        const DB_CARDS = {
+            protagonista: [
+                "Una aprendiz de cartógrafa que dibuja mapas de lugares que aún no existen",
+                "Un joven incapaz de mentir, aunque decir la verdad le meta en problemas",
+                "Una princesa que no quiere ser salvada, sino escribir su propio destino",
+                "Un bibliotecario que escucha voces entre las páginas antiguas",
+                "Un caballero de cristal que puede romperse si siente miedo",
+                "Una niña que habla con las sombras y sabe cuándo dicen la verdad",
+                "Un pirata que teme al agua pero conoce todos los secretos del mar",
+                "Una alquimista que ha perdido el olfato y no puede distinguir sus pociones",
+                "Un mensajero que siempre llega tarde, excepto cuando el futuro está en peligro",
+                "Una anciana que fue heroína y finge no recordar sus aventuras",
+                "Un aprendiz de mago que solo consigue hacer magia cuando se equivoca",
+                "Una ladrona que roba recuerdos en vez de monedas",
+                "Un príncipe exiliado que trabaja como panadero en una ciudad enemiga",
+                "Una pastora que encuentra estrellas caídas entre sus ovejas",
+                "Un niño que despierta cada día con una edad distinta",
+                "Una inventora que construye máquinas con objetos abandonados",
+                "Un guardián de faro que nunca ha visto el mar",
+                "Una exploradora que no puede volver por el mismo camino dos veces",
+                "Un músico callejero cuya melodía abre puertas secretas",
+                "Una escribana que descubre que todo lo que escribe se cumple al amanecer"
+            ],
+            deseo: [
+                "Encontrar a un familiar desaparecido antes de que todos olviden su nombre",
+                "Salvar su aldea de una amenaza que nadie se atreve a nombrar",
+                "Recuperar un recuerdo perdido que contiene la clave de su pasado",
+                "Demostrar su inocencia antes de que caiga la noche",
+                "Romper una maldición heredada por su familia",
+                "Llegar a la luna usando un mapa incompleto",
+                "Encontrar el último rayo dorado de un sol que se está apagando",
+                "Devolver la voz a una ciudad entera",
+                "Proteger un secreto que podría destruir el reino",
+                "Conseguir que dos pueblos enemigos vuelvan a confiar el uno en el otro",
+                "Cruzar la frontera prohibida para entregar una carta urgente",
+                "Encontrar un lugar donde nadie tenga miedo",
+                "Despertar a alguien que duerme desde hace cien años",
+                "Descubrir quién escribió una profecía falsa",
+                "Recuperar una canción capaz de calmar a las bestias",
+                "Salvar un bosque que se está convirtiendo en piedra",
+                "Ganar una prueba imposible sin traicionar a sus amigos",
+                "Encontrar el nombre verdadero de un monstruo",
+                "Cerrar una puerta que nunca debió abrirse",
+                "Volver a casa sin perder aquello que le hace ser quien es"
+            ],
+            obstaculo: [
+                "Nadie cree su historia porque todas las pruebas han desaparecido",
+                "Ha perdido la memoria cada vez que oye una campana",
+                "El camino cambia de lugar cada noche",
+                "El enemigo conoce sus pensamientos antes de que los tenga",
+                "El mapa está incompleto y parece borrar sus propias líneas",
+                "El tiempo avanza hacia atrás durante una hora al día",
+                "Una tormenta de tinta borra los nombres de las personas",
+                "Cada ayuda que recibe exige un precio inesperado",
+                "Una ley antigua le prohíbe decir la verdad",
+                "Sus amigos no recuerdan haberle conocido",
+                "La puerta que necesita abrir solo aparece cuando nadie la mira",
+                "Un impostor está ocupando su lugar",
+                "Cada paso que da despierta a una criatura dormida",
+                "El objeto que necesita está protegido por una promesa",
+                "La ciudad entera repite el mismo día una y otra vez",
+                "Un espejo revela sus peores decisiones",
+                "La magia del lugar convierte las mentiras en monstruos",
+                "El viaje solo puede completarse en silencio",
+                "La brújula señala siempre el mayor peligro",
+                "Una sombra le sigue y aprende a imitar su voz"
+            ],
+            lugar: [
+                "Una biblioteca subterránea donde los libros respiran",
+                "Un bosque que susurra nombres cuando sopla el viento",
+                "Una torre abandonada que crece un piso cada medianoche",
+                "Una ciudad donde nadie duerme porque todos temen soñar",
+                "Un castillo de cristal que refleja futuros posibles",
+                "La Ciudad de los Relojes Parados",
+                "Un desierto de sal azul bajo dos lunas",
+                "Una estación de tren al borde del vacío",
+                "Un mercado nocturno donde se compran y venden secretos",
+                "Una isla que aparece solo durante la niebla",
+                "Un monasterio construido sobre el lomo de una montaña",
+                "Un teatro en ruinas donde los actores son fantasmas",
+                "Un puerto sin barcos y con faros encendidos",
+                "Una escuela de magia clausurada por un accidente misterioso",
+                "Un jardín de estatuas que cambian de postura",
+                "Un laberinto de espejos bajo el palacio",
+                "Una mina donde se escuchan canciones antiguas",
+                "Una aldea enterrada bajo la nieve",
+                "Un puente interminable entre dos reinos",
+                "Una cueva iluminada por luciérnagas gigantes"
+            ],
+            objeto: [
+                "Una llave oxidada que abre puertas que no existen",
+                "Una brújula rota que señala lo que más se teme",
+                "Un cuaderno que escribe solo cuando nadie lo observa",
+                "Una vela que no se apaga ni bajo la lluvia",
+                "Un espejo cubierto de polvo que muestra una decisión futura",
+                "Un candil que alumbra escenas del pasado",
+                "Un mapa de seda que cambia cuando alguien miente",
+                "Una moneda con dos caras iguales",
+                "Una pluma que convierte los tachones en criaturas vivas",
+                "Una campana diminuta que solo oyen los culpables",
+                "Un anillo que pesa más cuanto más se oculta la verdad",
+                "Una caja cerrada que susurra desde dentro",
+                "Una piedra caliente caída del cielo",
+                "Una máscara que muestra el rostro que otros esperan ver",
+                "Un reloj de arena con tinta en lugar de arena",
+                "Una carta sin destinatario que siempre vuelve al bolsillo",
+                "Un hilo rojo que se tensa cuando alguien está en peligro",
+                "Una espada sin filo que corta promesas",
+                "Una botella con un mar en miniatura dentro",
+                "Un sello real que nadie debería poseer"
+            ],
+            giro: [
+                "El enemigo en realidad intenta proteger al protagonista",
+                "El objeto más importante pertenece al villano",
+                "El protagonista había olvidado algo decisivo sobre sí mismo",
+                "El lugar solo existe mientras alguien lo recuerda",
+                "El narrador ha ocultado una parte esencial de la verdad",
+                "El protagonista descubre que es un fantasma",
+                "Todo lo ocurrido forma parte de un dibujo que está cobrando vida",
+                "La persona rescatada no quiere ser rescatada",
+                "El monstruo tiene más miedo que los protagonistas",
+                "El verdadero traidor es quien parecía más generoso",
+                "La misión era una prueba preparada por alguien cercano",
+                "El mapa no guía hacia un lugar, sino hacia una decisión",
+                "La maldición se rompe solo si nadie obtiene lo que quería",
+                "El final feliz exige perder algo valioso",
+                "El protagonista descubre que ya había vivido esa aventura",
+                "La carta recibida fue escrita por su yo del futuro",
+                "La ciudad entera está construida sobre una mentira",
+                "El objeto no sirve para ganar, sino para pedir perdón",
+                "La puerta final se abre contando una historia verdadera",
+                "El villano y el protagonista buscan exactamente lo mismo"
+            ]
+        };
 
-      function flushHostQueue(){
-        if (!gameReady) return;
-        const pending = queuedHostMessages.slice();
-        queuedHostMessages = [];
-        pending.forEach(postToGame);
-      }
+        const MISSIONS = [
+            "Escribe una historia de misterio en la que el lector dude hasta el final.",
+            "Escribe una historia con final abierto, pero que deje una emoción clara.",
+            "Escribe una historia de aventuras con una decisión difícil.",
+            "Escribe una historia triste pero esperanzadora.",
+            "Escribe en primera persona, como si el protagonista confesara algo importante.",
+            "Escribe en tercera persona, como si fuera una leyenda antigua.",
+            "Escribe una historia donde un objeto parezca insignificante y luego sea decisivo.",
+            "Escribe una historia en la que el lugar sea casi un personaje más.",
+            "Escribe una historia con una promesa que alguien debe cumplir.",
+            "Escribe una historia en la que la victoria no consista en derrotar a nadie.",
+            "Escribe una historia que empiece con una pérdida y termine con un descubrimiento.",
+            "Escribe una historia de fantasía con un dilema moral.",
+            "Escribe una historia donde el protagonista tenga que elegir entre verdad y seguridad.",
+            "Escribe una historia que incluya una conversación decisiva.",
+            "Escribe una historia en la que el giro obligue a reinterpretar todo lo anterior."
+        ];
 
-      window.addEventListener('message', function(event){
-        const message = event.data || {};
-
-        if (isLenguArcadeHostMessage(message)) {
-          hostWindow = event.source || window.parent;
-          if (gameReady) postToGame(message);
-          else queuedHostMessages.push(message);
-          return;
+        const STOP_WORDS = new Set(["una","uno","unos","unas","que","con","sin","para","por","del","las","los","sus","sobre","entre","pero","como","cuando","donde","cada","todo","toda","todos","todas","este","esta","esto","aquel","aquella","alguien","nadie","algo","solo","sola","realidad"]);
+        function normalizeText(value) {
+            return String(value || "")
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9\s]/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
+        function countWords(text) { return normalizeText(text).split(/\s+/).filter(Boolean).length; }
+        function escapeHTML(value) {
+            return String(value || "").replace(/[&<>'"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch]));
+        }
+        function extractKeywords(cardText) {
+            return normalizeText(cardText).split(" ").filter(w => w.length > 3 && !STOP_WORDS.has(w)).slice(0, 8);
+        }
+        function matchK(text, cardText) {
+            const haystack = normalizeText(text);
+            const words = extractKeywords(cardText);
+            const matches = words.filter(w => haystack.includes(w)).length;
+            if (matches >= 2) return 2;
+            if (matches === 1) return 1;
+            return 0;
+        }
+        function matchW(text, list) {
+            const haystack = normalizeText(text);
+            return list.some(w => haystack.includes(normalizeText(w))) ? 2 : 0;
         }
 
-        if (isLenguArcadeGameMessage(message)) {
-          if (message.type === 'READY' || message.type === 'INITIALIZED') {
-            gameReady = true;
-            document.body.classList.add('ready');
-            flushHostQueue();
-          }
-          postToHost(message);
-        }
-      });
+        const PHASES = [
+            { name: "Inicio", instruction: "Presenta al protagonista, el lugar y la situación inicial. No resuelvas todavía el problema: abre la puerta del mundo.", tip: "Piensa en cámara de cine: ¿qué ve, oye o siente el lector en la primera escena?", objs: [{t:"Aparece el protagonista de tu carta",c:(t,c)=>matchK(t,c.protagonista)},{t:"Aparece el lugar de tu carta",c:(t,c)=>matchK(t,c.lugar)}] },
+            { name: "Conflicto", instruction: "Explica qué quiere conseguir el protagonista y qué problema se lo impide.", tip: "Un buen conflicto se entiende en una frase: quiere algo, pero algo se interpone.", objs: [{t:"Se entiende qué quiere conseguir",c:t=>matchW(t,["queria","buscaba","deseaba","necesitaba","intentaba","su objetivo","queria conseguir","debia encontrar","tenia que"])},{t:"Hay una dificultad clara",c:t=>matchW(t,["imposible","bloqueado","enemigo","miedo","problema","peligro","obstaculo","no podia","sin embargo","pero","amenaza","dificil"])}] },
+            { name: "Desarrollo", instruction: "Cuenta el primer intento serio de resolver el conflicto. Debe pasar algo concreto, no solo pensarlo.", tip: "Haz que el protagonista actúe: preguntar, abrir, correr, mentir, negociar, entrar, arriesgarse...", objs: [{t:"El protagonista realiza una acción importante",c:t=>matchW(t,["corrio","entro","abrio","busco","decidio","intento","salto","pregunto","siguio","encontro","avanzo","escapo","regreso","cruzo","descubrio","se acerco"])},{t:"El obstáculo de la carta entra en juego",c:(t,c)=>matchK(t,c.obstaculo)}] },
+            { name: "Giro", instruction: "Introduce un cambio inesperado que obligue al lector a mirar la historia de otra manera.", tip: "El giro no tiene que ser explosivo: basta con una revelación que cambie el sentido de lo anterior.", objs: [{t:"Hay una revelación o cambio inesperado",c:t=>matchW(t,["de repente","inesperadamente","entonces descubrio","comprendio que","sorpresa","sin avisar","en ese momento","pero entonces","revelo","la verdad era","nada era"] )},{t:"El giro de la carta aparece en la historia",c:(t,c)=>matchK(t,c.giro)}] },
+            { name: "Desenlace", instruction: "Cierra la historia mostrando la consecuencia final de lo ocurrido. Puede resolverse bien, mal o quedar abierto, pero debe sentirse como un cierre.", tip: "No acabes solo con “y ya está”: muestra qué ha cambiado en el protagonista o en el mundo.", objs: [{t:"Hay una frase o escena de cierre",c:t=>matchW(t,["finalmente","al final","por fin","desde entonces","al terminar","cuando todo acabo","aquella noche","nunca olvido","y asi"] )},{t:"Se ve una consecuencia o aprendizaje",c:t=>matchW(t,["aprendio","comprendio","desde entonces","nunca mas","ahora sabia","cambio","prometio","recordo","perdio","gano","volvio"])}] }
+        ];
 
-      frame.addEventListener('load', function(){
-        // Si Narratoria tarda en anunciarse, mantenemos visible la pantalla de carga.
-        setTimeout(function(){
-          if (!gameReady && frame.contentWindow) {
-            // Algunos navegadores pueden perder el primer INIT si el iframe estaba redirigiendo/cargando.
-            flushHostQueue();
-          }
-        }, 350);
-      });
-    })();
-  </script>
+        const SHOP_ITEMS = {
+            pluma: { name: "Pluma de Fénix", cost: 20, icon: "🪶", desc: "Se usa en la pantalla de CARTAS. Te permite descartar una carta al azar de tu mano y obtener una completamente nueva." },
+            pocion: { name: "Poción de Inspiración", cost: 40, icon: "🧪", desc: "Se usa en la pantalla de ESCRITURA. Te ayuda en la revisión final, pero no garantiza buena nota si faltan objetivos, redacción u ortografía." }
+        };
+
+        const tcgThemes = {
+            protagonista: { title: "Protagonista", icon: "👤", footer: "Toda historia necesita una mirada." },
+            deseo: { title: "Deseo", icon: "✨", footer: "Lo que se busca mueve el relato." },
+            obstaculo: { title: "Obstáculo", icon: "🧱", footer: "Sin dificultad no hay aventura." },
+            lugar: { title: "Lugar", icon: "🗺️", footer: "El mundo también cuenta la historia." },
+            objeto: { title: "Objeto", icon: "💎", footer: "A veces algo pequeño cambia el destino." },
+            giro: { title: "Giro", icon: "🌀", footer: "Nada era exactamente como parecía." }
+        };
+
+
+
+        const ACHIEVEMENTS_DATA = [
+
+            { id: "a_first", title: "Primeras líneas", desc: "Evalúa tu primera fase.", icon: "✍️", secret: false },
+            { id: "a_story_1", title: "Historia completa", desc: "Termina 1 crónica.", icon: "📜", secret: false },
+            { id: "a_story_3", title: "Cuentacuentos", desc: "Termina 3 crónicas.", icon: "📚", secret: false },
+            { id: "a_story_5", title: "Cronista", desc: "Termina 5 crónicas.", icon: "🏛️", secret: false },
+            { id: "a_story_10", title: "Archivero Real", desc: "Termina 10 crónicas.", icon: "👑", secret: false },
+            { id: "a_level_2", title: "Subiendo", desc: "Alcanza el nivel 2.", icon: "📈", secret: false },
+            { id: "a_level_5", title: "Erudito", desc: "Alcanza el nivel 5.", icon: "🎓", secret: false },
+            { id: "a_level_10", title: "Sabio", desc: "Alcanza el nivel 10.", icon: "🦉", secret: false },
+            { id: "a_words_100", title: "Palabrero", desc: "Escribe >100 palabras en una fase.", icon: "🚀", secret: false },
+            { id: "a_words_200", title: "Verborrea", desc: "Escribe >200 palabras en una fase.", icon: "🗣️", secret: false },
+            { id: "a_total_500", title: "Río de Tinta", desc: "Escribe 500 palabras en total.", icon: "🌊", secret: false },
+            { id: "a_total_1000", title: "Mar de Tinta", desc: "Escribe 1.000 palabras en total.", icon: "⚓", secret: false },
+            { id: "a_total_5000", title: "Océano de Tinta", desc: "Escribe 5.000 palabras en total.", icon: "🐋", secret: false },
+            { id: "a_perf_1", title: "Maestro Escriba", desc: "Saca un 10/10 en una evaluación final.", icon: "🌟", secret: false },
+            { id: "a_perf_3", title: "Perfeccionista", desc: "Saca un 10/10 en 3 historias.", icon: "✨", secret: false },
+            { id: "a_perf_5", title: "Leyenda Viva", desc: "Saca un 10/10 en 5 historias.", icon: "🌠", secret: false },
+            { id: "a_shop_1", title: "Cliente VIP", desc: "Compra 1 objeto en la tienda.", icon: "🪙", secret: false },
+            { id: "a_shop_5", title: "Inversor", desc: "Compra 5 objetos en la tienda.", icon: "💰", secret: false },
+            { id: "a_pluma_1", title: "Vuelo del Fénix", desc: "Usa la Pluma para cambiar tu destino 1 vez.", icon: "🪶", secret: false },
+            { id: "a_pluma_5", title: "Cambiador de Destinos", desc: "Usa la Pluma 5 veces.", icon: "🦚", secret: false },
+            { id: "a_pocion_1", title: "Mente Clara", desc: "Usa la poción de inspiración 1 vez.", icon: "🧪", secret: false },
+            { id: "a_pocion_5", title: "Adicto a la Inspiración", desc: "Usa la poción 5 veces.", icon: "⚗️", secret: false },
+            { id: "a_tint_200", title: "Ahorrador", desc: "Acumula 200 tinteros.", icon: "🏺", secret: false },
+            { id: "a_tint_500", title: "Tintero Desbordado", desc: "Acumula 500 tinteros.", icon: "⛲", secret: false },
+            { id: "a_short", title: "Minimalista", desc: "Escribe menos de 15 palabras en una fase y evalúala.", icon: "🐜", secret: false },
+
+
+            { id: "a_word_dragon", title: "Domador de Bestias", desc: "Menciona a un 'dragón' en tu historia.", icon: "🐉", secret: false },
+            { id: "a_word_magia", title: "Toque Arcano", desc: "Menciona la palabra 'magia'.", icon: "🔮", secret: false },
+            { id: "a_word_espada", title: "Acero Brillante", desc: "Menciona una 'espada'.", icon: "⚔️", secret: false },
+            { id: "a_word_rey", title: "Sangre Azul", desc: "Menciona a un 'rey' o 'reina'.", icon: "👑", secret: false },
+            { id: "a_word_bosque", title: "Silvano", desc: "Adéntrate en un 'bosque'.", icon: "🌲", secret: false },
+            { id: "a_word_noche", title: "Noctámbulo", desc: "Haz que la acción ocurra en la 'noche'.", icon: "🌙", secret: false },
+            { id: "a_word_fuego", title: "Piromante", desc: "Desata el 'fuego'.", icon: "🔥", secret: false },
+            { id: "a_word_sangre", title: "Tono Oscuro", desc: "Menciona la 'sangre'.", icon: "🩸", secret: false },
+            { id: "a_word_oro", title: "Codicioso", desc: "Encuentra 'oro'.", icon: "🪙", secret: false },
+            { id: "a_word_reloj", title: "Señor del Tiempo", desc: "Menciona un 'reloj' o el 'tiempo'.", icon: "⏳", secret: false },
+
+
+            { id: "a_potato", title: "El Huerto", desc: "Escribe la palabra 'patata'.", icon: "🥔", secret: true },
+            { id: "a_empty", title: "El Silencio", desc: "Intenta evaluar una fase totalmente en blanco.", icon: "🧊", secret: true },
+            { id: "a_fin", title: "El Telón", desc: "Termina tu historia escribiendo la palabra 'FIN'.", icon: "🎬", secret: true },
+            { id: "a_yo", title: "Egocéntrico", desc: "Escribe la palabra 'yo' más de 5 veces en una fase.", icon: "🪞", secret: true },
+            { id: "a_dots", title: "Inacabado", desc: "Termina una fase con puntos suspensivos.", icon: "💨", secret: true },
+            { id: "a_mayus", title: "Grito Sordo", desc: "Escribe una palabra completamente en MAYÚSCULAS.", icon: "📢", secret: true },
+            { id: "a_interroga", title: "Duda Existencial", desc: "Usa muchos signos de interrogación (?).", icon: "❓", secret: true },
+            { id: "a_amor", title: "Amor Verdadero", desc: "Menciona la palabra 'amor'.", icon: "❤️", secret: true },
+            { id: "a_risa", title: "Risa Contagiosa", desc: "Escribe 'jaja' o 'jajaja'.", icon: "😂", secret: true },
+            { id: "a_llorar", title: "Lágrimas de Tinta", desc: "Menciona la palabra 'llorar'.", icon: "😢", secret: true },
+            { id: "a_narratoria", title: "El Nombre Prohibido", desc: "Escribe 'Narratoria'.", icon: "📖", secret: true },
+            { id: "a_juego", title: "Ruptura de la 4ª Pared", desc: "Escribe la palabra 'juego'.", icon: "🎮", secret: true },
+            { id: "a_mascota", title: "Mascota Fiel", desc: "Menciona un 'perro' o un 'gato'.", icon: "🐕", secret: true },
+            { id: "a_maldicion", title: "Maldición Eterna", desc: "Menciona la palabra 'maldición'.", icon: "💀", secret: true },
+            { id: "a_dios", title: "Escriba Divino", desc: "Menciona a un 'dios' o 'diosa'.", icon: "⚡", secret: true }
+        ];
+
+
+
+        function getCardIcon(text) {
+            const t = text.toLowerCase();
+
+            if(t.includes("cartógrafa") || t.includes("mapa")) return "📜";
+            if(t.includes("princesa") || t.includes("rey")) return "👑";
+            if(t.includes("bibliotecario") || t.includes("cuaderno") || t.includes("biblioteca")) return "📚";
+            if(t.includes("caballero") || t.includes("espada")) return "⚔️";
+            if(t.includes("pirata") || t.includes("agua") || t.includes("mar")) return "⚓";
+            if(t.includes("alquimista") || t.includes("pocion") || t.includes("poción")) return "🧪";
+            if(t.includes("fantasma") || t.includes("maldición") || t.includes("maldicion")) return "👻";
+            if(t.includes("niña") || t.includes("joven")) return "🧒";
+
+            if(t.includes("castillo") || t.includes("torre") || t.includes("ciudad") || t.includes("aldea")) return "🏰";
+            if(t.includes("bosque") || t.includes("camino")) return "🌲";
+            if(t.includes("desierto") || t.includes("arena")) return "🏜️";
+            if(t.includes("estación") || t.includes("tren")) return "🚂";
+
+            if(t.includes("reloj") || t.includes("tiempo")) return "⏳";
+            if(t.includes("llave") || t.includes("abrir")) return "🗝️";
+            if(t.includes("brújula")) return "🧭";
+            if(t.includes("vela") || t.includes("candil") || t.includes("luz") || t.includes("dorado")) return "🕯️";
+            if(t.includes("espejo")) return "🪞";
+            if(t.includes("luna") || t.includes("noche") || t.includes("sombra") || t.includes("duerme")) return "🌙";
+            if(t.includes("memoria") || t.includes("olvidado") || t.includes("recuerdo") || t.includes("pensamiento")) return "🧠";
+            if(t.includes("villano") || t.includes("enemigo") || t.includes("mentira") || t.includes("mentido")) return "🦹";
+            if(t.includes("tinta") || t.includes("dibujo")) return "✒️";
+            if(t.includes("inocencia") || t.includes("salvar")) return "🕊️";
+
+            return "✨";
+        }
+
+
+
+        const defaultState = {
+            difficulty: { id: 'aprendiz', minWords: 30 },
+            mission: "",
+            cards: {},
+            rarities: {},
+            texts: ["","","","",""],
+            evaluations: [null,null,null,null,null],
+            currentPhase: 0,
+            unlockedAchievements: [],
+            xp: 0,
+            level: 1,
+            tinteros: 100,
+            totalStories: 0,
+            totalWords: 0,
+            inventory: { pluma: 0, pocion: 0 },
+            bonusPoints: 0,
+            finalReport: null,
+            sessionId: "",
+            storyId: "",
+            storyStartedAt: "",
+            lastSavedAt: "",
+            completedAt: "",
+            student: { name: "", group: "" },
+            itemUses: { pluma: 0, pocion: 0 },
+            stats: { stories: 0, perf: 0, items: 0, pluma: 0, pocion: 0 }
+        };
+        function makeId() { return `NAR-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`; }
+        function cloneDefaultState() { return JSON.parse(JSON.stringify(defaultState)); }
+        let state = cloneDefaultState();
+
+        const storage = {
+            save: () => {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                ui.checkContinueBtn();
+                ui.updateHUD();
+                ui.renderLenguArcadeStatus();
+            },
+            load: () => {
+                const s = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+                if(s) {
+                    const loaded = JSON.parse(s);
+                    const base = cloneDefaultState();
+                    state = { ...base, ...loaded };
+                    state.student = { ...base.student, ...(loaded.student || {}) };
+                    state.inventory = { ...base.inventory, ...(loaded.inventory || {}) };
+                    state.stats = { ...base.stats, ...(loaded.stats || {}) };
+                    state.itemUses = { ...base.itemUses, ...(loaded.itemUses || {}) };
+                    if(!state.storyId) state.storyId = loaded.storyId || loaded.sessionId || makeId();
+                    if(!state.sessionId) state.sessionId = state.storyId;
+                    return true;
+                }
+                state.sessionId = makeId();
+                state.storyId = state.sessionId;
+                return false;
+            }
+        };
+
+
+        function safeJSON(value, fallback) {
+            if (value === undefined || value === null || value === '') return fallback;
+            if (typeof value !== 'string') return value;
+            try {
+                const parsed = JSON.parse(value);
+                return parsed === undefined || parsed === null ? fallback : parsed;
+            } catch (error) {
+                console.warn('No se pudo leer JSON guardado:', error, value);
+                return fallback;
+            }
+        }
+
+        function asArray(value, fallback = []) {
+            const parsed = safeJSON(value, fallback);
+            return Array.isArray(parsed) ? parsed : fallback;
+        }
+
+        function asNumber(value, fallback = 0) {
+            const n = Number(value);
+            return Number.isFinite(n) ? n : fallback;
+        }
+
+        function formatDate(value) {
+            if (!value) return 'Sin fecha';
+            try {
+                const d = value instanceof Date ? value : new Date(value);
+                if (Number.isNaN(d.getTime())) return String(value);
+                return d.toLocaleString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (error) {
+                return String(value || 'Sin fecha');
+            }
+        }
+
+        function normaliseText(value) {
+            return String(value || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ');
+        }
+
+        function getStudentKey(student = state.student) {
+            const name = normaliseText(student?.name || 'sin-nombre');
+            const group = normaliseText(student?.group || 'sin-grupo');
+            return `${group}__${name}`.replace(/[^a-z0-9_ -]/g, '').replace(/\s+/g, '-');
+        }
+
+        function getAchievementDetails(ids = state.unlockedAchievements) {
+            return (ids || []).map(id => {
+                const ach = ACHIEVEMENTS_DATA.find(a => a.id === id);
+                return ach ? { id, title: ach.title, icon: ach.icon, secret: !!ach.secret } : { id, title: id, icon: '🏅', secret: false };
+            });
+        }
+
+        function getObjectiveLabelsByPhase() {
+            return PHASES.map(p => p.objs.map(o => o.t));
+        }
+
+        function getPhaseWords() {
+            return state.texts.map(t => countWords(t || ''));
+        }
+
+        function getPhaseWordsFromSnapshot(snapshot = {}) {
+            if(snapshot.phaseWordsJson) return asArray(snapshot.phaseWordsJson, []);
+            const texts = snapshot.stateData?.texts || [];
+            return Array.isArray(texts) ? texts.map(t => countWords(t || '')) : [];
+        }
+
+        function getFullText() {
+            return state.texts.join('\n\n').trim();
+        }
+
+        function getStoryStatus(defaultStatus = 'borrador') {
+            if(state.currentPhase >= 5 || state.finalReport) return 'finalizada';
+            return defaultStatus;
+        }
+
+        function buildStorySnapshot(status = 'borrador') {
+            const now = new Date().toISOString();
+            if(!state.storyId) state.storyId = state.sessionId || makeId();
+            if(!state.sessionId) state.sessionId = state.storyId;
+            const finalStatus = getStoryStatus(status);
+            const phaseWords = getPhaseWords();
+            const fullText = getFullText();
+            const snapshot = {
+                app: 'Narratoria',
+                version: 'v20-mis-historias-visibles',
+                action: 'upsertStory',
+                storyId: state.storyId,
+                studentKey: getStudentKey(),
+                studentName: state.student?.name || '',
+                studentGroup: state.student?.group || '',
+                status: finalStatus,
+                difficulty: state.difficulty?.id || '',
+                minWords: state.difficulty?.minWords || '',
+                mission: state.mission || '',
+                cardsJson: JSON.stringify(state.cards || {}),
+                raritiesJson: JSON.stringify(state.rarities || {}),
+                currentPhase: state.currentPhase,
+                currentPhaseName: PHASES[state.currentPhase]?.name || 'Final',
+                storyStartedAt: state.storyStartedAt || '',
+                lastSavedAt: now,
+                completedAt: state.finalReport?.completedAt || state.completedAt || '',
+                totalWords: countWords(fullText),
+                phaseWordsJson: JSON.stringify(phaseWords),
+                phaseTextsJson: JSON.stringify(state.texts || []),
+                phaseEvaluationsJson: JSON.stringify(state.evaluations || []),
+                objectiveLabelsJson: JSON.stringify(getObjectiveLabelsByPhase()),
+                fullText,
+                finalGrade: state.finalReport?.finalGrade ?? '',
+                finalReportJson: JSON.stringify(state.finalReport || null),
+                xp: state.xp,
+                level: state.level,
+                tinteros: state.tinteros,
+                achievementsJson: JSON.stringify(state.unlockedAchievements || []),
+                achievementsTitlesJson: JSON.stringify(getAchievementDetails()),
+                inventoryJson: JSON.stringify(state.inventory || {}),
+                statsJson: JSON.stringify(state.stats || {}),
+                itemUsesJson: JSON.stringify(state.itemUses || {}),
+                bonusPoints: state.bonusPoints || 0,
+                userAgent: navigator.userAgent,
+                stateData: JSON.parse(JSON.stringify(state))
+            };
+            return snapshot;
+        }
+
+        function snapshotForLenguArcade(snapshot) {
+            const copy = { ...snapshot };
+
+
+            copy.stateDataJson = JSON.stringify(snapshot.stateData || {});
+            delete copy.stateData;
+            return copy;
+        }
+
+        function snapshotFromServerRow(row) {
+            const snapshot = { ...row };
+            if(!snapshot.stateData && snapshot.stateDataJson) {
+                const parsedState = safeJSON(snapshot.stateDataJson, null);
+                if(parsedState && typeof parsedState === 'object') snapshot.stateData = parsedState;
+            }
+
+
+
+            if(!snapshot.stateData) {
+                const base = cloneDefaultState();
+                const texts = asArray(row.phaseTextsJson, ["","","",""]);
+                const evaluations = asArray(row.phaseEvaluationsJson, [null,null,null,null,null]);
+                const finalReport = safeJSON(row.finalReportJson, null);
+                snapshot.stateData = {
+                    ...base,
+                    sessionId: row.storyId || makeId(),
+                    storyId: row.storyId || makeId(),
+                    student: { name: row.studentName || '', group: row.studentGroup || '' },
+                    difficulty: { id: row.difficulty || base.difficulty.id, minWords: Number(row.minWords || base.difficulty.minWords) },
+                    mission: row.mission || '',
+                    cards: safeJSON(row.cardsJson, {}),
+                    rarities: safeJSON(row.raritiesJson, {}),
+                    texts: texts,
+                    evaluations: evaluations,
+                    currentPhase: asNumber(row.currentPhase, 0),
+                    storyStartedAt: row.storyStartedAt || '',
+                    lastSavedAt: row.lastSavedAt || '',
+                    completedAt: row.completedAt || '',
+                    finalReport,
+                    xp: asNumber(row.xp, 0),
+                    level: asNumber(row.level, 1),
+                    tinteros: asNumber(row.tinteros, 0),
+                    unlockedAchievements: asArray(row.achievementsJson, []),
+                    inventory: safeJSON(row.inventoryJson, base.inventory),
+                    stats: safeJSON(row.statsJson, base.stats),
+                    itemUses: safeJSON(row.itemUsesJson, base.itemUses),
+                    bonusPoints: asNumber(row.bonusPoints, 0)
+                };
+            }
+            return snapshot;
+        }
+
+        function ensureStorySnapshot(raw) {
+
+
+            if(!raw) return null;
+            let snapshot = (typeof raw === 'object') ? { ...raw } : { storyId: String(raw), mission: 'Historia guardada' };
+
+            try {
+                if(!snapshot.stateData || typeof snapshot.stateData !== 'object' || !Array.isArray(snapshot.stateData.texts)) {
+                    snapshot = snapshotFromServerRow(snapshot);
+                }
+            } catch(error) {
+                console.warn('No se pudo reconstruir stateData, se usará vista parcial:', error, raw);
+            }
+
+            const base = cloneDefaultState();
+            const texts = Array.isArray(snapshot.stateData?.texts)
+                ? snapshot.stateData.texts
+                : asArray(snapshot.phaseTextsJson, ["","","",""]);
+            const safeTexts = [0,1,2,3,4].map(i => String(texts[i] || ''));
+            const finalReport = snapshot.stateData?.finalReport || safeJSON(snapshot.finalReportJson, null);
+            const currentPhase = asNumber(snapshot.currentPhase ?? snapshot.stateData?.currentPhase, safeTexts.findIndex(t => !t.trim()));
+            const resolvedPhase = currentPhase < 0 ? 4 : Math.min(5, Math.max(0, currentPhase));
+            const cards = snapshot.stateData?.cards || safeJSON(snapshot.cardsJson, {});
+            const rarities = snapshot.stateData?.rarities || safeJSON(snapshot.raritiesJson, {});
+
+            const stateData = {
+                ...base,
+                ...(snapshot.stateData && typeof snapshot.stateData === 'object' ? snapshot.stateData : {}),
+                sessionId: snapshot.stateData?.sessionId || snapshot.storyId || makeId(),
+                storyId: snapshot.stateData?.storyId || snapshot.storyId || snapshot.stateData?.sessionId || makeId(),
+                student: {
+                    name: snapshot.stateData?.student?.name || snapshot.studentName || state.student?.name || '',
+                    group: snapshot.stateData?.student?.group || snapshot.studentGroup || state.student?.group || ''
+                },
+                difficulty: {
+                    id: snapshot.stateData?.difficulty?.id || snapshot.difficulty || base.difficulty.id,
+                    minWords: asNumber(snapshot.stateData?.difficulty?.minWords || snapshot.minWords, base.difficulty.minWords)
+                },
+                mission: snapshot.stateData?.mission || snapshot.mission || '',
+                cards,
+                rarities,
+                texts: safeTexts,
+                evaluations: Array.isArray(snapshot.stateData?.evaluations) ? snapshot.stateData.evaluations : asArray(snapshot.phaseEvaluationsJson, [null,null,null,null,null]),
+                currentPhase: resolvedPhase,
+                storyStartedAt: snapshot.stateData?.storyStartedAt || snapshot.storyStartedAt || '',
+                lastSavedAt: snapshot.stateData?.lastSavedAt || snapshot.lastSavedAt || '',
+                completedAt: snapshot.stateData?.completedAt || snapshot.completedAt || '',
+                finalReport,
+                xp: asNumber(snapshot.stateData?.xp ?? snapshot.xp, 0),
+                level: asNumber(snapshot.stateData?.level ?? snapshot.level, 1),
+                tinteros: asNumber(snapshot.stateData?.tinteros ?? snapshot.tinteros, 0),
+                unlockedAchievements: Array.isArray(snapshot.stateData?.unlockedAchievements) ? snapshot.stateData.unlockedAchievements : asArray(snapshot.achievementsJson, []),
+                inventory: snapshot.stateData?.inventory || safeJSON(snapshot.inventoryJson, base.inventory),
+                stats: snapshot.stateData?.stats || safeJSON(snapshot.statsJson, base.stats),
+                itemUses: snapshot.stateData?.itemUses || safeJSON(snapshot.itemUsesJson, base.itemUses),
+                bonusPoints: asNumber(snapshot.stateData?.bonusPoints ?? snapshot.bonusPoints, 0)
+            };
+
+            const fullText = snapshot.fullText || safeTexts.filter(Boolean).join('\n\n');
+            const phaseWords = asArray(snapshot.phaseWordsJson, safeTexts.map(t => countWords(t)));
+            const isFinished = String(snapshot.status || '').toLowerCase() === 'finalizada' || !!finalReport || resolvedPhase >= 5;
+
+            return {
+                ...snapshot,
+                storyId: snapshot.storyId || stateData.storyId,
+                studentKey: snapshot.studentKey || getStudentKey(stateData.student),
+                studentName: snapshot.studentName || stateData.student.name,
+                studentGroup: snapshot.studentGroup || stateData.student.group,
+                status: isFinished ? 'finalizada' : 'borrador',
+                difficulty: snapshot.difficulty || stateData.difficulty.id,
+                minWords: snapshot.minWords || stateData.difficulty.minWords,
+                mission: snapshot.mission || stateData.mission,
+                currentPhase: resolvedPhase,
+                currentPhaseName: snapshot.currentPhaseName || PHASES[resolvedPhase]?.name || (isFinished ? 'Final' : 'Inicio'),
+                totalWords: asNumber(snapshot.totalWords, countWords(fullText)),
+                phaseWordsJson: snapshot.phaseWordsJson || JSON.stringify(phaseWords),
+                phaseTextsJson: snapshot.phaseTextsJson || JSON.stringify(safeTexts),
+                fullText,
+                finalGrade: snapshot.finalGrade !== undefined && snapshot.finalGrade !== null ? snapshot.finalGrade : (finalReport?.finalGrade ?? ''),
+                finalReportJson: snapshot.finalReportJson || JSON.stringify(finalReport || null),
+                stateData
+            };
+        }
+
+        const archiveStore = {
+            load: () => {
+                try { return JSON.parse(localStorage.getItem(ARCHIVE_STORAGE_KEY) || '[]'); }
+                catch(e) { return []; }
+            },
+            saveAll: (stories) => {
+                try {
+                    localStorage.setItem(ARCHIVE_STORAGE_KEY, JSON.stringify(stories));
+                    return true;
+                } catch(e) {
+                    console.warn('No se pudo guardar el archivo local de historias:', e);
+                    return false;
+                }
+            },
+            upsert: (snapshot) => {
+                const stories = archiveStore.load();
+                const idx = stories.findIndex(s => s.storyId === snapshot.storyId);
+                if(idx >= 0) stories[idx] = { ...stories[idx], ...snapshot };
+                else stories.push(snapshot);
+                stories.sort((a,b) => String(b.lastSavedAt || b.completedAt || b.storyStartedAt || '').localeCompare(String(a.lastSavedAt || a.completedAt || a.storyStartedAt || '')));
+                archiveStore.saveAll(stories);
+                return snapshot;
+            },
+            mergeFromServer: (serverRows = []) => {
+                serverRows.forEach(row => archiveStore.upsert(snapshotFromServerRow(row)));
+                return archiveStore.forCurrentStudent();
+            },
+            find: (storyId) => archiveStore.load().find(s => s.storyId === storyId),
+            forCurrentStudent: () => {
+                const key = getStudentKey();
+                const name = normaliseText(state.student?.name || '');
+                const group = normaliseText(state.student?.group || '');
+                return archiveStore.load().filter(s => {
+                    if(!name) return true;
+                    const sKey = normaliseText(s.studentKey || '');
+                    const sName = normaliseText(s.studentName || s.stateData?.student?.name || '');
+                    const sGroup = normaliseText(s.studentGroup || s.stateData?.student?.group || '');
+                    if(sKey && sKey === normaliseText(key)) return true;
+                    if(sName === name && (!group || !sGroup || sGroup === group)) return true;
+                    return false;
+                });
+            }
+        };
+
+        const sheets = {
+            isConfigured: () => typeof google !== 'undefined' && google.script && google.script.run,
+            saveSnapshot: (snapshot, showToast = true) => {
+                if(!sheets.isConfigured()) {
+                    sheets.renderStatus('🟡 Abre Narratoria desde el enlace publicado de Apps Script para guardar en LenguArcade.');
+                    if(showToast) ui.showToast('Guardado localmente. Para enviarlo a LenguArcade, abre la app desde Apps Script.', '⚠️');
+                    return;
+                }
+                const payload = snapshotForLenguArcade(snapshot);
+                sheets.renderStatus('⏳ Guardando esta historia en LenguArcade...');
+                google.script.run
+                    .withSuccessHandler((res) => {
+                        if(res && res.ok) {
+                            const mode = res.result && res.result.mode === 'updated' ? 'actualizada' : 'creada';
+                            sheets.renderStatus(`🟢 Historia ${mode} en LenguArcade. Último guardado: ${new Date().toLocaleTimeString('es-ES')}`);
+                            if(showToast) ui.showToast('Historia guardada en LenguArcade.', '💾');
+                        } else {
+                            const msg = res && res.error ? res.error : 'Respuesta no reconocida del servidor.';
+                            sheets.renderStatus('🔴 No se pudo guardar en LenguArcade: ' + escapeHTML(msg));
+                            if(showToast) ui.showToast('No se pudo enviar a LenguArcade, pero se guardó en este navegador.', '⚠️');
+                        }
+                    })
+                    .withFailureHandler((err) => {
+                        const msg = err && err.message ? err.message : String(err || 'error desconocido');
+                        sheets.renderStatus('🔴 No se pudo guardar en LenguArcade: ' + escapeHTML(msg));
+                        if(showToast) ui.showToast('No se pudo enviar a LenguArcade, pero se guardó en este navegador.', '⚠️');
+                    })
+                    .saveStory(payload);
+            },
+            fetchMyStories: (onDone) => {
+                const statusEl = document.getElementById('stories-sync-status');
+                const finish = (stories = []) => { if(onDone) onDone(Array.isArray(stories) ? stories : []); };
+
+                if(!state.student?.name) {
+                    if(statusEl) statusEl.innerHTML = '🟡 Escribe tu nombre en la pantalla inicial para cargar tus historias.';
+                    finish([]);
+                    return;
+                }
+                if(!sheets.isConfigured()) {
+                    if(statusEl) statusEl.innerHTML = '🟡 Modo local: abre la app desde Apps Script para sincronizar con LenguArcade.';
+                    finish([]);
+                    return;
+                }
+
+                let completed = false;
+                const timeoutId = setTimeout(() => {
+                    if(completed) return;
+                    completed = true;
+                    if(statusEl) {
+                        statusEl.innerHTML = '🟠 La búsqueda en LenguArcade está tardando demasiado. Muestro las historias locales. Revisa que hayas sustituido también <strong>Codigo.gs</strong>, creado una <strong>nueva versión</strong> de la implementación y autorizado el script.';
+                    }
+                    finish([]);
+                }, 12000);
+
+                const doneOk = (res) => {
+                    if(completed) return;
+                    completed = true;
+                    clearTimeout(timeoutId);
+                    try {
+                        if(res && res.ok) {
+                            if(statusEl) statusEl.innerHTML = `🟢 Sincronizado con LenguArcade. Historias encontradas: ${res.count || 0}.`;
+                            archiveStore.mergeFromServer(res.stories || []);
+                            finish(res.stories || []);
+                        } else {
+                            const msg = res && res.error ? res.error : 'No se pudieron cargar las historias.';
+                            if(statusEl) statusEl.innerHTML = '🔴 ' + escapeHTML(msg);
+                            finish([]);
+                        }
+                    } catch(error) {
+                        if(statusEl) statusEl.innerHTML = '🔴 Error al procesar las historias recibidas: ' + escapeHTML(error.message || error);
+                        finish([]);
+                    }
+                };
+
+                const doneFail = (err) => {
+                    if(completed) return;
+                    completed = true;
+                    clearTimeout(timeoutId);
+                    const msg = err && err.message ? err.message : String(err || 'error desconocido');
+                    if(statusEl) statusEl.innerHTML = '🔴 No se pudieron cargar las historias desde LenguArcade: ' + escapeHTML(msg);
+                    finish([]);
+                };
+
+                try {
+                    if(statusEl) statusEl.innerHTML = '⏳ Buscando tus historias en LenguArcade...';
+                    google.script.run
+                        .withSuccessHandler(doneOk)
+                        .withFailureHandler(doneFail)
+                        .getStudentStories({
+                            studentKey: getStudentKey(),
+                            studentName: state.student?.name || '',
+                            studentGroup: state.student?.group || ''
+                        });
+                } catch(error) {
+                    doneFail(error);
+                }
+            },
+            renderStatus: (customText) => {
+                const el = document.getElementById('sheets-status');
+                if(!el) return;
+                if(customText) { el.innerHTML = customText; return; }
+                if(!sheets.isConfigured()) {
+                    el.innerHTML = '🟡 <strong>Modo local:</strong> abre la app desde Apps Script para guardar en el Sheet.';
+                } else {
+                    el.innerHTML = '🟢 Conectado a Apps Script. Se guardará solo al pulsar Guardar o al terminar.';
+                }
+            }
+        };
+
+        const eco = {
+            addXP: (a) => {
+                const oldLvl = state.level;
+                state.xp += a;
+                state.level = Math.floor(state.xp/100)+1;
+                if(state.level > oldLvl) {
+                    ui.showToast(`¡Has alcanzado el Nivel ${state.level}!`, '🎓');
+                    if(state.level >= 2) game.checkAchievement('a_level_2');
+                    if(state.level >= 5) game.checkAchievement('a_level_5');
+                    if(state.level >= 10) game.checkAchievement('a_level_10');
+                }
+            },
+            addTinteros: (a) => {
+                state.tinteros += a;
+                if(state.tinteros >= 200) game.checkAchievement('a_tint_200');
+                if(state.tinteros >= 500) game.checkAchievement('a_tint_500');
+            }
+        };
+
+
+
+
+        const EVAL_STOPWORDS = new Set('una uno unas unos para pero porque como cuando donde desde hasta sobre entre contra despues antes aquel aquella aquellos aquellas este esta estos estas ese esa esos esas todo toda todos todas historia protagonista lugar objeto deseo giro obstaculo carta tiene hacer ser estar haber tener poder decir ver cada'.split(' '));
+
+        const COMMON_SPELLING_PATTERNS = [
+            { re: /\baver\b/gi, label: '"aver" debe revisarse: normalmente será "a ver" o "haber".' },
+            { re: /\bhaver\b/gi, label: '"haver" debe escribirse "haber".' },
+            { re: /\biva(?:s|n|mos)?\b/gi, label: 'Formas como "iva" deben escribirse con b: "iba".' },
+            { re: /\bllendo\b/gi, label: '"llendo" debe escribirse "yendo".' },
+            { re: /\bbuelo\b/gi, label: '"buelo" debe escribirse "vuelo".' },
+            { re: /\b(?:a|ha)\s+sido\s+un\s+sueño\b/gi, label: 'Cierre tópico: revisa si "todo fue un sueño" está justificado.' },
+            { re: /\bde de\b|\bque que\b|\by y\b|\ba a\b/gi, label: 'Hay palabras repetidas seguidas.' },
+            { re: /\b(?:habia|tenia|queria|despues|tambien|algun|ningun|facil|dificil|lapiz|arbol|telefono|brujula|tunel|heroe|magico|principe|ejercito|ultimo|unico|publico)\b/gi, label: 'Hay palabras frecuentes que probablemente necesitan tilde.' },
+            { re: /([a-záéíóúñ])\1{3,}/gi, label: 'Hay letras repetidas en exceso dentro de alguna palabra.' }
+        ];
+
+        function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+        function round1(n) { return Math.round(n * 10) / 10; }
+        function pct(part, total) { return total ? Math.round((part / total) * 100) : 0; }
+        function normaliseEval(value) { return normaliseText(value || '').replace(/[^a-z0-9ñ\s]/g, ' ').replace(/\s+/g, ' ').trim(); }
+        function getTokens(text) { return normaliseEval(text).split(' ').filter(w => w.length > 0); }
+        function getKeywordList(text) {
+            const tokens = getTokens(text).filter(w => w.length >= 4 && !EVAL_STOPWORDS.has(w));
+            return [...new Set(tokens)].slice(0, 8);
+        }
+        function splitSentences(text) {
+            return String(text || '').split(/[.!?¡¿…]+/).map(s => s.trim()).filter(s => s.length > 0);
+        }
+        function countOccurrences(text, regex) {
+            const matches = String(text || '').match(regex);
+            return matches ? matches.length : 0;
+        }
+        function containsAny(text, list) {
+            const n = normaliseEval(text);
+            return list.some(item => n.includes(normaliseEval(item)));
+        }
+        function cardIntegration(cardText, fullText) {
+            const keywords = getKeywordList(cardText);
+            const normFull = normaliseEval(fullText);
+            const hits = keywords.filter(k => normFull.includes(k));
+            const sentenceHits = splitSentences(fullText).map(sentence => {
+                const ns = normaliseEval(sentence);
+                return keywords.filter(k => ns.includes(k)).length;
+            });
+            const bestSentence = sentenceHits.length ? Math.max(...sentenceHits) : 0;
+            let score = 0;
+            if (bestSentence >= 3) score = 3;
+            else if (bestSentence >= 2 || hits.length >= 3) score = 2;
+            else if (hits.length >= 1) score = 1;
+            return { cardText, keywords, hits, bestSentence, score };
+        }
+        function analyseSpelling(text) {
+            const issues = [];
+            COMMON_SPELLING_PATTERNS.forEach(rule => {
+                const matches = String(text || '').match(rule.re);
+                if(matches && matches.length) issues.push({ label: rule.label, count: matches.length });
+            });
+            const raw = String(text || '');
+            const missingQuestionOpen = Math.max(0, countOccurrences(raw, /\?/g) - countOccurrences(raw, /¿/g));
+            const missingExclamationOpen = Math.max(0, countOccurrences(raw, /!/g) - countOccurrences(raw, /¡/g));
+            if(missingQuestionOpen) issues.push({ label: 'Faltan signos de apertura en algunas preguntas: ¿ ?', count: missingQuestionOpen });
+            if(missingExclamationOpen) issues.push({ label: 'Faltan signos de apertura en algunas exclamaciones: ¡ !', count: missingExclamationOpen });
+            const lowerAfterPunctuation = (raw.match(/(^|[.!?]\s+)[a-záéíóúñ]/g) || []).length;
+            if(lowerAfterPunctuation) issues.push({ label: 'Hay frases que empiezan con minúscula después de punto o signo fuerte.', count: lowerAfterPunctuation });
+            const totalIssues = issues.reduce((sum, issue) => sum + issue.count, 0);
+            const wordsN = Math.max(1, countWords(raw));
+            const per100 = round1((totalIssues / wordsN) * 100);
+            const points = clamp(15 - (per100 * 1.25), 0, 15);
+            return { points: round1(points), issues, totalIssues, per100 };
+        }
+        function analyseWriting(text) {
+            const sentences = splitSentences(text);
+            const wordsN = countWords(text);
+            const tokens = getTokens(text).filter(w => w.length >= 3);
+            const unique = new Set(tokens);
+            const lexicalDiversity = tokens.length ? unique.size / tokens.length : 0;
+            const sentenceLengths = sentences.map(s => countWords(s));
+            const longSentences = sentenceLengths.filter(n => n > 35).length;
+            const hugeSentences = sentenceLengths.filter(n => n > 55).length;
+            const connectors = ['al principio','despues','después','entonces','de repente','sin embargo','aunque','mientras','cuando','porque','por eso','asi que','así que','finalmente','al final','desde entonces','por fin'];
+            const connectorCount = connectors.reduce((sum, c) => sum + (containsAny(text, [c]) ? 1 : 0), 0);
+            const yEntonces = countOccurrences(normaliseEval(text), /\by entonces\b/g);
+            const abruptEnding = /\b(y ya esta|y ya está|fin|se acabo|se acabó)\.?$/i.test(String(text || '').trim());
+            let points = 15;
+            if(sentences.length < 8) points -= 3;
+            if(connectorCount < 4) points -= 2;
+            if(longSentences > 2) points -= Math.min(4, longSentences);
+            if(hugeSentences > 0) points -= 2;
+            if(lexicalDiversity < 0.42 && wordsN > 120) points -= 2;
+            if(yEntonces >= 4) points -= 2;
+            if(abruptEnding) points -= 2;
+            points = clamp(points, 0, 15);
+            const issues = [];
+            if(sentences.length < 8) issues.push('Hay pocas frases completas: conviene separar mejor las ideas con puntos.');
+            if(connectorCount < 4) issues.push('Faltan conectores narrativos para unir mejor las acciones.');
+            if(longSentences > 2) issues.push('Hay varias frases muy largas; revisa la puntuación.');
+            if(lexicalDiversity < 0.42 && wordsN > 120) issues.push('Se repite bastante vocabulario; intenta variar palabras y expresiones.');
+            if(yEntonces >= 4) issues.push('Se abusa de “y entonces”; prueba con otros conectores.');
+            if(abruptEnding) issues.push('El final parece demasiado brusco o poco trabajado.');
+            return { points: round1(points), issues, sentences: sentences.length, longSentences, connectorCount, lexicalDiversity: round1(lexicalDiversity * 100) };
+        }
+        function analyseStructure(texts, fullText) {
+            const min = Number(state.difficulty?.minWords || 30);
+            const phaseWords = texts.map(t => countWords(t || ''));
+            const completedPhases = phaseWords.filter(w => w >= min).length;
+            const sentences = splitSentences(fullText).length;
+            const hasConflict = containsAny(texts[1] || '', ['problema','miedo','amenaza','peligro','imposible','enemigo','perder','obstaculo','obstáculo','dificil','difícil']);
+            const hasTurn = containsAny(texts[3] || '', ['de repente','sin embargo','inesperadamente','pero entonces','descubrio','descubrió','resulto','resultó','no era','en realidad']);
+            const hasEnding = containsAny(texts[4] || '', ['finalmente','al final','desde entonces','por fin','termino','terminó','aprendio','aprendió','comprendio','comprendió','volvio','volvió']);
+            let points = 0;
+            points += completedPhases * 1.6;
+            if(sentences >= 12) points += 2.5; else if(sentences >= 8) points += 1.5; else if(sentences >= 5) points += 0.8;
+            if(hasConflict) points += 1.5;
+            if(hasTurn) points += 1.5;
+            if(hasEnding) points += 1.5;
+            points = clamp(points, 0, 15);
+            const issues = [];
+            if(completedPhases < 5) issues.push('No todas las fases alcanzan el mínimo de palabras.');
+            if(!hasConflict) issues.push('El conflicto no se reconoce con claridad.');
+            if(!hasTurn) issues.push('El giro necesita sentirse como un cambio real en la historia.');
+            if(!hasEnding) issues.push('El desenlace debería mostrar una consecuencia o cierre más claro.');
+            return { points: round1(points), completedPhases, phaseWords, sentences, hasConflict, hasTurn, hasEnding, issues };
+        }
+        function analyseObjectives(texts) {
+            const phaseResults = PHASES.map((phase, i) => phase.objs.map(o => o.c(texts[i] || '', state.cards)));
+            const flat = phaseResults.flat();
+            const maxRaw = flat.length * 2;
+            const raw = flat.reduce((sum, value) => sum + Number(value || 0), 0);
+            const full = flat.filter(v => Number(v) >= 2).length;
+            const partial = flat.filter(v => Number(v) === 1).length;
+            const points = maxRaw ? (raw / maxRaw) * 30 : 0;
+            return { points: round1(points), raw, maxRaw, full, partial, totalObjectives: flat.length, phaseResults, ratio: maxRaw ? raw / maxRaw : 0 };
+        }
+        function evaluateStoryRubric() {
+            const texts = state.texts.map(t => String(t || '').trim());
+            const fullText = texts.join('\n\n').trim();
+            const totalW = countWords(fullText);
+            const objective = analyseObjectives(texts);
+            state.evaluations = objective.phaseResults;
+            const cardDetails = Object.entries(state.cards || {}).map(([key, cardText]) => ({ key, ...cardIntegration(cardText, fullText) }));
+            const cardRaw = cardDetails.reduce((sum, c) => sum + c.score, 0);
+            const cardMax = Math.max(1, cardDetails.length * 3);
+            const cardsIntegrated = cardDetails.filter(c => c.score >= 2).length;
+            const cardPoints = round1((cardRaw / cardMax) * 15);
+            const structure = analyseStructure(texts, fullText);
+            const writing = analyseWriting(fullText);
+            const spelling = analyseSpelling(fullText);
+            const evaluatedPhases = state.evaluations.filter(e => Array.isArray(e)).length;
+            let reviewPoints = 0;
+            reviewPoints += evaluatedPhases === 5 ? 4 : evaluatedPhases * 0.6;
+            reviewPoints += structure.completedPhases === 5 ? 2 : 0;
+            reviewPoints += totalW >= Number(state.difficulty?.minWords || 30) * 5 ? 2 : 0;
+            reviewPoints += Math.min(2, Number(state.bonusPoints || 0));
+            reviewPoints = round1(clamp(reviewPoints, 0, 10));
+            const categories = [
+                { id:'objectives', label:'Objetivos de fase', points:objective.points, max:30, detail:`${objective.full}/${objective.totalObjectives} objetivos completos; ${objective.partial} parciales.` },
+                { id:'cards', label:'Uso real de cartas', points:cardPoints, max:15, detail:`${cardsIntegrated}/${cardDetails.length} cartas integradas con claridad.` },
+                { id:'structure', label:'Estructura narrativa', points:structure.points, max:15, detail:`${structure.completedPhases}/5 fases completas; ${structure.sentences} frases.` },
+                { id:'writing', label:'Redacción y cohesión', points:writing.points, max:15, detail:`${writing.connectorCount} conectores; ${writing.longSentences} frases largas.` },
+                { id:'spelling', label:'Ortografía y puntuación', points:spelling.points, max:15, detail:`${spelling.totalIssues} aviso(s), ${spelling.per100} por cada 100 palabras.` },
+                { id:'revision', label:'Revisión y proceso', points:reviewPoints, max:10, detail:`${evaluatedPhases}/5 fases evaluadas. Poción: ${Math.min(2, Number(state.bonusPoints || 0))} punto(s) de ayuda.` }
+            ];
+            const rawPoints = round1(categories.reduce((sum, c) => sum + c.points, 0));
+            let rawGrade = round1(rawPoints / 10);
+            let maxGrade = 10;
+            const caps = [];
+            function cap(limit, reason) { if(maxGrade > limit) maxGrade = limit; caps.push({ limit, reason }); }
+            const minTotal = Number(state.difficulty?.minWords || 30) * 5;
+            if(structure.completedPhases < 5) cap(5.5, 'No todas las fases alcanzan el mínimo de palabras.');
+            if(totalW < minTotal) cap(6.5, `La historia tiene ${totalW} palabras; para esta dificultad debería rondar al menos ${minTotal}.`);
+            if(objective.ratio < 0.50) cap(5.5, 'Se cumple menos de la mitad de los objetivos de la actividad.');
+            else if(objective.ratio < 0.70) cap(7, 'Hay varios objetivos de fase sin cumplir o solo parcialmente cumplidos.');
+            if(cardsIntegrated < 3) cap(7, 'Menos de tres cartas están integradas con claridad en la historia.');
+            if(spelling.per100 > 10) cap(6.5, 'Hay demasiados avisos de ortografía o puntuación para una nota alta.');
+            else if(spelling.per100 > 6) cap(7.5, 'Hay bastantes avisos de ortografía o puntuación.');
+            else if(spelling.per100 > 3) cap(8.5, 'Hay algunos avisos de ortografía o puntuación que conviene revisar.');
+            if(writing.points < 7) cap(7, 'La redacción y cohesión necesitan una revisión importante.');
+            if(structure.points < 8) cap(7, 'La estructura narrativa no está suficientemente clara.');
+            const finalGrade = round1(Math.min(rawGrade, maxGrade));
+            const strengths = [];
+            if(objective.points >= 22) strengths.push('Has cumplido bastantes objetivos de las fases.');
+            if(cardsIntegrated >= 4) strengths.push('Has integrado varias cartas de forma reconocible.');
+            if(structure.completedPhases === 5) strengths.push('Has completado las cinco fases de la historia.');
+            if(spelling.per100 <= 3) strengths.push('La ortografía y la puntuación no presentan demasiados avisos automáticos.');
+            if(writing.points >= 11) strengths.push('La redacción tiene una cohesión razonable.');
+            if(!strengths.length) strengths.push('Has terminado una historia completa: ahora toca revisarla con calma.');
+            const improvements = [];
+            if(objective.ratio < 0.70) improvements.push('Revisa los objetivos de cada fase: algunos no aparecen con claridad en el texto.');
+            if(cardsIntegrated < 4) improvements.push('Integra mejor las cartas: no basta con nombrarlas, deben influir en la acción.');
+            improvements.push(...structure.issues.slice(0, 3));
+            improvements.push(...writing.issues.slice(0, 3));
+            spelling.issues.slice(0, 4).forEach(issue => improvements.push(issue.label + ' (' + issue.count + ')'));
+            const feedbackText = `Nota automática orientativa: ${finalGrade}/10. Puntuación bruta: ${rawPoints}/100. Tope aplicado: ${maxGrade}/10. Fortalezas: ${strengths.join(' ')} Para mejorar: ${improvements.join(' ')}`;
+            const rowHTML = categories.map(c => `<tr><td>${c.label}</td><td><strong>${round1(c.points)}/${c.max}</strong></td><td>${c.detail}</td></tr>`).join('');
+            const capsHTML = caps.length ? `<div class="rubric-warning"><strong>Tope de nota aplicado:</strong> máximo ${maxGrade}/10.<ul class="rubric-list">${caps.map(c => `<li>${escapeHTML(c.reason)}</li>`).join('')}</ul></div>` : `<div class="rubric-ok"><strong>Sin topes graves:</strong> la historia no activa límites importantes de nota.</div>`;
+            const feedbackHTML = `
+                <div class="rubric-note"><strong>Evaluación automática orientativa.</strong> La XP premia el trabajo, pero la nota se calcula con rúbrica, avisos y topes. Revísala siempre con el profesor.</div>
+                <table class="rubric-table"><thead><tr><th>Criterio</th><th>Puntos</th><th>Detalle</th></tr></thead><tbody>${rowHTML}</tbody></table>
+                <p><strong>Puntuación bruta:</strong> ${rawPoints}/100 → ${rawGrade}/10.</p>
+                ${capsHTML}
+                <div class="rubric-ok"><strong>Fortalezas</strong><ul class="rubric-list">${strengths.map(x => `<li>${escapeHTML(x)}</li>`).join('')}</ul></div>
+                <div class="rubric-warning"><strong>Para mejorar</strong><ul class="rubric-list">${improvements.slice(0, 9).map(x => `<li>${escapeHTML(x)}</li>`).join('')}</ul></div>
+            `;
+            return {
+                finalGrade, rawGrade, rawPoints, maxGrade, caps, categories,
+                totalW, objective, cardDetails, cardsIntegrated, structure, writing, spelling,
+                strengths, improvements: improvements.slice(0, 12), feedbackText, feedbackHTML,
+                completedAt: new Date().toISOString()
+            };
+        }
+
+        const game = {
+            init: () => {
+                storage.load();
+                ui.checkContinueBtn();
+                ui.updateHUD();
+                ui.renderStudentPanel();
+                sheets.renderStatus();
+            },
+
+            selectDifficulty: (id, w, btn) => {
+                state.difficulty = { id, minWords: w };
+                document.querySelectorAll('.btn-diff').forEach(b=>b.classList.remove('selected'));
+                btn.classList.add('selected');
+                storage.save();
+            },
+
+            saveStudentProfile: () => {
+                const nameEl = document.getElementById('student-name');
+                const groupEl = document.getElementById('student-group');
+                if(!nameEl || !groupEl) return;
+                state.student = {
+                    name: nameEl.value.trim(),
+                    group: groupEl.value.trim()
+                };
+                storage.save();
+            },
+
+            ensureStudentProfile: () => {
+                game.saveStudentProfile();
+                if(!state.student.name || state.student.name.length < 2) {
+                    ui.showToast('Escribe tu nombre antes de empezar para que quede registrado.', '🖊️');
+                    document.getElementById('student-name')?.focus();
+                    return false;
+                }
+                return true;
+            },
+
+            saveCurrentStory: (status = 'borrador', showToast = true) => {
+                if(!game.ensureStudentProfile()) return null;
+                const editor = document.getElementById('editor');
+                if(editor && document.getElementById('screen-writing')?.classList.contains('active')) {
+                    state.texts[state.currentPhase] = editor.value;
+                }
+                const snapshot = archiveStore.upsert(buildStorySnapshot(status));
+                state.lastSavedAt = snapshot.lastSavedAt;
+                storage.save();
+                sheets.saveSnapshot(snapshot, showToast);
+                if(showToast) ui.showToast('Historia guardada en Mis historias.', '📚');
+                return snapshot;
+            },
+
+            loadStory: (storyId) => {
+                let snapshot = archiveStore.find(storyId);
+                if(!snapshot) { ui.showToast('No encuentro esa historia guardada. Pulsa "Actualizar historias".', '⚠️'); return; }
+                snapshot = ensureStorySnapshot(snapshot);
+                if(!snapshot || !snapshot.stateData) { ui.showToast('No he podido reconstruir esta historia.', '⚠️'); return; }
+                archiveStore.upsert(snapshot);
+                const loadedState = snapshot.stateData;
+                const base = cloneDefaultState();
+                state = { ...base, ...loadedState };
+                state.student = { ...base.student, ...(loadedState.student || {}) };
+                state.inventory = { ...base.inventory, ...(loadedState.inventory || {}) };
+                state.stats = { ...base.stats, ...(loadedState.stats || {}) };
+                state.itemUses = { ...base.itemUses, ...(loadedState.itemUses || {}) };
+                if(!state.storyId) state.storyId = snapshot.storyId;
+                if(!state.sessionId) state.sessionId = state.storyId;
+                storage.save();
+                ui.renderStudentPanel();
+                if(state.currentPhase >= 5 || state.finalReport || snapshot.status === 'finalizada') {
+                    if(!state.finalReport && snapshot.finalGrade !== '') {
+                        state.finalReport = {
+                            finalGrade: snapshot.finalGrade,
+                            feedbackHTML: '<p>Historia recuperada desde LenguArcade. Puede que no conserve todo el informe antiguo de la rúbrica.</p>',
+                            totalW: snapshot.totalWords || countWords(state.texts.join(' ')),
+                            xpGain: 0,
+                            inkGain: 0
+                        };
+                    }
+                    ui.renderFinalScreen();
+                    ui.showScreen('screen-final');
+                } else {
+                    game.goToPhase(Math.min(4, Math.max(0, state.currentPhase || 0)));
+                }
+            },
+
+            resendStory: (storyId) => {
+                const snapshot = archiveStore.find(storyId);
+                if(!snapshot) { ui.showToast('No encuentro esa historia guardada.', '⚠️'); return; }
+                sheets.saveSnapshot(snapshot, true);
+            },
+
+            startNewGame: () => {
+                if(!game.ensureStudentProfile()) return;
+                if(state.texts?.some(t => (t || '').trim().length > 0) && state.currentPhase < 5) {
+                    const ok = confirm('Tienes una historia empezada. Si no la has guardado, pulsa Cancelar y usa "Guardar historia y salir" antes de crear otra. ¿Quieres empezar una historia nueva?');
+                    if(!ok) return;
+                }
+                state.sessionId = makeId();
+                state.storyId = state.sessionId;
+                state.storyStartedAt = new Date().toISOString();
+                state.lastSavedAt = '';
+                state.completedAt = '';
+                state.mission = MISSIONS[Math.floor(Math.random() * MISSIONS.length)];
+                state.cards = {};
+                state.rarities = {};
+                state.bonusPoints = 0;
+                state.finalReport = null;
+                state.itemUses = { pluma: 0, pocion: 0 };
+
+                ["protagonista", "deseo", "obstaculo", "lugar", "objeto", "giro"].forEach(k => {
+                    state.cards[k] = DB_CARDS[k][Math.floor(Math.random() * DB_CARDS[k].length)];
+                    state.rarities[k] = Math.random() > 0.9 ? "legendaria" : (Math.random() > 0.7 ? "épica" : (Math.random() > 0.4 ? "inusual" : "común"));
+                });
+
+                state.texts = ["","","","",""];
+                state.evaluations = [null,null,null,null,null];
+                state.currentPhase = 0;                storage.save();
+                ui.renderCardsScreen();
+                ui.showScreen('screen-cards');
+            },
+
+            continueGame: () => {
+                if(!game.ensureStudentProfile()) return;
+                if (state.currentPhase >= 5) {
+                    ui.renderFinalScreen();
+                    ui.showScreen('screen-final');
+                } else {
+                    game.goToPhase(state.currentPhase);
+                }
+            },
+
+            goToPhase: (i) => {
+                state.currentPhase = i;
+                storage.save();
+                ui.renderWritingScreen();
+                ui.showScreen('screen-writing');
+            },
+
+            prevPhase: () => {
+                if(state.currentPhase > 0){
+                    state.texts[state.currentPhase] = document.getElementById('editor').value;
+                    game.goToPhase(state.currentPhase-1);
+                }
+            },
+
+            nextPhase: () => {
+                if (state.currentPhase < 4) {
+                    game.goToPhase(state.currentPhase+1);
+                } else {
+                    game.finishGame();
+                }
+            },
+
+            buyItem: (id, cost) => {
+                if (state.tinteros >= cost) {
+                    state.tinteros -= cost;
+                    state.inventory[id]++;
+                    state.stats.items++;
+
+                    if(state.stats.items >= 1) game.checkAchievement('a_shop_1');
+                    if(state.stats.items >= 5) game.checkAchievement('a_shop_5');
+
+                    storage.save();
+                    ui.renderShop();
+                    ui.showToast(`¡Compraste: ${SHOP_ITEMS[id].name}!`, '🛍️');
+                } else {
+                    ui.showToast("No tienes tinteros suficientes.", '❌');
+                }
+            },
+
+            useItem: (id) => {
+                if (state.inventory[id] > 0) {
+                    state.inventory[id]--;
+
+                    if (id === 'pluma') {
+                        state.stats.pluma++;
+                        state.itemUses.pluma = (state.itemUses.pluma || 0) + 1;
+                        if(state.stats.pluma >= 1) game.checkAchievement('a_pluma_1');
+                        if(state.stats.pluma >= 5) game.checkAchievement('a_pluma_5');
+
+                        const keys = Object.keys(state.cards);
+                        const k = keys[Math.floor(Math.random() * keys.length)];
+                        state.cards[k] = DB_CARDS[k][Math.floor(Math.random() * DB_CARDS[k].length)];
+
+                        ui.renderCardsScreen();
+                        ui.showToast("La Pluma ha reescrito tu destino.", '🪶');
+                    }
+                    else if (id === 'pocion') {
+                        state.stats.pocion++;
+                        state.itemUses.pocion = (state.itemUses.pocion || 0) + 1;
+                        if(state.stats.pocion >= 1) game.checkAchievement('a_pocion_1');
+                        if(state.stats.pocion >= 5) game.checkAchievement('a_pocion_5');
+
+                        state.bonusPoints += 1;
+                        ui.showToast("Inspiración mágica: ayuda de revisión activada. La nota seguirá dependiendo de la calidad del texto.", '🧪');
+                    }
+
+                    storage.save();
+                    if(id === 'pocion') ui.renderWritingScreen();
+                }
+            },
+
+            evaluatePhase: () => {
+                const text = document.getElementById('editor').value.trim();
+                const w = countWords(text);
+                const lowerText = text.toLowerCase();
+
+                // EASTER EGGS CHECKERS FASE
+                if (w === 0) {
+                    game.checkAchievement('a_empty');
+                    ui.showToast("No puedes evaluar una hoja en blanco.", '⚠️');
+                    return;
+                }
+
+                if (w < state.difficulty.minWords) {
+                    ui.showToast(`Debes escribir un mínimo de ${state.difficulty.minWords} palabras.`, '📝');
+                    return;
+                }
+
+                // Checkeos de Logros Seguros
+                if (w < 15) game.checkAchievement('a_short');
+                if (w >= 100) game.checkAchievement('a_words_100');
+                if (w >= 200) game.checkAchievement('a_words_200');
+
+                if (lowerText.includes("patata")) game.checkAchievement('a_potato');
+                if (text.endsWith("...")) game.checkAchievement('a_dots');
+                if ((lowerText.match(/\byo\b/g) || []).length > 5) game.checkAchievement('a_yo');
+                if (/\b[A-ZÁÉÍÓÚÑ]{4,}\b/.test(text)) game.checkAchievement('a_mayus');
+                if (text.split('?').length - 1 > 3) game.checkAchievement('a_interroga');
+
+                if (lowerText.includes("amor")) game.checkAchievement('a_amor');
+                if (lowerText.includes("jaja")) game.checkAchievement('a_risa');
+                if (lowerText.includes("llorar")) game.checkAchievement('a_llorar');
+                if (lowerText.includes("narratoria")) game.checkAchievement('a_narratoria');
+                if (lowerText.includes("juego")) game.checkAchievement('a_juego');
+                if (lowerText.includes("perro") || lowerText.includes("gato")) game.checkAchievement('a_mascota');
+                if (lowerText.includes("maldición") || lowerText.includes("maldicion")) game.checkAchievement('a_maldicion');
+                if (lowerText.includes("dios") || lowerText.includes("diosa")) game.checkAchievement('a_dios');
+
+                // Chequeos Temáticos
+                if (lowerText.includes("dragón") || lowerText.includes("dragon")) game.checkAchievement('a_word_dragon');
+                if (lowerText.includes("magia")) game.checkAchievement('a_word_magia');
+                if (lowerText.includes("espada")) game.checkAchievement('a_word_espada');
+                if (lowerText.includes("rey") || lowerText.includes("reina")) game.checkAchievement('a_word_rey');
+                if (lowerText.includes("bosque")) game.checkAchievement('a_word_bosque');
+                if (lowerText.includes("noche")) game.checkAchievement('a_word_noche');
+                if (lowerText.includes("fuego")) game.checkAchievement('a_word_fuego');
+                if (lowerText.includes("sangre")) game.checkAchievement('a_word_sangre');
+                if (lowerText.includes("oro")) game.checkAchievement('a_word_oro');
+                if (lowerText.includes("reloj") || lowerText.includes("tiempo")) game.checkAchievement('a_word_reloj');
+
+                state.evaluations[state.currentPhase] = PHASES[state.currentPhase].objs.map(o => o.c(text, state.cards));
+                state.texts[state.currentPhase] = text;
+                state.totalWords += w;
+
+                if (state.totalWords >= 500) game.checkAchievement('a_total_500');
+                if (state.totalWords >= 1000) game.checkAchievement('a_total_1000');
+                if (state.totalWords >= 5000) game.checkAchievement('a_total_5000');
+
+                game.checkAchievement("a_first");
+                eco.addXP(10);
+                eco.addTinteros(5);
+                ui.showToast("Fase Superada: +10 XP | +5 ✒️", '✅');                storage.save();
+                ui.renderWritingScreen();
+            },
+
+            saveAndExit: () => {
+                state.texts[state.currentPhase] = document.getElementById('editor').value;
+                game.saveCurrentStory('borrador', true);
+                ui.showScreen('screen-home');
+            },
+
+            // EVALUACIÓN FINAL HEURÍSTICA / 10
+            finishGame: () => {
+                const fullText = state.texts.join("\n\n");
+                if(fullText.includes("FIN")) game.checkAchievement("a_fin");
+
+                const report = evaluateStoryRubric();
+                const finalGrade = report.finalGrade;
+
+                if (finalGrade >= 9.5) {
+                    state.stats.perf++;
+                    if(state.stats.perf >= 1) game.checkAchievement("a_perf_1");
+                    if(state.stats.perf >= 3) game.checkAchievement("a_perf_3");
+                    if(state.stats.perf >= 5) game.checkAchievement("a_perf_5");
+                }
+
+                state.stats.stories++;
+                state.totalStories++;
+                if(state.stats.stories >= 1) game.checkAchievement("a_story_1");
+                if(state.stats.stories >= 3) game.checkAchievement("a_story_3");
+                if(state.stats.stories >= 5) game.checkAchievement("a_story_5");
+                if(state.stats.stories >= 10) game.checkAchievement("a_story_10");
+
+                // La XP premia el trabajo, pero queda separada de la nota académica.
+                const xpGain = Math.max(20, Math.round(report.rawPoints));
+                const inkGain = Math.max(4, Math.round(finalGrade * 2));
+                eco.addXP(xpGain);
+                eco.addTinteros(inkGain);
+
+                state.currentPhase = 5;
+                state.finalReport = {
+                    ...report,
+                    xpGain,
+                    inkGain
+                };
+                state.completedAt = state.finalReport.completedAt;
+                storage.save();
+                game.saveCurrentStory('finalizada', true);
+
+                ui.renderFinalScreen();
+                ui.showScreen('screen-final');
+            },
+
+            checkAchievement: (id) => {
+                if (!state.unlockedAchievements.includes(id)) {
+                    state.unlockedAchievements.push(id);
+                    storage.save();
+                    const ach = ACHIEVEMENTS_DATA.find(a => a.id === id);
+                    if (ach) ui.showToast(`Logro Desbloqueado: ${ach.title}`, ach.icon);
+                }
+            }
+        };
+
+        /* =========================================
+           4. INTERFAZ DE USUARIO (UI)
+           ========================================= */
+        const ui = {
+            updateHUD: () => {
+                document.getElementById('hud-level').innerText = state.level;
+                document.getElementById('hud-xp').innerText = state.xp;
+                document.getElementById('hud-tinteros').innerText = state.tinteros;
+            },
+
+            showScreen: (id) => {
+                document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+                document.getElementById(id).classList.add('active');
+            },
+
+            checkContinueBtn: () => {
+                document.getElementById('btn-continue').style.display = (state.texts.some(t=>t.length>0) || Object.keys(state.cards).length>0) ? 'inline-block' : 'none';
+            },
+
+            renderStudentPanel: () => {
+                const nameEl = document.getElementById('student-name');
+                const groupEl = document.getElementById('student-group');
+                if(nameEl) nameEl.value = state.student?.name || '';
+                if(groupEl) groupEl.value = state.student?.group || '';
+                ui.renderLenguArcadeStatus();
+            },
+
+            renderLenguArcadeStatus: () => { sheets?.renderStatus?.(); },
+
+            renderFinalScreen: () => {
+                const report = state.finalReport || { finalGrade: 0, feedbackHTML: '<p>No hay evaluación final guardada todavía.</p>', totalW: countWords(state.texts.join(' ')), xpGain: 0, inkGain: 0 };
+                const gradeElem = document.getElementById('final-score-display');
+                gradeElem.innerText = `${report.finalGrade}/10`;
+                gradeElem.style.color = report.finalGrade >= 8 ? 'var(--success)' : (report.finalGrade >= 5 ? 'var(--partial)' : 'var(--danger)');
+                document.getElementById('eval-feedback-text').innerHTML = report.feedbackHTML || `<p>${escapeHTML(report.feedbackText || 'No hay informe detallado disponible.')}</p>`;
+                document.getElementById('eval-words').innerText = report.totalW || countWords(state.texts.join(' '));
+                document.getElementById('eval-xp-gained').innerText = `+${report.xpGain || 0} XP`;
+                document.getElementById('eval-ink-gained').innerText = `+${report.inkGain || 0} ✒️`;
+                document.getElementById('final-story-content').innerHTML = PHASES.map((p, i) => `<h4 style="color:var(--gold-dark); margin-top:15px; text-transform:uppercase; font-family:var(--font-ui); font-size:0.9rem;">${p.name}</h4><p>${escapeHTML(state.texts[i] || '').replace(/\n/g, '<br>')}</p>`).join('');
+            },
+
+            showToast: (m, icon="ℹ️") => {
+                const cont = document.getElementById('toast-container');
+                const t = document.createElement('div');
+                t.className = 'toast';
+                t.innerHTML = `<span style="font-size:1.5rem">${icon}</span> <span>${m}</span>`;
+                cont.appendChild(t);
+                setTimeout(() => t.remove(), 4000);
+            },
+
+
+            renderStories: () => {
+                const container = document.getElementById('stories-container');
+                const statusEl = document.getElementById('stories-sync-status');
+                if(!container) return;
+
+                try {
+                    game.saveStudentProfile();
+
+                    if(!state.student?.name) {
+                        container.className = '';
+                        if(statusEl) statusEl.innerHTML = '🟡 Escribe tu nombre en la pantalla inicial para cargar tus historias.';
+                        container.innerHTML = `<div class="empty-state"><h3>Falta el nombre del alumno.</h3><p>Vuelve al menú, escribe tu nombre y grupo, y después entra otra vez en <strong>Mis historias</strong>.</p></div>`;
+                        return;
+                    }
+
+                    const localStories = archiveStore.forCurrentStudent();
+                    ui.renderStoriesList(localStories, true);
+
+                    sheets.fetchMyStories(() => {
+                        ui.renderStoriesList(archiveStore.forCurrentStudent(), false);
+                    });
+                } catch(error) {
+                    if(statusEl) statusEl.innerHTML = '🔴 Error al abrir Mis historias: ' + escapeHTML(error.message || error);
+                    container.className = '';
+                    container.innerHTML = `<div class="empty-state"><h3>No he podido cargar las historias.</h3><p>Abre la consola y copia el error si vuelve a ocurrir.</p></div>`;
+                }
+            },
+
+            renderStoriesList: (stories, syncing = false) => {
+                const container = document.getElementById('stories-container');
+                const statusEl = document.getElementById('stories-sync-status');
+                if(!container) return;
+                stories = Array.isArray(stories) ? stories.filter(Boolean).map(ensureStorySnapshot).filter(Boolean) : [];
+                if(syncing && statusEl) statusEl.innerHTML = '⏳ Cargando historias locales y buscando en LenguArcade...';
+                if(!stories.length) {
+                    container.className = '';
+                    container.innerHTML = `<div class="empty-state"><h3>No hay historias guardadas todavía.</h3><p>Cuando pulses <strong>Guardar historia y salir</strong> o termines una historia, aparecerá aquí. Si ya habías guardado, pulsa <strong>Actualizar historias</strong>.</p></div>`;
+                    return;
+                }
+                container.className = 'story-list';
+                container.innerHTML = stories.map(s => {
+                    const phaseWords = asArray(s.phaseWordsJson, getPhaseWordsFromSnapshot(s)).map(n => asNumber(n, 0));
+                    const status = s.status === 'finalizada' ? 'finalizada' : 'borrador';
+                    const date = formatDate(s.lastSavedAt || s.completedAt || s.storyStartedAt || s.stateData?.lastSavedAt || '');
+                    const grade = s.finalGrade !== '' && s.finalGrade !== undefined && s.finalGrade !== null ? `${escapeHTML(s.finalGrade)}/10` : 'Sin cerrar';
+                    const currentPhase = asNumber(s.currentPhase ?? s.stateData?.currentPhase, 0);
+                    const phaseName = s.currentPhaseName || PHASES[currentPhase]?.name || (status === 'finalizada' ? 'Final' : 'Inicio');
+                    const storyId = String(s.storyId || s.stateData?.storyId || '');
+                    const studentName = s.studentName || s.stateData?.student?.name || '';
+                    const studentGroup = s.studentGroup || s.stateData?.student?.group || '';
+                    const mission = s.mission || s.stateData?.mission || 'Historia guardada sin misión';
+                    const fullText = s.fullText || s.stateData?.texts?.filter(Boolean).join('\n\n') || '';
+                    const preview = fullText ? escapeHTML(fullText.slice(0, 260)).replace(/\n/g, '<br>') + (fullText.length > 260 ? '…' : '') : '<em>Esta historia todavía no tiene texto escrito.</em>';
+                    const phasesDone = phaseWords.filter(n => Number(n) > 0).length;
+                    const safeStoryId = storyId.replace(/'/g, "\\'");
+                    const canOpen = !!storyId;
+                    return `<article class="story-card">
+                        <h3>${escapeHTML(mission)}</h3>
+                        <div class="story-meta">
+                            <strong>${escapeHTML(studentName)}</strong>${studentGroup ? ' · ' + escapeHTML(studentGroup) : ''}<br>
+                            Último guardado: ${date}<br>
+                            Fase actual: ${escapeHTML(phaseName)} · Palabras: ${escapeHTML(s.totalWords || countWords(fullText) || 0)}
+                        </div>
+                        <div class="story-badges">
+                            <span class="story-badge ${status === 'finalizada' ? 'finished' : 'draft'}">${status === 'finalizada' ? 'Finalizada' : 'Borrador'}</span>
+                            <span class="story-badge">Nota: ${grade}</span>
+                            <span class="story-badge">Fases: ${phasesDone}/5</span>
+                        </div>
+                        <div class="story-preview" style="margin-top:10px; background:rgba(255,255,255,.65); border:1px solid rgba(139,69,19,.18); border-radius:8px; padding:10px; font-size:.9rem; line-height:1.45; max-height:120px; overflow:auto;">${preview}</div>
+                        <div class="story-actions">
+                            ${canOpen ? `<button class="btn" onclick="game.loadStory('${safeStoryId}')">${status === 'finalizada' ? 'Ver historia' : 'Continuar'}</button>` : `<button class="btn" disabled>No se puede abrir</button>`}
+                            ${canOpen ? `<button class="btn btn-secondary" onclick="game.resendStory('${safeStoryId}')">Guardar en LenguArcade</button>` : ''}
+                        </div>
+                    </article>`;
+                }).join('');
+            },
+
+            renderCardsScreen: () => {
+                document.getElementById('ui-mission-text').innerText = state.mission;
+
+                const invCards = document.getElementById('cards-inventory');
+                invCards.innerHTML = '';
+                if (state.inventory.pluma > 0) {
+                    invCards.innerHTML = `<button class="inv-btn" onclick="game.useItem('pluma')">🪶 Usar Pluma de Fénix (Tienes ${state.inventory.pluma})</button>`;
+                }
+
+                const container = document.getElementById('cards-container');
+                container.innerHTML = '';
+
+                let idx = 0;
+                for (const [key, text] of Object.entries(state.cards)) {
+                    const theme = tcgThemes[key];
+                    const rarity = state.rarities[key] || "común";
+                    const icon = getCardIcon(text);
+
+                    container.innerHTML += `
+                        <div class="tcg-card rarity-${rarity}" style="animation-delay: ${idx * 0.1}s;">
+                            <div class="tcg-card-inner">
+                                <div class="tcg-card-back">
+                                    <div class="back-logo">🪶</div>
+                                    <div style="color:var(--gold); font-family:var(--font-title); font-size:1.5rem;">Narratoria</div>
+                                </div>
+                                <div class="tcg-card-front theme-${key}">
+                                    <div class="tcg-header">${theme.title}</div>
+                                    <div class="tcg-art-area">
+                                        <div class="tcg-art-bg"></div>
+                                        <div class="tcg-icon-large">${icon}</div>
+                                    </div>
+                                    <div class="tcg-body">
+                                        <div class="tcg-value">${text}</div>
+                                    </div>
+                                    <div class="tcg-footer">
+                                        <span>"${theme.footer}"</span>
+                                        <span class="tcg-rarity">${rarity}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    idx++;
+                }
+
+
+                setTimeout(() => {
+                    document.querySelectorAll('.tcg-card').forEach((c, i) => {
+                        setTimeout(() => c.classList.add('flipped'), 300 + (i * 150));
+                    });
+                }, 50);
+            },
+
+            renderWritingScreen: () => {
+                const phase = PHASES[state.currentPhase];
+                document.getElementById('ui-phase-title').innerText = `Fase ${state.currentPhase + 1}: ${phase.name}`;
+                const missionText = state.mission || 'Completa la historia respetando tus cartas y el objetivo narrativo.';
+                const sideMission = document.getElementById('ui-writing-mission');
+                const inlineMission = document.getElementById('ui-writing-mission-inline');
+                if (sideMission) sideMission.innerText = missionText;
+                if (inlineMission) inlineMission.innerText = missionText;
+                document.getElementById('ui-phase-instruction').innerText = phase.instruction;
+                document.getElementById('ui-phase-tip').innerText = `Consejo: ${phase.tip}`;
+                document.getElementById('editor').value = state.texts[state.currentPhase] || "";
+
+                const bar = document.getElementById('progress-bar');
+                bar.innerHTML = '';
+                PHASES.forEach((p, i) => {
+                    bar.innerHTML += `<div class="progress-step ${i===state.currentPhase?'active':(state.evaluations[i]!==null?'completed':'')}">${p.name}</div>`;
+                });
+
+                document.getElementById('mini-cards-container').innerHTML = Object.entries(state.cards).map(([k,v]) => `<div class="mini-card"><strong>${tcgThemes[k].icon} ${k}</strong>${v}</div>`).join('');
+
+                const evals = state.evaluations[state.currentPhase];
+                document.getElementById('objective-list').innerHTML = phase.objs.map((obj, idx) => {
+                    let st = evals ? evals[idx] : -1;
+                    let cls = st===2 ? 'status-ok' : (st===1 ? 'status-partial' : 'status-none');
+                    return `<li class="objective-item"><span class="obj-icon ${cls}">${st===2?'✔':(st===1?'~':(st===0?'✘':'•'))}</span> <span class="${cls}">${obj.t}</span></li>`;
+                }).join('');
+
+                const invPanel = document.getElementById('writing-inventory');
+                invPanel.innerHTML = '';
+                if (state.inventory.pocion > 0) {
+                    invPanel.innerHTML = `<button class="inv-btn" onclick="game.useItem('pocion')">🧪 Usar Poción de Inspiración: ayuda de revisión (Tienes ${state.inventory.pocion})</button>`;
+                }
+
+                document.getElementById('btn-prev').disabled = state.currentPhase === 0;
+                document.getElementById('btn-eval').style.display = evals ? 'none' : 'inline-block';
+
+                const nextBtn = document.getElementById('btn-next');
+                nextBtn.style.display = evals ? 'inline-block' : 'none';
+                nextBtn.innerText = state.currentPhase === 4 ? "Ir a la Evaluación Final" : "Siguiente Fase »";
+
+                ui.updateWordCount();
+            },
+
+            updateWordCount: () => {
+                const text = document.getElementById('editor').value.trim();
+                const c = countWords(text);
+                const m = state.difficulty.minWords;
+                const cnt = document.getElementById('ui-word-count');
+
+                cnt.innerText = `Palabras: ${c} / Mín: ${m}`;
+                cnt.style.background = c >= m ? 'var(--success)' : 'var(--danger)';
+            },
+
+            renderShop: () => {
+                document.getElementById('shop-tinteros').innerText = state.tinteros;
+                document.getElementById('shop-container').innerHTML = Object.entries(SHOP_ITEMS).map(([id, item]) => `
+                    <div class="shop-item">
+                        <div style="font-size:3rem; margin-bottom:10px;">${item.icon}</div>
+                        <h4 style="font-family:var(--font-title); font-size:1.3rem;">${item.name}</h4>
+                        <p style="font-size:0.9rem; margin:15px 0; color:var(--ink-light);">${item.desc}</p>
+                        <p style="margin-bottom:15px; font-weight:bold;">Tienes: ${state.inventory[id] || 0}</p>
+                        <button class="btn" style="width:100%; font-size:1rem;" ${state.tinteros < item.cost ? 'disabled' : ''} onclick="game.buyItem('${id}', ${item.cost})">
+                            Comprar (${item.cost} ✒️)
+                        </button>
+                    </div>
+                `).join('');
+            },
+
+            renderProfile: () => {
+                document.getElementById('prof-level').innerText = state.level;
+                document.getElementById('prof-xp').innerText = state.xp;
+                document.getElementById('prof-stories').innerText = state.totalStories;
+                document.getElementById('prof-words').innerText = state.totalWords;
+            },
+
+            renderAchievements: () => {
+                const container = document.getElementById('achievements-container');
+                container.innerHTML = ACHIEVEMENTS_DATA.map(ach => {
+                    const unlocked = state.unlockedAchievements.includes(ach.id);
+                    const title = unlocked ? ach.title : (ach.secret ? '???' : ach.title);
+                    const desc = unlocked ? ach.desc : (ach.secret ? 'Logro oculto. ¡Explora y experimenta para descubrirlo!' : ach.desc);
+                    const icon = unlocked ? ach.icon : '🔒';
+
+                    return `
+                        <div class="achievement ${unlocked ? 'unlocked' : ''}">
+                            <div class="achievement-icon">${icon}</div>
+                            <div>
+                                <h4 style="margin-bottom:3px; font-family:var(--font-ui); font-size:1rem;">${title}</h4>
+                                <p style="font-size:0.85rem; color:var(--ink-light);">${desc}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        };
+
+        // Iniciar el juego cuando cargue la página
+
+        const LENGUARCADE_GAME_ID = 'narratoria';
+        const LENGUARCADE_BRIDGE_VERSION = 'narratoria-original-ui-v1';
+        let laIntegrated = false;
+        let laChannel = '';
+        let laHostWindow = null;
+        let laInitialized = false;
+        let laReadyTimer = null;
+        let laSessionActive = false;
+        let laDirty = false;
+        let laFinishingStory = false;
+        let laProfile = { studentId: '', name: 'Alumno', classGroup: '' };
+        let laAchievementsAtSessionStart = new Set();
+
+        function laEscape(value) {
+            if(typeof escapeHTML === 'function') return escapeHTML(value);
+            return String(value == null ? '' : value).replace(/[&<>\"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[char]));
+        }
+
+        function laNumber(value, fallback = 0) {
+            const n = Number(value);
+            return Number.isFinite(n) ? n : fallback;
+        }
+
+        function laArray(value, fallback = []) {
+            if(Array.isArray(value)) return value;
+            if(typeof value === 'string' && value.trim()) {
+                try {
+                    const parsed = JSON.parse(value);
+                    if(Array.isArray(parsed)) return parsed;
+                } catch(error) {}
+            }
+            return fallback;
+        }
+
+        function laObject(value, fallback = {}) {
+            if(value && typeof value === 'object' && !Array.isArray(value)) return value;
+            if(typeof value === 'string' && value.trim()) {
+                try {
+                    const parsed = JSON.parse(value);
+                    if(parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+                } catch(error) {}
+            }
+            return fallback;
+        }
+
+        function laAchievementIds(value) {
+            return laArray(value, []).map(item => typeof item === 'string' ? item : item?.id).filter(Boolean);
+        }
+
+        function laStudentName(student) {
+            const full = [student?.nombre, student?.apellidos].filter(Boolean).join(' ').trim();
+            return full || student?.name || student?.displayName || student?.email || 'Alumno';
+        }
+
+        function laStudentGroup(student) {
+            return student?.clase || student?.classGroup || student?.grupo || student?.group || '';
+        }
+
+        function laPostToAncestors(message) {
+            let target = window;
+            for(let i = 0; i < 8; i++) {
+                try {
+                    if(!target.parent || target.parent === target) break;
+                    target = target.parent;
+                    target.postMessage(message, '*');
+                } catch(error) { break; }
+            }
+        }
+
+        function laPost(type, payload = {}) {
+            if(!laIntegrated || !laChannel) return;
+            const message = { namespace: 'lenguarcade-game', channel: laChannel, gameId: LENGUARCADE_GAME_ID, type, payload };
+            if(laHostWindow) laHostWindow.postMessage(message, '*');
+            else laPostToAncestors(message);
+        }
+
+        function laAnnounceReady() {
+            laPost('READY', { protocol: 1, version: LENGUARCADE_BRIDGE_VERSION });
+        }
+
+        function laSetBridgeStatus(text) {
+            const sheetsStatus = document.getElementById('sheets-status');
+            if(sheetsStatus) sheetsStatus.innerHTML = text;
+            const storiesStatus = document.getElementById('stories-sync-status');
+            if(storiesStatus && document.getElementById('screen-stories')?.classList.contains('active')) storiesStatus.innerHTML = text;
+        }
+
+        function laApplyProfileToState() {
+            if(!state.student) state.student = { name: '', group: '' };
+            state.student.name = laProfile.name || 'Alumno';
+            state.student.group = laProfile.classGroup || '';
+            state.student.id = laProfile.studentId || state.student.id || '';
+            const nameEl = document.getElementById('student-name');
+            const groupEl = document.getElementById('student-group');
+            if(nameEl) {
+                nameEl.value = state.student.name;
+                nameEl.readOnly = true;
+                nameEl.disabled = true;
+            }
+            if(groupEl) {
+                groupEl.value = state.student.group;
+                groupEl.readOnly = true;
+                groupEl.disabled = true;
+            }
+            const banner = document.getElementById('lenguarcade-profile-banner');
+            if(banner) {
+                banner.innerHTML = '<strong>' + laEscape(state.student.name) + '</strong><span>' + laEscape(state.student.group || 'Perfil conectado') + ' ? guardado automatico en LenguArcade</span>';
+            }
+        }
+
+        function laNormalizeStateSave(rawSave) {
+            if(!rawSave || typeof rawSave !== 'object') return null;
+            let source = rawSave;
+            if(source.save && typeof source.save === 'object') source = source.save;
+            if(source.rawGameData?.save && typeof source.rawGameData.save === 'object') source = source.rawGameData.save;
+            if(source.stateData && typeof source.stateData === 'object' && Array.isArray(source.stateData.texts)) source = source.stateData;
+
+            const base = cloneDefaultState();
+            const loaded = { ...base, ...source };
+            const sourceTexts = Array.isArray(source.texts) ? source.texts : (Array.isArray(source.phaseTexts) ? source.phaseTexts : laArray(source.phaseTextsJson, base.texts));
+            loaded.texts = [0, 1, 2, 3, 4].map(i => String(sourceTexts[i] || ''));
+            const sourceEvaluations = Array.isArray(source.evaluations) ? source.evaluations : (Array.isArray(source.phaseEvaluations) ? source.phaseEvaluations : laArray(source.phaseEvaluationsJson, base.evaluations));
+            loaded.evaluations = [0, 1, 2, 3, 4].map(i => sourceEvaluations[i] || null);
+
+            const difficulty = source.difficulty;
+            loaded.difficulty = {
+                id: typeof difficulty === 'string' ? difficulty : (difficulty?.id || source.difficultyId || base.difficulty.id),
+                minWords: laNumber((difficulty && typeof difficulty === 'object' ? difficulty.minWords : undefined) ?? source.minWords, base.difficulty.minWords)
+            };
+            loaded.cards = laObject(source.cards, laObject(source.cardsJson, base.cards));
+            loaded.rarities = laObject(source.rarities, laObject(source.raritiesJson, base.rarities));
+            loaded.inventory = { ...base.inventory, ...laObject(source.inventory, laObject(source.inventoryJson, {})) };
+            loaded.stats = { ...base.stats, ...laObject(source.stats, laObject(source.statsJson, {})) };
+            loaded.itemUses = { ...base.itemUses, ...laObject(source.itemUses, laObject(source.itemUsesJson, {})) };
+            loaded.unlockedAchievements = laAchievementIds(source.unlockedAchievements || source.achievements || source.achievementsJson);
+            loaded.finalReport = source.finalReport || laObject(source.finalReportJson, null);
+            loaded.currentPhase = Math.max(0, Math.min(5, laNumber(source.currentPhase, base.currentPhase)));
+            loaded.xp = Math.max(0, laNumber(source.xp, base.xp));
+            loaded.level = Math.max(1, laNumber(source.level, base.level));
+            loaded.tinteros = Math.max(0, laNumber(source.tinteros ?? source.ink, base.tinteros));
+            loaded.bonusPoints = Math.max(0, laNumber(source.bonusPoints, base.bonusPoints));
+            loaded.totalStories = Math.max(0, laNumber(source.totalStories, base.totalStories));
+            loaded.totalWords = Math.max(0, laNumber(source.totalWords, base.totalWords));
+            loaded.storyId = source.storyId || source.sessionId || '';
+            loaded.sessionId = source.sessionId || loaded.storyId || '';
+            loaded.storyStartedAt = source.storyStartedAt || source.startedAt || '';
+            loaded.lastSavedAt = source.lastSavedAt || '';
+            loaded.completedAt = source.completedAt || source.finalReport?.completedAt || '';
+            loaded.student = {
+                ...base.student,
+                ...laObject(source.student, {}),
+                name: laProfile.name || source.student?.name || source.studentName || base.student.name,
+                group: laProfile.classGroup || source.student?.group || source.studentGroup || base.student.group,
+                id: laProfile.studentId || source.student?.id || source.studentId || ''
+            };
+            return loaded;
+        }
+
+        function laLoadHostSave(save) {
+            const loaded = laNormalizeStateSave(save);
+            state = loaded || cloneDefaultState();
+            laApplyProfileToState();
+            try {
+                storage.save();
+                if(state.storyId || state.texts.some(text => String(text || '').trim())) {
+                    archiveStore.upsert(buildStorySnapshot(getStoryStatus()));
+                }
+            } catch(error) {
+                console.warn('No se pudo preparar la partida de Narratoria desde LenguArcade:', error);
+            }
+        }
+
+        function laBuildHostSave(snapshot) {
+            const safeSnapshot = ensureStorySnapshot(snapshot || buildStorySnapshot(getStoryStatus()));
+            const save = JSON.parse(JSON.stringify(safeSnapshot.stateData || state || {}));
+            const phaseWords = getPhaseWordsFromSnapshot(safeSnapshot);
+            save.app = 'Narratoria';
+            save.version = 'v20-original-ui-lenguarcade';
+            save.source = 'lenguarcade-bridge';
+            save.storyId = save.storyId || safeSnapshot.storyId || state.storyId || '';
+            save.sessionId = save.sessionId || save.storyId;
+            save.studentId = laProfile.studentId || save.studentId || '';
+            save.student = { ...(save.student || {}), id: laProfile.studentId || save.student?.id || '', name: laProfile.name || save.student?.name || '', group: laProfile.classGroup || save.student?.group || '' };
+            save.phaseTexts = Array.isArray(save.texts) ? save.texts : laArray(safeSnapshot.phaseTextsJson, ['', '', '', '', '']);
+            save.phaseWords = phaseWords;
+            save.fullText = safeSnapshot.fullText || save.phaseTexts.filter(Boolean).join('\n\n');
+            save.totalWords = laNumber(safeSnapshot.totalWords, countWords(save.fullText || ''));
+            save.finalGrade = safeSnapshot.finalGrade !== '' ? laNumber(safeSnapshot.finalGrade, 0) : laNumber(save.finalReport?.finalGrade, 0);
+            save.lastSavedAt = safeSnapshot.lastSavedAt || new Date().toISOString();
+            save.completedAt = safeSnapshot.completedAt || save.completedAt || save.finalReport?.completedAt || '';
+            save.unlockedAchievements = laAchievementIds(save.unlockedAchievements || safeSnapshot.achievementsJson);
+            save.snapshot = {
+                status: safeSnapshot.status,
+                mission: safeSnapshot.mission || save.mission || '',
+                currentPhase: safeSnapshot.currentPhase,
+                currentPhaseName: safeSnapshot.currentPhaseName || '',
+                finalGrade: safeSnapshot.finalGrade,
+                totalWords: safeSnapshot.totalWords
+            };
+            return { snapshot: safeSnapshot, save };
+        }
+
+        function laNewAchievementPayload() {
+            const ids = laAchievementIds(state.unlockedAchievements).filter(id => !laAchievementsAtSessionStart.has(id));
+            return ids.map(id => {
+                const ach = ACHIEVEMENTS_DATA.find(item => item.id === id) || {};
+                return {
+                    id,
+                    title: ach.title || id,
+                    description: ach.desc || ach.description || '',
+                    xpReward: laNumber(ach.xpReward, 20),
+                    hidden: !!ach.secret
+                };
+            });
+        }
+
+        function laRememberAchievements(achievements) {
+            (achievements || []).forEach(ach => { if(ach?.id) laAchievementsAtSessionStart.add(ach.id); });
+        }
+
+        function laSendCheckpoint(snapshot, eventType = 'borrador_guardado') {
+            const data = laBuildHostSave(snapshot);
+            const achievements = laNewAchievementPayload();
+            try { archiveStore.upsert(data.snapshot); } catch(error) {}
+            laPost('CHECKPOINT', {
+                checkpointId: 'nar_cp_' + Date.now(),
+                eventType,
+                players: [{ role: 'primary', save: data.save, achievements }]
+            });
+            laRememberAchievements(achievements);
+            laSetBridgeStatus('? Guardando historia en LenguArcade...');
+        }
+
+        function laSendResult(snapshot) {
+            const data = laBuildHostSave(snapshot);
+            const report = data.save.finalReport || state.finalReport || {};
+            const objective = report.objective || {};
+            const spelling = report.spelling || {};
+            const achievements = laNewAchievementPayload();
+            const finalGrade = laNumber(report.finalGrade ?? data.snapshot.finalGrade, 0);
+            const totalWords = laNumber(report.totalW ?? data.snapshot.totalWords ?? data.save.totalWords, 0);
+            const objectiveTotal = Math.max(1, laNumber(objective.maxRaw ?? objective.totalObjectives, 10));
+            const objectiveScore = Math.max(0, laNumber(objective.raw ?? objective.full ?? 0, 0));
+            const result = {
+                resultId: 'narratoria_' + (data.save.storyId || Date.now()) + '_' + Date.now(),
+                outcome: 'finished',
+                score: laNumber(report.rawPoints, finalGrade * 10),
+                totalWords,
+                correct: objectiveScore,
+                objectivesScore: objectiveScore,
+                objectivesTotal: objectiveTotal,
+                errors: laNumber(spelling.totalIssues, 0),
+                finalGrade,
+                grade: finalGrade,
+                percentage: 100,
+                xpGain: laNumber(report.xpGain, Math.max(20, Math.round(laNumber(report.rawPoints, finalGrade * 10)))) ,
+                inkGain: laNumber(report.inkGain, Math.max(4, Math.round(finalGrade * 2))),
+                achievements,
+                save: data.save
+            };
+            laPost('RESULT', result);
+            laRememberAchievements(achievements);
+            laSessionActive = false;
+            laSetBridgeStatus('? Guardando resultado final en LenguArcade...');
+        }
+
+        function laHasStartedStory() {
+            return !!(state.storyId || state.sessionId || state.texts?.some(text => String(text || '').trim()) || Object.keys(state.cards || {}).length);
+        }
+
+        function laMarkSessionStarted() {
+            if(!laIntegrated || laSessionActive) return;
+            laSessionActive = true;
+            laAchievementsAtSessionStart = new Set(laAchievementIds(state.unlockedAchievements));
+            laPost('SESSION_STARTED', { storyId: state.storyId || state.sessionId || '' });
+        }
+
+        function laInstallBridgeOverrides() {
+            if(laInstallBridgeOverrides.done) return;
+            laInstallBridgeOverrides.done = true;
+
+            const originalStorageSave = storage.save.bind(storage);
+            storage.save = () => {
+                originalStorageSave();
+                if(laIntegrated) laDirty = true;
+            };
+
+            const originalSheets = {
+                isConfigured: sheets.isConfigured.bind(sheets),
+                saveSnapshot: sheets.saveSnapshot.bind(sheets),
+                fetchMyStories: sheets.fetchMyStories.bind(sheets),
+                renderStatus: sheets.renderStatus.bind(sheets)
+            };
+            sheets.isConfigured = () => laIntegrated || originalSheets.isConfigured();
+            sheets.renderStatus = (customText) => {
+                if(!laIntegrated) return originalSheets.renderStatus(customText);
+                laSetBridgeStatus(customText || '?? Perfil conectado a LenguArcade. Guardado automatico preparado.');
+            };
+            sheets.fetchMyStories = (onDone) => {
+                if(!laIntegrated) return originalSheets.fetchMyStories(onDone);
+                const statusEl = document.getElementById('stories-sync-status');
+                if(statusEl) statusEl.innerHTML = '?? Historias cargadas desde LenguArcade y este navegador.';
+                if(onDone) setTimeout(() => onDone([]), 0);
+            };
+            sheets.saveSnapshot = (snapshot, showToast = true) => {
+                if(!laIntegrated) return originalSheets.saveSnapshot(snapshot, showToast);
+                const safeSnapshot = ensureStorySnapshot(snapshot || buildStorySnapshot(getStoryStatus()));
+                const isFinished = safeSnapshot.status === 'finalizada' || safeSnapshot.stateData?.currentPhase >= 5 || !!safeSnapshot.stateData?.finalReport;
+                if(isFinished && laFinishingStory) laSendResult(safeSnapshot);
+                else laSendCheckpoint(safeSnapshot, isFinished ? 'historia_final_guardada' : 'borrador_guardado');
+                if(showToast) ui.showToast('Historia guardada en LenguArcade.', '??');
+                return safeSnapshot;
+            };
+
+            const originalSaveStudentProfile = game.saveStudentProfile.bind(game);
+            game.saveStudentProfile = () => {
+                if(!laIntegrated) return originalSaveStudentProfile();
+                laApplyProfileToState();
+                storage.save();
+            };
+            const originalEnsureStudentProfile = game.ensureStudentProfile.bind(game);
+            game.ensureStudentProfile = () => {
+                if(!laIntegrated) return originalEnsureStudentProfile();
+                laApplyProfileToState();
+                return true;
+            };
+            const originalLoadStory = game.loadStory.bind(game);
+            game.loadStory = (storyId) => {
+                const result = originalLoadStory(storyId);
+                if(laIntegrated) {
+                    laApplyProfileToState();
+                    laMarkSessionStarted();
+                }
+                return result;
+            };
+            const originalStartNewGame = game.startNewGame.bind(game);
+            game.startNewGame = () => {
+                const before = state.storyId;
+                const result = originalStartNewGame();
+                if(laIntegrated && state.storyId && state.storyId !== before) laMarkSessionStarted();
+                return result;
+            };
+            const originalContinueGame = game.continueGame.bind(game);
+            game.continueGame = () => {
+                const result = originalContinueGame();
+                if(laIntegrated && laHasStartedStory()) laMarkSessionStarted();
+                return result;
+            };
+            const originalFinishGame = game.finishGame.bind(game);
+            game.finishGame = () => {
+                laFinishingStory = laIntegrated;
+                try { return originalFinishGame(); }
+                finally { laFinishingStory = false; }
+            };
+            const originalRenderStudentPanel = ui.renderStudentPanel.bind(ui);
+            ui.renderStudentPanel = () => {
+                originalRenderStudentPanel();
+                if(laIntegrated) laApplyProfileToState();
+            };
+        }
+
+        function laStartStandalone() {
+            laIntegrated = false;
+            laInstallBridgeOverrides();
+            game.init();
+        }
+
+        function laStartIntegrated(params) {
+            laIntegrated = true;
+            laChannel = String(params.channel || '');
+            document.body.classList.add('lenguarcade-embedded');
+            laInstallBridgeOverrides();
+            laSetBridgeStatus('?? Cargando datos del perfil desde LenguArcade...');
+            laAnnounceReady();
+            laReadyTimer = setInterval(() => {
+                if(laInitialized) clearInterval(laReadyTimer);
+                else laAnnounceReady();
+            }, 650);
+        }
+
+        function laApplyContext(context = {}) {
+            const student = context.student || {};
+            laProfile = {
+                studentId: String(student.studentId || student.email || student.id || ''),
+                name: laStudentName(student),
+                classGroup: laStudentGroup(student)
+            };
+            laLoadHostSave(context.save || null);
+            game.init();
+            laApplyProfileToState();
+            ui.checkContinueBtn();
+            ui.updateHUD();
+            sheets.renderStatus();
+            laAchievementsAtSessionStart = new Set(laAchievementIds(state.unlockedAchievements));
+            laInitialized = true;
+            laDirty = false;
+            clearInterval(laReadyTimer);
+            laPost('INITIALIZED', { profileId: laProfile.studentId });
+        }
+
+        function laHandleHostMessage(event) {
+            if(!laIntegrated) return;
+            const message = event.data || {};
+            if(message.namespace !== 'lenguarcade-host' || message.channel !== laChannel) return;
+            if(laHostWindow && event.source !== laHostWindow) return;
+            if(message.type === 'INIT') {
+                laHostWindow = event.source;
+                if(laInitialized) {
+                    laPost('INITIALIZED', { profileId: laProfile.studentId });
+                    return;
+                }
+                laApplyContext(message.payload || {});
+            }
+            if(message.type === 'REQUEST_EXIT') {
+                if(laHasStartedStory()) {
+                    try { game.saveCurrentStory(getStoryStatus('borrador'), false); }
+                    catch(error) { console.warn('No se pudo guardar al salir:', error); }
+                } else {
+                    laPost('CLOSE_READY');
+                }
+            }
+            if(message.type === 'CHECKPOINT_CONFIRMED') {
+                laDirty = false;
+                laSetBridgeStatus('?? Partida guardada en LenguArcade.');
+            }
+            if(message.type === 'CHECKPOINT_FAILED') {
+                laDirty = true;
+                laSetBridgeStatus('?? No se pudo guardar el borrador en LenguArcade.');
+            }
+            if(message.type === 'SAVE_CONFIRMED') {
+                laDirty = false;
+                laSessionActive = false;
+                laSetBridgeStatus('?? Resultado final guardado en LenguArcade.');
+            }
+            if(message.type === 'SAVE_FAILED') {
+                laDirty = true;
+                laSetBridgeStatus('?? No se pudo guardar el resultado final en LenguArcade.');
+            }
+        }
+
+        window.addEventListener('message', laHandleHostMessage);
+        window.__startNarratoriaLenguArcade = function(params = {}) {
+            const isIntegrated = String(params.lenguarcade || '') === '1' && String(params.channel || '') && window.parent !== window;
+            if(isIntegrated) laStartIntegrated(params);
+            else laStartStandalone();
+        };
+
+        window.onload = () => {
+            if(window.google && google.script && google.script.url) {
+                google.script.url.getLocation(locationData => window.__startNarratoriaLenguArcade((locationData && locationData.parameter) || {}));
+            } else {
+                window.__startNarratoriaLenguArcade(Object.fromEntries(new URLSearchParams(location.search).entries()));
+            }
+        };
+
+    </script>
 </body>
 </html>
