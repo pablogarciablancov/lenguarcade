@@ -167,7 +167,7 @@
   filter: drop-shadow(0 9px 0 rgba(0,0,0,.35)) drop-shadow(0 0 10px rgba(255,255,255,.08));
 }
 .monster-visual .sprite-frame img{
-  transform: scaleX(-1);
+  transform: none;
 }
 
 /* Bocadillo/panel de frase mÃ¡s premium y visible */
@@ -269,5 +269,121 @@ textarea:focus{
   .sprite-frame img{width: clamp(130px, 36vw, 190px);}
   .speech{font-size:.9rem;}
   .speech::before,.speech::after{display:none;}
+}
+/* Arena UI - menu and hub polish */
+.menu-panel,
+.start-panel,
+.screen-card,
+.pixel-panel,
+.login-scroll,
+.modal .dialog{
+  border-radius: 20px;
+  border: 3px solid #303750;
+  background: linear-gradient(180deg, rgba(22,28,48,.94), rgba(8,12,24,.96));
+  box-shadow: 0 24px 70px rgba(0,0,0,.58), inset 0 0 0 2px rgba(255,255,255,.04);
+}
+
+.menu-title,
+.screen-title,
+.start-title{
+  color: #f7edd2;
+  text-shadow: 0 4px 0 rgba(0,0,0,.45), 0 0 18px rgba(250,204,21,.24);
+  letter-spacing: .08em;
+}
+
+.menu-sub,
+.screen-sub,
+.start-sub{
+  color: #d8def3;
+}
+
+:is(.menu-btn, .btn.primary, .btn-pixel.primary, .btn-adventure, #start-new-btn, #continue-btn, #camp-rest-btn, .end-overlay-actions button){
+  border-radius: 14px;
+  border: 0;
+  border-bottom: 5px solid rgba(0,0,0,.35);
+  background: linear-gradient(180deg, #fff0a8, #facc15);
+  color: #2c2105;
+  box-shadow: 0 8px 0 rgba(0,0,0,.25), 0 14px 28px rgba(0,0,0,.22);
+  text-shadow: none;
+}
+
+:is(.menu-btn, .btn.primary, .btn-pixel.primary, .btn-adventure, #start-new-btn, #continue-btn, #camp-rest-btn, .end-overlay-actions button):hover{
+  filter: brightness(1.05) saturate(1.04);
+  transform: translateY(-2px);
+}
+
+:is(.menu-btn, .btn.primary, .btn-pixel.primary, .btn-adventure, #start-new-btn, #continue-btn, #camp-rest-btn, .end-overlay-actions button):active{
+  transform: translateY(4px);
+  box-shadow: 0 3px 0 rgba(0,0,0,.32), 0 8px 18px rgba(0,0,0,.18);
+}
+
+:is(.btn.secondary, .btn-pixel.secondary, button.secondary, .ghost, #new-from-saved-btn, #use-item-btn, #ability-btn, .inv-use-btn){
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,.14);
+  background: linear-gradient(180deg,#344064,#1b2036);
+  color: #eef3ff;
+  box-shadow: 0 5px 0 rgba(0,0,0,.28);
+}
+
+:is(.btn.secondary, .btn-pixel.secondary, button.secondary, .ghost, #new-from-saved-btn, #use-item-btn, #ability-btn, .inv-use-btn):hover{
+  filter: brightness(1.08);
+}
+
+.mode-card,
+.shop-item,
+.inv-card,
+.collection-monster,
+.ach-card,
+.hub-backpack,
+.camp-box,
+.diary-panel,
+.history-entry,
+.rule-card{
+  border-radius: 16px;
+  border: 2px solid rgba(255,255,255,.10);
+  background: linear-gradient(180deg, rgba(18,24,42,.92), rgba(10,14,27,.90));
+  box-shadow: 0 10px 24px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.04);
+}
+
+.mode-card:hover,
+.shop-item:hover,
+.inv-card:hover,
+.collection-monster:hover,
+.ach-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(0,0,0,.34), 0 0 0 1px rgba(250,204,21,.26);
+}
+
+.mode-title,
+.shop-item-name,
+.inv-card-name,
+.ach-title,
+.mon-name,
+.box-title,
+.log-title{
+  color: var(--arena-gold-soft);
+}
+
+.avatar-option.selected,
+.ach-card.unlocked,
+.inv-card.legendary{
+  border-color: rgba(250,204,21,.86);
+  box-shadow: 0 0 0 2px rgba(250,204,21,.16), 0 12px 28px rgba(0,0,0,.30);
+}
+
+input[type="text"],
+.pixel-input,
+.login-input,
+select,
+.ach-search{
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,.12);
+  background: rgba(2,6,23,.86);
+  color: #f9fafb;
+}
+
+@media (max-width: 900px){
+  .menu-panel,.start-panel,.screen-card{border-radius:16px;}
+  :is(.menu-btn, .btn.primary, .btn.secondary, .ghost){min-height:46px;}
 }
 </style>

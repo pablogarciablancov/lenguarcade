@@ -46,8 +46,15 @@ for (const required of [
   ".battle-screen",
   ".battle-sprites-row",
   "#attack-btn",
+  "Arena UI - menu and hub polish",
+  ".menu-panel",
+  ".mode-card",
 ]) {
   if (!arenaUiHtml.includes(required)) errors.push(`Falta la capa Arena UI de BattleGrafia: ${required}`);
+}
+
+if (arenaUiHtml.includes("scaleX(-1)")) {
+  errors.push("Arena UI no debe invertir los monstruos: quedan de espaldas al heroe.");
 }
 
 if (!codeSource.includes("setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)")) {
