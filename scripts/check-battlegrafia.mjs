@@ -21,18 +21,33 @@ for (const name of ["code.js", "index.html", "game.html", "menu.html", "lenguarc
 const indexHtml = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const codeSource = fs.readFileSync(path.join(root, "code.js"), "utf8");
 const bridgeHtml = fs.readFileSync(path.join(root, "lenguarcade_bridge.html"), "utf8");
+const arenaUiHtml = fs.readFileSync(path.join(root, "arena_ui.html"), "utf8");
 const centralServer = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Code.gs"), "utf8");
 const centralStudent = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Alumno.html"), "utf8");
 const supabaseDashboard = fs.readFileSync(path.resolve("supabase", "functions", "student-dashboard", "index.ts"), "utf8");
 
 for (const required of [
+  "include('arena_ui')",
   "include('lenguarcade_bridge')",
 ]) {
   if (!indexHtml.includes(required)) errors.push(`Falta la inclusion de BattleGrafia: ${required}`);
 }
 
+if (indexHtml.indexOf("include('arena_ui')") < indexHtml.indexOf("include('styles')")) {
+  errors.push("Arena UI debe cargarse despues de styles.html para actuar como capa visual reversible.");
+}
+
 if (indexHtml.indexOf("include('lenguarcade_bridge')") > indexHtml.indexOf("include('game')")) {
   errors.push("El puente de LenguArcade debe cargarse antes que game.html en BattleGrafia.");
+}
+
+for (const required of [
+  "Battlegraf",
+  ".battle-screen",
+  ".battle-sprites-row",
+  "#attack-btn",
+]) {
+  if (!arenaUiHtml.includes(required)) errors.push(`Falta la capa Arena UI de BattleGrafia: ${required}`);
 }
 
 if (!codeSource.includes("setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)")) {
