@@ -23,7 +23,7 @@ const LA_GOOGLE_AUTH_CONFIG = {
   GITHUB_PAGES_GAMES_BASE: 'https://pablogarciablancov.github.io/lenguarcade/games/'
 };
 
-function doGet(e) {
+function legacyPatchedDoGet_(e) {
   const params = (e && e.parameter) ? e.parameter : {};
   const page = String(params.page || params.p || 'alumno').toLowerCase();
   const legacy = String(params.legacy || '').trim() === '1';
@@ -411,7 +411,7 @@ function requireActiveGoogleEmail_() {
   return email;
 }
 
-function getActiveUserEmail_() {
+function legacyPatchedGetActiveUserEmail_() {
   try { return String(Session.getActiveUser().getEmail() || '').trim().toLowerCase(); }
   catch (error) { return ''; }
 }
