@@ -44,7 +44,7 @@ const LA_GAME_INTEGRATIONS = {
     integration: 'embedded'
   },
   narratoria: {
-    url: 'https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec?page=narratoria',
+    url: 'https://pablogarciablancov.github.io/lenguarcade/games/narratoria/',
     integration: 'embedded'
   },
   versopolis: {
@@ -76,14 +76,15 @@ const LA_HEADERS = {
 
 function doGet(e) {
   const page = String((e && e.parameter && e.parameter.page) || 'alumno').toLowerCase();
+  if (page === 'narratoria' && typeof buildExternalRedirectHtmlOutput_ === 'function') {
+    return buildExternalRedirectHtmlOutput_('https://pablogarciablancov.github.io/lenguarcade/games/narratoria/', 'Narratoria');
+  }
   const isProfesor = page === 'profesor' || page === 'teacher';
   const file = page === 'profesor' || page === 'teacher'
     ? 'LenguArcade_Profesor'
-    : page === 'narratoria'
-      ? 'Narratoria_Alumno'
-      : page === 'rimopolis' || page === 'versopolis'
-        ? 'Rimopolis_Alumno'
-        : 'LenguArcade_Alumno';
+    : page === 'rimopolis' || page === 'versopolis'
+      ? 'Rimopolis_Alumno'
+      : 'LenguArcade_Alumno';
   const title = page === 'profesor' || page === 'teacher'
     ? 'LenguArcade - Profesor'
     : page === 'narratoria'

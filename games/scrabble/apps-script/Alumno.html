@@ -1245,7 +1245,7 @@ const LenguArcadeBridge = (() => {
             if (runtimeReady) applyContext(pendingContext);
         }
         if (message.type === 'OPPONENT_AUTHENTICATED') applyOpponent(message.payload || {});
-        if (message.type === 'OPPONENT_AUTH_FAILED') showToast('No se pudo conectar al rival', (message.payload && message.payload.message) || 'Comprueba el correo y el PIN.', '⚠️');
+        if (message.type === 'OPPONENT_AUTH_FAILED') showToast('No se pudo conectar al rival', (message.payload && message.payload.message) || 'Comprueba el código del rival.', '⚠️');
         if (message.type === 'CHECKPOINT_CONFIRMED') {
             if (message.payload && message.payload.checkpointId === lastCheckpointId) {
                 const activeMatch = serializeActiveMatch();

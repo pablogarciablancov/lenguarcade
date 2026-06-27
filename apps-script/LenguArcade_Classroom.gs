@@ -113,6 +113,58 @@ function listAllClassroomStudents_(courseId) {
 const LA_SUPABASE_URL_ = 'https://spqcztbuwcbmsengeluz.supabase.co';
 const LA_SUPABASE_PUBLIC_KEY_ = 'sb_publishable_zScSYh0tbpXLcY_5iyzsqQ_wepkdqKe';
 
+function callSupabaseStudentDashboard_(accessToken) {
+  const cleanToken = String(accessToken || '').trim();
+  if (!cleanToken) throw new Error('La sesion de LenguArcade no es valida.');
+  const response = UrlFetchApp.fetch(LA_SUPABASE_URL_ + '/functions/v1/student-dashboard', {
+    method:'post',
+    contentType:'application/json',
+    headers:{
+      apikey:LA_SUPABASE_PUBLIC_KEY_,
+      Authorization:'Bearer ' + cleanToken
+    },
+    payload:JSON.stringify({}),
+    muteHttpExceptions:true
+  });
+  const text = response.getContentText();
+  let data = {};
+  try { data = JSON.parse(text || '{}'); } catch (error) {}
+  if (response.getResponseCode() < 200 || response.getResponseCode() >= 300 || !data.ok) {
+    throw new Error(data.error || 'No se ha podido validar la sesion de LenguArcade.');
+  }
+  return data;
+}
+
+function createScrabbleOpponentCode(accessToken) {
+  const dashboard = callSupabaseStudentDashboard_(accessToken);
+  const student = dashboard.student || {};
+  if (String(student.role || 'student') !== 'student') throw new Error('Solo un alumno puede generar codigo de rival.');
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const game = (dashboard.games || []).find(function(item) { return String(item.gameId || '').toLowerCase() === 'scrabble'; }) || { gameId:'scrabble', progress:{} };
+  CacheService.getScriptCache().put('LA_SCRABBLE_PAIR_' + code, JSON.stringify({
+    token:String(accessToken || ''),
+    student:student,
+    game:game,
+    createdAt:new Date().toISOString()
+  }), 600);
+  return { ok:true, code:code, expiresIn:600, student:student };
+}
+
+function loginGameOpponentByCode(primaryAccessToken, code, gameId) {
+  if (String(gameId || '').toLowerCase() !== 'scrabble') throw new Error('Este codigo solo sirve para Scrabble.');
+  const primary = callSupabaseStudentDashboard_(primaryAccessToken).student || {};
+  const cleanCode = String(code || '').replace(/\D+/g, '').slice(0, 6);
+  if (!/^\d{6}$/.test(cleanCode)) throw new Error('El codigo debe tener 6 cifras.');
+  const cache = CacheService.getScriptCache();
+  const raw = cache.get('LA_SCRABBLE_PAIR_' + cleanCode);
+  if (!raw) throw new Error('Codigo caducado o incorrecto. Genera uno nuevo desde la cuenta del rival.');
+  cache.remove('LA_SCRABBLE_PAIR_' + cleanCode);
+  const data = JSON.parse(raw || '{}');
+  if (String(data.student && data.student.studentId || '') === String(primary.studentId || '')) {
+    throw new Error('El contrincante debe ser otro alumno.');
+  }
+  return { ok:true, token:data.token, student:data.student, game:data.game || { gameId:'scrabble', progress:{} } };
+}
 function loginStudentPanelWithGoogle(supabaseAccessToken) {
   const email = requireActiveGoogleEmail_();
   if (!isStudentGoogleEmail_(email)) throw new Error('Para entrar como alumno debes usar tu cuenta @alumno.fomento.edu.');

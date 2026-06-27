@@ -22,7 +22,11 @@ const integrations: Record<string, { url:string; integration:string }> = {
     integration:"embedded",
   },
   narratoria:{
-    url:"https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec?page=narratoria",
+    url:"https://pablogarciablancov.github.io/lenguarcade/games/narratoria/",
+    integration:"embedded",
+  },
+  versopolis:{
+    url:"https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec?page=rimopolis",
     integration:"embedded",
   },
 };
