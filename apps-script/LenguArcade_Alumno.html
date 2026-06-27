@@ -63,8 +63,10 @@ body.avatarEditorOpen{overflow:hidden}
 <style>
 /* Perfil alumno: PIN y actividad reciente solo se gestionan fuera de la vista del alumno. */
 #perfil .profileSettings{
-  grid-template-columns:260px minmax(0,1fr)!important;
+  grid-template-columns:260px minmax(0,420px)!important;
+  max-width:760px;
 }
+#perfil .avatarProfileIntroCard{max-width:420px;}
 @media(max-width:720px){
   #perfil .profileSettings{grid-template-columns:1fr!important;}
 }

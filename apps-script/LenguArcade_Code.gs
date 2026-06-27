@@ -46,6 +46,16 @@ const LA_GAME_INTEGRATIONS = {
   narratoria: {
     url: 'https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec?page=narratoria',
     integration: 'embedded'
+  },
+  versopolis: {
+    url: 'https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec?page=rimopolis',
+    integration: 'embedded',
+    nombre: 'Rimópolis',
+    subtitulo: 'RPG de rimas',
+    categoria: 'Rimas',
+    descripcion: 'Combate en escenarios de rap y poesia eligiendo rimas correctas.',
+    icono: '🎤',
+    estado: 'beta'
   }
 };
 
@@ -70,12 +80,16 @@ function doGet(e) {
     ? 'LenguArcade_Profesor'
     : page === 'narratoria'
       ? 'Narratoria_Alumno'
-      : 'LenguArcade_Alumno';
+      : page === 'rimopolis' || page === 'versopolis'
+        ? 'Rimopolis_Alumno'
+        : 'LenguArcade_Alumno';
   const title = page === 'profesor' || page === 'teacher'
     ? 'LenguArcade - Profesor'
     : page === 'narratoria'
       ? 'Narratoria'
-      : 'LenguArcade - Alumno';
+      : page === 'rimopolis' || page === 'versopolis'
+        ? 'Rimópolis'
+        : 'LenguArcade - Alumno';
   return HtmlService.createHtmlOutputFromFile(file)
     .setTitle(title)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
@@ -623,7 +637,7 @@ function seedGames_() {
     ['battlegrafia','Battlegrafia','La aventura de las palabras','RPG','ortografia,gramatica,verbos','beta',1,'#f59e0b','🐉','https://script.google.com/macros/s/AKfycbwJRO4_CkEYp6tLtmaYohUD6dSEtAiit3OTW2669yo75DpY5IR6yGdeBv-kWor22zxEyA/exec','RPG de Lengua. Combate contra errores, desbloquea criaturas y guarda progreso en LenguArcade.','dragon'],
     ['maniacgrafia','Maniacgrafia','Atrapa las palabras','Ortografia','ortografia,acentuacion','beta',2,'#d946ef','⚡','','Corrige palabras trampa y mejora tu precision.','neon'],
     ['narratoria','Narratoria','Escribe. Crea. Cuenta.','Escritura','narracion,creatividad,redaccion','beta',3,'#f59e0b','📚','','Construye relatos con cartas, fases y objetivos.','paper'],
-    ['versopolis','Versopolis','La ciudad de la poesia','Poesia','poesia,literatura,creatividad','beta',4,'#8b5cf6','✒️','','Crea poemas y completa travesias poeticas.','city'],
+    ['versopolis','Rimópolis','RPG de rimas','Rimas','rimas,poesia,creatividad','beta',4,'#8b5cf6','🎤','','Combate en escenarios de rap y poesia eligiendo rimas correctas.','city'],
     ['scrabble','Scrabble','Palabras en juego','Lexico','lexico,vocabulario,estrategia','aula',5,'#34d399','🔤','','Forma palabras y compite por equipos.','board'],
     ['conjuga_apuesta','Conjuga y Apuesta','Verbos 1 contra 1','Verbos','verbos,morfologia','aula',6,'#fb7185','🎲','','Apuesta puntos conjugando formas verbales.','dice'],
     ['verb_battle','Verb Battle','Jeopardy verbal RPG','Verbos','verbos,morfologia,equipos','aula',7,'#60a5fa','⚔️','','Batalla por equipos con preguntas de conjugacion.','battle']
