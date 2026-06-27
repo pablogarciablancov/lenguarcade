@@ -48,14 +48,13 @@
         <span class="sub">v0.5</span>
       </section>
 
-      <section id="loginCard" class="card login">
-        <h2>Entrada de profesor</h2>
-        <p class="sub">Introduce la misma clave de profesor que utilizabas hasta ahora.</p>
-        <div class="loginGrid">
-          <div class="field"><label>Clave</label><input id="teacherPass" type="password" autocomplete="current-password" placeholder="Clave de profesor"></div>
-          <button type="button" id="loginBtn">Entrar</button>
+            <section id="loginCard" class="card login">
+        <h2>Entrada con Google</h2>
+        <p class="sub">Usa tu cuenta institucional @fomento.edu. El panel se conecta a Supabase sin PIN ni clave manual.</p>
+        <div class="loginGrid" style="grid-template-columns:1fr">
+          <button type="button" id="loginBtn">Entrar con Google de profesor</button>
         </div>
-        <div class="status" id="loginStatus">La pantalla ya está lista. Introduce tu clave.</div>
+        <div class="status" id="loginStatus">La pantalla ya está lista. Entra con tu cuenta de profesor.</div>
       </section>
 
       <section id="appContent" class="hidden">
@@ -80,10 +79,7 @@
           <div class="card" id="alumnos">
             <h2>Rendimiento de la clase</h2>
             <div class="sub" style="margin-bottom:10px">Pulsa un alumno para cargar su ficha completa.</div>
-            <div class="buttonRow" style="margin-bottom:10px">
-              <button type="button" class="dangerAction" id="resetPinsBtn">Resetear PIN del filtro</button>
-            </div>
-            <div style="overflow:auto"><table><thead><tr><th>Alumno</th><th>Clase</th><th>PIN</th><th>XP</th><th>Nivel</th><th>Sesiones</th><th>Juegos</th><th>Precisión</th><th>Nota</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
+            <div style="overflow:auto"><table><thead><tr><th>Alumno</th><th>Clase</th><th>XP</th><th>Nivel</th><th>Sesiones</th><th>Juegos</th><th>Precisión</th><th>Nota</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
           </div>
           <div class="card" id="juegos"><h2>Juegos más usados</h2><div id="popularGames"></div></div>
         </section>
@@ -153,7 +149,7 @@
       headers.Authorization='Bearer '+(accessToken||SUPABASE_KEY);
       const response=await fetch(SUPABASE_URL+path,Object.assign({},options,{headers}));
       const data=await response.json().catch(()=>({}));
-      if(!response.ok){const error=new Error(data.error==='invalid_credentials'?'Clave incorrecta.':data.error==='temporarily_blocked'?'Demasiados intentos. Espera quince minutos.':'No se ha podido conectar con Supabase.');error.status=response.status;error.code=data.error;throw error;}
+      if(!response.ok){const error=new Error(data.error==='invalid_credentials'?'Sesión no válida.':data.error==='temporarily_blocked'?'Demasiados intentos. Espera quince minutos.':'No se ha podido conectar con Supabase.');error.status=response.status;error.code=data.error;throw error;}
       return data;
     }
     async function createAnonymousSession(){return request('/auth/v1/signup',{method:'POST',body:JSON.stringify({data:{}})});}
@@ -161,16 +157,13 @@
     async function ensureSession(){if(!session)throw new Error('La sesión ha caducado.');if(session.expires_at*1000<Date.now()+45000)await refreshSession();return session.access_token;}
     async function edge(name,payload){const accessToken=await ensureSession();return request('/functions/v1/'+name,{method:'POST',body:JSON.stringify(payload||{})},accessToken);}
 
-    async function loginTeacher(){
+        async function loginTeacher(){
       if(busy)return;
-      const password=$('teacherPass').value;
-      if(password.length<8){setStatus('Introduce la clave completa.');return;}
-      setBusy(true,'Comprobando la clave...');
+      setBusy(true,'Comprobando tu cuenta Google...');
       try{
         const auth=await createAnonymousSession();
-        await request('/functions/v1/teacher-login',{method:'POST',body:JSON.stringify({password})},auth.access_token);
+        await appsCall('loginTeacherPanelWithGoogle',[auth.access_token]);
         saveSession(auth);
-        $('teacherPass').value='';
         await loadTeacher(true);
       }catch(error){localStorage.removeItem(SESSION_KEY);session=null;setStatus(error.message||String(error));}
       finally{setBusy(false);}
@@ -199,7 +192,7 @@
       renderFilters(data);
       const summary=data.summary||{};
       ['studentsTotal','activeStudents','sessionsToday','gamesAvailable','achievementsTotal','averageGrade'].forEach(key=>$(key).textContent=summary[key]??0);
-      $('studentsBody').innerHTML=(data.students||[]).map(student=>`<tr class="studentRow" data-student="${esc(student.studentId)}"><td><strong>${esc(student.nombre)}</strong><br><span class="sub">${esc(student.email)}</span></td><td>${esc(student.clase)}</td><td>${student.pinConfigured?'Configurado':'Pendiente'}</td><td>${student.xp}</td><td>${student.level}</td><td>${student.sessions}</td><td>${student.gamesPlayed}</td><td>${student.accuracy}%</td><td><strong>${student.grade}</strong></td></tr>`).join('');
+      $('studentsBody').innerHTML=(data.students||[]).map(student=>`<tr class="studentRow" data-student="${esc(student.studentId)}"><td><strong>${esc(student.nombre)}</strong><br><span class="sub">${esc(student.email)}</span></td><td>${esc(student.clase)}</td><td>${student.xp}</td><td>${student.level}</td><td>${student.sessions}</td><td>${student.gamesPlayed}</td><td>${student.accuracy}%</td><td><strong>${student.grade}</strong></td></tr>`).join('');
       document.querySelectorAll('.studentRow').forEach(row=>row.onclick=()=>openStudentDetail(row.dataset.student));
       $('popularGames').innerHTML=(data.popularGames||[]).map(game=>`<div class="gameMini" style="--img:url('${bannerUrl(game.gameId)}')"><div><strong>${esc(game.icono||'')} ${esc(game.nombre)}</strong><span>${game.sessions} sesiones</span><div class="bar" style="margin-top:8px"><div class="fill" style="width:${game.percent}%"></div></div></div></div>`).join('')||'<div class="sub">Sin partidas todavía.</div>';
       $('errors').innerHTML=(data.errorSummary||[]).map(row=>`<div class="box"><strong>${esc(row.label)}</strong><br><span class="sub">${row.count} apariciones</span></div>`).join('')||'<div class="sub">Sin errores registrados.</div>';
@@ -247,35 +240,6 @@
       decorateStudentProgress(detail||{});
     };
 
-    function showCredentialList(title,rows){
-      const list=(rows||[]).map(row=>{
-        const name=row.nombre?row.nombre+' · ':'';
-        const cls=row.clase?' · '+row.clase:'';
-        return `${name}${row.email}${cls}  ${row.pin}`;
-      });
-      $('classroomCredentials').textContent=title+'\nGuarda esta lista ahora; por seguridad no se volverá a mostrar:\n\n'+(list.join('\n')||'No se han generado PIN nuevos.');
-      $('classroomCredentials').classList.remove('hidden');
-    }
-    async function resetPinsForFilter(){
-      if(busy)return;
-      const classCode=$('classSelect').value;
-      const classLabel=classCode?$('classSelect').selectedOptions[0]?.textContent||classCode:'todos los alumnos visibles';
-      const warning=classCode
-        ? `Se generará un PIN nuevo para todos los alumnos de "${classLabel}". Los PIN anteriores dejarán de funcionar.`
-        : 'Se generará un PIN nuevo para TODOS los alumnos activos visibles. Los PIN anteriores dejarán de funcionar.';
-      if(!confirm(warning+'\n\n¿Continuar?'))return;
-      setBusy(true,'Regenerando PIN...');
-      try{
-        const result=await edge('teacher-dashboard',{action:'resetPins',classCode,confirmText:'RESET PIN'});
-        const rows=result.credentials||[];
-        showCredentialList('PIN nuevos generados desde el panel del profesor.',rows);
-        await loadTeacher(true);
-        showCredentialList('PIN nuevos generados desde el panel del profesor.',rows);
-        setStatus(`PIN reseteados: ${rows.length}. Copia o guarda la lista antes de cerrar el panel.`);
-      }catch(error){setStatus('No se pudieron resetear los PIN: '+(error.message||error));}
-      finally{setBusy(false);}
-    }
-
     async function openClassroomPicker(){
       if(busy)return;setBusy(true,'Leyendo tus cursos de Classroom...');
       try{
@@ -299,9 +263,6 @@
         const result=await appsCall('syncClassroomRoster',[await ensureSession(),selected]);
         const skipped=(result.skippedCourses||[]);
         setStatus(`Classroom sincronizado: ${result.coursesSeen||0} cursos y ${result.studentsSeen||0} alumnos.`+(skipped.length?` ${skipped.length} curso(s) sin permiso de roster.`:''));
-        if((result.newCredentials||[]).length){
-          showCredentialList('PIN inicial de alumnos nuevos.',result.newCredentials);
-        }
         await loadTeacher(true);
       }catch(error){setStatus('No se pudo sincronizar Classroom: '+(error.message||error));}
       finally{setBusy(false);}
@@ -322,7 +283,16 @@
     function bind(){
       document.querySelectorAll('.nav button').forEach(button=>button.onclick=()=>{document.getElementById(button.dataset.target)?.scrollIntoView({block:'start'});document.querySelectorAll('.nav button').forEach(item=>item.classList.remove('active'));button.classList.add('active');});
       $('themeBtn').onclick=()=>{document.body.classList.toggle('light');localStorage.setItem('LA_TEACHER_THEME',document.body.classList.contains('light')?'light':'dark');};
-      $('logoutBtn').onclick=logout;$('loginBtn').onclick=loginTeacher;$('teacherPass').onkeydown=event=>{if(event.key==='Enter')loginTeacher();};$('refreshBtn').onclick=()=>loadTeacher();$('classSelect').onchange=()=>loadTeacher();$('gameSelect').onchange=()=>loadTeacher();$('studentModalClose').onclick=()=>$('studentModal').classList.remove('open');$('classroomModalClose').onclick=()=>$('classroomModal').classList.remove('open');$('classroomSyncBtn').onclick=openClassroomPicker;$('classroomImportBtn').onclick=syncSelectedClassroomCourses;$('classroomGradesBtn').onclick=syncGrades;$('resetPinsBtn').onclick=resetPinsForFilter;
+      $('logoutBtn').onclick=logout;
+      $('loginBtn').onclick=loginTeacher;
+      $('refreshBtn').onclick=()=>loadTeacher();
+      $('classSelect').onchange=()=>loadTeacher();
+      $('gameSelect').onchange=()=>loadTeacher();
+      $('studentModalClose').onclick=()=>$('studentModal').classList.remove('open');
+      $('classroomModalClose').onclick=()=>$('classroomModal').classList.remove('open');
+      $('classroomSyncBtn').onclick=openClassroomPicker;
+      $('classroomImportBtn').onclick=syncSelectedClassroomCourses;
+      $('classroomGradesBtn').onclick=syncGrades;
     }
     async function boot(){
       if(localStorage.getItem('LA_TEACHER_THEME')==='light')document.body.classList.add('light');

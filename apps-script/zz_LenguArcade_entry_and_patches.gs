@@ -140,16 +140,32 @@ function getAlumnoOriginalGoogleLoginPatch_() {
     });
     return dashboard;
   }
+  async function loginGoogleViaSupabase(kind){
+    if(typeof createSupabaseAnonymousSession!=='function'||typeof loadSupabaseDashboard!=='function'||typeof saveSupabaseSession!=='function')return null;
+    const auth=await createSupabaseAnonymousSession();
+    const fn=kind==='teacher'?'loginTeacherPanelWithGoogle':'loginStudentPanelWithGoogle';
+    await baseCall(fn,[auth.access_token]);
+    const dashboard=await loadSupabaseDashboard(auth.access_token);
+    saveSupabaseSession(auth);
+    return {ok:true,source:'supabase',token:auth.access_token,dashboard:dashboard};
+  }
   function finishGoogleStudentLogin(result,message){
     if(!result||!result.token||!result.dashboard)throw new Error('El servidor no ha devuelto una sesión válida.');
+    const isSupabase=result.source==='supabase';
     secureSessionVerified=true;
     token=result.token;
     currentDashboard=normalizeNarratoriaUrl(result.dashboard);
-    try{supabaseBackend=false;}catch(error){}
-    try{legacySessionToken=token;}catch(error){}
-    localStorage.setItem('LA_STUDENT_TOKEN',token);
-    try{localStorage.setItem(LA_LEGACY_SESSION_KEY,token);}catch(error){}
-    try{localStorage.removeItem(LA_SUPABASE_SESSION_KEY);}catch(error){}
+    try{supabaseBackend=isSupabase;}catch(error){}
+    if(isSupabase){
+      try{legacySessionToken='';}catch(error){}
+      localStorage.removeItem('LA_STUDENT_TOKEN');
+      try{localStorage.removeItem(LA_LEGACY_SESSION_KEY);}catch(error){}
+    }else{
+      try{legacySessionToken=token;}catch(error){}
+      localStorage.setItem('LA_STUDENT_TOKEN',token);
+      try{localStorage.setItem(LA_LEGACY_SESSION_KEY,token);}catch(error){}
+      try{localStorage.removeItem(LA_SUPABASE_SESSION_KEY);}catch(error){}
+    }
     saveCache('LA_DASHBOARD_CACHE',currentDashboard);
     renderDashboard(currentDashboard);
     revealStudentApp();
@@ -161,7 +177,9 @@ function getAlumnoOriginalGoogleLoginPatch_() {
     disable('[data-google-student-login]',true);
     authStatus('Comprobando tu cuenta de Google del colegio...');
     try{
-      const result=await baseCall('loginWithGoogleAccount',['student']);
+      let result=null;
+      try{result=await loginGoogleViaSupabase('student');}catch(supabaseError){console.warn('Login Google Supabase alumno no disponible, usando respaldo.',supabaseError);}
+      if(!result)result=await baseCall('loginWithGoogleAccount',['student']);
       finishGoogleStudentLogin(result,'Sesión iniciada con Google del colegio.');
     }catch(error){
       authStatus(error.message||'No se ha podido iniciar sesión con Google.');
@@ -176,7 +194,9 @@ function getAlumnoOriginalGoogleLoginPatch_() {
     disable('[data-google-teacher-player-login]',true);
     authStatus('Creando o recuperando tu perfil de profe-jugador...');
     try{
-      const result=await baseCall('loginTeacherAsStudentWithGoogle');
+      let result=null;
+      try{result=await loginGoogleViaSupabase('teacher');}catch(supabaseError){console.warn('Login Google Supabase profe-jugador no disponible, usando respaldo.',supabaseError);}
+      if(!result)result=await baseCall('loginTeacherAsStudentWithGoogle');
       finishGoogleStudentLogin(result,'Modo profe-jugador activado.');
     }catch(error){
       authStatus(error.message||'No se ha podido entrar como profe-jugador.');

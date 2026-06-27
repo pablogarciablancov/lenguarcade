@@ -113,6 +113,54 @@ function listAllClassroomStudents_(courseId) {
 const LA_SUPABASE_URL_ = 'https://spqcztbuwcbmsengeluz.supabase.co';
 const LA_SUPABASE_PUBLIC_KEY_ = 'sb_publishable_zScSYh0tbpXLcY_5iyzsqQ_wepkdqKe';
 
+function loginStudentPanelWithGoogle(supabaseAccessToken) {
+  const email = requireActiveGoogleEmail_();
+  if (!isStudentGoogleEmail_(email)) throw new Error('Para entrar como alumno debes usar tu cuenta @alumno.fomento.edu.');
+  const cleanToken = String(supabaseAccessToken || '').trim();
+  if (!cleanToken) throw new Error('No se ha podido crear la sesion segura del alumno.');
+  const response = UrlFetchApp.fetch(LA_SUPABASE_URL_ + '/functions/v1/google-student-login', {
+    method:'post',
+    contentType:'application/json',
+    headers:{
+      apikey:LA_SUPABASE_PUBLIC_KEY_,
+      Authorization:'Bearer ' + cleanToken
+    },
+    payload:JSON.stringify({ googleAccessToken:ScriptApp.getOAuthToken() }),
+    muteHttpExceptions:true
+  });
+  const text = response.getContentText();
+  let data = {};
+  try { data = JSON.parse(text || '{}'); } catch (error) {}
+  if (response.getResponseCode() < 200 || response.getResponseCode() >= 300 || !data.ok) {
+    throw new Error(data.error || 'Supabase no ha aceptado la sesion de alumno con Google.');
+  }
+  data.email = email;
+  return data;
+}
+function loginTeacherPanelWithGoogle(supabaseAccessToken) {
+  const teacher = loginTeacherWithGoogle();
+  const cleanToken = String(supabaseAccessToken || '').trim();
+  if (!cleanToken) throw new Error('No se ha podido crear la sesion segura del panel.');
+  const response = UrlFetchApp.fetch(LA_SUPABASE_URL_ + '/functions/v1/google-teacher-login', {
+    method:'post',
+    contentType:'application/json',
+    headers:{
+      apikey:LA_SUPABASE_PUBLIC_KEY_,
+      Authorization:'Bearer ' + cleanToken
+    },
+    payload:JSON.stringify({ googleAccessToken:ScriptApp.getOAuthToken() }),
+    muteHttpExceptions:true
+  });
+  const text = response.getContentText();
+  let data = {};
+  try { data = JSON.parse(text || '{}'); } catch (error) {}
+  if (response.getResponseCode() < 200 || response.getResponseCode() >= 300 || !data.ok) {
+    throw new Error(data.error || 'Supabase no ha aceptado la sesion de profesor con Google.');
+  }
+  data.appsScriptTeacher = teacher;
+  return data;
+}
+
 function callSupabaseClassroomBridge_(accessToken, payload) {
   const cleanToken = String(accessToken || '').trim();
   if (!cleanToken) throw new Error('La sesion del profesor no es valida.');

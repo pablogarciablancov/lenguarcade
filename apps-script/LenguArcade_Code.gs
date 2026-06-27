@@ -76,6 +76,7 @@ const LA_HEADERS = {
 
 function doGet(e) {
   const page = String((e && e.parameter && e.parameter.page) || 'alumno').toLowerCase();
+  const isProfesor = page === 'profesor' || page === 'teacher';
   const file = page === 'profesor' || page === 'teacher'
     ? 'LenguArcade_Profesor'
     : page === 'narratoria'
@@ -90,6 +91,9 @@ function doGet(e) {
       : page === 'rimopolis' || page === 'versopolis'
         ? 'Rimópolis'
         : 'LenguArcade - Alumno';
+  if (typeof buildLenguArcadeHtmlOutput_ === 'function') {
+    return buildLenguArcadeHtmlOutput_(file, title, !isProfesor && file === 'LenguArcade_Alumno');
+  }
   return HtmlService.createHtmlOutputFromFile(file)
     .setTitle(title)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
