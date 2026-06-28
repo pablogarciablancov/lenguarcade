@@ -13,14 +13,14 @@
  * - Profesores: @fomento.edu
  *
  * Juegos:
- * - Los juegos viven en GitHub Pages y se abren desde el catálogo de LenguArcade.
+ * - Los juegos viven en GitHub/RawGithack y se abren desde el catálogo de LenguArcade.
  */
 const LA_GOOGLE_AUTH_CONFIG = {
   STUDENT_DOMAIN: '@alumno.fomento.edu',
   TEACHER_DOMAIN: '@fomento.edu',
   TEACHER_ALLOWED_CONFIG_KEY: 'TEACHER_ALLOWED_EMAILS',
   TEACHER_PLAYER_CLASS: 'PROFES',
-  GITHUB_PAGES_GAMES_BASE: 'https://pablogarciablancov.github.io/lenguarcade/games/'
+  GITHUB_PAGES_GAMES_BASE: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/'
 };
 
 function legacyPatchedDoGet_(e) {
@@ -75,7 +75,7 @@ function buildExternalRedirectHtmlOutput_(url, title) {
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<title>' + safeTitle + '</title>' +
     '<style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,Segoe UI,Arial,sans-serif;background:#0b1020;color:#f5f7ff}.box{max-width:520px;padding:28px;border-radius:24px;background:#17213d;box-shadow:0 18px 46px rgba(0,0,0,.34)}a{color:#7dd3fc}</style>' +
-    '</head><body><div class="box"><h1>Cargando ' + safeTitle + '...</h1><p>Abriendo el juego desde GitHub Pages.</p><p><a href="' + safeUrl + '">Abrir manualmente</a></p></div>' +
+    '</head><body><div class="box"><h1>Cargando ' + safeTitle + '...</h1><p>Abriendo el juego desde GitHub/RawGithack.</p><p><a href="' + safeUrl + '">Abrir manualmente</a></p></div>' +
     '<script>window.top.location.href="' + safeUrl + '";<\/script></body></html>'
   )
     .setTitle(safeTitle)
@@ -134,7 +134,7 @@ function getAlumnoOriginalGoogleLoginPatch_() {
     dashboard.games=dashboard.games.map(function(game){
       if(!game||String(game.gameId||'').toLowerCase()!=='narratoria')return game;
       const copy=Object.assign({},game);
-      copy.url='https://pablogarciablancov.github.io/lenguarcade/games/narratoria/';
+      copy.url='https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/';
       copy.embedUrl=copy.url;
       return copy;
     });

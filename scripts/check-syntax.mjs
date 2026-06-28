@@ -161,9 +161,9 @@ if (!/function verifyStudentSession\(token\)\s*\{[^}]*requireSession_\(token,\s*
 if (/function getPublicMetaV03\(\)\s*\{\s*ensureSheets_/.test(serverSource)) {
   errors.push("La carga publica no debe revisar todas las hojas en cada visita.");
 }
-if (!serverSource.includes("https://pablogarciablancov.github.io/lenguarcade/games/maniacgrafia/") ||
+if (!serverSource.includes("https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/maniacgrafia/") ||
     !serverSource.includes("decorateGameIntegration_")) {
-  errors.push("Maniacgrafia debe estar enlazada a GitHub Pages mediante el catalogo integrado.");
+  errors.push("Maniacgrafia debe estar enlazada a GitHub/RawGithack mediante el catalogo integrado.");
 }
 
 const publicStudentMatch = serverSource.match(/function publicStudent_\(s\)\s*\{([^}]+)\}/);

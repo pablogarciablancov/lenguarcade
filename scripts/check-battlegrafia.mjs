@@ -90,15 +90,15 @@ for (const required of [
   if (!bridgeHtml.includes(required)) errors.push(`Falta el puente de BattleGrafia: ${required}`);
 }
 
-const githubUrl = "https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia/";
+const githubUrl = "https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/";
 const staticIndex = fs.readFileSync(path.resolve("games", "battlegrafia", "index.html"), "utf8");
 if (staticIndex.includes("<?!=") || staticIndex.includes("include('")) {
-  errors.push("La version GitHub Pages de BattleGrafia debe estar aplanada sin includes de Apps Script.");
+  errors.push("La version GitHub/RawGithack de BattleGrafia debe estar aplanada sin includes de Apps Script.");
 }
 if (!centralServer.includes("battlegrafia") ||
     !centralServer.includes(githubUrl) ||
     !centralServer.includes("estado: 'beta'")) {
-  errors.push("LenguArcade_Code.gs debe activar BattleGrafia desde GitHub Pages como juego embebido beta.");
+  errors.push("LenguArcade_Code.gs debe activar BattleGrafia desde GitHub/RawGithack como juego embebido beta.");
 }
 
 if (!centralStudent.includes("gameRecord?.gameId==='battlegrafia'") ||
@@ -140,7 +140,7 @@ if (!menuHtml.includes("bg-game-notice") ||
 if (!supabaseDashboard.includes("battlegrafia") ||
     !supabaseDashboard.includes(githubUrl) ||
     !supabaseDashboard.includes("locked:!integration")) {
-  errors.push("student-dashboard debe exponer BattleGrafia desde GitHub Pages y desbloquearlo al tener integracion.");
+  errors.push("student-dashboard debe exponer BattleGrafia desde GitHub/RawGithack y desbloquearlo al tener integracion.");
 }
 
 if (errors.length) {

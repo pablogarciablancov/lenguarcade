@@ -10,23 +10,23 @@ function average(values: number[]) {
 
 const integrations: Record<string, { url:string; integration:string }> = {
   battlegrafia:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia/",
+    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/",
     integration:"embedded",
   },
   maniacgrafia:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/maniacgrafia/",
+    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/maniacgrafia/",
     integration:"embedded",
   },
   scrabble:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/scrabble/",
+    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/scrabble/",
     integration:"embedded",
   },
   narratoria:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/narratoria/",
+    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/",
     integration:"embedded",
   },
   versopolis:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/rimopolis/",
+    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/rimopolis/",
     integration:"embedded",
   },
 };

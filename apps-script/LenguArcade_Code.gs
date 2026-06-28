@@ -31,24 +31,24 @@ const LA_CONFIG = {
 
 const LA_GAME_INTEGRATIONS = {
   battlegrafia: {
-    url: 'https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia/',
+    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/',
     integration: 'embedded',
     estado: 'beta'
   },
   maniacgrafia: {
-    url: 'https://pablogarciablancov.github.io/lenguarcade/games/maniacgrafia/',
+    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/maniacgrafia/',
     integration: 'embedded'
   },
   scrabble: {
-    url: 'https://pablogarciablancov.github.io/lenguarcade/games/scrabble/',
+    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/scrabble/',
     integration: 'embedded'
   },
   narratoria: {
-    url: 'https://pablogarciablancov.github.io/lenguarcade/games/narratoria/',
+    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/',
     integration: 'embedded'
   },
   versopolis: {
-    url: 'https://pablogarciablancov.github.io/lenguarcade/games/rimopolis/',
+    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/rimopolis/',
     integration: 'embedded',
     nombre: 'Rimópolis',
     subtitulo: 'RPG de rimas',
@@ -77,7 +77,7 @@ const LA_HEADERS = {
 function doGet(e) {
   const page = String((e && e.parameter && e.parameter.page) || 'alumno').toLowerCase();
   if (page === 'narratoria' && typeof buildExternalRedirectHtmlOutput_ === 'function') {
-    return buildExternalRedirectHtmlOutput_('https://pablogarciablancov.github.io/lenguarcade/games/narratoria/', 'Narratoria');
+    return buildExternalRedirectHtmlOutput_('https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/', 'Narratoria');
   }
   const isProfesor = page === 'profesor' || page === 'teacher';
   const file = page === 'profesor' || page === 'teacher'
@@ -639,7 +639,7 @@ function seedGames_() {
   const sh = getSheet_(LA_CONFIG.SHEETS.JUEGOS);
   if (sh.getLastRow() > 1) return;
   const games = [
-    ['battlegrafia','Battlegrafia','La aventura de las palabras','RPG','ortografia,gramatica,verbos','beta',1,'#f59e0b','🐉','https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia/','RPG de Lengua. Combate contra errores, desbloquea criaturas y guarda progreso en LenguArcade.','dragon'],
+    ['battlegrafia','Battlegrafia','La aventura de las palabras','RPG','ortografia,gramatica,verbos','beta',1,'#f59e0b','🐉','https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/','RPG de Lengua. Combate contra errores, desbloquea criaturas y guarda progreso en LenguArcade.','dragon'],
     ['maniacgrafia','Maniacgrafia','Atrapa las palabras','Ortografia','ortografia,acentuacion','beta',2,'#d946ef','⚡','','Corrige palabras trampa y mejora tu precision.','neon'],
     ['narratoria','Narratoria','Escribe. Crea. Cuenta.','Escritura','narracion,creatividad,redaccion','beta',3,'#f59e0b','📚','','Construye relatos con cartas, fases y objetivos.','paper'],
     ['versopolis','Rimópolis','RPG de rimas','Rimas','rimas,poesia,creatividad','beta',4,'#8b5cf6','🎤','','Combate en escenarios de rap y poesia eligiendo rimas correctas.','city'],
