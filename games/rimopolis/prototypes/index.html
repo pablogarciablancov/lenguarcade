@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rimopolis Lab - prototipos jugables</title>
+<style>
+:root{
+  --bg:#080713;
+  --panel:#141128;
+  --panel2:#211a3f;
+  --text:#fff8ec;
+  --muted:#c7bce8;
+  --line:rgba(255,255,255,.16);
+  --gold:#ffd166;
+  --pink:#ff4fd8;
+  --cyan:#54e1ff;
+  --green:#66e38f;
+  --red:#ff6273;
+  --ink:#151024;
+  --shadow:0 22px 60px rgba(0,0,0,.38);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 12% 10%,rgba(255,79,216,.20),transparent 28%),
+    radial-gradient(circle at 88% 8%,rgba(84,225,255,.20),transparent 30%),
+    linear-gradient(145deg,#070612,#17102f 48%,#080814);
+}
+button,input,textarea{font:inherit}
+button{
+  border:0;
+  border-radius:16px;
+  padding:12px 16px;
+  font-weight:900;
+  cursor:pointer;
+  color:#160e24;
+  background:linear-gradient(135deg,var(--gold),#ff9f1c);
+  box-shadow:0 9px 0 #704005,0 16px 30px rgba(0,0,0,.26);
+  transition:transform .08s ease,filter .16s ease;
+}
+button:hover{filter:brightness(1.06)}
+button:active{transform:translateY(4px);box-shadow:0 5px 0 #704005,0 10px 22px rgba(0,0,0,.26)}
+button.secondary{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--line);box-shadow:none}
+button.small{padding:8px 11px;border-radius:12px;font-size:13px}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.app{width:min(1220px,100%);margin:0 auto;padding:18px}
+.hero{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:16px;
+  align-items:stretch;
+  margin-bottom:16px;
+}
+.brand,.note,.card,.stage,.log,.panel{
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.035));
+  box-shadow:var(--shadow);
+}
+.brand{border-radius:28px;padding:20px}
+.brand h1{margin:0;font-size:clamp(34px,5vw,62px);letter-spacing:.02em}
+.brand p{margin:8px 0 0;color:var(--muted);line-height:1.45}
+.note{border-radius:24px;padding:16px;width:min(360px,100%);color:var(--muted);line-height:1.45}
+.option-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:16px;
+}
+.card{
+  border-radius:22px;
+  padding:14px;
+  min-height:190px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.card.active{outline:3px solid rgba(255,209,102,.72);background:linear-gradient(180deg,rgba(255,209,102,.16),rgba(255,255,255,.04))}
+.card h2{margin:0;font-size:20px}
+.card p{margin:0;color:var(--muted);line-height:1.38;font-size:14px}
+.tag{display:inline-flex;width:max-content;align-items:center;border:1px solid var(--line);border-radius:999px;padding:6px 9px;color:#ffe6a7;background:rgba(255,209,102,.10);font-weight:900;font-size:12px}
+.card button{margin-top:auto}
+.stage{
+  position:relative;
+  overflow:hidden;
+  border-radius:32px;
+  min-height:560px;
+  background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.72)),var(--scene);
+}
+.stage:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 82%,rgba(255,209,102,.24),transparent 23%),
+    linear-gradient(90deg,rgba(255,79,216,.13),transparent 40%,rgba(84,225,255,.14));
+}
+.screen{display:none;position:relative;z-index:1;padding:18px}
+.screen.active{display:block}
+.screen-head{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+  margin-bottom:14px;
+}
+.screen-head h2{margin:0;font-size:clamp(28px,4vw,46px)}
+.screen-head p{margin:6px 0 0;color:var(--muted)}
+.hud{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin:12px 0 14px;
+}
+.stat{border:1px solid var(--line);border-radius:18px;padding:10px;background:rgba(0,0,0,.22)}
+.stat span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.06em}
+.stat b{font-size:24px}
+.bar{height:14px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:8px}
+.fill{height:100%;width:50%;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width .2s ease}
+.fill.bad{background:linear-gradient(90deg,var(--pink),var(--red))}
+.arena-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  align-items:end;
+  min-height:210px;
+  margin:10px 0 14px;
+}
+.performer{
+  min-height:190px;
+  display:grid;
+  place-items:end center;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:rgba(8,6,18,.58);
+  padding:18px;
+}
+.performer .sprite{
+  width:118px;height:150px;border-radius:34px 34px 20px 20px;
+  background:linear-gradient(180deg,#fef3c7,#f97316 55%,#1d4ed8 56%);
+  border:4px solid rgba(0,0,0,.58);
+  box-shadow:0 22px 0 rgba(0,0,0,.25),0 0 24px rgba(255,255,255,.10);
+  position:relative;
+}
+.sprite:before{content:"";position:absolute;left:27px;top:-28px;width:64px;height:48px;border-radius:50% 50% 40% 40%;background:#8b4518;border:4px solid rgba(0,0,0,.58)}
+.sprite:after{content:"";position:absolute;left:36px;top:20px;width:46px;height:18px;border-radius:50%;background:rgba(0,0,0,.22)}
+.performer.rival .sprite{background:linear-gradient(180deg,#f0abfc,#7c3aed 55%,#111827 56%)}
+.challenge,.board,.writing,.recital{
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:linear-gradient(180deg,rgba(20,17,40,.96),rgba(8,7,19,.96));
+  padding:16px;
+}
+.prompt{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+  margin-bottom:12px;
+}
+.prompt h3{margin:0;font-size:clamp(22px,3vw,34px)}
+.answers,.cards,.slots,.line-pool{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.answer,.word-card,.line-card{
+  min-height:62px;
+  text-align:left;
+  color:var(--text);
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--line);
+  box-shadow:none;
+}
+.answer.good,.word-card.good,.line-card.good{background:linear-gradient(135deg,rgba(102,227,143,.92),rgba(84,225,255,.72));color:#07131b}
+.answer.bad,.word-card.bad,.line-card.bad{background:linear-gradient(135deg,rgba(255,98,115,.92),rgba(255,79,216,.70));color:#fff}
+.input-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start}
+textarea{
+  width:100%;
+  min-height:100px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:rgba(255,255,255,.08);
+  color:var(--text);
+  padding:13px;
+  resize:vertical;
+}
+.meter{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.chain{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;margin:10px 0}
+.chip{border:1px solid var(--line);border-radius:999px;padding:8px 10px;background:rgba(255,255,255,.08);font-weight:900;color:#ffe6a7}
+.slot{min-height:76px;border:2px dashed rgba(255,255,255,.22);border-radius:18px;padding:10px;background:rgba(0,0,0,.18);color:var(--muted)}
+.slot.filled{border-style:solid;color:var(--text);background:rgba(255,255,255,.08)}
+.bottom{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;margin-top:16px}
+.panel{border-radius:24px;padding:14px}
+.panel h2{margin:0 0 8px}
+.logbox{min-height:130px;max-height:210px;overflow:auto;color:#eadfff;line-height:1.45}
+.achievement{display:inline-block;margin:4px 4px 0 0;border:1px solid rgba(255,209,102,.38);border-radius:999px;padding:7px 10px;background:rgba(255,209,102,.12);color:#ffe4a5;font-weight:900;font-size:12px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);padding:12px 16px;border-radius:16px;background:#101827;color:#fff;border:1px solid var(--line);box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .18s ease;z-index:9}
+.toast.show{opacity:1}
+@media(max-width:980px){.hero,.screen-head,.bottom,.arena-row{grid-template-columns:1fr}.option-grid{grid-template-columns:1fr 1fr}.note{width:100%}.hud{grid-template-columns:1fr 1fr}.prompt,.input-row{grid-template-columns:1fr}.performer{min-height:150px}.performer .sprite{transform:scale(.82)}}
+@media(max-width:620px){.option-grid,.answers,.cards,.slots,.line-pool,.meter{grid-template-columns:1fr}.app{padding:12px}.stage{border-radius:22px}.screen{padding:12px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hero">
+    <div class="brand">
+      <h1>Rim&oacute;polis Lab</h1>
+      <p>Cuatro pruebas jugables para decidir la identidad del juego antes de integrarlo en LenguArcade. Todo esto es laboratorio: no toca el Rim&oacute;polis actual.</p>
+    </div>
+    <aside class="note">
+      <strong>Idea base:</strong> que deje de parecer Battlegraf&iacute;a y se convierta en un juego de rimas, escenario, p&uacute;blico, flow y decisiones po&eacute;ticas.
+    </aside>
+  </header>
+
+  <section class="option-grid" id="optionGrid">
+    <article class="card active" data-mode="micro">
+      <span class="tag">Opcion 1</span>
+      <h2>Micro abierto RPG</h2>
+      <p>Rival esc&eacute;nico, p&uacute;blico y flow. Sigue siendo aventura, pero sin monstruos ni vida cl&aacute;sica.</p>
+      <button data-play="micro">Probar</button>
+    </article>
+    <article class="card" data-mode="freestyle">
+      <span class="tag">Opcion 2</span>
+      <h2>Freestyle escrito</h2>
+      <p>El alumno escribe versos. El juego punt&uacute;a rima final, longitud, palabras bonus y combo.</p>
+      <button data-play="freestyle">Probar</button>
+    </article>
+    <article class="card" data-mode="cadena">
+      <span class="tag">Opcion 3</span>
+      <h2>Cadena roguelite</h2>
+      <p>Cartas de palabras. Hay que mantener familias de rima y construir una cadena cada vez m&aacute;s arriesgada.</p>
+      <button data-play="cadena">Probar</button>
+    </article>
+    <article class="card" data-mode="recital">
+      <span class="tag">Opcion 4</span>
+      <h2>Recital puzzle</h2>
+      <p>Ordena versos para cumplir esquemas AABB o ABAB. M&aacute;s po&eacute;tico, menos combate.</p>
+      <button data-play="recital">Probar</button>
+    </article>
+  </section>
+
+  <main class="stage" id="stage">
+    <section class="screen active" id="screen-micro">
+      <div class="screen-head">
+        <div>
+          <h2>Micro abierto RPG</h2>
+          <p>Gana aplausos eligiendo la rima correcta. Si fallas, el rival baja tu flow.</p>
+        </div>
+        <button class="secondary" data-reset="micro">Reiniciar prueba</button>
+      </div>
+      <div class="hud">
+        <div class="stat"><span>Publico</span><b id="microAudience">50</b><div class="bar"><div class="fill" id="microAudienceBar"></div></div></div>
+        <div class="stat"><span>Tu flow</span><b id="microFlow">100</b><div class="bar"><div class="fill" id="microFlowBar"></div></div></div>
+        <div class="stat"><span>Rival</span><b id="microRival">100</b><div class="bar"><div class="fill bad" id="microRivalBar"></div></div></div>
+        <div class="stat"><span>Combo</span><b id="microCombo">0</b></div>
+      </div>
+      <div class="arena-row">
+        <div class="performer"><div class="sprite"></div><strong>Tu MC</strong></div>
+        <div class="performer rival"><div class="sprite"></div><strong id="microRivalName">DJ Silaba</strong></div>
+      </div>
+      <div class="challenge">
+        <div class="prompt">
+          <div><span class="tag" id="microKind">Rima consonante</span><h3 id="microPrompt">Rima con cancion</h3></div>
+          <span class="tag">Escenario: Plaza del Eco</span>
+        </div>
+        <div class="answers" id="microAnswers"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-freestyle">
+      <div class="screen-head">
+        <div>
+          <h2>Freestyle escrito</h2>
+          <p>Escribe un verso que cierre con la rima pedida. Se premia rima, ritmo y palabras de la ronda.</p>
+        </div>
+        <button class="secondary" data-reset="freestyle">Nueva ronda</button>
+      </div>
+      <div class="hud">
+        <div class="stat"><span>Flow</span><b id="freeFlow">0</b></div>
+        <div class="stat"><span>Rima</span><b id="freeRhyme">0</b></div>
+        <div class="stat"><span>Ritmo</span><b id="freeRhythm">0</b></div>
+        <div class="stat"><span>Combo</span><b id="freeCombo">0</b></div>
+      </div>
+      <div class="writing">
+        <div class="prompt">
+          <div><span class="tag">Final obligatorio</span><h3 id="freeEnding">-on</h3></div>
+          <span class="tag">Incluye: <b id="freeBonus">aula</b></span>
+        </div>
+        <div class="input-row">
+          <textarea id="freeText" placeholder="Escribe aqui tu verso... Ejemplo: En el aula mi voz despierta la cancion"></textarea>
+          <button id="freeCheck">Lanzar verso</button>
+        </div>
+        <div class="meter">
+          <div class="stat"><span>Consejo</span><b id="freeTip">Rima final</b></div>
+          <div class="stat"><span>Objetivo</span><b>60+</b></div>
+          <div class="stat"><span>Ronda</span><b id="freeRound">1</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-cadena">
+      <div class="screen-head">
+        <div>
+          <h2>Cadena roguelite</h2>
+          <p>Elige cartas que mantengan la familia de rima. Si cambias sin comodin, pierdes publico.</p>
+        </div>
+        <button class="secondary" data-reset="cadena">Rebarajar</button>
+      </div>
+      <div class="hud">
+        <div class="stat"><span>Publico</span><b id="chainAudience">70</b></div>
+        <div class="stat"><span>Cadena</span><b id="chainLength">0</b></div>
+        <div class="stat"><span>Familia</span><b id="chainFamily">-</b></div>
+        <div class="stat"><span>Objetivo</span><b>8</b></div>
+      </div>
+      <div class="board">
+        <span class="tag">Cadena actual</span>
+        <div class="chain" id="chainDisplay"></div>
+        <span class="tag">Mano</span>
+        <div class="cards" id="chainCards"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-recital">
+      <div class="screen-head">
+        <div>
+          <h2>Recital puzzle</h2>
+          <p>Ordena cuatro versos para cumplir el esquema de rima. Es la opcion mas tranquila y literaria.</p>
+        </div>
+        <button class="secondary" data-reset="recital">Nuevo poema</button>
+      </div>
+      <div class="hud">
+        <div class="stat"><span>Esquema</span><b id="recScheme">AABB</b></div>
+        <div class="stat"><span>Aciertos</span><b id="recWins">0</b></div>
+        <div class="stat"><span>Intentos</span><b id="recTries">0</b></div>
+        <div class="stat"><span>Fama</span><b id="recFame">0</b></div>
+      </div>
+      <div class="recital">
+        <span class="tag">Huecos del poema</span>
+        <div class="slots" id="recSlots"></div>
+        <p style="color:var(--muted)">Pulsa versos de abajo para colocarlos. Pulsa un hueco para vaciarlo.</p>
+        <div class="line-pool" id="recPool"></div>
+        <div class="actions" style="margin-top:12px"><button id="recCheck">Comprobar recital</button></div>
+      </div>
+    </section>
+  </main>
+
+  <section class="bottom">
+    <article class="panel">
+      <h2>Bitacora de pruebas</h2>
+      <div class="logbox" id="log"></div>
+    </article>
+    <article class="panel">
+      <h2>Logros absurdos</h2>
+      <div id="achievements"></div>
+    </article>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const logBox = $("log");
+const achievementsBox = $("achievements");
+const toastBox = $("toast");
+const achievements = new Set();
+
+function log(text){
+  logBox.insertAdjacentHTML("afterbegin","<div>"+escapeHtml(text)+"</div>");
+}
+function toast(text){
+  toastBox.textContent = text;
+  toastBox.classList.add("show");
+  setTimeout(()=>toastBox.classList.remove("show"),1300);
+}
+function escapeHtml(value){
+  return String(value ?? "").replace(/[&<>"']/g, (m)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+}
+function unlock(id,title){
+  if(achievements.has(id)) return;
+  achievements.add(id);
+  achievementsBox.insertAdjacentHTML("beforeend",'<span class="achievement">'+escapeHtml(title)+'</span>');
+  toast("Logro: "+title);
+}
+function setMode(mode){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".card").forEach(c=>c.classList.toggle("active",c.dataset.mode===mode));
+  $("screen-"+mode).classList.add("active");
+  const scenes = {
+    micro:"radial-gradient(circle at 50% 10%,#4338ca,transparent 32%),linear-gradient(160deg,#1e1b4b,#111827)",
+    freestyle:"radial-gradient(circle at 28% 18%,#f97316,transparent 26%),linear-gradient(160deg,#33150a,#111827)",
+    cadena:"radial-gradient(circle at 74% 20%,#0ea5e9,transparent 30%),linear-gradient(160deg,#06283d,#141128)",
+    recital:"radial-gradient(circle at 50% 18%,#ffd166,transparent 24%),linear-gradient(160deg,#2d1b4f,#080713)"
+  };
+  $("stage").style.setProperty("--scene",scenes[mode]);
+  log("Probando opcion: "+mode+".");
+}
+
+document.querySelectorAll("[data-play]").forEach(btn=>btn.addEventListener("click",()=>setMode(btn.dataset.play)));
+document.querySelectorAll("[data-reset]").forEach(btn=>btn.addEventListener("click",()=>{
+  const mode = btn.dataset.reset;
+  if(mode==="micro") resetMicro();
+  if(mode==="freestyle") resetFree();
+  if(mode==="cadena") resetChain();
+  if(mode==="recital") resetRecital();
+}));
+
+const microQuestions = [
+  {base:"cancion",kind:"consonante",answer:"emocion",options:["emocion","camino","mesa","verde"]},
+  {base:"camino",kind:"asonante",answer:"destino",options:["destino","cristal","luz","barco"]},
+  {base:"estrella",kind:"asonante",answer:"promesa",options:["promesa","tambor","papel","sol"]},
+  {base:"verdad",kind:"consonante",answer:"ciudad",options:["ciudad","nube","ritmo","clase"]},
+  {base:"lectura",kind:"consonante",answer:"aventura",options:["aventura","calle","azul","mar"]},
+  {base:"poesia",kind:"consonante",answer:"melodia",options:["melodia","pluma","bosque","voz"]}
+];
+let micro = {};
+function resetMicro(){
+  micro = {audience:50,flow:100,rival:100,combo:0,index:0};
+  renderMicro();
+  log("Micro abierto reiniciado. El publico espera algo decente.");
+}
+function renderMicro(){
+  const q = microQuestions[micro.index % microQuestions.length];
+  $("microAudience").textContent = micro.audience;
+  $("microFlow").textContent = micro.flow;
+  $("microRival").textContent = micro.rival;
+  $("microCombo").textContent = "x"+micro.combo;
+  $("microAudienceBar").style.width = micro.audience+"%";
+  $("microFlowBar").style.width = micro.flow+"%";
+  $("microRivalBar").style.width = micro.rival+"%";
+  $("microKind").textContent = "Rima "+q.kind;
+  $("microPrompt").textContent = "Rima con "+q.base;
+  $("microAnswers").innerHTML = q.options.map(opt=>'<button class="answer" data-opt="'+escapeHtml(opt)+'">'+escapeHtml(opt)+'</button>').join("");
+  document.querySelectorAll("#microAnswers .answer").forEach(btn=>btn.addEventListener("click",()=>answerMicro(btn.dataset.opt,btn)));
+}
+function answerMicro(opt,btn){
+  const q = microQuestions[micro.index % microQuestions.length];
+  if(opt===q.answer){
+    micro.combo++;
+    micro.audience = Math.min(100,micro.audience + 8 + micro.combo);
+    micro.rival = Math.max(0,micro.rival - 18 - micro.combo*4);
+    btn.classList.add("good");
+    log("Buena rima: "+q.base+" / "+opt+". El publico sube.");
+    unlock("micro-first","Primer aplauso sospechosamente sincero");
+    if(micro.combo>=3) unlock("micro-combo","Combo con flequillo poetico");
+  }else{
+    micro.combo = 0;
+    micro.flow = Math.max(0,micro.flow - 15);
+    micro.audience = Math.max(0,micro.audience - 6);
+    btn.classList.add("bad");
+    log("Esa rima no cuaja: "+opt+". El rival sonrie demasiado.");
+  }
+  micro.index++;
+  setTimeout(()=>{
+    if(micro.rival<=0){
+      unlock("micro-win","DJ Silaba se queda sin silabas");
+      log("Has ganado el duelo escenico. Esta opcion funciona bien como aventura principal.");
+      resetMicro();
+    }else if(micro.flow<=0){
+      log("Te quedaste sin flow. Revancha rapida.");
+      resetMicro();
+    }else renderMicro();
+  },260);
+}
+
+const freePrompts = [
+  {ending:"on",bonus:"aula",tips:["cancion","emocion","razon","balon"]},
+  {ending:"ia",bonus:"libro",tips:["melodia","poesia","alegria","guia"]},
+  {ending:"ar",bonus:"micro",tips:["cantar","brillar","saltar","sonar"]},
+  {ending:"ero",bonus:"patio",tips:["companero","sendero","ligero","guerrero"]},
+  {ending:"ura",bonus:"clase",tips:["aventura","lectura","locura","ternura"]}
+];
+let free = {};
+function resetFree(){
+  free = {round:1,combo:0,total:0,current:freePrompts[Math.floor(Math.random()*freePrompts.length)]};
+  $("freeText").value = "";
+  renderFree();
+  log("Freestyle preparado. Aqui interesa medir creatividad sin hacerlo injusto.");
+}
+function renderFree(){
+  $("freeEnding").textContent = "-"+free.current.ending;
+  $("freeBonus").textContent = free.current.bonus;
+  $("freeCombo").textContent = "x"+free.combo;
+  $("freeFlow").textContent = free.total;
+  $("freeRound").textContent = free.round;
+  $("freeTip").textContent = "Ej: "+free.current.tips.slice(0,2).join(", ");
+}
+function checkFree(){
+  const text = $("freeText").value.trim().toLowerCase();
+  const words = text.split(/\s+/).filter(Boolean);
+  const last = (words[words.length-1] || "").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z]/g,"");
+  let rhyme = last.endsWith(free.current.ending) ? 45 : free.current.tips.includes(last) ? 45 : 0;
+  let rhythm = Math.max(0,Math.min(35,words.length*4));
+  let bonus = text.includes(free.current.bonus) ? 20 : 0;
+  const score = rhyme + rhythm + bonus;
+  $("freeRhyme").textContent = rhyme;
+  $("freeRhythm").textContent = rhythm;
+  if(score>=60){
+    free.combo++;
+    free.total += score + free.combo*5;
+    log("Verso aceptado: "+score+" puntos. Rima final: "+(rhyme? "si":"no")+".");
+    unlock("free-write","Primer verso sin salir corriendo");
+    if(free.combo>=3) unlock("free-combo","Improvisador con papeles");
+  }else{
+    free.combo = 0;
+    log("Verso flojo: "+score+" puntos. Necesita rima final o mas cuerpo.");
+  }
+  free.round++;
+  free.current = freePrompts[Math.floor(Math.random()*freePrompts.length)];
+  $("freeText").value = "";
+  renderFree();
+}
+$("freeCheck").addEventListener("click",checkFree);
+
+const deckBase = [
+  {word:"cancion",family:"on"},{word:"emocion",family:"on"},{word:"balon",family:"on"},{word:"razon",family:"on"},
+  {word:"poesia",family:"ia"},{word:"melodia",family:"ia"},{word:"alegria",family:"ia"},{word:"guia",family:"ia"},
+  {word:"aventura",family:"ura"},{word:"lectura",family:"ura"},{word:"locura",family:"ura"},{word:"ternura",family:"ura"},
+  {word:"cantar",family:"ar"},{word:"brillar",family:"ar"},{word:"saltar",family:"ar"},{word:"sonar",family:"ar"},
+  {word:"comodin",family:"wild"}
+];
+let chain = {};
+function resetChain(){
+  chain = {audience:70,family:null,items:[],hand:drawHand()};
+  renderChain();
+  log("Cartas listas. Elige una familia de rima y aguanta la cadena.");
+}
+function drawHand(){
+  const pool = deckBase.slice().sort(()=>Math.random()-.5);
+  return pool.slice(0,6);
+}
+function renderChain(){
+  $("chainAudience").textContent = chain.audience;
+  $("chainLength").textContent = chain.items.length;
+  $("chainFamily").textContent = chain.family || "-";
+  $("chainDisplay").innerHTML = chain.items.map(item=>'<span class="chip">'+escapeHtml(item.word)+'</span>').join("") || '<span class="chip">Empieza la cadena</span>';
+  $("chainCards").innerHTML = chain.hand.map((card,i)=>'<button class="word-card" data-i="'+i+'"><strong>'+escapeHtml(card.word)+'</strong><br><span>Familia: '+escapeHtml(card.family)+'</span></button>').join("");
+  document.querySelectorAll("#chainCards .word-card").forEach(btn=>btn.addEventListener("click",()=>playCard(Number(btn.dataset.i),btn)));
+}
+function playCard(index,btn){
+  const card = chain.hand[index];
+  const ok = !chain.family || card.family===chain.family || card.family==="wild";
+  if(ok){
+    if(card.family!=="wild") chain.family = card.family;
+    chain.items.push(card);
+    chain.audience = Math.min(100,chain.audience + 4);
+    btn.classList.add("good");
+    log("Carta encajada: "+card.word+". Cadena de "+chain.items.length+".");
+    unlock("chain-start","Primera cadena que no se rompe sola");
+    if(chain.items.length>=8){
+      unlock("chain-win","Pulsera infinita de rimas");
+      log("Objetivo logrado. Esta opcion puede funcionar como modo rapido/roguelite.");
+      resetChain();
+      return;
+    }
+  }else{
+    chain.audience = Math.max(0,chain.audience - 16);
+    btn.classList.add("bad");
+    log("La carta "+card.word+" rompe la familia "+chain.family+". El publico murmura.");
+    if(chain.audience<=0){
+      log("El publico se fue a comprar pipas. Nueva cadena.");
+      resetChain();
+      return;
+    }
+  }
+  chain.hand.splice(index,1);
+  if(chain.hand.length<3) chain.hand = drawHand();
+  setTimeout(renderChain,200);
+}
+
+const poems = [
+  {scheme:"AABB",lines:[
+    {text:"La luna mira desde el balcon",r:"A"},
+    {text:"y tiembla dentro de mi cancion",r:"A"},
+    {text:"El patio guarda la primavera",r:"B"},
+    {text:"bajo la sombra de una higuera",r:"B"}
+  ]},
+  {scheme:"ABAB",lines:[
+    {text:"Traigo una pluma para cantar",r:"A"},
+    {text:"sobre la mesa duerme el dia",r:"B"},
+    {text:"si cae la noche vuelvo a brillar",r:"A"},
+    {text:"con una rima de fantasia",r:"B"}
+  ]},
+  {scheme:"AABB",lines:[
+    {text:"En la biblioteca suena un tambor",r:"A"},
+    {text:"cada palabra despierta color",r:"A"},
+    {text:"cuando la clase se pone a rimar",r:"B"},
+    {text:"hasta las sillas quieren cantar",r:"B"}
+  ]}
+];
+let recital = {};
+function resetRecital(){
+  const poem = poems[Math.floor(Math.random()*poems.length)];
+  recital = {poem,slots:[null,null,null,null],pool:poem.lines.slice().sort(()=>Math.random()-.5),wins:recital.wins||0,tries:recital.tries||0,fame:recital.fame||0};
+  renderRecital();
+  log("Nuevo recital. Ordena segun el esquema "+poem.scheme+".");
+}
+function renderRecital(){
+  $("recScheme").textContent = recital.poem.scheme;
+  $("recWins").textContent = recital.wins;
+  $("recTries").textContent = recital.tries;
+  $("recFame").textContent = recital.fame;
+  $("recSlots").innerHTML = recital.slots.map((line,i)=>'<button class="slot '+(line?'filled':'')+'" data-slot="'+i+'">'+(line?escapeHtml(line.text):"Hueco "+(i+1))+'</button>').join("");
+  $("recPool").innerHTML = recital.pool.map((line,i)=>'<button class="line-card" data-line="'+i+'">'+escapeHtml(line.text)+'</button>').join("");
+  document.querySelectorAll("#recSlots .slot").forEach(btn=>btn.addEventListener("click",()=>clearSlot(Number(btn.dataset.slot))));
+  document.querySelectorAll("#recPool .line-card").forEach(btn=>btn.addEventListener("click",()=>placeLine(Number(btn.dataset.line))));
+}
+function clearSlot(i){
+  if(!recital.slots[i]) return;
+  recital.pool.push(recital.slots[i]);
+  recital.slots[i]=null;
+  renderRecital();
+}
+function placeLine(i){
+  const empty = recital.slots.findIndex(x=>!x);
+  if(empty<0) return;
+  recital.slots[empty] = recital.pool.splice(i,1)[0];
+  renderRecital();
+}
+function checkRecital(){
+  if(recital.slots.some(x=>!x)){log("Faltan versos por colocar.");return;}
+  recital.tries++;
+  const got = recital.slots.map(x=>x.r).join("");
+  const ok = got === recital.poem.scheme;
+  if(ok){
+    recital.wins++;
+    recital.fame += 25;
+    unlock("recital-ok","Poema que no se cae por las escaleras");
+    log("Recital correcto: "+got+". La opcion puzzle tiene mucho potencial para literatura.");
+    resetRecital();
+  }else{
+    recital.fame = Math.max(0,recital.fame-8);
+    log("Esquema incorrecto: "+got+". Buscabas "+recital.poem.scheme+".");
+    renderRecital();
+  }
+}
+$("recCheck").addEventListener("click",checkRecital);
+
+resetMicro();
+resetFree();
+resetChain();
+resetRecital();
+setMode("micro");
+</script>
+</body>
+</html>
