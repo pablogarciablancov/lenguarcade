@@ -1,6 +1,136 @@
-<script>
+﻿<script>
 // js/app/collection.js
 (function(){
+const MONSTER_LORE = {
+  h_ghoul: {
+    desc: "Un fantasma flaco y muy digno que va dejando haches mudas por los pasillos. No grita: suspira en silencio y confunde a quien escribe con prisa.",
+    training: "Entrena con frases de haber/a ver y revisa cada hueco sospechoso antes de atacar. Si dudas, prueba a sustituirlo por 'veamos'."
+  },
+  vampiro_v: {
+    desc: "Elegante, dramatico y con capa de examen sorpresa. Se alimenta de b y v mal colocadas, especialmente cuando alguien escribe 'tubo' con cara de 'tuvo'.",
+    training: "Caza pares peligrosos de b/v y comprueba verbos frecuentes: tuvo, estuve, anduve. Este vampiro pierde glamour ante una consonante bien elegida."
+  },
+  gargantua_gj: {
+    desc: "Gigante con mandibula de piedra y una obsesion preocupante por la g y la j. Cuando bosteza, salen conjugaciones rodando por el suelo.",
+    training: "Practica verbos en -ger/-gir y palabras con j peleona. Lee la frase en voz alta y localiza donde ruge la confusion."
+  },
+  espectro_agudo: {
+    desc: "Flota con un acento luminoso sobre la cabeza y aparece justo cuando alguien se olvida de una tilde. Es dramatico, pero bastante puntual.",
+    training: "Marca silaba tonica y decide si la palabra es aguda, llana o esdrujula. El espectro odia que cuentes bien las silabas."
+  },
+  serpiente_comata: {
+    desc: "Una serpiente con cuerpo de coma que se enrolla entre sujetos, verbos e incisos. Parece inofensiva hasta que la frase deja de respirar.",
+    training: "Busca vocativos, enumeraciones e incisos. Coloca pausas donde el sentido las necesita y no dejes que la serpiente se haga un nudo."
+  },
+  lexikon: {
+    desc: "Jefe bibliotecario de mirada severa. Vive dentro de un diccionario enorme y solo sale para preguntar si esa palabra existe de verdad.",
+    training: "Haz revision completa: vocabulario, tildes, mayusculas y puntuacion. Contra Lexikon no basta acertar una cosa: hay que ordenar toda la frase."
+  },
+  diacritik: {
+    desc: "Un doble identico de si mismo: uno lleva tilde y el otro no. Los dos discuten todo el rato y esperan que tu pongas paz.",
+    training: "Compara tu/tu, el/el, si/si, mas/mas y que/que. Pregunta que funcion cumple la palabra antes de lanzar el golpe."
+  },
+  oxiton: {
+    desc: "Corre al final de cada palabra aguda como si estuviera llegando tarde. Si acaba en vocal, n o s, pide tilde con bastante insistencia.",
+    training: "Localiza palabras agudas y mira su final. Vocal, n o s suelen abrir la puerta de la tilde."
+  },
+  llanor: {
+    desc: "Guarda la llanura de las palabras serias. No hace ruido, pero pesa mucho cuando alguien pone o quita una tilde sin pensar.",
+    training: "Detecta palabras llanas y revisa si NO terminan en vocal, n o s. Llanor cae cuando justificas la tilde, no cuando la adivinas."
+  },
+  puntor: {
+    desc: "Caballero de punto, coma y dos puntos. Lleva tantas señales encima que parece un cruce con armadura.",
+    training: "Lee la frase como si fuera una carretera: pon senales donde cambie el sentido, haya pausa o empiece una explicacion."
+  },
+  kalkor: {
+    desc: "Criatura cuadrada y ruidosa que intenta meter k en cualquier palabra. Si pudiera, escribiria 'queso' con tres kas y una sonrisa.",
+    training: "Revisa c, qu y k antes de enviar. Ante e/i suele aparecer qu; la k se reserva para casos contados."
+  },
+  paper: {
+    desc: "Una hoja gigante con mala leche academica. No muerde, pero te rodea de tachones hasta que la redaccion queda clara.",
+    training: "Ordena ideas, limpia puntuacion y revisa coherencia. Paper se debilita cuando el texto parece escrito por alguien que ha respirado antes."
+  },
+  esdrulia: {
+    desc: "Bruja de acentos imposibles que aparece montada en una brujula. Todas sus palabras favoritas llevan tilde, por supuesto.",
+    training: "Si la palabra es esdrujula o sobresdrujula, no negocies: lleva tilde. Esdrulia respeta la seguridad absoluta."
+  },
+  muxlor: {
+    desc: "Guardian de nombres propios con casco brillante. Se enfada si madrid, ana o lunes reciben mayusculas por capricho.",
+    training: "Distingue nombres propios, inicio de texto y despues de punto. No gastes mayusculas como confeti."
+  },
+  prosodion: {
+    desc: "Musico del pantano que separa vocales con un laúd desafinado. Su especialidad es hacer que hiatos y diptongos bailen raro.",
+    training: "Escucha las vocales: si una cerrada tonica rompe el diptongo, marca la tilde. Prosodion pierde el ritmo cuando detectas el hiato."
+  },
+  zarruk: {
+    desc: "Bestia de lengua afilada que sisea, cecea y zumbra a la vez. Nadie sabe como pronuncia su propio nombre, y ese es el problema.",
+    training: "Revisa c, s y z en palabras frecuentes. No te fies solo del sonido: mira la familia de palabras y la forma correcta."
+  },
+  minotauro: {
+    desc: "Se pasea por un laberinto nasal repitiendo 'antes de b y p...'. Parece perdido, pero en realidad espera que tu lo estes.",
+    training: "Busca b y p, y mira la letra anterior. Si suena nasal, normalmente la m abre camino por el laberinto."
+  },
+  torvax: {
+    desc: "Jefe del pantano, cubierto de barro, tildes y carteles de 'revision obligatoria'. Cada fallo pequeño le parece una fiesta.",
+    training: "Haz una pasada final por todo: tildes, signos, mayusculas, haches y concordancia. Torvax cae por acumulacion de cuidado."
+  },
+  caoskrin: {
+    desc: "Un remolino con ojos que lanza signos de interrogacion como cuchillos. Vive feliz cuando una pregunta no se abre o no se cierra.",
+    training: "Comprueba signos dobles, puntos y comas. Si la frase pregunta o exclama, abre y cierra la puerta."
+  },
+  hiatikus: {
+    desc: "Monje de dos vocales separadas por una grieta. Habla despacio, silaba a silaba, para que nadie confunda el hiato.",
+    training: "Detecta vocal cerrada tonica junto a otra vocal. Si se pronuncian separadas, la tilde puede ser la cuerda del puente."
+  },
+  momia: {
+    desc: "Viene envuelta en vendas y haches antiguas. Casi no suena al caminar, como las letras que mas le gustan.",
+    training: "Revisa haber, hacer, hecho, hola y a/ha/ah. La momia se desenrolla cuando la h silenciosa esta en su sitio."
+  },
+  rugiton: {
+    desc: "Ruge con una erre tan fuerte que tiemblan las rocas. Si oye 'caro' donde deberia ir 'carro', embiste sin pensarlo.",
+    training: "Comprueba r inicial, rr entre vocales y pares como caro/carro. Rugiton respeta las vibraciones bien puestas."
+  },
+  zombie: {
+    desc: "Avanza despacio murmurando ces, eses y zetas. No parece peligroso hasta que infecta una palabra normalita.",
+    training: "Revisa c/s/z con calma y no ataques por intuicion fonetica. Este zombie cae con memoria visual y familias de palabras."
+  },
+  sintaxion: {
+    desc: "Jefe hecho de piezas de oracion mal encajadas. Tiene sujeto, verbo y complementos, pero los lleva todos en bolsillos equivocados.",
+    training: "Busca sujeto y verbo, revisa concordancia y ordena complementos. Sintaxion se desmonta cuando la frase tiene esqueleto claro."
+  },
+  gravikus: {
+    desc: "Una roca volcanica con tilde de metal. Aplasta palabras llanas hasta que alguien recuerda la regla completa.",
+    training: "Vuelve a las llanas: silaba tonica y terminacion. Si no acaba en vocal, n o s, prepara la tilde."
+  },
+  jarkon: {
+    desc: "Forjador de chispas entre la g y la j. Cada martillazo convierte una duda pequena en una falta incandescente.",
+    training: "Repasa g/j en verbos y palabras frecuentes. No corras: Jarkon vive de los ataques impulsivos."
+  },
+  ortograf: {
+    desc: "Armadura viviente fabricada con restos de todas las reglas. Es el tipico enemigo que pregunta 'vale, pero revisaste lo demas?'.",
+    training: "Haz revision global y busca errores mezclados. Contra Ortograf, cada detalle correcto suma defensa."
+  },
+  siseus: {
+    desc: "Ser de humo que susurra x y s hasta que parecen la misma letra. Si dices 'esamen', sonrie demasiado.",
+    training: "Comprueba palabras con x/s: examen, exito, explicar, exceso. Siseus desaparece con vocabulario bien fijado."
+  },
+  ciclope: {
+    desc: "Tiene un solo ojo, pero lo usa para mirar una unica letra con intensidad incomoda. Su pupila cambia entre c, qu y k.",
+    training: "Antes de e/i, revisa si necesitas qu. Reserva k para palabras que la llevan de verdad: el ojo de Ciclope no perdona adornos."
+  },
+  don_pablo: {
+    desc: "Jefe final con rubrica legendaria y mirada de 'esto lo hemos explicado'. No levanta la voz: solo subraya en rojo con precision mitica.",
+    training: "Respira y revisa todo: contenido, ortografia, puntuacion, coherencia y estilo. Don Pablo solo cae ante una entrega limpia."
+  }
+};
+
+function getMonsterLore(monster){
+  if(!monster) return { desc:"Criatura del bestiario linguistico de Battlegrafia.", training:"Revisa el area de aprendizaje y vuelve a combatir para mejorar precision." };
+  return MONSTER_LORE[monster.id] || {
+    desc: monster.desc || monster.type || "Criatura del bestiario linguistico de Battlegrafia.",
+    training: "Revisa el area de aprendizaje de esta criatura y vuelve a enfrentarte a ella para mejorar precision, estrategia y dominio linguistico."
+  };
+}
 
 function getDefeatedSet(){
   // La colección se desbloquea SOLO derrotando monstruos en Modo Aventura.
@@ -84,6 +214,7 @@ function openMonsterModal(monster, isUnlocked){
   const rule = document.getElementById("monster-modal-rule");
   const desc = document.getElementById("monster-modal-desc");
   const unlock = document.getElementById("monster-modal-unlock");
+  const training = document.getElementById("monster-modal-training");
 
   title.textContent = monster.name;
 
@@ -102,8 +233,10 @@ function openMonsterModal(monster, isUnlocked){
     if(unlock) unlock.textContent = "";
   }
 
+  const lore = getMonsterLore(monster);
   rule.textContent = monster.rule || "Contenido por asignar";
-  desc.textContent = monster.desc || monster.type || "Criatura del bestiario linguistico de Battlegrafia.";
+  desc.textContent = lore.desc;
+  if(training) training.textContent = lore.training;
 
   modal.classList.add("is-open");
   modal.setAttribute("aria-hidden", "false");

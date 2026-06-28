@@ -1,4 +1,4 @@
-<style>
+﻿<style>
 /*
   BattlegrafÃ­a Arena UI Â· Fase 1
   Capa visual quirÃºrgica para la pantalla de batalla.
@@ -501,4 +501,52 @@ select,
   .hub-panel{width:100% !important; max-height:calc(100vh - 24px) !important;}
 }
 
+
+/* Arena UI - scroll de pantallas internas de batalla */
+.game-shell{
+  min-height: 0 !important;
+}
+
+.game-shell .layout,
+.game-shell .battle-column{
+  min-height: 0 !important;
+}
+
+.game-shell :is(.camp-screen,.map-screen,.diary-screen,.history-screen,.inventory-screen)[style*="display: flex"]{
+  width: min(100%, 980px) !important;
+  max-height: min(760px, calc(100vh - 190px)) !important;
+  margin: 0 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  align-self: center !important;
+  box-sizing: border-box !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--arena-gold) rgba(15,23,42,.7);
+}
+
+.game-shell :is(.camp-screen,.map-screen,.diary-screen,.history-screen,.inventory-screen)[style*="display: flex"]::-webkit-scrollbar{
+  width: 10px;
+}
+.game-shell :is(.camp-screen,.map-screen,.diary-screen,.history-screen,.inventory-screen)[style*="display: flex"]::-webkit-scrollbar-track{
+  background: rgba(15,23,42,.75);
+  border-radius: 999px;
+}
+.game-shell :is(.camp-screen,.map-screen,.diary-screen,.history-screen,.inventory-screen)[style*="display: flex"]::-webkit-scrollbar-thumb{
+  background: linear-gradient(180deg, var(--arena-gold), var(--arena-orange));
+  border-radius: 999px;
+  border: 2px solid rgba(15,23,42,.85);
+}
+
+.game-shell :is(.camp-container,.map-container,.diary-container,.history-container,.inventory-container){
+  width: min(100%, 900px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+@media (max-width: 900px){
+  .game-shell :is(.camp-screen,.map-screen,.diary-screen,.history-screen,.inventory-screen)[style*="display: flex"]{
+    width: 100% !important;
+    max-height: calc(100vh - 150px) !important;
+  }
+}
 </style>
