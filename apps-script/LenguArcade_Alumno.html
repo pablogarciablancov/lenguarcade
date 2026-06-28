@@ -1067,9 +1067,19 @@ if(!token){
 <script>
 const LA_EMBEDDED_GAME_OVERRIDES={
   battlegrafia:{
-    url:'https://script.google.com/macros/s/AKfycbwJRO4_CkEYp6tLtmaYohUD6dSEtAiit3OTW2669yo75DpY5IR6yGdeBv-kWor22zxEyA/exec',
+    url:'https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia/',
     integration:'embedded',
     estado:'beta'
+  },
+  maniacgrafia:{
+    url:'https://pablogarciablancov.github.io/lenguarcade/games/maniacgrafia/',
+    integration:'embedded',
+    estado:'beta'
+  },
+  scrabble:{
+    url:'https://pablogarciablancov.github.io/lenguarcade/games/scrabble/',
+    integration:'embedded',
+    estado:'aula'
   },
   narratoria:{
     url:'https://pablogarciablancov.github.io/lenguarcade/games/narratoria/',
@@ -1077,7 +1087,7 @@ const LA_EMBEDDED_GAME_OVERRIDES={
     estado:'beta'
   },
   versopolis:{
-    url:'https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec?page=rimopolis',
+    url:'https://pablogarciablancov.github.io/lenguarcade/games/rimopolis/',
     integration:'embedded',
     nombre:'Rimópolis',
     subtitulo:'RPG de rimas',
@@ -1756,7 +1766,7 @@ function mountScrabblePairCodePanel(){
   box.id='scrabblePairCodeBox';
   box.className='avatarProfileIntroCard';
   box.style.marginTop='14px';
-  box.innerHTML='<strong>Código para Scrabble</strong><p>Si vas a ser el rival en una partida de Scrabble, genera un código desde tu propia sesión Google y dáselo al compañero que abre la partida.</p><button type="button" id="createScrabblePairCodeBtn" class="ghost" style="margin-top:10px">Generar código</button><div class="status" id="scrabblePairCodeStatus" style="margin-top:10px"></div>';
+  box.innerHTML='<strong>Código para Scrabble</strong><p>Si vas a ser rival en Scrabble, seas alumno o profe-jugador, genera un código desde tu propia sesión Google y dáselo a quien abre la partida.</p><button type="button" id="createScrabblePairCodeBtn" class="ghost" style="margin-top:10px">Generar código</button><div class="status" id="scrabblePairCodeStatus" style="margin-top:10px"></div>';
   perfil.appendChild(box);
   $('createScrabblePairCodeBtn').onclick=async()=>{
     if(!token)return $('scrabblePairCodeStatus').textContent='Inicia sesión primero.';

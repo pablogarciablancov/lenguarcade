@@ -10,15 +10,15 @@ function average(values: number[]) {
 
 const integrations: Record<string, { url:string; integration:string }> = {
   battlegrafia:{
-    url:"https://script.google.com/macros/s/AKfycbwJRO4_CkEYp6tLtmaYohUD6dSEtAiit3OTW2669yo75DpY5IR6yGdeBv-kWor22zxEyA/exec",
+    url:"https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia/",
     integration:"embedded",
   },
   maniacgrafia:{
-    url:"https://script.google.com/macros/s/AKfycbxgtB6NP9zVvkkEZjodyGhSQbZmFifeFdMf8uDr0QsXoWsp_AxZdb7OFxtS5vKM-VruPw/exec?view=alumno",
+    url:"https://pablogarciablancov.github.io/lenguarcade/games/maniacgrafia/",
     integration:"embedded",
   },
   scrabble:{
-    url:"https://script.google.com/macros/s/AKfycbxcVJ1I8jFuhbwjjPPzGFcCdku_LDnXKeZEmnpNYwYo9beCEyNHN8ElzWnXxxjyJFJb/exec",
+    url:"https://pablogarciablancov.github.io/lenguarcade/games/scrabble/",
     integration:"embedded",
   },
   narratoria:{
@@ -26,7 +26,7 @@ const integrations: Record<string, { url:string; integration:string }> = {
     integration:"embedded",
   },
   versopolis:{
-    url:"https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec?page=rimopolis",
+    url:"https://pablogarciablancov.github.io/lenguarcade/games/rimopolis/",
     integration:"embedded",
   },
 };

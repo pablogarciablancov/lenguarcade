@@ -2792,10 +2792,14 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
     try{ if(window.BG?.isDemo && window.BG.isDemo()) return; }catch(e){}
     // Persistimos también el progreso de batalla actual (p.ej. vida del monstruo en curso)
     try{
+      if(!player && window.player) player = window.player;
       if(player){
         player.currentMonsterIndex = currentMonsterIndex;
         player.currentMonsterId = (monsters && getMonsterAt(currentMonsterIndex)) ? getMonsterAt(currentMonsterIndex).id : null;
         player.currentMonsterHp = currentMonsterHp;
+        window.player = player;
+        window.BG = window.BG || {};
+        window.BG.getPlayer = function(){ return window.player || player || null; };
       }
     
     if (!window.player) return;

@@ -138,7 +138,6 @@ function callSupabaseStudentDashboard_(accessToken) {
 function createScrabbleOpponentCode(accessToken) {
   const dashboard = callSupabaseStudentDashboard_(accessToken);
   const student = dashboard.student || {};
-  if (String(student.role || 'student') !== 'student') throw new Error('Solo un alumno puede generar codigo de rival.');
   const code = String(Math.floor(100000 + Math.random() * 900000));
   const game = (dashboard.games || []).find(function(item) { return String(item.gameId || '').toLowerCase() === 'scrabble'; }) || { gameId:'scrabble', progress:{} };
   CacheService.getScriptCache().put('LA_SCRABBLE_PAIR_' + code, JSON.stringify({

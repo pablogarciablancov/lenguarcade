@@ -31,16 +31,16 @@ const LA_CONFIG = {
 
 const LA_GAME_INTEGRATIONS = {
   battlegrafia: {
-    url: 'https://script.google.com/macros/s/AKfycbwJRO4_CkEYp6tLtmaYohUD6dSEtAiit3OTW2669yo75DpY5IR6yGdeBv-kWor22zxEyA/exec',
+    url: 'https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia/',
     integration: 'embedded',
     estado: 'beta'
   },
   maniacgrafia: {
-    url: 'https://script.google.com/macros/s/AKfycbxgtB6NP9zVvkkEZjodyGhSQbZmFifeFdMf8uDr0QsXoWsp_AxZdb7OFxtS5vKM-VruPw/exec?view=alumno',
+    url: 'https://pablogarciablancov.github.io/lenguarcade/games/maniacgrafia/',
     integration: 'embedded'
   },
   scrabble: {
-    url: 'https://script.google.com/macros/s/AKfycbxcVJ1I8jFuhbwjjPPzGFcCdku_LDnXKeZEmnpNYwYo9beCEyNHN8ElzWnXxxjyJFJb/exec',
+    url: 'https://pablogarciablancov.github.io/lenguarcade/games/scrabble/',
     integration: 'embedded'
   },
   narratoria: {
@@ -48,7 +48,7 @@ const LA_GAME_INTEGRATIONS = {
     integration: 'embedded'
   },
   versopolis: {
-    url: 'https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec?page=rimopolis',
+    url: 'https://pablogarciablancov.github.io/lenguarcade/games/rimopolis/',
     integration: 'embedded',
     nombre: 'Rimópolis',
     subtitulo: 'RPG de rimas',
@@ -639,7 +639,7 @@ function seedGames_() {
   const sh = getSheet_(LA_CONFIG.SHEETS.JUEGOS);
   if (sh.getLastRow() > 1) return;
   const games = [
-    ['battlegrafia','Battlegrafia','La aventura de las palabras','RPG','ortografia,gramatica,verbos','beta',1,'#f59e0b','🐉','https://script.google.com/macros/s/AKfycbwJRO4_CkEYp6tLtmaYohUD6dSEtAiit3OTW2669yo75DpY5IR6yGdeBv-kWor22zxEyA/exec','RPG de Lengua. Combate contra errores, desbloquea criaturas y guarda progreso en LenguArcade.','dragon'],
+    ['battlegrafia','Battlegrafia','La aventura de las palabras','RPG','ortografia,gramatica,verbos','beta',1,'#f59e0b','🐉','https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia/','RPG de Lengua. Combate contra errores, desbloquea criaturas y guarda progreso en LenguArcade.','dragon'],
     ['maniacgrafia','Maniacgrafia','Atrapa las palabras','Ortografia','ortografia,acentuacion','beta',2,'#d946ef','⚡','','Corrige palabras trampa y mejora tu precision.','neon'],
     ['narratoria','Narratoria','Escribe. Crea. Cuenta.','Escritura','narracion,creatividad,redaccion','beta',3,'#f59e0b','📚','','Construye relatos con cartas, fases y objetivos.','paper'],
     ['versopolis','Rimópolis','RPG de rimas','Rimas','rimas,poesia,creatividad','beta',4,'#8b5cf6','🎤','','Combate en escenarios de rap y poesia eligiendo rimas correctas.','city'],
