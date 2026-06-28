@@ -3392,6 +3392,121 @@ select,
   .menu-panel,.start-panel,.screen-card{border-radius:16px;}
   :is(.menu-btn, .btn.primary, .btn.secondary, .ghost){min-height:46px;}
 }
+
+
+/* Arena UI - scroll y botones unificados en HUB/men?s */
+.app-screen.is-active,
+.app-screen[style*="display: block"]{
+  align-items: center !important;
+  justify-content: center !important;
+  padding: clamp(16px, 4vh, 34px) 16px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+.app-screen > .menu-panel,
+.app-screen > .screen-card,
+.hub-panel{
+  margin: auto !important;
+  max-height: calc(100vh - clamp(32px, 8vh, 68px)) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-color: rgba(250,204,21,.8) rgba(2,6,23,.55);
+  scrollbar-width: thin;
+}
+.hub-panel .screen-card,
+.menu-panel .screen-card{
+  max-height: none !important;
+  overflow: visible !important;
+}
+.modal.is-open{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 18px !important;
+  overflow: hidden !important;
+}
+.modal-card{
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  max-height: calc(100vh - 36px) !important;
+  overflow-y: auto !important;
+  scrollbar-color: rgba(250,204,21,.8) rgba(2,6,23,.55);
+  scrollbar-width: thin;
+}
+.overlay.is-open,
+.auth-overlay.is-open,
+.end-overlay.is-open{
+  overflow-y: auto !important;
+  padding: 18px !important;
+}
+.overlay-card,
+.auth-modal,
+.end-overlay-inner{
+  max-height: calc(100vh - 36px) !important;
+  overflow-y: auto !important;
+}
+
+:is(.shop-buy-btn,.shop-sell-btn,.shop-tab-btn,.ach-chip,.ach-filter,#achievements-close,#hub-shop-back,#hub-collection-back,#practiceClose,#practiceFight,#practiceRandom,.modal-head button,.btn.tiny){
+  min-height: 40px !important;
+  border-radius: 13px !important;
+  border: 0 !important;
+  border-bottom: 4px solid rgba(0,0,0,.36) !important;
+  background: linear-gradient(180deg,#fff0a8,#facc15) !important;
+  color: #2c2105 !important;
+  box-shadow: 0 7px 0 rgba(0,0,0,.24), 0 13px 24px rgba(0,0,0,.20) !important;
+  font-weight: 950 !important;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  text-shadow: none !important;
+}
+:is(.shop-tab-btn[style*="background: #0f172a"],.btn.secondary,.ghost,#hub-shop-back,#hub-collection-back,#practiceClose,.modal-head button){
+  border: 2px solid rgba(255,255,255,.14) !important;
+  border-bottom: 4px solid rgba(0,0,0,.35) !important;
+  background: linear-gradient(180deg,#344064,#1b2036) !important;
+  color: #eef3ff !important;
+}
+.shop-sell-btn,
+.shop-sell-btn[style]{
+  background: linear-gradient(180deg,#ff8a8a,#ef4444) !important;
+  color: #fff7ed !important;
+}
+:is(.shop-buy-btn,.shop-sell-btn,.shop-tab-btn,.ach-chip,.ach-filter,#achievements-close,#hub-shop-back,#hub-collection-back,#practiceClose,#practiceFight,#practiceRandom,.modal-head button,.btn.tiny):hover{
+  filter: brightness(1.06) saturate(1.04) !important;
+  transform: translateY(-2px) !important;
+}
+:is(.shop-buy-btn,.shop-sell-btn,.shop-tab-btn,.ach-chip,.ach-filter,#achievements-close,#hub-shop-back,#hub-collection-back,#practiceClose,#practiceFight,#practiceRandom,.modal-head button,.btn.tiny):active{
+  transform: translateY(3px) !important;
+  box-shadow: 0 3px 0 rgba(0,0,0,.32), 0 8px 18px rgba(0,0,0,.18) !important;
+}
+:is(.shop-buy-btn,.shop-sell-btn,.shop-tab-btn,.ach-chip,.ach-filter,#achievements-close,#hub-shop-back,#hub-collection-back,#practiceClose,#practiceFight,#practiceRandom,.modal-head button,.btn.tiny):disabled{
+  opacity: .55 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+.shop-item,
+.mon-card,
+.monster-field,
+.monster-examples{
+  border-radius: 16px !important;
+  border: 2px solid rgba(255,255,255,.10) !important;
+  background: linear-gradient(180deg, rgba(18,24,42,.92), rgba(10,14,27,.90)) !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.04) !important;
+}
+.shop-item-footer{align-items:center; gap:12px; flex-wrap:wrap;}
+.shop-price{background:rgba(250,204,21,.12) !important; border-color:rgba(250,204,21,.45) !important; color:var(--arena-gold-soft) !important;}
+.mon-rule,.monster-label{color:var(--arena-gold-soft) !important;}
+.monster-examples{border-style:solid !important;}
+
+@media (max-width: 720px){
+  .app-screen.is-active,
+  .app-screen[style*="display: block"]{align-items:flex-start !important; padding:12px !important;}
+  .app-screen > .menu-panel,
+  .app-screen > .screen-card,
+  .hub-panel{width:100% !important; max-height:calc(100vh - 24px) !important;}
+}
+
 </style>
 </head>
 <body class="layout-flex">
@@ -4033,26 +4148,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <div class="monster-profile-right">
           <div class="monster-field">
-            <div class="monster-label">Regla</div>
+            <div class="monster-label">Area de aprendizaje</div>
             <div id="monster-modal-rule" class="monster-value">—</div>
           </div>
 
           <div class="monster-field">
-            <div class="monster-label">Descripción</div>
-            <div id="monster-modal-desc" class="monster-value" style="opacity:.92">Por añadir.</div>
-          </div>
-
-          <div class="monster-field">
-            <div class="monster-label">Cómo desbloquear</div>
-            <div id="monster-modal-unlock" class="monster-value" style="opacity:.92">Derrota a este monstruo en Modo Aventura.</div>
+            <div class="monster-label">Descripcion</div>
+            <div id="monster-modal-desc" class="monster-value" style="opacity:.92">Criatura del bestiario linguistico.</div>
           </div>
         </div>
       </div>
 
       <div class="monster-examples">
-        <div class="monster-label">Ejemplos (próximamente)</div>
+        <div class="monster-label">Reto de entrenamiento</div>
         <div class="monster-value" style="opacity:.8">
-          Aquí podremos poner 2–3 frases de ejemplo o mini-retos ligados a la regla.
+          Revisa el area de aprendizaje de esta criatura y vuelve a enfrentarte a ella para mejorar precision, estrategia y dominio linguistico.
         </div>
       </div>
     </div>
@@ -16177,7 +16287,7 @@ function getDefeatedSet(){
                onerror="this.onerror=null; this.style.opacity='0.2'; this.title='No se encontró: ${m.sprite}'">
         </div>
         <div class="mon-name">${m.name}</div>
-        <div class="mon-rule">${m.rule || "Regla por definir"}</div>
+        <div class="mon-rule">${m.rule || "Contenido por definir"}</div>
       `;
 	  
 card.addEventListener("click", () => {
@@ -16208,16 +16318,16 @@ function openMonsterModal(monster, isUnlocked){
     state.textContent = "Derrotado ✅";
     sprite.style.filter = "";
     sprite.style.opacity = "1";
-    unlock.textContent = "Ya lo has derrotado en Modo Aventura.";
+    if(unlock) unlock.textContent = "Ya lo has derrotado en Modo Aventura.";
   }else{
     state.textContent = "Bloqueado 🔒";
     sprite.style.filter = "brightness(0) saturate(0) contrast(1.2)";
     sprite.style.opacity = "0.85";
-    unlock.textContent = "Derrota a este monstruo en Modo Aventura para desbloquearlo.";
+    if(unlock) unlock.textContent = "";
   }
 
-  rule.textContent = monster.rule || "Por asignar";
-  desc.textContent = monster.desc || "Por añadir.";
+  rule.textContent = monster.rule || "Contenido por asignar";
+  desc.textContent = monster.desc || monster.type || "Criatura del bestiario linguistico de Battlegrafia.";
 
   modal.classList.add("is-open");
   modal.setAttribute("aria-hidden", "false");

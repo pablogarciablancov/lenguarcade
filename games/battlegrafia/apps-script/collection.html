@@ -63,7 +63,7 @@ function getDefeatedSet(){
                onerror="this.onerror=null; this.style.opacity='0.2'; this.title='No se encontró: ${m.sprite}'">
         </div>
         <div class="mon-name">${m.name}</div>
-        <div class="mon-rule">${m.rule || "Regla por definir"}</div>
+        <div class="mon-rule">${m.rule || "Contenido por definir"}</div>
       `;
 	  
 card.addEventListener("click", () => {
@@ -94,16 +94,16 @@ function openMonsterModal(monster, isUnlocked){
     state.textContent = "Derrotado ✅";
     sprite.style.filter = "";
     sprite.style.opacity = "1";
-    unlock.textContent = "Ya lo has derrotado en Modo Aventura.";
+    if(unlock) unlock.textContent = "Ya lo has derrotado en Modo Aventura.";
   }else{
     state.textContent = "Bloqueado 🔒";
     sprite.style.filter = "brightness(0) saturate(0) contrast(1.2)";
     sprite.style.opacity = "0.85";
-    unlock.textContent = "Derrota a este monstruo en Modo Aventura para desbloquearlo.";
+    if(unlock) unlock.textContent = "";
   }
 
-  rule.textContent = monster.rule || "Por asignar";
-  desc.textContent = monster.desc || "Por añadir.";
+  rule.textContent = monster.rule || "Contenido por asignar";
+  desc.textContent = monster.desc || monster.type || "Criatura del bestiario linguistico de Battlegrafia.";
 
   modal.classList.add("is-open");
   modal.setAttribute("aria-hidden", "false");
