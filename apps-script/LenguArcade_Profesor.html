@@ -21,6 +21,91 @@
     .studentDetailGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.detailItem{border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.15);padding:12px}.detailItem b{display:block;font-size:22px;overflow-wrap:anywhere}.progressList{display:grid;grid-template-columns:1fr 1fr;gap:10px}.studentDetailSection{margin-top:20px}.detailTimeline{display:grid;gap:8px}.detailMeta{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.detailMeta time{white-space:nowrap;color:var(--muted);font-size:12px}.credentials{max-height:220px;overflow:auto;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.18);font:12px ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap}.coursePicker{display:grid;gap:9px;margin:18px 0}.courseChoice{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(0,0,0,.14);cursor:pointer}.courseChoice input{width:18px;height:18px;margin:2px 0}.courseChoice strong,.courseChoice span{display:block}.courseChoice span{color:var(--muted);font-size:12px;margin-top:3px}
     @keyframes loading{to{width:88%;transform:translateX(12%)}}@media(max-width:1160px){body{overflow:auto}.app{height:auto;grid-template-columns:1fr}.nav{display:flex;gap:8px;overflow:auto}.nav button{white-space:nowrap}.layout,.cols{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}.railFooter{grid-template-columns:1fr 1fr}}@media(max-width:760px){.top{flex-direction:column;align-items:flex-start}.kpis,.loginGrid,.filters,.studentDetailGrid,.progressList{grid-template-columns:1fr}table{min-width:820px}.detailMeta{display:block}.detailMeta time{display:block;margin-top:5px;white-space:normal}}
   </style>
+<!-- LA_ASSET_FALLBACK_V1: GitHub Raw primary, jsDelivr automatic fallback -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<script id="la-asset-fallback-v1">
+(() => {
+  const RAW = 'https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/';
+  const CDN = 'https://cdn.jsdelivr.net/gh/pablogarciablancov/lenguarcade-assets@main/';
+  const PROBE = 'assets/brand/lenguarcade-favicon.png';
+  let fallbackActive = false;
+
+  const swap = value => typeof value === 'string' ? value.split(RAW).join(CDN) : value;
+
+  function rewriteElement(element) {
+    if (!(element instanceof Element)) return;
+    ['src', 'href', 'style', 'poster'].forEach(attr => {
+      const value = element.getAttribute(attr);
+      if (value && value.includes(RAW)) element.setAttribute(attr, swap(value));
+    });
+  }
+
+  function rewriteTree(root) {
+    if (!root) return;
+    if (root instanceof Element) rewriteElement(root);
+    root.querySelectorAll?.('[src],[href],[style],[poster]').forEach(rewriteElement);
+  }
+
+  function rewriteInlineStyles() {
+    document.querySelectorAll('style').forEach(style => {
+      const css = style.textContent || '';
+      if (css.includes(RAW)) style.textContent = swap(css);
+    });
+  }
+
+  function activateFallback(reason) {
+    if (fallbackActive) return;
+    fallbackActive = true;
+    window.LA_ASSET_SOURCE = 'jsdelivr';
+    window.LA_ASSET_FALLBACK_REASON = reason || 'raw-unavailable';
+    rewriteInlineStyles();
+    rewriteTree(document.documentElement);
+    console.warn('[LenguArcade] GitHub Raw no disponible; usando jsDelivr para los assets.', reason || '');
+  }
+
+  document.addEventListener('error', event => {
+    const element = event.target;
+    if (!(element instanceof Element)) return;
+    const attr = element.tagName === 'LINK' ? 'href' : (element.hasAttribute('src') ? 'src' : null);
+    if (!attr) return;
+    const value = element.getAttribute(attr) || '';
+    if (value.includes(RAW)) {
+      element.setAttribute(attr, swap(value));
+      console.warn('[LenguArcade] Asset recuperado desde jsDelivr:', value);
+    }
+  }, true);
+
+  const observer = new MutationObserver(mutations => {
+    if (!fallbackActive) return;
+    mutations.forEach(mutation => {
+      if (mutation.type === 'attributes') rewriteElement(mutation.target);
+      mutation.addedNodes.forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE) rewriteTree(node);
+      });
+    });
+  });
+  observer.observe(document.documentElement, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ['src', 'href', 'style', 'poster']
+  });
+
+  window.LA_ASSET_SOURCE = 'github-raw';
+  window.LA_ASSET_PRIMARY = RAW;
+  window.LA_ASSET_FALLBACK = CDN;
+  window.LA_ACTIVATE_ASSET_FALLBACK = activateFallback;
+
+  const probe = new Image();
+  const timeout = setTimeout(() => activateFallback('raw-timeout'), 2500);
+  probe.onload = () => clearTimeout(timeout);
+  probe.onerror = () => {
+    clearTimeout(timeout);
+    activateFallback('raw-error');
+  };
+  probe.src = RAW + PROBE + '?v=20260817-fallback-probe';
+})();
+</script>
 </head>
 <body>
   <div class="app">
