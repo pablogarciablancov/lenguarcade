@@ -13,8 +13,14 @@ jobs:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout LenguArcade
         uses: actions/checkout@v4
+
+      - name: Checkout asset catalog
+        uses: actions/checkout@v4
+        with:
+          repository: pablogarciablancov/lenguarcade-assets
+          path: _asset_audit
 
       - name: Inject GitHub Raw to jsDelivr fallback
         shell: python
@@ -128,49 +134,37 @@ jobs:
 
           print('Patched:', ', '.join(changed) if changed else 'nothing to patch')
 
-      - name: Verify referenced LenguArcade asset paths exist
+      - name: Verify the complete LenguArcade asset catalog
         shell: python
         run: |
-          import re
-          import urllib.error
-          import urllib.request
           from pathlib import Path
 
-          RAW = 'https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/'
-          CDN = 'https://cdn.jsdelivr.net/gh/pablogarciablancov/lenguarcade-assets@main/'
-          pattern = re.compile(r'https://raw\.githubusercontent\.com/pablogarciablancov/lenguarcade-assets/main/([^\"\'\)\s?]+)')
-          paths = set()
-          for file in Path('.').rglob('*'):
-              if file.is_file() and file.suffix.lower() in {'.html', '.js', '.css', '.md', '.gs'}:
-                  try:
-                      text = file.read_text(encoding='utf-8')
-                  except UnicodeDecodeError:
-                      continue
-                  paths.update(pattern.findall(text))
+          root = Path('_asset_audit')
+          expected = {
+              'assets/brand/lenguarcade-logo.png',
+              'assets/brand/lenguarcade-favicon.png',
+              'assets/brand/lenguarcade-hero-banner.jpg',
+              'assets/games/battlegrafia-banner.jpg',
+              'assets/games/maniacgrafia-banner.jpg',
+              'assets/games/narratoria-banner.jpg',
+              'assets/games/versopolis-banner.jpg',
+              'assets/games/scrabble-banner.jpg',
+              'assets/games/conjuga-apuesta-banner.jpg',
+              'assets/games/verb-battle-banner.jpg',
+          }
+          expected.update(f'assets/avatars/avatar-{index:02d}.webp' for index in range(1, 17))
+          expected.update(f'assets/avatar-backgrounds/background-{index:02d}.webp' for index in range(1, 13))
 
-          failures = []
-          for asset in sorted(paths):
-              ok = False
-              for base in (RAW, CDN):
-                  try:
-                      request = urllib.request.Request(base + asset, method='HEAD', headers={'User-Agent': 'LenguArcade-asset-audit'})
-                      with urllib.request.urlopen(request, timeout=12) as response:
-                          if 200 <= response.status < 400:
-                              ok = True
-                              break
-                  except Exception:
-                      pass
-              if not ok:
-                  failures.append(asset)
-
-          print(f'Assets referenced: {len(paths)}')
-          if failures:
-              raise SystemExit('Assets unavailable from both sources: ' + ', '.join(failures))
+          missing = sorted(path for path in expected if not (root / path).is_file())
+          print(f'Assets checked: {len(expected)}')
+          if missing:
+              raise SystemExit('Missing asset files: ' + ', '.join(missing))
+          print('Complete LenguArcade asset catalog OK')
 
       - name: Commit hardened HTML
         shell: bash
         run: |
-          if git diff --quiet; then
+          if git diff --quiet -- apps-script/*.html; then
             echo "No changes needed."
             exit 0
           fi
