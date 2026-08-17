@@ -1,0 +1,181 @@
+name: Harden LenguArcade assets
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  harden-assets:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Inject GitHub Raw to jsDelivr fallback
+        shell: python
+        run: |
+          from pathlib import Path
+
+          RAW = "https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/"
+          CDN = "https://cdn.jsdelivr.net/gh/pablogarciablancov/lenguarcade-assets@main/"
+          MARKER = "LA_ASSET_FALLBACK_V1"
+
+          fallback = r'''<!-- LA_ASSET_FALLBACK_V1: GitHub Raw primary, jsDelivr automatic fallback -->
+          <link rel="preconnect" href="https://cdn.jsdelivr.net">
+          <script id="la-asset-fallback-v1">
+          (() => {
+            const RAW = 'https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/';
+            const CDN = 'https://cdn.jsdelivr.net/gh/pablogarciablancov/lenguarcade-assets@main/';
+            const PROBE = 'assets/brand/lenguarcade-favicon.png';
+            let fallbackActive = false;
+
+            const swap = value => typeof value === 'string' ? value.split(RAW).join(CDN) : value;
+
+            function rewriteElement(element) {
+              if (!(element instanceof Element)) return;
+              ['src', 'href', 'style', 'poster'].forEach(attr => {
+                const value = element.getAttribute(attr);
+                if (value && value.includes(RAW)) element.setAttribute(attr, swap(value));
+              });
+            }
+
+            function rewriteTree(root) {
+              if (!root) return;
+              if (root instanceof Element) rewriteElement(root);
+              root.querySelectorAll?.('[src],[href],[style],[poster]').forEach(rewriteElement);
+            }
+
+            function rewriteInlineStyles() {
+              document.querySelectorAll('style').forEach(style => {
+                const css = style.textContent || '';
+                if (css.includes(RAW)) style.textContent = swap(css);
+              });
+            }
+
+            function activateFallback(reason) {
+              if (fallbackActive) return;
+              fallbackActive = true;
+              window.LA_ASSET_SOURCE = 'jsdelivr';
+              window.LA_ASSET_FALLBACK_REASON = reason || 'raw-unavailable';
+              rewriteInlineStyles();
+              rewriteTree(document.documentElement);
+              console.warn('[LenguArcade] GitHub Raw no disponible; usando jsDelivr para los assets.', reason || '');
+            }
+
+            document.addEventListener('error', event => {
+              const element = event.target;
+              if (!(element instanceof Element)) return;
+              const attr = element.tagName === 'LINK' ? 'href' : (element.hasAttribute('src') ? 'src' : null);
+              if (!attr) return;
+              const value = element.getAttribute(attr) || '';
+              if (value.includes(RAW)) {
+                element.setAttribute(attr, swap(value));
+                console.warn('[LenguArcade] Asset recuperado desde jsDelivr:', value);
+              }
+            }, true);
+
+            const observer = new MutationObserver(mutations => {
+              if (!fallbackActive) return;
+              mutations.forEach(mutation => {
+                if (mutation.type === 'attributes') rewriteElement(mutation.target);
+                mutation.addedNodes.forEach(node => {
+                  if (node.nodeType === Node.ELEMENT_NODE) rewriteTree(node);
+                });
+              });
+            });
+            observer.observe(document.documentElement, {
+              subtree: true,
+              childList: true,
+              attributes: true,
+              attributeFilter: ['src', 'href', 'style', 'poster']
+            });
+
+            window.LA_ASSET_SOURCE = 'github-raw';
+            window.LA_ASSET_PRIMARY = RAW;
+            window.LA_ASSET_FALLBACK = CDN;
+            window.LA_ACTIVATE_ASSET_FALLBACK = activateFallback;
+
+            const probe = new Image();
+            const timeout = setTimeout(() => activateFallback('raw-timeout'), 2500);
+            probe.onload = () => clearTimeout(timeout);
+            probe.onerror = () => {
+              clearTimeout(timeout);
+              activateFallback('raw-error');
+            };
+            probe.src = RAW + PROBE + '?v=20260817-fallback-probe';
+          })();
+          </script>'''
+
+          changed = []
+          for path in sorted(Path('apps-script').glob('*.html')):
+              text = path.read_text(encoding='utf-8')
+              if RAW not in text or MARKER in text:
+                  continue
+              anchor = '<link rel="preconnect" href="https://raw.githubusercontent.com">'
+              if anchor in text:
+                  text = text.replace(anchor, anchor + '\n' + fallback, 1)
+              elif '</head>' in text:
+                  text = text.replace('</head>', fallback + '\n</head>', 1)
+              else:
+                  continue
+              path.write_text(text, encoding='utf-8')
+              changed.append(str(path))
+
+          print('Patched:', ', '.join(changed) if changed else 'nothing to patch')
+
+      - name: Verify referenced LenguArcade asset paths exist
+        shell: python
+        run: |
+          import re
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+
+          RAW = 'https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/'
+          CDN = 'https://cdn.jsdelivr.net/gh/pablogarciablancov/lenguarcade-assets@main/'
+          pattern = re.compile(r'https://raw\.githubusercontent\.com/pablogarciablancov/lenguarcade-assets/main/([^\"\'\)\s?]+)')
+          paths = set()
+          for file in Path('.').rglob('*'):
+              if file.is_file() and file.suffix.lower() in {'.html', '.js', '.css', '.md', '.gs'}:
+                  try:
+                      text = file.read_text(encoding='utf-8')
+                  except UnicodeDecodeError:
+                      continue
+                  paths.update(pattern.findall(text))
+
+          failures = []
+          for asset in sorted(paths):
+              ok = False
+              for base in (RAW, CDN):
+                  try:
+                      request = urllib.request.Request(base + asset, method='HEAD', headers={'User-Agent': 'LenguArcade-asset-audit'})
+                      with urllib.request.urlopen(request, timeout=12) as response:
+                          if 200 <= response.status < 400:
+                              ok = True
+                              break
+                  except Exception:
+                      pass
+              if not ok:
+                  failures.append(asset)
+
+          print(f'Assets referenced: {len(paths)}')
+          if failures:
+              raise SystemExit('Assets unavailable from both sources: ' + ', '.join(failures))
+
+      - name: Commit hardened HTML
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps-script/*.html
+          git commit -m "Harden LenguArcade asset loading [skip ci]"
+          git push
