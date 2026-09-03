@@ -1,5 +1,30 @@
 # Registro de cambios
 
+## 2026-09-03 - Control de acceso del taller
+
+- Se añadió al panel del profesor una sección `Control del taller` para decidir qué aplicaciones están abiertas o cerradas.
+- El profesor puede aplicar una regla general a todas las clases o seleccionar una clase concreta.
+- Se añadieron acciones rápidas `Abrir todos` y `Cerrar todos` para preparar una sesión semanal en pocos segundos.
+- Los estados se guardan de forma persistente en la hoja `AccesosJuegos`, con clase, juego, estado, fecha y profesor que realizó el cambio.
+- Si una clase no tiene una regla propia, hereda la regla general; si tampoco existe una regla general, el juego permanece disponible para conservar el comportamiento anterior.
+- La vista del alumno mantiene visibles todas las tarjetas y marca cada aplicación como `Disponible hoy` o `Cerrado hoy`.
+- Los juegos cerrados quedan desactivados desde el launcher y muestran un mensaje explicativo si se intenta abrirlos.
+- La disponibilidad se vuelve a consultar automáticamente cada 30 segundos para que los cambios del profesor lleguen a una sesión ya abierta.
+- La lógica se implementó como una capa común de LenguArcade y no modifica las mecánicas ni el guardado interno de Battlegrafía, Maniacgrafía, Narratoria, Rimópolis, Scrabble ni otros juegos.
+- El control de acceso gobierna el launcher de LenguArcade; no pretende convertir las URLs públicas de los juegos en recursos privados.
+
+Archivos:
+
+- `apps-script/zzzz_LenguArcade_workshop_access.gs`
+- `docs/CAMBIOS.md`
+- `docs/PRUEBAS.md`
+
+Riesgos a comprobar al publicar:
+
+- El nuevo adaptador debe cargarse después de `zz_LenguArcade_entry_and_patches.gs`; el nombre `zzzz_...` lo sitúa al final del orden alfabético usado por `clasp` para los archivos no incluidos en `filePushOrder`.
+- La primera consulta crea la hoja `AccesosJuegos` si todavía no existe.
+- Si la consulta de disponibilidad falla, la interfaz conserva el comportamiento previo para no bloquear LenguArcade por un fallo de red.
+
 ## 2026-06-15 - Supabase activo y puente de Classroom
 
 - Se migro la base inicial a Supabase: perfiles, progreso, partidas, eventos,
