@@ -1,5 +1,33 @@
 # Registro de cambios
 
+## 2026-09-03 - Sesiones del taller y acceso supervisado en casa
+
+- Se añadió una capa de `Sesión del taller` por clase sobre el control de acceso existente.
+- Cada sesión puede tener título, mensaje para los alumnos, objetivo de XP y una selección concreta de juegos.
+- En clase, el profesor abre y cierra manualmente la sesión con `Abrir en clase` y `Cerrar en clase`, pensado para la sesión semanal de 30 minutos.
+- Fuera del aula, el profesor puede activar `Acceso supervisado en casa` e indicar una fecha y hora de inicio y de fin. La ventana se activa y caduca automáticamente.
+- Una sesión publicada pero cerrada bloquea sus juegos hasta que el profesor la abra en clase o llegue una ventana doméstica autorizada.
+- Los alumnos ven una tarjeta `MISIÓN ACTUAL` con el título, instrucciones, objetivo de XP, número de juegos y, si existe, la ventana de casa.
+- La disponibilidad de la sesión se vuelve a consultar automáticamente cada 30 segundos.
+- La configuración se guarda en la nueva hoja `TallerSesiones` con una fila por clase.
+- La selección de la sesión no elimina el control manual `AccesosJuegos`: un juego cerrado manualmente sigue cerrado aunque forme parte de la misión.
+- El catálogo del editor es dinámico. Cualquier juego nuevo que se incorpore y se marque como activo en `Juegos` aparecerá automáticamente en las sesiones sin tener que modificar esta capa.
+- Si una clase todavía no tiene una sesión publicada, se mantiene el comportamiento anterior del launcher para no romper el curso ya existente.
+
+Archivos:
+
+- `apps-script/zzzzz_LenguArcade_workshop_sessions.gs`
+- `apps-script/zzzzzz_LenguArcade_workshop_session_guard.gs`
+- `docs/CAMBIOS.md`
+- `docs/PRUEBAS.md`
+
+Riesgos a comprobar al publicar:
+
+- `zzzzz_...` y `zzzzzz_...` deben cargarse después de `zzzz_LenguArcade_workshop_access.gs`; sus nombres mantienen ese orden alfabético en el flujo actual de `clasp`.
+- La primera consulta crea la hoja `TallerSesiones` si todavía no existe.
+- La ventana de casa se interpreta con la zona horaria del proyecto de Apps Script; debe mantenerse configurada para Madrid/España.
+- El guard final conserva como autoritativo cualquier cierre manual de `AccesosJuegos` dentro de una sesión.
+
 ## 2026-09-03 - Control de acceso del taller
 
 - Se añadió al panel del profesor una sección `Control del taller` para decidir qué aplicaciones están abiertas o cerradas.
