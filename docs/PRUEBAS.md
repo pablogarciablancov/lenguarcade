@@ -1,5 +1,30 @@
 # Plan de pruebas
 
+## Sesiones del taller y acceso supervisado en casa
+
+1. Publicar la nueva versión de Apps Script y abrir `/exec?page=profesor` con una cuenta autorizada.
+2. Entrar en `🎛️ Taller` y seleccionar una clase concreta.
+3. Confirmar que aparece `🎯 Sesión del taller` con título, objetivo XP, mensaje, selector de juegos y controles de casa.
+4. Preparar una misión con dos juegos, un título y un mensaje; pulsar `Guardar sesión`.
+5. Abrir la vista de un alumno de esa clase y confirmar que aparece la tarjeta `MISIÓN ACTUAL`.
+6. Con la sesión guardada pero cerrada, confirmar que los juegos de la misión no pueden abrirse.
+7. Pulsar `Abrir en clase` y comprobar que, en un máximo aproximado de 30 segundos, los juegos seleccionados quedan disponibles para ese alumno.
+8. Confirmar que un juego no seleccionado permanece bloqueado aunque otros juegos de la sesión estén abiertos.
+9. Pulsar `Cerrar en clase` y confirmar que vuelven a bloquearse sin cerrar sesión ni recargar manualmente.
+10. Activar `Acceso supervisado en casa`, indicar un intervalo que incluya la hora actual y guardar.
+11. Con la sesión de clase cerrada, confirmar que durante ese intervalo la tarjeta indica `Abierta en casa` y los juegos seleccionados pueden abrirse.
+12. Cambiar el final del intervalo a una hora ya pasada y confirmar que el acceso doméstico queda cerrado tras la siguiente actualización.
+13. Programar un intervalo futuro y confirmar que la tarjeta muestra que existe acceso en casa programado pero no abre todavía los juegos.
+14. Cerrar manualmente uno de los juegos seleccionados mediante `AccesosJuegos` y confirmar que sigue cerrado incluso cuando la sesión está abierta.
+15. Pulsar `Retirar sesión` y confirmar que deja de aparecer `MISIÓN ACTUAL`; para esa clase vuelve a aplicarse el comportamiento previo del launcher.
+16. Abrir la hoja central y confirmar que existe `TallerSesiones` con una fila por clase y las columnas de configuración de la sesión.
+17. Recargar el panel del profesor y confirmar que título, mensaje, XP, juegos y horario de casa persisten.
+18. Comprobar que un alumno no puede invocar las funciones de escritura de sesiones porque el servidor exige profesor autorizado.
+19. Activar en el catálogo un juego nuevo de prueba y confirmar que aparece automáticamente en el selector de `Juegos de esta misión` sin modificar el código de sesiones.
+20. Repetir la prueba en móvil y escritorio y confirmar que el editor, las fechas y la tarjeta de misión no desbordan.
+
+Resultado esperado por defecto: una clase que todavía no tenga sesión publicada conserva el comportamiento anterior basado en `AccesosJuegos`.
+
 ## Control de acceso del taller
 
 1. Publicar la nueva versión de Apps Script con el flujo estable del proyecto.
