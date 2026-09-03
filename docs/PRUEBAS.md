@@ -1,5 +1,25 @@
 # Plan de pruebas
 
+## Control de acceso del taller
+
+1. Publicar la nueva versión de Apps Script con el flujo estable del proyecto.
+2. Abrir `/exec?page=profesor` con una cuenta autorizada `@fomento.edu`.
+3. Confirmar que aparece la nueva opción `🎛️ Taller` y la tarjeta `Control del taller`.
+4. En `Todas las clases · regla general`, cerrar un juego concreto y comprobar que el botón pasa a `🔒 Cerrado`.
+5. Abrir `/exec?page=alumno` con un alumno y confirmar que ese juego sigue visible, aparece como `🔒 Cerrado hoy` y su botón está desactivado.
+6. Intentar abrir el juego cerrado y confirmar que LenguArcade muestra el aviso de que no está disponible en el taller de hoy.
+7. Desde el panel del profesor, volver a abrirlo y confirmar que la vista del alumno se actualiza en un máximo aproximado de 30 segundos sin volver a iniciar sesión.
+8. Seleccionar una clase concreta, cerrar otro juego y confirmar que para esa clase aparece `Regla propia de esta clase`.
+9. Entrar con un alumno de otra clase y confirmar que conserva la regla general.
+10. Probar `Cerrar todos` y `Abrir todos` y confirmar que el contador de juegos abiertos coincide con las tarjetas.
+11. Abrir la hoja central y confirmar que existe `AccesosJuegos` con las columnas `classCode`, `gameId`, `enabled`, `updatedAt` y `updatedBy`.
+12. Recargar profesor y alumno y confirmar que la configuración persiste.
+13. Confirmar que un alumno no puede invocar las funciones de escritura del control del taller porque el servidor exige una cuenta de profesor autorizada.
+14. Abrir Battlegrafía, Narratoria, Maniacgrafía, Rimópolis y Scrabble cuando estén permitidos y confirmar que su mecánica y guardado siguen funcionando igual que antes.
+15. Probar escritorio y móvil para confirmar que el panel de interruptores no desborda.
+
+Resultado esperado por defecto: si `AccesosJuegos` todavía está vacía, todos los juegos activos conservan su disponibilidad anterior.
+
 ## Supabase y Classroom
 
 1. Ejecutar `npm.cmd run check` y confirmar la comprobacion del esquema.
