@@ -190,3 +190,10 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 6. Repetir el expediente ya resuelto y confirmar que no concede de nuevo la recompensa principal de XP.
 7. Abrir el alumno en el panel del profesor y comprobar el bloque «Entre Líneas · diagnóstico lector» con pistas, conexiones, ayudas, intentos y habilidades.
 8. Probar la investigación a 1366×768 y en viewport móvil; los paneles no deben tapar el documento ni impedir el acceso a las acciones principales.
+
+
+## Acceso inicial simplificado
+1. Abrir la portada de LenguArcade sin sesión y comprobar que no aparece el texto sobre «cuenta institucional de Google» ni la explicación de los dominios.
+2. Pulsar «Soy profesor» y comprobar que no aparece el párrafo explicativo sobre panel docente/profe-jugador.
+3. Confirmar que siguen funcionando y visibles «Entrar con Google del colegio», «Entrar como profe-jugador» y «Abrir panel del profesor».
+4. Validar que alumno y profesor pueden iniciar sesión exactamente igual que antes.
