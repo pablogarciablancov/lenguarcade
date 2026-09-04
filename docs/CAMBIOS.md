@@ -228,3 +228,16 @@ Cada cambio debe indicar:
 - Corregida la construcción del parche docente de Entre Líneas, que contenía comillas sin escapar y hacía inválido `zzzzzzzzzz_LenguArcade_entre_lineas.gs`.
 - El cambio no modifica la mecánica ni los datos de Entre Líneas; solo la generación del HTML del bloque de diagnóstico docente.
 - Verificados todos los bloques JavaScript de `apps-script/`: sin errores de sintaxis.
+
+
+## 2026-09-04 · Gestión de clases y alumnado
+- Nueva sección «Gestión» en el panel del profesor para limpiar cursos antiguos sin tocar el seguimiento académico.
+- Las clases y alumnos pueden archivarse y restaurarse. Archivar oculta el elemento del uso activo y conserva progreso, partidas, logros y evaluaciones.
+- Se añade eliminación definitiva con confirmación escrita `ELIMINAR`.
+- Al eliminar un alumno se borra su perfil de Supabase y, por cascada, su progreso, eventos, logros, guardados, errores y evaluaciones.
+- Al eliminar una clase se conservan los alumnos que también pertenecen a otra clase; solo se eliminan por completo los perfiles que quedan sin ninguna otra clase.
+- Las sesiones de alumnos archivados o eliminados se revocan inmediatamente.
+- Las operaciones quedan limitadas a profesores autenticados y a la organización activa.
+- Se añade respaldo equivalente en Sheets cuando existe una fila legacy relacionada, para evitar que el acceso de respaldo reactive datos antiguos.
+- Nueva Edge Function `teacher-roster-management`, desplegada con JWT obligatorio.
+- Nueva comprobación `scripts/check-roster-management.mjs`, incluida en `npm run check`.
