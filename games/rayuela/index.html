@@ -88,6 +88,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .editorActionRow{display:flex;gap:6px;flex-wrap:wrap}
 .choiceList{display:grid;gap:8px}.choiceRow{padding:9px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035)}.choiceTop{display:grid;grid-template-columns:1fr auto;gap:6px}.choiceTop input{width:100%;border:0;background:transparent;color:var(--text);font-weight:800;font-size:11px;padding:5px}.choiceButtons{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}.choiceTarget{font-size:9px;color:var(--muted);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .advancedBox{padding:10px;border-radius:14px;border:1px dashed rgba(139,92,246,.3);background:rgba(139,92,246,.05);margin-top:10px}.advancedBox summary{cursor:pointer;font-size:10px;font-weight:900;color:#ddd6fe}
+.teacherFeedback{padding:11px;border-radius:14px;border:1px solid rgba(34,211,238,.24);background:linear-gradient(145deg,rgba(34,211,238,.07),rgba(139,92,246,.07))}
+.teacherFeedbackHead{display:flex;align-items:center;justify-content:space-between;gap:8px}.teacherFeedbackScore{padding:5px 8px;border-radius:999px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);font-size:10px;font-weight:950}
+.teacherComment{margin-top:8px;padding:9px;border-radius:11px;background:rgba(255,255,255,.045);border:1px solid var(--line);font-size:10px;line-height:1.45}.teacherComment.reviewed{opacity:.58}.teacherComment button{margin-top:7px}
 .footerbar{min-height:60px;display:flex;align-items:center;gap:8px;padding:9px 15px;border-top:1px solid var(--line);background:rgba(10,15,30,.9);z-index:30}.footerbar .statusText{margin-left:auto;font-size:10px;color:var(--muted);max-width:330px;text-align:right}
 .modal{position:fixed;inset:0;z-index:100;background:rgba(3,7,18,.82);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:18px}.modal.open{display:flex}.dialog{width:min(760px,96vw);max-height:92vh;overflow:auto;background:linear-gradient(165deg,#18233d,#10182c);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:20px}.dialog.wide{width:min(1080px,97vw)}.dialogHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:14px}.dialogHead h2{margin:0}.dialogHead p{margin:4px 0 0;color:var(--muted);font-size:11px}
 .playModal{padding:0;background:#070b15}.playStage{width:100%;height:100%;display:grid;grid-template-rows:auto 1fr auto;background:
@@ -211,6 +214,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
           <div class="panelTitle"><h3>🔀 Decisiones</h3><button id="addChoiceBtn" class="smallBtn">＋ Opción</button></div>
           <div id="choiceList" class="choiceList"></div>
           <p class="muted" style="font-size:9px;line-height:1.5">Cada decisión puede crear una nueva casilla o enlazar con una escena que ya exista.</p>
+        </section>
+        <section id="teacherFeedbackSection" class="panelSection hidden">
+          <div id="teacherFeedbackBox" class="teacherFeedback"></div>
         </section>
       </div>
     </aside>
@@ -429,7 +435,7 @@ function defaultProject(){
     schema:"rayuela-project-v1",version:GAME_VERSION,id:uid("rayuela"),title:"Mi aventura",genre:"Aventura",createdAt:now(),updatedAt:now(),
     status:"draft",submittedAt:"",grid:{rows:9,cols:9},nodes:[start],xp:0,unlockedAchievements:[],objectiveRewards:[],
     editCount:0,playTests:0,playthroughs:0,discoveredEndings:[],teacherComments:[],submissions:[],settings:{difficulty:"basic",sound:true},
-    variables:{},items:[],lastSavedAt:""
+    variables:{},items:[],teacherFeedback:null,reviewedTeacherComments:[],lastSavedAt:""
   };
 }
 var project=defaultProject();
@@ -454,6 +460,8 @@ function normalizeProject(raw){
   p.submissions=Array.isArray(raw.submissions)?raw.submissions:[];
   p.variables=raw.variables&&typeof raw.variables==="object"?raw.variables:{};
   p.items=Array.isArray(raw.items)?raw.items:[];
+  p.teacherFeedback=raw.teacherFeedback&&typeof raw.teacherFeedback==="object"?raw.teacherFeedback:null;
+  p.reviewedTeacherComments=Array.isArray(raw.reviewedTeacherComments)?raw.reviewedTeacherComments:[];
   p.xp=Math.max(0,Number(raw.xp||0));p.editCount=Math.max(0,Number(raw.editCount||0));p.playTests=Math.max(0,Number(raw.playTests||0));p.playthroughs=Math.max(0,Number(raw.playthroughs||0));
   return p;
 }
@@ -518,6 +526,7 @@ function applyHostInit(payload){
   $("profileBadge").textContent="👤 "+label+(student.clase?" · "+student.clase:"");
   if(payload.save&&typeof payload.save==="object")project=normalizeProject(payload.save);
   else loadLocal();
+  if(payload.feedback&&typeof payload.feedback==="object")project.teacherFeedback=payload.feedback;
   bridgeInitialized=true;
   postToHost("INITIALIZED",{projectId:project.id});
   bootProject();
@@ -775,9 +784,31 @@ function renderEditor(){
   $("nodeWordCount").textContent=words(n.text)+" palabras";$("endingFields").classList.toggle("hidden",!isEnding(n));$("choicesSection").classList.toggle("hidden",isEnding(n));
   $("deleteNodeBtn").disabled=n.type==="start";$("duplicateNodeBtn").disabled=n.type==="start";
   renderChoices(n);
+  renderTeacherFeedback(n);
 }
 function fillSelect(select,map,value){
   select.innerHTML=Object.keys(map).map(function(k){return '<option value="'+k+'">'+esc((map[k].icon||"")+" "+map[k].label)+'</option>';}).join("");select.value=value;
+}
+function renderTeacherFeedback(n){
+  var section=$("teacherFeedbackSection"),box=$("teacherFeedbackBox"),feedback=project.teacherFeedback;
+  if(!section||!box){return;}
+  var breakdown=feedback&&feedback.breakdown&&typeof feedback.breakdown==="object"?feedback.breakdown:{};
+  var comments=Array.isArray(breakdown.nodeComments)?breakdown.nodeComments.filter(function(item){return item.nodeId===n.id;}):[];
+  var overall=String(breakdown.overallComment||"").trim();
+  var has=comments.length||overall||Number(feedback&&feedback.score)>=0&&feedback&&feedback.updatedAt;
+  section.classList.toggle("hidden",!has);if(!has)return;
+  var score=Number(feedback.score);var head='<div class="teacherFeedbackHead"><div><div class="eyebrow">Feedback del profesor</div><strong>Revisión de tu Rayuela</strong></div>'+(Number.isFinite(score)?'<span class="teacherFeedbackScore">'+score.toFixed(1)+'/10</span>':'')+'</div>';
+  var general=overall?'<div class="teacherComment"><strong>Comentario general</strong><div style="margin-top:4px">'+esc(overall)+'</div></div>':'';
+  var nodeHtml=comments.map(function(item){
+    var id=String(item.id||item.nodeId||"comment"),reviewed=project.reviewedTeacherComments.indexOf(id)!==-1;
+    return '<div class="teacherComment '+(reviewed?'reviewed':'')+'"><strong>💬 Sobre esta escena</strong><div style="margin-top:4px">'+esc(item.comment||"")+'</div><button class="smallBtn" data-review-comment="'+esc(id)+'">'+(reviewed?'✓ Revisado':'Marcar como revisado')+'</button></div>';
+  }).join("");
+  box.innerHTML=head+general+nodeHtml;
+  box.querySelectorAll("[data-review-comment]").forEach(function(btn){btn.onclick=function(){
+    var id=btn.dataset.reviewComment;if(project.reviewedTeacherComments.indexOf(id)===-1)project.reviewedTeacherComments.push(id);
+    else project.reviewedTeacherComments=project.reviewedTeacherComments.filter(function(x){return x!==id;});
+    scheduleSave("teacher_feedback_reviewed");renderTeacherFeedback(n);
+  };});
 }
 function renderChoices(n){
   $("choiceList").innerHTML=n.choices.map(function(c,idx){
