@@ -60,7 +60,64 @@ Deno.serve(async (request) => {
 
     let progress: Record<string, unknown> = clientProgress;
     let authoritativeRayuelaXp: number | null = null;
+    let authoritativeEntreLineasXp: number | null = null;
     let rayuelaSubmissionFeathers = 0;
+    let entreLineasSolvedFeathers = 0;
+
+    if (gameId === "entre_lineas" && save) {
+      const profile = save.profile && typeof save.profile === "object"
+        ? save.profile as Record<string, unknown>
+        : {};
+      const metrics = rawGameData.metrics && typeof rawGameData.metrics === "object"
+        ? rawGameData.metrics as Record<string, unknown>
+        : {};
+      const lastSession = rawGameData.lastSession && typeof rawGameData.lastSession === "object"
+        ? rawGameData.lastSession as Record<string, unknown>
+        : {};
+      authoritativeEntreLineasXp = Math.max(
+        0,
+        Math.round(boundedNumber(profile.xp, 0, 100000000, oldXp)),
+      );
+      const solved = String(lastSession.outcome || "").toLowerCase() === "solved" ||
+        metrics.success === true;
+      const taskScore = boundedNumber(metrics.taskScore, 0, 100, Number(old?.accuracy || 0));
+      const cluesImportant = Math.max(0, Math.round(boundedNumber(metrics.cluesImportant, 0, 100000)));
+      const cluesTotal = Math.max(0, Math.round(boundedNumber(metrics.cluesTotal, 0, 100000)));
+      const tasksCorrect = Math.max(0, Math.round(boundedNumber(metrics.tasksCorrect, 0, 100000)));
+      const tasksTotal = Math.max(0, Math.round(boundedNumber(metrics.tasksTotal, 0, 100000)));
+      const keyConnections = Math.max(0, Math.round(boundedNumber(metrics.keyConnections, 0, 100000)));
+      const irrelevantClues = Math.max(0, Math.round(boundedNumber(metrics.irrelevantClues, 0, 100000)));
+      const finalAttempts = Math.max(0, Math.round(boundedNumber(metrics.finalAttempts, 0, 100000)));
+      const sessionSuccesses = cluesImportant + tasksCorrect + keyConnections;
+      const sessionErrors = Math.max(0, cluesTotal - cluesImportant) +
+        Math.max(0, tasksTotal - tasksCorrect) +
+        irrelevantClues +
+        Math.max(0, finalAttempts - 1);
+      const attempts = Number(old?.attempts || 0) + sessionSuccesses + sessionErrors;
+      const successes = Number(old?.successes || 0) + sessionSuccesses;
+      const errors = Number(old?.errors || 0) + sessionErrors;
+      const accuracy = attempts ? Math.round((successes / attempts) * 100) : taskScore;
+      const previousCases = Number(
+        old?.raw_data && typeof old.raw_data === "object" &&
+        (old.raw_data as Record<string, unknown>).save &&
+        typeof (old.raw_data as Record<string, unknown>).save === "object"
+          ? (((old.raw_data as Record<string, unknown>).save as Record<string, unknown>).profile as Record<string, unknown> | undefined)?.cases || 0
+          : 0,
+      );
+      const currentCases = Math.max(0, Math.round(boundedNumber(profile.cases, 0, 100000, previousCases)));
+      entreLineasSolvedFeathers = solved && currentCases > previousCases
+        ? Math.max(1, Math.min(8, Math.round(taskScore / 25)))
+        : 0;
+      progress = {
+        ...clientProgress,
+        percentage:Math.max(Number(old?.percentage || 0), solved ? 100 : taskScore),
+        accuracy,
+        attempts,
+        successes,
+        errors,
+        streak:Math.max(Number(old?.streak || 0), keyConnections),
+      };
+    }
 
     if (gameId === "rayuela" && save) {
       const nodes = Array.isArray(save.nodes) ? save.nodes as Record<string, unknown>[] : [];
@@ -115,12 +172,16 @@ Deno.serve(async (request) => {
     const xpDelta = Math.round(boundedNumber(progress.xpDelta, 0, 5000));
     const feathersDelta = gameId === "rayuela"
       ? rayuelaSubmissionFeathers
-      : Math.round(boundedNumber(progress.plumasDelta ?? progress.feathersDelta, 0, 500));
-    const newXp = authoritativeRayuelaXp == null
-      ? (progress.xp == null
-          ? oldXp + xpDelta
-          : Math.max(oldXp, Math.round(boundedNumber(progress.xp, 0, 100000000))))
-      : Math.max(oldXp, authoritativeRayuelaXp);
+      : gameId === "entre_lineas"
+        ? entreLineasSolvedFeathers
+        : Math.round(boundedNumber(progress.plumasDelta ?? progress.feathersDelta, 0, 500));
+    const newXp = authoritativeEntreLineasXp != null
+      ? Math.max(oldXp, authoritativeEntreLineasXp)
+      : authoritativeRayuelaXp == null
+        ? (progress.xp == null
+            ? oldXp + xpDelta
+            : Math.max(oldXp, Math.round(boundedNumber(progress.xp, 0, 100000000))))
+        : Math.max(oldXp, authoritativeRayuelaXp);
     const newFeathers = progress.plumas == null && progress.feathers == null
       ? oldFeathers + feathersDelta
       : Math.max(oldFeathers, Math.round(boundedNumber(progress.plumas ?? progress.feathers, 0, 10000000)));
