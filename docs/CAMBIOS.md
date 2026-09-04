@@ -197,8 +197,9 @@ Cada cambio debe indicar:
 - Brújula del autor, inspector estructural, métricas de complejidad, más de 30 logros, easter eggs, XP interno, tutorial, plantillas, pruebas desde cualquier escena y colección de finales.
 - Autoguardado local, importar/exportar JSON, deshacer/rehacer y entrega con copia congelada.
 - Integración con el bridge de LenguArcade: INIT/READY, checkpoints, resultados, logros y cierre seguro sin compartir el token con el juego.
-- Adaptador `zzzzzzzzz_LenguArcade_rayuela.gs` para catálogo, controles de taller, XP central y resumen específico en la ficha del profesor.
+- Integración nativa en el host del alumno para XP/guardado; adaptador `zzzzzzzzz_LenguArcade_rayuela.gs` como compatibilidad para catálogos antiguos y para la ficha/rúbrica específica del profesor.
 - Migración Supabase preparada para registrar `rayuela` en el catálogo y `student-dashboard` preparado para abrirlo embebido.
+- Rúbrica docente configurable (criterios, pesos, notas y comentarios), con comentarios por escena que vuelven al editor del alumno como feedback revisable.
 - La nota final continúa siendo decisión del profesor; las métricas automáticas se usan como evidencias estructurales, no como calificación definitiva.
 - Evaluación específica de Rayuela mediante una rúbrica configurable guardada en `evaluations` con `scope=game`.
 - El panel docente puede abrir el mapa narrativo completo, leer escenas y dejar comentarios generales o asociados a nodos concretos.
