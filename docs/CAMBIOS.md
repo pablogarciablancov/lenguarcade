@@ -205,3 +205,12 @@ Cada cambio debe indicar:
 - El panel docente puede abrir el mapa narrativo completo, leer escenas y dejar comentarios generales o asociados a nodos concretos.
 - Los comentarios del profesor vuelven al juego a través del dashboard del alumno; el alumno puede marcarlos como revisados sin modificar la evaluación docente.
 
+
+## 2026-09-04 · Entre Líneas
+- Nuevo juego de comprensión lectora: **Entre Líneas · Agencia de Investigación Lectora**.
+- Se integra como juego embebido de LenguArcade con sesión del alumno, autoguardado, recuperación de partida y resultados centrales.
+- El Expediente 001, «El aula vacía», registra pistas, conexiones, pruebas de comprensión, ayudas, intentos finales, notas, perfil lector y logros.
+- El resultado envía XP al progreso central con protección frente a repetir el mismo expediente para acumular experiencia.
+- El catálogo del alumno y el control de acceso del taller pueden habilitar/bloquear Entre Líneas igual que el resto de juegos.
+- El panel del profesor incorpora un diagnóstico específico con métricas de investigación y las seis habilidades lectoras.
+- Supabase incorpora el juego al catálogo y el dashboard lo publica con integración embebida.

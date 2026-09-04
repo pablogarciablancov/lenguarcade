@@ -33,6 +33,10 @@ const integrations: Record<string, { url:string; integration:string }> = {
     url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/rayuela/",
     integration:"embedded",
   },
+  entre_lineas:{
+    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/",
+    integration:"embedded",
+  },
 };
 
 Deno.serve(async (request) => {

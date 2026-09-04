@@ -180,3 +180,13 @@ Pruebas mínimas antes de publicar:
 20. Marcar el comentario de escena como revisado, guardar y comprobar desde el panel docente que el proyecto conserva ese estado en el siguiente checkpoint.
 
 Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; A2 y B1 se reencuentran; final bueno, final malo y final secreto. Guardar, recargar, recorrer los tres finales, entregar y abrir desde profesor.
+
+## Entre Líneas
+1. Iniciar sesión como alumno y comprobar que **Entre Líneas** aparece en el catálogo con la etiqueta de comprensión lectora.
+2. Desde el panel del profesor, bloquear y desbloquear Entre Líneas y verificar que el alumno recibe el estado correcto tanto en horario de taller como fuera de él.
+3. Abrir el juego: debe cargarse dentro del runner de LenguArcade y mostrar el perfil conectado; el acceso docente local no debe aparecer.
+4. Empezar «El aula vacía», marcar pistas, crear una conexión, responder una prueba y recargar: el checkpoint debe recuperar el estado.
+5. Resolver correctamente el expediente usando dos pruebas distintas y comprobar que se guarda resultado, XP, precisión, logros y actividad.
+6. Repetir el expediente ya resuelto y confirmar que no concede de nuevo la recompensa principal de XP.
+7. Abrir el alumno en el panel del profesor y comprobar el bloque «Entre Líneas · diagnóstico lector» con pistas, conexiones, ayudas, intentos y habilidades.
+8. Probar la investigación a 1366×768 y en viewport móvil; los paneles no deben tapar el documento ni impedir el acceso a las acciones principales.
