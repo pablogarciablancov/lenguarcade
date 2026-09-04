@@ -222,3 +222,9 @@ Cada cambio debe indicar:
 - Se mantienen intactos el acceso con Google, la validación de sesión, «Entrar como profe-jugador» y «Abrir panel del profesor».
 - Archivo modificado: `apps-script/zz_LenguArcade_entry_and_patches.gs`.
 - Riesgo esperado: mínimo; cambio exclusivamente de contenido visual, sin tocar la lógica de autenticación.
+
+
+## 2026-09-04 · Corrección de publicación bloqueada por Entre Líneas
+- Corregida la construcción del parche docente de Entre Líneas, que contenía comillas sin escapar y hacía inválido `zzzzzzzzzz_LenguArcade_entre_lineas.gs`.
+- El cambio no modifica la mecánica ni los datos de Entre Líneas; solo la generación del HTML del bloque de diagnóstico docente.
+- Verificados todos los bloques JavaScript de `apps-script/`: sin errores de sintaxis.
