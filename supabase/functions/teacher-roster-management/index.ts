@@ -132,8 +132,15 @@ async function listRoster(admin: any, organizationId: string) {
 async function archiveStudent(admin: any, organizationId: string, profileId: string) {
   const profile = await getStudent(admin, organizationId, profileId);
   if (!profile) return { ok:false, error:"student_not_found" };
+  const now = new Date().toISOString();
   const { error } = await admin.from("profiles")
-    .update({ active:false, updated_at:new Date().toISOString() })
+    .update({
+      active:false,
+      archived_at:now,
+      archive_reason:"manual",
+      archived_by_classroom_id:null,
+      updated_at:now,
+    })
     .eq("id", profile.id)
     .eq("organization_id", organizationId)
     .eq("role", "student");
@@ -146,7 +153,13 @@ async function restoreStudent(admin: any, organizationId: string, profileId: str
   const profile = await getStudent(admin, organizationId, profileId);
   if (!profile) return { ok:false, error:"student_not_found" };
   const { error } = await admin.from("profiles")
-    .update({ active:true, updated_at:new Date().toISOString() })
+    .update({
+      active:true,
+      archived_at:null,
+      archive_reason:null,
+      archived_by_classroom_id:null,
+      updated_at:new Date().toISOString(),
+    })
     .eq("id", profile.id)
     .eq("organization_id", organizationId)
     .eq("role", "student");
@@ -206,20 +219,31 @@ async function archiveClass(admin: any, organizationId: string, classroomId: str
   if (error) throw error;
 
   const exclusiveIds = await profilesExclusiveToClass(admin, organizationId, classroom.id, profileIds);
+  let archivedIds: string[] = [];
   if (exclusiveIds.length) {
-    const { error:profilesError } = await admin.from("profiles")
-      .update({ active:false, updated_at:new Date().toISOString() })
+    const now = new Date().toISOString();
+    const { data:archivedProfiles, error:profilesError } = await admin.from("profiles")
+      .update({
+        active:false,
+        archived_at:now,
+        archive_reason:"class",
+        archived_by_classroom_id:classroom.id,
+        updated_at:now,
+      })
       .eq("organization_id", organizationId)
       .eq("role", "student")
-      .in("id", exclusiveIds);
+      .eq("active", true)
+      .in("id", exclusiveIds)
+      .select("id");
     if (profilesError) throw profilesError;
-    await revokeSessions(admin, exclusiveIds);
+    archivedIds = (archivedProfiles || []).map((row: Row) => row.id);
+    await revokeSessions(admin, archivedIds);
   }
   return {
     ok:true,
     action:"archiveClass",
     classroom:{ id:classroom.id, name:classroom.name, classCode:classroom.legacy_class_code || classroom.id },
-    archivedStudents:exclusiveIds.length,
+    archivedStudents:archivedIds.length,
   };
 }
 
@@ -233,25 +257,27 @@ async function restoreClass(admin: any, organizationId: string, classroomId: str
     .eq("organization_id", organizationId);
   if (error) throw error;
 
-  const { data:enrollments, error:enrollmentError } = await admin.from("classroom_enrollments")
-    .select("profile_id")
-    .eq("classroom_id", classroom.id)
-    .eq("active", true);
-  if (enrollmentError) throw enrollmentError;
-  const profileIds = [...new Set((enrollments || []).map((row: Row) => row.profile_id))];
-  if (profileIds.length) {
-    const { error:profilesError } = await admin.from("profiles")
-      .update({ active:true, updated_at:new Date().toISOString() })
-      .eq("organization_id", organizationId)
-      .eq("role", "student")
-      .in("id", profileIds);
-    if (profilesError) throw profilesError;
-  }
+  const { data:restoredProfiles, error:profilesError } = await admin.from("profiles")
+    .update({
+      active:true,
+      archived_at:null,
+      archive_reason:null,
+      archived_by_classroom_id:null,
+      updated_at:new Date().toISOString(),
+    })
+    .eq("organization_id", organizationId)
+    .eq("role", "student")
+    .eq("active", false)
+    .eq("archive_reason", "class")
+    .eq("archived_by_classroom_id", classroom.id)
+    .select("id");
+  if (profilesError) throw profilesError;
+  const restoredIds = (restoredProfiles || []).map((row: Row) => row.id);
   return {
     ok:true,
     action:"restoreClass",
     classroom:{ id:classroom.id, name:classroom.name, classCode:classroom.legacy_class_code || classroom.id },
-    restoredStudents:profileIds.length,
+    restoredStudents:restoredIds.length,
   };
 }
 
