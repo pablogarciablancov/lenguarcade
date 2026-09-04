@@ -13,6 +13,12 @@ type Criterion = {
   comment:string;
 };
 
+type NodeComment = {
+  id:string;
+  nodeId:string;
+  comment:string;
+};
+
 function cleanText(value: unknown, max: number) {
   return String(value ?? "").trim().slice(0, max);
 }
@@ -26,6 +32,20 @@ function cleanCriteria(value: unknown): Criterion[] {
     score:boundedNumber(item?.score, 0, 10, 0),
     comment:cleanText(item?.comment, 1000),
   })).filter(item => item.id && item.label && item.weight > 0);
+}
+
+function cleanNodeComments(value: unknown): NodeComment[] {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 100).map((raw, index) => {
+    const item = raw && typeof raw === "object" ? raw as Record<string, unknown> : {};
+    const nodeId = cleanText(item.nodeId, 120);
+    const comment = cleanText(item.comment, 1800);
+    return {
+      id:cleanText(item.id || `node_comment_${index + 1}`, 120),
+      nodeId,
+      comment,
+    };
+  }).filter(item => item.nodeId && item.comment);
 }
 
 Deno.serve(async (request) => {
@@ -67,6 +87,7 @@ Deno.serve(async (request) => {
       criteria,
       totalWeight,
       overallComment:cleanText(body.overallComment, 4000),
+      nodeComments:cleanNodeComments(body.nodeComments),
       nodeComments,
       projectId:cleanText(body.projectId, 120),
       submissionId:cleanText(body.submissionId, 120),
