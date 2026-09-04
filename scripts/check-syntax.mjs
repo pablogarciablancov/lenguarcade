@@ -25,7 +25,8 @@ for (const entry of files) {
   }
 
   if (entry.name.endsWith(".html")) {
-    const ids = [...source.matchAll(/\bid=["']([^"']+)["']/g)].map((match) => match[1]);
+    const staticHtml = source.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
+    const ids = [...staticHtml.matchAll(/\bid=["']([^"']+)["']/g)].map((match) => match[1]);
     const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index);
     const referencedIds = [...source.matchAll(/\$\('([^']+)'\)/g)].map((match) => match[1]);
     const missingIds = [...new Set(referencedIds.filter((id) => !ids.includes(id)))];
