@@ -1822,7 +1822,8 @@ window.addEventListener('message',event=>{
     $('gameRunnerStatus').textContent='Cargando tu progreso...';
     sendToActiveGame('INIT',{
       student:currentDashboard.student,
-      save:parseStoredGameSave(runner.game)
+      save:parseStoredGameSave(runner.game),
+      feedback:(currentDashboard.evaluations||[]).find(item=>item.gameId===runner.game.gameId)||null
     });
   }
   if(message.type==='INITIALIZED'){
