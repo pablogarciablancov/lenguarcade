@@ -39,3 +39,31 @@ const templates = (html.match(/data-template=/g) || []).length;
 if (templates < 4) throw new Error('Rayuela: deben existir al menos cuatro plantillas de inicio.');
 
 console.log('Rayuela OK · '+checks.length+' contratos · '+scripts.length+' script(s) compilados · '+achievements+' logros.');
+
+
+const alumno = fs.readFileSync(path.resolve("apps-script","LenguArcade_Alumno.html"),"utf8");
+const codeGs = fs.readFileSync(path.resolve("apps-script","LenguArcade_Code.gs"),"utf8");
+const adapter = fs.readFileSync(path.resolve("apps-script","zzzzzzzzz_LenguArcade_rayuela.gs"),"utf8");
+const evaluation = fs.readFileSync(path.resolve("supabase","functions","teacher-rayuela-evaluation","index.ts"),"utf8");
+const dashboard = fs.readFileSync(path.resolve("supabase","functions","student-dashboard","index.ts"),"utf8");
+const migrations = fs.readdirSync(path.resolve("supabase","migrations")).filter(name => name.includes("rayuela"));
+
+if (!alumno.includes("gameRecord?.gameId==='rayuela'") || !alumno.includes("projectXp-Number(old.xp||0)")) {
+  throw new Error("Rayuela: falta la integración de XP idempotente en el host del alumno.");
+}
+if (!codeGs.includes("rayuela: {") || !codeGs.includes("['rayuela','Rayuela'")) {
+  throw new Error("Rayuela: falta el catálogo de Apps Script.");
+}
+if (!adapter.includes("teacher-rayuela-evaluation") || !adapter.includes("Comentarios por escena")) {
+  throw new Error("Rayuela: falta la rúbrica específica del profesor.");
+}
+if (!evaluation.includes("nodeComments:cleanNodeComments(body.nodeComments)")) {
+  throw new Error("Rayuela: la evaluación no conserva comentarios por escena.");
+}
+if (!dashboard.includes("evaluations:(evaluationsResult.data || [])")) {
+  throw new Error("Rayuela: el alumno no recibiría el feedback docente.");
+}
+if (migrations.length !== 1) {
+  throw new Error("Rayuela: debe existir exactamente una migración de alta; encontradas "+migrations.length+".");
+}
+console.log("Integración Rayuela OK · catálogo, XP, rúbrica, feedback y migración única.");
