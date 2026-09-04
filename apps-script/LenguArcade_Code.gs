@@ -48,7 +48,7 @@ const LA_GAME_INTEGRATIONS = {
     integration: 'embedded'
   },
   rayuela: {
-    url: 'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/',
+    url: 'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html',
     integration: 'embedded',
     nombre: 'Rayuela',
     subtitulo: 'Tu historia. Tus decisiones.',
@@ -652,7 +652,7 @@ function seedGames_() {
     ['battlegrafia','Battlegrafia','La aventura de las palabras','RPG','ortografia,gramatica,verbos','beta',1,'#f59e0b','🐉','https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/','RPG de Lengua. Combate contra errores, desbloquea criaturas y guarda progreso en LenguArcade.','dragon'],
     ['maniacgrafia','Maniacgrafia','Atrapa las palabras','Ortografia','ortografia,acentuacion','beta',2,'#d946ef','⚡','','Corrige palabras trampa y mejora tu precision.','neon'],
     ['narratoria','Narratoria','Escribe. Crea. Cuenta.','Escritura','narracion,creatividad,redaccion','beta',3,'#f59e0b','📚','','Construye relatos con cartas, fases y objetivos.','paper'],
-    ['rayuela','Rayuela','Tu historia. Tus decisiones.','Escritura','narracion,creatividad,redaccion,coherencia','beta',8,'#22d3ee','⌗','https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/','Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.','rayuela'],
+    ['rayuela','Rayuela','Tu historia. Tus decisiones.','Escritura','narracion,creatividad,redaccion,coherencia','beta',8,'#22d3ee','⌗','https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html','Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.','rayuela'],
     ['versopolis','Rimópolis','RPG de rimas','Rimas','rimas,poesia,creatividad','beta',4,'#8b5cf6','🎤','','Combate en escenarios de rap y poesia eligiendo rimas correctas.','city'],
     ['scrabble','Scrabble','Palabras en juego','Lexico','lexico,vocabulario,estrategia','aula',5,'#34d399','🔤','','Forma palabras y compite por equipos.','board'],
     ['conjuga_apuesta','Conjuga y Apuesta','Verbos 1 contra 1','Verbos','verbos,morfologia','aula',6,'#fb7185','🎲','','Apuesta puntos conjugando formas verbales.','dice'],
