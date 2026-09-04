@@ -173,5 +173,10 @@ Pruebas mínimas antes de publicar:
 13. Abrir la ficha del alumno en el panel docente y comprobar el bloque Rayuela con escenas, palabras, decisiones, finales, complejidad y errores estructurales.
 14. Verificar que los controles de taller pueden bloquear/desbloquear `rayuela` igual que cualquier otro juego.
 15. Ejecutar `npm run check`; incluye `scripts/check-rayuela.mjs` y debe finalizar sin errores.
+16. En la ficha docente, abrir «Mapa y evaluación»: deben verse las escenas y conexiones del último guardado.
+17. Cambiar nombres/pesos de la rúbrica, puntuar los criterios y guardar. La nota debe persistir como evaluación específica de `rayuela`.
+18. Seleccionar un nodo del mapa, dejar un comentario y guardar la evaluación.
+19. Volver a entrar como alumno: el comentario general y el comentario de esa escena deben aparecer dentro del editor.
+20. Marcar el comentario de escena como revisado, guardar y comprobar desde el panel docente que el proyecto conserva ese estado en el siguiente checkpoint.
 
 Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; A2 y B1 se reencuentran; final bueno, final malo y final secreto. Guardar, recargar, recorrer los tres finales, entregar y abrir desde profesor.
