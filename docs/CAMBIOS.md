@@ -200,3 +200,7 @@ Cada cambio debe indicar:
 - Adaptador `zzzzzzzzz_LenguArcade_rayuela.gs` para catálogo, controles de taller, XP central y resumen específico en la ficha del profesor.
 - Migración Supabase preparada para registrar `rayuela` en el catálogo y `student-dashboard` preparado para abrirlo embebido.
 - La nota final continúa siendo decisión del profesor; las métricas automáticas se usan como evidencias estructurales, no como calificación definitiva.
+- Evaluación específica de Rayuela mediante una rúbrica configurable guardada en `evaluations` con `scope=game`.
+- El panel docente puede abrir el mapa narrativo completo, leer escenas y dejar comentarios generales o asociados a nodos concretos.
+- Los comentarios del profesor vuelven al juego a través del dashboard del alumno; el alumno puede marcarlos como revisados sin modificar la evaluación docente.
+
