@@ -51,7 +51,7 @@ console.log('Rayuela OK · '+checks.length+' contratos · '+scripts.length+' scr
 
 const alumno = fs.readFileSync(path.resolve("apps-script","LenguArcade_Alumno.html"),"utf8");
 const codeGs = fs.readFileSync(path.resolve("apps-script","LenguArcade_Code.gs"),"utf8");
-const adapter = fs.readFileSync(path.resolve("apps-script","zzzzzzzzz_LenguArcade_rayuela.gs"),"utf8");
+const profesor = fs.readFileSync(path.resolve("apps-script","LenguArcade_Profesor.html"),"utf8");
 const evaluation = fs.readFileSync(path.resolve("supabase","functions","teacher-rayuela-evaluation","index.ts"),"utf8");
 const dashboard = fs.readFileSync(path.resolve("supabase","functions","student-dashboard","index.ts"),"utf8");
 const saveProgress = fs.readFileSync(path.resolve("supabase","functions","save-progress","index.ts"),"utf8");
@@ -63,7 +63,7 @@ if (!alumno.includes("gameRecord?.gameId==='rayuela'") || !alumno.includes("proj
 if (!codeGs.includes("rayuela: {") || !codeGs.includes("['rayuela','Rayuela'")) {
   throw new Error("Rayuela: falta el catálogo de Apps Script.");
 }
-if (!adapter.includes("teacher-rayuela-evaluation") || !adapter.includes("Comentarios por escena")) {
+if (!profesor.includes("teacher-rayuela-evaluation") || !profesor.includes("Comentarios por escena") || !profesor.includes("__LA_RAYUELA_TEACHER_PATCH__")) {
   throw new Error("Rayuela: falta la rúbrica específica del profesor.");
 }
 if (!evaluation.includes("nodeComments:cleanNodeComments(body.nodeComments)")) {
