@@ -45,8 +45,8 @@ Deno.serve(async (request) => {
         .select("classrooms(name,legacy_class_code)")
         .eq("profile_id", studentId).eq("active", true).limit(1),
       admin.from("evaluations")
-        .select("score,updated_at")
-        .eq("profile_id", studentId).eq("scope", "general").order("updated_at", { ascending:false }).limit(1),
+        .select("scope,game_id,score,breakdown,updated_at")
+        .eq("profile_id", studentId).order("updated_at", { ascending:false }),
     ]);
     const failure = [
       profileResult.error, gamesResult.error, progressResult.error, eventsResult.error,
@@ -92,6 +92,8 @@ Deno.serve(async (request) => {
       ...(eventsResult.data || []).map(row => row.occurred_at),
     ].filter(Boolean).sort().pop() || "";
     const computedGrade = attempts ? Math.round((successes / attempts) * 100) / 10 : 0;
+    const evaluationRows = evaluationsResult.data || [];
+    const generalEvaluation = evaluationRows.find(row => row.scope === "general");
 
     return jsonResponse({
       ok:true,
@@ -110,7 +112,14 @@ Deno.serve(async (request) => {
         gamesPlayed:rows.filter(row => Number(row.sessions || 0) > 0).length,
         accuracy:attempts ? Math.round((successes / attempts) * 100) : 0,
       },
-      grade:{ score:Number(evaluationsResult.data?.[0]?.score ?? computedGrade) },
+      grade:{ score:Number(generalEvaluation?.score ?? computedGrade) },
+      evaluations:evaluationRows.map(row => ({
+        scope:row.scope,
+        gameId:row.game_id,
+        score:Number(row.score || 0),
+        breakdown:row.breakdown || {},
+        updatedAt:row.updated_at,
+      })),
       lastActivity,
       progress,
       events:(eventsResult.data || []).map(row => ({
