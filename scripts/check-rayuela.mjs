@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
+import path from 'node:path';
 
-const path = new URL('../games/rayuela/index.html', import.meta.url);
-const html = fs.readFileSync(path, 'utf8');
+const htmlPath = new URL('../games/rayuela/index.html', import.meta.url);
+const html = fs.readFileSync(htmlPath, 'utf8');
 const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
   .filter(match => !/type=["']text\/plain/i.test(match[0]))
   .map(match => match[1]);
@@ -25,12 +26,19 @@ const checks = [
   ['guardado local', 'localStorage'],
   ['accesibilidad de movimiento', 'prefers-reduced-motion'],
   ['brújula del autor', 'Brújula del autor'],
-  ['entrega', 'sendSubmissionResult']
+  ['entrega', 'sendSubmissionResult'],
+  ['selección por clic', 'card.onclick=function(e){e.stopPropagation();if(linkMode)'],
+  ['asa exclusiva de arrastre', 'nodeDragHandle'],
+  ['editor sencillo paso 1', 'Escribe la escena'],
+  ['editor sencillo paso 2', 'Da opciones al lector'],
+  ['tema claro', 'Rayuela 1.1 · Light Classroom UX'],
+  ['final rápido', 'toggleEndingBtn']
 ];
 for (const [label, needle] of checks) {
   if (!html.includes(needle)) throw new Error('Rayuela: falta '+label+' ('+needle+')');
 }
 if (/\beval\s*\(/.test(html)) throw new Error('Rayuela no debe usar eval().');
+if (html.includes('card.onpointerdown=function')) throw new Error('Rayuela: el arrastre no debe volver a ocupar toda la tarjeta.');
 
 const achievements = [...html.matchAll(/\{id:"[^"]+",icon:/g)].length;
 if (achievements < 30) throw new Error('Rayuela: se esperaban al menos 30 logros; encontrados '+achievements);
