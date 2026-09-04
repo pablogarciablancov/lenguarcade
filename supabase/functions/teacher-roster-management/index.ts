@@ -293,14 +293,74 @@ async function deleteClass(admin: any, organizationId: string, classroomId: stri
   const profileIds = [...new Set((targetEnrollments || []).map((row: Row) => row.profile_id))];
 
   let orphanIds: string[] = [];
+  const otherByProfile = new Map<string, Row[]>();
   if (profileIds.length) {
     const { data:otherEnrollments, error:otherError } = await admin.from("classroom_enrollments")
-      .select("profile_id,classroom_id")
+      .select("profile_id,classroom_id,active")
       .in("profile_id", profileIds)
       .neq("classroom_id", classroom.id);
     if (otherError) throw otherError;
-    const withOtherClass = new Set((otherEnrollments || []).map((row: Row) => row.profile_id));
-    orphanIds = profileIds.filter(id => !withOtherClass.has(id));
+    for (const row of otherEnrollments || []) {
+      const list = otherByProfile.get(row.profile_id) || [];
+      list.push(row);
+      otherByProfile.set(row.profile_id, list);
+    }
+    orphanIds = profileIds.filter(id => !(otherByProfile.get(id) || []).length);
+
+    const otherClassIds = [...new Set(
+      [...otherByProfile.values()].flat().map((row: Row) => row.classroom_id)
+    )];
+    const classStatus = new Map<string, boolean>();
+    if (otherClassIds.length) {
+      const { data:otherClasses, error:otherClassesError } = await admin.from("classrooms")
+        .select("id,active")
+        .eq("organization_id", organizationId)
+        .in("id", otherClassIds);
+      if (otherClassesError) throw otherClassesError;
+      for (const row of otherClasses || []) classStatus.set(row.id, row.active !== false);
+    }
+
+    const { data:archivedProfiles, error:archivedProfilesError } = await admin.from("profiles")
+      .select("id,active,archive_reason,archived_by_classroom_id")
+      .eq("organization_id", organizationId)
+      .eq("role", "student")
+      .eq("archive_reason", "class")
+      .eq("archived_by_classroom_id", classroom.id)
+      .in("id", profileIds);
+    if (archivedProfilesError) throw archivedProfilesError;
+
+    for (const profile of archivedProfiles || []) {
+      const alternatives = otherByProfile.get(profile.id) || [];
+      if (!alternatives.length) continue;
+      const activeAlternative = alternatives.find((row: Row) =>
+        row.active !== false && classStatus.get(row.classroom_id) === true
+      );
+      if (activeAlternative) {
+        const { error:updateError } = await admin.from("profiles")
+          .update({
+            active:true,
+            archived_at:null,
+            archive_reason:null,
+            archived_by_classroom_id:null,
+            updated_at:new Date().toISOString(),
+          })
+          .eq("id", profile.id)
+          .eq("organization_id", organizationId)
+          .eq("role", "student");
+        if (updateError) throw updateError;
+      } else {
+        const replacementClassId = alternatives[0].classroom_id;
+        const { error:updateError } = await admin.from("profiles")
+          .update({
+            archived_by_classroom_id:replacementClassId,
+            updated_at:new Date().toISOString(),
+          })
+          .eq("id", profile.id)
+          .eq("organization_id", organizationId)
+          .eq("role", "student");
+        if (updateError) throw updateError;
+      }
+    }
   }
 
   const { error:classError } = await admin.from("classrooms")
