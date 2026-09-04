@@ -954,12 +954,14 @@ body.la-teacher-screen-nav #resumen,
 body.la-teacher-screen-nav #alumnos,
 body.la-teacher-screen-nav #juegos,
 body.la-teacher-screen-nav #errores,
+body.la-teacher-screen-nav #gestion,
 body.la-teacher-screen-nav #classroom,
 body.la-teacher-screen-nav #taller{display:none!important}
 body.la-teacher-screen-nav #resumen.la-screen-active,
 body.la-teacher-screen-nav #alumnos.la-screen-active,
 body.la-teacher-screen-nav #juegos.la-screen-active,
 body.la-teacher-screen-nav #errores.la-screen-active,
+body.la-teacher-screen-nav #gestion.la-screen-active,
 body.la-teacher-screen-nav #classroom.la-screen-active,
 body.la-teacher-screen-nav #taller.la-screen-active{display:block!important;animation:laScreenIn .16s ease}
 body.la-teacher-screen-nav #appContent>.layout,
@@ -1080,7 +1082,7 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
 
   function installTeacherNavigation(){
     if(!document.getElementById('appContent')||document.getElementById('inicio'))return false;
-    var allowed=['resumen','taller','alumnos','juegos','errores','classroom'];
+    var allowed=['resumen','taller','alumnos','juegos','errores','gestion','classroom'];
     document.body.classList.add('la-teacher-screen-nav');
     markTeacherGroups();
 
@@ -1095,6 +1097,7 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
       markTeacherGroups();
       activateMenuButton(target);
       try{localStorage.setItem('LA_TEACHER_SCREEN',target);}catch(error){}
+      if(target==='gestion'&&typeof loadRosterState==='function')loadRosterState(true);
       var main=document.querySelector('.main');
       if(main&&typeof main.scrollTo==='function')main.scrollTo({top:0,behavior:'auto'});
       window.scrollTo(0,0);
