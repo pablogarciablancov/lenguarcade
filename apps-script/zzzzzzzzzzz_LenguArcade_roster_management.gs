@@ -29,6 +29,18 @@ function rosterRowObject_(headers, row) {
   return object;
 }
 
+function rosterEnsureStudentArchiveColumns_() {
+  var sheet = getDb_().getSheetByName(LA_CONFIG.SHEETS.ALUMNOS);
+  if (!sheet) return;
+  var lastColumn = Math.max(1, sheet.getLastColumn());
+  var headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0].map(function(value){ return String(value || ''); });
+  ['archivoMotivo','archivoClase','archivadoAt'].forEach(function(header) {
+    if (headers.indexOf(header) !== -1) return;
+    headers.push(header);
+    sheet.getRange(1, headers.length).setValue(header);
+  });
+}
+
 function rosterUpdateRows_(sheetName, predicate, patch) {
   var data = rosterSheetData_(sheetName);
   if (!data) return 0;
@@ -100,29 +112,49 @@ function rosterDeleteStudentReferences_(reference) {
 function applyRosterBackupAction(action, payload) {
   requireRosterManagerTeacher_();
   ensureSheets_();
+  rosterEnsureStudentArchiveColumns_();
   var cleanAction = String(action || '').trim();
   var reference = payload && typeof payload === 'object' ? payload : {};
   var changed = 0;
+  var archiveKey = String(reference.classCode || reference.className || reference.section || '').trim();
 
-  if (cleanAction === 'archiveStudent' || cleanAction === 'restoreStudent') {
+  if (cleanAction === 'archiveStudent') {
     changed = rosterUpdateRows_(
       LA_CONFIG.SHEETS.ALUMNOS,
       rosterStudentPredicate_(reference),
-      {activo:cleanAction === 'restoreStudent'}
+      {activo:false, archivoMotivo:'manual', archivoClase:'', archivadoAt:nowIso_()}
+    );
+  } else if (cleanAction === 'restoreStudent') {
+    changed = rosterUpdateRows_(
+      LA_CONFIG.SHEETS.ALUMNOS,
+      rosterStudentPredicate_(reference),
+      {activo:true, archivoMotivo:'', archivoClase:'', archivadoAt:''}
     );
   } else if (cleanAction === 'deleteStudent') {
     changed = rosterDeleteStudentReferences_(reference);
-  } else if (cleanAction === 'archiveClass' || cleanAction === 'restoreClass') {
-    var active = cleanAction === 'restoreClass';
-    var classPredicate = rosterClassPredicate_(reference);
-    changed += rosterUpdateRows_(LA_CONFIG.SHEETS.CLASES, classPredicate, {activa:active});
+  } else if (cleanAction === 'archiveClass') {
+    var archiveClassPredicate = rosterClassPredicate_(reference);
+    changed += rosterUpdateRows_(LA_CONFIG.SHEETS.CLASES, archiveClassPredicate, {activa:false});
     changed += rosterUpdateRows_(LA_CONFIG.SHEETS.ALUMNOS, function(row){
-      return classPredicate({
+      if (!isTrue_(row.activo)) return false;
+      return archiveClassPredicate({
         classCode:row.clase,
         clase:row.clase,
         nombreVisible:row.clase
       });
-    }, {activo:active});
+    }, {activo:false, archivoMotivo:'class', archivoClase:archiveKey, archivadoAt:nowIso_()});
+  } else if (cleanAction === 'restoreClass') {
+    var restoreClassPredicate = rosterClassPredicate_(reference);
+    changed += rosterUpdateRows_(LA_CONFIG.SHEETS.CLASES, restoreClassPredicate, {activa:true});
+    changed += rosterUpdateRows_(LA_CONFIG.SHEETS.ALUMNOS, function(row){
+      if (!rosterSameText_(row.archivoMotivo, 'class')) return false;
+      if (archiveKey && !rosterSameText_(row.archivoClase, archiveKey)) return false;
+      return restoreClassPredicate({
+        classCode:row.clase,
+        clase:row.clase,
+        nombreVisible:row.clase
+      });
+    }, {activo:true, archivoMotivo:'', archivoClase:'', archivadoAt:''});
   } else if (cleanAction === 'deleteClass') {
     var deleteClassPredicate = rosterClassPredicate_(reference);
     var studentsData = rosterSheetData_(LA_CONFIG.SHEETS.ALUMNOS);
