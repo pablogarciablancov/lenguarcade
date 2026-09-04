@@ -46,6 +46,7 @@ const codeGs = fs.readFileSync(path.resolve("apps-script","LenguArcade_Code.gs")
 const adapter = fs.readFileSync(path.resolve("apps-script","zzzzzzzzz_LenguArcade_rayuela.gs"),"utf8");
 const evaluation = fs.readFileSync(path.resolve("supabase","functions","teacher-rayuela-evaluation","index.ts"),"utf8");
 const dashboard = fs.readFileSync(path.resolve("supabase","functions","student-dashboard","index.ts"),"utf8");
+const saveProgress = fs.readFileSync(path.resolve("supabase","functions","save-progress","index.ts"),"utf8");
 const migrations = fs.readdirSync(path.resolve("supabase","migrations")).filter(name => name.includes("rayuela"));
 
 if (!alumno.includes("gameRecord?.gameId==='rayuela'") || !alumno.includes("projectXp-Number(old.xp||0)")) {
@@ -62,6 +63,9 @@ if (!evaluation.includes("nodeComments:cleanNodeComments(body.nodeComments)")) {
 }
 if (!dashboard.includes("evaluations:(evaluationsResult.data || [])")) {
   throw new Error("Rayuela: el alumno no recibiría el feedback docente.");
+}
+if (!saveProgress.includes("authoritativeRayuelaXp") || !saveProgress.includes('gameId === "rayuela"')) {
+  throw new Error("Rayuela: falta el blindaje server-side del XP y los checkpoints.");
 }
 if (migrations.length !== 1) {
   throw new Error("Rayuela: debe existir exactamente una migración de alta; encontradas "+migrations.length+".");
