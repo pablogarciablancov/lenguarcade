@@ -75,20 +75,12 @@ Deno.serve(async (request) => {
       (criteria.reduce((sum, item) => sum + item.score * item.weight, 0) / totalWeight) * 100,
     ) / 100;
     const now = new Date().toISOString();
-    const nodeComments = Array.isArray(body.nodeComments)
-      ? body.nodeComments.slice(0, 100).map((item: Record<string, unknown>, index) => ({
-          id:cleanText(item?.id || `comment_${index + 1}`, 120),
-          nodeId:cleanText(item?.nodeId, 120),
-          comment:cleanText(item?.comment, 2000),
-        })).filter(item => item.nodeId && item.comment)
-      : [];
     const breakdown = {
       schema:"rayuela-rubric-v1",
       criteria,
       totalWeight,
       overallComment:cleanText(body.overallComment, 4000),
       nodeComments:cleanNodeComments(body.nodeComments),
-      nodeComments,
       projectId:cleanText(body.projectId, 120),
       submissionId:cleanText(body.submissionId, 120),
       evaluatedBy:teacherProfileId,
