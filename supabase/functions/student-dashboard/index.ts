@@ -30,7 +30,7 @@ const integrations: Record<string, { url:string; integration:string }> = {
     integration:"embedded",
   },
   rayuela:{
-    url:"https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/",
+    url:"https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html",
     integration:"embedded",
   },
   entre_lineas:{
