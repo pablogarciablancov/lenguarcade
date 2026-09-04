@@ -125,7 +125,7 @@ function getRayuelaTeacherPatch_() {
       var nodes=project.nodes;
       metrics={
         nodes:nodes.length,
-        words:nodes.reduce(function(total,node){var match=String(node.text||'').trim().match(/\S+/g);return total+(match?match.length:0);},0),
+        words:nodes.reduce(function(total,node){var match=String(node.text||'').trim().match(/\\S+/g);return total+(match?match.length:0);},0),
         choices:nodes.reduce(function(total,node){return total+(Array.isArray(node.choices)?node.choices.filter(function(choice){return !!choice.targetId;}).length:0);},0),
         endings:nodes.filter(function(node){return node.type==='ending'||node.type==='secret';}).length,
         complexity:Math.max(1,Math.min(5,Math.ceil(nodes.length/8))),
