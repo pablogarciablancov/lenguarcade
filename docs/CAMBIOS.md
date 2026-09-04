@@ -197,7 +197,7 @@ Cada cambio debe indicar:
 - Brújula del autor, inspector estructural, métricas de complejidad, más de 30 logros, easter eggs, XP interno, tutorial, plantillas, pruebas desde cualquier escena y colección de finales.
 - Autoguardado local, importar/exportar JSON, deshacer/rehacer y entrega con copia congelada.
 - Integración con el bridge de LenguArcade: INIT/READY, checkpoints, resultados, logros y cierre seguro sin compartir el token con el juego.
-- Integración nativa en el host del alumno para XP/guardado; adaptador `zzzzzzzzz_LenguArcade_rayuela.gs` como compatibilidad para catálogos antiguos y para la ficha/rúbrica específica del profesor.
+- Integración nativa en los hosts de alumno y profesor para XP/guardado, catálogo legacy y ficha/rúbrica específica, sin adaptadores `zz`.
 - Migración Supabase preparada para registrar `rayuela` en el catálogo y `student-dashboard` preparado para abrirlo embebido.
 - Rúbrica docente configurable (criterios, pesos, notas y comentarios), con comentarios por escena que vuelven al editor del alumno como feedback revisable.
 - La nota final continúa siendo decisión del profesor; las métricas automáticas se usan como evidencias estructurales, no como calificación definitiva.
@@ -220,12 +220,12 @@ Cada cambio debe indicar:
 - Eliminados de la portada los textos explicativos sobre el uso de la cuenta institucional y los dominios de alumno/profesor.
 - Eliminado del desplegable «Soy profesor» el texto descriptivo sobre panel docente y modo profe-jugador.
 - Se mantienen intactos el acceso con Google, la validación de sesión, «Entrar como profe-jugador» y «Abrir panel del profesor».
-- Archivo modificado: `apps-script/zz_LenguArcade_entry_and_patches.gs`.
+- La simplificación queda integrada directamente en `apps-script/LenguArcade_Alumno.html`.
 - Riesgo esperado: mínimo; cambio exclusivamente de contenido visual, sin tocar la lógica de autenticación.
 
 
 ## 2026-09-04 · Corrección de publicación bloqueada por Entre Líneas
-- Corregida la construcción del parche docente de Entre Líneas, que contenía comillas sin escapar y hacía inválido `zzzzzzzzzz_LenguArcade_entre_lineas.gs`.
+- Se corrigió el antiguo adaptador docente de Entre Líneas que bloqueaba la publicación. Ese adaptador ha sido eliminado posteriormente al consolidar la arquitectura.
 - El cambio no modifica la mecánica ni los datos de Entre Líneas; solo la generación del HTML del bloque de diagnóstico docente.
 - Verificados todos los bloques JavaScript de `apps-script/`: sin errores de sintaxis.
 
@@ -241,3 +241,21 @@ Cada cambio debe indicar:
 - Se añade respaldo equivalente en Sheets cuando existe una fila legacy relacionada, para evitar que el acceso de respaldo reactive datos antiguos.
 - Nueva Edge Function `teacher-roster-management`, desplegada con JWT obligatorio.
 - Nueva comprobación `scripts/check-roster-management.mjs`, incluida en `npm run check`.
+
+
+## 2026-09-04 · Consolidación completa de Apps Script
+- Eliminada la arquitectura acumulativa basada en archivos `zz_...`, `zzzz_...` y envoltorios sucesivos de `buildLenguArcadeHtmlOutput_`.
+- Las interfaces finales del alumno y del profesor viven directamente en `LenguArcade_Alumno.html` y `LenguArcade_Profesor.html`.
+- La lógica de servidor queda separada por responsabilidad:
+  - `LenguArcade_Code.gs`: núcleo, catálogo, progreso y entrada web.
+  - `LenguArcade_Auth.gs`: autenticación Google, compatibilidad V03 y utilidades de sesión.
+  - `LenguArcade_Workshop.gs`: control del taller, sesiones y permisos temporales.
+  - `LenguArcade_Roster.gs`: respaldo legacy de gestión de clases y alumnado.
+  - `LenguArcade_Classroom.gs`: integración con Google Classroom.
+- Rayuela y Entre Líneas forman parte del catálogo consolidado y ya no sobrescriben dinámicamente `getActiveGames_` ni `findGame_`.
+- La entrada `doGet` utiliza un único constructor de HTML y no inyecta código en tiempo de ejecución.
+- Eliminados nueve archivos legacy `zz...` del proyecto Apps Script.
+- Añadida `scripts/check-consolidated-architecture.mjs` para impedir que vuelva a aparecer una cadena de inyección dinámica o archivos `zz`.
+- `check-syntax.mjs` distingue ahora los IDs del HTML estático de los IDs creados dinámicamente por la interfaz.
+- Se conserva el comportamiento funcional existente: login Google, profe-jugador, navegación por pantallas, taller, sesiones, acceso desde casa, Rayuela, Entre Líneas y Gestión.
+- Riesgo principal: al tratarse de una consolidación amplia, la aceptación final debe comprobar tanto alumno como profesor antes de seguir añadiendo funciones.
