@@ -189,3 +189,19 @@ Cada cambio debe indicar:
 - qué no se ha tocado
 - cómo probarlo
 - posibles riesgos
+
+## 2026-09-04 · Rayuela, aventura narrativa ramificada
+
+- Nuevo juego `games/rayuela/index.html`: editor visual de aventuras con mapa inicial 9×9 ampliable, escenas conectadas, decisiones y múltiples finales.
+- Dos experiencias separadas: modo creador y modo jugador, con inventario, variables, condiciones, capítulos y finales secretos.
+- Brújula del autor, inspector estructural, métricas de complejidad, más de 30 logros, easter eggs, XP interno, tutorial, plantillas, pruebas desde cualquier escena y colección de finales.
+- Autoguardado local, importar/exportar JSON, deshacer/rehacer y entrega con copia congelada.
+- Integración con el bridge de LenguArcade: INIT/READY, checkpoints, resultados, logros y cierre seguro sin compartir el token con el juego.
+- Integración nativa en el host del alumno para XP/guardado; adaptador `zzzzzzzzz_LenguArcade_rayuela.gs` como compatibilidad para catálogos antiguos y para la ficha/rúbrica específica del profesor.
+- Migración Supabase preparada para registrar `rayuela` en el catálogo y `student-dashboard` preparado para abrirlo embebido.
+- Rúbrica docente configurable (criterios, pesos, notas y comentarios), con comentarios por escena que vuelven al editor del alumno como feedback revisable.
+- La nota final continúa siendo decisión del profesor; las métricas automáticas se usan como evidencias estructurales, no como calificación definitiva.
+- Evaluación específica de Rayuela mediante una rúbrica configurable guardada en `evaluations` con `scope=game`.
+- El panel docente puede abrir el mapa narrativo completo, leer escenas y dejar comentarios generales o asociados a nodos concretos.
+- Los comentarios del profesor vuelven al juego a través del dashboard del alumno; el alumno puede marcarlos como revisados sin modificar la evaluación docente.
+

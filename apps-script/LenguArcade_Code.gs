@@ -47,6 +47,16 @@ const LA_GAME_INTEGRATIONS = {
     url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/',
     integration: 'embedded'
   },
+  rayuela: {
+    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/rayuela/',
+    integration: 'embedded',
+    nombre: 'Rayuela',
+    subtitulo: 'Tu historia. Tus decisiones.',
+    categoria: 'Escritura',
+    descripcion: 'Construye una aventura ramificada, prueba sus caminos y crea finales diferentes.',
+    icono: '⌗',
+    estado: 'beta'
+  },
   versopolis: {
     url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/rimopolis/',
     integration: 'embedded',
@@ -642,6 +652,7 @@ function seedGames_() {
     ['battlegrafia','Battlegrafia','La aventura de las palabras','RPG','ortografia,gramatica,verbos','beta',1,'#f59e0b','🐉','https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/','RPG de Lengua. Combate contra errores, desbloquea criaturas y guarda progreso en LenguArcade.','dragon'],
     ['maniacgrafia','Maniacgrafia','Atrapa las palabras','Ortografia','ortografia,acentuacion','beta',2,'#d946ef','⚡','','Corrige palabras trampa y mejora tu precision.','neon'],
     ['narratoria','Narratoria','Escribe. Crea. Cuenta.','Escritura','narracion,creatividad,redaccion','beta',3,'#f59e0b','📚','','Construye relatos con cartas, fases y objetivos.','paper'],
+    ['rayuela','Rayuela','Tu historia. Tus decisiones.','Escritura','narracion,creatividad,redaccion,coherencia','beta',8,'#22d3ee','⌗','https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/rayuela/','Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.','rayuela'],
     ['versopolis','Rimópolis','RPG de rimas','Rimas','rimas,poesia,creatividad','beta',4,'#8b5cf6','🎤','','Combate en escenarios de rap y poesia eligiendo rimas correctas.','city'],
     ['scrabble','Scrabble','Palabras en juego','Lexico','lexico,vocabulario,estrategia','aula',5,'#34d399','🔤','','Forma palabras y compite por equipos.','board'],
     ['conjuga_apuesta','Conjuga y Apuesta','Verbos 1 contra 1','Verbos','verbos,morfologia','aula',6,'#fb7185','🎲','','Apuesta puntos conjugando formas verbales.','dice'],
