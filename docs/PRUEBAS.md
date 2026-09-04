@@ -197,3 +197,10 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 2. Pulsar «Soy profesor» y comprobar que no aparece el párrafo explicativo sobre panel docente/profe-jugador.
 3. Confirmar que siguen funcionando y visibles «Entrar con Google del colegio», «Entrar como profe-jugador» y «Abrir panel del profesor».
 4. Validar que alumno y profesor pueden iniciar sesión exactamente igual que antes.
+
+
+## Publicación tras corrección de Entre Líneas
+1. Ejecutar `npm.cmd run check` y confirmar que no aparece el error `Unexpected identifier 'sub'`.
+2. Ejecutar `npm.cmd run apps:publish -- "Simplifica la pantalla de acceso"`.
+3. Confirmar que el proceso llega hasta `Apps Script publicado en la version ...`.
+4. Abrir el panel docente y verificar que el bloque de diagnóstico de Entre Líneas sigue mostrándose correctamente.
