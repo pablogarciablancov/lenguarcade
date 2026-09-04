@@ -552,14 +552,14 @@ function sendCheckpoint(reason,force){
 }
 function bridgeMetrics(){
   var s=computeStats();var issues=validateStory();
-  return {words:s.words,nodes:s.nodes,choices:s.connectedChoices,endings:s.endings,depth:s.depth,complexity:s.stars,quality:qualityScore(issues,s),submitted:project.status==="submitted",percentage:objectiveState().percent};
+  return {words:s.words,nodes:s.nodes,choices:s.connectedChoices,endings:s.endings,depth:s.depth,complexity:s.stars,quality:qualityScore(issues,s),structuralErrors:issues.filter(function(i){return i.severity==="error";}).length,submitted:project.status==="submitted",percentage:objectiveState().percent};
 }
 function sendSubmissionResult(){
   if(!integrated)return;
   var issues=validateStory(),s=computeStats(),quality=qualityScore(issues,s);
   var ids=Array.from(pendingAchievementIds);
   postToHost("RESULT",{
-    resultId:"rayuela_"+project.id+"_"+Date.now(),outcome:"finished",score:quality*10,totalWords:s.words,correct:Math.max(0,12-issues.filter(function(i){return i.severity==="error";}).length),
+    resultId:"rayuela_"+project.id+"_"+Date.now(),outcome:"submitted",score:quality*10,totalWords:s.words,correct:Math.max(0,12-issues.filter(function(i){return i.severity==="error";}).length),
     errors:issues.length,percentage:objectiveState().percent,xpGain:project.xp,finalGrade:Math.round(quality)/10,achievements:buildAchievementPayload(ids),save:clone(project),
     metrics:bridgeMetrics()
   });
@@ -921,7 +921,7 @@ function openSubmit(){
   $("submitChecklist").innerHTML=checks.map(function(c){return '<div class="fullIssue">'+(c.ok?"✅":"⚠️")+' '+esc(c.text)+'</div>';}).join("")+'<p class="muted" style="font-size:10px">La nota final la decide el profesor. Rayuela solo comprueba la estructura y guarda evidencias del proceso.</p>';$("submitModal").classList.add("open");
 }
 function confirmSubmit(){
-  pushHistory();project.status="submitted";project.submittedAt=now();var snapshot={id:uid("submission"),at:project.submittedAt,project:clone(project),stats:computeStats(),quality:qualityScore(validateStory(),computeStats())};project.submissions.push(snapshot);
+  pushHistory();project.status="submitted";project.submittedAt=now();var frozen=clone(project);frozen.submissions=[];var snapshot={id:uid("submission"),at:project.submittedAt,project:frozen,stats:computeStats(),quality:qualityScore(validateStory(),computeStats())};project.submissions.push(snapshot);
   awardAchievement("submitted");localPersist();renderAll();closeModal("submitModal");sendCheckpoint("submission",true);setTimeout(sendSubmissionResult,350);toast("📬 Aventura entregada","Se ha congelado una versión para evaluación.","achievement");
 }
 function closeModal(id){$(id).classList.remove("open");}
