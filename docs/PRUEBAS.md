@@ -204,3 +204,17 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 2. Ejecutar `npm.cmd run apps:publish -- "Simplifica la pantalla de acceso"`.
 3. Confirmar que el proceso llega hasta `Apps Script publicado en la version ...`.
 4. Abrir el panel docente y verificar que el bloque de diagnóstico de Entre Líneas sigue mostrándose correctamente.
+
+
+## Gestión de clases y alumnado
+1. Entrar en el panel del profesor y comprobar que aparece «Gestión» en la navegación lateral.
+2. Abrir «Gestión»: deben mostrarse clases y alumnos con estado Activo/Archivado, buscador y filtros.
+3. Archivar un alumno de prueba: debe desaparecer del panel activo, permanecer visible como archivado en Gestión y no poder iniciar sesión.
+4. Restaurar ese alumno: debe volver al panel activo y recuperar exactamente su progreso anterior.
+5. Archivar una clase de prueba: la clase debe desaparecer de los filtros activos; los alumnos que solo pertenecen a esa clase deben quedar archivados. Los que también estén en otra clase activa deben conservarse activos.
+6. Restaurar la clase y comprobar que vuelven la clase y sus alumnos.
+7. Pulsar «Eliminar…» sobre un alumno y cancelar o escribir algo distinto de `ELIMINAR`: no debe modificarse ningún dato.
+8. Con un alumno de prueba, confirmar `ELIMINAR`: su perfil y datos asociados deben desaparecer definitivamente.
+9. Con una clase de prueba, confirmar `ELIMINAR`: debe borrarse la clase; los alumnos exclusivos deben borrarse y los compartidos con otra clase deben conservarse.
+10. Ejecutar `npm.cmd run check`: debe incluir «Gestión de clases y alumnado: comprobaciones correctas.».
+11. Publicar Apps Script y volver a probar la sección desde la URL estable del profesor.
