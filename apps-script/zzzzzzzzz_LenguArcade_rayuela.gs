@@ -77,7 +77,7 @@ function getRayuelaStudentPatch_() {
         var currentXp=Math.max(0,num(save.xp,num(result&&result.xpGain,num(result&&result.score,0))));
         var oldXp=Math.max(0,num(old.xp,0));
         var complexity=Math.max(0,num(metrics.complexity,num(metrics.stars,0)));
-        var pct=Math.max(num(old.percentage,0),num(result&&result.percentage,0),Math.min(100,complexity*20));
+        var pct=Math.max(num(old.percentage,0),num(result&&result.percentage,0),num(metrics.percentage,0),Math.min(100,complexity*20));
         return {
           xpDelta:Math.min(600,Math.max(0,currentXp-oldXp)),
           plumasDelta:String(result&&result.outcome||'')==='submitted'?5:0,
@@ -121,6 +121,18 @@ function getRayuelaTeacherPatch_() {
     var raw=readRaw(row),save=raw.save||(raw.rawGameData&&raw.rawGameData.save)||{};
     var metrics=save.metrics||raw.metrics||(raw.rawGameData&&raw.rawGameData.metrics)||{};
     var project=save.project||save||{};
+    if((!metrics.nodes&&!metrics.words)&&project&&Array.isArray(project.nodes)){
+      var nodes=project.nodes;
+      metrics={
+        nodes:nodes.length,
+        words:nodes.reduce(function(total,node){var match=String(node.text||'').trim().match(/\S+/g);return total+(match?match.length:0);},0),
+        choices:nodes.reduce(function(total,node){return total+(Array.isArray(node.choices)?node.choices.filter(function(choice){return !!choice.targetId;}).length:0);},0),
+        endings:nodes.filter(function(node){return node.type==='ending'||node.type==='secret';}).length,
+        complexity:Math.max(1,Math.min(5,Math.ceil(nodes.length/8))),
+        structuralErrors:Number(row.errors||0)
+      };
+    }
+    if(!metrics.structuralErrors)metrics.structuralErrors=Number(row.errors||0);
     if(!metrics.nodes&&!metrics.words&&!row.sessions)return;
     var status=project.status||save.status||'borrador';
     var data=[
