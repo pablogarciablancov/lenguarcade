@@ -66,6 +66,35 @@ const LA_GAME_INTEGRATIONS = {
     descripcion: 'Combate en escenarios de rap y poesia eligiendo rimas correctas.',
     icono: '🎤',
     estado: 'beta'
+  },
+  entre_lineas: {
+    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/',
+    integration: 'embedded',
+    nombre: 'Entre Líneas',
+    subtitulo: 'Agencia de Investigación Lectora',
+    categoria: 'Comprensión lectora',
+    descripcion: 'Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.',
+    icono: '🔎',
+    estado: 'beta'
+  }
+};
+
+const LA_FALLBACK_GAMES = {
+  rayuela: {
+    gameId:'rayuela', nombre:'Rayuela', subtitulo:'Tu historia. Tus decisiones.',
+    categoria:'Escritura', competencias:'narracion,creatividad,redaccion,coherencia,planificacion',
+    estado:'beta', orden:8, color:'#22d3ee', icono:'⌗',
+    url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html',
+    descripcion:'Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.',
+    banner:'rayuela', activo:true
+  },
+  entre_lineas: {
+    gameId:'entre_lineas', nombre:'Entre Líneas', subtitulo:'Agencia de Investigación Lectora',
+    categoria:'Comprensión lectora', competencias:'comprension,inferencia,sintesis,analisis,coherencia,vocabulario',
+    estado:'beta', orden:9, color:'#d7a942', icono:'🔎',
+    url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/',
+    descripcion:'Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.',
+    banner:'entre_lineas', activo:true
   }
 };
 
@@ -85,26 +114,24 @@ const LA_HEADERS = {
 };
 
 function doGet(e) {
-  const page = String((e && e.parameter && e.parameter.page) || 'alumno').toLowerCase();
-  if (page === 'narratoria' && typeof buildExternalRedirectHtmlOutput_ === 'function') {
-    return buildExternalRedirectHtmlOutput_('https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/', 'Narratoria');
+  const params = (e && e.parameter) ? e.parameter : {};
+  const page = String(params.page || params.p || 'alumno').toLowerCase();
+
+  if (page === 'narratoria') {
+    return buildExternalRedirectHtmlOutput_(
+      'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/',
+      'Narratoria'
+    );
   }
-  const isProfesor = page === 'profesor' || page === 'teacher';
-  const file = page === 'profesor' || page === 'teacher'
-    ? 'LenguArcade_Profesor'
-    : page === 'rimopolis' || page === 'versopolis'
-      ? 'Rimopolis_Alumno'
-      : 'LenguArcade_Alumno';
-  const title = page === 'profesor' || page === 'teacher'
-    ? 'LenguArcade - Profesor'
-    : page === 'narratoria'
-      ? 'Narratoria'
-      : page === 'rimopolis' || page === 'versopolis'
-        ? 'Rimópolis'
-        : 'LenguArcade - Alumno';
-  if (typeof buildLenguArcadeHtmlOutput_ === 'function') {
-    return buildLenguArcadeHtmlOutput_(file, title, !isProfesor && file === 'LenguArcade_Alumno');
-  }
+
+  const isTeacher = page === 'profesor' || page === 'profe' || page === 'teacher';
+  const isRimopolis = page === 'rimopolis' || page === 'versopolis';
+  const file = isTeacher ? 'LenguArcade_Profesor' : (isRimopolis ? 'Rimopolis_Alumno' : 'LenguArcade_Alumno');
+  const title = isTeacher ? 'LenguArcade - Profesor' : (isRimopolis ? 'Rimópolis' : 'LenguArcade - Alumno');
+  return buildLenguArcadeHtmlOutput_(file, title);
+}
+
+function buildLenguArcadeHtmlOutput_(file, title) {
   return HtmlService.createHtmlOutputFromFile(file)
     .setTitle(title)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
@@ -680,7 +707,15 @@ function createSession_(type, id) { const token = Utilities.getUuid(); CacheServ
 function requireSession_(token, expectedType) { if (!token) throw new Error('Sesion no iniciada.'); const raw = CacheService.getScriptCache().get('LA_SESSION_' + token); if (!raw) throw new Error('Sesion caducada. Vuelve a entrar.'); const s = JSON.parse(raw); if (s.type !== expectedType) throw new Error('Sesion no valida.'); return s.id; }
 function safeStudent_(s) { return { studentId:s.studentId, nombre:s.nombre, apellidos:s.apellidos, email:s.email, clase:s.clase, curso:s.curso, linea:s.linea, avatar:s.avatar, xpGeneral:Number(s.xpGeneral || 0), nivelGeneral:Number(s.nivelGeneral || 1), plumas:Number(s.plumas || 0), ultimaSesion:s.ultimaSesion || '' }; }
 function publicStudent_(s) { return { studentId:s.studentId, nombre:s.nombre, apellidos:s.apellidos, clase:s.clase, avatar:s.avatar }; }
-function getActiveGames_() { return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS)).filter(g => isTrue_(g.activo)).sort((a,b) => Number(a.orden || 0) - Number(b.orden || 0)); }
+function getActiveGames_() {
+  const games = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS)).filter(g => isTrue_(g.activo)).slice();
+  Object.keys(LA_FALLBACK_GAMES).forEach(gameId => {
+    if (!games.some(game => String(game.gameId || '').toLowerCase() === gameId)) {
+      games.push(Object.assign({}, LA_FALLBACK_GAMES[gameId]));
+    }
+  });
+  return games.sort((a,b) => Number(a.orden || 0) - Number(b.orden || 0));
+}
 function decorateGameIntegration_(game) {
   const integration = LA_GAME_INTEGRATIONS[String(game.gameId || '').toLowerCase()];
   return integration ? Object.assign({}, game, integration) : game;
@@ -709,7 +744,12 @@ function registerStudentLoginFailure_(email, previous) {
   CacheService.getScriptCache().put(studentLoginThrottleKey_(email), JSON.stringify(state), 900);
 }
 function clearStudentLoginFailures_(email) { CacheService.getScriptCache().remove(studentLoginThrottleKey_(email)); }
-function findGame_(gameId) { return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS)).find(g => String(g.gameId) === String(gameId)); }
+function findGame_(gameId) {
+  const clean = String(gameId || '').toLowerCase();
+  const found = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS))
+    .find(g => String(g.gameId || '').toLowerCase() === clean);
+  return found || (LA_FALLBACK_GAMES[clean] ? Object.assign({}, LA_FALLBACK_GAMES[clean]) : null);
+}
 function touchStudent_(studentId) { updateStudent_(studentId, { ultimaSesion:nowIso_() }); }
 function recalculateStudentGeneral_(studentId) { const rows = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.PROGRESO)).filter(r => String(r.studentId) === String(studentId)).map(normalizeProgressRow_); const xp = rows.reduce((a,r) => a + Number(r.xp || 0), 0); const plumas = rows.reduce((a,r) => a + Number(r.plumas || 0), 0); updateStudent_(studentId, { xpGeneral:xp, nivelGeneral:Math.floor(xp / 500) + 1, plumas:plumas, ultimaSesion:nowIso_() }); }
 function buildGeneralProgress_(student, progressRows, games) { const xp = progressRows.reduce((a,r) => a + Number(r.xp || 0), 0); const attempts = progressRows.reduce((a,r) => a + Number(r.attempts || 0), 0); const successes = progressRows.reduce((a,r) => a + Number(r.successes || 0), 0); const sessions = progressRows.reduce((a,r) => a + Number(r.sessions || 0), 0); return { xp:xp, level:Math.floor(xp / 500) + 1, nextLevelXp:(Math.floor(xp / 500) + 1) * 500, levelProgress:Math.round((xp % 500) / 5), plumas:progressRows.reduce((a,r) => a + Number(r.plumas || 0), 0), percentage:Math.round(average_(progressRows.map(r => Number(r.percentage || 0))) || 0), accuracy:attempts ? Math.round((successes / attempts) * 100) : 0, sessions:sessions, gamesPlayed:progressRows.filter(r => Number(r.sessions || 0) > 0).length, totalGames:games.filter(g => String(g.estado).toLowerCase() !== 'proximamente').length }; }
