@@ -1900,5 +1900,806 @@ renderDashboard=function(dashboard){
   mountScrabblePairCodePanel();
 };
 mountScrabblePairCodePanel();
-</script></body>
+</script>
+<script>
+(function(){
+  window.__LA_GOOGLE_LOGIN_CONSOLIDATED__=true;
+  function q(id){return document.getElementById(id);}
+  function baseCall(fn,args){
+    const runner=(typeof studentCallServerBase==='function')?studentCallServerBase:callServer;
+    return runner(fn,args||[]);
+  }
+  function authStatus(message){
+    const status=document.querySelector('#loginCard [data-google-auth-status]')||q('status');
+    if(status)status.textContent=message;
+  }
+  function disable(selector,value){
+    const button=document.querySelector('#loginCard '+selector);
+    if(button)button.disabled=!!value;
+  }
+  async function goToProfesorPanel(){
+    try{
+      authStatus('Abriendo panel del profesor...');
+      const url=await baseCall('getWebAppUrl');
+      window.top.location.href=url+'?page=profesor';
+    }catch(error){
+      authStatus('No se ha podido abrir el panel: '+(error.message||error));
+    }
+  }
+  function normalizeNarratoriaUrl(dashboard){
+    if(!dashboard||!Array.isArray(dashboard.games))return dashboard;
+    dashboard.games=dashboard.games.map(function(game){
+      if(!game||String(game.gameId||'').toLowerCase()!=='narratoria')return game;
+      const copy=Object.assign({},game);
+      copy.url='https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/';
+      copy.embedUrl=copy.url;
+      return copy;
+    });
+    return dashboard;
+  }
+  async function loginGoogleViaSupabase(kind){
+    if(typeof createSupabaseAnonymousSession!=='function'||typeof loadSupabaseDashboard!=='function'||typeof saveSupabaseSession!=='function')return null;
+    const auth=await createSupabaseAnonymousSession();
+    const fn=kind==='teacher'?'loginTeacherPanelWithGoogle':'loginStudentPanelWithGoogle';
+    await baseCall(fn,[auth.access_token]);
+    const dashboard=await loadSupabaseDashboard(auth.access_token);
+    saveSupabaseSession(auth);
+    return {ok:true,source:'supabase',token:auth.access_token,dashboard:dashboard};
+  }
+  function finishGoogleStudentLogin(result,message){
+    if(!result||!result.token||!result.dashboard)throw new Error('El servidor no ha devuelto una sesión válida.');
+    const isSupabase=result.source==='supabase';
+    secureSessionVerified=true;
+    token=result.token;
+    currentDashboard=normalizeNarratoriaUrl(result.dashboard);
+    try{supabaseBackend=isSupabase;}catch(error){}
+    if(isSupabase){
+      try{legacySessionToken='';}catch(error){}
+      localStorage.removeItem('LA_STUDENT_TOKEN');
+      try{localStorage.removeItem(LA_LEGACY_SESSION_KEY);}catch(error){}
+    }else{
+      try{legacySessionToken=token;}catch(error){}
+      localStorage.setItem('LA_STUDENT_TOKEN',token);
+      try{localStorage.setItem(LA_LEGACY_SESSION_KEY,token);}catch(error){}
+      try{localStorage.removeItem(LA_SUPABASE_SESSION_KEY);}catch(error){}
+    }
+    saveCache('LA_DASHBOARD_CACHE',currentDashboard);
+    renderDashboard(currentDashboard);
+    revealStudentApp();
+    setStatus(message||'Sesión iniciada con Google.');
+  }
+  window.secureStudentLogin=async function(){
+    if(busy)return;
+    busy=true;
+    disable('[data-google-student-login]',true);
+    authStatus('Comprobando tu cuenta de Google del colegio...');
+    try{
+      let result=null;
+      try{result=await loginGoogleViaSupabase('student');}catch(supabaseError){console.warn('Login Google Supabase alumno no disponible, usando respaldo.',supabaseError);}
+      if(!result)result=await baseCall('loginWithGoogleAccount',['student']);
+      finishGoogleStudentLogin(result,'Sesión iniciada con Google del colegio.');
+    }catch(error){
+      authStatus(error.message||'No se ha podido iniciar sesión con Google.');
+    }finally{
+      busy=false;
+      disable('[data-google-student-login]',false);
+    }
+  };
+  window.secureTeacherLogin=async function(){
+    if(busy)return;
+    busy=true;
+    disable('[data-google-teacher-player-login]',true);
+    authStatus('Creando o recuperando tu perfil de profe-jugador...');
+    try{
+      let result=null;
+      try{result=await loginGoogleViaSupabase('teacher');}catch(supabaseError){console.warn('Login Google Supabase profe-jugador no disponible, usando respaldo.',supabaseError);}
+      if(!result)result=await baseCall('loginTeacherAsStudentWithGoogle');
+      finishGoogleStudentLogin(result,'Modo profe-jugador activado.');
+    }catch(error){
+      authStatus(error.message||'No se ha podido entrar como profe-jugador.');
+    }finally{
+      busy=false;
+      disable('[data-google-teacher-player-login]',false);
+    }
+  };
+  window.mountGoogleStudentLogin=function(){
+    const card=q('loginCard');
+    if(!card)return;
+    document.body.classList.add('authPending');
+    card.classList.remove('hidden');
+    card.innerHTML=
+      '<div class="authShell">'+
+        '<section class="authWelcome">'+
+          '<div class="authWelcomeLogo" aria-hidden="true"></div>'+
+          '<h1><span class="grad">LenguArcade</span></h1>'+
+          '<p>Tu universo de juegos de Lengua. Entra con la cuenta Google del colegio para guardar tu progreso, tus logros y tu personaje.</p>'+
+        '</section>'+
+        '<section class="authForm" aria-labelledby="googleLoginTitle">'+
+          '<div class="sub">ACCESO DE ALUMNOS</div>'+
+          '<h2 id="googleLoginTitle">Entra en tu cuenta</h2>'+
+          '<span class="authDomain">@alumno.fomento.edu</span>'+
+          '<button type="button" data-google-student-login>Entrar con Google del colegio</button>'+
+          '<div class="teacherAccess">'+
+            '<button type="button" class="teacherToggle" data-teacher-toggle>Soy profesor</button>'+
+            '<div class="teacherPanel" data-teacher-panel>'+
+              '<button type="button" data-google-teacher-player-login>Entrar como profe-jugador</button>'+
+              '<button type="button" class="teacherToggle" data-open-teacher-panel style="margin-top:10px">Abrir panel del profesor</button>'+
+            '</div>'+
+          '</div>'+
+          '<div class="status authStatus" id="status" data-google-auth-status>Elige cómo quieres entrar.</div>'+
+          '<span id="version" hidden></span>'+
+        '</section>'+
+      '</div>';
+    const studentButton=card.querySelector('[data-google-student-login]');
+    const teacherToggle=card.querySelector('[data-teacher-toggle]');
+    const teacherPanel=card.querySelector('[data-teacher-panel]');
+    const teacherPlayerButton=card.querySelector('[data-google-teacher-player-login]');
+    const teacherPanelButton=card.querySelector('[data-open-teacher-panel]');
+    if(studentButton)studentButton.onclick=window.secureStudentLogin;
+    if(teacherToggle&&teacherPanel)teacherToggle.onclick=function(){teacherPanel.classList.toggle('open');};
+    if(teacherPlayerButton)teacherPlayerButton.onclick=window.secureTeacherLogin;
+    if(teacherPanelButton)teacherPanelButton.onclick=goToProfesorPanel;
+  };
+  try{
+    if(token&&currentDashboard){
+      currentDashboard=normalizeNarratoriaUrl(currentDashboard);
+      secureSessionVerified=true;
+      revealStudentApp();
+    }else{
+      mountGoogleStudentLogin();
+    }
+  }catch(error){
+    console.error('No se pudo montar el login Google de LenguArcade',error);
+    authStatus(error.message||String(error));
+  }
+})();
+</script>
+
+<script>
+(function(){
+  if(window.__LA_BATTLEGRAFIA_PROFILE_PATCH__) return;
+  window.__LA_BATTLEGRAFIA_PROFILE_PATCH__ = true;
+  function cleanText(value){return String(value == null ? '' : value).trim();}
+  function isBattlegrafiaGame(game){return String(game && game.gameId || '').toLowerCase() === 'battlegrafia';}
+  function getProfileSource(explicit){return explicit || (window.currentDashboard && window.currentDashboard.student) || (typeof currentDashboard !== 'undefined' && currentDashboard && currentDashboard.student) || {};}
+  function buildLenguArcadeProfile(explicitStudent){
+    const source = getProfileSource(explicitStudent);
+    const nombre = cleanText(source.nombre || source.firstName || source.givenName);
+    const apellidos = cleanText(source.apellidos || source.lastName || source.familyName);
+    const email = cleanText(source.email || source.mail || source.userEmail).toLowerCase();
+    const localPart = email ? email.split('@')[0] : '';
+    const explicitName = cleanText(source.name || source.fullName || source.displayName || source.playerName);
+    const fullName = cleanText(explicitName || [nombre, apellidos].filter(Boolean).join(' ') || localPart || 'Jugador');
+    const studentId = cleanText(source.studentId || source.student_id || source.id || source.profileId || localPart || '');
+    const clase = cleanText(source.clase || source.classCode || source.className || source.group || source.course || '');
+    const isTeacherPlayer = !!(source.teacherPlayer || source.isTeacherPlayer || clase === 'PROFES' || (email && /@fomento\.edu$/i.test(email) && !/@alumno\.fomento\.edu$/i.test(email)));
+    return Object.assign({}, source, {schema:'lenguarcade-profile-v1', source:'LenguArcade', role:isTeacherPlayer?'teacher-player':(source.role||'student'), teacherPlayer:isTeacherPlayer, isTeacherPlayer:isTeacherPlayer, studentId:studentId, student_id:studentId, profileId:studentId, id:studentId, email:email, mail:email, userEmail:email, nombre:nombre||fullName, apellidos:apellidos, name:fullName, fullName:fullName, displayName:fullName, playerName:fullName, username:localPart, clase:clase, classCode:clase, className:clase, group:clase, course:source.curso || source.course || clase});
+  }
+  function enrichInitPayload(payload){
+    const next = Object.assign({}, payload || {});
+    const profile = buildLenguArcadeProfile(next.student || next.profile || next.user);
+    next.student = Object.assign({}, profile, next.student || {});
+    next.profile = Object.assign({}, profile, next.profile || {});
+    next.user = Object.assign({}, profile, next.user || {});
+    next.player = Object.assign({}, profile, next.player || {});
+    next.lenguarcadeProfile = profile;
+    if(next.save && typeof next.save === 'object'){
+      next.save.__lenguarcadeProfile = profile;
+      next.save.lenguarcadeProfile = profile;
+      ['studentId','profileId','email','playerName','name','clase','classCode'].forEach(function(k){ if(!next.save[k]) next.save[k] = profile[k] || profile.playerName || profile.clase || ''; });
+    }
+    return next;
+  }
+  function addBattlegrafiaProfileToUrl(runner){
+    try{
+      if(!runner || !isBattlegrafiaGame(runner.game) || !runner.url) return runner;
+      const profile = buildLenguArcadeProfile();
+      const url = new URL(runner.url);
+      url.searchParams.set('laProfile','1');
+      url.searchParams.set('studentId',profile.studentId||'');
+      url.searchParams.set('profileId',profile.profileId||'');
+      url.searchParams.set('studentName',profile.playerName||'');
+      url.searchParams.set('playerName',profile.playerName||'');
+      url.searchParams.set('studentEmail',profile.email||'');
+      url.searchParams.set('classCode',profile.classCode||'');
+      url.searchParams.set('teacherPlayer',profile.isTeacherPlayer?'1':'0');
+      runner.url = url.toString();
+    }catch(error){console.warn('No se pudo añadir el perfil de LenguArcade a la URL de Battlegrafía.', error);}
+    return runner;
+  }
+  function installPatch(){
+    if(typeof sendToActiveGame === 'function' && !sendToActiveGame.__battlegrafiaProfilePatched){
+      const originalSendToActiveGame = sendToActiveGame;
+      const patchedSendToActiveGame = function(type,payload){
+        let nextPayload = payload || {};
+        try{const runner=(typeof activeGameRunner!=='undefined')?activeGameRunner:null; if(type==='INIT' && runner && isBattlegrafiaGame(runner.game)) nextPayload=enrichInitPayload(nextPayload);}catch(error){console.warn('No se pudo normalizar el perfil para Battlegrafía.', error);}
+        return originalSendToActiveGame(type,nextPayload);
+      };
+      patchedSendToActiveGame.__battlegrafiaProfilePatched = true;
+      sendToActiveGame = patchedSendToActiveGame;
+      window.sendToActiveGame = patchedSendToActiveGame;
+    }
+    if(typeof prepareEmbeddedGame === 'function' && !prepareEmbeddedGame.__battlegrafiaProfilePatched){
+      const originalPrepareEmbeddedGame = prepareEmbeddedGame;
+      const patchedPrepareEmbeddedGame = function(game){return addBattlegrafiaProfileToUrl(originalPrepareEmbeddedGame(game));};
+      patchedPrepareEmbeddedGame.__battlegrafiaProfilePatched = true;
+      prepareEmbeddedGame = patchedPrepareEmbeddedGame;
+      window.prepareEmbeddedGame = patchedPrepareEmbeddedGame;
+    }
+  }
+  installPatch(); setTimeout(installPatch,0); setTimeout(installPatch,250);
+})();
+</script>
+
+<style id="la-workshop-access-style">
+.workshopAccessSummary{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(54,211,153,.08);color:#c8f7e5;font-size:12px;font-weight:800}
+body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
+.game.locked{filter:saturate(.28);opacity:.62}
+.game.locked .play{background:rgba(255,255,255,.12);color:#d8deef;box-shadow:none}
+.workshopPanelHead{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px}
+.workshopPanelHead h2{margin-bottom:5px}
+.workshopToolbar{display:grid;grid-template-columns:minmax(220px,1fr) auto auto;gap:10px;align-items:end;margin-bottom:16px}
+.workshopToolbar .field{min-width:0}
+.workshopGameGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.workshopGameRow{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.14)}
+body.light .workshopGameRow{background:rgba(94,53,177,.04)}
+.workshopGameRow.isClosed{opacity:.67;filter:saturate(.55)}
+.workshopGameIcon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:25px;background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(124,77,255,.2));border:1px solid var(--line)}
+.workshopGameInfo{min-width:0}.workshopGameInfo strong{display:block;font-size:14px}.workshopGameInfo span{display:block;margin-top:3px;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.workshopToggle{width:112px!important;margin:0!important;padding:10px 12px!important;box-shadow:none!important}
+.workshopToggle.isOpen{background:linear-gradient(135deg,#1fa66f,#36d399)!important}.workshopToggle.isClosed{background:linear-gradient(135deg,#586174,#30384a)!important}
+.workshopStatus{min-height:20px;margin-top:12px}.workshopCount{white-space:nowrap;color:var(--muted);font-size:12px}
+@media(max-width:900px){.workshopToolbar{grid-template-columns:1fr 1fr}.workshopToolbar .field{grid-column:1/-1}.workshopGameGrid{grid-template-columns:1fr}}
+@media(max-width:620px){.workshopToolbar{grid-template-columns:1fr}.workshopToolbar .field{grid-column:auto}.workshopGameRow{grid-template-columns:42px minmax(0,1fr)}.workshopGameIcon{width:42px;height:42px}.workshopToggle{grid-column:1/-1;width:100%!important}}
+</style>
+<script>
+(function(){
+  if(window.__LA_WORKSHOP_ACCESS_PATCH__)return;
+  window.__LA_WORKSHOP_ACCESS_PATCH__=true;
+  var ACCESS_CACHE_KEY='LA_WORKSHOP_ACCESS_CACHE_V1';
+  var workshopStudentAccess=null;
+  var workshopTeacherState=null;
+  var workshopTeacherMounted=false;
+  var workshopRefreshTimer=null;
+
+  function workshopCall(name,args){
+    return new Promise(function(resolve,reject){
+      google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[name].apply(null,args||[]);
+    });
+  }
+  function workshopEsc(value){
+    return String(value==null?'':value).replace(/[&<>"]/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char];});
+  }
+  function readWorkshopCache(){
+    try{var value=JSON.parse(localStorage.getItem(ACCESS_CACHE_KEY)||'null');return value&&value.games?value:null;}catch(error){return null;}
+  }
+  function saveWorkshopCache(value){
+    try{localStorage.setItem(ACCESS_CACHE_KEY,JSON.stringify(value));}catch(error){}
+  }
+  function accessForGame(gameId){
+    if(!workshopStudentAccess||!Array.isArray(workshopStudentAccess.games))return null;
+    return workshopStudentAccess.games.find(function(game){return String(game.gameId)===String(gameId);})||null;
+  }
+  function decorateWorkshopGames(games){
+    return (games||[]).map(function(game){
+      var access=accessForGame(game.gameId);
+      if(!access)return game;
+      var copy=Object.assign({},game);
+      copy.workshopEnabled=!!access.enabled;
+      copy.workshopAccessSource=access.accessSource||'';
+      copy.catalogEstado=copy.catalogEstado||copy.estado;
+      if(access.enabled){
+        copy.estado='✅ Disponible hoy';
+      }else{
+        copy.locked=true;
+        copy.estado='🔒 Cerrado hoy';
+        copy.buttonLabel='No disponible hoy';
+      }
+      return copy;
+    });
+  }
+  function updateStudentWorkshopHeader(){
+    var section=document.getElementById('juegos');
+    if(!section||!workshopStudentAccess)return;
+    var head=section.querySelector('.head');
+    var title=head&&head.querySelector('h2');
+    var sub=head&&head.querySelector('.sub');
+    if(title)title.textContent='Juegos del taller';
+    if(sub)sub.textContent=String(workshopStudentAccess.available||0)+' de '+String(workshopStudentAccess.total||0)+' disponibles para tu clase';
+    var existing=document.getElementById('workshopAccessSummary');
+    if(!existing&&head){
+      existing=document.createElement('span');existing.id='workshopAccessSummary';existing.className='workshopAccessSummary';head.appendChild(existing);
+    }
+    if(existing)existing.textContent='🎮 '+String(workshopStudentAccess.available||0)+' abiertos';
+  }
+  function rerenderStudentGames(){
+    try{
+      if(typeof currentDashboard!=='undefined'&&currentDashboard&&Array.isArray(currentDashboard.games)&&typeof renderGames==='function')renderGames(currentDashboard.games);
+    }catch(error){console.warn('No se pudo refrescar el catálogo del taller.',error);}
+    updateStudentWorkshopHeader();
+  }
+  async function refreshStudentWorkshopAccess(silent){
+    try{
+      var result=await workshopCall('getWorkshopAccessForCurrentUser',[]);
+      var changed=JSON.stringify(workshopStudentAccess&&workshopStudentAccess.games||[])!==JSON.stringify(result&&result.games||[]);
+      workshopStudentAccess=result;
+      saveWorkshopCache(result);
+      if(changed||!silent)rerenderStudentGames();
+    }catch(error){
+      if(!silent)console.warn('No se pudo consultar el acceso del taller.',error);
+    }
+  }
+  function installStudentWorkshop(){
+    if(!document.getElementById('games')||typeof renderGames!=='function'||typeof openGame!=='function')return false;
+    workshopStudentAccess=readWorkshopCache();
+    var baseRenderGames=renderGames;
+    renderGames=function(games){
+      var result=baseRenderGames(decorateWorkshopGames(games));
+      updateStudentWorkshopHeader();
+      return result;
+    };
+    var baseOpenGame=openGame;
+    openGame=function(gameId){
+      var access=accessForGame(gameId);
+      if(access&&access.enabled===false){
+        var game=null;
+        try{game=(currentDashboard&&currentDashboard.games||[]).find(function(item){return item.gameId===gameId;});}catch(error){}
+        var title=document.getElementById('gameModalTitle');
+        var text=document.getElementById('gameModalText');
+        if(title)title.textContent=(game&&game.nombre)||'Juego cerrado';
+        if(text)text.textContent='Este juego no está disponible en el taller de hoy. El profesor lo abrirá cuando toque.';
+        var modal=document.getElementById('gameModal');if(modal)modal.classList.add('open');
+        return;
+      }
+      return baseOpenGame(gameId);
+    };
+    if(workshopStudentAccess)rerenderStudentGames();
+    setTimeout(function(){refreshStudentWorkshopAccess(false);},350);
+    workshopRefreshTimer=setInterval(function(){
+      try{if(typeof currentDashboard!=='undefined'&&currentDashboard)refreshStudentWorkshopAccess(true);}catch(error){}
+    },30000);
+    return true;
+  }
+
+  function teacherScope(){
+    var select=document.getElementById('workshopClassSelect');
+    return select?select.value:'*';
+  }
+  function teacherGameLabel(game){
+    if(game.accessSource==='class')return 'Regla propia de esta clase';
+    if(game.accessSource==='general')return teacherScope()==='*'?'Regla general':'Hereda la regla general';
+    return 'Disponible por defecto';
+  }
+  function renderTeacherWorkshopState(state){
+    workshopTeacherState=state;
+    var select=document.getElementById('workshopClassSelect');
+    if(!select)return;
+    var selected=state.scope||'*';
+    var options='<option value="*">Todas las clases · regla general</option>'+(state.classes||[]).map(function(row){return '<option value="'+workshopEsc(row.classCode)+'">'+workshopEsc(row.nombreVisible)+'</option>';}).join('');
+    select.innerHTML=options;
+    if([].slice.call(select.options).some(function(option){return option.value===selected;}))select.value=selected;else select.value='*';
+    localStorage.setItem('LA_WORKSHOP_SCOPE',select.value);
+    var grid=document.getElementById('workshopGameGrid');
+    grid.innerHTML=(state.games||[]).map(function(game){
+      var open=!!game.enabled;
+      return '<div class="workshopGameRow '+(open?'':'isClosed')+'" data-workshop-game="'+workshopEsc(game.gameId)+'">'+
+        '<div class="workshopGameIcon">'+workshopEsc(game.icono||'🎮')+'</div>'+
+        '<div class="workshopGameInfo"><strong>'+workshopEsc(game.nombre)+'</strong><span>'+workshopEsc(teacherGameLabel(game))+'</span></div>'+
+        '<button type="button" class="workshopToggle '+(open?'isOpen':'isClosed')+'" data-workshop-toggle="'+workshopEsc(game.gameId)+'" data-enabled="'+(open?'1':'0')+'">'+(open?'✓ Abierto':'🔒 Cerrado')+'</button>'+
+      '</div>';
+    }).join('')||'<div class="sub">No hay juegos activos en el catálogo.</div>';
+    [].slice.call(grid.querySelectorAll('[data-workshop-toggle]')).forEach(function(button){
+      button.onclick=function(){setTeacherGameAccess(button.dataset.workshopToggle,button.dataset.enabled!=='1',button);};
+    });
+    var count=document.getElementById('workshopCount');
+    if(count)count.textContent=String(state.available||0)+' de '+String(state.total||0)+' abiertos';
+    var status=document.getElementById('workshopStatus');
+    if(status)status.textContent='Cambios guardados · los alumnos actualizan el estado automáticamente.';
+  }
+  async function loadTeacherWorkshopState(scope,showLoading){
+    var status=document.getElementById('workshopStatus');
+    if(showLoading&&status)status.textContent='Cargando accesos...';
+    try{
+      var result=await workshopCall('getWorkshopAccessAdmin',[scope||'*']);
+      renderTeacherWorkshopState(result);
+    }catch(error){
+      if(status)status.textContent='No se pudo cargar el control del taller: '+(error.message||error);
+    }
+  }
+  async function setTeacherGameAccess(gameId,enabled,button){
+    var status=document.getElementById('workshopStatus');
+    if(button)button.disabled=true;
+    if(status)status.textContent='Guardando cambio...';
+    try{
+      var result=await workshopCall('setWorkshopGameAccess',[teacherScope(),gameId,!!enabled]);
+      result.classes=(workshopTeacherState&&workshopTeacherState.classes)||[];
+      renderTeacherWorkshopState(result);
+    }catch(error){
+      if(status)status.textContent='No se pudo guardar: '+(error.message||error);
+      if(button)button.disabled=false;
+    }
+  }
+  async function setTeacherAllAccess(enabled){
+    var status=document.getElementById('workshopStatus');
+    var buttons=[document.getElementById('workshopOpenAll'),document.getElementById('workshopCloseAll')];
+    buttons.forEach(function(button){if(button)button.disabled=true;});
+    if(status)status.textContent=enabled?'Abriendo todos los juegos...':'Cerrando todos los juegos...';
+    try{
+      var result=await workshopCall('setWorkshopAllGamesAccess',[teacherScope(),!!enabled]);
+      result.classes=(workshopTeacherState&&workshopTeacherState.classes)||[];
+      renderTeacherWorkshopState(result);
+    }catch(error){
+      if(status)status.textContent='No se pudo guardar: '+(error.message||error);
+    }finally{
+      buttons.forEach(function(button){if(button)button.disabled=false;});
+    }
+  }
+  function mountTeacherWorkshop(){
+    if(workshopTeacherMounted||!document.getElementById('appContent'))return;
+    workshopTeacherMounted=true;
+    var nav=document.querySelector('.nav');
+    if(nav&&!nav.querySelector('[data-target="taller"]')){
+      var button=document.createElement('button');button.type='button';button.dataset.target='taller';button.textContent='🎛️ Taller';
+      var gamesButton=nav.querySelector('[data-target="juegos"]');nav.insertBefore(button,gamesButton||null);
+      button.onclick=function(){document.getElementById('taller').scrollIntoView({block:'start'});document.querySelectorAll('.nav button').forEach(function(item){item.classList.remove('active');});button.classList.add('active');};
+    }
+    var resumen=document.getElementById('resumen');
+    if(resumen&&!document.getElementById('taller')){
+      resumen.insertAdjacentHTML('afterend','<section id="taller" class="card"><div class="workshopPanelHead"><div><h2>Control del taller</h2><div class="sub">Abre solo las aplicaciones que quieras usar en la sesión. Puedes aplicar una regla general o cambiarla para una clase concreta.</div></div><div class="workshopCount" id="workshopCount"></div></div><div class="workshopToolbar"><div class="field"><label>Aplicar a</label><select id="workshopClassSelect"><option value="*">Todas las clases · regla general</option></select></div><button type="button" id="workshopOpenAll">✓ Abrir todos</button><button type="button" class="dangerAction" id="workshopCloseAll">🔒 Cerrar todos</button></div><div class="workshopGameGrid" id="workshopGameGrid"><div class="sub">Cargando catálogo...</div></div><div class="status workshopStatus" id="workshopStatus"></div></section>');
+      document.getElementById('workshopClassSelect').onchange=function(){loadTeacherWorkshopState(this.value,true);};
+      document.getElementById('workshopOpenAll').onclick=function(){setTeacherAllAccess(true);};
+      document.getElementById('workshopCloseAll').onclick=function(){setTeacherAllAccess(false);};
+    }
+  }
+  function installTeacherWorkshop(){
+    if(!document.getElementById('appContent')||typeof renderTeacher!=='function')return false;
+    mountTeacherWorkshop();
+    var baseRenderTeacher=renderTeacher;
+    renderTeacher=function(data){
+      var result=baseRenderTeacher(data);
+      mountTeacherWorkshop();
+      if(!workshopTeacherState){
+        var remembered=localStorage.getItem('LA_WORKSHOP_SCOPE')||'*';
+        setTimeout(function(){loadTeacherWorkshopState(remembered,false);},0);
+      }
+      return result;
+    };
+    if(typeof currentTeacher!=='undefined'&&currentTeacher){
+      var remembered=localStorage.getItem('LA_WORKSHOP_SCOPE')||'*';
+      loadTeacherWorkshopState(remembered,false);
+    }
+    return true;
+  }
+
+  if(!installStudentWorkshop())installTeacherWorkshop();
+})();
+</script>
+
+<style id="la-workshop-session-style">
+.workshopSessionEditor{margin:0 0 18px;padding:16px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(135deg,rgba(0,212,255,.06),rgba(124,77,255,.08))}
+.workshopSessionTop{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}.workshopSessionTop h3{margin:0 0 4px;font-size:18px}
+.workshopSessionState{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);font-size:11px;font-weight:900;white-space:nowrap}
+.workshopSessionState.open{background:rgba(54,211,153,.12);color:#aef0d4}.workshopSessionState.home{background:rgba(0,212,255,.10);color:#b8f2ff}.workshopSessionState.closed{background:rgba(255,255,255,.06);color:var(--muted)}
+body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionState.home{color:#0d6580}
+.workshopSessionForm{display:grid;grid-template-columns:1fr 160px;gap:10px}.workshopSessionForm .wide{grid-column:1/-1}.workshopSessionForm textarea{width:100%;min-height:74px;resize:vertical;padding:12px 13px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.22);color:var(--text)}body.light .workshopSessionForm textarea{background:#fff}
+.workshopSessionHome{grid-column:1/-1;padding:12px;border:1px dashed var(--line);border-radius:16px}.workshopSessionHomeHead{display:flex;justify-content:space-between;gap:12px;align-items:center}.workshopSessionHomeHead label{display:flex;align-items:center;gap:7px;font-weight:800}.workshopSessionHomeHead input{width:auto}
+.workshopSessionHomeTimes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.workshopGamePicker{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.workshopPick{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.10);cursor:pointer}.workshopPick input{width:18px;height:18px}.workshopPick span{min-width:0}.workshopPick strong{display:block;font-size:13px}.workshopPick small{display:block;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.workshopSessionActions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}.workshopSessionActions button{margin:0!important}.workshopSessionHelp{grid-column:1/-1;color:var(--muted);font-size:11px;line-height:1.45}
+.studentMissionCard{margin:0 0 16px;padding:16px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,rgba(124,77,255,.16),rgba(0,212,255,.10));box-shadow:0 12px 34px rgba(0,0,0,.12)}
+.studentMissionHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.studentMissionHead h2{margin:0 0 5px;font-size:20px}.studentMissionBadge{display:inline-flex;padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900;border:1px solid var(--line);white-space:nowrap}.studentMissionBadge.open{background:rgba(54,211,153,.14)}.studentMissionBadge.home{background:rgba(0,212,255,.14)}.studentMissionBadge.closed{background:rgba(255,255,255,.07);color:var(--muted)}
+.studentMissionMessage{margin-top:10px;line-height:1.5}.studentMissionMeta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.studentMissionMeta span{padding:6px 9px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted)}
+.game.sessionLocked{filter:saturate(.2);opacity:.56}.game.sessionLocked .play{background:rgba(255,255,255,.10)!important;color:#d8deef!important;box-shadow:none!important}
+@media(max-width:760px){.workshopSessionForm{grid-template-columns:1fr}.workshopSessionForm .wide,.workshopSessionHome,.workshopGamePicker,.workshopSessionActions,.workshopSessionHelp{grid-column:auto}.workshopGamePicker,.workshopSessionHomeTimes{grid-template-columns:1fr}.studentMissionHead,.workshopSessionTop{flex-direction:column}}
+</style>
+<script>
+(function(){
+  if(window.__LA_WORKSHOP_SESSION_PATCH__)return;
+  window.__LA_WORKSHOP_SESSION_PATCH__=true;
+
+  var workshopSessionState=null;
+  var teacherSessionBusy=false;
+
+  function sessionCall(name,args){return new Promise(function(resolve,reject){google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[name].apply(null,args||[]);});}
+  function sessionEsc(value){return String(value==null?'':value).replace(/[&<>"]/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char];});}
+  function sessionModeLabel(session){if(!session||!session.published)return 'Sin sesión publicada';if(session.mode==='classroom')return '🟢 Abierta en clase';if(session.mode==='home')return '🏠 Abierta en casa';if(session.homeEnabled&&session.homeStart&&session.homeEnd)return '⏱️ Cerrada · casa programada';return '🔒 Sesión cerrada';}
+  function sessionModeClass(session){if(session&&session.mode==='classroom')return 'open';if(session&&session.mode==='home')return 'home';return 'closed';}
+  function sessionSelected(gameId){var s=workshopSessionState&&workshopSessionState.session;if(!s||!s.published)return null;return Array.isArray(s.gameIds)&&s.gameIds.indexOf(String(gameId))!==-1;}
+  function sessionAllowsGame(gameId){var s=workshopSessionState&&workshopSessionState.session;if(!s||!s.published)return null;return !!(s.active&&sessionSelected(gameId));}
+  function missionWindowText(s){if(!s||!s.homeEnabled||!s.homeStart||!s.homeEnd)return '';return s.homeStart.replace('T',' ')+' → '+s.homeEnd.replace('T',' ');}
+
+  function renderStudentMission(){
+    var section=document.getElementById('juegos');if(!section)return;
+    var existing=document.getElementById('studentMissionCard');var s=workshopSessionState&&workshopSessionState.session;
+    if(!s||!s.published){if(existing)existing.remove();return;}
+    if(!existing){existing=document.createElement('div');existing.id='studentMissionCard';existing.className='studentMissionCard';section.insertBefore(existing,section.firstChild);}
+    var meta=[];if(s.targetXp>0)meta.push('<span>🎯 Objetivo: '+sessionEsc(s.targetXp)+' XP</span>');if(s.gameIds&&s.gameIds.length)meta.push('<span>🎮 '+sessionEsc(s.gameIds.length)+' juegos</span>');if(s.homeEnabled)meta.push('<span>🏠 '+sessionEsc(missionWindowText(s))+'</span>');
+    existing.innerHTML='<div class="studentMissionHead"><div><div class="sub">MISIÓN ACTUAL</div><h2>'+sessionEsc(s.title||'Sesión LenguArcade')+'</h2></div><span class="studentMissionBadge '+sessionModeClass(s)+'">'+sessionEsc(sessionModeLabel(s))+'</span></div>'+(s.message?'<div class="studentMissionMessage">'+sessionEsc(s.message)+'</div>':'')+'<div class="studentMissionMeta">'+meta.join('')+'</div>';
+  }
+
+  function applyStudentSessionToCards(){
+    var s=workshopSessionState&&workshopSessionState.session;renderStudentMission();if(!s||!s.published)return;
+    var games=(typeof currentDashboard!=='undefined'&&currentDashboard&&currentDashboard.games)||[];
+    var cards=[].slice.call(document.querySelectorAll('#games .game'));
+    cards.forEach(function(card,index){
+      var game=games[index];if(!game)return;var allowed=sessionAllowsGame(game.gameId);var button=card.querySelector('.play');var chip=card.querySelector('.chip');
+      card.classList.toggle('sessionLocked',allowed===false);
+      if(allowed===false){if(button){button.disabled=true;button.textContent='No disponible';}if(chip)chip.textContent=s.active?'🔒 Fuera de la misión':'🔒 Sesión cerrada';}
+      else if(allowed===true){if(button&&!game.locked)button.disabled=false;if(chip&&!game.locked)chip.textContent=s.mode==='home'?'🏠 Disponible en casa':'✅ Disponible en la sesión';}
+    });
+  }
+
+  async function refreshStudentSession(silent){
+    try{var result=await sessionCall('getWorkshopSessionForCurrentUser',[]);var before=JSON.stringify(workshopSessionState&&workshopSessionState.session||null);var after=JSON.stringify(result&&result.session||null);workshopSessionState=result;if(before!==after||!silent){if(typeof currentDashboard!=='undefined'&&currentDashboard&&typeof renderGames==='function')renderGames(currentDashboard.games);applyStudentSessionToCards();}}
+    catch(error){if(!silent)console.warn('No se pudo consultar la sesión del taller.',error);}
+  }
+
+  function installStudentSession(){
+    if(!document.getElementById('games')||typeof renderGames!=='function'||typeof openGame!=='function')return false;
+    var baseRenderGames=renderGames;renderGames=function(games){var result=baseRenderGames(games);setTimeout(applyStudentSessionToCards,0);return result;};
+    var baseOpenGame=openGame;openGame=function(gameId){var allowed=sessionAllowsGame(gameId);if(allowed===false){var s=workshopSessionState&&workshopSessionState.session;var title=document.getElementById('gameModalTitle');var text=document.getElementById('gameModalText');if(title)title.textContent=s&&s.title?s.title:'Sesión cerrada';if(text)text.textContent=s&&s.active?'Este juego no forma parte de la misión que el profesor ha abierto.':'LenguArcade está cerrado ahora mismo para esta clase. Podrás entrar cuando el profesor abra la sesión o durante un horario de casa autorizado.';var modal=document.getElementById('gameModal');if(modal)modal.classList.add('open');return;}return baseOpenGame(gameId);};
+    setTimeout(function(){refreshStudentSession(false);},500);setInterval(function(){refreshStudentSession(true);},30000);return true;
+  }
+
+  function teacherCurrentClass(){var select=document.getElementById('workshopClassSelect');var value=select?String(select.value||''):'';return value==='*'?'':value;}
+  function teacherSessionPayload(){var editor=document.getElementById('workshopSessionEditor');return {title:(document.getElementById('workshopSessionTitle')||{}).value||'',message:(document.getElementById('workshopSessionMessage')||{}).value||'',targetXp:Number((document.getElementById('workshopSessionXp')||{}).value||0),homeEnabled:!!((document.getElementById('workshopHomeEnabled')||{}).checked),homeStart:(document.getElementById('workshopHomeStart')||{}).value||'',homeEnd:(document.getElementById('workshopHomeEnd')||{}).value||'',gameIds:editor?[].slice.call(editor.querySelectorAll('[data-session-game]:checked')).map(function(input){return input.value;}):[]};}
+  function setTeacherSessionStatus(text,isError){var status=document.getElementById('workshopSessionStatus');if(status){status.textContent=text||'';status.style.color=isError?'#ff9b9b':'';}}
+  function setTeacherSessionBusy(busy){teacherSessionBusy=!!busy;var editor=document.getElementById('workshopSessionEditor');if(!editor)return;[].slice.call(editor.querySelectorAll('button')).forEach(function(button){button.disabled=!!busy;});}
+
+  function renderTeacherSession(result){
+    var s=result&&result.session;if(!s)return;
+    document.getElementById('workshopSessionTitle').value=s.title||'';document.getElementById('workshopSessionMessage').value=s.message||'';document.getElementById('workshopSessionXp').value=Number(s.targetXp||0);document.getElementById('workshopHomeEnabled').checked=!!s.homeEnabled;document.getElementById('workshopHomeStart').value=s.homeStart||'';document.getElementById('workshopHomeEnd').value=s.homeEnd||'';
+    var state=document.getElementById('workshopSessionState');state.className='workshopSessionState '+sessionModeClass(s);state.textContent=sessionModeLabel(s);
+    var selected={};(s.gameIds||[]).forEach(function(id){selected[String(id)]=true;});var picker=document.getElementById('workshopSessionGames');picker.innerHTML=(s.catalog||[]).map(function(game){return '<label class="workshopPick"><input type="checkbox" data-session-game value="'+sessionEsc(game.gameId)+'" '+(selected[String(game.gameId)]?'checked':'')+'><span><strong>'+sessionEsc((game.icono||'🎮')+' '+game.nombre)+'</strong><small>'+sessionEsc(game.categoria||game.subtitulo||'Juego LenguArcade')+'</small></span></label>';}).join('')||'<div class="sub">No hay juegos activos todavía.</div>';
+    setTeacherSessionBusy(false);document.getElementById('workshopSessionClose').disabled=!s.classroomOpen;document.getElementById('workshopSessionRetire').disabled=!s.published;setTeacherSessionStatus(s.updatedAt?'Guardado · '+s.updatedAt:'Prepara la sesión y guárdala.');
+  }
+
+  async function loadTeacherSession(){var classCode=teacherCurrentClass();var editor=document.getElementById('workshopSessionEditor');if(!editor)return;if(!classCode){setTeacherSessionStatus('Elige una clase concreta arriba para preparar su sesión.');var state=document.getElementById('workshopSessionState');state.className='workshopSessionState closed';state.textContent='Selecciona una clase';return;}setTeacherSessionStatus('Cargando sesión...');try{renderTeacherSession(await sessionCall('getWorkshopSessionAdmin',[classCode]));}catch(error){setTeacherSessionStatus('No se pudo cargar la sesión: '+(error.message||error),true);}}
+  async function saveTeacherSession(mode){if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode){setTeacherSessionStatus('Elige una clase concreta.',true);return;}var payload=teacherSessionPayload();if(!payload.gameIds.length){setTeacherSessionStatus('Selecciona al menos un juego para la misión.',true);return;}setTeacherSessionBusy(true);setTeacherSessionStatus(mode==='open'?'Abriendo la sesión en clase...':'Guardando sesión...');try{var result=mode==='open'?await sessionCall('setWorkshopClassroomSessionOpen',[classCode,true,payload]):await sessionCall('saveWorkshopSession',[classCode,payload]);renderTeacherSession(result);}catch(error){setTeacherSessionBusy(false);setTeacherSessionStatus('No se pudo guardar: '+(error.message||error),true);}}
+  async function closeTeacherSession(){if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode)return;setTeacherSessionBusy(true);setTeacherSessionStatus('Cerrando la sesión en clase...');try{renderTeacherSession(await sessionCall('setWorkshopClassroomSessionOpen',[classCode,false,teacherSessionPayload()]));}catch(error){setTeacherSessionBusy(false);setTeacherSessionStatus('No se pudo cerrar: '+(error.message||error),true);}}
+  async function retireTeacherSession(){if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode)return;setTeacherSessionBusy(true);setTeacherSessionStatus('Retirando sesión...');try{renderTeacherSession(await sessionCall('retireWorkshopSession',[classCode]));}catch(error){setTeacherSessionBusy(false);setTeacherSessionStatus('No se pudo retirar: '+(error.message||error),true);}}
+
+  function mountTeacherSession(){
+    var taller=document.getElementById('taller');if(!taller||document.getElementById('workshopSessionEditor'))return false;var grid=taller.querySelector('.workshopGameGrid');var editor=document.createElement('div');editor.id='workshopSessionEditor';editor.className='workshopSessionEditor';
+    editor.innerHTML='<div class="workshopSessionTop"><div><h3>🎯 Sesión del taller</h3><div class="sub">En clase la abres y cierras tú. En casa solo funciona durante el horario que autorices.</div></div><span id="workshopSessionState" class="workshopSessionState closed">Selecciona una clase</span></div><div class="workshopSessionForm"><div class="field"><label>Título de la misión</label><input id="workshopSessionTitle" type="text" maxlength="80" placeholder="Ej.: Cazadores de tildes"></div><div class="field"><label>Objetivo XP</label><input id="workshopSessionXp" type="number" min="0" step="25" value="0"></div><div class="field wide"><label>Mensaje para los alumnos</label><textarea id="workshopSessionMessage" maxlength="400" placeholder="Qué tienen que hacer hoy, qué pueden elegir o qué reto deben superar."></textarea></div><div class="workshopSessionHome"><div class="workshopSessionHomeHead"><div><strong>🏠 Acceso supervisado en casa</strong><div class="sub">Para tardes, fines de semana o tareas concretas.</div></div><label><input id="workshopHomeEnabled" type="checkbox"> Permitir</label></div><div class="workshopSessionHomeTimes"><div class="field"><label>Desde</label><input id="workshopHomeStart" type="datetime-local"></div><div class="field"><label>Hasta</label><input id="workshopHomeEnd" type="datetime-local"></div></div></div><div class="wide"><label>Juegos de esta misión</label></div><div id="workshopSessionGames" class="workshopGamePicker"><div class="sub">Elige una clase para cargar el catálogo.</div></div><div class="workshopSessionActions"><button type="button" id="workshopSessionSave">💾 Guardar sesión</button><button type="button" id="workshopSessionOpen">▶ Abrir en clase</button><button type="button" id="workshopSessionClose">⏹ Cerrar en clase</button><button type="button" class="dangerAction" id="workshopSessionRetire">Retirar sesión</button></div><div class="workshopSessionHelp">La sesión añade una capa de supervisión al control manual de juegos de abajo. Si está publicada pero cerrada, sus juegos no se pueden abrir. El acceso en casa se activa y caduca automáticamente. Los juegos nuevos aparecerán aquí en cuanto se activen en el catálogo de LenguArcade.</div><div class="status workshopStatus" id="workshopSessionStatus"></div></div>';
+    if(grid)taller.insertBefore(editor,grid);else taller.appendChild(editor);document.getElementById('workshopSessionSave').onclick=function(){saveTeacherSession('save');};document.getElementById('workshopSessionOpen').onclick=function(){saveTeacherSession('open');};document.getElementById('workshopSessionClose').onclick=closeTeacherSession;document.getElementById('workshopSessionRetire').onclick=retireTeacherSession;var select=document.getElementById('workshopClassSelect');if(select)select.addEventListener('change',function(){setTimeout(loadTeacherSession,0);});setTimeout(loadTeacherSession,0);return true;
+  }
+  function installTeacherSession(){var attempts=0;var timer=setInterval(function(){attempts++;if(mountTeacherSession()||attempts>30)clearInterval(timer);},150);return true;}
+
+  if(!installStudentSession())installTeacherSession();
+})();
+</script>
+
+<script>
+(function(){
+  if(window.__LA_WORKSHOP_SESSION_GUARD__)return;
+  window.__LA_WORKSHOP_SESSION_GUARD__=true;
+  if(!document.getElementById('games')||typeof renderGames!=='function')return;
+
+  function enforceManualLocks(){
+    [].slice.call(document.querySelectorAll('#games .game.locked')).forEach(function(card){
+      var button=card.querySelector('.play');
+      var chip=card.querySelector('.chip');
+      if(button){button.disabled=true;button.textContent='No disponible';}
+      if(chip)chip.textContent='🔒 Cerrado por el profesor';
+    });
+  }
+
+  var baseRenderGames=renderGames;
+  renderGames=function(games){
+    var result=baseRenderGames(games);
+    setTimeout(enforceManualLocks,0);
+    return result;
+  };
+  setTimeout(enforceManualLocks,700);
+})();
+</script>
+
+<style id="la-screen-navigation-style">
+@keyframes laScreenIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* Alumno: una pantalla por opción de menú. */
+body.la-screen-nav #inicio,
+body.la-screen-nav #juegos,
+body.la-screen-nav #misiones,
+body.la-screen-nav #ranking,
+body.la-screen-nav #perfil{display:none!important}
+body.la-screen-nav #inicio.la-screen-active{display:grid!important;animation:laScreenIn .16s ease}
+body.la-screen-nav #juegos.la-screen-active,
+body.la-screen-nav #misiones.la-screen-active,
+body.la-screen-nav #ranking.la-screen-active,
+body.la-screen-nav #perfil.la-screen-active{display:block!important;animation:laScreenIn .16s ease}
+body.la-screen-nav .layout{display:none!important}
+body.la-screen-nav[data-la-screen="juegos"] .layout,
+body.la-screen-nav[data-la-screen="misiones"] .layout,
+body.la-screen-nav[data-la-screen="ranking"] .layout{display:block!important}
+body.la-screen-nav[data-la-screen="juegos"] .sidePanels{display:none!important}
+body.la-screen-nav[data-la-screen="misiones"] .sidePanels,
+body.la-screen-nav[data-la-screen="ranking"] .sidePanels{display:block!important}
+body.la-screen-nav[data-la-screen="misiones"] .sidePanels,
+body.la-screen-nav[data-la-screen="ranking"] .sidePanels{width:100%;max-width:none}
+body.la-screen-nav[data-la-screen="perfil"] #perfil{margin-top:0}
+
+/* Profesor: una pantalla por opción de menú. */
+body.la-teacher-screen-nav #resumen,
+body.la-teacher-screen-nav #alumnos,
+body.la-teacher-screen-nav #juegos,
+body.la-teacher-screen-nav #errores,
+body.la-teacher-screen-nav #classroom,
+body.la-teacher-screen-nav #taller{display:none!important}
+body.la-teacher-screen-nav #resumen.la-screen-active,
+body.la-teacher-screen-nav #alumnos.la-screen-active,
+body.la-teacher-screen-nav #juegos.la-screen-active,
+body.la-teacher-screen-nav #errores.la-screen-active,
+body.la-teacher-screen-nav #classroom.la-screen-active,
+body.la-teacher-screen-nav #taller.la-screen-active{display:block!important;animation:laScreenIn .16s ease}
+body.la-teacher-screen-nav #appContent>.layout,
+body.la-teacher-screen-nav #appContent>.cols{display:none!important}
+body.la-teacher-screen-nav[data-la-screen="alumnos"] #appContent>.layout,
+body.la-teacher-screen-nav[data-la-screen="juegos"] #appContent>.layout{display:block!important}
+body.la-teacher-screen-nav[data-la-screen="resumen"] #appContent>[data-la-summary-extra="1"]{display:grid!important}
+body.la-teacher-screen-nav[data-la-screen="errores"] #appContent>[data-la-tools-group="1"],
+body.la-teacher-screen-nav[data-la-screen="classroom"] #appContent>[data-la-tools-group="1"]{display:block!important}
+body.la-teacher-screen-nav #appContent>.layout>.card,
+body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100%;max-width:none}
+
+@media(max-width:1160px){
+  body.la-screen-nav .main,
+  body.la-teacher-screen-nav .main{overflow:visible}
+}
+</style>
+<script>
+(function(){
+  if(window.__LA_SCREEN_NAVIGATION_PATCH__)return;
+  window.__LA_SCREEN_NAVIGATION_PATCH__=true;
+
+  function activateMenuButton(target){
+    var nav=document.querySelector('.nav');
+    if(!nav)return;
+    [].slice.call(nav.querySelectorAll('button[data-target]')).forEach(function(button){
+      button.classList.toggle('active',String(button.dataset.target||'')===String(target||''));
+    });
+  }
+
+  function installNavCapture(showPage){
+    var nav=document.querySelector('.nav');
+    if(!nav||nav.dataset.laScreenNavigation==='1')return;
+    nav.dataset.laScreenNavigation='1';
+    nav.addEventListener('click',function(event){
+      var button=event.target&&event.target.closest?event.target.closest('button[data-target]'):null;
+      if(!button||!nav.contains(button))return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      showPage(button.dataset.target);
+    },true);
+  }
+
+  function installStudentNavigation(){
+    if(!document.getElementById('inicio')||!document.getElementById('games'))return false;
+    var allowed=['inicio','juegos','misiones','ranking','perfil'];
+    document.body.classList.add('la-screen-nav');
+
+    window.laShowStudentScreen=function(target){
+      target=allowed.indexOf(String(target||''))!==-1?String(target):'inicio';
+      document.body.setAttribute('data-la-screen',target);
+      allowed.forEach(function(id){
+        var element=document.getElementById(id);
+        if(element)element.classList.toggle('la-screen-active',id===target);
+      });
+      activateMenuButton(target);
+      try{localStorage.setItem('LA_STUDENT_SCREEN',target);}catch(error){}
+      var main=document.querySelector('.main');
+      if(main&&typeof main.scrollTo==='function')main.scrollTo({top:0,behavior:'auto'});
+      window.scrollTo(0,0);
+    };
+
+    installNavCapture(window.laShowStudentScreen);
+
+    var baseReveal=(typeof window.revealStudentApp==='function')?window.revealStudentApp:null;
+    if(baseReveal&&!baseReveal.__laScreenPatched){
+      var patchedReveal=function(){
+        var result=baseReveal.apply(this,arguments);
+        var target='inicio';
+        try{target=localStorage.getItem('LA_STUDENT_SCREEN')||'inicio';}catch(error){}
+        window.laShowStudentScreen(target);
+        return result;
+      };
+      patchedReveal.__laScreenPatched=true;
+      window.revealStudentApp=patchedReveal;
+      try{revealStudentApp=patchedReveal;}catch(error){}
+    }
+
+    var baseLogout=(typeof window.secureStudentLogout==='function')?window.secureStudentLogout:(typeof secureStudentLogout==='function'?secureStudentLogout:null);
+    if(baseLogout&&!baseLogout.__laGoogleLogoutPatched){
+      var patchedLogout=function(){
+        var result=baseLogout.apply(this,arguments);
+        try{localStorage.setItem('LA_STUDENT_SCREEN','inicio');}catch(error){}
+        window.laShowStudentScreen('inicio');
+        setTimeout(function(){
+          try{
+            if(typeof window.mountGoogleStudentLogin==='function'){
+              window.mountGoogleStudentLogin();
+              var status=document.querySelector('#loginCard [data-google-auth-status]');
+              if(status)status.textContent='Sesión cerrada. Entra de nuevo con tu cuenta Google del colegio.';
+            }
+          }catch(error){console.warn('No se pudo reconstruir el acceso Google tras salir.',error);}
+        },0);
+        return result;
+      };
+      patchedLogout.__laGoogleLogoutPatched=true;
+      window.secureStudentLogout=patchedLogout;
+      try{secureStudentLogout=patchedLogout;}catch(error){}
+      try{logout=patchedLogout;}catch(error){}
+      var logoutButton=document.getElementById('logoutBtn');
+      if(logoutButton)logoutButton.onclick=patchedLogout;
+    }
+
+    window.laShowStudentScreen('inicio');
+    return true;
+  }
+
+  function markTeacherGroups(){
+    var app=document.getElementById('appContent');
+    if(!app)return;
+    var cols=[];
+    [].slice.call(app.children).forEach(function(child){
+      if(child.classList&&child.classList.contains('cols'))cols.push(child);
+    });
+    if(cols[0])cols[0].setAttribute('data-la-summary-extra','1');
+    if(cols[1])cols[1].setAttribute('data-la-tools-group','1');
+  }
+
+  function installTeacherNavigation(){
+    if(!document.getElementById('appContent')||document.getElementById('inicio'))return false;
+    var allowed=['resumen','taller','alumnos','juegos','errores','classroom'];
+    document.body.classList.add('la-teacher-screen-nav');
+    markTeacherGroups();
+
+    window.laShowTeacherScreen=function(target){
+      target=allowed.indexOf(String(target||''))!==-1?String(target):'resumen';
+      if(target==='taller'&&!document.getElementById('taller'))target='resumen';
+      document.body.setAttribute('data-la-screen',target);
+      allowed.forEach(function(id){
+        var element=document.getElementById(id);
+        if(element)element.classList.toggle('la-screen-active',id===target);
+      });
+      markTeacherGroups();
+      activateMenuButton(target);
+      try{localStorage.setItem('LA_TEACHER_SCREEN',target);}catch(error){}
+      var main=document.querySelector('.main');
+      if(main&&typeof main.scrollTo==='function')main.scrollTo({top:0,behavior:'auto'});
+      window.scrollTo(0,0);
+    };
+
+    installNavCapture(window.laShowTeacherScreen);
+    var target='resumen';
+    try{target=localStorage.getItem('LA_TEACHER_SCREEN')||'resumen';}catch(error){}
+    window.laShowTeacherScreen(target);
+
+    var app=document.getElementById('appContent');
+    if(app&&typeof MutationObserver!=='undefined'){
+      var observer=new MutationObserver(function(){
+        markTeacherGroups();
+        var current=document.body.getAttribute('data-la-screen')||'resumen';
+        if(current==='taller'&&document.getElementById('taller'))window.laShowTeacherScreen('taller');
+      });
+      observer.observe(app,{childList:true});
+    }
+    return true;
+  }
+
+  if(!installStudentNavigation())installTeacherNavigation();
+})();
+</script>
+
+<script>
+(function(){
+if(window.__LA_ENTRE_LINEAS_STUDENT_PATCH__)return;window.__LA_ENTRE_LINEAS_STUDENT_PATCH__=true;
+if(typeof LA_EMBEDDED_GAME_OVERRIDES==='object'){LA_EMBEDDED_GAME_OVERRIDES.entre_lineas={url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/',integration:'embedded',estado:'beta',nombre:'Entre Líneas',subtitulo:'Agencia de Investigación Lectora',categoria:'Comprensión lectora',descripcion:'Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.',icono:'🔎'};}
+if(typeof buildCentralProgress==='function'){var base=buildCentralProgress;buildCentralProgress=function(result,gameRecord){
+if(gameRecord&&gameRecord.gameId==='entre_lineas'){var old=gameRecord.progress||{},m=result.metrics||{};var correct=Math.max(0,Number(result.correct||0)),errors=Math.max(0,Number(result.errors||0));var attempts=Number(old.attempts||0)+correct+errors,successes=Number(old.successes||0)+correct,totalErrors=Number(old.errors||0)+errors;var accuracy=attempts?Math.round(successes/attempts*100):Number(old.accuracy||0);var percentage=Math.max(Number(old.percentage||0),Math.max(0,Math.min(100,Number(result.percentage||0))));var xpDelta=Math.min(500,Math.max(0,Number(result.xpGain||0)));var score=Math.max(0,Math.min(100,Number(m.taskScore||0)));return {xpDelta:xpDelta,plumasDelta:result.outcome==='solved'?Math.max(1,Math.min(8,Math.round(score/25))):0,percentage:percentage,accuracy:accuracy,attempts:attempts,successes:successes,errors:totalErrors,streak:Math.max(Number(old.streak||0),Number(m.keyConnections||0))};}
+return base(result,gameRecord);};}
+})();
+</script>
+</body>
 </html>
