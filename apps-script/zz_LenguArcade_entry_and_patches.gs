@@ -220,20 +220,17 @@ function getAlumnoOriginalGoogleLoginPatch_() {
         '<section class="authForm" aria-labelledby="googleLoginTitle">'+
           '<div class="sub">ACCESO DE ALUMNOS</div>'+
           '<h2 id="googleLoginTitle">Entra en tu cuenta</h2>'+
-          '<p class="sub">Usa tu cuenta institucional de Google. No tienes que elegir clase, alumno ni PIN.</p>'+
           '<span class="authDomain">@alumno.fomento.edu</span>'+
           '<button type="button" data-google-student-login>Entrar con Google del colegio</button>'+
           '<div class="teacherAccess">'+
             '<button type="button" class="teacherToggle" data-teacher-toggle>Soy profesor</button>'+
             '<div class="teacherPanel" data-teacher-panel>'+
-              '<p>Como profesor puedes abrir el panel docente o entrar como jugador con tu propio progreso dentro de LenguArcade.</p>'+
               '<button type="button" data-google-teacher-player-login>Entrar como profe-jugador</button>'+
               '<button type="button" class="teacherToggle" data-open-teacher-panel style="margin-top:10px">Abrir panel del profesor</button>'+
             '</div>'+
           '</div>'+
           '<div class="status authStatus" id="status" data-google-auth-status>Elige cómo quieres entrar.</div>'+
           '<span id="version" hidden></span>'+
-          '<div class="authSecurity"><span>✓</span><span>La sesión se valida con la cuenta Google activa del colegio. Los alumnos entran con @alumno.fomento.edu y los profesores con @fomento.edu.</span></div>'+
         '</section>'+
       '</div>';
     const studentButton=card.querySelector('[data-google-student-login]');
