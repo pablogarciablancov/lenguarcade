@@ -18,8 +18,9 @@
     table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted)}tr.studentRow{cursor:pointer}tr.studentRow:hover td{background:rgba(124,77,255,.12)}.bar{height:9px;background:rgba(255,255,255,.13);border-radius:999px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,var(--secondary),var(--primary),var(--danger))}
     .box{border:1px solid var(--line);border-radius:16px;padding:11px;background:rgba(0,0,0,.15);margin-bottom:9px}.boxHead{display:flex;justify-content:space-between;gap:12px}.gameMini{position:relative;overflow:hidden;min-height:92px;border-radius:18px;border:1px solid var(--line);margin-bottom:10px;background-image:linear-gradient(90deg,rgba(0,0,0,.68),rgba(0,0,0,.18)),var(--img);background-size:cover;background-position:center;padding:12px;display:flex;align-items:flex-end}.gameMini strong{font-size:16px;text-shadow:0 2px 10px #000}.gameMini span{display:block;color:#e5edff;font-size:12px;text-shadow:0 2px 8px #000}.status{white-space:pre-wrap;color:var(--muted);font-size:13px}.hidden{display:none!important}
     .loader,.modal{position:fixed;inset:0;background:rgba(5,7,18,.76);backdrop-filter:blur(10px);z-index:50;display:none;align-items:center;justify-content:center;padding:20px}.loader.open,.modal.open{display:flex}.loaderBox,.dialog{width:min(560px,96vw);background:var(--surface);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);padding:24px}.loaderTitle{font-size:22px;font-weight:900}.loaderBar{height:14px;background:rgba(255,255,255,.13);border-radius:999px;overflow:hidden;margin:18px 0 8px}.loaderFill{height:100%;width:35%;background:linear-gradient(90deg,var(--secondary),var(--accent),var(--primary));animation:loading 1.1s ease-in-out infinite alternate}.dialog{width:min(850px,96vw);max-height:86vh;overflow:auto}.dialogHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.closeX{width:auto;background:rgba(255,255,255,.08);border:1px solid var(--line);box-shadow:none;color:var(--text)}
-    .studentDetailGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.detailItem{border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.15);padding:12px}.detailItem b{display:block;font-size:22px;overflow-wrap:anywhere}.progressList{display:grid;grid-template-columns:1fr 1fr;gap:10px}.studentDetailSection{margin-top:20px}.detailTimeline{display:grid;gap:8px}.detailMeta{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.detailMeta time{white-space:nowrap;color:var(--muted);font-size:12px}.credentials{max-height:220px;overflow:auto;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.18);font:12px ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap}.coursePicker{display:grid;gap:9px;margin:18px 0}.courseChoice{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(0,0,0,.14);cursor:pointer}.courseChoice input{width:18px;height:18px;margin:2px 0}.courseChoice strong,.courseChoice span{display:block}.courseChoice span{color:var(--muted);font-size:12px;margin-top:3px}
-    @keyframes loading{to{width:88%;transform:translateX(12%)}}@media(max-width:1160px){body{overflow:auto}.app{height:auto;grid-template-columns:1fr}.nav{display:flex;gap:8px;overflow:auto}.nav button{white-space:nowrap}.layout,.cols{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}.railFooter{grid-template-columns:1fr 1fr}}@media(max-width:760px){.top{flex-direction:column;align-items:flex-start}.kpis,.loginGrid,.filters,.studentDetailGrid,.progressList{grid-template-columns:1fr}table{min-width:820px}.detailMeta{display:block}.detailMeta time{display:block;margin-top:5px;white-space:normal}}
+    .rosterHead{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}.rosterSummary{display:flex;gap:8px;flex-wrap:wrap}.rosterPill{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(124,77,255,.08);font-size:12px;font-weight:800}.rosterToolbar{display:grid;grid-template-columns:minmax(220px,1.5fr) minmax(170px,.8fr) minmax(170px,.8fr);gap:10px;margin:16px 0}.rosterGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.rosterCard{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(0,0,0,.12)}body.light .rosterCard{background:rgba(255,255,255,.72)}.rosterCardTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.rosterBadge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:900;background:rgba(54,211,153,.12);color:#78e8bd}.rosterBadge.archived{background:rgba(255,184,77,.13);color:#ffd08a}.rosterActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.rosterActions button{width:auto;padding:8px 10px;font-size:12px}.rosterDanger{background:rgba(255,88,113,.12)!important;border:1px solid rgba(255,88,113,.35)!important;color:#ff9aaa!important;box-shadow:none!important}.rosterTableWrap{overflow:auto;margin-top:12px}.rosterTableWrap table{min-width:880px}.rosterTableWrap td:last-child{white-space:nowrap}.rosterEmpty{padding:18px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center}
+        .studentDetailGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.detailItem{border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.15);padding:12px}.detailItem b{display:block;font-size:22px;overflow-wrap:anywhere}.progressList{display:grid;grid-template-columns:1fr 1fr;gap:10px}.studentDetailSection{margin-top:20px}.detailTimeline{display:grid;gap:8px}.detailMeta{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.detailMeta time{white-space:nowrap;color:var(--muted);font-size:12px}.credentials{max-height:220px;overflow:auto;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.18);font:12px ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap}.coursePicker{display:grid;gap:9px;margin:18px 0}.courseChoice{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(0,0,0,.14);cursor:pointer}.courseChoice input{width:18px;height:18px;margin:2px 0}.courseChoice strong,.courseChoice span{display:block}.courseChoice span{color:var(--muted);font-size:12px;margin-top:3px}
+    @keyframes loading{to{width:88%;transform:translateX(12%)}}@media(max-width:1160px){.rosterGrid{grid-template-columns:1fr}.rosterToolbar{grid-template-columns:1fr}body{overflow:auto}.app{height:auto;grid-template-columns:1fr}.nav{display:flex;gap:8px;overflow:auto}.nav button{white-space:nowrap}.layout,.cols{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}.railFooter{grid-template-columns:1fr 1fr}}@media(max-width:760px){.top{flex-direction:column;align-items:flex-start}.kpis,.loginGrid,.filters,.studentDetailGrid,.progressList{grid-template-columns:1fr}table{min-width:820px}.detailMeta{display:block}.detailMeta time{display:block;margin-top:5px;white-space:normal}}
   </style>
 <!-- LA_ASSET_FALLBACK_V1: GitHub Raw primary, jsDelivr automatic fallback -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
@@ -116,6 +117,7 @@
         <button type="button" data-target="alumnos">Alumnos</button>
         <button type="button" data-target="juegos">Juegos</button>
         <button type="button" data-target="errores">Errores</button>
+        <button type="button" data-target="gestion">Gestión</button>
         <button type="button" data-target="classroom">Classroom</button>
       </nav>
       <div class="railFooter">
@@ -173,6 +175,31 @@
           <div class="card"><h2>Alumno en foco</h2><div id="focus"></div></div>
           <div class="card"><h2>Recomendaciones</h2><div id="recommendations"></div></div>
         </section>
+        <section class="card" id="gestion">
+          <div class="rosterHead">
+            <div>
+              <h2>Gestión de clases y alumnado</h2>
+              <div class="sub">Archiva para limpiar el curso sin perder datos. Usa la eliminación definitiva solo cuando quieras borrar también el historial.</div>
+            </div>
+            <div class="rosterSummary" id="rosterSummary"></div>
+          </div>
+          <div class="status" id="rosterStatus">Pulsa «Gestión» para cargar clases y alumnos.</div>
+          <h3 style="margin-top:18px">Clases</h3>
+          <div class="rosterGrid" id="rosterClasses"><div class="rosterEmpty">Todavía no se han cargado las clases.</div></div>
+          <h3 style="margin-top:22px">Alumnos</h3>
+          <div class="rosterToolbar">
+            <input id="rosterSearch" type="search" placeholder="Buscar por nombre o correo">
+            <select id="rosterClassFilter"><option value="">Todas las clases</option></select>
+            <select id="rosterStatusFilter"><option value="all">Activos y archivados</option><option value="active">Solo activos</option><option value="archived">Solo archivados</option></select>
+          </div>
+          <div class="rosterTableWrap">
+            <table>
+              <thead><tr><th>Alumno</th><th>Clase</th><th>Estado</th><th>Origen</th><th>Acciones</th></tr></thead>
+              <tbody id="rosterStudentsBody"><tr><td colspan="5"><div class="rosterEmpty">Pulsa «Gestión» para cargar el listado.</div></td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
         <section class="cols">
           <div class="card" id="errores"><h2>Análisis de errores</h2><div id="errors"></div></div>
           <div class="card" id="classroom">
@@ -213,6 +240,7 @@
     const BANNERS={battlegrafia:'battlegrafia-banner.jpg',maniacgrafia:'maniacgrafia-banner.jpg',narratoria:'narratoria-banner.jpg',versopolis:'versopolis-banner.jpg',scrabble:'scrabble-banner.jpg',conjuga_apuesta:'conjuga-apuesta-banner.jpg',verb_battle:'verb-battle-banner.jpg'};
     const $=id=>document.getElementById(id);
     let session=null,currentTeacher=null,busy=false;
+    let rosterState={classes:[],students:[],summary:{}};
 
     function esc(value){return String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));}
     function bannerUrl(id){return ASSET_BASE+(BANNERS[id]||'maniacgrafia-banner.jpg');}
@@ -361,12 +389,148 @@
       finally{setBusy(false);}
     }
 
+    function rosterClassLabel(row){return [row?.name,row?.section].filter(Boolean).join(' · ');}
+    function rosterMembershipLabel(row){return [row?.name,row?.section].filter(Boolean).join(' · ');}
+    function rosterStatus(text){if($('rosterStatus'))$('rosterStatus').textContent=text||'';}
+    function rosterActionName(action){return ({archiveStudent:'Archivar alumno',restoreStudent:'Restaurar alumno',deleteStudent:'Eliminar alumno',archiveClass:'Archivar clase',restoreClass:'Restaurar clase',deleteClass:'Eliminar clase'})[action]||action;}
+    function rosterIsDelete(action){return action==='deleteStudent'||action==='deleteClass';}
+
+    function renderRosterSummary(){
+      const summary=rosterState.summary||{};
+      $('rosterSummary').innerHTML=
+        `<span class="rosterPill">🏫 ${Number(summary.activeClasses||0)} clases activas</span>
+         <span class="rosterPill">📦 ${Number(summary.archivedClasses||0)} archivadas</span>
+         <span class="rosterPill">👤 ${Number(summary.activeStudents||0)} alumnos activos</span>
+         <span class="rosterPill">🗄️ ${Number(summary.archivedStudents||0)} archivados</span>`;
+    }
+
+    function bindRosterActionButtons(root){
+      root.querySelectorAll('[data-roster-action]').forEach(button=>{
+        button.onclick=()=>performRosterAction(button.dataset.rosterAction,button.dataset.rosterId);
+      });
+    }
+
+    function renderRosterClasses(){
+      const rows=rosterState.classes||[];
+      $('rosterClasses').innerHTML=rows.length?rows.map(row=>{
+        const archived=!row.active;
+        return `<article class="rosterCard">
+          <div class="rosterCardTop">
+            <div><strong>${esc(rosterClassLabel(row)||'Clase')}</strong><div class="sub">${Number(row.studentCount||0)} alumnos${row.lastSyncedAt?' · última sincronización '+esc(formatDate(row.lastSyncedAt)):''}</div></div>
+            <span class="rosterBadge ${archived?'archived':''}">${archived?'Archivada':'Activa'}</span>
+          </div>
+          <div class="rosterActions">
+            ${archived?`<button type="button" class="ghost" data-roster-action="restoreClass" data-roster-id="${esc(row.id)}">Restaurar</button>`:`<button type="button" class="ghost" data-roster-action="archiveClass" data-roster-id="${esc(row.id)}">Archivar</button>`}
+            <button type="button" class="rosterDanger" data-roster-action="deleteClass" data-roster-id="${esc(row.id)}">Eliminar definitivamente…</button>
+          </div>
+        </article>`;
+      }).join(''):'<div class="rosterEmpty">No hay clases registradas.</div>';
+      bindRosterActionButtons($('rosterClasses'));
+    }
+
+    function filteredRosterStudents(){
+      const query=String($('rosterSearch').value||'').trim().toLowerCase();
+      const classId=String($('rosterClassFilter').value||'');
+      const status=String($('rosterStatusFilter').value||'all');
+      return (rosterState.students||[]).filter(row=>{
+        const text=(row.name+' '+row.email+' '+(row.classes||[]).map(rosterMembershipLabel).join(' ')).toLowerCase();
+        if(query&&!text.includes(query))return false;
+        if(classId&&!(row.classes||[]).some(item=>item.id===classId))return false;
+        if(status==='active'&&!row.active)return false;
+        if(status==='archived'&&row.active)return false;
+        return true;
+      });
+    }
+
+    function renderRosterStudents(){
+      const rows=filteredRosterStudents();
+      $('rosterStudentsBody').innerHTML=rows.length?rows.map(row=>{
+        const memberships=(row.classes||[]).map(rosterMembershipLabel).filter(Boolean).map(esc).join('<br>')||'Sin clase';
+        return `<tr>
+          <td><strong>${esc(row.name||'Alumno')}</strong><br><span class="sub">${esc(row.email)}</span></td>
+          <td>${memberships}</td>
+          <td><span class="rosterBadge ${!row.active?'archived':''}">${row.active?'Activo':'Archivado'}</span></td>
+          <td>${esc(row.source||'')}</td>
+          <td><div class="rosterActions" style="margin-top:0">
+            ${row.active?`<button type="button" class="ghost" data-roster-action="archiveStudent" data-roster-id="${esc(row.id)}">Archivar</button>`:`<button type="button" class="ghost" data-roster-action="restoreStudent" data-roster-id="${esc(row.id)}">Restaurar</button>`}
+            <button type="button" class="rosterDanger" data-roster-action="deleteStudent" data-roster-id="${esc(row.id)}">Eliminar…</button>
+          </div></td>
+        </tr>`;
+      }).join(''):'<tr><td colspan="5"><div class="rosterEmpty">No hay alumnos que coincidan con el filtro.</div></td></tr>';
+      bindRosterActionButtons($('rosterStudentsBody'));
+    }
+
+    function renderRosterFilters(){
+      const selected=$('rosterClassFilter').value;
+      $('rosterClassFilter').innerHTML='<option value="">Todas las clases</option>'+(rosterState.classes||[]).map(row=>`<option value="${esc(row.id)}">${esc(rosterClassLabel(row))}${row.active?'':' · archivada'}</option>`).join('');
+      if([...$('rosterClassFilter').options].some(option=>option.value===selected))$('rosterClassFilter').value=selected;
+    }
+
+    function renderRoster(){
+      renderRosterSummary();
+      renderRosterFilters();
+      renderRosterClasses();
+      renderRosterStudents();
+    }
+
+    function rosterBackupPayload(action,target){
+      if(action.includes('Student'))return {studentId:target.id,email:target.email,name:target.name};
+      return {classCode:target.classCode,id:target.id,className:target.name,section:target.section};
+    }
+
+    async function loadRosterState(showMessage=false){
+      if(showMessage)rosterStatus('Cargando clases y alumnado…');
+      try{
+        rosterState=await edge('teacher-roster-management',{action:'list'});
+        renderRoster();
+        rosterStatus('Los elementos archivados conservan sus datos y pueden restaurarse.');
+      }catch(error){
+        rosterStatus('No se pudo cargar la gestión: '+(error.message||error));
+      }
+    }
+
+    async function performRosterAction(action,targetId){
+      const student=action.includes('Student')?(rosterState.students||[]).find(row=>row.id===targetId):null;
+      const classroom=action.includes('Class')?(rosterState.classes||[]).find(row=>row.id===targetId):null;
+      const target=student||classroom;
+      if(!target)return;
+      const label=student?(student.name||student.email):rosterClassLabel(classroom);
+      let confirmText='';
+      if(rosterIsDelete(action)){
+        const warning=action==='deleteClass'
+          ?`Vas a eliminar definitivamente la clase «${label}». También se borrarán los alumnos que solo pertenezcan a esa clase. Los alumnos presentes en otra clase se conservarán.\n\nEscribe ELIMINAR para continuar.`
+          :`Vas a eliminar definitivamente a «${label}» y todo su progreso, logros, partidas y evaluaciones.\n\nEscribe ELIMINAR para continuar.`;
+        confirmText=window.prompt(warning,'');
+        if(confirmText!=='ELIMINAR')return;
+      }else{
+        const message=action.startsWith('archive')
+          ?`¿Archivar «${label}»? Desaparecerá del panel activo, pero sus datos se conservarán y podrás restaurarlo.`
+          :`¿Restaurar «${label}»? Volverá a aparecer como activo.`;
+        if(!window.confirm(message))return;
+      }
+
+      setBusy(true,rosterActionName(action)+'…');
+      try{
+        const result=await edge('teacher-roster-management',{action,targetId,confirmText});
+        try{await appsCall('applyRosterBackupAction',[action,rosterBackupPayload(action,target)]);}
+        catch(backupError){console.warn('La acción principal se completó, pero el respaldo de Sheets no pudo actualizarse.',backupError);}
+        await loadRosterState(false);
+        await loadTeacher(true);
+        const extra=result.deletedStudents?` · ${result.deletedStudents} alumnos eliminados`:result.archivedStudents?` · ${result.archivedStudents} alumnos archivados`:'';
+        setStatus(rosterActionName(action)+' completado'+extra+'.');
+      }catch(error){
+        setStatus('No se pudo completar la acción: '+(error.message||error));
+      }finally{
+        setBusy(false);
+      }
+    }
+
     function logout(){
       if(session?.access_token)request('/auth/v1/logout',{method:'POST'},session.access_token).catch(()=>{});
       localStorage.removeItem(SESSION_KEY);session=null;currentTeacher=null;$('appContent').classList.add('hidden');$('loginCard').classList.remove('hidden');setStatus('Sesión cerrada.');
     }
     function bind(){
-      document.querySelectorAll('.nav button').forEach(button=>button.onclick=()=>{document.getElementById(button.dataset.target)?.scrollIntoView({block:'start'});document.querySelectorAll('.nav button').forEach(item=>item.classList.remove('active'));button.classList.add('active');});
+      document.querySelectorAll('.nav button').forEach(button=>button.onclick=()=>{document.getElementById(button.dataset.target)?.scrollIntoView({block:'start'});document.querySelectorAll('.nav button').forEach(item=>item.classList.remove('active'));button.classList.add('active');if(button.dataset.target==='gestion')loadRosterState(true);});
       $('themeBtn').onclick=()=>{document.body.classList.toggle('light');localStorage.setItem('LA_TEACHER_THEME',document.body.classList.contains('light')?'light':'dark');};
       $('logoutBtn').onclick=logout;
       $('loginBtn').onclick=loginTeacher;
@@ -378,6 +542,9 @@
       $('classroomSyncBtn').onclick=openClassroomPicker;
       $('classroomImportBtn').onclick=syncSelectedClassroomCourses;
       $('classroomGradesBtn').onclick=syncGrades;
+      $('rosterSearch').oninput=renderRosterStudents;
+      $('rosterClassFilter').onchange=renderRosterStudents;
+      $('rosterStatusFilter').onchange=renderRosterStudents;
     }
     async function boot(){
       if(localStorage.getItem('LA_TEACHER_THEME')==='light')document.body.classList.add('light');
