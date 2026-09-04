@@ -153,3 +153,25 @@ Comprobar que hay conexion con backend, lectura de alumnos, lectura de catalogo 
 ## Si falla
 
 Pasar al asistente: captura, error exacto, consola del navegador, pantalla concreta y paso donde se rompe.
+
+## Rayuela · 2026-09-04
+
+Pruebas mínimas antes de publicar:
+
+1. Abrir `games/rayuela/index.html` y comprobar que aparece una única escena central en la cuadrícula inicial.
+2. Escribir el inicio y crear dos decisiones. Crear continuaciones distintas desde ambas.
+3. Crear al menos tres finales, incluyendo un final secreto, y comprobar que las flechas llegan al destino correcto.
+4. Hacer que dos rutas vuelvan a encontrarse y confirmar que la métrica de reencuentros/complejidad cambia.
+5. Crear una escena con objeto, una decisión condicionada por ese objeto y verificar en modo jugador que la opción solo aparece cuando corresponde.
+6. Ejecutar Inspector: debe detectar escenas inaccesibles, opciones sin destino, callejones sin final y ausencia de finales.
+7. Probar desde una escena intermedia y después jugar desde el inicio hasta un final. Comprobar la colección de finales.
+8. Recargar el navegador: el proyecto debe conservarse. Exportar JSON, borrar/restablecer e importar la copia.
+9. Entregar: debe guardarse una instantánea congelada sin anidar entregas anteriores.
+10. Abrir mediante el visor embebido de LenguArcade y confirmar READY → INIT → INITIALIZED → SESSION_STARTED.
+11. Editar y esperar al autoguardado: debe llegar CHECKPOINT y quedar una copia en `game_saves`.
+12. Entregar: RESULT debe llegar con `outcome=submitted`, métricas estructurales y logros.
+13. Abrir la ficha del alumno en el panel docente y comprobar el bloque Rayuela con escenas, palabras, decisiones, finales, complejidad y errores estructurales.
+14. Verificar que los controles de taller pueden bloquear/desbloquear `rayuela` igual que cualquier otro juego.
+15. Ejecutar `npm run check`; incluye `scripts/check-rayuela.mjs` y debe finalizar sin errores.
+
+Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; A2 y B1 se reencuentran; final bueno, final malo y final secreto. Guardar, recargar, recorrer los tres finales, entregar y abrir desde profesor.
