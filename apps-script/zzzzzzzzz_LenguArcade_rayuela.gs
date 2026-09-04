@@ -13,7 +13,7 @@ var LA_RAYUELA_GAME_ = {
   orden:8,
   color:'#22d3ee',
   icono:'⌗',
-  url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/rayuela/',
+  url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html',
   descripcion:'Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.',
   banner:'rayuela',
   activo:true
