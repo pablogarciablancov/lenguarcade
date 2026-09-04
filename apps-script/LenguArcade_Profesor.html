@@ -107,6 +107,33 @@
   probe.src = RAW + PROBE + '?v=20260817-fallback-probe';
 })();
 </script>
+
+<script>window.__LA_TEACHER_DIRECT_HEAD__=true;document.documentElement.classList.add('la-teacher-direct-pending');</script>
+<style id="la-teacher-direct-head-style" data-consolidated="1">
+html.la-teacher-direct-pending #loginCard{display:none!important}
+html.la-teacher-direct-pending body:before{
+  content:'Abriendo panel del profesor…';
+  position:fixed;inset:0;z-index:1000;
+  display:grid;place-items:center;
+  padding:24px;
+  background:radial-gradient(circle at 72% 18%,rgba(0,212,255,.16),transparent 30%),radial-gradient(circle at 18% 85%,rgba(124,77,255,.22),transparent 36%),#070b19;
+  color:#f5f7ff;
+  font:800 17px/1.4 Roboto,Inter,system-ui,Segoe UI,Arial,sans-serif;
+  letter-spacing:.1px;
+}
+html.la-teacher-direct-pending body:after{
+  content:'';
+  position:fixed;z-index:1001;
+  left:50%;top:calc(50% + 38px);
+  width:150px;height:6px;
+  transform:translateX(-50%);
+  border-radius:999px;
+  background:linear-gradient(90deg,#00d4ff,#7c4dff,#ff5c8a);
+  animation:laTeacherDirectPulse .8s ease-in-out infinite alternate;
+}
+@keyframes laTeacherDirectPulse{from{opacity:.35;transform:translateX(-50%) scaleX(.55)}to{opacity:1;transform:translateX(-50%) scaleX(1)}}
+html.la-teacher-direct-fallback #loginCard{display:block!important}
+</style>
 </head>
 <body>
   <div class="app">
@@ -557,5 +584,809 @@
     }
     boot();
   </script>
+
+<style id="la-workshop-access-style">
+.workshopAccessSummary{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(54,211,153,.08);color:#c8f7e5;font-size:12px;font-weight:800}
+body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
+.game.locked{filter:saturate(.28);opacity:.62}
+.game.locked .play{background:rgba(255,255,255,.12);color:#d8deef;box-shadow:none}
+.workshopPanelHead{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px}
+.workshopPanelHead h2{margin-bottom:5px}
+.workshopToolbar{display:grid;grid-template-columns:minmax(220px,1fr) auto auto;gap:10px;align-items:end;margin-bottom:16px}
+.workshopToolbar .field{min-width:0}
+.workshopGameGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.workshopGameRow{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.14)}
+body.light .workshopGameRow{background:rgba(94,53,177,.04)}
+.workshopGameRow.isClosed{opacity:.67;filter:saturate(.55)}
+.workshopGameIcon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:25px;background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(124,77,255,.2));border:1px solid var(--line)}
+.workshopGameInfo{min-width:0}.workshopGameInfo strong{display:block;font-size:14px}.workshopGameInfo span{display:block;margin-top:3px;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.workshopToggle{width:112px!important;margin:0!important;padding:10px 12px!important;box-shadow:none!important}
+.workshopToggle.isOpen{background:linear-gradient(135deg,#1fa66f,#36d399)!important}.workshopToggle.isClosed{background:linear-gradient(135deg,#586174,#30384a)!important}
+.workshopStatus{min-height:20px;margin-top:12px}.workshopCount{white-space:nowrap;color:var(--muted);font-size:12px}
+@media(max-width:900px){.workshopToolbar{grid-template-columns:1fr 1fr}.workshopToolbar .field{grid-column:1/-1}.workshopGameGrid{grid-template-columns:1fr}}
+@media(max-width:620px){.workshopToolbar{grid-template-columns:1fr}.workshopToolbar .field{grid-column:auto}.workshopGameRow{grid-template-columns:42px minmax(0,1fr)}.workshopGameIcon{width:42px;height:42px}.workshopToggle{grid-column:1/-1;width:100%!important}}
+</style>
+<script>
+(function(){
+  if(window.__LA_WORKSHOP_ACCESS_PATCH__)return;
+  window.__LA_WORKSHOP_ACCESS_PATCH__=true;
+  var ACCESS_CACHE_KEY='LA_WORKSHOP_ACCESS_CACHE_V1';
+  var workshopStudentAccess=null;
+  var workshopTeacherState=null;
+  var workshopTeacherMounted=false;
+  var workshopRefreshTimer=null;
+
+  function workshopCall(name,args){
+    return new Promise(function(resolve,reject){
+      google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[name].apply(null,args||[]);
+    });
+  }
+  function workshopEsc(value){
+    return String(value==null?'':value).replace(/[&<>"]/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char];});
+  }
+  function readWorkshopCache(){
+    try{var value=JSON.parse(localStorage.getItem(ACCESS_CACHE_KEY)||'null');return value&&value.games?value:null;}catch(error){return null;}
+  }
+  function saveWorkshopCache(value){
+    try{localStorage.setItem(ACCESS_CACHE_KEY,JSON.stringify(value));}catch(error){}
+  }
+  function accessForGame(gameId){
+    if(!workshopStudentAccess||!Array.isArray(workshopStudentAccess.games))return null;
+    return workshopStudentAccess.games.find(function(game){return String(game.gameId)===String(gameId);})||null;
+  }
+  function decorateWorkshopGames(games){
+    return (games||[]).map(function(game){
+      var access=accessForGame(game.gameId);
+      if(!access)return game;
+      var copy=Object.assign({},game);
+      copy.workshopEnabled=!!access.enabled;
+      copy.workshopAccessSource=access.accessSource||'';
+      copy.catalogEstado=copy.catalogEstado||copy.estado;
+      if(access.enabled){
+        copy.estado='✅ Disponible hoy';
+      }else{
+        copy.locked=true;
+        copy.estado='🔒 Cerrado hoy';
+        copy.buttonLabel='No disponible hoy';
+      }
+      return copy;
+    });
+  }
+  function updateStudentWorkshopHeader(){
+    var section=document.getElementById('juegos');
+    if(!section||!workshopStudentAccess)return;
+    var head=section.querySelector('.head');
+    var title=head&&head.querySelector('h2');
+    var sub=head&&head.querySelector('.sub');
+    if(title)title.textContent='Juegos del taller';
+    if(sub)sub.textContent=String(workshopStudentAccess.available||0)+' de '+String(workshopStudentAccess.total||0)+' disponibles para tu clase';
+    var existing=document.getElementById('workshopAccessSummary');
+    if(!existing&&head){
+      existing=document.createElement('span');existing.id='workshopAccessSummary';existing.className='workshopAccessSummary';head.appendChild(existing);
+    }
+    if(existing)existing.textContent='🎮 '+String(workshopStudentAccess.available||0)+' abiertos';
+  }
+  function rerenderStudentGames(){
+    try{
+      if(typeof currentDashboard!=='undefined'&&currentDashboard&&Array.isArray(currentDashboard.games)&&typeof renderGames==='function')renderGames(currentDashboard.games);
+    }catch(error){console.warn('No se pudo refrescar el catálogo del taller.',error);}
+    updateStudentWorkshopHeader();
+  }
+  async function refreshStudentWorkshopAccess(silent){
+    try{
+      var result=await workshopCall('getWorkshopAccessForCurrentUser',[]);
+      var changed=JSON.stringify(workshopStudentAccess&&workshopStudentAccess.games||[])!==JSON.stringify(result&&result.games||[]);
+      workshopStudentAccess=result;
+      saveWorkshopCache(result);
+      if(changed||!silent)rerenderStudentGames();
+    }catch(error){
+      if(!silent)console.warn('No se pudo consultar el acceso del taller.',error);
+    }
+  }
+  function installStudentWorkshop(){
+    if(!document.getElementById('games')||typeof renderGames!=='function'||typeof openGame!=='function')return false;
+    workshopStudentAccess=readWorkshopCache();
+    var baseRenderGames=renderGames;
+    renderGames=function(games){
+      var result=baseRenderGames(decorateWorkshopGames(games));
+      updateStudentWorkshopHeader();
+      return result;
+    };
+    var baseOpenGame=openGame;
+    openGame=function(gameId){
+      var access=accessForGame(gameId);
+      if(access&&access.enabled===false){
+        var game=null;
+        try{game=(currentDashboard&&currentDashboard.games||[]).find(function(item){return item.gameId===gameId;});}catch(error){}
+        var title=document.getElementById('gameModalTitle');
+        var text=document.getElementById('gameModalText');
+        if(title)title.textContent=(game&&game.nombre)||'Juego cerrado';
+        if(text)text.textContent='Este juego no está disponible en el taller de hoy. El profesor lo abrirá cuando toque.';
+        var modal=document.getElementById('gameModal');if(modal)modal.classList.add('open');
+        return;
+      }
+      return baseOpenGame(gameId);
+    };
+    if(workshopStudentAccess)rerenderStudentGames();
+    setTimeout(function(){refreshStudentWorkshopAccess(false);},350);
+    workshopRefreshTimer=setInterval(function(){
+      try{if(typeof currentDashboard!=='undefined'&&currentDashboard)refreshStudentWorkshopAccess(true);}catch(error){}
+    },30000);
+    return true;
+  }
+
+  function teacherScope(){
+    var select=document.getElementById('workshopClassSelect');
+    return select?select.value:'*';
+  }
+  function teacherGameLabel(game){
+    if(game.accessSource==='class')return 'Regla propia de esta clase';
+    if(game.accessSource==='general')return teacherScope()==='*'?'Regla general':'Hereda la regla general';
+    return 'Disponible por defecto';
+  }
+  function renderTeacherWorkshopState(state){
+    workshopTeacherState=state;
+    var select=document.getElementById('workshopClassSelect');
+    if(!select)return;
+    var selected=state.scope||'*';
+    var options='<option value="*">Todas las clases · regla general</option>'+(state.classes||[]).map(function(row){return '<option value="'+workshopEsc(row.classCode)+'">'+workshopEsc(row.nombreVisible)+'</option>';}).join('');
+    select.innerHTML=options;
+    if([].slice.call(select.options).some(function(option){return option.value===selected;}))select.value=selected;else select.value='*';
+    localStorage.setItem('LA_WORKSHOP_SCOPE',select.value);
+    var grid=document.getElementById('workshopGameGrid');
+    grid.innerHTML=(state.games||[]).map(function(game){
+      var open=!!game.enabled;
+      return '<div class="workshopGameRow '+(open?'':'isClosed')+'" data-workshop-game="'+workshopEsc(game.gameId)+'">'+
+        '<div class="workshopGameIcon">'+workshopEsc(game.icono||'🎮')+'</div>'+
+        '<div class="workshopGameInfo"><strong>'+workshopEsc(game.nombre)+'</strong><span>'+workshopEsc(teacherGameLabel(game))+'</span></div>'+
+        '<button type="button" class="workshopToggle '+(open?'isOpen':'isClosed')+'" data-workshop-toggle="'+workshopEsc(game.gameId)+'" data-enabled="'+(open?'1':'0')+'">'+(open?'✓ Abierto':'🔒 Cerrado')+'</button>'+
+      '</div>';
+    }).join('')||'<div class="sub">No hay juegos activos en el catálogo.</div>';
+    [].slice.call(grid.querySelectorAll('[data-workshop-toggle]')).forEach(function(button){
+      button.onclick=function(){setTeacherGameAccess(button.dataset.workshopToggle,button.dataset.enabled!=='1',button);};
+    });
+    var count=document.getElementById('workshopCount');
+    if(count)count.textContent=String(state.available||0)+' de '+String(state.total||0)+' abiertos';
+    var status=document.getElementById('workshopStatus');
+    if(status)status.textContent='Cambios guardados · los alumnos actualizan el estado automáticamente.';
+  }
+  async function loadTeacherWorkshopState(scope,showLoading){
+    var status=document.getElementById('workshopStatus');
+    if(showLoading&&status)status.textContent='Cargando accesos...';
+    try{
+      var result=await workshopCall('getWorkshopAccessAdmin',[scope||'*']);
+      renderTeacherWorkshopState(result);
+    }catch(error){
+      if(status)status.textContent='No se pudo cargar el control del taller: '+(error.message||error);
+    }
+  }
+  async function setTeacherGameAccess(gameId,enabled,button){
+    var status=document.getElementById('workshopStatus');
+    if(button)button.disabled=true;
+    if(status)status.textContent='Guardando cambio...';
+    try{
+      var result=await workshopCall('setWorkshopGameAccess',[teacherScope(),gameId,!!enabled]);
+      result.classes=(workshopTeacherState&&workshopTeacherState.classes)||[];
+      renderTeacherWorkshopState(result);
+    }catch(error){
+      if(status)status.textContent='No se pudo guardar: '+(error.message||error);
+      if(button)button.disabled=false;
+    }
+  }
+  async function setTeacherAllAccess(enabled){
+    var status=document.getElementById('workshopStatus');
+    var buttons=[document.getElementById('workshopOpenAll'),document.getElementById('workshopCloseAll')];
+    buttons.forEach(function(button){if(button)button.disabled=true;});
+    if(status)status.textContent=enabled?'Abriendo todos los juegos...':'Cerrando todos los juegos...';
+    try{
+      var result=await workshopCall('setWorkshopAllGamesAccess',[teacherScope(),!!enabled]);
+      result.classes=(workshopTeacherState&&workshopTeacherState.classes)||[];
+      renderTeacherWorkshopState(result);
+    }catch(error){
+      if(status)status.textContent='No se pudo guardar: '+(error.message||error);
+    }finally{
+      buttons.forEach(function(button){if(button)button.disabled=false;});
+    }
+  }
+  function mountTeacherWorkshop(){
+    if(workshopTeacherMounted||!document.getElementById('appContent'))return;
+    workshopTeacherMounted=true;
+    var nav=document.querySelector('.nav');
+    if(nav&&!nav.querySelector('[data-target="taller"]')){
+      var button=document.createElement('button');button.type='button';button.dataset.target='taller';button.textContent='🎛️ Taller';
+      var gamesButton=nav.querySelector('[data-target="juegos"]');nav.insertBefore(button,gamesButton||null);
+      button.onclick=function(){document.getElementById('taller').scrollIntoView({block:'start'});document.querySelectorAll('.nav button').forEach(function(item){item.classList.remove('active');});button.classList.add('active');};
+    }
+    var resumen=document.getElementById('resumen');
+    if(resumen&&!document.getElementById('taller')){
+      resumen.insertAdjacentHTML('afterend','<section id="taller" class="card"><div class="workshopPanelHead"><div><h2>Control del taller</h2><div class="sub">Abre solo las aplicaciones que quieras usar en la sesión. Puedes aplicar una regla general o cambiarla para una clase concreta.</div></div><div class="workshopCount" id="workshopCount"></div></div><div class="workshopToolbar"><div class="field"><label>Aplicar a</label><select id="workshopClassSelect"><option value="*">Todas las clases · regla general</option></select></div><button type="button" id="workshopOpenAll">✓ Abrir todos</button><button type="button" class="dangerAction" id="workshopCloseAll">🔒 Cerrar todos</button></div><div class="workshopGameGrid" id="workshopGameGrid"><div class="sub">Cargando catálogo...</div></div><div class="status workshopStatus" id="workshopStatus"></div></section>');
+      document.getElementById('workshopClassSelect').onchange=function(){loadTeacherWorkshopState(this.value,true);};
+      document.getElementById('workshopOpenAll').onclick=function(){setTeacherAllAccess(true);};
+      document.getElementById('workshopCloseAll').onclick=function(){setTeacherAllAccess(false);};
+    }
+  }
+  function installTeacherWorkshop(){
+    if(!document.getElementById('appContent')||typeof renderTeacher!=='function')return false;
+    mountTeacherWorkshop();
+    var baseRenderTeacher=renderTeacher;
+    renderTeacher=function(data){
+      var result=baseRenderTeacher(data);
+      mountTeacherWorkshop();
+      if(!workshopTeacherState){
+        var remembered=localStorage.getItem('LA_WORKSHOP_SCOPE')||'*';
+        setTimeout(function(){loadTeacherWorkshopState(remembered,false);},0);
+      }
+      return result;
+    };
+    if(typeof currentTeacher!=='undefined'&&currentTeacher){
+      var remembered=localStorage.getItem('LA_WORKSHOP_SCOPE')||'*';
+      loadTeacherWorkshopState(remembered,false);
+    }
+    return true;
+  }
+
+  if(!installStudentWorkshop())installTeacherWorkshop();
+})();
+</script>
+
+<style id="la-workshop-session-style">
+.workshopSessionEditor{margin:0 0 18px;padding:16px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(135deg,rgba(0,212,255,.06),rgba(124,77,255,.08))}
+.workshopSessionTop{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}.workshopSessionTop h3{margin:0 0 4px;font-size:18px}
+.workshopSessionState{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);font-size:11px;font-weight:900;white-space:nowrap}
+.workshopSessionState.open{background:rgba(54,211,153,.12);color:#aef0d4}.workshopSessionState.home{background:rgba(0,212,255,.10);color:#b8f2ff}.workshopSessionState.closed{background:rgba(255,255,255,.06);color:var(--muted)}
+body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionState.home{color:#0d6580}
+.workshopSessionForm{display:grid;grid-template-columns:1fr 160px;gap:10px}.workshopSessionForm .wide{grid-column:1/-1}.workshopSessionForm textarea{width:100%;min-height:74px;resize:vertical;padding:12px 13px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.22);color:var(--text)}body.light .workshopSessionForm textarea{background:#fff}
+.workshopSessionHome{grid-column:1/-1;padding:12px;border:1px dashed var(--line);border-radius:16px}.workshopSessionHomeHead{display:flex;justify-content:space-between;gap:12px;align-items:center}.workshopSessionHomeHead label{display:flex;align-items:center;gap:7px;font-weight:800}.workshopSessionHomeHead input{width:auto}
+.workshopSessionHomeTimes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.workshopGamePicker{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.workshopPick{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.10);cursor:pointer}.workshopPick input{width:18px;height:18px}.workshopPick span{min-width:0}.workshopPick strong{display:block;font-size:13px}.workshopPick small{display:block;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.workshopSessionActions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}.workshopSessionActions button{margin:0!important}.workshopSessionHelp{grid-column:1/-1;color:var(--muted);font-size:11px;line-height:1.45}
+.studentMissionCard{margin:0 0 16px;padding:16px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,rgba(124,77,255,.16),rgba(0,212,255,.10));box-shadow:0 12px 34px rgba(0,0,0,.12)}
+.studentMissionHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.studentMissionHead h2{margin:0 0 5px;font-size:20px}.studentMissionBadge{display:inline-flex;padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900;border:1px solid var(--line);white-space:nowrap}.studentMissionBadge.open{background:rgba(54,211,153,.14)}.studentMissionBadge.home{background:rgba(0,212,255,.14)}.studentMissionBadge.closed{background:rgba(255,255,255,.07);color:var(--muted)}
+.studentMissionMessage{margin-top:10px;line-height:1.5}.studentMissionMeta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.studentMissionMeta span{padding:6px 9px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted)}
+.game.sessionLocked{filter:saturate(.2);opacity:.56}.game.sessionLocked .play{background:rgba(255,255,255,.10)!important;color:#d8deef!important;box-shadow:none!important}
+@media(max-width:760px){.workshopSessionForm{grid-template-columns:1fr}.workshopSessionForm .wide,.workshopSessionHome,.workshopGamePicker,.workshopSessionActions,.workshopSessionHelp{grid-column:auto}.workshopGamePicker,.workshopSessionHomeTimes{grid-template-columns:1fr}.studentMissionHead,.workshopSessionTop{flex-direction:column}}
+</style>
+<script>
+(function(){
+  if(window.__LA_WORKSHOP_SESSION_PATCH__)return;
+  window.__LA_WORKSHOP_SESSION_PATCH__=true;
+
+  var workshopSessionState=null;
+  var teacherSessionBusy=false;
+
+  function sessionCall(name,args){return new Promise(function(resolve,reject){google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[name].apply(null,args||[]);});}
+  function sessionEsc(value){return String(value==null?'':value).replace(/[&<>"]/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char];});}
+  function sessionModeLabel(session){if(!session||!session.published)return 'Sin sesión publicada';if(session.mode==='classroom')return '🟢 Abierta en clase';if(session.mode==='home')return '🏠 Abierta en casa';if(session.homeEnabled&&session.homeStart&&session.homeEnd)return '⏱️ Cerrada · casa programada';return '🔒 Sesión cerrada';}
+  function sessionModeClass(session){if(session&&session.mode==='classroom')return 'open';if(session&&session.mode==='home')return 'home';return 'closed';}
+  function sessionSelected(gameId){var s=workshopSessionState&&workshopSessionState.session;if(!s||!s.published)return null;return Array.isArray(s.gameIds)&&s.gameIds.indexOf(String(gameId))!==-1;}
+  function sessionAllowsGame(gameId){var s=workshopSessionState&&workshopSessionState.session;if(!s||!s.published)return null;return !!(s.active&&sessionSelected(gameId));}
+  function missionWindowText(s){if(!s||!s.homeEnabled||!s.homeStart||!s.homeEnd)return '';return s.homeStart.replace('T',' ')+' → '+s.homeEnd.replace('T',' ');}
+
+  function renderStudentMission(){
+    var section=document.getElementById('juegos');if(!section)return;
+    var existing=document.getElementById('studentMissionCard');var s=workshopSessionState&&workshopSessionState.session;
+    if(!s||!s.published){if(existing)existing.remove();return;}
+    if(!existing){existing=document.createElement('div');existing.id='studentMissionCard';existing.className='studentMissionCard';section.insertBefore(existing,section.firstChild);}
+    var meta=[];if(s.targetXp>0)meta.push('<span>🎯 Objetivo: '+sessionEsc(s.targetXp)+' XP</span>');if(s.gameIds&&s.gameIds.length)meta.push('<span>🎮 '+sessionEsc(s.gameIds.length)+' juegos</span>');if(s.homeEnabled)meta.push('<span>🏠 '+sessionEsc(missionWindowText(s))+'</span>');
+    existing.innerHTML='<div class="studentMissionHead"><div><div class="sub">MISIÓN ACTUAL</div><h2>'+sessionEsc(s.title||'Sesión LenguArcade')+'</h2></div><span class="studentMissionBadge '+sessionModeClass(s)+'">'+sessionEsc(sessionModeLabel(s))+'</span></div>'+(s.message?'<div class="studentMissionMessage">'+sessionEsc(s.message)+'</div>':'')+'<div class="studentMissionMeta">'+meta.join('')+'</div>';
+  }
+
+  function applyStudentSessionToCards(){
+    var s=workshopSessionState&&workshopSessionState.session;renderStudentMission();if(!s||!s.published)return;
+    var games=(typeof currentDashboard!=='undefined'&&currentDashboard&&currentDashboard.games)||[];
+    var cards=[].slice.call(document.querySelectorAll('#games .game'));
+    cards.forEach(function(card,index){
+      var game=games[index];if(!game)return;var allowed=sessionAllowsGame(game.gameId);var button=card.querySelector('.play');var chip=card.querySelector('.chip');
+      card.classList.toggle('sessionLocked',allowed===false);
+      if(allowed===false){if(button){button.disabled=true;button.textContent='No disponible';}if(chip)chip.textContent=s.active?'🔒 Fuera de la misión':'🔒 Sesión cerrada';}
+      else if(allowed===true){if(button&&!game.locked)button.disabled=false;if(chip&&!game.locked)chip.textContent=s.mode==='home'?'🏠 Disponible en casa':'✅ Disponible en la sesión';}
+    });
+  }
+
+  async function refreshStudentSession(silent){
+    try{var result=await sessionCall('getWorkshopSessionForCurrentUser',[]);var before=JSON.stringify(workshopSessionState&&workshopSessionState.session||null);var after=JSON.stringify(result&&result.session||null);workshopSessionState=result;if(before!==after||!silent){if(typeof currentDashboard!=='undefined'&&currentDashboard&&typeof renderGames==='function')renderGames(currentDashboard.games);applyStudentSessionToCards();}}
+    catch(error){if(!silent)console.warn('No se pudo consultar la sesión del taller.',error);}
+  }
+
+  function installStudentSession(){
+    if(!document.getElementById('games')||typeof renderGames!=='function'||typeof openGame!=='function')return false;
+    var baseRenderGames=renderGames;renderGames=function(games){var result=baseRenderGames(games);setTimeout(applyStudentSessionToCards,0);return result;};
+    var baseOpenGame=openGame;openGame=function(gameId){var allowed=sessionAllowsGame(gameId);if(allowed===false){var s=workshopSessionState&&workshopSessionState.session;var title=document.getElementById('gameModalTitle');var text=document.getElementById('gameModalText');if(title)title.textContent=s&&s.title?s.title:'Sesión cerrada';if(text)text.textContent=s&&s.active?'Este juego no forma parte de la misión que el profesor ha abierto.':'LenguArcade está cerrado ahora mismo para esta clase. Podrás entrar cuando el profesor abra la sesión o durante un horario de casa autorizado.';var modal=document.getElementById('gameModal');if(modal)modal.classList.add('open');return;}return baseOpenGame(gameId);};
+    setTimeout(function(){refreshStudentSession(false);},500);setInterval(function(){refreshStudentSession(true);},30000);return true;
+  }
+
+  function teacherCurrentClass(){var select=document.getElementById('workshopClassSelect');var value=select?String(select.value||''):'';return value==='*'?'':value;}
+  function teacherSessionPayload(){var editor=document.getElementById('workshopSessionEditor');return {title:(document.getElementById('workshopSessionTitle')||{}).value||'',message:(document.getElementById('workshopSessionMessage')||{}).value||'',targetXp:Number((document.getElementById('workshopSessionXp')||{}).value||0),homeEnabled:!!((document.getElementById('workshopHomeEnabled')||{}).checked),homeStart:(document.getElementById('workshopHomeStart')||{}).value||'',homeEnd:(document.getElementById('workshopHomeEnd')||{}).value||'',gameIds:editor?[].slice.call(editor.querySelectorAll('[data-session-game]:checked')).map(function(input){return input.value;}):[]};}
+  function setTeacherSessionStatus(text,isError){var status=document.getElementById('workshopSessionStatus');if(status){status.textContent=text||'';status.style.color=isError?'#ff9b9b':'';}}
+  function setTeacherSessionBusy(busy){teacherSessionBusy=!!busy;var editor=document.getElementById('workshopSessionEditor');if(!editor)return;[].slice.call(editor.querySelectorAll('button')).forEach(function(button){button.disabled=!!busy;});}
+
+  function renderTeacherSession(result){
+    var s=result&&result.session;if(!s)return;
+    document.getElementById('workshopSessionTitle').value=s.title||'';document.getElementById('workshopSessionMessage').value=s.message||'';document.getElementById('workshopSessionXp').value=Number(s.targetXp||0);document.getElementById('workshopHomeEnabled').checked=!!s.homeEnabled;document.getElementById('workshopHomeStart').value=s.homeStart||'';document.getElementById('workshopHomeEnd').value=s.homeEnd||'';
+    var state=document.getElementById('workshopSessionState');state.className='workshopSessionState '+sessionModeClass(s);state.textContent=sessionModeLabel(s);
+    var selected={};(s.gameIds||[]).forEach(function(id){selected[String(id)]=true;});var picker=document.getElementById('workshopSessionGames');picker.innerHTML=(s.catalog||[]).map(function(game){return '<label class="workshopPick"><input type="checkbox" data-session-game value="'+sessionEsc(game.gameId)+'" '+(selected[String(game.gameId)]?'checked':'')+'><span><strong>'+sessionEsc((game.icono||'🎮')+' '+game.nombre)+'</strong><small>'+sessionEsc(game.categoria||game.subtitulo||'Juego LenguArcade')+'</small></span></label>';}).join('')||'<div class="sub">No hay juegos activos todavía.</div>';
+    setTeacherSessionBusy(false);document.getElementById('workshopSessionClose').disabled=!s.classroomOpen;document.getElementById('workshopSessionRetire').disabled=!s.published;setTeacherSessionStatus(s.updatedAt?'Guardado · '+s.updatedAt:'Prepara la sesión y guárdala.');
+  }
+
+  async function loadTeacherSession(){var classCode=teacherCurrentClass();var editor=document.getElementById('workshopSessionEditor');if(!editor)return;if(!classCode){setTeacherSessionStatus('Elige una clase concreta arriba para preparar su sesión.');var state=document.getElementById('workshopSessionState');state.className='workshopSessionState closed';state.textContent='Selecciona una clase';return;}setTeacherSessionStatus('Cargando sesión...');try{renderTeacherSession(await sessionCall('getWorkshopSessionAdmin',[classCode]));}catch(error){setTeacherSessionStatus('No se pudo cargar la sesión: '+(error.message||error),true);}}
+  async function saveTeacherSession(mode){if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode){setTeacherSessionStatus('Elige una clase concreta.',true);return;}var payload=teacherSessionPayload();if(!payload.gameIds.length){setTeacherSessionStatus('Selecciona al menos un juego para la misión.',true);return;}setTeacherSessionBusy(true);setTeacherSessionStatus(mode==='open'?'Abriendo la sesión en clase...':'Guardando sesión...');try{var result=mode==='open'?await sessionCall('setWorkshopClassroomSessionOpen',[classCode,true,payload]):await sessionCall('saveWorkshopSession',[classCode,payload]);renderTeacherSession(result);}catch(error){setTeacherSessionBusy(false);setTeacherSessionStatus('No se pudo guardar: '+(error.message||error),true);}}
+  async function closeTeacherSession(){if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode)return;setTeacherSessionBusy(true);setTeacherSessionStatus('Cerrando la sesión en clase...');try{renderTeacherSession(await sessionCall('setWorkshopClassroomSessionOpen',[classCode,false,teacherSessionPayload()]));}catch(error){setTeacherSessionBusy(false);setTeacherSessionStatus('No se pudo cerrar: '+(error.message||error),true);}}
+  async function retireTeacherSession(){if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode)return;setTeacherSessionBusy(true);setTeacherSessionStatus('Retirando sesión...');try{renderTeacherSession(await sessionCall('retireWorkshopSession',[classCode]));}catch(error){setTeacherSessionBusy(false);setTeacherSessionStatus('No se pudo retirar: '+(error.message||error),true);}}
+
+  function mountTeacherSession(){
+    var taller=document.getElementById('taller');if(!taller||document.getElementById('workshopSessionEditor'))return false;var grid=taller.querySelector('.workshopGameGrid');var editor=document.createElement('div');editor.id='workshopSessionEditor';editor.className='workshopSessionEditor';
+    editor.innerHTML='<div class="workshopSessionTop"><div><h3>🎯 Sesión del taller</h3><div class="sub">En clase la abres y cierras tú. En casa solo funciona durante el horario que autorices.</div></div><span id="workshopSessionState" class="workshopSessionState closed">Selecciona una clase</span></div><div class="workshopSessionForm"><div class="field"><label>Título de la misión</label><input id="workshopSessionTitle" type="text" maxlength="80" placeholder="Ej.: Cazadores de tildes"></div><div class="field"><label>Objetivo XP</label><input id="workshopSessionXp" type="number" min="0" step="25" value="0"></div><div class="field wide"><label>Mensaje para los alumnos</label><textarea id="workshopSessionMessage" maxlength="400" placeholder="Qué tienen que hacer hoy, qué pueden elegir o qué reto deben superar."></textarea></div><div class="workshopSessionHome"><div class="workshopSessionHomeHead"><div><strong>🏠 Acceso supervisado en casa</strong><div class="sub">Para tardes, fines de semana o tareas concretas.</div></div><label><input id="workshopHomeEnabled" type="checkbox"> Permitir</label></div><div class="workshopSessionHomeTimes"><div class="field"><label>Desde</label><input id="workshopHomeStart" type="datetime-local"></div><div class="field"><label>Hasta</label><input id="workshopHomeEnd" type="datetime-local"></div></div></div><div class="wide"><label>Juegos de esta misión</label></div><div id="workshopSessionGames" class="workshopGamePicker"><div class="sub">Elige una clase para cargar el catálogo.</div></div><div class="workshopSessionActions"><button type="button" id="workshopSessionSave">💾 Guardar sesión</button><button type="button" id="workshopSessionOpen">▶ Abrir en clase</button><button type="button" id="workshopSessionClose">⏹ Cerrar en clase</button><button type="button" class="dangerAction" id="workshopSessionRetire">Retirar sesión</button></div><div class="workshopSessionHelp">La sesión añade una capa de supervisión al control manual de juegos de abajo. Si está publicada pero cerrada, sus juegos no se pueden abrir. El acceso en casa se activa y caduca automáticamente. Los juegos nuevos aparecerán aquí en cuanto se activen en el catálogo de LenguArcade.</div><div class="status workshopStatus" id="workshopSessionStatus"></div></div>';
+    if(grid)taller.insertBefore(editor,grid);else taller.appendChild(editor);document.getElementById('workshopSessionSave').onclick=function(){saveTeacherSession('save');};document.getElementById('workshopSessionOpen').onclick=function(){saveTeacherSession('open');};document.getElementById('workshopSessionClose').onclick=closeTeacherSession;document.getElementById('workshopSessionRetire').onclick=retireTeacherSession;var select=document.getElementById('workshopClassSelect');if(select)select.addEventListener('change',function(){setTimeout(loadTeacherSession,0);});setTimeout(loadTeacherSession,0);return true;
+  }
+  function installTeacherSession(){var attempts=0;var timer=setInterval(function(){attempts++;if(mountTeacherSession()||attempts>30)clearInterval(timer);},150);return true;}
+
+  if(!installStudentSession())installTeacherSession();
+})();
+</script>
+
+<style id="la-screen-navigation-style">
+@keyframes laScreenIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* Alumno: una pantalla por opción de menú. */
+body.la-screen-nav #inicio,
+body.la-screen-nav #juegos,
+body.la-screen-nav #misiones,
+body.la-screen-nav #ranking,
+body.la-screen-nav #perfil{display:none!important}
+body.la-screen-nav #inicio.la-screen-active{display:grid!important;animation:laScreenIn .16s ease}
+body.la-screen-nav #juegos.la-screen-active,
+body.la-screen-nav #misiones.la-screen-active,
+body.la-screen-nav #ranking.la-screen-active,
+body.la-screen-nav #perfil.la-screen-active{display:block!important;animation:laScreenIn .16s ease}
+body.la-screen-nav .layout{display:none!important}
+body.la-screen-nav[data-la-screen="juegos"] .layout,
+body.la-screen-nav[data-la-screen="misiones"] .layout,
+body.la-screen-nav[data-la-screen="ranking"] .layout{display:block!important}
+body.la-screen-nav[data-la-screen="juegos"] .sidePanels{display:none!important}
+body.la-screen-nav[data-la-screen="misiones"] .sidePanels,
+body.la-screen-nav[data-la-screen="ranking"] .sidePanels{display:block!important}
+body.la-screen-nav[data-la-screen="misiones"] .sidePanels,
+body.la-screen-nav[data-la-screen="ranking"] .sidePanels{width:100%;max-width:none}
+body.la-screen-nav[data-la-screen="perfil"] #perfil{margin-top:0}
+
+/* Profesor: una pantalla por opción de menú. */
+body.la-teacher-screen-nav #resumen,
+body.la-teacher-screen-nav #alumnos,
+body.la-teacher-screen-nav #juegos,
+body.la-teacher-screen-nav #errores,
+body.la-teacher-screen-nav #classroom,
+body.la-teacher-screen-nav #taller{display:none!important}
+body.la-teacher-screen-nav #resumen.la-screen-active,
+body.la-teacher-screen-nav #alumnos.la-screen-active,
+body.la-teacher-screen-nav #juegos.la-screen-active,
+body.la-teacher-screen-nav #errores.la-screen-active,
+body.la-teacher-screen-nav #classroom.la-screen-active,
+body.la-teacher-screen-nav #taller.la-screen-active{display:block!important;animation:laScreenIn .16s ease}
+body.la-teacher-screen-nav #appContent>.layout,
+body.la-teacher-screen-nav #appContent>.cols{display:none!important}
+body.la-teacher-screen-nav[data-la-screen="alumnos"] #appContent>.layout,
+body.la-teacher-screen-nav[data-la-screen="juegos"] #appContent>.layout{display:block!important}
+body.la-teacher-screen-nav[data-la-screen="resumen"] #appContent>[data-la-summary-extra="1"]{display:grid!important}
+body.la-teacher-screen-nav[data-la-screen="errores"] #appContent>[data-la-tools-group="1"],
+body.la-teacher-screen-nav[data-la-screen="classroom"] #appContent>[data-la-tools-group="1"]{display:block!important}
+body.la-teacher-screen-nav #appContent>.layout>.card,
+body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100%;max-width:none}
+
+@media(max-width:1160px){
+  body.la-screen-nav .main,
+  body.la-teacher-screen-nav .main{overflow:visible}
+}
+</style>
+<script>
+(function(){
+  if(window.__LA_SCREEN_NAVIGATION_PATCH__)return;
+  window.__LA_SCREEN_NAVIGATION_PATCH__=true;
+
+  function activateMenuButton(target){
+    var nav=document.querySelector('.nav');
+    if(!nav)return;
+    [].slice.call(nav.querySelectorAll('button[data-target]')).forEach(function(button){
+      button.classList.toggle('active',String(button.dataset.target||'')===String(target||''));
+    });
+  }
+
+  function installNavCapture(showPage){
+    var nav=document.querySelector('.nav');
+    if(!nav||nav.dataset.laScreenNavigation==='1')return;
+    nav.dataset.laScreenNavigation='1';
+    nav.addEventListener('click',function(event){
+      var button=event.target&&event.target.closest?event.target.closest('button[data-target]'):null;
+      if(!button||!nav.contains(button))return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      showPage(button.dataset.target);
+    },true);
+  }
+
+  function installStudentNavigation(){
+    if(!document.getElementById('inicio')||!document.getElementById('games'))return false;
+    var allowed=['inicio','juegos','misiones','ranking','perfil'];
+    document.body.classList.add('la-screen-nav');
+
+    window.laShowStudentScreen=function(target){
+      target=allowed.indexOf(String(target||''))!==-1?String(target):'inicio';
+      document.body.setAttribute('data-la-screen',target);
+      allowed.forEach(function(id){
+        var element=document.getElementById(id);
+        if(element)element.classList.toggle('la-screen-active',id===target);
+      });
+      activateMenuButton(target);
+      try{localStorage.setItem('LA_STUDENT_SCREEN',target);}catch(error){}
+      var main=document.querySelector('.main');
+      if(main&&typeof main.scrollTo==='function')main.scrollTo({top:0,behavior:'auto'});
+      window.scrollTo(0,0);
+    };
+
+    installNavCapture(window.laShowStudentScreen);
+
+    var baseReveal=(typeof window.revealStudentApp==='function')?window.revealStudentApp:null;
+    if(baseReveal&&!baseReveal.__laScreenPatched){
+      var patchedReveal=function(){
+        var result=baseReveal.apply(this,arguments);
+        var target='inicio';
+        try{target=localStorage.getItem('LA_STUDENT_SCREEN')||'inicio';}catch(error){}
+        window.laShowStudentScreen(target);
+        return result;
+      };
+      patchedReveal.__laScreenPatched=true;
+      window.revealStudentApp=patchedReveal;
+      try{revealStudentApp=patchedReveal;}catch(error){}
+    }
+
+    var baseLogout=(typeof window.secureStudentLogout==='function')?window.secureStudentLogout:(typeof secureStudentLogout==='function'?secureStudentLogout:null);
+    if(baseLogout&&!baseLogout.__laGoogleLogoutPatched){
+      var patchedLogout=function(){
+        var result=baseLogout.apply(this,arguments);
+        try{localStorage.setItem('LA_STUDENT_SCREEN','inicio');}catch(error){}
+        window.laShowStudentScreen('inicio');
+        setTimeout(function(){
+          try{
+            if(typeof window.mountGoogleStudentLogin==='function'){
+              window.mountGoogleStudentLogin();
+              var status=document.querySelector('#loginCard [data-google-auth-status]');
+              if(status)status.textContent='Sesión cerrada. Entra de nuevo con tu cuenta Google del colegio.';
+            }
+          }catch(error){console.warn('No se pudo reconstruir el acceso Google tras salir.',error);}
+        },0);
+        return result;
+      };
+      patchedLogout.__laGoogleLogoutPatched=true;
+      window.secureStudentLogout=patchedLogout;
+      try{secureStudentLogout=patchedLogout;}catch(error){}
+      try{logout=patchedLogout;}catch(error){}
+      var logoutButton=document.getElementById('logoutBtn');
+      if(logoutButton)logoutButton.onclick=patchedLogout;
+    }
+
+    window.laShowStudentScreen('inicio');
+    return true;
+  }
+
+  function markTeacherGroups(){
+    var app=document.getElementById('appContent');
+    if(!app)return;
+    var cols=[];
+    [].slice.call(app.children).forEach(function(child){
+      if(child.classList&&child.classList.contains('cols'))cols.push(child);
+    });
+    if(cols[0])cols[0].setAttribute('data-la-summary-extra','1');
+    if(cols[1])cols[1].setAttribute('data-la-tools-group','1');
+  }
+
+  function installTeacherNavigation(){
+    if(!document.getElementById('appContent')||document.getElementById('inicio'))return false;
+    var allowed=['resumen','taller','alumnos','juegos','errores','classroom'];
+    document.body.classList.add('la-teacher-screen-nav');
+    markTeacherGroups();
+
+    window.laShowTeacherScreen=function(target){
+      target=allowed.indexOf(String(target||''))!==-1?String(target):'resumen';
+      if(target==='taller'&&!document.getElementById('taller'))target='resumen';
+      document.body.setAttribute('data-la-screen',target);
+      allowed.forEach(function(id){
+        var element=document.getElementById(id);
+        if(element)element.classList.toggle('la-screen-active',id===target);
+      });
+      markTeacherGroups();
+      activateMenuButton(target);
+      try{localStorage.setItem('LA_TEACHER_SCREEN',target);}catch(error){}
+      var main=document.querySelector('.main');
+      if(main&&typeof main.scrollTo==='function')main.scrollTo({top:0,behavior:'auto'});
+      window.scrollTo(0,0);
+    };
+
+    installNavCapture(window.laShowTeacherScreen);
+    var target='resumen';
+    try{target=localStorage.getItem('LA_TEACHER_SCREEN')||'resumen';}catch(error){}
+    window.laShowTeacherScreen(target);
+
+    var app=document.getElementById('appContent');
+    if(app&&typeof MutationObserver!=='undefined'){
+      var observer=new MutationObserver(function(){
+        markTeacherGroups();
+        var current=document.body.getAttribute('data-la-screen')||'resumen';
+        if(current==='taller'&&document.getElementById('taller'))window.laShowTeacherScreen('taller');
+      });
+      observer.observe(app,{childList:true});
+    }
+    return true;
+  }
+
+  if(!installStudentNavigation())installTeacherNavigation();
+})();
+</script>
+
+<script>
+(function(){
+  if(window.__LA_TEACHER_DIRECT_ACCESS_PATCH__)return;
+  window.__LA_TEACHER_DIRECT_ACCESS_PATCH__=true;
+
+  if(!document.getElementById('appContent') || document.getElementById('inicio')){
+    document.documentElement.classList.remove('la-teacher-direct-pending');
+    return;
+  }
+
+  var AUTO_KEY='LA_TEACHER_DIRECT_AUTO_ATTEMPT_V1';
+
+  function finishPending(){
+    document.documentElement.classList.remove('la-teacher-direct-pending');
+  }
+
+  function showFallback(message){
+    document.documentElement.classList.add('la-teacher-direct-fallback');
+    finishPending();
+    var loginCard=document.getElementById('loginCard');
+    if(loginCard)loginCard.classList.remove('hidden');
+    var status=document.getElementById('loginStatus');
+    if(status&&message)status.textContent=message;
+  }
+
+  function callApps(name,args){
+    if(typeof appsCall==='function')return appsCall(name,args||[]);
+    return new Promise(function(resolve,reject){
+      google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[name].apply(null,args||[]);
+    });
+  }
+
+  async function goToGeneralAccess(){
+    try{
+      var url=await callApps('getWebAppUrl',[]);
+      window.top.location.replace(url);
+    }catch(error){
+      var href=String(window.location.href||'');
+      window.top.location.replace(href.split('?')[0]);
+    }
+  }
+
+  function installTeacherLogout(){
+    var button=document.getElementById('logoutBtn');
+    if(!button || button.dataset.laDirectLogout==='1')return;
+    button.dataset.laDirectLogout='1';
+    var originalLogout=(typeof logout==='function')?logout:null;
+    button.onclick=function(){
+      try{sessionStorage.removeItem(AUTO_KEY);}catch(error){}
+      try{
+        if(originalLogout)originalLogout();
+        else{
+          try{localStorage.removeItem('LA_TEACHER_SUPABASE_SESSION');}catch(error){}
+        }
+      }catch(error){console.warn('No se pudo cerrar completamente la sesión del profesor.',error);}
+      goToGeneralAccess();
+    };
+  }
+
+  async function autoEnterTeacher(){
+    var loginCard=document.getElementById('loginCard');
+    var app=document.getElementById('appContent');
+    if(!loginCard || !app){finishPending();return;}
+    if(!app.classList.contains('hidden')){
+      finishPending();
+      return;
+    }
+
+    try{
+      if(sessionStorage.getItem(AUTO_KEY)==='1'){
+        showFallback('No se ha podido completar el acceso automático. Pulsa para volver a intentarlo.');
+        return;
+      }
+      sessionStorage.setItem(AUTO_KEY,'1');
+    }catch(error){}
+
+    var loginFunction=(typeof loginTeacher==='function')?loginTeacher:null;
+    if(!loginFunction){
+      showFallback('No se ha podido iniciar automáticamente el panel.');
+      return;
+    }
+
+    loginCard.classList.add('hidden');
+    try{
+      await loginFunction();
+      var entered=!app.classList.contains('hidden');
+      if(entered){
+        try{sessionStorage.removeItem(AUTO_KEY);}catch(error){}
+        document.documentElement.classList.remove('la-teacher-direct-fallback');
+        finishPending();
+        if(typeof window.laShowTeacherScreen==='function')window.laShowTeacherScreen('resumen');
+      }else{
+        showFallback('No se ha podido validar automáticamente tu cuenta de profesor.');
+      }
+    }catch(error){
+      showFallback(error.message||String(error));
+    }finally{
+      if(typeof hideLoader==='function')hideLoader();
+    }
+  }
+
+  installTeacherLogout();
+
+  // El HTML ya llega visualmente bloqueado desde <head>, así que podemos dejar
+  // que el boot original recupere una sesión guardada sin enseñar el login.
+  var hasStoredSession=false;
+  try{hasStoredSession=!!localStorage.getItem('LA_TEACHER_SUPABASE_SESSION');}catch(error){}
+  setTimeout(function(){
+    installTeacherLogout();
+    var app=document.getElementById('appContent');
+    if(app && !app.classList.contains('hidden')){
+      try{sessionStorage.removeItem(AUTO_KEY);}catch(error){}
+      finishPending();
+      return;
+    }
+    autoEnterTeacher();
+  },hasStoredSession?550:0);
+})();
+</script>
+
+<style>
+.rayuelaTeacherBox{margin-top:14px;padding:16px;border:1px solid rgba(34,211,238,.28);border-radius:18px;background:linear-gradient(135deg,rgba(34,211,238,.07),rgba(139,92,246,.07))}
+.rayuelaTeacherHead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.rayuelaTeacherGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:12px}
+.rayuelaTeacherMetric{padding:9px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.13)}
+.rayuelaTeacherMetric span{display:block;color:var(--muted);font-size:10px}.rayuelaTeacherMetric b{font-size:17px}
+.rayuelaRubric{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.rayuelaRubricRow{display:grid;grid-template-columns:minmax(180px,1.2fr) 80px 90px minmax(180px,1fr);gap:8px;margin:8px 0;align-items:start}
+.rayuelaRubricRow input,.rayuelaRubricRow textarea,.rayuelaNodeComment select,.rayuelaNodeComment textarea,.rayuelaOverall{width:100%;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.16);color:inherit;padding:8px}
+.rayuelaRubricRow textarea{min-height:52px;resize:vertical}.rayuelaNodeComment{display:grid;grid-template-columns:minmax(170px,.7fr) minmax(220px,1.3fr) auto;gap:8px;margin:8px 0;align-items:start}.rayuelaNodeComment textarea{min-height:62px;resize:vertical}
+.rayuelaRubricLabels{display:grid;grid-template-columns:minmax(180px,1.2fr) 80px 90px minmax(180px,1fr);gap:8px;color:var(--muted);font-size:10px;margin-top:8px}
+.rayuelaRubricScore{font-size:22px;font-weight:900}.rayuelaTeacherActions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.rayuelaTeacherStatus{color:var(--muted);font-size:11px}
+@media(max-width:900px){.rayuelaTeacherGrid{grid-template-columns:repeat(2,1fr)}.rayuelaRubricRow,.rayuelaRubricLabels{grid-template-columns:1fr 65px 75px}.rayuelaRubricRow textarea,.rayuelaRubricLabels span:last-child{grid-column:1/-1}.rayuelaNodeComment{grid-template-columns:1fr}.rayuelaNodeComment button{justify-self:start}}
+</style>
+<script>
+(function(){
+  if(window.__LA_RAYUELA_TEACHER_PATCH__)return;
+  window.__LA_RAYUELA_TEACHER_PATCH__=true;
+  var DEFAULT_CRITERIA=[
+    {id:'estructura',label:'Estructura narrativa',weight:20,score:0,comment:''},
+    {id:'ramificacion',label:'Ramificación y consecuencias',weight:20,score:0,comment:''},
+    {id:'escritura',label:'Calidad de escritura',weight:20,score:0,comment:''},
+    {id:'correccion',label:'Corrección lingüística',weight:20,score:0,comment:''},
+    {id:'creatividad',label:'Creatividad y elaboración',weight:20,score:0,comment:''}
+  ];
+  var currentDetail=null;
+  function escR(value){return String(value==null?'':value).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function readRaw(row){try{return typeof row.rawJson==='string'?JSON.parse(row.rawJson||'{}'):(row.rawJson||{});}catch(e){return {};}}
+  function getProject(row){
+    var raw=readRaw(row||{});
+    var save=raw.save||(raw.rawGameData&&raw.rawGameData.save)||{};
+    return save&&typeof save==='object'?save:{};
+  }
+  function projectMetrics(project,row){
+    var nodes=Array.isArray(project.nodes)?project.nodes:[];
+    var words=0,choices=0,endings=0;
+    nodes.forEach(function(node){
+      var match=String(node.text||'').trim().match(/\S+/g);words+=match?match.length:0;
+      choices+=Array.isArray(node.choices)?node.choices.filter(function(choice){return !!choice.targetId;}).length:0;
+      if(node.type==='ending'||node.type==='secret')endings++;
+    });
+    var raw=readRaw(row||{}),metrics=raw.metrics||(raw.rawGameData&&raw.rawGameData.metrics)||{};
+    return {
+      nodes:Number(metrics.nodes||nodes.length||0),
+      words:Number(metrics.words||words||0),
+      choices:Number(metrics.choices||choices||0),
+      endings:Number(metrics.endings||endings||0),
+      complexity:Number(metrics.complexity||metrics.stars||Math.max(0,Math.min(5,Math.ceil(nodes.length/8)))||0),
+      structuralErrors:Number(metrics.structuralErrors||row.errors||0),
+      status:String(project.status||'draft'),
+      submissions:Array.isArray(project.submissions)?project.submissions.length:0
+    };
+  }
+  function getEvaluation(detail){
+    return (detail.evaluations||[]).find(function(item){return item.scope==='game'&&item.gameId==='rayuela';})||null;
+  }
+  function criteriaFor(detail){
+    var ev=getEvaluation(detail),existing=ev&&ev.breakdown&&Array.isArray(ev.breakdown.criteria)?ev.breakdown.criteria:null;
+    return (existing&&existing.length?existing:DEFAULT_CRITERIA).map(function(item,index){
+      return {id:String(item.id||('criterion_'+(index+1))),label:String(item.label||''),weight:Number(item.weight||0),score:Number(item.score||0),comment:String(item.comment||'')};
+    });
+  }
+  function nodeOptions(project,selected){
+    var nodes=Array.isArray(project.nodes)?project.nodes:[];
+    return nodes.map(function(node){return '<option value="'+escR(node.id)+'" '+(String(node.id)===String(selected)?'selected':'')+'>'+escR((node.title||'Escena')+' · '+(node.type||'story'))+'</option>';}).join('');
+  }
+  function renderRayuelaTeacher(detail){
+    currentDetail=detail;
+    var root=document.getElementById('studentDetailProgress');if(!root)return;
+    var old=document.getElementById('rayuelaTeacherBox');if(old)old.remove();
+    var row=(detail.progress||[]).find(function(item){return String(item.gameId)==='rayuela';});if(!row)return;
+    var rootProject=getProject(row),submissions=Array.isArray(rootProject.submissions)?rootProject.submissions:[];
+    var latestSubmission=submissions.length?submissions[submissions.length-1]:null;
+    var project=latestSubmission&&latestSubmission.project&&typeof latestSubmission.project==='object'?latestSubmission.project:rootProject;
+    var nodes=Array.isArray(project.nodes)?project.nodes:[];
+    if(!nodes.length&&!Number(row.sessions||0))return;
+    var m=projectMetrics(project,row);m.submissions=submissions.length;if(latestSubmission){m.status='submitted';var ss=latestSubmission.stats||{};m.nodes=Number(ss.nodes||m.nodes);m.words=Number(ss.words||m.words);m.choices=Number(ss.connectedChoices||ss.choices||m.choices);m.endings=Number(ss.endings||m.endings);m.complexity=Number(ss.stars||m.complexity);}
+    var ev=getEvaluation(detail),criteria=criteriaFor(detail);
+    var breakdown=ev&&ev.breakdown||{},comments=Array.isArray(breakdown.nodeComments)?breakdown.nodeComments:[];
+    var box=document.createElement('section');box.id='rayuelaTeacherBox';box.className='rayuelaTeacherBox';
+    var metrics=[
+      ['Escenas',m.nodes],['Palabras',m.words],['Decisiones',m.choices],['Finales',m.endings],['Complejidad',m.complexity+'/5'],
+      ['Errores estruct.',m.structuralErrors],['Estado',m.status],['Entregas',m.submissions],['XP',row.xp||rootProject.xp||project.xp||0],['Última actividad',row.lastActivity?formatDate(row.lastActivity):'—']
+    ];
+    var criterionRows=criteria.map(function(item){
+      return '<div class="rayuelaRubricRow" data-r-criterion="'+escR(item.id)+'"><input data-r-label value="'+escR(item.label)+'"><input data-r-weight type="number" min="0" max="100" step="1" value="'+escR(item.weight)+'"><input data-r-score type="number" min="0" max="10" step="0.25" value="'+escR(item.score)+'"><textarea data-r-comment placeholder="Observación sobre este criterio">'+escR(item.comment)+'</textarea></div>';
+    }).join('');
+    var commentRows=comments.map(function(item,index){
+      return '<div class="rayuelaNodeComment" data-r-node-comment="'+index+'"><select data-r-node>'+nodeOptions(project,item.nodeId)+'</select><textarea data-r-node-text placeholder="Comentario para esta escena">'+escR(item.comment||'')+'</textarea><button type="button" class="ghost" data-r-remove-comment>Quitar</button></div>';
+    }).join('');
+    box.innerHTML='<div class="rayuelaTeacherHead"><div><strong>🧭 Rayuela · proyecto narrativo</strong><div class="sub">Mapa, proceso y rúbrica de esta aventura. La nota la decides tú.</div></div><div><span class="sub">Nota Rayuela</span><div class="rayuelaRubricScore" id="rayuelaRubricScore">'+(ev?Number(ev.score||0).toFixed(2):'—')+'</div></div></div>'+
+      '<div class="rayuelaTeacherGrid">'+metrics.map(function(x){return '<div class="rayuelaTeacherMetric"><span>'+escR(x[0])+'</span><b>'+escR(x[1])+'</b></div>';}).join('')+'</div>'+
+      '<div class="rayuelaRubric"><h3>Rúbrica de evaluación</h3><div class="sub">Puedes cambiar criterios, pesos, puntuaciones y comentarios.</div><div class="rayuelaRubricLabels"><span>Criterio</span><span>Peso %</span><span>Nota /10</span><span>Comentario</span></div><div id="rayuelaCriteria">'+criterionRows+'</div>'+
+      '<label class="sub" for="rayuelaOverall">Comentario general</label><textarea id="rayuelaOverall" class="rayuelaOverall" rows="3" placeholder="Comentario general para el alumno">'+escR(breakdown.overallComment||'')+'</textarea>'+
+      '<h3 style="margin-top:14px">Comentarios por escena</h3><div class="sub">El alumno los verá al seleccionar la escena correspondiente y podrá marcarlos como revisados.</div><div id="rayuelaNodeComments">'+commentRows+'</div>'+
+      '<div class="rayuelaTeacherActions"><button type="button" class="ghost" id="rayuelaAddComment">＋ Comentario de escena</button><button type="button" id="rayuelaSaveEvaluation">Guardar evaluación</button><span class="rayuelaTeacherStatus" id="rayuelaTeacherStatus">'+(ev&&ev.updatedAt?'Última evaluación: '+escR(formatDate(ev.updatedAt)):'Sin evaluar todavía')+'</span></div></div>';
+    root.parentNode.insertBefore(box,root.nextSibling);
+    bindRayuelaTeacher(project);
+    recalcRayuelaScore();
+  }
+  function recalcRayuelaScore(){
+    var rows=[].slice.call(document.querySelectorAll('#rayuelaCriteria .rayuelaRubricRow')),sum=0,total=0;
+    rows.forEach(function(row){var w=Math.max(0,Number(row.querySelector('[data-r-weight]').value||0)),s=Math.max(0,Math.min(10,Number(row.querySelector('[data-r-score]').value||0)));sum+=w*s;total+=w;});
+    var out=document.getElementById('rayuelaRubricScore');if(out)out.textContent=total?(sum/total).toFixed(2):'—';
+  }
+  function bindRayuelaTeacher(project){
+    document.querySelectorAll('#rayuelaCriteria input').forEach(function(input){input.addEventListener('input',recalcRayuelaScore);});
+    document.querySelectorAll('[data-r-remove-comment]').forEach(function(btn){btn.onclick=function(){btn.closest('.rayuelaNodeComment').remove();};});
+    var add=document.getElementById('rayuelaAddComment');if(add)add.onclick=function(){
+      var nodes=Array.isArray(project.nodes)?project.nodes:[];if(!nodes.length)return;
+      var wrap=document.createElement('div');wrap.className='rayuelaNodeComment';
+      wrap.innerHTML='<select data-r-node>'+nodeOptions(project,nodes[0].id)+'</select><textarea data-r-node-text placeholder="Comentario para esta escena"></textarea><button type="button" class="ghost" data-r-remove-comment>Quitar</button>';
+      document.getElementById('rayuelaNodeComments').appendChild(wrap);wrap.querySelector('[data-r-remove-comment]').onclick=function(){wrap.remove();};
+    };
+    var save=document.getElementById('rayuelaSaveEvaluation');if(save)save.onclick=saveRayuelaEvaluation;
+  }
+  async function saveRayuelaEvaluation(){
+    if(!currentDetail)return;
+    var button=document.getElementById('rayuelaSaveEvaluation'),status=document.getElementById('rayuelaTeacherStatus');button.disabled=true;status.textContent='Guardando evaluación...';
+    try{
+      var criteria=[].slice.call(document.querySelectorAll('#rayuelaCriteria .rayuelaRubricRow')).map(function(row,index){
+        return {id:row.dataset.rCriterion||('criterion_'+(index+1)),label:row.querySelector('[data-r-label]').value,weight:Number(row.querySelector('[data-r-weight]').value||0),score:Number(row.querySelector('[data-r-score]').value||0),comment:row.querySelector('[data-r-comment]').value};
+      });
+      var nodeComments=[].slice.call(document.querySelectorAll('#rayuelaNodeComments .rayuelaNodeComment')).map(function(row,index){
+        return {id:'node_comment_'+Date.now()+'_'+index,nodeId:row.querySelector('[data-r-node]').value,comment:row.querySelector('[data-r-node-text]').value};
+      }).filter(function(item){return item.nodeId&&item.comment.trim();});
+      var rayRow=(currentDetail.progress||[]).find(function(item){return String(item.gameId)==='rayuela';})||{},project=getProject(rayRow),submissions=Array.isArray(project.submissions)?project.submissions:[];
+      var latest=submissions.length?submissions[submissions.length-1]:null;
+      var response=await edge('teacher-rayuela-evaluation',{studentId:currentDetail.student.studentId,criteria:criteria,overallComment:document.getElementById('rayuelaOverall').value,nodeComments:nodeComments,projectId:project.id||'',submissionId:latest&&latest.id||''});
+      currentDetail.evaluations=(currentDetail.evaluations||[]).filter(function(item){return !(item.scope==='game'&&item.gameId==='rayuela');});
+      currentDetail.evaluations.push({scope:'game',gameId:'rayuela',score:response.score,breakdown:response.breakdown||{},updatedAt:response.updatedAt});
+      status.textContent='Evaluación guardada · '+Number(response.score||0).toFixed(2)+'/10';
+      renderRayuelaTeacher(currentDetail);
+    }catch(error){status.textContent='No se pudo guardar: '+(error.message||String(error));}
+    finally{if(button)button.disabled=false;}
+  }
+  function install(){
+    if(typeof renderStudentDetail!=='function'){setTimeout(install,100);return;}
+    var base=renderStudentDetail;
+    renderStudentDetail=function(detail){var value=base(detail);setTimeout(function(){renderRayuelaTeacher(detail||{});},0);return value;};
+  }
+  install();
+})();
+</script>
+
+<style>.elTeacherBox{margin-top:14px;padding:16px;border:1px solid rgba(215,169,66,.3);border-radius:18px;background:linear-gradient(135deg,rgba(215,169,66,.08),rgba(102,167,217,.07))}.elTeacherGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}.elMetric{padding:9px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.13)}.elMetric span{display:block;color:var(--muted);font-size:10px}.elMetric b{font-size:17px}.elSkills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.elSkill{padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.12)}.elSkill small{display:block;color:var(--muted)}@media(max-width:800px){.elTeacherGrid,.elSkills{grid-template-columns:repeat(2,1fr)}}</style><script>(function(){if(window.__LA_ENTRE_LINEAS_TEACHER_PATCH__)return;window.__LA_ENTRE_LINEAS_TEACHER_PATCH__=true;function readRaw(row){try{return typeof row.rawJson==='string'?JSON.parse(row.rawJson||'{}'):(row.rawJson||{});}catch(e){return {};}}function escEL(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}function renderEL(detail){var root=document.getElementById('studentDetailProgress');if(!root)return;var old=document.getElementById('elTeacherBox');if(old)old.remove();var row=(detail.progress||[]).find(function(x){return String(x.gameId)==='entre_lineas';});if(!row)return;var raw=readRaw(row),m=raw.metrics||(raw.rawGameData&&raw.rawGameData.metrics)||{},save=raw.save||(raw.rawGameData&&raw.rawGameData.save)||{},skills=m.skills||(save.profile&&save.profile.skills)||{};if(!Number(row.sessions||0)&&!m.caseId)return;var labels={observation:'Observación',inference:'Inferencia',connection:'Conexión',context:'Contexto',synthesis:'Síntesis',analysis:'Análisis'};var vals=Object.keys(labels).map(function(k){return [k,Number(skills[k]||0)];});var low=vals.slice().sort(function(a,b){return a[1]-b[1];})[0];var metrics=[['Expediente',m.caseId||'—'],['Pistas relevantes',(m.cluesImportant||0)+'/'+(m.cluesTotal||0)],['Conexiones clave',m.keyConnections||0],['Pruebas',Math.round(Number(m.taskScore||0))+'%'],['Ayudas',m.hints||0],['Intentos finales',m.finalAttempts||0],['Notas',m.notesLength||0],['XP',row.xp||0]];var box=document.createElement('section');box.id='elTeacherBox';box.className='elTeacherBox';box.innerHTML='<strong>🔎 Entre Líneas · diagnóstico lector</strong><div class="sub">Última investigación y perfil de comprensión acumulado.</div><div class="elTeacherGrid">'+metrics.map(function(x){return '<div class="elMetric"><span>'+escEL(x[0])+'</span><b>'+escEL(x[1])+'</b></div>';}).join('')+'</div><div class="elSkills">'+vals.map(function(x){return '<div class="elSkill"><small>'+labels[x[0]]+'</small><b>'+Math.round(x[1])+'</b></div>';}).join('')+'</div><div class="sub" style="margin-top:10px">'+(low&&low[1]>0?'Área que conviene reforzar: '+labels[low[0]]+'.':'Completa más expedientes para obtener un diagnóstico estable.')+'</div>';root.parentNode.insertBefore(box,root.nextSibling);}function install(){if(typeof renderStudentDetail!=='function'){setTimeout(install,100);return;}var base=renderStudentDetail;renderStudentDetail=function(detail){var v=base(detail);setTimeout(function(){renderEL(detail||{});},0);return v;};}install();})();</script>
 </body>
 </html>
