@@ -216,5 +216,19 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 7. Pulsar «Eliminar…» sobre un alumno y cancelar o escribir algo distinto de `ELIMINAR`: no debe modificarse ningún dato.
 8. Con un alumno de prueba, confirmar `ELIMINAR`: su perfil y datos asociados deben desaparecer definitivamente.
 9. Con una clase de prueba, confirmar `ELIMINAR`: debe borrarse la clase; los alumnos exclusivos deben borrarse y los compartidos con otra clase deben conservarse.
-10. Ejecutar `npm.cmd run check`: debe incluir «Gestión de clases y alumnado: comprobaciones correctas.».
+10. Ejecutar `npm.cmd run check`: debe incluir «Gestión de clases y alumnado: arquitectura consolidada correcta.».
 11. Publicar Apps Script y volver a probar la sección desde la URL estable del profesor.
+
+
+## Aceptación de la arquitectura consolidada
+1. Ejecutar `npm.cmd run check`. Deben superar sintaxis, juegos, Supabase, Rayuela, Entre Líneas, Gestión y la comprobación de arquitectura consolidada.
+2. Ejecutar `npm.cmd run apps:status`: no debe aparecer ningún archivo cuyo nombre empiece por `zz`.
+3. Publicar la versión estable y abrir la portada del alumno con recarga completa.
+4. Comprobar login Google de alumno, menú de profesor y modo profe-jugador.
+5. Entrar como alumno y verificar catálogo, navegación lateral, avatar, taller, bloqueo/desbloqueo de juegos y apertura de un juego embebido.
+6. Verificar una sesión de taller y un permiso temporal de casa.
+7. Abrir Rayuela y Entre Líneas desde el catálogo y confirmar que siguen comunicándose con el host.
+8. Entrar en el panel del profesor y comprobar acceso directo, navegación, control del taller, Classroom y la nueva sección Gestión.
+9. Abrir la ficha de un alumno con datos de Rayuela y Entre Líneas: deben aparecer la rúbrica de Rayuela y el diagnóstico lector.
+10. En Gestión, probar solo con datos de prueba: archivar/restaurar alumno y clase antes de probar cualquier eliminación definitiva.
+11. Confirmar que `apps-script/` contiene únicamente los módulos base y ningún adaptador `zz...`.
