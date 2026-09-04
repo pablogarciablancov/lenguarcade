@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<title>Rayuela · Tu historia. Tus decisiones.</title>
+<style>
+:root{
+  --bg:#0b1020;--surface:#121a2f;--surface2:#18233d;--surface3:#202d4d;--text:#f6f7fb;--muted:#9aa8c7;
+  --line:rgba(255,255,255,.11);--primary:#8b5cf6;--primary2:#c084fc;--cyan:#22d3ee;--green:#34d399;
+  --yellow:#fbbf24;--red:#fb7185;--orange:#fb923c;--shadow:0 20px 60px rgba(0,0,0,.34);--radius:20px;
+  --node:#8b5cf6;--cell-w:210px;--cell-h:150px
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:
+ radial-gradient(circle at 20% 10%,rgba(139,92,246,.15),transparent 30%),
+ radial-gradient(circle at 80% 0%,rgba(34,211,238,.09),transparent 26%),var(--bg);color:var(--text);overflow:hidden}
+button,input,textarea,select{font:inherit}
+button{border:0;cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.45}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.hidden{display:none!important}
+.app{height:100%;display:grid;grid-template-rows:auto 1fr auto}
+.topbar{height:72px;display:flex;gap:14px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);background:rgba(10,15,30,.87);backdrop-filter:blur(18px);z-index:40}
+.brand{display:flex;align-items:center;gap:12px;min-width:220px}
+.brandMark{width:45px;height:45px;border-radius:15px;display:grid;place-items:center;font-size:27px;background:
+ linear-gradient(145deg,rgba(139,92,246,.3),rgba(34,211,238,.16));border:1px solid var(--line);box-shadow:0 8px 24px rgba(139,92,246,.18)}
+.brand h1{font-size:20px;line-height:1.05;margin:0}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.topProject{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.projectTitleInput{min-width:0;width:min(420px,100%);border:1px solid transparent;background:transparent;color:var(--text);font-size:15px;font-weight:850;padding:8px 10px;border-radius:12px}
+.projectTitleInput:hover,.projectTitleInput:focus{background:rgba(255,255,255,.05);border-color:var(--line)}
+.saveBadge,.profileBadge,.xpBadge{display:inline-flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.045);font-size:11px;font-weight:800;white-space:nowrap}
+.saveBadge.saving{color:#fde68a}.saveBadge.ok{color:#bbf7d0}.saveBadge.error{color:#fecaca}
+.topActions{display:flex;gap:7px;align-items:center}
+.iconBtn,.smallBtn,.mainBtn,.ghostBtn,.dangerBtn{border-radius:13px;border:1px solid var(--line);color:var(--text);background:rgba(255,255,255,.07);padding:9px 11px;font-weight:850;transition:.18s transform,.18s background}
+.iconBtn{width:40px;height:40px;padding:0;display:grid;place-items:center;font-size:17px}
+.iconBtn:hover,.smallBtn:hover,.ghostBtn:hover{background:rgba(255,255,255,.12);transform:translateY(-1px)}
+.mainBtn{background:linear-gradient(135deg,var(--primary),#6d5dfc);box-shadow:0 8px 22px rgba(139,92,246,.24)}
+.mainBtn:hover{transform:translateY(-1px);filter:brightness(1.07)}
+.dangerBtn{background:rgba(251,113,133,.11);color:#fecdd3}
+.workspace{min-height:0;display:grid;grid-template-columns:270px minmax(0,1fr) 340px}
+.panel{min-height:0;background:rgba(15,23,42,.74);backdrop-filter:blur(12px);border-right:1px solid var(--line);overflow:auto}
+.panel.right{border-right:0;border-left:1px solid var(--line)}
+.panelSection{padding:15px;border-bottom:1px solid var(--line)}
+.panelTitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.panelTitle h2,.panelTitle h3{margin:0;font-size:15px}
+.eyebrow{font-size:10px;font-weight:900;letter-spacing:.13em;color:var(--cyan);text-transform:uppercase}
+.muted{color:var(--muted)}
+.authorCompass{background:linear-gradient(145deg,rgba(139,92,246,.12),rgba(34,211,238,.05))}
+.objectiveList{display:grid;gap:8px}.objective{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:start;padding:8px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid transparent}
+.objective.done{border-color:rgba(52,211,153,.22);background:rgba(52,211,153,.06)}.objectiveIcon{width:22px;height:22px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.07);font-size:11px}
+.objective strong{display:block;font-size:11px}.objective small{display:block;font-size:10px;color:var(--muted);margin-top:2px}.objectiveXp{font-size:9px;color:#fde68a;font-weight:900}
+.progressBar{height:7px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-top:11px}.progressFill{height:100%;background:linear-gradient(90deg,var(--primary),var(--cyan))}
+.metricGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.metric{padding:9px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}.metric span{display:block;color:var(--muted);font-size:9px}.metric b{display:block;font-size:17px;margin-top:2px}
+.stars{letter-spacing:2px;color:#fde68a}
+.inspectorSummary{display:flex;align-items:center;gap:10px;padding:10px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--line)}.inspectorCount{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-weight:950;background:rgba(251,191,36,.12);color:#fde68a}
+.inspectorSummary.clean .inspectorCount{background:rgba(52,211,153,.12);color:#bbf7d0}
+.inspectorIssues{display:grid;gap:7px;margin-top:9px}.issue{font-size:10px;padding:8px 9px;border-radius:10px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.12);cursor:pointer}.issue.error{background:rgba(251,113,133,.07);border-color:rgba(251,113,133,.16)}
+.achievementMini{display:flex;align-items:center;gap:8px;padding:8px;border-radius:11px;background:rgba(255,255,255,.035);font-size:10px;margin-bottom:6px}.achievementMini.locked{opacity:.45;filter:saturate(.35)}
+.boardShell{min-width:0;min-height:0;display:grid;grid-template-rows:auto 1fr;background:rgba(4,8,20,.38)}
+.boardToolbar{display:flex;gap:7px;align-items:center;padding:9px 11px;border-bottom:1px solid var(--line);background:rgba(9,14,28,.82);z-index:15;flex-wrap:wrap}
+.toolbarSpacer{flex:1}.zoomLabel{font-size:10px;color:var(--muted);min-width:39px;text-align:center}
+.modeBanner{display:none;align-items:center;gap:9px;padding:7px 10px;border-radius:12px;background:rgba(34,211,238,.11);border:1px solid rgba(34,211,238,.22);color:#cffafe;font-size:11px;font-weight:800}
+.modeBanner.active{display:flex}
+.boardViewport{position:relative;overflow:auto;overscroll-behavior:contain;scroll-behavior:smooth;background:
+ radial-gradient(circle at center,rgba(139,92,246,.05),transparent 42%),
+ linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),
+ linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:100% 100%,22px 22px,22px 22px}
+.boardScaler{position:relative;transform-origin:0 0}
+.board{position:absolute;left:0;top:0}
+.gridCell{position:absolute;width:var(--cell-w);height:var(--cell-h);border-right:1px dashed rgba(255,255,255,.045);border-bottom:1px dashed rgba(255,255,255,.045)}
+.gridCell::after{content:"";position:absolute;inset:12px;border-radius:18px;border:1px dashed transparent;transition:.15s}
+.gridCell.placeable{cursor:crosshair}.gridCell.placeable:hover::after{border-color:rgba(34,211,238,.42);background:rgba(34,211,238,.06)}
+.gridCell.centerCell::before{content:"";position:absolute;inset:18px;border-radius:16px;background:repeating-linear-gradient(-35deg,rgba(255,255,255,.017) 0 5px,transparent 5px 10px)}
+.edgeSvg{position:absolute;left:0;top:0;overflow:visible;pointer-events:none;z-index:2}
+.edgePath{fill:none;stroke:rgba(148,163,184,.42);stroke-width:3;transition:.15s}.edgePath.selected{stroke:var(--cyan);stroke-width:4}.edgePath.secret{stroke-dasharray:7 6}.edgeLabel{fill:#dbeafe;font-size:10px;font-weight:900;paint-order:stroke;stroke:#0b1020;stroke-width:4;stroke-linejoin:round}
+.nodeCard{position:absolute;width:174px;min-height:106px;border-radius:18px;border:1px solid rgba(255,255,255,.15);background:linear-gradient(155deg,rgba(30,41,59,.97),rgba(15,23,42,.96));box-shadow:0 12px 32px rgba(0,0,0,.26);z-index:5;user-select:none;transition:.14s transform,.14s border-color,.14s box-shadow;overflow:hidden}
+.nodeCard:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(0,0,0,.33)}.nodeCard.selected{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(34,211,238,.14),0 16px 36px rgba(0,0,0,.35)}.nodeCard.linkTarget{cursor:crosshair;box-shadow:0 0 0 2px rgba(52,211,153,.28)}.nodeCard.dragging{opacity:.83;z-index:20}
+.nodeStripe{height:5px;background:var(--node)}
+.nodeHead{display:flex;gap:8px;align-items:center;padding:8px 9px 5px}.nodeIcon{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.08);font-size:14px;flex:none}.nodeHead strong{min-width:0;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nodeType{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:1px}
+.nodeExcerpt{padding:0 9px;color:#cbd5e1;font-size:9px;line-height:1.35;height:29px;overflow:hidden}.nodeFoot{display:flex;align-items:center;justify-content:space-between;padding:6px 9px 8px;font-size:9px;color:var(--muted)}.nodeBadge{padding:3px 6px;border-radius:999px;background:rgba(255,255,255,.06)}
+.tizaHint{position:absolute;z-index:1;pointer-events:none;opacity:.18;font-family:"Comic Sans MS",cursive;transform:rotate(-4deg);font-size:15px;color:white;border:2px solid white;border-radius:10px;padding:8px 12px}
+.emptyMessage{position:absolute;z-index:1;pointer-events:none;text-align:center;color:rgba(226,232,240,.22);font-weight:850;font-size:19px;line-height:1.55;width:280px}
+.editorEmpty{padding:24px 16px;text-align:center;color:var(--muted)}.editorEmpty .big{font-size:45px;margin-bottom:10px;filter:grayscale(.2)}
+.field{margin-bottom:11px}.field label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted);font-weight:800;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);background:rgba(0,0,0,.18);color:var(--text);border-radius:11px;padding:9px 10px}.field textarea{min-height:130px;resize:vertical;line-height:1.45}.field input::placeholder,.field textarea::placeholder{color:#64748b}
+.wordCounter{font-size:9px;color:var(--muted);font-weight:700}
+.editorActionRow{display:flex;gap:6px;flex-wrap:wrap}
+.choiceList{display:grid;gap:8px}.choiceRow{padding:9px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035)}.choiceTop{display:grid;grid-template-columns:1fr auto;gap:6px}.choiceTop input{width:100%;border:0;background:transparent;color:var(--text);font-weight:800;font-size:11px;padding:5px}.choiceButtons{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}.choiceTarget{font-size:9px;color:var(--muted);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.advancedBox{padding:10px;border-radius:14px;border:1px dashed rgba(139,92,246,.3);background:rgba(139,92,246,.05);margin-top:10px}.advancedBox summary{cursor:pointer;font-size:10px;font-weight:900;color:#ddd6fe}
+.footerbar{min-height:60px;display:flex;align-items:center;gap:8px;padding:9px 15px;border-top:1px solid var(--line);background:rgba(10,15,30,.9);z-index:30}.footerbar .statusText{margin-left:auto;font-size:10px;color:var(--muted);max-width:330px;text-align:right}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(3,7,18,.82);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:18px}.modal.open{display:flex}.dialog{width:min(760px,96vw);max-height:92vh;overflow:auto;background:linear-gradient(165deg,#18233d,#10182c);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:20px}.dialog.wide{width:min(1080px,97vw)}.dialogHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:14px}.dialogHead h2{margin:0}.dialogHead p{margin:4px 0 0;color:var(--muted);font-size:11px}
+.playModal{padding:0;background:#070b15}.playStage{width:100%;height:100%;display:grid;grid-template-rows:auto 1fr auto;background:
+ radial-gradient(circle at 50% 0%,rgba(139,92,246,.16),transparent 38%),#080d19}
+.playTop{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(8,13,25,.82);backdrop-filter:blur(18px)}.playTop h2{margin:0;font-size:15px}.playTop .spacer{flex:1}
+.playContent{overflow:auto;padding:clamp(20px,5vw,55px);display:grid;place-items:center}.storyCard{width:min(780px,94vw);padding:clamp(20px,4vw,38px);border-radius:28px;border:1px solid var(--line);background:linear-gradient(155deg,rgba(25,35,60,.96),rgba(12,18,34,.96));box-shadow:0 30px 80px rgba(0,0,0,.4)}.storyImage{width:100%;max-height:310px;object-fit:cover;border-radius:20px;margin-bottom:18px;border:1px solid var(--line)}.storyEyebrow{font-size:10px;color:var(--cyan);font-weight:900;letter-spacing:.12em;text-transform:uppercase}.storyCard h1{font-size:clamp(24px,4vw,42px);margin:8px 0 16px}.storyText{white-space:pre-wrap;font-family:Georgia,"Times New Roman",serif;font-size:clamp(17px,2vw,21px);line-height:1.7;color:#eef2ff}.storyChoices{display:grid;gap:9px;margin-top:24px}.storyChoice{width:100%;text-align:left;padding:13px 15px;border-radius:15px;border:1px solid rgba(139,92,246,.25);background:rgba(139,92,246,.09);color:var(--text);font-weight:850}.storyChoice:hover{background:rgba(139,92,246,.18);transform:translateX(2px)}.storyChoice.locked{opacity:.45}
+.playFoot{display:flex;justify-content:center;gap:8px;padding:10px 15px;border-top:1px solid var(--line);background:rgba(8,13,25,.82);font-size:10px;color:var(--muted)}
+.inventoryPill{padding:6px 9px;border-radius:999px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.18)}
+.endingBox{text-align:center;padding:15px}.endingIcon{font-size:70px}.endingBox h1{font-size:38px;margin:10px 0}.endingCollection{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:18px 0}.endingDot{padding:7px 10px;border-radius:999px;border:1px solid var(--line);font-size:10px}.endingDot.found{background:rgba(52,211,153,.09);color:#bbf7d0}.endingDot.locked{color:#64748b}
+.templateGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.templateCard{padding:15px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.04);cursor:pointer}.templateCard:hover{border-color:rgba(139,92,246,.45);background:rgba(139,92,246,.08)}.templateCard strong{display:block;margin-bottom:5px}.templateCard span{font-size:10px;color:var(--muted)}
+.achievementGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.achievementCard{padding:11px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.035);min-height:95px}.achievementCard.locked{opacity:.42;filter:saturate(.25)}.achievementCard .ico{font-size:23px}.achievementCard strong{display:block;font-size:11px;margin-top:5px}.achievementCard p{font-size:9px;color:var(--muted);margin:4px 0}.achievementCard small{color:#fde68a;font-size:9px}
+.inspectorGrid{display:grid;grid-template-columns:240px 1fr;gap:14px}.scoreRing{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;margin:15px auto;background:conic-gradient(var(--green) calc(var(--score)*1%),rgba(255,255,255,.07) 0);position:relative}.scoreRing::after{content:"";position:absolute;inset:10px;border-radius:50%;background:#141e35}.scoreRing b{position:relative;z-index:1;font-size:35px}.fullIssue{padding:10px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.035);margin-bottom:7px;font-size:11px;cursor:pointer}
+.toastStack{position:fixed;right:18px;bottom:78px;z-index:150;display:grid;gap:8px;width:min(330px,calc(100vw - 36px));pointer-events:none}.toast{padding:12px 13px;border:1px solid var(--line);border-radius:15px;background:rgba(20,30,52,.96);box-shadow:0 16px 38px rgba(0,0,0,.28);animation:toastIn .25s ease}.toast strong{display:block;font-size:11px}.toast span{display:block;color:var(--muted);font-size:9px;margin-top:3px}.toast.achievement{border-color:rgba(251,191,36,.26);background:linear-gradient(145deg,rgba(58,42,20,.97),rgba(20,30,52,.97))}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.tutorialDots{display:flex;justify-content:center;gap:6px;margin:16px}.tutorialDot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.14)}.tutorialDot.active{background:var(--cyan)}.tutorialStage{text-align:center;padding:20px}.tutorialStage .bigIcon{font-size:65px}.tutorialStage h2{font-size:28px}.tutorialStage p{max-width:520px;margin:0 auto;color:#cbd5e1;line-height:1.6}
+.chalkHop{display:flex;justify-content:center;gap:6px;margin:25px auto;transform:rotate(-2deg);opacity:.55}.chalkHop span{display:grid;place-items:center;width:38px;height:38px;border:2px solid rgba(255,255,255,.7);font-family:"Comic Sans MS",cursive}
+@media(max-width:1180px){.workspace{grid-template-columns:230px minmax(0,1fr) 310px}.profileBadge{display:none}}
+@media(max-width:900px){
+  body{overflow:auto}.app{min-height:100%;height:auto;grid-template-rows:auto auto auto}.workspace{display:block}.panel{display:none;position:fixed;inset:72px 0 60px 0;z-index:80;border:0!important}.panel.mobileOpen{display:block}.boardShell{height:calc(100vh - 132px)}.topbar{position:sticky;top:0}.brand small,.saveBadge{display:none}.brand{min-width:0}.brand h1{font-size:16px}.projectTitleInput{font-size:12px}.footerbar{position:sticky;bottom:0;overflow:auto}.footerbar .statusText{display:none}.achievementGrid{grid-template-columns:1fr 1fr}.inspectorGrid{grid-template-columns:1fr}.mobilePanelBtn{display:grid!important}
+}
+@media(min-width:901px){.mobilePanelBtn{display:none!important}}
+@media(max-width:560px){.topActions .iconBtn:nth-child(-n+2){display:none}.xpBadge{display:none}.templateGrid,.achievementGrid{grid-template-columns:1fr}.storyCard{border-radius:20px}.playContent{padding:15px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brandMark" aria-hidden="true">⌗</div>
+      <div><h1>RAYUELA</h1><small>Tu historia. Tus decisiones.</small></div>
+    </div>
+    <div class="topProject">
+      <input id="projectTitle" class="projectTitleInput" maxlength="80" aria-label="Título de la historia" value="Mi aventura">
+      <span id="saveBadge" class="saveBadge ok">✓ Guardado</span>
+    </div>
+    <span id="profileBadge" class="profileBadge">👤 Autor local</span>
+    <span id="xpBadge" class="xpBadge">✨ <b id="xpValue">0</b> XP</span>
+    <div class="topActions">
+      <button id="undoBtn" class="iconBtn" title="Deshacer" aria-label="Deshacer">↶</button>
+      <button id="redoBtn" class="iconBtn" title="Rehacer" aria-label="Rehacer">↷</button>
+      <button id="mobileLeftBtn" class="iconBtn mobilePanelBtn" title="Brújula">🧭</button>
+      <button id="mobileRightBtn" class="iconBtn mobilePanelBtn" title="Editor">✍️</button>
+      <button id="moreBtn" class="iconBtn" title="Proyecto">•••</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside id="leftPanel" class="panel left">
+      <section class="panelSection authorCompass">
+        <div class="eyebrow">Brújula del autor</div>
+        <div class="panelTitle"><h2>Tu aventura crece contigo</h2></div>
+        <div id="objectiveList" class="objectiveList"></div>
+        <div class="progressBar"><div id="objectiveProgress" class="progressFill" style="width:0%"></div></div>
+      </section>
+      <section class="panelSection">
+        <div class="panelTitle"><h3>📊 Tu mapa</h3><span id="complexityStars" class="stars">☆☆☆☆☆</span></div>
+        <div id="metrics" class="metricGrid"></div>
+      </section>
+      <section class="panelSection">
+        <div class="panelTitle"><h3>🛠 Inspector</h3><button id="openInspectorBtn" class="smallBtn">Ver todo</button></div>
+        <div id="inspectorSummary" class="inspectorSummary"></div>
+        <div id="inspectorIssues" class="inspectorIssues"></div>
+      </section>
+      <section class="panelSection">
+        <div class="panelTitle"><h3>🏆 Logros</h3><button id="openAchievementsBtn" class="smallBtn">Todos</button></div>
+        <div id="achievementPreview"></div>
+      </section>
+    </aside>
+
+    <section class="boardShell">
+      <div class="boardToolbar">
+        <button id="addNodeBtn" class="smallBtn">＋ Nueva escena</button>
+        <button id="centerBtn" class="smallBtn">◎ Inicio</button>
+        <button id="expandBtn" class="smallBtn">↗ Ampliar mapa</button>
+        <div id="modeBanner" class="modeBanner"><span id="modeText"></span><button id="cancelModeBtn" class="smallBtn">Cancelar</button></div>
+        <div class="toolbarSpacer"></div>
+        <button id="zoomOutBtn" class="iconBtn" aria-label="Alejar">−</button>
+        <span id="zoomLabel" class="zoomLabel">100%</span>
+        <button id="zoomInBtn" class="iconBtn" aria-label="Acercar">＋</button>
+      </div>
+      <div id="boardViewport" class="boardViewport">
+        <div id="boardScaler" class="boardScaler">
+          <div id="board" class="board"></div>
+        </div>
+      </div>
+    </section>
+
+    <aside id="rightPanel" class="panel right">
+      <div id="editorEmpty" class="editorEmpty">
+        <div class="big">✍️</div>
+        <h3>Selecciona una casilla</h3>
+        <p>Escribe qué ocurre y decide por dónde puede continuar el lector.</p>
+      </div>
+      <div id="nodeEditor" class="hidden">
+        <section class="panelSection">
+          <div class="eyebrow">Escena seleccionada</div>
+          <div class="panelTitle"><h2 id="editorHeading">Nodo</h2><button id="duplicateNodeBtn" class="smallBtn">Duplicar</button></div>
+          <div class="field"><label>Tipo</label><select id="nodeType"></select></div>
+          <div class="field"><label>Título interno</label><input id="nodeTitle" maxlength="70" placeholder="Ej.: La puerta cerrada"></div>
+          <div class="field"><label>Capítulo / zona</label><input id="nodeChapter" maxlength="60" placeholder="Ej.: El bosque"></div>
+          <div class="field">
+            <label>Texto narrativo <span id="nodeWordCount" class="wordCounter">0 palabras</span></label>
+            <textarea id="nodeText" maxlength="12000" placeholder="Cuenta qué ocurre en esta escena..."></textarea>
+          </div>
+          <div class="field"><label>Imagen opcional (URL)</label><input id="nodeImage" type="url" placeholder="https://..."></div>
+          <div id="endingFields" class="field hidden"><label>Tipo de final</label><select id="endingType"></select></div>
+          <details class="advancedBox">
+            <summary>Mecánicas avanzadas</summary>
+            <div class="field" style="margin-top:10px"><label>Objeto que recibe aquí</label><input id="nodeGiveItem" maxlength="40" placeholder="Ej.: Llave de cobre"></div>
+            <div class="field"><label>Objeto necesario para entrar</label><input id="nodeRequireItem" maxlength="40" placeholder="Déjalo vacío si no hace falta"></div>
+            <div class="field"><label>Variable que cambia</label><input id="nodeVariable" maxlength="30" placeholder="Ej.: valentia"></div>
+            <div class="field"><label>Cambio de variable</label><input id="nodeVariableDelta" type="number" min="-99" max="99" value="0"></div>
+          </details>
+          <div class="editorActionRow" style="margin-top:11px">
+            <button id="testFromNodeBtn" class="smallBtn">🧪 Probar desde aquí</button>
+            <button id="deleteNodeBtn" class="dangerBtn">Eliminar</button>
+          </div>
+        </section>
+        <section id="choicesSection" class="panelSection">
+          <div class="panelTitle"><h3>🔀 Decisiones</h3><button id="addChoiceBtn" class="smallBtn">＋ Opción</button></div>
+          <div id="choiceList" class="choiceList"></div>
+          <p class="muted" style="font-size:9px;line-height:1.5">Cada decisión puede crear una nueva casilla o enlazar con una escena que ya exista.</p>
+        </section>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footerbar">
+    <button id="playBtn" class="mainBtn">▶ Jugar mi historia</button>
+    <button id="testBtn" class="ghostBtn">🧪 Probar</button>
+    <button id="submitBtn" class="ghostBtn">📬 Entregar</button>
+    <button id="exportBtn" class="ghostBtn">⇩ Exportar</button>
+    <span id="footerStatus" class="statusText">Todo comienza en una casilla.</span>
+  </footer>
+</div>
+
+<div id="playModal" class="modal playModal" role="dialog" aria-modal="true">
+  <div class="playStage">
+    <div class="playTop">
+      <button id="closePlayBtn" class="iconBtn" aria-label="Cerrar">✕</button>
+      <div><div class="eyebrow">Modo jugador</div><h2 id="playProjectTitle">Rayuela</h2></div>
+      <div class="spacer"></div>
+      <span id="playInventory" class="inventoryPill">🎒 Vacío</span>
+      <button id="fullscreenBtn" class="smallBtn">⛶ Pantalla completa</button>
+    </div>
+    <div id="playContent" class="playContent"></div>
+    <div class="playFoot"><span id="playPathLabel">0 decisiones</span><span>·</span><span id="playEndingLabel">0 finales descubiertos</span></div>
+  </div>
+</div>
+
+<div id="projectModal" class="modal" role="dialog" aria-modal="true">
+  <div class="dialog">
+    <div class="dialogHead"><div><h2>Proyecto Rayuela</h2><p>Empieza otra aventura, importa una copia o descarga tu trabajo.</p></div><button class="iconBtn" data-close="projectModal">✕</button></div>
+    <div class="templateGrid">
+      <div class="templateCard" data-template="blank"><strong>🧱 En blanco</strong><span>Una sola casilla central. El resto lo construyes tú.</span></div>
+      <div class="templateCard" data-template="simple"><strong>🌱 Historia sencilla</strong><span>Una bifurcación y dos finales para empezar rápido.</span></div>
+      <div class="templateCard" data-template="mystery"><strong>🔎 Misterio</strong><span>Estructura inicial con pista, decisión y final secreto.</span></div>
+      <div class="templateCard" data-template="adventure"><strong>🗺 Aventura</strong><span>Mapa inicial algo más amplio con caminos que vuelven a encontrarse.</span></div>
+    </div>
+    <div class="editorActionRow" style="margin-top:15px">
+      <button id="downloadJsonBtn" class="ghostBtn">Descargar proyecto JSON</button>
+      <button id="downloadTextBtn" class="ghostBtn">Exportar texto completo</button>
+      <label class="ghostBtn" style="cursor:pointer">Importar JSON<input id="importInput" type="file" accept=".json,application/json" hidden></label>
+      <button id="showTutorialBtn" class="ghostBtn">Ver tutorial</button>
+    </div>
+  </div>
+</div>
+
+<div id="inspectorModal" class="modal" role="dialog" aria-modal="true">
+  <div class="dialog wide">
+    <div class="dialogHead"><div><h2>🛠 Inspector de historia</h2><p>Comprueba estructura, recorridos y posibles cabos sueltos.</p></div><button class="iconBtn" data-close="inspectorModal">✕</button></div>
+    <div class="inspectorGrid">
+      <div>
+        <div id="qualityRing" class="scoreRing" style="--score:0"><b id="qualityScore">0</b></div>
+        <div id="qualityLabel" style="text-align:center;font-weight:900">Preparando mapa…</div>
+      </div>
+      <div id="fullInspectorIssues"></div>
+    </div>
+  </div>
+</div>
+
+<div id="achievementsModal" class="modal" role="dialog" aria-modal="true">
+  <div class="dialog wide">
+    <div class="dialogHead"><div><h2>🏆 Logros de Rayuela</h2><p>Algunos solo aparecen cuando los descubres.</p></div><button class="iconBtn" data-close="achievementsModal">✕</button></div>
+    <div id="achievementGrid" class="achievementGrid"></div>
+  </div>
+</div>
+
+<div id="submitModal" class="modal" role="dialog" aria-modal="true">
+  <div class="dialog">
+    <div class="dialogHead"><div><h2>📬 Preparar entrega</h2><p>Rayuela revisará tu estructura antes de congelar una versión.</p></div><button class="iconBtn" data-close="submitModal">✕</button></div>
+    <div id="submitChecklist"></div>
+    <div class="editorActionRow" style="margin-top:15px">
+      <button id="returnToEditBtn" class="ghostBtn">Seguir revisando</button>
+      <button id="confirmSubmitBtn" class="mainBtn">Entregar igualmente</button>
+    </div>
+  </div>
+</div>
+
+<div id="tutorialModal" class="modal" role="dialog" aria-modal="true">
+  <div class="dialog">
+    <div id="tutorialStage" class="tutorialStage"></div>
+    <div id="tutorialDots" class="tutorialDots"></div>
+    <div class="editorActionRow" style="justify-content:center">
+      <button id="tutorialSkipBtn" class="ghostBtn">Ya sé cómo funciona</button>
+      <button id="tutorialNextBtn" class="mainBtn">Siguiente</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastStack" class="toastStack" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+var GAME_ID="rayuela";
+var GAME_VERSION="1.0.0-beta";
+var STORAGE_KEY="LA_RAYUELA_PROJECT_V1";
+var DISCOVERY_KEY="LA_RAYUELA_DISCOVERIES_V1";
+var TUTORIAL_KEY="LA_RAYUELA_TUTORIAL_V1";
+var BRIDGE_NS_GAME="lenguarcade-game";
+var BRIDGE_NS_HOST="lenguarcade-host";
+var channel="";
+var integrated=false;
+var hostWindow=null;
+var bridgeReady=false;
+var bridgeInitialized=false;
+var bridgeSessionStarted=false;
+var pendingAchievementIds=new Set();
+var checkpointInFlight={};
+var checkpointTimer=null;
+var autosaveTimer=null;
+var selectedNodeId="";
+var placementMode=null;
+var linkMode=null;
+var genericPlacement=false;
+var zoom=1;
+var historyStack=[];
+var futureStack=[];
+var historyLock=false;
+var playState=null;
+var tutorialIndex=0;
+var dragState=null;
+var CELL_W=210;
+var CELL_H=150;
+var NODE_W=174;
+var NODE_H=106;
+
+var NODE_TYPES={
+  start:{label:"Inicio",icon:"🚩",color:"#22d3ee"},
+  story:{label:"Historia",icon:"📖",color:"#8b5cf6"},
+  decision:{label:"Decisión",icon:"🔀",color:"#c084fc"},
+  event:{label:"Evento",icon:"⚡",color:"#fb923c"},
+  item:{label:"Objeto",icon:"🎒",color:"#34d399"},
+  condition:{label:"Condición",icon:"🔐",color:"#fbbf24"},
+  ending:{label:"Final",icon:"🏁",color:"#fb7185"},
+  secret:{label:"Final secreto",icon:"👑",color:"#fbbf24"}
+};
+var ENDING_TYPES={
+  perfect:{label:"Final perfecto",icon:"🏆"},
+  good:{label:"Final bueno",icon:"🙂"},
+  neutral:{label:"Final neutral",icon:"😐"},
+  bad:{label:"Final malo",icon:"☠️"},
+  defeat:{label:"Derrota",icon:"💀"},
+  secret:{label:"Final secreto",icon:"👑"},
+  mystery:{label:"Final misterioso",icon:"❓"}
+};
+var ACHIEVEMENTS=[
+  {id:"first_step",icon:"🧱",title:"Primer paso",desc:"Crea tu primera escena nueva.",xp:5},
+  {id:"first_choice",icon:"🔀",title:"¿Y ahora qué?",desc:"Crea tu primera decisión conectada.",xp:10},
+  {id:"triple_path",icon:"🛣",title:"Tres caminos",desc:"Crea una escena con tres opciones.",xp:15},
+  {id:"four_options",icon:"🧭",title:"Encrucijada",desc:"Crea una escena con cuatro opciones.",xp:20},
+  {id:"nodes_10",icon:"🗺",title:"Cartógrafo",desc:"Alcanza 10 escenas.",xp:15},
+  {id:"nodes_25",icon:"🏗",title:"Arquitecto de mundos",desc:"Alcanza 25 escenas.",xp:25},
+  {id:"nodes_42",icon:"✨",title:"La respuesta definitiva",desc:"Exactamente 42 escenas. Casualidad, seguro.",xp:42,secret:true},
+  {id:"words_500",icon:"✍️",title:"Ya hay historia",desc:"Supera 500 palabras.",xp:15},
+  {id:"words_1500",icon:"📚",title:"Pluma incansable",desc:"Supera 1.500 palabras.",xp:25},
+  {id:"words_2500",icon:"🔥",title:"Escritor incansable",desc:"Supera 2.500 palabras.",xp:35},
+  {id:"words_exact_1000",icon:"🎯",title:"Mil exactas",desc:"Alcanza exactamente 1.000 palabras.",xp:20,secret:true},
+  {id:"ending_1",icon:"🏁",title:"Todo termina",desc:"Crea tu primer final.",xp:15},
+  {id:"ending_3",icon:"🎭",title:"Tres destinos",desc:"Crea tres finales distintos.",xp:20},
+  {id:"ending_5",icon:"🌌",title:"Multiverso",desc:"Crea cinco finales.",xp:30},
+  {id:"ending_7",icon:"🪐",title:"¿En cuántos universos estamos?",desc:"Crea siete finales.",xp:35,secret:true},
+  {id:"secret_ending",icon:"👑",title:"El camino oculto",desc:"Crea un final secreto.",xp:25},
+  {id:"reconnect",icon:"🪢",title:"Todo estaba planeado",desc:"Haz que dos caminos vuelvan a encontrarse.",xp:20},
+  {id:"cycle",icon:"🌀",title:"Otra vez aquí…",desc:"Crea un recorrido circular.",xp:20,secret:true},
+  {id:"choices_20",icon:"🎲",title:"Decisiones, decisiones",desc:"Supera 20 decisiones conectadas.",xp:25},
+  {id:"depth_10",icon:"🕳",title:"Muy adentro",desc:"Crea un recorrido de al menos 10 pasos.",xp:25},
+  {id:"chapters_3",icon:"📑",title:"Por capítulos",desc:"Organiza la aventura en tres zonas o capítulos.",xp:15},
+  {id:"item_used",icon:"🔑",title:"La llave maestra",desc:"Usa al menos un objeto narrativo.",xp:20},
+  {id:"variable_used",icon:"📈",title:"Variables invisibles",desc:"Haz que una escena cambie una variable.",xp:25},
+  {id:"dialogue",icon:"💬",title:"Que hablen",desc:"Incluye diálogo en varias escenas.",xp:15},
+  {id:"revision_10",icon:"🧽",title:"Corrector",desc:"Edita al menos diez veces tu historia.",xp:15},
+  {id:"playtest",icon:"🧪",title:"Probador oficial",desc:"Prueba tu propia aventura.",xp:10},
+  {id:"ending_found",icon:"🔍",title:"Explorador",desc:"Descubre un final jugando.",xp:10},
+  {id:"all_endings_found",icon:"🧿",title:"Lo he visto todo",desc:"Descubre todos tus finales.",xp:30},
+  {id:"clean_map",icon:"✅",title:"Sin cabos sueltos",desc:"Consigue que el inspector no muestre errores estructurales graves.",xp:30},
+  {id:"complexity_5",icon:"⭐",title:"Maestro de la Rayuela",desc:"Alcanza cinco estrellas de complejidad.",xp:40},
+  {id:"full_title",icon:"🎬",title:"Tiene nombre",desc:"Pon un título propio a tu aventura.",xp:5},
+  {id:"long_scene",icon:"📜",title:"Una escena para recordar",desc:"Escribe una escena de más de 250 palabras.",xp:15},
+  {id:"no_return",icon:"🚪",title:"No hay vuelta atrás",desc:"Crea un camino que no regresa a ninguna escena anterior.",xp:15},
+  {id:"all_types",icon:"🎨",title:"Caja de herramientas",desc:"Usa al menos cinco tipos diferentes de escena.",xp:20},
+  {id:"submitted",icon:"📬",title:"Rayuelista",desc:"Entrega tu primera aventura.",xp:50},
+  {id:"secret_phrase",icon:"🤫",title:"No pulses aquí",desc:"Alguien ha ignorado una advertencia muy clara.",xp:12,secret:true}
+];
+
+var OBJECTIVES=[
+  {id:"opening",label:"Escribe un comienzo",help:"Dale al lector una primera situación que despierte curiosidad.",xp:5},
+  {id:"firstDecision",label:"Crea tu primera decisión",help:"Añade al menos dos opciones que conduzcan a escenas distintas.",xp:10},
+  {id:"fiveNodes",label:"Haz crecer el mapa",help:"Alcanza al menos cinco escenas.",xp:10},
+  {id:"threeEndings",label:"Construye tres finales",help:"Que distintas decisiones tengan consecuencias reales.",xp:20},
+  {id:"meaningfulBranches",label:"Ramifica de verdad",help:"Crea al menos ocho decisiones conectadas.",xp:15},
+  {id:"connected",label:"Sin islas perdidas",help:"Todas las escenas deben poder alcanzarse desde el inicio.",xp:20},
+  {id:"playtested",label:"Prueba tu aventura",help:"Juega al menos un recorrido completo.",xp:10},
+  {id:"submitted",label:"Entrega tu Rayuela",help:"Congela una versión lista para evaluación.",xp:50}
+];
+
+var $=function(id){return document.getElementById(id);};
+function uid(prefix){return (prefix||"id")+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8);}
+function now(){return new Date().toISOString();}
+function esc(value){return String(value==null?"":value).replace(/[&<>"]/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch];});}
+function words(text){var m=String(text||"").trim().match(/\S+/g);return m?m.length:0;}
+function clone(value){return JSON.parse(JSON.stringify(value));}
+function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
+function isEnding(node){return node&&((node.type==="ending")||(node.type==="secret"));}
+function typeDef(node){return NODE_TYPES[node&&node.type]||NODE_TYPES.story;}
+function getNode(id){return project.nodes.find(function(n){return n.id===id;})||null;}
+function getStart(){return project.nodes.find(function(n){return n.type==="start";})||project.nodes[0]||null;}
+function getChoice(node,choiceId){return node&&node.choices.find(function(c){return c.id===choiceId;})||null;}
+function occupied(row,col,ignoreId){return project.nodes.some(function(n){return n.id!==ignoreId&&n.row===row&&n.col===col;});}
+function freshNode(type,row,col,title){
+  return {id:uid("node"),type:type||"story",title:title||"Nueva escena",text:"",row:row,col:col,chapter:"",image:"",endingType:type==="secret"?"secret":"good",choices:[],giveItem:"",requireItem:"",variable:"",variableDelta:0,updatedAt:now()};
+}
+function defaultProject(){
+  var start=freshNode("start",4,4,"Todo comienza aquí");
+  start.text="";
+  return {
+    schema:"rayuela-project-v1",version:GAME_VERSION,id:uid("rayuela"),title:"Mi aventura",genre:"Aventura",createdAt:now(),updatedAt:now(),
+    status:"draft",submittedAt:"",grid:{rows:9,cols:9},nodes:[start],xp:0,unlockedAchievements:[],objectiveRewards:[],
+    editCount:0,playTests:0,playthroughs:0,discoveredEndings:[],teacherComments:[],submissions:[],settings:{difficulty:"basic",sound:true},
+    variables:{},items:[],lastSavedAt:""
+  };
+}
+var project=defaultProject();
+
+function normalizeProject(raw){
+  if(!raw||typeof raw!=="object")return defaultProject();
+  var base=defaultProject();
+  var p=Object.assign(base,raw);
+  p.grid=Object.assign({rows:9,cols:9},raw.grid||{});
+  p.grid.rows=Math.max(9,Number(p.grid.rows||9));p.grid.cols=Math.max(9,Number(p.grid.cols||9));
+  p.nodes=Array.isArray(raw.nodes)?raw.nodes.map(function(n){
+    var nn=Object.assign(freshNode(n.type||"story",Number(n.row||0),Number(n.col||0),n.title||"Escena"),n);
+    nn.choices=Array.isArray(n.choices)?n.choices.map(function(c){return Object.assign({id:uid("choice"),text:"Decisión",targetId:"",requireItem:"",conditionVar:"",conditionOp:">=",conditionValue:0},c);}):[];
+    return nn;
+  }):base.nodes;
+  if(!p.nodes.some(function(n){return n.type==="start";})){
+    var s=freshNode("start",4,4,"Todo comienza aquí");p.nodes.unshift(s);
+  }
+  p.unlockedAchievements=Array.isArray(raw.unlockedAchievements)?raw.unlockedAchievements:[];
+  p.objectiveRewards=Array.isArray(raw.objectiveRewards)?raw.objectiveRewards:[];
+  p.discoveredEndings=Array.isArray(raw.discoveredEndings)?raw.discoveredEndings:[];
+  p.submissions=Array.isArray(raw.submissions)?raw.submissions:[];
+  p.variables=raw.variables&&typeof raw.variables==="object"?raw.variables:{};
+  p.items=Array.isArray(raw.items)?raw.items:[];
+  p.xp=Math.max(0,Number(raw.xp||0));p.editCount=Math.max(0,Number(raw.editCount||0));p.playTests=Math.max(0,Number(raw.playTests||0));p.playthroughs=Math.max(0,Number(raw.playthroughs||0));
+  return p;
+}
+
+function loadLocal(){
+  try{
+    var raw=localStorage.getItem(STORAGE_KEY);
+    if(raw)project=normalizeProject(JSON.parse(raw));
+  }catch(error){console.warn("No se pudo cargar Rayuela",error);project=defaultProject();}
+}
+function localPersist(){
+  project.updatedAt=now();project.lastSavedAt=now();
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(project));setSaveStatus("ok","✓ Guardado");}
+  catch(error){console.warn(error);setSaveStatus("error","⚠ Sin guardar");}
+}
+function setSaveStatus(cls,text){var el=$("saveBadge");el.className="saveBadge "+cls;el.textContent=text;}
+function scheduleSave(reason){
+  setSaveStatus("saving","Guardando…");
+  clearTimeout(autosaveTimer);
+  autosaveTimer=setTimeout(function(){localPersist();if(integrated)scheduleCheckpoint(reason||"autosave");},450);
+}
+function scheduleCheckpoint(reason){
+  clearTimeout(checkpointTimer);
+  checkpointTimer=setTimeout(function(){sendCheckpoint(reason||"autosave");},2200);
+}
+function historySnapshot(){return JSON.stringify(project);}
+function pushHistory(){
+  if(historyLock)return;
+  historyStack.push(historySnapshot());if(historyStack.length>40)historyStack.shift();futureStack=[];
+  updateHistoryButtons();
+}
+function restoreSnapshot(raw){
+  historyLock=true;
+  try{project=normalizeProject(JSON.parse(raw));selectedNodeId=getStart()?getStart().id:"";renderAll();scheduleSave("history");}
+  finally{historyLock=false;}
+}
+function undo(){if(!historyStack.length)return;futureStack.push(historySnapshot());restoreSnapshot(historyStack.pop());updateHistoryButtons();}
+function redo(){if(!futureStack.length)return;historyStack.push(historySnapshot());restoreSnapshot(futureStack.pop());updateHistoryButtons();}
+function updateHistoryButtons(){$("undoBtn").disabled=!historyStack.length;$("redoBtn").disabled=!futureStack.length;}
+
+function postToHost(type,payload){
+  if(!integrated||!channel)return;
+  var msg={namespace:BRIDGE_NS_GAME,channel:channel,gameId:GAME_ID,type:type,payload:payload||{}};
+  try{(hostWindow||window.parent).postMessage(msg,"*");}catch(error){console.warn("Bridge",error);}
+}
+function announceReady(){postToHost("READY",{version:GAME_VERSION});bridgeReady=true;}
+function startBridge(){
+  var params=new URLSearchParams(location.search);
+  channel=params.get("channel")||"";
+  integrated=params.get("lenguarcade")==="1"&&!!channel&&window.parent!==window;
+  if(integrated){
+    announceReady();
+    var timer=setInterval(function(){if(bridgeInitialized)clearInterval(timer);else announceReady();},700);
+    setTimeout(function(){clearInterval(timer);},15000);
+  }else{
+    loadLocal();bootProject();
+  }
+}
+function applyHostInit(payload){
+  var student=payload.student||{};
+  var label=student.nombre||student.name||student.displayName||student.email||"Autor conectado";
+  $("profileBadge").textContent="👤 "+label+(student.clase?" · "+student.clase:"");
+  if(payload.save&&typeof payload.save==="object")project=normalizeProject(payload.save);
+  else loadLocal();
+  bridgeInitialized=true;
+  postToHost("INITIALIZED",{projectId:project.id});
+  bootProject();
+}
+window.addEventListener("message",function(event){
+  var msg=event.data||{};
+  if(!integrated||msg.namespace!==BRIDGE_NS_HOST||msg.channel!==channel)return;
+  if(hostWindow&&event.source!==hostWindow)return;
+  if(msg.type==="INIT"){hostWindow=event.source;applyHostInit(msg.payload||{});}
+  if(msg.type==="REQUEST_EXIT"){sendCheckpoint("exit",true);setTimeout(function(){postToHost("CLOSE_READY",{});},500);}
+  if(msg.type==="CHECKPOINT_CONFIRMED"){
+    var id=msg.payload&&msg.payload.checkpointId;var list=checkpointInFlight[id]||[];
+    list.forEach(function(aid){pendingAchievementIds.delete(aid);});delete checkpointInFlight[id];setSaveStatus("ok","✓ Guardado");
+  }
+  if(msg.type==="CHECKPOINT_FAILED"){setSaveStatus("error","⚠ Reintentar");}
+  if(msg.type==="SAVE_CONFIRMED"){setSaveStatus("ok","✓ Entregado");}
+  if(msg.type==="SAVE_FAILED"){setSaveStatus("error","⚠ Entrega pendiente");toast("No se pudo guardar la entrega","Tu copia local sigue a salvo.");}
+});
+function ensureBridgeSession(){
+  if(integrated&&!bridgeSessionStarted){bridgeSessionStarted=true;postToHost("SESSION_STARTED",{projectId:project.id});}
+}
+function buildAchievementPayload(ids){
+  return ids.map(function(id){var a=ACHIEVEMENTS.find(function(x){return x.id===id;});return a?{id:a.id,title:a.title,description:a.desc,xpReward:a.xp,hidden:!!a.secret}:null;}).filter(Boolean);
+}
+function sendCheckpoint(reason,force){
+  if(!integrated)return;
+  var checkpointId="ray_cp_"+Date.now()+"_"+Math.random().toString(36).slice(2,6);
+  var ids=Array.from(pendingAchievementIds);
+  checkpointInFlight[checkpointId]=ids.slice();
+  postToHost("CHECKPOINT",{checkpointId:checkpointId,reason:reason||"autosave",players:[{role:"primary",save:clone(project),achievements:buildAchievementPayload(ids),metrics:bridgeMetrics()}]});
+  if(force)setSaveStatus("saving","Guardando…");
+}
+function bridgeMetrics(){
+  var s=computeStats();var issues=validateStory();
+  return {words:s.words,nodes:s.nodes,choices:s.connectedChoices,endings:s.endings,depth:s.depth,complexity:s.stars,quality:qualityScore(issues,s),submitted:project.status==="submitted",percentage:objectiveState().percent};
+}
+function sendSubmissionResult(){
+  if(!integrated)return;
+  var issues=validateStory(),s=computeStats(),quality=qualityScore(issues,s);
+  var ids=Array.from(pendingAchievementIds);
+  postToHost("RESULT",{
+    resultId:"rayuela_"+project.id+"_"+Date.now(),outcome:"finished",score:quality*10,totalWords:s.words,correct:Math.max(0,12-issues.filter(function(i){return i.severity==="error";}).length),
+    errors:issues.length,percentage:objectiveState().percent,xpGain:project.xp,finalGrade:Math.round(quality)/10,achievements:buildAchievementPayload(ids),save:clone(project),
+    metrics:bridgeMetrics()
+  });
+}
+
+function toast(title,text,kind){
+  var el=document.createElement("div");el.className="toast "+(kind||"");el.innerHTML="<strong>"+esc(title)+"</strong><span>"+esc(text||"")+"</span>";$("toastStack").appendChild(el);
+  setTimeout(function(){el.remove();},3600);
+}
+function awardAchievement(id){
+  if(project.unlockedAchievements.indexOf(id)!==-1)return false;
+  var a=ACHIEVEMENTS.find(function(x){return x.id===id;});if(!a)return false;
+  project.unlockedAchievements.push(id);project.xp+=Number(a.xp||0);pendingAchievementIds.add(id);
+  toast("🏆 "+a.title,a.desc+" · +"+a.xp+" XP","achievement");
+  scheduleSave("achievement");return true;
+}
+function awardObjective(id,xp){
+  if(project.objectiveRewards.indexOf(id)!==-1)return;
+  project.objectiveRewards.push(id);project.xp+=Number(xp||0);toast("🧭 Objetivo completado","+"+xp+" XP");scheduleSave("objective");
+}
+function evaluateAchievements(stats,issues){
+  var connected=stats.connectedChoices;
+  if(project.nodes.length>1)awardAchievement("first_step");
+  if(connected>=1)awardAchievement("first_choice");
+  if(project.nodes.some(function(n){return n.choices.filter(function(c){return c.targetId;}).length>=3;}))awardAchievement("triple_path");
+  if(project.nodes.some(function(n){return n.choices.filter(function(c){return c.targetId;}).length>=4;}))awardAchievement("four_options");
+  if(stats.nodes>=10)awardAchievement("nodes_10");if(stats.nodes>=25)awardAchievement("nodes_25");if(stats.nodes===42)awardAchievement("nodes_42");
+  if(stats.words>=500)awardAchievement("words_500");if(stats.words>=1500)awardAchievement("words_1500");if(stats.words>=2500)awardAchievement("words_2500");if(stats.words===1000)awardAchievement("words_exact_1000");
+  if(stats.endings>=1)awardAchievement("ending_1");if(stats.endings>=3)awardAchievement("ending_3");if(stats.endings>=5)awardAchievement("ending_5");if(stats.endings>=7)awardAchievement("ending_7");
+  if(project.nodes.some(function(n){return n.type==="secret"||n.endingType==="secret";}))awardAchievement("secret_ending");
+  if(stats.reconnects>0)awardAchievement("reconnect");if(stats.hasCycle)awardAchievement("cycle");if(connected>=20)awardAchievement("choices_20");if(stats.depth>=10)awardAchievement("depth_10");
+  if(stats.chapters>=3)awardAchievement("chapters_3");
+  if(project.nodes.some(function(n){return n.giveItem||n.requireItem||n.choices.some(function(c){return c.requireItem;});}))awardAchievement("item_used");
+  if(project.nodes.some(function(n){return n.variable&&Number(n.variableDelta||0)!==0;}))awardAchievement("variable_used");
+  if(stats.dialogueScenes>=3)awardAchievement("dialogue");if(project.editCount>=10)awardAchievement("revision_10");if(project.playTests>0)awardAchievement("playtest");
+  if(project.discoveredEndings.length>0)awardAchievement("ending_found");if(stats.endings>0&&project.discoveredEndings.length>=stats.endings)awardAchievement("all_endings_found");
+  if(!issues.some(function(i){return i.severity==="error";})&&stats.nodes>=5&&stats.endings>=1)awardAchievement("clean_map");
+  if(stats.stars>=5)awardAchievement("complexity_5");
+  if(project.title&&project.title!=="Mi aventura")awardAchievement("full_title");
+  if(project.nodes.some(function(n){return words(n.text)>=250;}))awardAchievement("long_scene");
+  if(stats.deadEndBranches>0)awardAchievement("no_return");
+  if(stats.types>=5)awardAchievement("all_types");
+  if(project.status==="submitted")awardAchievement("submitted");
+}
+function objectiveState(){
+  var s=computeStats(),reach=reachableSet(),start=getStart();
+  var checks={
+    opening:!!(start&&words(start.text)>=35),
+    firstDecision:!!(start&&start.choices.filter(function(c){return c.targetId;}).length>=2)||s.connectedChoices>=2,
+    fiveNodes:s.nodes>=5,
+    threeEndings:s.endings>=3,
+    meaningfulBranches:s.connectedChoices>=8,
+    connected:reach.size===s.nodes,
+    playtested:project.playTests>0,
+    submitted:project.status==="submitted"
+  };
+  var done=OBJECTIVES.filter(function(o){return checks[o.id];}).length;
+  return {checks:checks,done:done,total:OBJECTIVES.length,percent:Math.round(done/OBJECTIVES.length*100)};
+}
+function evaluateObjectives(){
+  var st=objectiveState();
+  OBJECTIVES.forEach(function(o){if(st.checks[o.id])awardObjective(o.id,o.xp);});
+  return st;
+}
+
+function reachableSet(startId){
+  var start=startId||((getStart()||{}).id);var set=new Set();if(!start)return set;var queue=[start];
+  while(queue.length){var id=queue.shift();if(set.has(id))continue;set.add(id);var n=getNode(id);if(!n)continue;n.choices.forEach(function(c){if(c.targetId&&!set.has(c.targetId))queue.push(c.targetId);});}
+  return set;
+}
+function reverseEndingReachable(){
+  var endings=new Set(project.nodes.filter(isEnding).map(function(n){return n.id;}));var reverse={};
+  project.nodes.forEach(function(n){n.choices.forEach(function(c){if(c.targetId){(reverse[c.targetId]||(reverse[c.targetId]=[])).push(n.id);}});});
+  var queue=Array.from(endings),set=new Set(queue);
+  while(queue.length){var id=queue.shift();(reverse[id]||[]).forEach(function(src){if(!set.has(src)){set.add(src);queue.push(src);}});}
+  return set;
+}
+function detectCycle(){
+  var visiting=new Set(),visited=new Set(),has=false;
+  function dfs(id){if(has)return;if(visiting.has(id)){has=true;return;}if(visited.has(id))return;visiting.add(id);var n=getNode(id);if(n)n.choices.forEach(function(c){if(c.targetId)dfs(c.targetId);});visiting.delete(id);visited.add(id);}
+  var s=getStart();if(s)dfs(s.id);return has;
+}
+function maxDepth(){
+  var s=getStart();if(!s)return 0;var best=0;
+  function dfs(id,seen,depth){best=Math.max(best,depth);if(depth>60)return;var n=getNode(id);if(!n)return;n.choices.forEach(function(c){if(c.targetId&&!seen.has(c.targetId)){var ns=new Set(seen);ns.add(c.targetId);dfs(c.targetId,ns,depth+1);}});}
+  dfs(s.id,new Set([s.id]),0);return best;
+}
+function computeStats(){
+  var nodeCount=project.nodes.length,choiceCount=0,connected=0,endings=0,totalWords=0,chapters=new Set(),types=new Set(),dialogue=0,maxScene=0;
+  var indegree={},outdegree={};
+  project.nodes.forEach(function(n){
+    types.add(n.type);if(n.chapter)chapters.add(n.chapter.trim().toLowerCase());var w=words(n.text);totalWords+=w;maxScene=Math.max(maxScene,w);
+    if(/[—\-]["“«]?[A-Za-zÁÉÍÓÚáéíóúÑñ]|[«“"].+?[»”"]/.test(n.text||""))dialogue++;
+    if(isEnding(n))endings++;
+    choiceCount+=n.choices.length;outdegree[n.id]=n.choices.filter(function(c){return c.targetId;}).length;
+    n.choices.forEach(function(c){if(c.targetId){connected++;indegree[c.targetId]=(indegree[c.targetId]||0)+1;}});
+  });
+  var reconnects=Object.keys(indegree).filter(function(id){return indegree[id]>1;}).length;
+  var depth=maxDepth(),cycle=detectCycle(),reach=reachableSet(),deadEndBranches=project.nodes.filter(function(n){return !isEnding(n)&&n.id!==(getStart()||{}).id&&(outdegree[n.id]||0)===0&&reach.has(n.id);}).length;
+  var stars=0;
+  if(nodeCount>=5&&connected>=3)stars=1;if(nodeCount>=10&&connected>=8&&endings>=2)stars=2;if(nodeCount>=16&&connected>=14&&endings>=3&&depth>=6)stars=3;
+  if(nodeCount>=22&&connected>=20&&endings>=4&&depth>=8&&(reconnects>0||cycle))stars=4;
+  if(nodeCount>=28&&connected>=28&&endings>=5&&depth>=10&&reconnects>0&&reach.size===nodeCount)stars=5;
+  return {nodes:nodeCount,choices:choiceCount,connectedChoices:connected,endings:endings,words:totalWords,chapters:chapters.size,types:types.size,dialogueScenes:dialogue,maxSceneWords:maxScene,reconnects:reconnects,depth:depth,hasCycle:cycle,reachable:reach.size,deadEndBranches:deadEndBranches,stars:stars};
+}
+function validateStory(){
+  var issues=[],start=getStart(),reach=reachableSet(),toEnding=reverseEndingReachable();
+  if(!start)issues.push({severity:"error",code:"no_start",text:"No existe una escena de inicio."});
+  project.nodes.forEach(function(n){
+    if(!String(n.text||"").trim())issues.push({severity:"warning",code:"empty_text",nodeId:n.id,text:"«"+n.title+"» todavía no tiene texto."});
+    if(!isEnding(n)&&n.choices.length===0)issues.push({severity:"error",code:"dead_end",nodeId:n.id,text:"«"+n.title+"» termina sin decisión ni final."});
+    if(isEnding(n)&&n.choices.some(function(c){return c.targetId;}))issues.push({severity:"warning",code:"ending_choices",nodeId:n.id,text:"El final «"+n.title+"» todavía tiene salidas."});
+    n.choices.forEach(function(c){
+      if(!c.text.trim())issues.push({severity:"warning",code:"empty_choice",nodeId:n.id,text:"Hay una decisión sin texto en «"+n.title+"»."});
+      if(!c.targetId)issues.push({severity:"error",code:"no_target",nodeId:n.id,text:"Una decisión de «"+n.title+"» no tiene destino."});
+      else if(!getNode(c.targetId))issues.push({severity:"error",code:"broken_target",nodeId:n.id,text:"Una conexión de «"+n.title+"» apunta a una escena inexistente."});
+    });
+    var targets=n.choices.map(function(c){return c.targetId;}).filter(Boolean);if(new Set(targets).size<targets.length)issues.push({severity:"warning",code:"same_target",nodeId:n.id,text:"Dos decisiones de «"+n.title+"» conducen al mismo destino."});
+    if(start&&n.id!==start.id&&!reach.has(n.id))issues.push({severity:"error",code:"unreachable",nodeId:n.id,text:"«"+n.title+"» no puede alcanzarse desde el inicio."});
+    if(start&&reach.has(n.id)&&!isEnding(n)&&!toEnding.has(n.id))issues.push({severity:"warning",code:"no_ending_path",nodeId:n.id,text:"Desde «"+n.title+"» no se llega a ningún final."});
+  });
+  var s=computeStats();
+  if(s.endings===0)issues.push({severity:"error",code:"no_endings",text:"La historia todavía no tiene ningún final."});
+  if(s.connectedChoices<2)issues.push({severity:"warning",code:"low_branching",text:"La aventura casi no se ramifica todavía."});
+  return issues;
+}
+function qualityScore(issues,stats){
+  var score=100;issues.forEach(function(i){score-=i.severity==="error"?9:3;});
+  if(stats.endings<3)score-=Math.max(0,3-stats.endings)*5;if(stats.connectedChoices<8)score-=Math.max(0,8-stats.connectedChoices)*2;if(stats.words<500)score-=10;
+  if(stats.reconnects>0)score+=3;if(stats.depth>=8)score+=3;if(stats.stars>=4)score+=4;
+  return clamp(Math.round(score),0,100);
+}
+
+function renderAll(){
+  $("projectTitle").value=project.title||"Mi aventura";$("xpValue").textContent=project.xp;
+  renderBoard();renderEditor();renderCompass();renderMetrics();renderInspectorPreview();renderAchievementPreview();updateHistoryButtons();
+  evaluateObjectives();var issues=validateStory(),s=computeStats();evaluateAchievements(s,issues);
+  $("xpValue").textContent=project.xp;
+}
+function renderCompass(){
+  var st=objectiveState();$("objectiveList").innerHTML=OBJECTIVES.map(function(o){
+    var done=!!st.checks[o.id];return '<div class="objective '+(done?'done':'')+'"><div class="objectiveIcon">'+(done?'✓':'○')+'</div><div><strong>'+esc(o.label)+'</strong><small>'+esc(o.help)+'</small></div><span class="objectiveXp">+'+o.xp+' XP</span></div>';
+  }).join("");$("objectiveProgress").style.width=st.percent+"%";
+}
+function renderMetrics(){
+  var s=computeStats();$("metrics").innerHTML=[
+    ["Escenas",s.nodes],["Decisiones",s.connectedChoices],["Finales",s.endings],["Palabras",s.words.toLocaleString("es-ES")],["Profundidad",s.depth],["Capítulos",s.chapters]
+  ].map(function(m){return '<div class="metric"><span>'+m[0]+'</span><b>'+m[1]+'</b></div>';}).join("");
+  $("complexityStars").textContent="★★★★★".slice(0,s.stars)+"☆☆☆☆☆".slice(0,5-s.stars);
+}
+function renderInspectorPreview(){
+  var issues=validateStory(),errors=issues.filter(function(i){return i.severity==="error";}).length;
+  var summary=$("inspectorSummary");summary.className="inspectorSummary "+(errors===0?"clean":"");
+  summary.innerHTML='<div class="inspectorCount">'+errors+'</div><div><strong>'+(errors===0?'Estructura sólida':'Problemas estructurales')+'</strong><div class="muted" style="font-size:9px;margin-top:2px">'+issues.length+' avisos en total</div></div>';
+  $("inspectorIssues").innerHTML=issues.slice(0,3).map(function(i){return '<div class="issue '+(i.severity==="error"?"error":"")+'" data-node="'+esc(i.nodeId||"")+'">'+esc(i.text)+'</div>';}).join("")||(computeStats().nodes<5?'<div class="muted" style="font-size:10px">El inspector tendrá más que decir cuando el mapa crezca.</div>':'<div class="muted" style="font-size:10px">✓ No hay avisos importantes.</div>');
+  $("inspectorIssues").querySelectorAll("[data-node]").forEach(function(el){el.onclick=function(){if(el.dataset.node)selectNode(el.dataset.node,true);};});
+}
+function renderAchievementPreview(){
+  var unlocked=project.unlockedAchievements.slice().reverse();var ids=unlocked.slice(0,3);
+  if(ids.length<3)ACHIEVEMENTS.filter(function(a){return !a.secret&&unlocked.indexOf(a.id)===-1;}).slice(0,3-ids.length).forEach(function(a){ids.push(a.id);});
+  $("achievementPreview").innerHTML=ids.map(function(id){var a=ACHIEVEMENTS.find(function(x){return x.id===id;}),got=unlocked.indexOf(id)!==-1;return '<div class="achievementMini '+(got?'':'locked')+'"><span style="font-size:18px">'+(got?a.icon:'🔒')+'</span><div><strong>'+esc(got?a.title:"Por descubrir")+'</strong><div class="muted">'+esc(got?a.desc:"Sigue construyendo…")+'</div></div></div>';}).join("");
+}
+function renderBoard(){
+  var board=$("board"),scaler=$("boardScaler"),w=project.grid.cols*CELL_W,h=project.grid.rows*CELL_H;
+  board.style.width=w+"px";board.style.height=h+"px";scaler.style.width=(w*zoom)+"px";scaler.style.height=(h*zoom)+"px";board.style.transform="scale("+zoom+")";board.style.transformOrigin="0 0";
+  var html=[];
+  for(var r=0;r<project.grid.rows;r++)for(var c=0;c<project.grid.cols;c++){
+    var cls="gridCell";if((placementMode||genericPlacement)&&!occupied(r,c))cls+=" placeable";if(r===Math.floor(project.grid.rows/2)&&c===Math.floor(project.grid.cols/2))cls+=" centerCell";
+    html.push('<div class="'+cls+'" data-row="'+r+'" data-col="'+c+'" style="left:'+(c*CELL_W)+'px;top:'+(r*CELL_H)+'px"></div>');
+  }
+  html.push('<svg id="edgeSvg" class="edgeSvg" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'"><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="rgba(148,163,184,.7)"></path></marker></defs></svg>');
+  var start=getStart();if(start)html.push('<div class="tizaHint" style="left:'+(start.col*CELL_W-50)+'px;top:'+(start.row*CELL_H+117)+'px">1 · 2 · 3 · salta</div>');
+  if(project.nodes.length<=2)html.push('<div class="emptyMessage" style="left:'+(Math.max(0,(start?start.col:4)*CELL_W-55))+'px;top:'+(Math.max(0,(start?start.row:4)*CELL_H-190))+'px">Tu mundo todavía está vacío.<br>Haz que una decisión abra el primer camino.</div>');
+  project.nodes.forEach(function(n){
+    var def=typeDef(n),left=n.col*CELL_W+18,top=n.row*CELL_H+20,sel=n.id===selectedNodeId?" selected":"",link=linkMode&&n.id!==linkMode.sourceId?" linkTarget":"";
+    html.push('<article class="nodeCard'+sel+link+'" data-node="'+esc(n.id)+'" style="--node:'+def.color+';left:'+left+'px;top:'+top+'px"><div class="nodeStripe"></div><div class="nodeHead"><div class="nodeIcon">'+def.icon+'</div><div style="min-width:0"><strong>'+esc(n.title||def.label)+'</strong><div class="nodeType">'+esc(def.label)+(n.chapter?' · '+esc(n.chapter):'')+'</div></div></div><div class="nodeExcerpt">'+esc((n.text||"").slice(0,105)||(isEnding(n)?"Aquí termina este camino.":"Aún no has escrito esta escena."))+'</div><div class="nodeFoot"><span class="nodeBadge">'+n.choices.filter(function(c){return c.targetId;}).length+' salidas</span><span>'+words(n.text)+' palabras</span></div></article>');
+  });
+  board.innerHTML=html.join("");
+  renderEdges();
+  board.querySelectorAll(".gridCell.placeable").forEach(function(cell){cell.onclick=function(e){e.stopPropagation();handleCellPlacement(Number(cell.dataset.row),Number(cell.dataset.col));};});
+  board.querySelectorAll(".nodeCard").forEach(function(card){
+    card.onclick=function(e){e.stopPropagation();if(linkMode){completeLink(card.dataset.node);return;}selectNode(card.dataset.node,false);};
+    card.ondblclick=function(e){e.stopPropagation();selectNode(card.dataset.node,true);};
+    card.onpointerdown=function(e){if(e.button!==0||linkMode||placementMode||genericPlacement)return;beginDrag(e,card);};
+  });
+  $("zoomLabel").textContent=Math.round(zoom*100)+"%";
+}
+function edgePoint(n){return {x:n.col*CELL_W+18+NODE_W/2,y:n.row*CELL_H+20+NODE_H/2};}
+function renderEdges(){
+  var svg=$("edgeSvg");if(!svg)return;var parts=['<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="rgba(148,163,184,.7)"></path></marker></defs>'];
+  project.nodes.forEach(function(n){
+    var a=edgePoint(n);n.choices.forEach(function(c,idx){var t=getNode(c.targetId);if(!t)return;var b=edgePoint(t),dx=Math.max(50,Math.abs(b.x-a.x)*.42),path="M "+a.x+" "+a.y+" C "+(a.x+(b.x>=a.x?dx:-dx))+" "+a.y+", "+(b.x-(b.x>=a.x?dx:-dx))+" "+b.y+", "+b.x+" "+b.y;
+      var cls="edgePath"+((t.type==="secret"||t.endingType==="secret")?" secret":"");var mx=(a.x+b.x)/2,my=(a.y+b.y)/2-6;
+      parts.push('<path class="'+cls+'" d="'+path+'" marker-end="url(#arrow)"></path><text class="edgeLabel" x="'+mx+'" y="'+my+'" text-anchor="middle">'+(idx+1)+'</text>');
+    });
+  });svg.innerHTML=parts.join("");
+}
+function centerOnNode(id){
+  var n=getNode(id);if(!n)return;var vp=$("boardViewport"),x=(n.col*CELL_W+CELL_W/2)*zoom-vp.clientWidth/2,y=(n.row*CELL_H+CELL_H/2)*zoom-vp.clientHeight/2;
+  vp.scrollTo({left:Math.max(0,x),top:Math.max(0,y),behavior:"smooth"});
+}
+function selectNode(id,focusText){
+  selectedNodeId=id;renderBoard();renderEditor();if(focusText)setTimeout(function(){$("nodeText").focus();},0);
+  if(window.innerWidth<=900){$("rightPanel").classList.add("mobileOpen");$("leftPanel").classList.remove("mobileOpen");}
+}
+function renderEditor(){
+  var n=getNode(selectedNodeId);
+  $("editorEmpty").classList.toggle("hidden",!!n);$("nodeEditor").classList.toggle("hidden",!n);if(!n)return;
+  $("editorHeading").textContent=n.title||typeDef(n).label;
+  fillSelect($("nodeType"),NODE_TYPES,n.type);fillSelect($("endingType"),ENDING_TYPES,n.endingType||"good");
+  $("nodeTitle").value=n.title||"";$("nodeChapter").value=n.chapter||"";$("nodeText").value=n.text||"";$("nodeImage").value=n.image||"";
+  $("nodeGiveItem").value=n.giveItem||"";$("nodeRequireItem").value=n.requireItem||"";$("nodeVariable").value=n.variable||"";$("nodeVariableDelta").value=Number(n.variableDelta||0);
+  $("nodeWordCount").textContent=words(n.text)+" palabras";$("endingFields").classList.toggle("hidden",!isEnding(n));$("choicesSection").classList.toggle("hidden",isEnding(n));
+  $("deleteNodeBtn").disabled=n.type==="start";$("duplicateNodeBtn").disabled=n.type==="start";
+  renderChoices(n);
+}
+function fillSelect(select,map,value){
+  select.innerHTML=Object.keys(map).map(function(k){return '<option value="'+k+'">'+esc((map[k].icon||"")+" "+map[k].label)+'</option>';}).join("");select.value=value;
+}
+function renderChoices(n){
+  $("choiceList").innerHTML=n.choices.map(function(c,idx){
+    var target=getNode(c.targetId),targetText=target?(typeDef(target).icon+" "+target.title):"Sin destino";
+    return '<div class="choiceRow" data-choice="'+esc(c.id)+'"><div class="choiceTop"><input data-role="choiceText" maxlength="120" value="'+esc(c.text||"")+'" placeholder="¿Qué puede elegir el lector?"><button data-role="removeChoice" class="iconBtn" style="width:30px;height:30px">✕</button></div><div class="choiceTarget">→ '+esc(targetText)+'</div><div class="choiceButtons"><button data-role="createTarget" class="smallBtn">＋ Crear continuación</button><button data-role="linkTarget" class="smallBtn">🔗 Enlazar existente</button>'+(c.targetId?'<button data-role="unlink" class="smallBtn">⛓ Quitar enlace</button>':'')+'</div><details class="advancedBox"><summary>Condiciones de esta decisión</summary><div class="field" style="margin-top:8px"><label>Requiere objeto</label><input data-role="choiceItem" maxlength="40" value="'+esc(c.requireItem||"")+'" placeholder="Ej.: Llave"></div><div class="field"><label>Variable</label><input data-role="choiceVar" maxlength="30" value="'+esc(c.conditionVar||"")+'" placeholder="Ej.: valentia"></div><div style="display:grid;grid-template-columns:80px 1fr;gap:7px"><select data-role="choiceOp"><option value=">=">&gt;=</option><option value=">">&gt;</option><option value="=">=</option><option value="<=">&lt;=</option><option value="<">&lt;</option></select><input data-role="choiceVal" type="number" value="'+Number(c.conditionValue||0)+'"></div></details></div>';
+  }).join("")||'<div class="muted" style="font-size:10px">Añade una opción para que la historia pueda continuar.</div>';
+  $("choiceList").querySelectorAll(".choiceRow").forEach(function(row){
+    var cid=row.dataset.choice,c=getChoice(n,cid);
+    row.querySelector('[data-role="choiceText"]').oninput=function(e){mutateText(function(){c.text=e.target.value;});};
+    row.querySelector('[data-role="removeChoice"]').onclick=function(){pushHistory();n.choices=n.choices.filter(function(x){return x.id!==cid;});project.editCount++;renderAll();scheduleSave("choice_removed");};
+    row.querySelector('[data-role="createTarget"]').onclick=function(){startPlacement(n.id,cid);};
+    row.querySelector('[data-role="linkTarget"]').onclick=function(){startLink(n.id,cid);};
+    var unlink=row.querySelector('[data-role="unlink"]');if(unlink)unlink.onclick=function(){pushHistory();c.targetId="";project.editCount++;cancelModes();renderAll();scheduleSave("unlink");};
+    row.querySelector('[data-role="choiceItem"]').oninput=function(e){c.requireItem=e.target.value;scheduleSave("choice_condition");};
+    row.querySelector('[data-role="choiceVar"]').oninput=function(e){c.conditionVar=e.target.value;scheduleSave("choice_condition");};
+    var op=row.querySelector('[data-role="choiceOp"]');op.value=c.conditionOp||">=";op.onchange=function(e){c.conditionOp=e.target.value;scheduleSave("choice_condition");};
+    row.querySelector('[data-role="choiceVal"]').oninput=function(e){c.conditionValue=Number(e.target.value||0);scheduleSave("choice_condition");};
+  });
+}
+var textMutationTimer=null;
+function mutateText(fn){
+  fn();var n=getNode(selectedNodeId);if(n)n.updatedAt=now();project.editCount++;clearTimeout(textMutationTimer);textMutationTimer=setTimeout(function(){renderCompass();renderMetrics();renderInspectorPreview();renderAchievementPreview();evaluateObjectives();evaluateAchievements(computeStats(),validateStory());$("xpValue").textContent=project.xp;scheduleSave("edit");},350);
+}
+function bindEditor(){
+  $("nodeType").onchange=function(e){var n=getNode(selectedNodeId);if(!n)return;pushHistory();n.type=e.target.value;if(n.type==="start")project.nodes.forEach(function(o){if(o.id!==n.id&&o.type==="start")o.type="story";});if(n.type==="secret")n.endingType="secret";project.editCount++;renderAll();scheduleSave("type");};
+  $("nodeTitle").oninput=function(e){var n=getNode(selectedNodeId);if(!n)return;n.title=e.target.value;n.updatedAt=now();project.editCount++;$("editorHeading").textContent=n.title||typeDef(n).label;renderBoard();scheduleSave("title");};
+  $("nodeChapter").oninput=function(e){var n=getNode(selectedNodeId);if(!n)return;n.chapter=e.target.value;project.editCount++;scheduleSave("chapter");renderBoard();};
+  $("nodeText").oninput=function(e){var n=getNode(selectedNodeId);if(!n)return;n.text=e.target.value;$("nodeWordCount").textContent=words(n.text)+" palabras";mutateText(function(){});renderBoard();};
+  $("nodeImage").oninput=function(e){var n=getNode(selectedNodeId);if(n){n.image=e.target.value;scheduleSave("image");}};
+  $("endingType").onchange=function(e){var n=getNode(selectedNodeId);if(n){n.endingType=e.target.value;scheduleSave("ending");}};
+  $("nodeGiveItem").oninput=function(e){var n=getNode(selectedNodeId);if(n){n.giveItem=e.target.value;scheduleSave("advanced");}};
+  $("nodeRequireItem").oninput=function(e){var n=getNode(selectedNodeId);if(n){n.requireItem=e.target.value;scheduleSave("advanced");}};
+  $("nodeVariable").oninput=function(e){var n=getNode(selectedNodeId);if(n){n.variable=e.target.value;scheduleSave("advanced");}};
+  $("nodeVariableDelta").oninput=function(e){var n=getNode(selectedNodeId);if(n){n.variableDelta=Number(e.target.value||0);scheduleSave("advanced");}};
+}
+function addChoice(){
+  var n=getNode(selectedNodeId);if(!n||isEnding(n)||n.choices.length>=4)return;
+  pushHistory();n.choices.push({id:uid("choice"),text:"",targetId:"",requireItem:"",conditionVar:"",conditionOp:">=",conditionValue:0});project.editCount++;renderEditor();renderBoard();scheduleSave("choice");
+}
+function startPlacement(sourceId,choiceId){placementMode={sourceId:sourceId,choiceId:choiceId};linkMode=null;genericPlacement=false;setMode("Haz clic en una casilla vacía para crear la continuación.");renderBoard();}
+function startGenericPlacement(){genericPlacement=true;placementMode=null;linkMode=null;setMode("Elige una casilla vacía para crear una nueva escena.");renderBoard();}
+function startLink(sourceId,choiceId){linkMode={sourceId:sourceId,choiceId:choiceId};placementMode=null;genericPlacement=false;setMode("Haz clic en la escena existente que será el destino.");renderBoard();}
+function setMode(text){$("modeBanner").classList.add("active");$("modeText").textContent=text;}
+function cancelModes(){placementMode=null;linkMode=null;genericPlacement=false;$("modeBanner").classList.remove("active");renderBoard();}
+function handleCellPlacement(row,col){
+  if(occupied(row,col))return;
+  pushHistory();var node=freshNode("story",row,col,"Nueva escena");project.nodes.push(node);project.editCount++;
+  if(placementMode){var src=getNode(placementMode.sourceId),choice=getChoice(src,placementMode.choiceId);if(choice)choice.targetId=node.id;}
+  selectedNodeId=node.id;growIfNeeded(node);cancelModes();renderAll();scheduleSave("node_created");setTimeout(function(){centerOnNode(node.id);$("nodeText").focus();},60);
+}
+function completeLink(targetId){
+  if(!linkMode||targetId===linkMode.sourceId)return;pushHistory();var src=getNode(linkMode.sourceId),c=getChoice(src,linkMode.choiceId);if(c)c.targetId=targetId;project.editCount++;selectedNodeId=src.id;cancelModes();renderAll();scheduleSave("link");
+}
+function growIfNeeded(node){
+  var changed=false;
+  if(node.row<=1){project.nodes.forEach(function(n){n.row+=2;});project.grid.rows+=2;changed=true;}
+  if(node.col<=1){project.nodes.forEach(function(n){n.col+=2;});project.grid.cols+=2;changed=true;}
+  if(node.row>=project.grid.rows-2){project.grid.rows+=2;changed=true;}
+  if(node.col>=project.grid.cols-2){project.grid.cols+=2;changed=true;}
+  if(changed)toast("🗺 El mapa ha crecido","Tu historia necesitaba más espacio.");
+}
+function expandMap(){pushHistory();project.grid.rows+=2;project.grid.cols+=2;project.nodes.forEach(function(n){n.row+=1;n.col+=1;});renderAll();scheduleSave("expand");toast("Mapa ampliado","Dos filas y dos columnas nuevas.");}
+function deleteSelected(){
+  var n=getNode(selectedNodeId);if(!n||n.type==="start")return;pushHistory();project.nodes=project.nodes.filter(function(x){return x.id!==n.id;});project.nodes.forEach(function(x){x.choices.forEach(function(c){if(c.targetId===n.id)c.targetId="";});});selectedNodeId=(getStart()||{}).id||"";project.editCount++;renderAll();scheduleSave("delete");
+}
+function duplicateSelected(){
+  var n=getNode(selectedNodeId);if(!n||n.type==="start")return;var row=n.row,col=n.col+1;if(occupied(row,col)){row=n.row+1;col=n.col;}if(occupied(row,col)){startGenericPlacement();toast("Elige dónde copiarla","No hay una casilla libre junto a la escena.");return;}
+  pushHistory();var copy=clone(n);copy.id=uid("node");copy.title=(n.title||"Escena")+" · copia";copy.row=row;copy.col=col;copy.choices=[];project.nodes.push(copy);selectedNodeId=copy.id;growIfNeeded(copy);project.editCount++;renderAll();scheduleSave("duplicate");
+}
+function beginDrag(e,card){
+  var n=getNode(card.dataset.node);if(!n)return;dragState={nodeId:n.id,startX:e.clientX,startY:e.clientY,startLeft:n.col*CELL_W+18,startTop:n.row*CELL_H+20,card:card,origRow:n.row,origCol:n.col,moved:false};card.classList.add("dragging");card.setPointerCapture(e.pointerId);
+  card.onpointermove=dragMove;card.onpointerup=dragEnd;card.onpointercancel=dragEnd;
+}
+function dragMove(e){
+  if(!dragState)return;var dx=(e.clientX-dragState.startX)/zoom,dy=(e.clientY-dragState.startY)/zoom;if(Math.abs(dx)+Math.abs(dy)>5)dragState.moved=true;
+  dragState.card.style.left=(dragState.startLeft+dx)+"px";dragState.card.style.top=(dragState.startTop+dy)+"px";
+}
+function dragEnd(e){
+  if(!dragState)return;var d=dragState,n=getNode(d.nodeId);d.card.classList.remove("dragging");d.card.onpointermove=null;d.card.onpointerup=null;d.card.onpointercancel=null;
+  if(d.moved&&n){var left=parseFloat(d.card.style.left)-18,top=parseFloat(d.card.style.top)-20,newCol=clamp(Math.round(left/CELL_W),0,project.grid.cols-1),newRow=clamp(Math.round(top/CELL_H),0,project.grid.rows-1);
+    if(!occupied(newRow,newCol,n.id)){pushHistory();n.row=newRow;n.col=newCol;growIfNeeded(n);project.editCount++;scheduleSave("move");}
+  }
+  dragState=null;renderBoard();
+}
+
+function choiceAllowed(c,inventory,vars){
+  if(c.requireItem&&inventory.indexOf(c.requireItem)===-1)return false;
+  if(c.conditionVar){var a=Number(vars[c.conditionVar]||0),b=Number(c.conditionValue||0);if(c.conditionOp===">="&&!(a>=b))return false;if(c.conditionOp===">"&&!(a>b))return false;if(c.conditionOp==="="&&!(a===b))return false;if(c.conditionOp==="<="&&!(a<=b))return false;if(c.conditionOp==="<"&&!(a<b))return false;}
+  return true;
+}
+function startPlay(nodeId){
+  var start=getNode(nodeId)||getStart();if(!start)return;
+  project.playTests++;ensureBridgeSession();awardAchievement("playtest");scheduleSave("playtest");
+  playState={nodeId:start.id,path:[start.id],inventory:[],vars:clone(project.variables||{}),startedAt:now(),testStart:nodeId||""};$("playModal").classList.add("open");$("playProjectTitle").textContent=project.title||"Rayuela";renderPlayNode();
+}
+function applyNodeEffects(n){
+  if(n.requireItem&&playState.inventory.indexOf(n.requireItem)===-1)return false;
+  if(n.giveItem&&playState.inventory.indexOf(n.giveItem)===-1)playState.inventory.push(n.giveItem);
+  if(n.variable){playState.vars[n.variable]=Number(playState.vars[n.variable]||0)+Number(n.variableDelta||0);}
+  return true;
+}
+function renderPlayNode(){
+  if(!playState)return;var n=getNode(playState.nodeId);if(!n)return;
+  applyNodeEffects(n);$("playInventory").textContent=playState.inventory.length?"🎒 "+playState.inventory.join(" · "):"🎒 Vacío";$("playPathLabel").textContent=Math.max(0,playState.path.length-1)+" decisiones";$("playEndingLabel").textContent=project.discoveredEndings.length+" finales descubiertos";
+  if(isEnding(n)){renderEnding(n);return;}
+  var allowed=n.choices.filter(function(c){return c.targetId&&getNode(c.targetId)&&choiceAllowed(c,playState.inventory,playState.vars);});
+  var img=n.image?'<img class="storyImage" src="'+esc(n.image)+'" alt="">':"";
+  var choices=allowed.map(function(c){return '<button class="storyChoice" data-choice="'+esc(c.id)+'">'+esc(c.text||"Continuar")+'</button>';}).join("");
+  if(!allowed.length)choices='<div class="muted" style="margin-top:20px">Este camino se ha quedado sin salida. Vuelve al editor y revisa sus conexiones.</div>';
+  $("playContent").innerHTML='<article class="storyCard">'+img+'<div class="storyEyebrow">'+esc(n.chapter||typeDef(n).label)+'</div><h1>'+esc(n.title||"Escena")+'</h1><div class="storyText">'+esc(n.text||"Esta escena todavía no tiene texto.")+'</div><div class="storyChoices">'+choices+'</div></article>';
+  $("playContent").querySelectorAll("[data-choice]").forEach(function(btn){btn.onclick=function(){var c=getChoice(n,btn.dataset.choice);if(!c)return;if(String(c.text||"").trim().toLowerCase()==="no pulses aquí"){awardAchievement("secret_phrase");toast("💥 Lo has pulsado","Tiza te mira con profunda decepción.","achievement");}playState.nodeId=c.targetId;playState.path.push(c.targetId);renderPlayNode();};});
+}
+function renderEnding(n){
+  if(project.discoveredEndings.indexOf(n.id)===-1){project.discoveredEndings.push(n.id);awardAchievement("ending_found");scheduleSave("ending_discovered");}
+  project.playthroughs++;var s=computeStats();if(s.endings&&project.discoveredEndings.length>=s.endings)awardAchievement("all_endings_found");
+  var et=ENDING_TYPES[n.endingType]||ENDING_TYPES.good;var dots=project.nodes.filter(isEnding).map(function(e){var found=project.discoveredEndings.indexOf(e.id)!==-1;return '<span class="endingDot '+(found?'found':'locked')+'">'+(found?esc(e.title||"Final"):"?????")+'</span>';}).join("");
+  $("playContent").innerHTML='<article class="storyCard endingBox"><div class="endingIcon">'+et.icon+'</div><div class="storyEyebrow">Has descubierto</div><h1>'+esc(n.title||et.label)+'</h1><div class="storyText">'+esc(n.text||"Aquí termina este camino.")+'</div><div class="endingCollection">'+dots+'</div><div class="editorActionRow" style="justify-content:center"><button id="replayBtn" class="mainBtn">↻ Volver a jugar</button><button id="closeEndingBtn" class="ghostBtn">Salir</button></div></article>';
+  $("playEndingLabel").textContent=project.discoveredEndings.length+" de "+s.endings+" finales descubiertos";$("replayBtn").onclick=function(){startPlay();};$("closeEndingBtn").onclick=closePlay;
+}
+function closePlay(){$("playModal").classList.remove("open");playState=null;renderAll();}
+
+function openInspector(){
+  var issues=validateStory(),s=computeStats(),score=qualityScore(issues,s);$("qualityRing").style.setProperty("--score",score);$("qualityScore").textContent=score;
+  $("qualityLabel").textContent=score>=90?"Lista para impresionar":score>=75?"Muy buen camino":score>=55?"Va tomando forma":"Todavía en construcción";
+  $("fullInspectorIssues").innerHTML=issues.length?issues.map(function(i){return '<div class="fullIssue" data-node="'+esc(i.nodeId||"")+'"><strong>'+(i.severity==="error"?"🔴":"🟡")+' '+esc(i.text)+'</strong></div>';}).join(""):'<div class="fullIssue">✅ No hemos encontrado problemas estructurales importantes.</div>';
+  $("fullInspectorIssues").querySelectorAll("[data-node]").forEach(function(el){el.onclick=function(){closeModal("inspectorModal");if(el.dataset.node)selectNode(el.dataset.node,true);};});$("inspectorModal").classList.add("open");
+}
+function renderAchievementsModal(){
+  var unlocked=project.unlockedAchievements;$("achievementGrid").innerHTML=ACHIEVEMENTS.map(function(a){var got=unlocked.indexOf(a.id)!==-1;if(a.secret&&!got)return '<div class="achievementCard locked"><div class="ico">❔</div><strong>Logro secreto</strong><p>Se revelará cuando ocurra algo especial.</p><small>??? XP</small></div>';
+    return '<div class="achievementCard '+(got?'':'locked')+'"><div class="ico">'+(got?a.icon:"🔒")+'</div><strong>'+esc(a.title)+'</strong><p>'+esc(a.desc)+'</p><small>+'+a.xp+' XP</small></div>';}).join("");$("achievementsModal").classList.add("open");
+}
+function openSubmit(){
+  var issues=validateStory(),s=computeStats(),checks=[
+    {ok:!!getStart(),text:"Tiene escena de inicio"},
+    {ok:s.endings>=3,text:"Tiene al menos 3 finales"},
+    {ok:reachableSet().size===s.nodes,text:"Todas las escenas son accesibles"},
+    {ok:!issues.some(function(i){return i.code==="no_target";}),text:"Todas las decisiones tienen destino"},
+    {ok:s.words>=500,text:"Supera 500 palabras"},
+    {ok:project.playTests>0,text:"La historia ha sido probada"}
+  ];
+  $("submitChecklist").innerHTML=checks.map(function(c){return '<div class="fullIssue">'+(c.ok?"✅":"⚠️")+' '+esc(c.text)+'</div>';}).join("")+'<p class="muted" style="font-size:10px">La nota final la decide el profesor. Rayuela solo comprueba la estructura y guarda evidencias del proceso.</p>';$("submitModal").classList.add("open");
+}
+function confirmSubmit(){
+  pushHistory();project.status="submitted";project.submittedAt=now();var snapshot={id:uid("submission"),at:project.submittedAt,project:clone(project),stats:computeStats(),quality:qualityScore(validateStory(),computeStats())};project.submissions.push(snapshot);
+  awardAchievement("submitted");localPersist();renderAll();closeModal("submitModal");sendCheckpoint("submission",true);setTimeout(sendSubmissionResult,350);toast("📬 Aventura entregada","Se ha congelado una versión para evaluación.","achievement");
+}
+function closeModal(id){$(id).classList.remove("open");}
+function download(filename,text,type){
+  var blob=new Blob([text],{type:type||"text/plain;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);
+}
+function exportText(){
+  var lines=["RAYUELA · "+project.title,"","Mapa narrativo","==============",""];
+  project.nodes.forEach(function(n,i){lines.push((i+1)+". "+n.title+" ["+typeDef(n).label+"]");if(n.chapter)lines.push("Capítulo: "+n.chapter);lines.push(n.text||"(sin texto)");if(n.choices.length){lines.push("Decisiones:");n.choices.forEach(function(c){var t=getNode(c.targetId);lines.push("- "+(c.text||"(sin texto)")+" → "+(t?t.title:"SIN DESTINO"));});}lines.push("");});
+  download((project.title||"rayuela").replace(/[^\w\-áéíóúñ]+/gi,"_")+".txt",lines.join("\n"));
+}
+function importJson(file){
+  var reader=new FileReader();reader.onload=function(){try{var raw=JSON.parse(reader.result);pushHistory();project=normalizeProject(raw);selectedNodeId=(getStart()||{}).id||"";localPersist();renderAll();closeModal("projectModal");toast("Proyecto importado","La copia se ha cargado correctamente.");}catch(error){toast("No se pudo importar","El archivo no parece un proyecto Rayuela válido.");}};reader.readAsText(file);
+}
+function templateProject(kind){
+  var p=defaultProject(),s=p.nodes[0];p.title=kind==="blank"?"Mi aventura":kind==="mystery"?"El misterio sin resolver":kind==="adventure"?"La ruta imposible":"Una decisión inesperada";s.text=kind==="blank"?"":"Todo parecía normal hasta que algo cambió. Ahora debes decidir qué hacer.";
+  function add(type,row,col,title,text){var n=freshNode(type,row,col,title);n.text=text||"";p.nodes.push(n);return n;}
+  function choice(src,text,target){src.choices.push({id:uid("choice"),text:text,targetId:target.id,requireItem:"",conditionVar:"",conditionOp:">=",conditionValue:0});}
+  if(kind==="simple"){var a=add("story",3,2,"El camino de la izquierda","Has elegido el camino menos transitado."),b=add("story",3,6,"El camino de la derecha","Algo brilla al fondo."),e1=add("ending",1,2,"Final A","Tu decisión te conduce a un final inesperado."),e2=add("ending",1,6,"Final B","Este camino termina de otra manera.");choice(s,"Ir por la izquierda",a);choice(s,"Ir por la derecha",b);choice(a,"Seguir adelante",e1);choice(b,"Seguir adelante",e2);}
+  if(kind==="mystery"){var hall=add("story",3,4,"El vestíbulo","Hay una fotografía rota sobre la mesa."),door=add("decision",2,2,"Dos puertas","Una puerta está entreabierta. La otra tiene una cerradura nueva."),clue=add("item",2,6,"La pista","Encuentras una llave diminuta.");clue.giveItem="Llave";var bad=add("ending",0,2,"Demasiado tarde","La casa queda en silencio."),secret=add("secret",0,6,"Lo que nadie debía saber","La llave abre una habitación que no figuraba en los planos.");choice(s,"Entrar en la casa",hall);choice(hall,"Examinar las puertas",door);choice(hall,"Buscar pistas",clue);choice(door,"Abrir la puerta entreabierta",bad);var sc={id:uid("choice"),text:"Usar la llave diminuta",targetId:secret.id,requireItem:"Llave",conditionVar:"",conditionOp:">=",conditionValue:0};clue.choices.push(sc);}
+  if(kind==="adventure"){var l=add("story",4,2,"Sendero del río","El río bloquea el paso."),r=add("story",4,6,"Sendero del bosque","Entre los árboles escuchas un silbido."),meet=add("decision",2,4,"El refugio","Los dos caminos terminan en el mismo refugio."),e1=add("ending",0,3,"Regreso a casa","Decides que ya has tenido suficiente aventura."),e2=add("ending",0,5,"Más allá del mapa","Cruzas el último umbral.");choice(s,"Seguir el río",l);choice(s,"Entrar en el bosque",r);choice(l,"Buscar refugio",meet);choice(r,"Seguir el silbido",meet);choice(meet,"Regresar",e1);choice(meet,"Continuar",e2);}
+  return p;
+}
+function replaceWithTemplate(kind){
+  pushHistory();project=templateProject(kind);selectedNodeId=(getStart()||{}).id||"";localPersist();renderAll();closeModal("projectModal");centerOnNode(selectedNodeId);toast("Nueva Rayuela","Todo comienza en una casilla.");
+}
+function showTutorial(){
+  tutorialIndex=0;$("tutorialModal").classList.add("open");renderTutorial();
+}
+var TUTORIAL=[
+  {icon:"⌗",title:"Todo comienza en una casilla",text:"Esta es tu Rayuela. Al principio solo existe el inicio. El resto del mapa aparecerá a medida que escribas y tomes decisiones."},
+  {icon:"✍️",title:"Escribe qué ocurre",text:"Selecciona una casilla y usa el editor. El título te ayuda a orientarte; el texto es lo que leerá el jugador."},
+  {icon:"🔀",title:"Crea una decisión",text:"Añade entre una y cuatro opciones. Cada una puede crear una escena nueva o conectar con una que ya exista."},
+  {icon:"🗺",title:"Haz crecer el mapa",text:"Acércate a los bordes y Rayuela ampliará el mundo. Puedes crear bifurcaciones, reencuentros, bucles y caminos secretos."},
+  {icon:"▶",title:"Conviértela en juego",text:"Pulsa «Jugar mi historia» para vivirla como lector. Encuentra finales, prueba rutas y corrige lo que no funcione."}
+];
+function renderTutorial(){
+  var t=TUTORIAL[tutorialIndex];$("tutorialStage").innerHTML='<div class="bigIcon">'+t.icon+'</div><h2>'+esc(t.title)+'</h2><p>'+esc(t.text)+'</p>'+(tutorialIndex===0?'<div class="chalkHop"><span>1</span><span>2</span><span>3</span><span>✦</span></div>':'');
+  $("tutorialDots").innerHTML=TUTORIAL.map(function(_,i){return '<span class="tutorialDot '+(i===tutorialIndex?'active':'')+'"></span>';}).join("");$("tutorialNextBtn").textContent=tutorialIndex===TUTORIAL.length-1?"Empezar a escribir":"Siguiente";
+}
+function nextTutorial(){if(tutorialIndex<TUTORIAL.length-1){tutorialIndex++;renderTutorial();}else{localStorage.setItem(TUTORIAL_KEY,"1");closeModal("tutorialModal");}}
+function maybeTutorial(){if(!localStorage.getItem(TUTORIAL_KEY))showTutorial();}
+
+function bindUi(){
+  $("projectTitle").oninput=function(e){project.title=e.target.value;project.editCount++;scheduleSave("project_title");renderAchievementPreview();};
+  $("undoBtn").onclick=undo;$("redoBtn").onclick=redo;$("moreBtn").onclick=function(){$("projectModal").classList.add("open");};
+  $("addNodeBtn").onclick=startGenericPlacement;$("centerBtn").onclick=function(){var s=getStart();if(s){selectNode(s.id,false);centerOnNode(s.id);}};$("expandBtn").onclick=expandMap;
+  $("cancelModeBtn").onclick=cancelModes;$("zoomOutBtn").onclick=function(){zoom=clamp(Math.round((zoom-.1)*10)/10,.5,1.5);renderBoard();};$("zoomInBtn").onclick=function(){zoom=clamp(Math.round((zoom+.1)*10)/10,.5,1.5);renderBoard();};
+  $("addChoiceBtn").onclick=addChoice;$("deleteNodeBtn").onclick=deleteSelected;$("duplicateNodeBtn").onclick=duplicateSelected;$("testFromNodeBtn").onclick=function(){startPlay(selectedNodeId);};
+  $("playBtn").onclick=function(){startPlay();};$("testBtn").onclick=function(){startPlay();};$("closePlayBtn").onclick=closePlay;$("submitBtn").onclick=openSubmit;$("openInspectorBtn").onclick=openInspector;$("openAchievementsBtn").onclick=renderAchievementsModal;
+  $("fullscreenBtn").onclick=function(){var el=$("playModal");if(!document.fullscreenElement&&el.requestFullscreen)el.requestFullscreen();else if(document.exitFullscreen)document.exitFullscreen();};
+  $("exportBtn").onclick=function(){$("projectModal").classList.add("open");};$("downloadJsonBtn").onclick=function(){download((project.title||"rayuela").replace(/[^\w\-áéíóúñ]+/gi,"_")+".json",JSON.stringify(project,null,2),"application/json");};$("downloadTextBtn").onclick=exportText;
+  $("importInput").onchange=function(e){if(e.target.files&&e.target.files[0])importJson(e.target.files[0]);e.target.value="";};
+  $("showTutorialBtn").onclick=showTutorial;$("tutorialNextBtn").onclick=nextTutorial;$("tutorialSkipBtn").onclick=function(){localStorage.setItem(TUTORIAL_KEY,"1");closeModal("tutorialModal");};
+  $("returnToEditBtn").onclick=function(){closeModal("submitModal");};$("confirmSubmitBtn").onclick=confirmSubmit;
+  document.querySelectorAll("[data-close]").forEach(function(b){b.onclick=function(){closeModal(b.dataset.close);};});
+  document.querySelectorAll("[data-template]").forEach(function(card){card.onclick=function(){replaceWithTemplate(card.dataset.template);};});
+  $("mobileLeftBtn").onclick=function(){$("leftPanel").classList.toggle("mobileOpen");$("rightPanel").classList.remove("mobileOpen");};
+  $("mobileRightBtn").onclick=function(){$("rightPanel").classList.toggle("mobileOpen");$("leftPanel").classList.remove("mobileOpen");};
+  window.addEventListener("keydown",function(e){
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();e.shiftKey?redo():undo();}
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();redo();}
+    if(e.key==="Escape"){cancelModes();["projectModal","inspectorModal","achievementsModal","submitModal","tutorialModal"].forEach(closeModal);}
+  });
+  bindEditor();
+}
+function bootProject(){
+  selectedNodeId=(getStart()||{}).id||"";bindUi();renderAll();localPersist();setTimeout(function(){centerOnNode(selectedNodeId);},160);maybeTutorial();
+  $("footerStatus").textContent=integrated?"Perfil conectado a LenguArcade · guardado automático activado":"Modo local · tu proyecto se guarda en este navegador";
+}
+startBridge();
+})();
+</script>
+</body>
+</html>
