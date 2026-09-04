@@ -48,19 +48,83 @@ Deno.serve(async (request) => {
       .eq("profile_id", profileId)
       .eq("game_id", gameId)
       .maybeSingle();
-    const progress = body.progress && typeof body.progress === "object" ? body.progress : {};
+    const rawGameData = body.rawGameData && typeof body.rawGameData === "object" ? body.rawGameData : {};
+    const save = rawGameData.save && typeof rawGameData.save === "object"
+      ? rawGameData.save as Record<string, unknown>
+      : body.save && typeof body.save === "object" ? body.save as Record<string, unknown> : null;
+    const clientProgress = body.progress && typeof body.progress === "object"
+      ? body.progress as Record<string, unknown>
+      : {};
     const oldXp = Number(old?.xp || 0);
     const oldFeathers = Number(old?.feathers || 0);
+
+    let progress: Record<string, unknown> = clientProgress;
+    let authoritativeRayuelaXp: number | null = null;
+    let rayuelaSubmissionFeathers = 0;
+
+    if (gameId === "rayuela" && save) {
+      const nodes = Array.isArray(save.nodes) ? save.nodes as Record<string, unknown>[] : [];
+      const choices = nodes.reduce((sum, node) => {
+        const nodeChoices = Array.isArray(node.choices) ? node.choices as Record<string, unknown>[] : [];
+        return sum + nodeChoices.filter(choice => String(choice.targetId || "")).length;
+      }, 0);
+      const endings = nodes.filter(node => node.type === "ending" || node.type === "secret").length;
+      const start = nodes.find(node => node.type === "start") || nodes[0] || null;
+      const byId = new Map(nodes.map(node => [String(node.id || ""), node]));
+      const reachable = new Set<string>();
+      const queue = start ? [String(start.id || "")] : [];
+      while (queue.length) {
+        const id = queue.shift()!;
+        if (!id || reachable.has(id)) continue;
+        reachable.add(id);
+        const node = byId.get(id);
+        const nodeChoices = node && Array.isArray(node.choices) ? node.choices as Record<string, unknown>[] : [];
+        for (const choice of nodeChoices) {
+          const target = String(choice.targetId || "");
+          if (target && !reachable.has(target)) queue.push(target);
+        }
+      }
+      let structuralErrors = start ? 0 : 1;
+      if (!endings) structuralErrors += 1;
+      for (const node of nodes) {
+        const isEnding = node.type === "ending" || node.type === "secret";
+        const nodeChoices = Array.isArray(node.choices) ? node.choices as Record<string, unknown>[] : [];
+        if (!isEnding && nodeChoices.length === 0) structuralErrors += 1;
+        structuralErrors += nodeChoices.filter(choice => !String(choice.targetId || "")).length;
+        if (start && !reachable.has(String(node.id || ""))) structuralErrors += 1;
+      }
+      const attempts = Math.max(1, nodes.length + choices);
+      const objectiveRewards = Array.isArray(save.objectiveRewards) ? save.objectiveRewards.length : 0;
+      const percentage = String(save.status || "") === "submitted"
+        ? 100
+        : Math.min(99, Math.round((objectiveRewards / 8) * 100));
+      authoritativeRayuelaXp = Math.max(0, Math.round(boundedNumber(save.xp, 0, 100000000, oldXp)));
+      const eventType = String(body.eventType || "").toLowerCase();
+      rayuelaSubmissionFeathers = !body.checkpoint && eventType.includes("submitted") ? 3 : 0;
+      progress = {
+        ...clientProgress,
+        percentage:Math.max(Number(old?.percentage || 0), percentage),
+        accuracy:Math.max(0, Math.min(100, Math.round(((attempts - Math.min(attempts, structuralErrors)) / attempts) * 100))),
+        attempts,
+        successes:Math.max(0, attempts - structuralErrors),
+        errors:structuralErrors,
+        streak:Math.max(endings, Number(old?.streak || 0)),
+      };
+    }
+
     const xpDelta = Math.round(boundedNumber(progress.xpDelta, 0, 5000));
-    const feathersDelta = Math.round(boundedNumber(progress.plumasDelta ?? progress.feathersDelta, 0, 500));
-    const newXp = progress.xp == null
-      ? oldXp + xpDelta
-      : Math.max(oldXp, Math.round(boundedNumber(progress.xp, 0, 100000000)));
+    const feathersDelta = gameId === "rayuela"
+      ? rayuelaSubmissionFeathers
+      : Math.round(boundedNumber(progress.plumasDelta ?? progress.feathersDelta, 0, 500));
+    const newXp = authoritativeRayuelaXp == null
+      ? (progress.xp == null
+          ? oldXp + xpDelta
+          : Math.max(oldXp, Math.round(boundedNumber(progress.xp, 0, 100000000))))
+      : Math.max(oldXp, authoritativeRayuelaXp);
     const newFeathers = progress.plumas == null && progress.feathers == null
       ? oldFeathers + feathersDelta
       : Math.max(oldFeathers, Math.round(boundedNumber(progress.plumas ?? progress.feathers, 0, 10000000)));
     const now = new Date().toISOString();
-    const rawGameData = body.rawGameData && typeof body.rawGameData === "object" ? body.rawGameData : {};
     const achievements = Array.isArray(body.achievements)
       ? body.achievements.map(cleanAchievement).filter(item => item.id)
       : [];
@@ -132,9 +196,6 @@ Deno.serve(async (request) => {
       if (eventError) throw eventError;
     }
 
-    const save = rawGameData.save && typeof rawGameData.save === "object"
-      ? rawGameData.save
-      : body.save && typeof body.save === "object" ? body.save : null;
     if (save) {
       const { data:oldSave } = await admin.from("game_saves")
         .select("revision")
