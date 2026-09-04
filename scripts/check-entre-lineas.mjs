@@ -31,3 +31,17 @@ for(const token of required){
 if(!/function\s+sendBridgeResult\s*\(/.test(html)) throw new Error("Entre Líneas: falta sendBridgeResult()");
 if(!/function\s+buildBridgeSave\s*\(/.test(html)) throw new Error("Entre Líneas: falta buildBridgeSave()");
 console.log("✓ Entre Líneas: loader, expediente y puente LenguArcade verificados.");
+
+const alumnoHost=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Alumno.html"),"utf8");
+const teacherHost=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Profesor.html"),"utf8");
+const codeHost=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Code.gs"),"utf8");
+if(!alumnoHost.includes("__LA_ENTRE_LINEAS_STUDENT_PATCH__") || !alumnoHost.includes("buildCentralProgress")) {
+  throw new Error("Entre Líneas: falta la integración consolidada del alumno.");
+}
+if(!teacherHost.includes("__LA_ENTRE_LINEAS_TEACHER_PATCH__") || !teacherHost.includes("diagnóstico lector")) {
+  throw new Error("Entre Líneas: falta el diagnóstico consolidado del profesor.");
+}
+if(!codeHost.includes("gameId:'entre_lineas'") || !codeHost.includes("entre_lineas: {")) {
+  throw new Error("Entre Líneas: falta el catálogo consolidado.");
+}
+console.log("✓ Entre Líneas: integración consolidada de alumno, profesor y catálogo verificada.");
