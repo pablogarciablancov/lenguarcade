@@ -49,6 +49,7 @@ Deno.serve(async (request) => {
       achievementsResult,
       enrollmentsResult,
       missionsResult,
+      evaluationsResult,
     ] = await Promise.all([
       admin.from("profiles")
         .select("id,email,first_name,last_name,avatar,last_login_at,role")
@@ -78,6 +79,9 @@ Deno.serve(async (request) => {
       admin.from("mission_definitions")
         .select("id,title,description,game_id,mission_type,target,reward_xp,reward_feathers")
         .eq("active", true),
+      admin.from("evaluations")
+        .select("scope,game_id,score,breakdown,updated_at")
+        .eq("profile_id", profileId),
     ]);
 
     const failure = [
@@ -88,6 +92,7 @@ Deno.serve(async (request) => {
       achievementsResult.error,
       enrollmentsResult.error,
       missionsResult.error,
+      evaluationsResult.error,
     ].find(Boolean);
     if (failure || !profileResult.data) {
       console.error("student-dashboard query failed", failure);
@@ -242,6 +247,13 @@ Deno.serve(async (request) => {
       })),
       ranking:[],
       missions:missionProgress,
+      evaluations:(evaluationsResult.data || []).map(row => ({
+        scope:row.scope,
+        gameId:row.game_id,
+        score:Number(row.score || 0),
+        breakdown:row.breakdown || {},
+        updatedAt:row.updated_at,
+      })),
       grade:{ score:grade },
     });
   } catch (error) {
