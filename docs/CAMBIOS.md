@@ -214,3 +214,11 @@ Cada cambio debe indicar:
 - El catálogo del alumno y el control de acceso del taller pueden habilitar/bloquear Entre Líneas igual que el resto de juegos.
 - El panel del profesor incorpora un diagnóstico específico con métricas de investigación y las seis habilidades lectoras.
 - Supabase incorpora el juego al catálogo y el dashboard lo publica con integración embebida.
+
+
+## 2026-09-04 · Simplificación de la pantalla de acceso
+- Eliminados de la portada los textos explicativos sobre el uso de la cuenta institucional y los dominios de alumno/profesor.
+- Eliminado del desplegable «Soy profesor» el texto descriptivo sobre panel docente y modo profe-jugador.
+- Se mantienen intactos el acceso con Google, la validación de sesión, «Entrar como profe-jugador» y «Abrir panel del profesor».
+- Archivo modificado: `apps-script/zz_LenguArcade_entry_and_patches.gs`.
+- Riesgo esperado: mínimo; cambio exclusivamente de contenido visual, sin tocar la lógica de autenticación.
