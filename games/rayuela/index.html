@@ -139,9 +139,9 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 .gridCell{border-color:rgba(71,85,105,.06)}.gridCell.centerCell::before{background:repeating-linear-gradient(-35deg,rgba(71,85,105,.025) 0 5px,transparent 5px 10px)}
 .edgePath{stroke:rgba(71,85,105,.44)}.edgeLabel{fill:#475569;stroke:#f4f7fb}
 .nodeCard{cursor:pointer;border-color:rgba(51,65,85,.16);background:linear-gradient(155deg,#fff,#f8fafc);box-shadow:0 9px 24px rgba(51,65,85,.14)}
-.nodeCard:hover{box-shadow:0 13px 28px rgba(51,65,85,.18)}.nodeCard.selected{border-color:#1597b3;box-shadow:0 0 0 3px rgba(21,151,179,.13),0 14px 30px rgba(51,65,85,.18)}
+.nodeCard:hover{box-shadow:0 13px 28px rgba(51,65,85,.18)}.nodeCard:focus-visible{outline:3px solid rgba(8,127,156,.28);outline-offset:3px}.nodeCard.selected{border-color:#1597b3;box-shadow:0 0 0 3px rgba(21,151,179,.13),0 14px 30px rgba(51,65,85,.18)}
 .nodeIcon{background:#f1f5f9}.nodeExcerpt{color:#526176}.nodeBadge{background:#eef2f7}
-.nodeDragHandle{position:absolute;right:6px;top:10px;z-index:8;width:27px;height:25px;border-radius:8px;border:1px solid rgba(51,65,85,.13);background:rgba(255,255,255,.88);color:#748298;font-size:16px;line-height:1;cursor:grab;padding:0;display:grid;place-items:center;letter-spacing:-3px}.nodeDragHandle:hover{background:#eef2f7;color:#334155}.nodeDragHandle:active{cursor:grabbing}
+.nodeDragHandle{touch-action:none;position:absolute;right:6px;top:10px;z-index:8;width:27px;height:25px;border-radius:8px;border:1px solid rgba(51,65,85,.13);background:rgba(255,255,255,.88);color:#748298;font-size:16px;line-height:1;cursor:grab;padding:0;display:grid;place-items:center;letter-spacing:-3px}.nodeDragHandle:hover{background:#eef2f7;color:#334155}.nodeDragHandle:active{cursor:grabbing}
 .nodeEditStatus{position:absolute;right:38px;top:11px;z-index:7;padding:3px 6px;border-radius:999px;background:#e6f7fb;color:#08718b;font-size:7px;font-weight:950;letter-spacing:.08em}
 .tizaHint{font-family:ui-rounded,"Segoe UI",sans-serif;color:#64748b;border-color:#64748b;opacity:.16}.emptyMessage{color:rgba(71,85,105,.23)}
 .workspace{grid-template-columns:250px minmax(0,1fr) 380px}
@@ -1096,7 +1096,7 @@ function showTutorial(){
 }
 var TUTORIAL=[
   {icon:"⌗",title:"Todo comienza en una casilla",text:"Esta es tu Rayuela. Al principio solo existe el inicio. El resto del mapa aparecerá a medida que escribas y tomes decisiones."},
-  {icon:"✍️",title:"Escribe qué ocurre",text:"Selecciona una casilla y usa el editor. El título te ayuda a orientarte; el texto es lo que leerá el jugador."},
+  {icon:"✍️",title:"Haz clic y escribe",text:"Haz clic una vez en una casilla para abrirla en el editor. Para moverla, arrastra solo desde el asa ⋮⋮. Primero escribe la escena y después añade las decisiones."},
   {icon:"🔀",title:"Crea una decisión",text:"Añade entre una y cuatro opciones. Cada una puede crear una escena nueva o conectar con una que ya exista."},
   {icon:"🗺",title:"Haz crecer el mapa",text:"Acércate a los bordes y Rayuela ampliará el mundo. Puedes crear bifurcaciones, reencuentros, bucles y caminos secretos."},
   {icon:"▶",title:"Conviértela en juego",text:"Pulsa «Jugar mi historia» para vivirla como lector. Encuentra finales, prueba rutas y corrige lo que no funcione."}
