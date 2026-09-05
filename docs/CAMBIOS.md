@@ -347,3 +347,34 @@ Cada cambio debe indicar:
 - LenguArcade ignora `CLOSE_READY` de Conjuga y apuesta cuando no existe una salida explícita ni un abandono real.
 - El comportamiento del resto de juegos no cambia: el blindaje especial se limita a `conjuga_apuesta`.
 - El cierre automático posterior a guardado exige ahora que la salida haya sido solicitada explícitamente.
+
+
+## 2026-09-05 · Batalla verbal v1 — Arena táctica de los verbos
+- Se recupera el HTML original «Jeopardy de verbos» y se conserva su núcleo: tablero 5×5, juego por equipos, selección de objetivo, ataque por respuesta correcta y defensa verbal del equipo atacado.
+- El juego deja de presentarse como «Battlegrafía: Jeopardy RPG» para convertirse en **Batalla verbal**, identidad propia dentro de LenguArcade.
+- Rediseño completo de interfaz con estética de arena táctica, HUD de turno, paneles de equipo, tablero responsive, registro de combate, animaciones y pantalla final.
+- Configuración de 2 a 4 equipos, nombres personalizados, tres duraciones de batalla:
+  - Relámpago: 90 PV.
+  - Clásica: 120 PV.
+  - Épica: 160 PV.
+- Temporizador opcional de 20, 30 o 45 segundos, o juego sin límite.
+- Cuatro clases jugables:
+  - **Guerrero**: +10% daño; Furia verbal (+60% en el siguiente ataque).
+  - **Mago**: energía adicional; Eco arcano (40% de daño a otro rival).
+  - **Arquero**: +10% puntuación; Flecha rúnica (ignora defensa y escudo).
+  - **Clérigo**: cura al defender; Concordancia vital (+30 PV y +15 escudo).
+- Sistema de energía 0–100 para cargar habilidades especiales.
+- Escudos que absorben daño antes de los PV.
+- Combos de respuestas correctas que aumentan la puntuación.
+- El tablero se regenera en cada partida: las 25 casillas se extraen de bancos dinámicos y no son siempre las mismas.
+- Cinco familias de retos: Indicativo, Tiempos compuestos, Subjuntivo, Imperativo y Maestría irregular.
+- El generador reúne cerca de **5.000 retos posibles**, con al menos 20 alternativas incluso en los niveles más escasos de Maestría.
+- Se evita repetir la misma pregunta, respuesta y, cuando es posible, los verbos usados recientemente dentro de una misma partida.
+- Cuatro casillas por tablero contienen runas ocultas: curación, escudo, energía o crítico.
+- Cada cinco casillas resueltas se activa un evento de arena: tormenta rúnica, fuente vital, muralla gramatical, frenesí verbal o bote de puntuación.
+- La defensa ya no es un banco fijo de cinco preguntas: se genera desde los propios bancos del juego.
+- Sistema persistente de XP, niveles de arena y **24 logros**.
+- Integración nativa con el bridge de LenguArcade: carga de progreso, guardado de resultados y salida segura.
+- Batalla verbal queda marcada como **en pruebas** en Apps Script y Supabase y se abre embebida desde `games/verb_battle/`.
+- Supabase actualizado mediante `202609050003_verb_battle_v1.sql` y `student-dashboard` desplegado con la nueva integración.
+- Nueva comprobación automática `scripts/check-verb-battle.mjs`.
