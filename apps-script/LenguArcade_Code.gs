@@ -34,6 +34,10 @@ const LA_GAME_INTEGRATIONS = {
     url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/',
     integration:'embedded'
   },
+  battlegrafia_v2: {
+    url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia_v2/',
+    integration:'embedded'
+  },
   maniacgrafia: {
     url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/maniacgrafia/',
     integration:'embedded'
@@ -66,6 +70,7 @@ const LA_GAME_INTEGRATIONS = {
 
 const LA_OFFICIAL_GAMES = [
   {gameId:'battlegrafia',nombre:'Battlegrafía',subtitulo:'La aventura de las palabras',categoria:'RPG',competencias:'ortografía,verbos,semántica',estado:'en pruebas',orden:1,color:'#f59e0b',icono:'🐉',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/',descripcion:'RPG de Lengua con combates, mundos, criaturas y progresión.',banner:'dragon',activo:true},
+  {gameId:'battlegrafia_v2',nombre:'Battlegrafía 2.0',subtitulo:'Fantasy Arcade · versión alternativa',categoria:'RPG',competencias:'ortografía,verbos,semántica',estado:'en pruebas',orden:1.1,color:'#68d9ff',icono:'⚔️',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia_v2/',descripcion:'Nueva presentación de Battlegrafía con los cinco mundos, sus 30 monstruos originales y la misma lógica RPG estable.',banner:'dragon',activo:true},
   {gameId:'maniacgrafia',nombre:'Maniacgrafía',subtitulo:'Atrapa las palabras',categoria:'Ortografía',competencias:'ortografía,acentuación,atención',estado:'listo',orden:2,color:'#d946ef',icono:'⚡',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/maniacgrafia/',descripcion:'Atrapa y corrige palabras trampa mientras mejoras rapidez y precisión.',banner:'neon',activo:true},
   {gameId:'narratoria',nombre:'Narratoria',subtitulo:'Escribe. Crea. Cuenta.',categoria:'Escritura',competencias:'narración,creatividad,redacción',estado:'listo',orden:3,color:'#f59e0b',icono:'📚',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/',descripcion:'Construye relatos por fases con objetivos, decisiones y creatividad.',banner:'paper',activo:true},
   {gameId:'versopolis',nombre:'Versópolis',subtitulo:'La ciudad de la poesía',categoria:'Poesía',competencias:'poesía,rima,métrica,creatividad',estado:'en revisión',orden:4,color:'#8b5cf6',icono:'✒️',url:'',descripcion:'Crea poemas, supera retos líricos y progresa como autor dentro de la ciudad de la poesía.',banner:'city',activo:true},
