@@ -80,9 +80,9 @@ if(!student.includes("gameRecord?.gameId==='conjuga_apuesta'") ||
   errors.push("El host del alumno no integra correctamente progreso, emparejamiento y cierre seguro de Conjuga y apuesta.");
 }
 if(!classroom.includes("function createGameOpponentCode") ||
-   !classroom.includes("const LA_PAIRABLE_GAME_IDS_ = ['scrabble','conjuga_apuesta']") ||
+   !classroom.includes("const LA_PAIRABLE_GAME_IDS_ = ['scrabble','conjuga_apuesta','verb_battle']") ||
    !classroom.includes("'LA_GAME_PAIR_'")){
-  errors.push("El backend de Apps Script no admite códigos genéricos para los dos juegos 1v1.");
+  errors.push("El backend de Apps Script no mantiene el código general para los juegos multijugador compatibles.");
 }
 if(!migration.includes("status='en pruebas'") ||
    !migration.includes("games/conjuga_apuesta/")){
