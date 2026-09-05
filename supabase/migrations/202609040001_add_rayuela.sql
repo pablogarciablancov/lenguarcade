@@ -13,7 +13,7 @@ values (
   8,
   '#22d3ee',
   'route',
-  'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html',
+  'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/49ca8564f1dd015c72ad86ba8547fed50a75717e/games/rayuela/index.html',
   'rayuela',
   true
 )
