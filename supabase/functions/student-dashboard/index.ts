@@ -25,6 +25,10 @@ const integrations: Record<string, { url:string; integration:string }> = {
     url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/conjuga_apuesta/",
     integration:"embedded",
   },
+  verb_battle:{
+    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/verb_battle/",
+    integration:"embedded",
+  },
   narratoria:{
     url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/",
     integration:"embedded",
