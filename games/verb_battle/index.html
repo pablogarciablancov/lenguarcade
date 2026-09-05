@@ -3,384 +3,223 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Batalla Verbal · Arena de los Verbos</title>
+<title>Batalla Verbal · LenguArcade</title>
 <style>
 :root{
-  --bg:#07101f;--bg2:#0d1830;--panel:#101d36;--panel2:#172642;--line:rgba(255,255,255,.12);
-  --text:#f7fbff;--muted:#a9b9d2;--gold:#ffd166;--cyan:#52e4ff;--violet:#9b8cff;
-  --green:#62e6a7;--red:#ff6b7a;--orange:#ffad5a;--shadow:0 24px 70px rgba(0,0,0,.35)
+  --ink:#17213a;--muted:#71809d;--paper:#f7f9fd;--panel:#ffffff;--line:#dce3ef;
+  --blue:#4169e1;--blue2:#6f8cff;--violet:#7557d8;--green:#25a66f;--red:#db5363;
+  --gold:#e4a72e;--cyan:#2aa8be;--shadow:0 18px 48px rgba(41,59,92,.13)
 }
 *{box-sizing:border-box}
-html,body{min-height:100%;margin:0}
-body{
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  color:var(--text);background:
-    radial-gradient(circle at 15% 12%,rgba(82,228,255,.13),transparent 28%),
-    radial-gradient(circle at 85% 18%,rgba(155,140,255,.16),transparent 28%),
-    linear-gradient(180deg,#081426 0%,#07101f 48%,#050b15 100%);
-  overflow-x:hidden
-}
-body:before{
-  content:"";position:fixed;inset:0;pointer-events:none;opacity:.14;
-  background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
-  background-size:42px 42px;mask-image:linear-gradient(to bottom,#000,transparent 75%)
-}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:
+  radial-gradient(circle at 12% 12%,rgba(111,140,255,.13),transparent 25%),
+  radial-gradient(circle at 90% 15%,rgba(117,87,216,.10),transparent 24%),#eef3fb}
 button,input,select{font:inherit}
 button{cursor:pointer}
 button:disabled{cursor:not-allowed;opacity:.45}
 .hidden{display:none!important}
-.shell{width:min(1440px,100%);margin:auto;padding:18px}
-.hero{
-  display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 4px 22px
+#app{height:100dvh;display:grid;grid-template-rows:54px minmax(0,1fr)}
+.topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 16px;background:rgba(255,255,255,.84);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:950;letter-spacing:-.02em}.brandMark{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,#4c6fe7,#7c5de1);color:#fff;box-shadow:0 8px 20px rgba(79,102,211,.25)}
+.topTitle{text-align:center;font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#596987}
+.topActions{display:flex;justify-content:flex-end;align-items:center;gap:8px}.topChip{padding:7px 10px;border-radius:999px;background:#eef2ff;color:#4b5e91;font-size:11px;font-weight:800}
+.iconBtn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:7px 10px;border-radius:11px;font-weight:800}
+.screen{min-height:0;height:100%;padding:12px}
+.card{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}
+.setupShell{height:100%;max-width:1180px;margin:auto;display:grid;grid-template-columns:.78fr 1.22fr;overflow:hidden}
+.setupIntro{padding:28px;display:grid;align-content:center;background:
+  linear-gradient(160deg,rgba(76,111,231,.10),rgba(117,87,216,.04)),#fff;border-right:1px solid var(--line)}
+.kicker{font-size:10px;font-weight:950;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)}
+.setupIntro h1{font-size:clamp(34px,4.2vw,58px);line-height:.91;letter-spacing:-.055em;margin:8px 0 13px}.setupIntro h1 span{color:var(--blue)}
+.setupIntro p{font-size:13px;color:var(--muted);line-height:1.55;max-width:430px}
+.modeCards{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}
+.modeCard{border:1px solid var(--line);border-radius:16px;padding:13px;background:#fff;text-align:left;color:var(--ink);transition:.15s}
+.modeCard:hover{transform:translateY(-1px)}.modeCard.active{border-color:#7994ef;background:#eef2ff;box-shadow:0 0 0 3px rgba(65,105,225,.08)}
+.modeCard b{display:block;font-size:13px}.modeCard span{display:block;color:var(--muted);font-size:10px;line-height:1.35;margin-top:4px}
+.rulesMini{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:14px}.ruleMini{padding:9px;border-radius:13px;background:rgba(255,255,255,.72);border:1px solid var(--line);font-size:9px;color:#64718c}.ruleMini b{display:block;color:var(--ink);font-size:10px;margin-bottom:2px}
+.setupMain{padding:20px;min-height:0;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:11px}
+.setupHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.setupHead h2{margin:0;font-size:21px;letter-spacing:-.035em}.setupHead p{margin:3px 0 0;font-size:10px;color:var(--muted)}
+.settingsRow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.field label{display:block;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#73819b;margin-bottom:5px}.field select,.field input{width:100%;border:1px solid var(--line);border-radius:11px;background:#f9fbff;color:var(--ink);padding:8px 9px;outline:none;font-size:11px}.field select:focus,.field input:focus{border-color:#7d94e7;box-shadow:0 0 0 3px rgba(65,105,225,.08)}
+.roster{min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:8px}
+.playerSlot{position:relative;min-height:0;padding:10px;border:1px solid var(--line);border-radius:15px;background:#fbfcff;display:grid;grid-template-columns:38px minmax(0,1fr) 122px;gap:8px;align-items:center}
+.playerSlot.empty{border-style:dashed;background:#fafbfe}.avatar{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#edf1ff;font-size:19px}.playerMeta{min-width:0}.playerMeta b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}.playerMeta span{display:block;font-size:9px;color:var(--muted);margin-top:2px}.slotAction{display:grid;gap:5px}.connectBtn{border:0;border-radius:9px;background:#eaf0ff;color:#4260b1;font-size:9px;font-weight:900;padding:7px}.classSelect{width:100%;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);padding:6px;font-size:9px}
+.startBar{display:flex;align-items:center;justify-content:space-between;gap:12px}.startHint{font-size:9px;color:var(--muted);line-height:1.35}.primaryBtn{border:0;border-radius:12px;background:linear-gradient(135deg,#456be5,#735ad9);color:#fff;padding:10px 16px;font-weight:950;font-size:11px;box-shadow:0 10px 26px rgba(79,92,203,.23)}
+.gameShell{height:100%;display:grid;grid-template-rows:88px minmax(0,1fr) 26px;gap:8px}
+.playersBar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;min-height:0}
+.playerCard{--p:#4c6fe7;position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;padding:9px 10px;overflow:hidden;min-width:0}
+.playerCard:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--p)}.playerCard.active{box-shadow:0 0 0 2px color-mix(in srgb,var(--p) 38%,transparent),0 10px 28px rgba(49,63,104,.12)}.playerCard.targeted{background:#fff9ed}.playerCard.dead{opacity:.4;filter:grayscale(.7)}
+.pcTop{display:flex;justify-content:space-between;gap:6px}.pcName{font-size:11px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pcRole{font-size:8px;color:var(--muted);white-space:nowrap}.score{font-size:10px;font-weight:950;color:#4d5d7f}
+.meterLabel{display:flex;justify-content:space-between;margin-top:5px;font-size:8px;color:#71809b}.meter{height:6px;border-radius:999px;background:#edf1f7;overflow:hidden}.hp{height:100%;background:linear-gradient(90deg,#38b77b,#71d5a8)}.en{height:100%;background:linear-gradient(90deg,#6681ed,#a56de0)}
+.pcBottom{display:flex;align-items:center;justify-content:space-between;margin-top:5px;font-size:8px;color:#6f7f9c}.ability{border:0;border-radius:8px;padding:4px 6px;background:#eef0ff;color:#6555b6;font-size:8px;font-weight:900}.ability.ready{background:#6f58da;color:#fff}
+.arena{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 218px;gap:8px}
+.boardCard{min-height:0;padding:8px;display:grid;grid-template-rows:minmax(0,1fr)}
+.board{min-height:0;height:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:46px repeat(5,minmax(0,1fr));gap:5px}
+.cat{border-radius:10px;background:#eef3ff;border:1px solid #d8e1f4;display:grid;place-items:center;text-align:center;padding:4px}.cat b{font-size:9px;line-height:1.05}.cat span{font-size:13px}.cat small{font-size:7px;color:#7a89a5}
+.cell{position:relative;border:1px solid #d9e1ef;border-radius:11px;background:linear-gradient(160deg,#4f73e5,#617bd7);color:#fff;font-weight:950;font-size:clamp(12px,2vw,20px);box-shadow:inset 0 1px rgba(255,255,255,.18);transition:.14s}.cell:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.06)}.cell:disabled{background:#eef1f6;color:#aab4c4;box-shadow:none}.cell.rune:not(:disabled):after{content:"✦";position:absolute;right:6px;top:4px;font-size:8px;color:#fff1ac}.cell small{position:absolute;left:5px;top:4px;font-size:7px;opacity:.7}
+.side{min-height:0;display:grid;grid-template-rows:auto auto minmax(0,1fr);gap:7px}.sideCard{padding:10px;border-radius:15px;background:#fff;border:1px solid var(--line);min-height:0}.sideCard h3{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:#7785a0;margin:0 0 6px}.targetSelect{width:100%;border:1px solid var(--line);border-radius:10px;padding:7px;background:#f9fbff;color:var(--ink);font-size:9px}
+.eventNext{padding:7px;border-radius:10px;background:#fff7df;color:#8b6a19;font-size:8px;margin-top:7px}.log{display:grid;gap:5px;align-content:start}.logItem{padding:6px 7px;border-radius:9px;background:#f7f9fd;font-size:8px;color:#64718d;line-height:1.25}.logItem b{color:#2a3650}
+.difficultyLegend{display:grid;grid-template-columns:1fr;gap:4px}.difficultyLegend div{display:flex;justify-content:space-between;gap:6px;padding:5px 6px;border-radius:8px;background:#f8faff;font-size:8px;color:#697793}.difficultyLegend b{color:#344261}
+.footerLine{display:flex;align-items:center;justify-content:space-between;font-size:8px;color:#7b88a0;padding:0 4px}.practiceBadge{color:#2c9165;font-weight:900}
+.overlay{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:12px;background:rgba(39,50,76,.34);backdrop-filter:blur(8px)}.overlay.open{display:grid}
+.modal{width:min(620px,95vw);max-height:calc(100dvh - 30px);overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 28px 80px rgba(38,51,83,.25);padding:18px}
+.modalHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.modalTag{font-size:8px;text-transform:uppercase;letter-spacing:.12em;color:var(--blue);font-weight:950}.modal h2{margin:3px 0 0;font-size:20px;letter-spacing:-.035em}.value{padding:6px 9px;border-radius:999px;background:#eef2ff;color:#526ac0;font-size:9px;font-weight:950}
+.prompt{margin:13px 0 10px;padding:15px;border-radius:15px;background:#f6f8fd;border:1px solid #e2e7f1;text-align:center;font-size:16px;font-weight:850;line-height:1.3}
+.answerBox{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}.answerInput{width:100%;border:2px solid #d9e1ef;border-radius:12px;padding:11px 12px;font-size:14px;outline:none}.answerInput:focus{border-color:#758ee8;box-shadow:0 0 0 3px rgba(65,105,225,.09)}.submitAnswer{border:0;border-radius:12px;background:#4668df;color:#fff;font-weight:950;padding:0 15px}
+.charRow{display:flex;gap:4px;justify-content:center;margin-top:7px}.charBtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 7px;font-size:10px;color:#53617b}
+.feedback{min-height:27px;margin-top:7px;padding:6px 9px;border-radius:9px;font-size:9px;color:#65738d}.feedback.good{background:#eaf8f1;color:#21764f}.feedback.bad{background:#fff0f1;color:#a9414d}.feedback.near{background:#fff7df;color:#8b6918}
+.timerRow{display:flex;gap:7px;align-items:center;margin-top:8px;font-size:8px;color:#7a879f}.timerTrack{height:5px;flex:1;border-radius:999px;background:#edf0f5;overflow:hidden}.timerFill{height:100%;background:linear-gradient(90deg,#31a875,#e1a72f,#d75562);transition:width 1s linear}
+.preview{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;margin-top:8px}.pill{padding:5px 7px;border-radius:999px;background:#f1f4fa;color:#697793;font-size:8px}
+.effectModal{text-align:center}.effectIcon{font-size:52px;margin-bottom:5px}.effectWho{font-size:10px;color:var(--blue);font-weight:900;text-transform:uppercase;letter-spacing:.08em}.effectTitle{font-size:24px;font-weight:950;letter-spacing:-.04em;margin:4px 0}.effectText{font-size:12px;color:var(--muted);line-height:1.45;max-width:430px;margin:0 auto 14px}
+.end{text-align:center}.trophy{font-size:54px}.endStats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px 0}.endStat{padding:9px;border-radius:12px;background:#f7f9fd}.endStat b{display:block;font-size:16px}.endStat span{font-size:7px;color:#7a879d;text-transform:uppercase}.modalActions{display:flex;justify-content:center;gap:7px}.ghostBtn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:11px;padding:9px 13px;font-weight:850;font-size:10px}
+.achievementPage{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}.achievement{padding:8px;border-radius:11px;background:#f8faff;border:1px solid #e4e8f1;min-height:66px}.achievement.locked{opacity:.45}.achievement .ico{font-size:18px}.achievement b{font-size:9px}.achievement p{font-size:7px;color:#7b879d;margin:3px 0 0}
+.toastStack{position:fixed;right:12px;bottom:12px;z-index:150;display:grid;gap:5px}.toast{width:min(300px,calc(100vw - 24px));padding:9px 10px;border-radius:12px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);font-size:9px}.toast b{display:block;font-size:10px}.toast span{color:var(--muted)}
+@media(max-height:700px){
+  #app{grid-template-rows:46px minmax(0,1fr)}.topbar{padding:0 10px}.setupIntro{padding:18px}.setupIntro h1{font-size:37px}.setupIntro p{font-size:11px}.modeCards{margin-top:9px}.ruleMini{padding:6px}.setupMain{padding:13px;gap:7px}.playerSlot{padding:7px}.gameShell{grid-template-rows:76px minmax(0,1fr) 22px}.playersBar{gap:5px}.playerCard{padding:6px 8px}.board{grid-template-rows:38px repeat(5,minmax(0,1fr));gap:4px}.sideCard{padding:7px}.prompt{font-size:14px;padding:11px;margin:9px 0 8px}.modal{padding:14px}
 }
-.brand{display:flex;align-items:center;gap:14px}
-.brandMark{
-  width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:29px;
-  background:linear-gradient(145deg,#1c2d51,#0d1730);border:1px solid rgba(255,255,255,.16);
-  box-shadow:0 14px 35px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.08)
+@media(max-width:900px){
+  .setupShell{grid-template-columns:.68fr 1.32fr}.setupIntro{padding:18px}.rulesMini{display:none}.arena{grid-template-columns:minmax(0,1fr) 180px}.roster{grid-template-columns:1fr}.playerSlot{grid-template-columns:34px minmax(0,1fr) 104px}
 }
-.eyebrow{font-size:11px;font-weight:900;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase}
-h1,h2,h3,p{margin-top:0}
-h1{font-size:clamp(28px,4vw,50px);line-height:.98;margin:4px 0 6px;letter-spacing:-.045em}
-.hero p{margin:0;color:var(--muted);font-size:14px}
-.career{
-  min-width:245px;padding:12px 15px;border:1px solid var(--line);border-radius:18px;background:rgba(12,24,47,.72);
-  backdrop-filter:blur(14px)
-}
-.careerTop{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted)}
-.careerTop strong{font-size:18px;color:#fff}
-.xpTrack,.hpTrack,.energyTrack{height:8px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
-.xpFill,.hpFill,.energyFill{height:100%;border-radius:inherit;transition:width .35s ease}
-.xpFill{background:linear-gradient(90deg,var(--violet),var(--cyan))}
-.panel{
-  border:1px solid var(--line);border-radius:26px;background:linear-gradient(180deg,rgba(22,39,70,.9),rgba(11,22,42,.92));
-  box-shadow:var(--shadow);backdrop-filter:blur(14px)
-}
-.setup{max-width:1080px;margin:30px auto;padding:30px}
-.setupIntro{display:grid;grid-template-columns:1.1fr .9fr;gap:26px;align-items:start}
-.setupIntro h2{font-size:32px;margin-bottom:9px}
-.setupIntro p{color:var(--muted);line-height:1.65}
-.featureGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.feature{padding:14px;border-radius:17px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}
-.feature b{display:block;margin-bottom:4px}.feature span{font-size:12px;color:var(--muted)}
-.setupControls{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:25px 0 18px}
-.field label{display:block;font-size:11px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 7px}
-.field input,.field select{
-  width:100%;border:1px solid var(--line);border-radius:13px;padding:12px 13px;color:#fff;background:#0b1730;outline:none
-}
-.field input:focus,.field select:focus{border-color:rgba(82,228,255,.58);box-shadow:0 0 0 3px rgba(82,228,255,.09)}
-.teamSetupGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.teamSetup{
-  display:grid;grid-template-columns:54px 1fr 165px;gap:10px;align-items:center;padding:13px;border-radius:17px;
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)
-}
-.teamSetupIcon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-size:25px;background:#0b1730}
-.startRow{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px}
-.tip{color:var(--muted);font-size:12px;max-width:640px;line-height:1.5}
-.primaryBtn,.ghostBtn,.abilityBtn,.modalBtn{
-  border:0;border-radius:14px;padding:12px 17px;font-weight:850;transition:transform .15s ease,filter .15s ease
-}
-.primaryBtn{color:#07101f;background:linear-gradient(135deg,var(--gold),#ffb84e);box-shadow:0 10px 30px rgba(255,193,77,.2)}
-.primaryBtn:hover,.modalBtn:hover,.abilityBtn:hover{transform:translateY(-1px);filter:brightness(1.05)}
-.ghostBtn{background:rgba(255,255,255,.07);border:1px solid var(--line);color:#fff}
-.game{display:grid;gap:14px}
-.hud{padding:12px 14px;display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}
-.turnBox{display:flex;align-items:center;gap:10px}
-.turnOrb{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:#0b1730;border:1px solid var(--line);font-size:20px}
-.turnBox b{display:block}.turnBox span{font-size:12px;color:var(--muted)}
-.arenaState{text-align:center}
-.arenaState b{display:block;color:var(--gold);font-size:13px}.arenaState span{font-size:11px;color:var(--muted)}
-.hudActions{display:flex;justify-content:flex-end;gap:8px}
-.teams{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.teamCard{
-  position:relative;padding:14px;border-radius:20px;background:linear-gradient(180deg,rgba(25,43,75,.96),rgba(12,25,47,.96));
-  border:1px solid var(--line);overflow:hidden;transition:.18s ease
-}
-.teamCard:before{content:"";position:absolute;inset:0 0 auto;height:3px;background:var(--team)}
-.teamCard.active{transform:translateY(-3px);border-color:color-mix(in srgb,var(--team) 70%,white 10%);box-shadow:0 15px 45px color-mix(in srgb,var(--team) 18%,transparent)}
-.teamCard.targeted{outline:2px solid rgba(255,209,102,.6);outline-offset:-4px}
-.teamCard.dead{opacity:.38;filter:grayscale(.8)}
-.teamHeader{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
-.teamIdentity{display:flex;gap:9px;align-items:center;min-width:0}
-.roleIcon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.08);font-size:21px}
-.teamName{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.roleName{font-size:11px;color:var(--muted)}
-.scorePill{font-size:12px;font-weight:900;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,.07)}
-.statLine{display:flex;justify-content:space-between;gap:10px;margin:9px 0 4px;font-size:10px;color:var(--muted);font-weight:800}
-.hpTrack{height:10px}.hpFill{background:linear-gradient(90deg,#39d98a,#82f4bd)}
-.energyTrack{height:6px;margin-top:5px}.energyFill{background:linear-gradient(90deg,#6b7cff,#b783ff)}
-.teamBottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px}
-.miniStats{font-size:11px;color:var(--muted)}
-.abilityBtn{padding:7px 9px;border-radius:10px;border:1px solid rgba(155,140,255,.35);background:rgba(155,140,255,.12);color:#ddd8ff;font-size:10px}
-.abilityBtn.ready{background:linear-gradient(135deg,#7d65ff,#b285ff);color:#fff;box-shadow:0 8px 25px rgba(139,112,255,.28)}
-.mainGrid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:12px}
-.boardPanel{padding:12px;min-width:0}
-.board{
-  display:grid;grid-template-columns:repeat(5,minmax(100px,1fr));gap:7px;min-width:620px
-}
-.boardScroller{overflow-x:auto;padding-bottom:3px}
-.category{
-  min-height:80px;padding:10px;border-radius:15px;background:linear-gradient(180deg,#203b70,#142956);
-  border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center
-}
-.category .catIcon{font-size:22px}.category b{font-size:12px;line-height:1.15;margin-top:5px}.category small{font-size:9px;color:#aabfe7;margin-top:4px}
-.cell{
-  position:relative;min-height:79px;border:1px solid rgba(255,255,255,.1);border-radius:15px;color:#fff;
-  background:linear-gradient(155deg,#175fd0,#194ca1);display:flex;align-items:center;justify-content:center;
-  font-size:22px;font-weight:950;letter-spacing:-.02em;box-shadow:inset 0 1px rgba(255,255,255,.12);
-  transition:transform .15s ease,filter .15s ease,opacity .15s ease
-}
-.cell:hover:not(.used){transform:translateY(-2px);filter:brightness(1.12)}
-.cell.used{background:#111d34;color:#60708c;cursor:not-allowed;box-shadow:none}
-.cell.rune:not(.used):after{content:"✦";position:absolute;right:7px;top:5px;font-size:10px;color:#ffe49a;text-shadow:0 0 10px #ffd166}
-.cellLevel{position:absolute;left:7px;top:6px;font-size:8px;color:rgba(255,255,255,.56);letter-spacing:.08em}
-.side{display:grid;gap:10px;align-content:start}
-.sidePanel{padding:15px}
-.sidePanel h3{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:#c7d6ef;margin-bottom:10px}
-.targetSelect{width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:#0b1730;color:#fff}
-.eventCard{padding:12px;border-radius:14px;background:linear-gradient(135deg,rgba(255,209,102,.11),rgba(155,140,255,.09));border:1px solid rgba(255,209,102,.2)}
-.eventCard b{display:block;color:var(--gold);margin-bottom:3px}.eventCard span{font-size:11px;color:var(--muted);line-height:1.45}
-.log{display:grid;gap:7px;max-height:246px;overflow:auto;padding-right:3px}
-.logItem{padding:9px 10px;border-radius:11px;background:rgba(255,255,255,.045);font-size:11px;line-height:1.4;color:#c8d5e9}
-.logItem strong{color:#fff}.logItem .time{color:#627491;margin-right:5px}
-.legendMini{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;color:var(--muted)}
-.legendMini span{padding:7px;border-radius:10px;background:rgba(255,255,255,.04)}
-.modalBackdrop{
-  position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:18px;
-  background:rgba(3,8,17,.82);backdrop-filter:blur(12px)
-}
-.modalBackdrop.open{display:flex}
-.modal{
-  width:min(780px,96vw);border:1px solid rgba(255,255,255,.14);border-radius:28px;padding:24px;
-  background:linear-gradient(180deg,#142745,#0c1930);box-shadow:0 30px 90px rgba(0,0,0,.5)
-}
-.modalHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
-.modalTag{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
-.modal h2{font-size:26px;margin:5px 0 0}
-.valueChip{padding:8px 11px;border-radius:999px;background:rgba(255,209,102,.12);color:var(--gold);font-weight:900;font-size:12px}
-.question{
-  min-height:126px;margin:20px 0;padding:22px;border-radius:20px;display:flex;align-items:center;justify-content:center;text-align:center;
-  background:radial-gradient(circle at 50% 0,rgba(82,228,255,.08),transparent 55%),#0a1730;border:1px solid rgba(255,255,255,.08);
-  font-size:clamp(19px,3vw,29px);font-weight:800;line-height:1.35
-}
-.timer{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
-.timerBar{height:6px;flex:1;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
-.timerFill{height:100%;width:100%;background:linear-gradient(90deg,var(--green),var(--gold),var(--red));transform-origin:left;transition:width 1s linear}
-.answer{
-  display:none;padding:15px;border-radius:15px;background:rgba(82,228,255,.08);border:1px solid rgba(82,228,255,.16);
-  color:#dffaff;text-align:center;font-weight:900
-}
-.answer.open{display:block}
-.modalActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}
-.modalBtn{color:#fff;background:#263a5c;border:1px solid rgba(255,255,255,.09)}
-.modalBtn.reveal{background:#775b20;color:#fff4cf}.modalBtn.good{background:#17724f}.modalBtn.bad{background:#8e2b3a}.modalBtn.cancel{background:#26344c}
-.battlePreview{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:12px}
-.previewPill{padding:7px 9px;border-radius:999px;background:rgba(255,255,255,.055);font-size:10px;color:var(--muted)}
-.endModal{text-align:center}
-.trophy{font-size:70px;filter:drop-shadow(0 13px 20px rgba(255,209,102,.25));animation:floaty 2s ease-in-out infinite}
-@keyframes floaty{50%{transform:translateY(-7px)}}
-.endStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0}
-.endStat{padding:12px;border-radius:14px;background:rgba(255,255,255,.055)}
-.endStat b{display:block;font-size:20px}.endStat span{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.toastStack{position:fixed;right:18px;bottom:18px;z-index:300;display:grid;gap:8px;pointer-events:none}
-.toast{width:min(340px,calc(100vw - 36px));padding:13px 14px;border-radius:16px;background:#12243f;border:1px solid rgba(255,255,255,.14);box-shadow:var(--shadow);animation:toastIn .25s ease}
-.toast b{display:block;margin-bottom:2px}.toast span{font-size:11px;color:var(--muted)}
-@keyframes toastIn{from{opacity:0;transform:translateY(8px)}}
-.flashDamage{animation:damage .42s ease}.flashHeal{animation:heal .5s ease}
-@keyframes damage{25%{transform:translateX(-4px)}50%{transform:translateX(4px);filter:brightness(1.5)}75%{transform:translateX(-2px)}}
-@keyframes heal{50%{box-shadow:0 0 0 3px rgba(98,230,167,.4),0 0 38px rgba(98,230,167,.25)}}
-@media(max-width:1100px){
-  .teams{grid-template-columns:repeat(2,1fr)}.mainGrid{grid-template-columns:1fr}.side{grid-template-columns:1fr 1fr}
-}
-@media(max-width:760px){
-  .shell{padding:10px}.hero{align-items:flex-start}.career{display:none}.setup{padding:18px;margin-top:10px}
-  .setupIntro{grid-template-columns:1fr}.setupControls,.teamSetupGrid{grid-template-columns:1fr}.teamSetup{grid-template-columns:48px 1fr}
-  .teamSetup .field:last-child{grid-column:2}.teams{grid-template-columns:1fr 1fr}.hud{grid-template-columns:1fr auto}
-  .arenaState{display:none}.side{grid-template-columns:1fr}.endStats{grid-template-columns:1fr 1fr}
-}
-@media(max-width:520px){.teams{grid-template-columns:1fr}.hudActions .ghostBtn:first-child{display:none}.hero p{display:none}}
 </style>
 </head>
 <body>
-<div class="shell">
-  <header class="hero">
-    <div class="brand">
-      <div class="brandMark">⚔️</div>
-      <div>
-        <div class="eyebrow">LenguArcade · Arena táctica</div>
-        <h1>Batalla Verbal</h1>
-        <p>Conjuga. Ataca. Defiéndete. Domina la arena de los verbos.</p>
-      </div>
-    </div>
-    <div class="career">
-      <div class="careerTop"><span>Maestría de arena</span><strong id="careerLevel">Nv. 1</strong></div>
-      <div class="xpTrack" style="margin:8px 0 6px"><div class="xpFill" id="careerXpFill" style="width:0"></div></div>
-      <div class="careerTop"><span id="careerXp">0 XP</span><span id="careerAchievements">0/24 logros</span></div>
-    </div>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><div class="brandMark">⚔️</div><span>Batalla Verbal</span></div>
+    <div class="topTitle">Arena de conjugación</div>
+    <div class="topActions"><span class="topChip" id="careerChip">Nv. 1 · 0 XP</span><button class="iconBtn" id="achievementsBtn">🏅</button><button class="iconBtn hidden" id="exitBtn">Salir</button></div>
   </header>
 
-  <section class="panel setup" id="setupScreen">
-    <div class="setupIntro">
-      <div>
-        <div class="eyebrow">Preparar combate</div>
-        <h2>Una partida ya no se gana solo sabiendo verbos.</h2>
-        <p>Cada equipo elige una clase. Los aciertos cargan energía, las defensas salvan vidas y las habilidades pueden darle la vuelta a una ronda. El tablero cambia en cada partida.</p>
-      </div>
-      <div class="featureGrid">
-        <div class="feature"><b>🧩 Tablero variable</b><span>Miles de combinaciones y 25 casillas nuevas cada partida.</span></div>
-        <div class="feature"><b>✨ 4 clases</b><span>Guerrero, Mago, Arquero y Clérigo con habilidades propias.</span></div>
-        <div class="feature"><b>✦ Runas ocultas</b><span>Algunas casillas guardan curación, escudo, energía o críticos.</span></div>
-        <div class="feature"><b>🏆 Progresión</b><span>XP, nivel de arena, estadísticas y 24 logros persistentes.</span></div>
-      </div>
-    </div>
-    <div class="setupControls">
-      <div class="field"><label>Equipos</label><select id="playerCount"><option value="2">2 equipos</option><option value="3">3 equipos</option><option value="4" selected>4 equipos</option></select></div>
-      <div class="field"><label>Tipo de batalla</label><select id="battleMode"><option value="quick">Relámpago · 90 PV</option><option value="classic" selected>Clásica · 120 PV</option><option value="epic">Épica · 160 PV</option></select></div>
-      <div class="field"><label>Tiempo por reto</label><select id="turnTimer"><option value="0" selected>Sin límite</option><option value="20">20 segundos</option><option value="30">30 segundos</option><option value="45">45 segundos</option></select></div>
-    </div>
-    <div class="teamSetupGrid" id="teamSetupGrid"></div>
-    <div class="startRow">
-      <div class="tip">Consejo: las casillas de mayor valor hacen más daño, pero también castigan más los fallos. Cada quinta casilla resuelta activa un evento de arena.</div>
-      <button class="primaryBtn" id="startBtn">Entrar en la arena ⚔️</button>
-    </div>
-  </section>
-
-  <section class="game hidden" id="gameScreen">
-    <div class="panel hud">
-      <div class="turnBox"><div class="turnOrb" id="turnRoleIcon">⚔️</div><div><span>Turno</span><b id="turnLabel">Equipo 1</b></div></div>
-      <div class="arenaState"><b id="arenaEventTitle">Arena estable</b><span id="arenaEventText">Cada quinta casilla puede cambiar las reglas.</span></div>
-      <div class="hudActions"><button class="ghostBtn" id="achievementsBtn">🏅 Logros</button><button class="ghostBtn" id="exitBtn">Salir</button></div>
-    </div>
-
-    <div class="teams" id="teamsContainer"></div>
-
-    <div class="mainGrid">
-      <div class="panel boardPanel">
-        <div class="boardScroller"><div class="board" id="board"></div></div>
-      </div>
-      <aside class="side">
-        <div class="panel sidePanel">
-          <h3>Objetivo del ataque</h3>
-          <select class="targetSelect" id="targetSelect"></select>
-          <div class="eventCard" style="margin-top:10px"><b id="nextEventCounter">Próximo evento: 5 casillas</b><span>Los eventos afectan a todos o modifican el siguiente ataque.</span></div>
-        </div>
-        <div class="panel sidePanel">
-          <h3>Parte de batalla</h3>
-          <div class="log" id="battleLog"></div>
-        </div>
-        <div class="panel sidePanel">
-          <h3>Cómo leer el tablero</h3>
-          <div class="legendMini">
-            <span>100–200<br>riesgo bajo</span><span>300<br>riesgo medio</span>
-            <span>400<br>riesgo alto</span><span>500<br>golpe máximo</span>
+  <section class="screen" id="setupScreen">
+    <div class="card setupShell">
+      <div class="setupIntro">
+        <div>
+          <div class="kicker">LenguArcade · Verbos</div>
+          <h1>Piensa.<br><span>Escribe.</span><br>Ataca.</h1>
+          <p>Las respuestas ya no se validan “a ojo”: cada ataque y cada defensa exige escribir correctamente la forma verbal.</p>
+          <div class="modeCards">
+            <button class="modeCard active" data-mode="battle"><b>⚔️ Batalla</b><span>De 2 a 4 jugadores identificados con su código de LenguArcade.</span></button>
+            <button class="modeCard" data-mode="practice"><b>🧠 Práctica individual</b><span>Un jugador, 25 retos y progresión sin combate.</span></button>
+          </div>
+          <div class="rulesMini">
+            <div class="ruleMini"><b>100 → accesible</b>Formas frecuentes y regulares.</div>
+            <div class="ruleMini"><b>300 → exigente</b>Tiempos menos mecánicos.</div>
+            <div class="ruleMini"><b>500 → experto</b>Irregularidad y formas complejas.</div>
           </div>
         </div>
-      </aside>
+      </div>
+
+      <div class="setupMain">
+        <div class="setupHead"><div><h2 id="setupTitle">Preparar batalla</h2><p id="setupSubtitle">El jugador principal ya viene identificado desde LenguArcade.</p></div><span class="topChip" id="questionCountChip">5.000+ retos</span></div>
+        <div class="settingsRow">
+          <div class="field" id="playerCountField"><label>Jugadores</label><select id="playerCount"><option value="2" selected>2 jugadores</option><option value="3">3 jugadores</option><option value="4">4 jugadores</option></select></div>
+          <div class="field"><label>Duración</label><select id="battleMode"><option value="quick">Relámpago · 90 PV</option><option value="classic" selected>Clásica · 120 PV</option><option value="epic">Épica · 160 PV</option></select></div>
+          <div class="field"><label>Tiempo</label><select id="turnTimer"><option value="0" selected>Sin límite</option><option value="30">30 s</option><option value="45">45 s</option><option value="60">60 s</option></select></div>
+        </div>
+        <div class="roster" id="roster"></div>
+        <div class="startBar"><div class="startHint" id="startHint">Cada jugador adicional debe generar en su perfil un código general de LenguArcade y dictárselo al jugador que abre la partida.</div><button class="primaryBtn" id="startBtn">Entrar en la arena</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen hidden" id="gameScreen">
+    <div class="gameShell">
+      <div class="playersBar" id="playersBar"></div>
+      <div class="arena">
+        <div class="card boardCard"><div class="board" id="board"></div></div>
+        <aside class="side">
+          <div class="sideCard" id="targetCard"><h3>Objetivo</h3><select class="targetSelect" id="targetSelect"></select><div class="eventNext" id="eventNext">Evento en 5 casillas</div></div>
+          <div class="sideCard"><h3>Últimos movimientos</h3><div class="log" id="battleLog"></div></div>
+          <div class="sideCard"><h3>Equilibrio ataque/defensa</h3><div class="difficultyLegend">
+            <div><b>100</b><span>defensa nivel 5 · bloquea 65%</span></div>
+            <div><b>200</b><span>defensa nivel 4 · bloquea 60%</span></div>
+            <div><b>300</b><span>defensa nivel 3 · bloquea 55%</span></div>
+            <div><b>400</b><span>defensa nivel 2 · bloquea 50%</span></div>
+            <div><b>500</b><span>defensa nivel 1 · bloquea 45%</span></div>
+          </div></div>
+        </aside>
+      </div>
+      <div class="footerLine"><span id="turnLine">Elige una casilla.</span><span id="modeLine"></span></div>
     </div>
   </section>
 </div>
 
-<div class="modalBackdrop" id="questionModal">
-  <div class="modal">
-    <div class="modalHeader"><div><div class="modalTag" id="questionTag">Indicativo · Nivel 1</div><h2 id="questionTitle">Reto verbal</h2></div><div class="valueChip" id="questionValue">100 pts</div></div>
-    <div class="question" id="questionText"></div>
-    <div class="timer hidden" id="questionTimer"><span id="timerNumber">30</span><div class="timerBar"><div class="timerFill" id="timerFill"></div></div></div>
-    <div class="answer" id="questionAnswer"></div>
-    <div class="battlePreview" id="battlePreview"></div>
-    <div class="modalActions">
-      <button class="modalBtn reveal" id="revealBtn">👁 Mostrar solución</button>
-      <button class="modalBtn good" id="correctBtn">✓ Ha acertado</button>
-      <button class="modalBtn bad" id="wrongBtn">✕ Ha fallado</button>
-      <button class="modalBtn cancel" id="cancelQuestionBtn">Cancelar</button>
-    </div>
-  </div>
-</div>
+<div class="overlay" id="questionModal"><div class="modal">
+  <div class="modalHead"><div><div class="modalTag" id="questionTag">Ataque</div><h2 id="questionTitle">Reto verbal</h2></div><div class="value" id="questionValue">100</div></div>
+  <div class="prompt" id="questionPrompt"></div>
+  <form id="questionForm"><div class="answerBox"><input id="questionInput" class="answerInput" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Escribe la respuesta…"><button class="submitAnswer">Responder</button></div></form>
+  <div class="charRow" data-target="questionInput"><button type="button" class="charBtn">á</button><button type="button" class="charBtn">é</button><button type="button" class="charBtn">í</button><button type="button" class="charBtn">ó</button><button type="button" class="charBtn">ú</button><button type="button" class="charBtn">ü</button><button type="button" class="charBtn">ñ</button></div>
+  <div class="feedback" id="questionFeedback"></div>
+  <div class="timerRow hidden" id="questionTimer"><span id="questionTime">30</span><div class="timerTrack"><div class="timerFill" id="questionTimerFill"></div></div></div>
+  <div class="preview" id="questionPreview"></div>
+</div></div>
 
-<div class="modalBackdrop" id="defenseModal">
-  <div class="modal">
-    <div class="modalHeader"><div><div class="modalTag">🛡️ Contraataque defensivo</div><h2 id="defenseTitle">Defensa</h2></div><div class="valueChip" id="defenseDamage">—</div></div>
-    <div class="question" id="defenseQuestion"></div>
-    <div class="answer" id="defenseAnswer"></div>
-    <div class="modalActions">
-      <button class="modalBtn reveal" id="defenseRevealBtn">👁 Mostrar solución</button>
-      <button class="modalBtn good" id="defenseCorrectBtn">🛡️ Se defiende</button>
-      <button class="modalBtn bad" id="defenseWrongBtn">💥 No se defiende</button>
-    </div>
-  </div>
-</div>
+<div class="overlay" id="defenseModal"><div class="modal">
+  <div class="modalHead"><div><div class="modalTag">🛡 Defensa escrita</div><h2 id="defenseTitle">Defensa</h2></div><div class="value" id="defenseValue"></div></div>
+  <div class="prompt" id="defensePrompt"></div>
+  <form id="defenseForm"><div class="answerBox"><input id="defenseInput" class="answerInput" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Escribe la defensa…"><button class="submitAnswer">Defender</button></div></form>
+  <div class="charRow" data-target="defenseInput"><button type="button" class="charBtn">á</button><button type="button" class="charBtn">é</button><button type="button" class="charBtn">í</button><button type="button" class="charBtn">ó</button><button type="button" class="charBtn">ú</button><button type="button" class="charBtn">ü</button><button type="button" class="charBtn">ñ</button></div>
+  <div class="feedback" id="defenseFeedback"></div>
+  <div class="preview" id="defensePreview"></div>
+</div></div>
 
-<div class="modalBackdrop" id="endModal">
-  <div class="modal endModal">
-    <div class="trophy">🏆</div>
-    <div class="eyebrow">Fin de la batalla</div>
-    <h2 id="winnerTitle">Victoria</h2>
-    <p id="winnerText" style="color:var(--muted)"></p>
-    <div class="endStats" id="endStats"></div>
-    <div class="modalActions" style="justify-content:center">
-      <button class="primaryBtn" id="rematchBtn">Revancha</button>
-      <button class="ghostBtn" id="homeBtn">Volver al inicio</button>
-    </div>
-  </div>
-</div>
+<div class="overlay" id="effectModal"><div class="modal effectModal">
+  <div class="effectIcon" id="effectIcon">✦</div><div class="effectWho" id="effectWho"></div><div class="effectTitle" id="effectTitle"></div><div class="effectText" id="effectText"></div>
+  <button class="primaryBtn" id="effectContinue">Continuar</button>
+</div></div>
 
-<div class="modalBackdrop" id="achievementsModal">
-  <div class="modal">
-    <div class="modalHeader"><div><div class="modalTag">Progresión</div><h2>Logros de arena</h2></div><button class="ghostBtn" id="closeAchievementsBtn">Cerrar</button></div>
-    <div id="achievementsGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:18px;max-height:62vh;overflow:auto"></div>
-  </div>
-</div>
+<div class="overlay" id="endModal"><div class="modal end">
+  <div class="trophy" id="endIcon">🏆</div><div class="kicker" id="endKicker">Fin de la batalla</div><h2 id="endTitle">Victoria</h2><p id="endText" style="font-size:11px;color:var(--muted)"></p><div class="endStats" id="endStats"></div>
+  <div class="modalActions"><button class="primaryBtn" id="rematchBtn">Otra partida</button><button class="ghostBtn" id="homeBtn">Volver al inicio</button></div>
+</div></div>
+
+<div class="overlay" id="achievementsModal"><div class="modal">
+  <div class="modalHead"><div><div class="modalTag">Progresión</div><h2 id="achievementOwner">Logros</h2></div><div class="value" id="achievementPageLabel">1/2</div></div>
+  <div class="achievementPage" id="achievementGrid"></div>
+  <div class="modalActions"><button class="ghostBtn" id="achievementPrev">←</button><button class="ghostBtn" id="closeAchievements">Cerrar</button><button class="ghostBtn" id="achievementNext">→</button></div>
+</div></div>
 <div class="toastStack" id="toastStack"></div>
 
 <script>
 (function(){
 "use strict";
 
-var GAME_ID="verb_battle";
-var BRIDGE_NAMESPACE="lenguarcade-game";
-var HOST_NAMESPACE="lenguarcade-host";
-var query=new URLSearchParams(location.search);
-var bridgeEnabled=query.get("lenguarcade")==="1";
-var channel=query.get("channel")||"";
-var maxHp=120;
-var teams=[];
-var currentTeam=0;
-var currentTarget=1;
-var boardCards=[];
-var currentCard=null;
-var pendingAttack=null;
-var usedQuestionIds=new Set();
-var usedAnswers=new Set();
-var recentVerbs=[];
-var resolvedCells=0;
-var matchActive=false;
-var matchEnded=false;
-var matchId="";
-var matchXp=0;
-var currentTimerId=null;
-var timeLeft=0;
-var timerSeconds=0;
-var eventBuff={damage:1,score:1,label:""};
-var pendingExit=false;
-var primaryStudent=null;
-var saveData=loadLocalSave();
-var newUnlocks=[];
+const GAME_ID="verb_battle";
+const BRIDGE_NAMESPACE="lenguarcade-game";
+const HOST_NAMESPACE="lenguarcade-host";
+const query=new URLSearchParams(location.search);
+const bridgeEnabled=query.get("lenguarcade")==="1";
+const channel=query.get("channel")||"";
+const $=id=>document.getElementById(id);
 
-var ROLE_DEFS={
-  warrior:{name:"Guerrero",icon:"🗡️",color:"#ff8a63",passive:"+10% de daño",ultimate:"Furia verbal",description:"El próximo ataque correcto hace +60% de daño.",type:"nextDamage"},
-  mage:{name:"Mago",icon:"🔮",color:"#a78bfa",passive:"+5 energía al acertar",ultimate:"Eco arcano",description:"El próximo ataque salpica un 40% a otro rival.",type:"splash"},
-  archer:{name:"Arquero",icon:"🏹",color:"#5ee6d1",passive:"+10% de puntos",ultimate:"Flecha rúnica",description:"El próximo ataque ignora defensa y escudo.",type:"pierce"},
-  cleric:{name:"Clérigo",icon:"✨",color:"#ffd166",passive:"+5 PV al defender",ultimate:"Concordancia vital",description:"Recupera 30 PV y obtiene 15 de escudo.",type:"heal"}
+let setupMode="battle";
+let primaryProfile=null;
+let connectedProfiles={};
+let teams=[];
+let currentTeam=0,currentTarget=1,currentCard=null,pendingAttack=null;
+let boardCards=[],resolvedCells=0,matchActive=false,matchEnded=false,matchId="",maxHp=120;
+let usedIds=new Set(),usedAnswers=new Set(),recentVerbs=[];
+let timerSeconds=0,timerId=null,timeLeft=0;
+let pendingExit=false,effectCallback=null,achievementPage=0;
+let arenaBuff={damage:1,score:1,label:""};
+let localPrimarySave=loadLocalSave();
+
+const ROLES={
+  warrior:{name:"Guerrero",icon:"🗡️",color:"#de6a55",passive:"+10% daño",ultimate:"Furia verbal",type:"nextDamage",text:"El siguiente ataque correcto hace +60% de daño."},
+  mage:{name:"Mago",icon:"🔮",color:"#785dd7",passive:"+5 energía",ultimate:"Eco arcano",type:"splash",text:"El siguiente ataque salpica un 40% a otro rival."},
+  archer:{name:"Arquero",icon:"🏹",color:"#2e9c91",passive:"+10% puntos",ultimate:"Flecha rúnica",type:"pierce",text:"El siguiente ataque ignora la defensa y el escudo."},
+  cleric:{name:"Clérigo",icon:"✨",color:"#d7a238",passive:"+5 PV al defender",ultimate:"Concordancia vital",type:"heal",text:"Recupera 30 PV y obtiene 15 de escudo."}
 };
 
-var CATEGORIES=[
-  {id:"indicative",name:"Indicativo",icon:"⚡",subtitle:"presente · pasado · futuro"},
-  {id:"compound",name:"Tiempos compuestos",icon:"⏳",subtitle:"haber + participio"},
-  {id:"subjunctive",name:"Subjuntivo",icon:"🌙",subtitle:"deseo · duda · posibilidad"},
-  {id:"imperative",name:"Imperativo",icon:"📣",subtitle:"órdenes afirmativas y negativas"},
-  {id:"mastery",name:"Maestría irregular",icon:"👑",subtitle:"formas no personales y trampas"}
+const CATEGORIES=[
+  {id:"indicative",name:"Indicativo",icon:"⚡",sub:"formas simples"},
+  {id:"compound",name:"Compuestos",icon:"⏳",sub:"haber + participio"},
+  {id:"subjunctive",name:"Subjuntivo",icon:"🌙",sub:"duda y posibilidad"},
+  {id:"imperative",name:"Imperativo",icon:"📣",sub:"órdenes"},
+  {id:"mastery",name:"Maestría",icon:"👑",sub:"irregularidades"}
 ];
 
-var PERSONS=[
+const PERSONS=[
   {label:"1.ª persona singular",pronoun:"yo",i:0},
   {label:"2.ª persona singular",pronoun:"tú",i:1},
   {label:"3.ª persona singular",pronoun:"él",i:2},
@@ -389,13 +228,13 @@ var PERSONS=[
   {label:"3.ª persona plural",pronoun:"ellos",i:5}
 ];
 
-var REGULAR={
+const REGULAR={
   ar:["cantar","amar","bailar","trabajar","estudiar","viajar","caminar","saltar","gritar","cocinar","descansar","ayudar","mirar","hablar","comprar","escuchar","preguntar","entrar","llamar","tomar","preparar","limpiar","visitar","esperar","dibujar","celebrar","cuidar","observar"],
   er:["comer","beber","correr","aprender","comprender","responder","vender","deber","temer","prometer","barrer","sorprender","depender"],
   ir:["vivir","subir","decidir","permitir","recibir","compartir","existir","asistir","partir","unir","sufrir","cumplir","discutir"]
 };
 
-var HABER={
+const HABER={
   present:["he","has","ha","hemos","habéis","han"],
   imperfect:["había","habías","había","habíamos","habíais","habían"],
   future:["habré","habrás","habrá","habremos","habréis","habrán"],
@@ -404,545 +243,402 @@ var HABER={
   subjImperfect:["hubiera","hubieras","hubiera","hubiéramos","hubierais","hubieran"]
 };
 
-var pools={indicative:[[],[],[],[],[]],compound:[[],[],[],[],[]],subjunctive:[[],[],[],[],[]],imperative:[[],[],[],[],[]],mastery:[[],[],[],[],[]]};
+const IRREG={
+  tener:{present:["tengo","tienes","tiene","tenemos","tenéis","tienen"],preterite:["tuve","tuviste","tuvo","tuvimos","tuvisteis","tuvieron"],future:["tendré","tendrás","tendrá","tendremos","tendréis","tendrán"],conditional:["tendría","tendrías","tendría","tendríamos","tendríais","tendrían"],subj:["tenga","tengas","tenga","tengamos","tengáis","tengan"],subjImp:["tuviera","tuvieras","tuviera","tuviéramos","tuvierais","tuvieran"]},
+  venir:{present:["vengo","vienes","viene","venimos","venís","vienen"],preterite:["vine","viniste","vino","vinimos","vinisteis","vinieron"],future:["vendré","vendrás","vendrá","vendremos","vendréis","vendrán"],conditional:["vendría","vendrías","vendría","vendríamos","vendríais","vendrían"],subj:["venga","vengas","venga","vengamos","vengáis","vengan"],subjImp:["viniera","vinieras","viniera","viniéramos","vinierais","vinieran"]},
+  decir:{present:["digo","dices","dice","decimos","decís","dicen"],preterite:["dije","dijiste","dijo","dijimos","dijisteis","dijeron"],future:["diré","dirás","dirá","diremos","diréis","dirán"],conditional:["diría","dirías","diría","diríamos","diríais","dirían"],subj:["diga","digas","diga","digamos","digáis","digan"],subjImp:["dijera","dijeras","dijera","dijéramos","dijerais","dijeran"]},
+  hacer:{present:["hago","haces","hace","hacemos","hacéis","hacen"],preterite:["hice","hiciste","hizo","hicimos","hicisteis","hicieron"],future:["haré","harás","hará","haremos","haréis","harán"],conditional:["haría","harías","haría","haríamos","haríais","harían"],subj:["haga","hagas","haga","hagamos","hagáis","hagan"],subjImp:["hiciera","hicieras","hiciera","hiciéramos","hicierais","hicieran"]},
+  poner:{present:["pongo","pones","pone","ponemos","ponéis","ponen"],preterite:["puse","pusiste","puso","pusimos","pusisteis","pusieron"],future:["pondré","pondrás","pondrá","pondremos","pondréis","pondrán"],conditional:["pondría","pondrías","pondría","pondríamos","pondríais","pondrían"],subj:["ponga","pongas","ponga","pongamos","pongáis","pongan"],subjImp:["pusiera","pusieras","pusiera","pusiéramos","pusierais","pusieran"]},
+  poder:{present:["puedo","puedes","puede","podemos","podéis","pueden"],preterite:["pude","pudiste","pudo","pudimos","pudisteis","pudieron"],future:["podré","podrás","podrá","podremos","podréis","podrán"],conditional:["podría","podrías","podría","podríamos","podríais","podrían"],subj:["pueda","puedas","pueda","podamos","podáis","puedan"],subjImp:["pudiera","pudieras","pudiera","pudiéramos","pudierais","pudieran"]},
+  querer:{present:["quiero","quieres","quiere","queremos","queréis","quieren"],preterite:["quise","quisiste","quiso","quisimos","quisisteis","quisieron"],future:["querré","querrás","querrá","querremos","querréis","querrán"],conditional:["querría","querrías","querría","querríamos","querríais","querrían"],subj:["quiera","quieras","quiera","queramos","queráis","quieran"],subjImp:["quisiera","quisieras","quisiera","quisiéramos","quisierais","quisieran"]},
+  saber:{present:["sé","sabes","sabe","sabemos","sabéis","saben"],preterite:["supe","supiste","supo","supimos","supisteis","supieron"],future:["sabré","sabrás","sabrá","sabremos","sabréis","sabrán"],conditional:["sabría","sabrías","sabría","sabríamos","sabríais","sabrían"],subj:["sepa","sepas","sepa","sepamos","sepáis","sepan"],subjImp:["supiera","supieras","supiera","supiéramos","supierais","supieran"]},
+  estar:{present:["estoy","estás","está","estamos","estáis","están"],preterite:["estuve","estuviste","estuvo","estuvimos","estuvisteis","estuvieron"],future:["estaré","estarás","estará","estaremos","estaréis","estarán"],conditional:["estaría","estarías","estaría","estaríamos","estaríais","estarían"],subj:["esté","estés","esté","estemos","estéis","estén"],subjImp:["estuviera","estuvieras","estuviera","estuviéramos","estuvierais","estuvieran"]},
+  traer:{present:["traigo","traes","trae","traemos","traéis","traen"],preterite:["traje","trajiste","trajo","trajimos","trajisteis","trajeron"],future:["traeré","traerás","traerá","traeremos","traeréis","traerán"],conditional:["traería","traerías","traería","traeríamos","traeríais","traerían"],subj:["traiga","traigas","traiga","traigamos","traigáis","traigan"],subjImp:["trajera","trajeras","trajera","trajéramos","trajerais","trajeran"]},
+  caber:{present:["quepo","cabes","cabe","cabemos","cabéis","caben"],preterite:["cupe","cupiste","cupo","cupimos","cupisteis","cupieron"],future:["cabré","cabrás","cabrá","cabremos","cabréis","cabrán"],conditional:["cabría","cabrías","cabría","cabríamos","cabríais","cabrían"],subj:["quepa","quepas","quepa","quepamos","quepáis","quepan"],subjImp:["cupiera","cupieras","cupiera","cupiéramos","cupierais","cupieran"]}
+};
 
-function norm(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[¿?¡!.,;:]/g,"").replace(/\s+/g," ").trim()}
-function parts(verb){var ending=verb.slice(-2);var stem=verb.slice(0,-2);return{ending:ending,stem:stem,participle:stem+(ending==="ar"?"ado":"ido"),gerund:stem+(ending==="ar"?"ando":"iendo")}}
-function simple(verb,tense,i){
-  var p=parts(verb),e=p.ending,s=p.stem;
-  var tables={
+const PARTICIPLES={
+  abrir:"abierto",cubrir:"cubierto",decir:"dicho",escribir:"escrito",hacer:"hecho",morir:"muerto",poner:"puesto",resolver:"resuelto",romper:"roto",ver:"visto",volver:"vuelto",oponer:"opuesto",suponer:"supuesto",proponer:"propuesto",prever:"previsto",satisfacer:"satisfecho",freír:"frito / freído",imprimir:"impreso / imprimido",proveer:"provisto / proveído"
+};
+const GERUNDS={ir:"yendo",leer:"leyendo",oír:"oyendo",traer:"trayendo",caer:"cayendo",construir:"construyendo",huir:"huyendo",poder:"pudiendo",morir:"muriendo",dormir:"durmiendo",pedir:"pidiendo",sentir:"sintiendo",servir:"sirviendo",vestir:"vistiendo",reír:"riendo",sonreír:"sonriendo",preferir:"prefiriendo",seguir:"siguiendo",conseguir:"consiguiendo",venir:"viniendo",decir:"diciendo"};
+
+const pools={indicative:[[],[],[],[],[]],compound:[[],[],[],[],[]],subjunctive:[[],[],[],[],[]],imperative:[[],[],[],[],[]],mastery:[[],[],[],[],[]]};
+
+function parts(verb){const ending=verb.slice(-2),stem=verb.slice(0,-2);return{ending,stem,participle:stem+(ending==="ar"?"ado":"ido"),gerund:stem+(ending==="ar"?"ando":"iendo")}}
+function regularSimple(verb,tense,i){
+  const p=parts(verb),e=p.ending,s=p.stem;
+  const t={
     present:{ar:["o","as","a","amos","áis","an"],er:["o","es","e","emos","éis","en"],ir:["o","es","e","imos","ís","en"]},
     imperfect:{ar:["aba","abas","aba","ábamos","abais","aban"],er:["ía","ías","ía","íamos","íais","ían"],ir:["ía","ías","ía","íamos","íais","ían"]},
     preterite:{ar:["é","aste","ó","amos","asteis","aron"],er:["í","iste","ió","imos","isteis","ieron"],ir:["í","iste","ió","imos","isteis","ieron"]},
     future:["é","ás","á","emos","éis","án"],
     conditional:["ía","ías","ía","íamos","íais","ían"],
-    subjPresent:{ar:["e","es","e","emos","éis","en"],er:["a","as","a","amos","áis","an"],ir:["a","as","a","amos","áis","an"]},
-    subjImperfect:{ar:["ara","aras","ara","áramos","arais","aran"],er:["iera","ieras","iera","iéramos","ierais","ieran"],ir:["iera","ieras","iera","iéramos","ierais","ieran"]}
+    subj:{ar:["e","es","e","emos","éis","en"],er:["a","as","a","amos","áis","an"],ir:["a","as","a","amos","áis","an"]},
+    subjImp:{ar:["ara","aras","ara","áramos","arais","aran"],er:["iera","ieras","iera","iéramos","ierais","ieran"],ir:["iera","ieras","iera","iéramos","ierais","ieran"]}
   };
-  if(tense==="future"||tense==="conditional")return verb+tables[tense][i];
-  return s+tables[tense][e][i];
+  if(tense==="future"||tense==="conditional")return verb+t[tense][i];
+  return s+t[tense][e][i]
 }
-function addQuestion(cat,level,verb,prompt,answer,skill){
-  var q={id:cat+"_"+level+"_"+pools[cat][level-1].length+"_"+verb,category:cat,level:level,verb:verb,prompt:prompt,answer:answer,skill:skill||cat};
-  pools[cat][level-1].push(q)
+function add(cat,level,verb,prompt,answer,skill){
+  pools[cat][level-1].push({id:cat+"_"+level+"_"+pools[cat][level-1].length+"_"+verb,category:cat,level,verb,prompt,answer,skill:skill||cat})
 }
-function generatePools(){
-  Object.keys(REGULAR).forEach(function(group){
-    REGULAR[group].forEach(function(verb){
-      var p=parts(verb);
-      PERSONS.forEach(function(person){
-        addQuestion("indicative",1,verb,"Conjuga «"+verb+"» en "+person.label+" del presente de indicativo.",person.pronoun+" "+simple(verb,"present",person.i),"presente");
-        addQuestion("indicative",2,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito imperfecto de indicativo.",person.pronoun+" "+simple(verb,"imperfect",person.i),"imperfecto");
-        addQuestion("indicative",3,verb,"Conjuga «"+verb+"» en "+person.label+" del futuro simple.",person.pronoun+" "+simple(verb,"future",person.i),"futuro");
-        addQuestion("indicative",4,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto simple.",person.pronoun+" "+simple(verb,"preterite",person.i),"pretérito");
-        addQuestion("indicative",5,verb,"Conjuga «"+verb+"» en "+person.label+" del condicional simple.",person.pronoun+" "+simple(verb,"conditional",person.i),"condicional");
+function withPronoun(person,form){return person.pronoun+" "+form}
+function buildPools(){
+  Object.values(REGULAR).flat().forEach(verb=>{
+    const p=parts(verb);
+    PERSONS.forEach(person=>{
+      add("indicative",1,verb,"Conjuga «"+verb+"» en "+person.label+" del presente de indicativo.",withPronoun(person,regularSimple(verb,"present",person.i)),"presente regular");
+      add("indicative",2,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito imperfecto de indicativo.",withPronoun(person,regularSimple(verb,"imperfect",person.i)),"imperfecto regular");
+      add("indicative",2,verb,"Conjuga «"+verb+"» en "+person.label+" del futuro simple.",withPronoun(person,regularSimple(verb,"future",person.i)),"futuro regular");
+      add("indicative",3,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto simple.",withPronoun(person,regularSimple(verb,"preterite",person.i)),"pretérito regular");
+      add("indicative",3,verb,"Conjuga «"+verb+"» en "+person.label+" del condicional simple.",withPronoun(person,regularSimple(verb,"conditional",person.i)),"condicional regular");
 
-        addQuestion("compound",1,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto compuesto.",person.pronoun+" "+HABER.present[person.i]+" "+p.participle,"perfecto compuesto");
-        addQuestion("compound",2,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito pluscuamperfecto.",person.pronoun+" "+HABER.imperfect[person.i]+" "+p.participle,"pluscuamperfecto");
-        addQuestion("compound",3,verb,"Conjuga «"+verb+"» en "+person.label+" del futuro perfecto.",person.pronoun+" "+HABER.future[person.i]+" "+p.participle,"futuro perfecto");
-        addQuestion("compound",4,verb,"Conjuga «"+verb+"» en "+person.label+" del condicional compuesto.",person.pronoun+" "+HABER.conditional[person.i]+" "+p.participle,"condicional compuesto");
-        addQuestion("compound",5,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito pluscuamperfecto de subjuntivo.",person.pronoun+" "+HABER.subjImperfect[person.i]+" "+p.participle,"pluscuamperfecto subjuntivo");
+      add("compound",1,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto compuesto.",withPronoun(person,HABER.present[person.i]+" "+p.participle),"perfecto compuesto");
+      add("compound",2,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito pluscuamperfecto.",withPronoun(person,HABER.imperfect[person.i]+" "+p.participle),"pluscuamperfecto");
+      add("compound",3,verb,"Conjuga «"+verb+"» en "+person.label+" del futuro perfecto.",withPronoun(person,HABER.future[person.i]+" "+p.participle),"futuro perfecto");
+      add("compound",4,verb,"Conjuga «"+verb+"» en "+person.label+" del condicional compuesto.",withPronoun(person,HABER.conditional[person.i]+" "+p.participle),"condicional compuesto");
 
-        addQuestion("subjunctive",1,verb,"Conjuga «"+verb+"» en "+person.label+" del presente de subjuntivo.",person.pronoun+" "+simple(verb,"subjPresent",person.i),"subjuntivo presente");
-        addQuestion("subjunctive",3,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito imperfecto de subjuntivo.",person.pronoun+" "+simple(verb,"subjImperfect",person.i),"subjuntivo imperfecto");
-        addQuestion("subjunctive",4,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto de subjuntivo.",person.pronoun+" "+HABER.subjPresent[person.i]+" "+p.participle,"subjuntivo perfecto");
-        addQuestion("subjunctive",5,verb,"Conjuga «"+verb+"» en "+person.label+" del pluscuamperfecto de subjuntivo.",person.pronoun+" "+HABER.subjImperfect[person.i]+" "+p.participle,"subjuntivo pluscuamperfecto");
-      });
-      addQuestion("imperative",1,verb,"Imperativo afirmativo de «"+verb+"» para tú.","tú "+p.stem+(p.ending==="ar"?"a":"e"),"imperativo afirmativo");
-      addQuestion("imperative",2,verb,"Imperativo afirmativo de «"+verb+"» para vosotros.","vosotros "+p.stem+(p.ending==="ar"?"ad":p.ending==="er"?"ed":"id"),"imperativo afirmativo");
-      addQuestion("imperative",3,verb,"Imperativo negativo de «"+verb+"» para tú.","no "+simple(verb,"subjPresent",1),"imperativo negativo");
-      addQuestion("imperative",4,verb,"Imperativo negativo de «"+verb+"» para vosotros.","no "+simple(verb,"subjPresent",4),"imperativo negativo");
+      add("subjunctive",1,verb,"Conjuga «"+verb+"» en "+person.label+" del presente de subjuntivo.",withPronoun(person,regularSimple(verb,"subj",person.i)),"subjuntivo presente");
+      add("subjunctive",2,verb,"Conjuga «"+verb+"» en "+person.label+" del presente de subjuntivo.",withPronoun(person,regularSimple(verb,"subj",person.i)),"subjuntivo presente");
+      add("subjunctive",3,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito imperfecto de subjuntivo.",withPronoun(person,regularSimple(verb,"subjImp",person.i)),"subjuntivo imperfecto");
 
-      addQuestion("mastery",1,verb,"Di el participio de «"+verb+"».",p.participle,"participio");
-      addQuestion("mastery",2,verb,"Di el gerundio de «"+verb+"».",p.gerund,"gerundio");
+      add("compound",5,verb,"Conjuga «"+verb+"» en "+person.label+" del pluscuamperfecto de subjuntivo.",withPronoun(person,HABER.subjImperfect[person.i]+" "+p.participle),"pluscuamperfecto de subjuntivo");
+      add("subjunctive",5,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto de subjuntivo.",withPronoun(person,HABER.subjPresent[person.i]+" "+p.participle),"subjuntivo perfecto");
+    });
+    add("imperative",1,verb,"Escribe el imperativo afirmativo de «"+verb+"» para tú.","tú "+p.stem+(p.ending==="ar"?"a":"e"),"imperativo afirmativo");
+    add("imperative",2,verb,"Escribe el imperativo afirmativo de «"+verb+"» para vosotros.","vosotros "+p.stem+(p.ending==="ar"?"ad":p.ending==="er"?"ed":"id"),"imperativo afirmativo");
+    add("imperative",3,verb,"Escribe el imperativo negativo de «"+verb+"» para tú.","no "+regularSimple(verb,"subj",1),"imperativo negativo");
+    add("imperative",3,verb,"Escribe el imperativo negativo de «"+verb+"» para vosotros.","no "+regularSimple(verb,"subj",4),"imperativo negativo");
+    add("mastery",1,verb,"Escribe el participio de «"+verb+"».",p.participle,"participio regular");
+    add("mastery",2,verb,"Escribe el gerundio de «"+verb+"».",p.gerund,"gerundio regular")
+  });
+
+  Object.entries(IRREG).forEach(([verb,forms])=>{
+    PERSONS.forEach(person=>{
+      add("indicative",4,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto simple.",withPronoun(person,forms.preterite[person.i]),"pretérito irregular");
+      add("indicative",4,verb,"Conjuga «"+verb+"» en "+person.label+" del futuro simple.",withPronoun(person,forms.future[person.i]),"futuro irregular");
+      add("indicative",5,verb,"Conjuga «"+verb+"» en "+person.label+" del condicional simple.",withPronoun(person,forms.conditional[person.i]),"condicional irregular");
+      add("indicative",5,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto simple.",withPronoun(person,forms.preterite[person.i]),"pretérito irregular");
+
+      add("subjunctive",4,verb,"Conjuga «"+verb+"» en "+person.label+" del presente de subjuntivo.",withPronoun(person,forms.subj[person.i]),"subjuntivo irregular");
+      add("subjunctive",4,verb,"Conjuga «"+verb+"» en "+person.label+" del imperfecto de subjuntivo.",withPronoun(person,forms.subjImp[person.i]),"subjuntivo irregular");
+      add("subjunctive",5,verb,"Conjuga «"+verb+"» en "+person.label+" del pluscuamperfecto de subjuntivo.",withPronoun(person,HABER.subjImperfect[person.i]+" "+(PARTICIPLES[verb]||parts(verb).participle).split(" / ")[0]),"subjuntivo compuesto irregular");
+
+      add("compound",4,verb,"Conjuga «"+verb+"» en "+person.label+" del futuro perfecto.",withPronoun(person,HABER.future[person.i]+" "+(PARTICIPLES[verb]||parts(verb).participle).split(" / ")[0]),"compuesto irregular");
+      add("compound",5,verb,"Conjuga «"+verb+"» en "+person.label+" del condicional compuesto.",withPronoun(person,HABER.conditional[person.i]+" "+(PARTICIPLES[verb]||parts(verb).participle).split(" / ")[0]),"compuesto irregular")
     })
   });
 
-  var irr=[
-    ["indicative",2,"ser","Conjuga «ser» en 1.ª persona singular del pretérito imperfecto.","yo era"],
-    ["indicative",3,"tener","Conjuga «tener» en 1.ª persona singular del futuro simple.","yo tendré"],
-    ["indicative",3,"hacer","Conjuga «hacer» en 3.ª persona plural del futuro simple.","ellos harán"],
-    ["indicative",3,"poder","Conjuga «poder» en 2.ª persona plural del futuro simple.","vosotros podréis"],
-    ["indicative",4,"andar","Conjuga «andar» en 3.ª persona singular del pretérito perfecto simple.","él anduvo"],
-    ["indicative",4,"tener","Conjuga «tener» en 3.ª persona plural del pretérito perfecto simple.","ellos tuvieron"],
-    ["indicative",4,"estar","Conjuga «estar» en 1.ª persona singular del pretérito perfecto simple.","yo estuve"],
-    ["indicative",4,"hacer","Conjuga «hacer» en 3.ª persona singular del pretérito perfecto simple.","él hizo"],
-    ["indicative",4,"decir","Conjuga «decir» en 1.ª persona plural del pretérito perfecto simple.","nosotros dijimos"],
-    ["indicative",5,"poner","Conjuga «poner» en 2.ª persona singular del condicional simple.","tú pondrías"],
-    ["indicative",5,"venir","Conjuga «venir» en 3.ª persona plural del condicional simple.","ellos vendrían"],
-    ["indicative",5,"querer","Conjuga «querer» en 1.ª persona singular del condicional simple.","yo querría"],
-
-    ["compound",2,"romper","Conjuga «romper» en 2.ª persona plural del pluscuamperfecto.","vosotros habíais roto"],
-    ["compound",2,"escribir","Conjuga «escribir» en 3.ª persona singular del pluscuamperfecto.","él había escrito"],
-    ["compound",3,"ver","Conjuga «ver» en 1.ª persona plural del futuro perfecto.","nosotros habremos visto"],
-    ["compound",3,"hacer","Conjuga «hacer» en 3.ª persona plural del futuro perfecto.","ellos habrán hecho"],
-    ["compound",4,"decir","Conjuga «decir» en 2.ª persona singular del condicional compuesto.","tú habrías dicho"],
-    ["compound",4,"morir","Conjuga «morir» en 3.ª persona plural del condicional compuesto.","ellos habrían muerto"],
-    ["compound",5,"poner","Conjuga «poner» en 1.ª persona plural del pluscuamperfecto de subjuntivo.","nosotros hubiéramos puesto"],
-    ["compound",5,"volver","Conjuga «volver» en 2.ª persona plural del pluscuamperfecto de subjuntivo.","vosotros hubierais vuelto"],
-
-    ["subjunctive",2,"ser","Conjuga «ser» en 1.ª persona singular del presente de subjuntivo.","yo sea"],
-    ["subjunctive",2,"estar","Conjuga «estar» en 2.ª persona singular del presente de subjuntivo.","tú estés"],
-    ["subjunctive",2,"ir","Conjuga «ir» en 3.ª persona plural del presente de subjuntivo.","ellos vayan"],
-    ["subjunctive",3,"tener","Conjuga «tener» en 1.ª persona plural del presente de subjuntivo.","nosotros tengamos"],
-    ["subjunctive",3,"hacer","Conjuga «hacer» en 2.ª persona plural del presente de subjuntivo.","vosotros hagáis"],
-    ["subjunctive",4,"decir","Conjuga «decir» en 3.ª persona plural del imperfecto de subjuntivo.","ellos dijeran"],
-    ["subjunctive",4,"poder","Conjuga «poder» en 1.ª persona plural del imperfecto de subjuntivo.","nosotros pudiéramos"],
-    ["subjunctive",5,"haber","Conjuga «haber» en 1.ª persona singular del imperfecto de subjuntivo.","yo hubiera"],
-    ["subjunctive",5,"venir","Conjuga «venir» en 2.ª persona plural del imperfecto de subjuntivo.","vosotros vinierais"],
-
-    ["imperative",3,"venir","Imperativo afirmativo de «venir» para tú.","ven"],
-    ["imperative",3,"decir","Imperativo afirmativo de «decir» para tú.","di"],
-    ["imperative",3,"salir","Imperativo afirmativo de «salir» para tú.","sal"],
-    ["imperative",4,"hacer","Imperativo afirmativo de «hacer» para tú.","haz"],
-    ["imperative",4,"poner","Imperativo afirmativo de «poner» para tú.","pon"],
-    ["imperative",4,"tener","Imperativo afirmativo de «tener» para tú.","ten"],
-    ["imperative",4,"ir","Imperativo afirmativo de «ir» para tú.","ve"],
-    ["imperative",5,"decir","Imperativo negativo de «decir» para tú.","no digas"],
-    ["imperative",5,"salir","Imperativo negativo de «salir» para tú.","no salgas"],
-    ["imperative",5,"hacer","Imperativo negativo de «hacer» para vosotros.","no hagáis"],
-    ["imperative",5,"ir","Imperativo negativo de «ir» para vosotros.","no vayáis"],
-
-    ["mastery",2,"romper","Participio irregular de «romper».","roto"],
-    ["mastery",2,"ver","Participio irregular de «ver».","visto"],
-    ["mastery",2,"escribir","Participio irregular de «escribir».","escrito"],
-    ["mastery",3,"hacer","Participio irregular de «hacer».","hecho"],
-    ["mastery",3,"decir","Participio irregular de «decir».","dicho"],
-    ["mastery",3,"morir","Participio irregular de «morir».","muerto"],
-    ["mastery",3,"volver","Participio irregular de «volver».","vuelto"],
-    ["mastery",4,"ir","Gerundio irregular de «ir».","yendo"],
-    ["mastery",4,"dormir","Gerundio irregular de «dormir».","durmiendo"],
-    ["mastery",4,"pedir","Gerundio irregular de «pedir».","pidiendo"],
-    ["mastery",4,"decir","Gerundio irregular de «decir».","diciendo"],
-    ["mastery",5,"andar","¿Cuál es el infinitivo de «anduvieron»?","andar"],
-    ["mastery",5,"tener","¿Cuál es el infinitivo de «tuviese»?","tener"],
-    ["mastery",5,"caber","¿Cuál es el infinitivo de «quepo»?","caber"],
-    ["mastery",5,"satisfacer","¿Cuál es el infinitivo de «satisfizo»?","satisfacer"],
-    ["mastery",5,"prever","¿Cuál es el infinitivo de «previeron»?","prever"],
-
-    ["mastery",3,"abrir","Participio irregular de «abrir».","abierto"],
-    ["mastery",3,"cubrir","Participio irregular de «cubrir».","cubierto"],
-    ["mastery",3,"descubrir","Participio irregular de «descubrir».","descubierto"],
-    ["mastery",3,"resolver","Participio irregular de «resolver».","resuelto"],
-    ["mastery",3,"devolver","Participio irregular de «devolver».","devuelto"],
-    ["mastery",3,"envolver","Participio irregular de «envolver».","envuelto"],
-    ["mastery",3,"componer","Participio irregular de «componer».","compuesto"],
-    ["mastery",3,"deshacer","Participio irregular de «deshacer».","deshecho"],
-    ["mastery",3,"prever","Participio irregular de «prever».","previsto"],
-    ["mastery",3,"satisfacer","Participio irregular de «satisfacer».","satisfecho"],
-    ["mastery",3,"freír","Da los dos participios admitidos de «freír».","frito / freído"],
-    ["mastery",3,"imprimir","Da los dos participios admitidos de «imprimir».","impreso / imprimido"],
-    ["mastery",3,"proveer","Da los dos participios admitidos de «proveer».","provisto / proveído"],
-    ["mastery",3,"oponer","Participio irregular de «oponer».","opuesto"],
-    ["mastery",3,"suponer","Participio irregular de «suponer».","supuesto"],
-    ["mastery",3,"proponer","Participio irregular de «proponer».","propuesto"],
-
-    ["mastery",4,"leer","Gerundio de «leer».","leyendo"],
-    ["mastery",4,"oír","Gerundio de «oír».","oyendo"],
-    ["mastery",4,"traer","Gerundio de «traer».","trayendo"],
-    ["mastery",4,"caer","Gerundio de «caer».","cayendo"],
-    ["mastery",4,"construir","Gerundio de «construir».","construyendo"],
-    ["mastery",4,"huir","Gerundio de «huir».","huyendo"],
-    ["mastery",4,"poder","Gerundio de «poder».","pudiendo"],
-    ["mastery",4,"morir","Gerundio de «morir».","muriendo"],
-    ["mastery",4,"sentir","Gerundio de «sentir».","sintiendo"],
-    ["mastery",4,"servir","Gerundio de «servir».","sirviendo"],
-    ["mastery",4,"vestir","Gerundio de «vestir».","vistiendo"],
-    ["mastery",4,"reír","Gerundio de «reír».","riendo"],
-    ["mastery",4,"sonreír","Gerundio de «sonreír».","sonriendo"],
-    ["mastery",4,"preferir","Gerundio de «preferir».","prefiriendo"],
-    ["mastery",4,"seguir","Gerundio de «seguir».","siguiendo"],
-    ["mastery",4,"conseguir","Gerundio de «conseguir».","consiguiendo"],
-    ["mastery",4,"venir","Gerundio de «venir».","viniendo"],
-    ["mastery",4,"decir","Gerundio de «decir».","diciendo"],
-
-    ["mastery",5,"caber","¿Cuál es el infinitivo de «cupe»?","caber"],
-    ["mastery",5,"saber","¿Cuál es el infinitivo de «supieron»?","saber"],
-    ["mastery",5,"querer","¿Cuál es el infinitivo de «quisiera»?","querer"],
-    ["mastery",5,"venir","¿Cuál es el infinitivo de «viniste»?","venir"],
-    ["mastery",5,"poner","¿Cuál es el infinitivo de «pusiese»?","poner"],
-    ["mastery",5,"traer","¿Cuál es el infinitivo de «trajeron»?","traer"],
-    ["mastery",5,"conducir","¿Cuál es el infinitivo de «condujiste»?","conducir"],
-    ["mastery",5,"decir","¿Cuál es el infinitivo de «dijéramos»?","decir"],
-    ["mastery",5,"hacer","¿Cuál es el infinitivo de «hicisteis»?","hacer"],
-    ["mastery",5,"caber","¿Cuál es el infinitivo de «quepa»?","caber"],
-    ["mastery",5,"satisfacer","¿Cuál es el infinitivo de «satisfagan»?","satisfacer"],
-    ["mastery",5,"prever","¿Cuál es el infinitivo de «preveamos»?","prever"],
-    ["mastery",5,"andar","¿Cuál es el infinitivo de «anduviéramos»?","andar"],
-    ["mastery",5,"estar","¿Cuál es el infinitivo de «estuvieseis»?","estar"],
-    ["mastery",5,"traducir","¿Cuál es el infinitivo de «tradujeran»?","traducir"],
-    ["mastery",5,"producir","¿Cuál es el infinitivo de «produjiste»?","producir"]
+  const imperatives=[
+    ["venir","ven","no vengas","no vengáis"],["decir","di","no digas","no digáis"],["salir","sal","no salgas","no salgáis"],["hacer","haz","no hagas","no hagáis"],
+    ["poner","pon","no pongas","no pongáis"],["tener","ten","no tengas","no tengáis"],["ir","ve","no vayas","no vayáis"],["ser","sé","no seas","no seáis"]
   ];
-  irr.forEach(function(r){addQuestion(r[0],r[1],r[2],r[3],r[4],r[0])});
+  imperatives.forEach(([verb,aff,negTu,negVos])=>{
+    add("imperative",4,verb,"Escribe el imperativo afirmativo de «"+verb+"» para tú.",aff,"imperativo irregular");
+    add("imperative",4,verb,"Escribe el imperativo negativo de «"+verb+"» para tú.",negTu,"imperativo irregular");
+    add("imperative",5,verb,"Escribe el imperativo negativo de «"+verb+"» para vosotros.",negVos,"imperativo irregular");
+    add("imperative",5,verb,"Escribe el imperativo negativo de «"+verb+"» para tú.",negTu,"imperativo irregular")
+  });
 
-  ["subjunctive","imperative"].forEach(function(cat){
-    for(var level=1;level<=5;level++){
-      if(pools[cat][level-1].length<18){
-        var source=cat==="subjunctive"?pools[cat][Math.max(0,level-2)]:pools[cat][Math.min(3,Math.max(0,level-1))];
-        source.slice(0,22).forEach(function(q){
-          var clone=Object.assign({},q,{id:q.id+"_x"+level,level:level});
-          pools[cat][level-1].push(clone)
-        })
-      }
+  Object.entries(PARTICIPLES).forEach(([verb,form])=>{
+    add("mastery",3,verb,"Escribe el participio irregular de «"+verb+"».",form,"participio irregular");
+    PERSONS.slice(0,3).forEach(person=>add("compound",5,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto compuesto.",withPronoun(person,HABER.present[person.i]+" "+form.split(" / ")[0]),"participio irregular en compuesto"))
+  });
+  Object.entries(GERUNDS).forEach(([verb,form])=>add("mastery",4,verb,"Escribe el gerundio irregular de «"+verb+"».",form,"gerundio irregular"));
+
+  const rare=[
+    ["anduvieron","andar"],["tuviese","tener"],["quepo","caber"],["satisfizo","satisfacer"],["previeron","prever"],["supieron","saber"],["quisiera","querer"],["viniste","venir"],["pusiese","poner"],["trajeron","traer"],["condujiste","conducir"],["dijéramos","decir"],["hicisteis","hacer"],["quepa","caber"],["satisfagan","satisfacer"],["preveamos","prever"],["anduviéramos","andar"],["estuvieseis","estar"],["tradujeran","traducir"],["produjiste","producir"],["cupieron","caber"],["querríamos","querer"],["trajeseis","traer"],["pusieran","poner"],["supisteis","saber"],["vinieran","venir"]
+  ];
+  rare.forEach(([form,verb])=>add("mastery",5,verb,"¿Cuál es el infinitivo de «"+form+"»?",verb,"reconocimiento irregular"));
+
+  // Garantía: ningún nivel se queda pequeño.
+  Object.keys(pools).forEach(cat=>pools[cat].forEach((arr,index)=>{
+    if(arr.length<20){
+      const source=arr.length?arr:pools[cat][Math.max(0,index-1)];
+      while(arr.length<20&&source.length)arr.push(Object.assign({},source[arr.length%source.length],{id:cat+"_"+(index+1)+"_fill_"+arr.length,level:index+1}))
     }
-  })
+  }))
 }
-generatePools();
+buildPools();
 
-var ACHIEVEMENTS=[
-  {id:"first_hit",icon:"⚔️",title:"Primera sangre",desc:"Consigue el primer ataque correcto.",xp:20,check:function(s){return s.stats.correct>=1}},
-  {id:"first_defense",icon:"🛡️",title:"No pasarán",desc:"Completa una defensa con éxito.",xp:20,check:function(s){return s.stats.defenses>=1}},
-  {id:"combo3",icon:"🔥",title:"Racha verbal",desc:"Alcanza un combo de 3.",xp:25,check:function(s){return s.stats.maxCombo>=3}},
-  {id:"combo5",icon:"🌋",title:"Imparable",desc:"Alcanza un combo de 5.",xp:45,check:function(s){return s.stats.maxCombo>=5}},
-  {id:"damage40",icon:"💥",title:"Golpe serio",desc:"Inflige 40 o más de daño en un ataque.",xp:30,check:function(s){return s.stats.biggestHit>=40}},
-  {id:"damage60",icon:"☄️",title:"Impacto crítico",desc:"Inflige 60 o más de daño en un ataque.",xp:55,check:function(s){return s.stats.biggestHit>=60}},
-  {id:"ultimate",icon:"✨",title:"Poder desatado",desc:"Activa una habilidad de clase.",xp:25,check:function(s){return s.stats.ultimates>=1}},
-  {id:"ultimates5",icon:"🔮",title:"Veterano arcano",desc:"Activa 5 habilidades a lo largo de tus partidas.",xp:50,check:function(s){return s.stats.ultimates>=5}},
-  {id:"rune",icon:"✦",title:"Cazarrunas",desc:"Activa una runa del tablero.",xp:20,check:function(s){return s.stats.runes>=1}},
-  {id:"runes10",icon:"💎",title:"Coleccionista rúnico",desc:"Activa 10 runas.",xp:50,check:function(s){return s.stats.runes>=10}},
-  {id:"questions25",icon:"🧠",title:"Arena completa",desc:"Resuelve las 25 casillas de una partida.",xp:60,check:function(s){return s.stats.fullBoards>=1}},
-  {id:"match1",icon:"🎟️",title:"Debut",desc:"Termina tu primera batalla.",xp:20,check:function(s){return s.stats.matches>=1}},
-  {id:"match5",icon:"🏟️",title:"Habitual de la arena",desc:"Termina 5 batallas.",xp:45,check:function(s){return s.stats.matches>=5}},
-  {id:"match20",icon:"🏛️",title:"Leyenda de grada",desc:"Termina 20 batallas.",xp:90,check:function(s){return s.stats.matches>=20}},
-  {id:"correct25",icon:"✅",title:"Conjugador",desc:"Acumula 25 respuestas correctas.",xp:35,check:function(s){return s.stats.correct>=25}},
-  {id:"correct100",icon:"📚",title:"Maestro verbal",desc:"Acumula 100 respuestas correctas.",xp:80,check:function(s){return s.stats.correct>=100}},
-  {id:"defense10",icon:"🏰",title:"Muralla",desc:"Acumula 10 defensas correctas.",xp:45,check:function(s){return s.stats.defenses>=10}},
-  {id:"damage500",icon:"⚡",title:"Destructor",desc:"Acumula 500 puntos de daño.",xp:45,check:function(s){return s.stats.damage>=500}},
-  {id:"damage2000",icon:"🐲",title:"Devastador",desc:"Acumula 2000 puntos de daño.",xp:100,check:function(s){return s.stats.damage>=2000}},
-  {id:"level5",icon:"⭐",title:"Nivel 5",desc:"Alcanza nivel 5 de arena.",xp:35,check:function(s){return levelForXp(s.xp)>=5}},
-  {id:"level10",icon:"🌟",title:"Nivel 10",desc:"Alcanza nivel 10 de arena.",xp:70,check:function(s){return levelForXp(s.xp)>=10}},
-  {id:"close_call",icon:"❤️‍🔥",title:"A un hilo",desc:"Sobrevive en una batalla con 15 PV o menos.",xp:40,check:function(s){return s.stats.closeCalls>=1}},
-  {id:"event5",icon:"🌪️",title:"Clima cambiante",desc:"Activa 5 eventos de arena.",xp:35,check:function(s){return s.stats.events>=5}},
-  {id:"perfect_defense",icon:"🪽",title:"Escudo perfecto",desc:"Logra 3 defensas seguidas en una partida.",xp:55,check:function(s){return s.stats.bestDefenseStreak>=3}}
+const ACHIEVEMENTS=[
+  {id:"first",icon:"⚔️",title:"Primera sangre",desc:"Primer ataque correcto.",xp:20,check:s=>s.correct>=1},
+  {id:"def1",icon:"🛡️",title:"No pasarán",desc:"Primera defensa correcta.",xp:20,check:s=>s.defenses>=1},
+  {id:"combo3",icon:"🔥",title:"Racha verbal",desc:"Combo de 3.",xp:25,check:s=>s.maxCombo>=3},
+  {id:"combo5",icon:"🌋",title:"Imparable",desc:"Combo de 5.",xp:45,check:s=>s.maxCombo>=5},
+  {id:"hit40",icon:"💥",title:"Golpe serio",desc:"40 de daño en un golpe.",xp:30,check:s=>s.biggestHit>=40},
+  {id:"hit60",icon:"☄️",title:"Impacto crítico",desc:"60 de daño en un golpe.",xp:55,check:s=>s.biggestHit>=60},
+  {id:"ult",icon:"✨",title:"Poder desatado",desc:"Usa una habilidad.",xp:25,check:s=>s.ultimates>=1},
+  {id:"ult5",icon:"🔮",title:"Veterano arcano",desc:"Usa 5 habilidades.",xp:50,check:s=>s.ultimates>=5},
+  {id:"rune",icon:"✦",title:"Cazarrunas",desc:"Consigue una runa.",xp:20,check:s=>s.runes>=1},
+  {id:"rune10",icon:"💎",title:"Coleccionista",desc:"Consigue 10 runas.",xp:50,check:s=>s.runes>=10},
+  {id:"board",icon:"🧠",title:"Tablero completo",desc:"Completa 25 casillas.",xp:60,check:s=>s.fullBoards>=1},
+  {id:"match1",icon:"🎟️",title:"Debut",desc:"Termina una partida.",xp:20,check:s=>s.matches>=1},
+  {id:"match5",icon:"🏟️",title:"Habitual",desc:"Termina 5 partidas.",xp:45,check:s=>s.matches>=5},
+  {id:"match20",icon:"🏛️",title:"Leyenda",desc:"Termina 20 partidas.",xp:90,check:s=>s.matches>=20},
+  {id:"correct25",icon:"✅",title:"Conjugador",desc:"25 respuestas correctas.",xp:35,check:s=>s.correct>=25},
+  {id:"correct100",icon:"📚",title:"Maestro verbal",desc:"100 respuestas correctas.",xp:80,check:s=>s.correct>=100},
+  {id:"def10",icon:"🏰",title:"Muralla",desc:"10 defensas correctas.",xp:45,check:s=>s.defenses>=10},
+  {id:"damage500",icon:"⚡",title:"Destructor",desc:"500 de daño acumulado.",xp:45,check:s=>s.damage>=500},
+  {id:"damage2000",icon:"🐲",title:"Devastador",desc:"2000 de daño acumulado.",xp:100,check:s=>s.damage>=2000},
+  {id:"level5",icon:"⭐",title:"Nivel 5",desc:"Alcanza nivel 5.",xp:35,check:s=>levelForXp(s.xp)>=5},
+  {id:"level10",icon:"🌟",title:"Nivel 10",desc:"Alcanza nivel 10.",xp:70,check:s=>levelForXp(s.xp)>=10},
+  {id:"close",icon:"❤️‍🔥",title:"A un hilo",desc:"Sobrevive con 15 PV o menos.",xp:40,check:s=>s.closeCalls>=1},
+  {id:"event5",icon:"🌪️",title:"Clima cambiante",desc:"Vive 5 eventos.",xp:35,check:s=>s.events>=5},
+  {id:"def3",icon:"🪽",title:"Escudo perfecto",desc:"3 defensas seguidas.",xp:55,check:s=>s.bestDefenseStreak>=3}
 ];
 
-function defaultSave(){
-  return{version:1,xp:0,unlocked:{},stats:{matches:0,correct:0,wrong:0,defenses:0,maxCombo:0,biggestHit:0,ultimates:0,runes:0,fullBoards:0,damage:0,closeCalls:0,events:0,bestDefenseStreak:0}}
-}
-function normalizeSave(v){
-  var base=defaultSave(),src=v&&typeof v==="object"?v:{};
-  base.xp=Math.max(0,Number(src.xp||0));
-  base.unlocked=Object.assign({},src.unlocked||{});
-  base.stats=Object.assign(base.stats,src.stats||{});
-  return base
-}
-function loadLocalSave(){
-  try{return normalizeSave(JSON.parse(localStorage.getItem("LA_VERB_BATTLE_SAVE")||"null"))}catch(e){return defaultSave()}
-}
-function persistLocal(){try{localStorage.setItem("LA_VERB_BATTLE_SAVE",JSON.stringify(saveData))}catch(e){}}
+function defaultSave(){return{version:2,xp:0,unlocked:{},stats:{matches:0,correct:0,wrong:0,defenses:0,maxCombo:0,biggestHit:0,ultimates:0,runes:0,fullBoards:0,damage:0,closeCalls:0,events:0,bestDefenseStreak:0}}}
+function normalizeSave(v){const b=defaultSave(),s=v&&typeof v==="object"?v:{};b.xp=Math.max(0,Number(s.xp||0));b.unlocked=Object.assign({},s.unlocked||{});b.stats=Object.assign(b.stats,s.stats||{});return b}
+function loadLocalSave(){try{return normalizeSave(JSON.parse(localStorage.getItem("LA_VERB_BATTLE_SAVE")||"null"))}catch(e){return defaultSave()}}
+function persistLocal(){if(bridgeEnabled)return;try{localStorage.setItem("LA_VERB_BATTLE_SAVE",JSON.stringify(localPrimarySave))}catch(e){}}
 function levelForXp(xp){return Math.floor(Math.max(0,Number(xp||0))/300)+1}
-function levelProgress(xp){return Math.round((Math.max(0,Number(xp||0))%300)/300*100)}
-function escapeHtml(v){return String(v==null?"":v).replace(/[&<>"]/g,function(ch){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]})}
+function levelPct(xp){return Math.round((Math.max(0,Number(xp||0))%300)/3)}
+function strictNorm(s){return String(s||"").toLowerCase().trim().replace(/[¿?¡!.,;:]/g,"").replace(/\s+/g," ")}
+function accentless(s){return strictNorm(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+function answerVariants(answer){
+  const out=[];
+  String(answer||"").split(/\s*\/\s*/).forEach(part=>{
+    const clean=strictNorm(part);if(!clean)return;out.push(clean);
+    const stripped=clean.replace(/^(yo|tú|tu|él|el|ella|usted|nosotros|nosotras|vosotros|vosotras|ellos|ellas|ustedes)\s+/,"");
+    if(stripped!==clean)out.push(stripped)
+  });
+  return [...new Set(out)]
+}
+function checkWritten(value,answer){
+  const user=strictNorm(value),variants=answerVariants(answer);
+  if(variants.includes(user))return"correct";
+  if(variants.some(v=>accentless(v)===accentless(user)))return"accent";
+  return"wrong"
+}
+function escapeHtml(v){return String(v==null?"":v).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]))}
 function uid(){return Date.now().toString(36)+"_"+Math.random().toString(36).slice(2)}
 function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
-function aliveTeams(){return teams.filter(function(t){return t.alive})}
+function profileName(student){return[student?.nombre,student?.apellidos].filter(Boolean).join(" ")||"Jugador"}
+function roleDef(team){return ROLES[team.classKey]||ROLES.warrior}
+function alive(){return teams.filter(t=>t.alive)}
 function current(){return teams[currentTeam]}
 function target(){return teams[currentTarget]}
-function roleOf(team){return ROLE_DEFS[team.role]}
-function post(type,payload){
-  if(!bridgeEnabled||!window.parent)return;
-  window.parent.postMessage({namespace:BRIDGE_NAMESPACE,channel:channel,gameId:GAME_ID,type:type,payload:payload||{}},"*")
-}
-function announce(){post("READY",{protocol:3,version:1,multiplayer:false})}
-function toast(title,text){
-  var el=document.createElement("div");el.className="toast";el.innerHTML="<b>"+escapeHtml(title)+"</b><span>"+escapeHtml(text||"")+"</span>";
-  document.getElementById("toastStack").appendChild(el);setTimeout(function(){el.remove()},3600)
-}
-function addLog(html){
-  var log=document.getElementById("battleLog"),item=document.createElement("div"),d=new Date();
-  item.className="logItem";item.innerHTML='<span class="time">'+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+"</span>"+html;
-  log.prepend(item)
-}
-function renderCareer(){
-  document.getElementById("careerLevel").textContent="Nv. "+levelForXp(saveData.xp);
-  document.getElementById("careerXp").textContent=saveData.xp+" XP";
-  document.getElementById("careerXpFill").style.width=levelProgress(saveData.xp)+"%";
-  document.getElementById("careerAchievements").textContent=Object.keys(saveData.unlocked).length+"/24 logros"
-}
-function gainXp(amount,reason){
-  amount=Math.max(0,Math.round(amount||0));if(!amount)return;
-  matchXp+=amount;saveData.xp+=amount;persistLocal();renderCareer();
-  if(reason)toast("+"+amount+" XP",reason);
-  evaluateAchievements()
-}
-function evaluateAchievements(){
-  ACHIEVEMENTS.forEach(function(a){
-    if(saveData.unlocked[a.id])return;
-    if(a.check(saveData)){
-      saveData.unlocked[a.id]={at:new Date().toISOString(),xp:a.xp};
-      saveData.xp+=a.xp;newUnlocks.push(a);toast("🏅 "+a.title,a.desc+" · +"+a.xp+" XP")
+function post(type,payload={}){if(bridgeEnabled&&window.parent)window.parent.postMessage({namespace:BRIDGE_NAMESPACE,channel,gameId:GAME_ID,type,payload},"*")}
+function toast(title,text){const d=document.createElement("div");d.className="toast";d.innerHTML="<b>"+escapeHtml(title)+"</b><span>"+escapeHtml(text||"")+"</span>";$("toastStack").appendChild(d);setTimeout(()=>d.remove(),3200)}
+function addLog(text){const log=$("battleLog"),d=document.createElement("div");d.className="logItem";d.innerHTML=text;log.prepend(d);while(log.children.length>4)log.lastElementChild.remove()}
+function setMode(mode){setupMode=mode;document.querySelectorAll(".modeCard").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));$("playerCountField").classList.toggle("hidden",mode==="practice");$("battleMode").disabled=mode==="practice";$("setupTitle").textContent=mode==="practice"?"Práctica individual":"Preparar batalla";$("setupSubtitle").textContent=mode==="practice"?"Tu perfil, 25 retos y respuesta escrita.":"Conecta los perfiles que participarán en la arena.";renderRoster()}
+function classOptions(selected){return Object.entries(ROLES).map(([k,r])=>'<option value="'+k+'" '+(k===selected?"selected":"")+'>'+r.icon+" "+r.name+"</option>").join("")}
+function requestPlayer(role){post("REQUEST_OPPONENT_AUTH",{role,requestId:"vb_"+role+"_"+uid()})}
+function renderRoster(){
+  const host=$("roster"),count=setupMode==="practice"?1:Number($("playerCount").value||2);host.innerHTML="";
+  for(let i=0;i<count;i++){
+    const role=i===0?"primary":"opponent_"+i;
+    const profile=i===0?primaryProfile:connectedProfiles[role];
+    const cls=profile?.classKey||Object.keys(ROLES)[i%4];
+    const slot=document.createElement("div");slot.className="playerSlot"+(profile?"":" empty");
+    if(profile){
+      slot.innerHTML='<div class="avatar">'+ROLES[cls].icon+'</div><div class="playerMeta"><b>'+escapeHtml(profile.name)+'</b><span>'+escapeHtml(profile.classGroup||"Perfil LenguArcade")+'</span></div><div class="slotAction"><select class="classSelect" data-role="'+role+'">'+classOptions(cls)+'</select>'+(i?'<button class="connectBtn" data-connect="'+role+'">Cambiar jugador</button>':"")+'</div>'
+    }else if(bridgeEnabled){
+      slot.innerHTML='<div class="avatar">＋</div><div class="playerMeta"><b>Jugador '+(i+1)+'</b><span>Introduce su código general de LenguArcade.</span></div><div class="slotAction"><button class="connectBtn" data-connect="'+role+'">Conectar código</button></div>'
+    }else{
+      slot.innerHTML='<div class="avatar">'+ROLES[cls].icon+'</div><div class="playerMeta"><input class="localName field" data-local="'+role+'" value="Jugador '+(i+1)+'"></div><div class="slotAction"><select class="classSelect" data-role="'+role+'">'+classOptions(cls)+'</select></div>'
     }
-  });
-  persistLocal();renderCareer()
-}
-function renderAchievements(){
-  var host=document.getElementById("achievementsGrid");
-  host.innerHTML=ACHIEVEMENTS.map(function(a){
-    var on=!!saveData.unlocked[a.id];
-    return '<div style="padding:12px;border-radius:14px;border:1px solid '+(on?"rgba(98,230,167,.32)":"rgba(255,255,255,.08)")+';background:'+(on?"rgba(98,230,167,.07)":"rgba(255,255,255,.035)")+';opacity:'+(on?1:.58)+'"><div style="font-size:23px">'+a.icon+'</div><b>'+escapeHtml(a.title)+'</b><div style="font-size:11px;color:var(--muted);margin-top:4px">'+escapeHtml(a.desc)+'</div><div style="font-size:10px;color:var(--gold);margin-top:6px">+'+a.xp+' XP</div></div>'
-  }).join("")
-}
-
-function renderSetupTeams(){
-  var count=Number(document.getElementById("playerCount").value),grid=document.getElementById("teamSetupGrid");
-  var prev=[];
-  grid.querySelectorAll(".teamSetup").forEach(function(row){prev.push({name:row.querySelector("input").value,role:row.querySelector("select").value})});
-  var roleKeys=Object.keys(ROLE_DEFS);
-  grid.innerHTML="";
-  for(var i=0;i<count;i++){
-    var role=prev[i]?prev[i].role:roleKeys[i%roleKeys.length],r=ROLE_DEFS[role];
-    var row=document.createElement("div");row.className="teamSetup";row.dataset.index=i;
-    row.innerHTML='<div class="teamSetupIcon">'+r.icon+'</div><div class="field"><label>Equipo '+(i+1)+'</label><input maxlength="24" value="'+escapeHtml(prev[i]?prev[i].name:(i===0&&primaryStudent?primaryStudent.nombre:"Equipo "+(i+1)))+'"></div><div class="field"><label>Clase</label><select>'+roleKeys.map(function(k){return '<option value="'+k+'" '+(k===role?"selected":"")+'>'+ROLE_DEFS[k].icon+" "+ROLE_DEFS[k].name+"</option>"}).join("")+"</select></div>";
-    row.querySelector("select").addEventListener("change",function(){var key=this.value;this.closest(".teamSetup").querySelector(".teamSetupIcon").textContent=ROLE_DEFS[key].icon});
-    grid.appendChild(row)
+    host.appendChild(slot)
   }
+  host.querySelectorAll("[data-connect]").forEach(btn=>btn.onclick=()=>requestPlayer(btn.dataset.connect));
+  host.querySelectorAll(".classSelect").forEach(sel=>sel.onchange=()=>{const role=sel.dataset.role;if(role==="primary"&&primaryProfile)primaryProfile.classKey=sel.value;else if(connectedProfiles[role])connectedProfiles[role].classKey=sel.value;renderRoster()});
+  updateStartState()
 }
-function battleHp(){var mode=document.getElementById("battleMode").value;return mode==="quick"?90:mode==="epic"?160:120}
+function updateStartState(){
+  const count=setupMode==="practice"?1:Number($("playerCount").value||2);
+  let ready=!!primaryProfile||!bridgeEnabled;
+  if(setupMode==="battle"&&bridgeEnabled)for(let i=1;i<count;i++)ready=ready&&!!connectedProfiles["opponent_"+i];
+  $("startBtn").disabled=!ready;
+  $("startHint").textContent=setupMode==="practice"
+    ?"Modo práctica: no hay rival ni defensa. Los fallos rompen la racha, pero no te eliminan."
+    :"Cada jugador adicional genera un código general desde su perfil. La partida se juega por turnos en este dispositivo."
+}
+function maxBattleHp(){const m=$("battleMode").value;return m==="quick"?90:m==="epic"?160:120}
+function teamFromProfile(profile,index){
+  const classKey=profile.classKey||Object.keys(ROLES)[index%4],save=normalizeSave(profile.save);
+  return{id:index,profileRole:profile.role,studentId:profile.studentId,name:profile.name,classKey,save,newUnlocks:[],matchXp:0,hp:maxHp,shield:0,energy:0,score:0,combo:0,maxCombo:0,correct:0,wrong:0,defenses:0,defenseStreak:0,alive:true,ultimate:null}
+}
 function startGame(){
-  var rows=[].slice.call(document.querySelectorAll(".teamSetup"));
-  maxHp=battleHp();timerSeconds=Number(document.getElementById("turnTimer").value||0);
-  teams=rows.map(function(row,i){
-    var name=row.querySelector("input").value.trim()||"Equipo "+(i+1),role=row.querySelector("select").value;
-    return{id:i,name:name,role:role,hp:maxHp,shield:0,energy:0,score:0,combo:0,maxCombo:0,correct:0,wrong:0,defenses:0,defenseStreak:0,alive:true,ultimate:null}
-  });
-  currentTeam=0;currentTarget=teams.length>1?1:0;resolvedCells=0;currentCard=null;pendingAttack=null;usedQuestionIds=new Set();usedAnswers=new Set();recentVerbs=[];
-  eventBuff={damage:1,score:1,label:""};matchActive=true;matchEnded=false;matchId="vb_"+uid();matchXp=0;newUnlocks=[];
-  boardCards=createBoard();document.getElementById("setupScreen").classList.add("hidden");document.getElementById("gameScreen").classList.remove("hidden");
-  renderAll();addLog("⚔️ <strong>Comienza la batalla.</strong> El tablero se ha regenerado.");post("SESSION_STARTED",{mode:"arena",matchId:matchId})
+  timerSeconds=Number($("turnTimer").value||0);maxHp=setupMode==="practice"?100:maxBattleHp();
+  const count=setupMode==="practice"?1:Number($("playerCount").value||2),profiles=[];
+  if(bridgeEnabled){
+    if(!primaryProfile)return;
+    profiles.push(primaryProfile);
+    if(setupMode==="battle")for(let i=1;i<count;i++)profiles.push(connectedProfiles["opponent_"+i])
+  }else{
+    for(let i=0;i<count;i++){
+      const role=i===0?"primary":"opponent_"+i,slot=[...document.querySelectorAll(".playerSlot")][i],name=slot.querySelector("[data-local]")?.value||"Jugador "+(i+1),classKey=slot.querySelector(".classSelect")?.value||Object.keys(ROLES)[i%4];
+      profiles.push({role,studentId:"local_"+i,name,classGroup:"Local",classKey,save:i===0?localPrimarySave:defaultSave()})
+    }
+  }
+  teams=profiles.map(teamFromProfile);currentTeam=0;currentTarget=teams.length>1?1:0;resolvedCells=0;matchActive=true;matchEnded=false;matchId="vb_"+uid();arenaBuff={damage:1,score:1,label:""};usedIds=new Set();usedAnswers=new Set();recentVerbs=[];pendingAttack=null;currentCard=null;
+  boardCards=createBoard();$("setupScreen").classList.add("hidden");$("gameScreen").classList.remove("hidden");$("exitBtn").classList.remove("hidden");$("modeLine").textContent=setupMode==="practice"?"PRÁCTICA INDIVIDUAL":"BATALLA · "+teams.length+" JUGADORES";renderAll();addLog("<b>Comienza "+(setupMode==="practice"?"la práctica":"la batalla")+".</b>");post("SESSION_STARTED",{mode:setupMode,matchId})
 }
 function randomQuestion(cat,level){
-  var pool=pools[cat][level-1].slice(),filtered=pool.filter(function(q){return!usedQuestionIds.has(q.id)&&!usedAnswers.has(norm(q.answer))&&recentVerbs.indexOf(q.verb)===-1});
-  if(!filtered.length)filtered=pool.filter(function(q){return!usedQuestionIds.has(q.id)&&!usedAnswers.has(norm(q.answer))});
-  if(!filtered.length)filtered=pool.filter(function(q){return!usedQuestionIds.has(q.id)});
-  if(!filtered.length)filtered=pool;
-  var q=filtered[Math.floor(Math.random()*filtered.length)];
-  usedQuestionIds.add(q.id);usedAnswers.add(norm(q.answer));recentVerbs.push(q.verb);if(recentVerbs.length>7)recentVerbs.shift();
-  return Object.assign({},q)
+  const base=pools[cat][level-1],filtered=base.filter(q=>!usedIds.has(q.id)&&!usedAnswers.has(strictNorm(q.answer))&&!recentVerbs.includes(q.verb));
+  let pool=filtered.length?filtered:base.filter(q=>!usedIds.has(q.id)&&!usedAnswers.has(strictNorm(q.answer)));
+  if(!pool.length)pool=base.filter(q=>!usedIds.has(q.id));if(!pool.length)pool=base;
+  const q=Object.assign({},pool[Math.floor(Math.random()*pool.length)]);usedIds.add(q.id);usedAnswers.add(strictNorm(q.answer));recentVerbs.push(q.verb);if(recentVerbs.length>7)recentVerbs.shift();return q
 }
 function createBoard(){
-  var cards=[],runeIndexes=[];
-  while(runeIndexes.length<4){var n=Math.floor(Math.random()*25);if(runeIndexes.indexOf(n)<0)runeIndexes.push(n)}
-  for(var row=1;row<=5;row++)for(var col=0;col<5;col++){
-    var q=randomQuestion(CATEGORIES[col].id,row),value=row*100;
-    cards.push({index:(row-1)*5+col,row:row,col:col,value:value,damage:[12,18,24,32,42][row-1],selfDamage:[5,8,11,14,18][row-1],question:q,used:false,rune:runeIndexes.indexOf((row-1)*5+col)>=0?["heal","shield","energy","critical"][runeIndexes.indexOf((row-1)*5+col)]:null})
-  }
+  const cards=[],runes=[];while(runes.length<4){const n=Math.floor(Math.random()*25);if(!runes.includes(n))runes.push(n)}
+  for(let row=1;row<=5;row++)for(let col=0;col<5;col++){const index=(row-1)*5+col;cards.push({index,row,col,value:row*100,damage:[12,18,27,38,52][row-1],self:[0,4,6,9,12][row-1],question:randomQuestion(CATEGORIES[col].id,row),used:false,rune:runes.includes(index)?["heal","shield","energy","critical"][runes.indexOf(index)]:null})}
   return cards
 }
 function renderBoard(){
-  var board=document.getElementById("board");board.innerHTML="";
-  CATEGORIES.forEach(function(cat){var h=document.createElement("div");h.className="category";h.innerHTML='<div class="catIcon">'+cat.icon+'</div><b>'+escapeHtml(cat.name)+'</b><small>'+escapeHtml(cat.subtitle)+'</small>';board.appendChild(h)});
-  boardCards.forEach(function(card){
-    var cell=document.createElement("button");cell.className="cell"+(card.used?" used":"")+(card.rune?" rune":"");cell.disabled=card.used||matchEnded;
-    cell.innerHTML='<span class="cellLevel">NV '+card.row+'</span>'+(card.used?"·":card.value);
-    cell.addEventListener("click",function(){openQuestion(card.index)});board.appendChild(cell)
-  })
+  const b=$("board");b.innerHTML="";CATEGORIES.forEach(cat=>{const d=document.createElement("div");d.className="cat";d.innerHTML="<span>"+cat.icon+"</span><b>"+cat.name+"</b><small>"+cat.sub+"</small>";b.appendChild(d)});
+  boardCards.forEach(card=>{const btn=document.createElement("button");btn.className="cell"+(card.rune?" rune":"");btn.disabled=card.used||matchEnded;btn.innerHTML="<small>NV "+card.row+"</small>"+(card.used?"·":card.value);btn.onclick=()=>openQuestion(card);b.appendChild(btn)})
 }
-function renderTeams(){
-  var host=document.getElementById("teamsContainer");host.innerHTML="";
-  teams.forEach(function(team,i){
-    var r=roleOf(team),card=document.createElement("div");card.className="teamCard"+(i===currentTeam?" active":"")+(i===currentTarget&&i!==currentTeam?" targeted":"")+(!team.alive?" dead":"");card.style.setProperty("--team",r.color);card.id="teamCard_"+i;
-    var hpPct=team.hp/maxHp*100,energy=clamp(team.energy,0,100);
-    card.innerHTML='<div class="teamHeader"><div class="teamIdentity"><div class="roleIcon">'+r.icon+'</div><div style="min-width:0"><div class="teamName">'+escapeHtml(team.name)+'</div><div class="roleName">'+escapeHtml(r.name)+' · '+escapeHtml(r.passive)+'</div></div></div><div class="scorePill">'+team.score+' pts</div></div>'+
-      '<div class="statLine"><span>PV '+team.hp+"/"+maxHp+(team.shield?" · 🛡 "+team.shield:"")+'</span><span>Combo ×'+team.combo+"</span></div>"+
-      '<div class="hpTrack"><div class="hpFill" style="width:'+hpPct+'%"></div></div><div class="energyTrack"><div class="energyFill" style="width:'+energy+'%"></div></div>'+
-      '<div class="teamBottom"><div class="miniStats">⚡ '+energy+' · ✓ '+team.correct+' · 🛡 '+team.defenses+'</div><button class="abilityBtn '+(energy>=100&&team.alive?"ready":"")+'" '+(i!==currentTeam||energy<100||!team.alive?"disabled":"")+' data-ability="'+i+'">'+(energy>=100?"✨ "+r.ultimate:"⚡ "+energy+"/100")+"</button></div>";
-    host.appendChild(card)
-  });
-  host.querySelectorAll("[data-ability]").forEach(function(btn){btn.addEventListener("click",function(){useAbility(Number(this.dataset.ability))})})
+function renderPlayers(){
+  const bar=$("playersBar");bar.innerHTML="";bar.style.gridTemplateColumns="repeat("+Math.max(1,teams.length)+",minmax(0,1fr))";
+  teams.forEach((t,i)=>{const r=roleDef(t),d=document.createElement("div");d.className="playerCard"+(i===currentTeam?" active":"")+(setupMode==="battle"&&i===currentTarget&&i!==currentTeam?" targeted":"")+(!t.alive?" dead":"");d.style.setProperty("--p",r.color);d.innerHTML='<div class="pcTop"><div style="min-width:0"><div class="pcName">'+escapeHtml(t.name)+'</div><div class="pcRole">'+r.icon+" "+r.name+'</div></div><div class="score">'+t.score+' pts</div></div><div class="meterLabel"><span>PV '+t.hp+(t.shield?" · 🛡"+t.shield:"")+'</span><span>combo ×'+t.combo+'</span></div><div class="meter"><div class="hp" style="width:'+clamp(t.hp/maxHp*100,0,100)+'%"></div></div><div class="meter" style="margin-top:3px"><div class="en" style="width:'+clamp(t.energy,0,100)+'%"></div></div><div class="pcBottom"><span>⚡ '+t.energy+' · ✓ '+t.correct+'</span>'+(setupMode==="battle"?'<button class="ability '+(t.energy>=100?"ready":"")+'" '+(i!==currentTeam||t.energy<100||!t.alive?"disabled":"")+' data-ability="'+i+'">'+(t.energy>=100?r.ultimate:"habilidad")+"</button>":"<span>Nv. "+levelForXp(t.save.xp)+"</span>")+"</div>";bar.appendChild(d)});
+  bar.querySelectorAll("[data-ability]").forEach(btn=>btn.onclick=()=>useAbility(Number(btn.dataset.ability)))
 }
 function renderTarget(){
-  var select=document.getElementById("targetSelect"),available=teams.filter(function(t,i){return i!==currentTeam&&t.alive});
-  select.innerHTML=available.map(function(t){return '<option value="'+t.id+'" '+(t.id===currentTarget?"selected":"")+'>'+escapeHtml(t.name)+" · "+t.hp+" PV</option>"}).join("");
-  if(available.length&&available.every(function(t){return t.id!==currentTarget}))currentTarget=available[0].id;
-  select.value=String(currentTarget)
+  $("targetCard").classList.toggle("hidden",setupMode==="practice");if(setupMode==="practice")return;
+  const choices=teams.filter((t,i)=>i!==currentTeam&&t.alive);if(choices.length&&!choices.some(t=>t.id===currentTarget))currentTarget=choices[0].id;
+  $("targetSelect").innerHTML=choices.map(t=>'<option value="'+t.id+'" '+(t.id===currentTarget?"selected":"")+'>'+escapeHtml(t.name)+" · "+t.hp+" PV</option>").join("");$("targetSelect").value=String(currentTarget)
 }
-function renderHud(){
-  var t=current(),r=t?roleOf(t):{icon:"⚔️"};
-  document.getElementById("turnRoleIcon").textContent=r.icon;document.getElementById("turnLabel").textContent=t?t.name:"—";
-  var remain=5-(resolvedCells%5);document.getElementById("nextEventCounter").textContent="Próximo evento: "+remain+" "+(remain===1?"casilla":"casillas")
+function renderCareer(){
+  const owner=teams.length?current():primaryProfile?{save:primaryProfile.save||defaultSave()}: {save:localPrimarySave};
+  $("careerChip").textContent="Nv. "+levelForXp(owner.save.xp)+" · "+owner.save.xp+" XP"
 }
-function renderAll(){renderTeams();renderTarget();renderBoard();renderHud()}
-
-function openQuestion(index){
-  if(matchEnded||currentCard)return;var card=boardCards[index];if(!card||card.used||!current().alive)return;
-  currentCard=card;var cat=CATEGORIES[card.col],r=roleOf(current());
-  document.getElementById("questionTag").textContent=cat.name+" · Nivel "+card.row;document.getElementById("questionTitle").textContent=current().name+" ataca a "+target().name;
-  document.getElementById("questionValue").textContent=card.value+" pts";document.getElementById("questionText").textContent=card.question.prompt;
-  document.getElementById("questionAnswer").textContent="Respuesta: "+card.question.answer;document.getElementById("questionAnswer").classList.remove("open");
-  var predicted=Math.round(card.damage*(r===ROLE_DEFS.warrior?1.1:1)*(eventBuff.damage||1));
-  document.getElementById("battlePreview").innerHTML='<span class="previewPill">⚔️ Daño base '+predicted+'</span><span class="previewPill">💥 Retroceso '+card.selfDamage+'</span><span class="previewPill">🔥 Combo ×'+current().combo+'</span>'+(card.rune?'<span class="previewPill">✦ Runa detectada</span>':"");
-  document.getElementById("questionModal").classList.add("open");startTimer()
-}
+function renderAll(){renderPlayers();renderTarget();renderBoard();renderCareer();$("eventNext").textContent="Evento en "+(5-(resolvedCells%5))+" casilla"+((5-(resolvedCells%5))===1?"":"s");$("turnLine").textContent=setupMode==="practice"?"Elige un reto para practicar.":"Turno de "+current().name+" · elige una casilla."}
 function startTimer(){
-  clearTimer();var wrap=document.getElementById("questionTimer");if(!timerSeconds){wrap.classList.add("hidden");return}
-  wrap.classList.remove("hidden");timeLeft=timerSeconds;updateTimer();
-  currentTimerId=setInterval(function(){timeLeft--;updateTimer();if(timeLeft<=0){clearTimer();toast("⏱ Tiempo agotado","El reto cuenta como fallo.");resolveQuestion(false,true)}},1000)
+  clearTimer();if(!timerSeconds){$("questionTimer").classList.add("hidden");return}$("questionTimer").classList.remove("hidden");timeLeft=timerSeconds;updateTimer();timerId=setInterval(()=>{timeLeft--;updateTimer();if(timeLeft<=0){clearTimer();$("questionFeedback").className="feedback bad";$("questionFeedback").textContent="Tiempo agotado. Respuesta: "+currentCard.question.answer;setTimeout(()=>resolveAttack(false,true),900)}},1000)
 }
-function updateTimer(){document.getElementById("timerNumber").textContent=timeLeft;document.getElementById("timerFill").style.width=(timeLeft/timerSeconds*100)+"%"}
-function clearTimer(){if(currentTimerId){clearInterval(currentTimerId);currentTimerId=null}}
-function closeQuestion(){clearTimer();document.getElementById("questionModal").classList.remove("open");document.getElementById("questionAnswer").classList.remove("open")}
-function revealQuestion(){document.getElementById("questionAnswer").classList.add("open")}
-function resolveQuestion(ok,timeout){
-  if(!currentCard)return;var attacker=current(),defender=target(),card=currentCard,r=roleOf(attacker);card.used=true;resolvedCells++;closeQuestion();currentCard=null;
-  if(!ok){
-    attacker.wrong++;attacker.combo=0;saveData.stats.wrong++;applyDamage(attacker,card.selfDamage,false);attacker.energy=clamp(attacker.energy+8,0,100);
-    addLog((timeout?"⏱ ":"💥 ")+"<strong>"+escapeHtml(attacker.name)+"</strong> falla y recibe "+card.selfDamage+" PV de retroceso.");gainXp(4,"Participación en la arena");afterResolvedCell();finalizeTurn();return
-  }
-  attacker.correct++;attacker.combo++;attacker.maxCombo=Math.max(attacker.maxCombo,attacker.combo);saveData.stats.correct++;saveData.stats.maxCombo=Math.max(saveData.stats.maxCombo,attacker.maxCombo);
-  attacker.energy=clamp(attacker.energy+30+(attacker.role==="mage"?5:0),0,100);
-  var score=Math.round(card.value*(1+(Math.min(attacker.combo,5)-1)*.08)*(attacker.role==="archer"?1.1:1)*(eventBuff.score||1));attacker.score+=score;
-  var damage=card.damage*(attacker.role==="warrior"?1.1:1)*(eventBuff.damage||1);
-  if(attacker.ultimate&&attacker.ultimate.type==="nextDamage")damage*=1.6;
-  damage=Math.round(damage);
-  if(eventBuff.damage!==1||eventBuff.score!==1)consumeEventBuff();
-  gainXp(10+card.row*4,"Reto de nivel "+card.row+" superado");
-  activateRune(card,attacker);
-  if(attacker.ultimate&&attacker.ultimate.type==="pierce"){
-    attacker.ultimate=null;addLog("🏹 <strong>"+escapeHtml(attacker.name)+"</strong> lanza Flecha rúnica: no hay defensa posible.");
-    dealAttack(attacker,defender,damage,true);afterResolvedCell();finalizeTurn();return
-  }
-  pendingAttack={attackerIndex:currentTeam,defenderIndex:currentTarget,damage:damage,score:score,question:pickDefenseQuestion(card.row),splash:attacker.ultimate&&attacker.ultimate.type==="splash"};
-  attacker.ultimate=null;openDefense();afterResolvedCell()
+function updateTimer(){$("questionTime").textContent=timeLeft;$("questionTimerFill").style.width=(timeLeft/timerSeconds*100)+"%"}
+function clearTimer(){if(timerId){clearInterval(timerId);timerId=null}}
+function openQuestion(card){
+  if(currentCard||card.used||matchEnded)return;currentCard=card;const cat=CATEGORIES[card.col];
+  $("questionTag").textContent=(setupMode==="practice"?"Práctica":"Ataque")+" · "+cat.name+" · nivel "+card.row;$("questionTitle").textContent=setupMode==="practice"?current().name:current().name+" → "+target().name;$("questionValue").textContent=card.value+" pts";$("questionPrompt").textContent=card.question.prompt;$("questionInput").value="";$("questionFeedback").className="feedback";$("questionFeedback").textContent="";
+  const defenseLevel=6-card.row,block=[65,60,55,50,45][card.row-1];$("questionPreview").innerHTML='<span class="pill">Dificultad '+card.row+'/5</span>'+(setupMode==="battle"?'<span class="pill">Daño '+card.damage+'</span><span class="pill">Defensa nivel '+defenseLevel+' · bloquea '+block+'%</span>':'<span class="pill">Escribe con tildes correctas</span>');$("questionModal").classList.add("open");setTimeout(()=>$("questionInput").focus(),40);startTimer()
 }
-function pickDefenseQuestion(level){
-  var cat=CATEGORIES[Math.floor(Math.random()*4)].id,lev=Math.max(1,Math.min(3,level-1||1)),pool=pools[cat][lev-1],q=pool[Math.floor(Math.random()*pool.length)];
-  return q
+function submitAttack(){
+  if(!currentCard)return;const result=checkWritten($("questionInput").value,currentCard.question.answer);
+  if(result==="accent"){$("questionFeedback").className="feedback near";$("questionFeedback").textContent="Casi: la forma verbal es correcta, pero revisa la tilde.";return}
+  if(result==="wrong"){$("questionFeedback").className="feedback bad";$("questionFeedback").textContent="No es correcta. Respuesta: "+currentCard.question.answer;clearTimer();setTimeout(()=>resolveAttack(false,false),850);return}
+  $("questionFeedback").className="feedback good";$("questionFeedback").textContent="Correcto.";clearTimer();setTimeout(()=>resolveAttack(true,false),350)
+}
+function gainXp(team,amount,reason){
+  amount=Math.max(0,Math.round(amount));team.matchXp+=amount;team.save.xp+=amount;if(!bridgeEnabled&&team.profileRole==="primary"){localPrimarySave=team.save;persistLocal()}if(reason)toast("+"+amount+" XP · "+team.name,reason);evaluateAchievements(team)
+}
+function evaluateAchievements(team){
+  const s=team.save.stats;ACHIEVEMENTS.forEach(a=>{if(team.save.unlocked[a.id])return;if(a.check(Object.assign({xp:team.save.xp},s))){team.save.unlocked[a.id]={at:new Date().toISOString(),xp:a.xp};team.save.xp+=a.xp;team.newUnlocks.push(a);toast("🏅 "+a.title,team.name+" · "+a.desc)}});if(!bridgeEnabled&&team.profileRole==="primary"){localPrimarySave=team.save;persistLocal()}renderCareer()
+}
+function activateRune(card,team,baseDamage,onDone){
+  if(!card.rune)return onDone(baseDamage);team.save.stats.runes++;let icon="✦",title="",text="",damage=baseDamage;
+  if(card.rune==="heal"){const before=team.hp;team.hp=Math.min(maxHp,team.hp+15);title="Runa vital";icon="💚";text=team.name+" recupera "+(team.hp-before)+" PV."}
+  if(card.rune==="shield"){team.shield+=18;title="Runa de guardia";icon="🛡️";text=team.name+" obtiene 18 puntos de escudo."}
+  if(card.rune==="energy"){team.energy=clamp(team.energy+30,0,100);title="Runa de energía";icon="⚡";text=team.name+" recibe 30 puntos de energía."}
+  if(card.rune==="critical"){damage=Math.round(baseDamage*1.25);title="Runa crítica";icon="☄️";text="El ataque de "+team.name+" aumenta un 25%: "+damage+" de daño base."}
+  evaluateAchievements(team);showEffect(icon,team.name+" ha conseguido una runa",title,text,()=>onDone(damage))
+}
+function resolveAttack(ok,timeout){
+  const card=currentCard,attacker=current();if(!card)return;card.used=true;resolvedCells++;$("questionModal").classList.remove("open");currentCard=null;
+  if(!ok){attacker.wrong++;attacker.combo=0;attacker.save.stats.wrong++;if(setupMode==="battle"&&card.self>0)applyDamage(attacker,card.self,false);gainXp(attacker,4,"Reto intentado");addLog((timeout?"⏱ ":"✕ ")+"<b>"+escapeHtml(attacker.name)+"</b> falla.");return finalizeTurn()}
+  attacker.correct++;attacker.combo++;attacker.maxCombo=Math.max(attacker.maxCombo,attacker.combo);attacker.save.stats.correct++;attacker.save.stats.maxCombo=Math.max(attacker.save.stats.maxCombo,attacker.maxCombo);attacker.energy=clamp(attacker.energy+30+(attacker.classKey==="mage"?5:0),0,100);
+  let score=Math.round(card.value*(1+(Math.min(attacker.combo,5)-1)*.08)*(attacker.classKey==="archer"?1.1:1)*(arenaBuff.score||1));attacker.score+=score;let damage=Math.round(card.damage*(attacker.classKey==="warrior"?1.1:1)*(arenaBuff.damage||1));if(attacker.ultimate?.type==="nextDamage")damage=Math.round(damage*1.6);
+  if(arenaBuff.damage!==1||arenaBuff.score!==1)arenaBuff={damage:1,score:1,label:""};gainXp(attacker,8+card.row*5,"Reto nivel "+card.row+" superado");addLog("✓ <b>"+escapeHtml(attacker.name)+"</b> supera "+card.value+".");
+  activateRune(card,attacker,damage,finalDamage=>{
+    if(setupMode==="practice"){attacker.ultimate=null;return finalizeTurn()}
+    if(attacker.ultimate?.type==="pierce"){attacker.ultimate=null;dealAttack(attacker,target(),finalDamage,true);return finalizeTurn()}
+    pendingAttack={attackerIndex:currentTeam,defenderIndex:currentTarget,damage:finalDamage,attackLevel:card.row,splash:attacker.ultimate?.type==="splash"};attacker.ultimate=null;openDefense()
+  })
+}
+function defenseQuestionFor(attackLevel){
+  const level=6-attackLevel,cats=["indicative","compound","subjunctive","imperative","mastery"],cat=cats[Math.floor(Math.random()*cats.length)];
+  return{level,question:randomQuestion(cat,level),block:[65,60,55,50,45][attackLevel-1]}
 }
 function openDefense(){
-  var d=teams[pendingAttack.defenderIndex],q=pendingAttack.question;
-  document.getElementById("defenseTitle").textContent=d.name+" puede reducir el golpe";document.getElementById("defenseDamage").textContent=pendingAttack.damage+" daño";
-  document.getElementById("defenseQuestion").textContent=q.prompt;document.getElementById("defenseAnswer").textContent="Respuesta: "+q.answer;document.getElementById("defenseAnswer").classList.remove("open");
-  document.getElementById("defenseModal").classList.add("open");addLog("🛡️ <strong>"+escapeHtml(d.name)+"</strong> intenta defenderse.")
+  const d=teams[pendingAttack.defenderIndex],info=defenseQuestionFor(pendingAttack.attackLevel);pendingAttack.defense=info;$("defenseTitle").textContent=d.name+" se defiende";$("defenseValue").textContent="Nivel "+info.level+" · bloquea "+info.block+"%";$("defensePrompt").textContent=info.question.prompt;$("defenseInput").value="";$("defenseFeedback").className="feedback";$("defenseFeedback").textContent="";$("defensePreview").innerHTML='<span class="pill">Ataque '+(pendingAttack.attackLevel*100)+'</span><span class="pill">'+pendingAttack.damage+' daño base</span><span class="pill">Defensa inversa: '+info.level+'/5</span>';$("defenseModal").classList.add("open");setTimeout(()=>$("defenseInput").focus(),40)
+}
+function submitDefense(){
+  if(!pendingAttack)return;const result=checkWritten($("defenseInput").value,pendingAttack.defense.question.answer);
+  if(result==="accent"){$("defenseFeedback").className="feedback near";$("defenseFeedback").textContent="Casi: revisa la tilde antes de defenderte.";return}
+  if(result==="wrong"){$("defenseFeedback").className="feedback bad";$("defenseFeedback").textContent="Defensa fallida. Respuesta: "+pendingAttack.defense.question.answer;setTimeout(()=>resolveDefense(false),850);return}
+  $("defenseFeedback").className="feedback good";$("defenseFeedback").textContent="Defensa correcta.";setTimeout(()=>resolveDefense(true),350)
 }
 function resolveDefense(ok){
-  if(!pendingAttack)return;var a=teams[pendingAttack.attackerIndex],d=teams[pendingAttack.defenderIndex],damage=pendingAttack.damage;
-  if(ok){
-    d.defenses++;d.defenseStreak++;saveData.stats.defenses++;saveData.stats.bestDefenseStreak=Math.max(saveData.stats.bestDefenseStreak,d.defenseStreak);
-    damage=Math.ceil(damage/2);d.energy=clamp(d.energy+22,0,100);if(d.role==="cleric")healTeam(d,5);
-    addLog("🛡️ <strong>"+escapeHtml(d.name)+"</strong> conjuga bien y reduce el golpe a "+damage+" PV.");gainXp(8,"Defensa verbal")
-  }else{d.defenseStreak=0;addLog("⚔️ La defensa de <strong>"+escapeHtml(d.name)+"</strong> falla.")}
-  document.getElementById("defenseModal").classList.remove("open");document.getElementById("defenseAnswer").classList.remove("open");
-  dealAttack(a,d,damage,false);
-  if(pendingAttack.splash)applySplash(a,d,damage);
-  pendingAttack=null;finalizeTurn()
-}
-function dealAttack(attacker,defender,damage,pierce){
-  var dealt=applyDamage(defender,damage,pierce);saveData.stats.damage+=dealt;saveData.stats.biggestHit=Math.max(saveData.stats.biggestHit,dealt);
-  addLog("💥 <strong>"+escapeHtml(attacker.name)+"</strong> golpea a <strong>"+escapeHtml(defender.name)+"</strong> por "+dealt+" PV.");
-  flashTeam(defender.id,"flashDamage")
-}
-function applySplash(attacker,primary,damage){
-  var others=teams.filter(function(t){return t.alive&&t.id!==attacker.id&&t.id!==primary.id});if(!others.length)return;
-  var victim=others[Math.floor(Math.random()*others.length)],splash=Math.max(1,Math.round(damage*.4));var dealt=applyDamage(victim,splash,false);
-  saveData.stats.damage+=dealt;addLog("🔮 Eco arcano alcanza a <strong>"+escapeHtml(victim.name)+"</strong> por "+dealt+" PV.");flashTeam(victim.id,"flashDamage")
+  const a=teams[pendingAttack.attackerIndex],d=teams[pendingAttack.defenderIndex];let damage=pendingAttack.damage;
+  if(ok){d.defenses++;d.defenseStreak++;d.save.stats.defenses++;d.save.stats.bestDefenseStreak=Math.max(d.save.stats.bestDefenseStreak,d.defenseStreak);const blocked=Math.round(damage*pendingAttack.defense.block/100);damage=Math.max(0,damage-blocked);d.energy=clamp(d.energy+22,0,100);if(d.classKey==="cleric")d.hp=Math.min(maxHp,d.hp+5);gainXp(d,8+pendingAttack.defense.level*3,"Defensa nivel "+pendingAttack.defense.level);addLog("🛡 <b>"+escapeHtml(d.name)+"</b> bloquea "+blocked+" de daño.")}else{d.defenseStreak=0;addLog("💥 La defensa de <b>"+escapeHtml(d.name)+"</b> falla.")}
+  $("defenseModal").classList.remove("open");dealAttack(a,d,damage,false);if(pendingAttack.splash)applySplash(a,d,damage);pendingAttack=null;finalizeTurn()
 }
 function applyDamage(team,amount,pierce){
-  amount=Math.max(0,Math.round(amount));var original=amount;
-  if(!pierce&&team.shield>0){var absorbed=Math.min(team.shield,amount);team.shield-=absorbed;amount-=absorbed;if(absorbed)addLog("🛡️ El escudo de <strong>"+escapeHtml(team.name)+"</strong> absorbe "+absorbed+" PV.")}
-  team.hp=Math.max(0,team.hp-amount);if(team.hp<=15&&team.hp>0)saveData.stats.closeCalls++;
-  if(team.hp<=0&&team.alive){team.alive=false;team.hp=0;addLog("☠️ <strong>"+escapeHtml(team.name)+"</strong> queda fuera de combate.")}
-  return pierce?original:amount
+  amount=Math.max(0,Math.round(amount));let dealt=amount;if(!pierce&&team.shield>0){const absorb=Math.min(team.shield,amount);team.shield-=absorb;amount-=absorb}team.hp=Math.max(0,team.hp-amount);dealt=amount;if(team.hp<=15&&team.hp>0)team.save.stats.closeCalls++;if(team.hp<=0&&team.alive){team.alive=false;addLog("☠️ <b>"+escapeHtml(team.name)+"</b> queda fuera.")}return dealt
 }
-function healTeam(team,amount){var before=team.hp;team.hp=Math.min(maxHp,team.hp+amount);var healed=team.hp-before;if(healed)flashTeam(team.id,"flashHeal");return healed}
-function flashTeam(id,cls){setTimeout(function(){var el=document.getElementById("teamCard_"+id);if(!el)return;el.classList.add(cls);setTimeout(function(){el.classList.remove(cls)},550)},30)}
-
+function dealAttack(a,d,damage,pierce){const dealt=applyDamage(d,damage,pierce);a.save.stats.damage+=dealt;a.save.stats.biggestHit=Math.max(a.save.stats.biggestHit,dealt);addLog("⚔️ <b>"+escapeHtml(a.name)+"</b> hace "+dealt+" a "+escapeHtml(d.name)+".");evaluateAchievements(a)}
+function applySplash(a,primary,damage){const others=teams.filter(t=>t.alive&&t.id!==a.id&&t.id!==primary.id);if(!others.length)return;const v=others[Math.floor(Math.random()*others.length)],s=Math.round(damage*.4),dealt=applyDamage(v,s,false);a.save.stats.damage+=dealt;addLog("🔮 Eco arcano: "+dealt+" a <b>"+escapeHtml(v.name)+"</b>.")}
 function useAbility(index){
-  var team=teams[index];if(!team||index!==currentTeam||team.energy<100||!team.alive)return;var r=roleOf(team);team.energy=0;saveData.stats.ultimates++;
-  if(r.type==="heal"){var healed=healTeam(team,30);team.shield+=15;addLog("✨ <strong>"+escapeHtml(team.name)+"</strong> usa Concordancia vital: +"+healed+" PV y +15 de escudo.");toast(r.ultimate,r.description)}
-  else{team.ultimate={type:r.type,name:r.ultimate};addLog(r.icon+" <strong>"+escapeHtml(team.name)+"</strong> prepara "+escapeHtml(r.ultimate)+".");toast(r.ultimate,r.description)}
-  evaluateAchievements();renderTeams()
+  const t=teams[index];if(setupMode!=="battle"||!t||index!==currentTeam||t.energy<100||!t.alive)return;const r=roleDef(t);t.energy=0;t.save.stats.ultimates++;
+  if(r.type==="heal"){const before=t.hp;t.hp=Math.min(maxHp,t.hp+30);t.shield+=15;showEffect(r.icon,t.name+" activa su habilidad",r.ultimate,"Recupera "+(t.hp-before)+" PV y obtiene 15 de escudo.",()=>renderAll())}
+  else{t.ultimate={type:r.type};showEffect(r.icon,t.name+" activa su habilidad",r.ultimate,r.text,()=>renderAll())}
+  evaluateAchievements(t)
 }
-function activateRune(card,team){
-  if(!card.rune)return;saveData.stats.runes++;var msg="";
-  if(card.rune==="heal"){var h=healTeam(team,15);msg="💚 Runa vital: +"+h+" PV."}
-  if(card.rune==="shield"){team.shield+=18;msg="🛡️ Runa de guardia: +18 de escudo."}
-  if(card.rune==="energy"){team.energy=clamp(team.energy+30,0,100);msg="⚡ Runa de energía: +30."}
-  if(card.rune==="critical"){eventBuff.damage=Math.max(eventBuff.damage,1.25);eventBuff.label="Golpe crítico";msg="☄️ Runa crítica: el próximo ataque hace +25%."}
-  addLog("✦ <strong>"+escapeHtml(team.name)+"</strong> activa una runa. "+msg);toast("Runa encontrada",msg);evaluateAchievements()
-}
-function afterResolvedCell(){
-  if(resolvedCells%5===0)triggerArenaEvent();renderAll()
-}
-function triggerArenaEvent(){
-  saveData.stats.events++;var events=[
-    {title:"🌪️ Tormenta rúnica",text:"Todos los equipos vivos ganan 20 de energía.",run:function(){aliveTeams().forEach(function(t){t.energy=clamp(t.energy+20,0,100)})}},
-    {title:"💚 Fuente de concordancia",text:"Todos los equipos vivos recuperan 10 PV.",run:function(){aliveTeams().forEach(function(t){healTeam(t,10)})}},
-    {title:"🏰 Muralla gramatical",text:"Todos los equipos vivos reciben 10 de escudo.",run:function(){aliveTeams().forEach(function(t){t.shield+=10})}},
-    {title:"🔥 Frenesí verbal",text:"El próximo ataque hace un 25% más de daño.",run:function(){eventBuff.damage=1.25;eventBuff.label="Frenesí +25% daño"}},
-    {title:"💰 Bote de la arena",text:"La próxima respuesta correcta puntúa el doble.",run:function(){eventBuff.score=2;eventBuff.label="Bote ×2 puntos"}}
-  ];
-  var e=events[Math.floor(Math.random()*events.length)];e.run();document.getElementById("arenaEventTitle").textContent=e.title;document.getElementById("arenaEventText").textContent=e.text;
-  addLog("<strong>"+e.title+"</strong> "+e.text);toast(e.title,e.text);evaluateAchievements()
-}
-function consumeEventBuff(){eventBuff={damage:1,score:1,label:""};document.getElementById("arenaEventTitle").textContent="Arena estable";document.getElementById("arenaEventText").textContent="Cada quinta casilla puede cambiar las reglas."}
-
 function finalizeTurn(){
-  evaluateAchievements();renderAll();
-  if(aliveTeams().length<=1){finishMatch("elimination");return}
-  if(resolvedCells>=25){saveData.stats.fullBoards++;finishMatch("board");return}
-  currentTeam=nextAlive(currentTeam);var available=teams.filter(function(t,i){return i!==currentTeam&&t.alive});currentTarget=available.length?available[0].id:currentTeam;renderAll()
+  evaluateAchievements(current());renderAll();
+  if(setupMode==="battle"&&alive().length<=1)return finishMatch("elimination");
+  if(resolvedCells>=25){current().save.stats.fullBoards++;return finishMatch("board")}
+  const continueTurn=()=>{if(setupMode==="battle"){currentTeam=nextAlive(currentTeam);const choices=teams.filter((t,i)=>i!==currentTeam&&t.alive);currentTarget=choices.length?choices[0].id:currentTeam}renderAll()};
+  if(resolvedCells%5===0)return triggerArenaEvent(continueTurn);continueTurn()
 }
-function nextAlive(from){var idx=from;for(var i=0;i<teams.length;i++){idx=(idx+1)%teams.length;if(teams[idx].alive)return idx}return from}
-function determineWinner(){
-  var live=aliveTeams();if(live.length===1)return live[0];
-  var ranked=teams.slice().sort(function(a,b){return b.score-a.score||b.hp-a.hp||b.correct-a.correct});return ranked[0]
+function nextAlive(from){let idx=from;for(let i=0;i<teams.length;i++){idx=(idx+1)%teams.length;if(teams[idx].alive)return idx}return from}
+function triggerArenaEvent(done){
+  teams.forEach(t=>t.save.stats.events++);const events=[
+    {icon:"🌪️",title:"Tormenta rúnica",text:"Todos los jugadores vivos ganan 20 de energía.",run:()=>alive().forEach(t=>t.energy=clamp(t.energy+20,0,100))},
+    {icon:"💚",title:"Fuente verbal",text:"Todos los jugadores vivos recuperan 10 PV.",run:()=>alive().forEach(t=>t.hp=Math.min(maxHp,t.hp+10))},
+    {icon:"🏰",title:"Muralla gramatical",text:"Todos los jugadores vivos reciben 10 de escudo.",run:()=>alive().forEach(t=>t.shield+=10)},
+    {icon:"🔥",title:"Frenesí verbal",text:"El próximo ataque correcto hará un 25% más de daño.",run:()=>arenaBuff.damage=1.25},
+    {icon:"💰",title:"Bote de la arena",text:"La próxima respuesta correcta puntuará el doble.",run:()=>arenaBuff.score=2}
+  ];const e=events[Math.floor(Math.random()*events.length)];e.run();teams.forEach(evaluateAchievements);showEffect(e.icon,"Evento de arena",e.title,e.text,()=>{renderAll();done()})
 }
+function showEffect(icon,who,title,text,onClose){effectCallback=onClose||null;$("effectIcon").textContent=icon;$("effectWho").textContent=who;$("effectTitle").textContent=title;$("effectText").textContent=text;$("effectModal").classList.add("open")}
+function determineWinner(){if(setupMode==="practice")return teams[0];const live=alive();if(live.length===1)return live[0];return teams.slice().sort((a,b)=>b.score-a.score||b.hp-a.hp||b.correct-a.correct)[0]}
 function finishMatch(reason){
-  if(matchEnded)return;matchEnded=true;matchActive=false;clearTimer();var winner=determineWinner();saveData.stats.matches++;gainXp(40,"Batalla completada");gainXp(60,"Victoria de "+winner.name);evaluateAchievements();persistLocal();
-  document.getElementById("winnerTitle").textContent=winner.name+" domina la arena";
-  document.getElementById("winnerText").textContent=reason==="board"?"El tablero se ha agotado. Gana por puntuación, vida y precisión.":"El último equipo en pie se lleva la victoria.";
-  var totalCorrect=teams.reduce(function(s,t){return s+t.correct},0),totalWrong=teams.reduce(function(s,t){return s+t.wrong},0),bestCombo=Math.max.apply(null,teams.map(function(t){return t.maxCombo}));
-  document.getElementById("endStats").innerHTML='<div class="endStat"><b>'+winner.score+'</b><span>Puntos ganador</span></div><div class="endStat"><b>'+totalCorrect+'</b><span>Aciertos</span></div><div class="endStat"><b>'+bestCombo+'</b><span>Mejor combo</span></div><div class="endStat"><b>+'+matchXp+'</b><span>XP de arena</span></div>';
-  document.getElementById("endModal").classList.add("open");sendResult(winner,reason,totalCorrect,totalWrong,bestCombo)
+  if(matchEnded)return;matchEnded=true;matchActive=false;clearTimer();const winner=determineWinner();teams.forEach(t=>{t.save.stats.matches++;gainXp(t,setupMode==="practice"?35:25,"Partida completada")});if(setupMode==="battle")gainXp(winner,60,"Victoria en la arena");const totalCorrect=teams.reduce((s,t)=>s+t.correct,0),totalWrong=teams.reduce((s,t)=>s+t.wrong,0),bestCombo=Math.max(...teams.map(t=>t.maxCombo));
+  $("endIcon").textContent=setupMode==="practice"?"🧠":"🏆";$("endKicker").textContent=setupMode==="practice"?"Práctica completada":"Fin de la batalla";$("endTitle").textContent=setupMode==="practice"?"25 retos superados":winner.name+" gana";$("endText").textContent=setupMode==="practice"?"Has completado un tablero completo de práctica.":"La clasificación combina supervivencia, puntuación y precisión.";$("endStats").innerHTML='<div class="endStat"><b>'+winner.score+'</b><span>Puntos</span></div><div class="endStat"><b>'+totalCorrect+'</b><span>Aciertos</span></div><div class="endStat"><b>'+bestCombo+'</b><span>Mejor combo</span></div><div class="endStat"><b>'+resolvedCells+'</b><span>Casillas</span></div>';$("endModal").classList.add("open");sendResult(winner,reason,totalCorrect,totalWrong,bestCombo)
 }
+function achievementPayload(team){return team.newUnlocks.map(a=>({id:a.id,title:a.title,description:a.desc,xpReward:a.xp}))}
 function sendResult(winner,reason,correct,wrong,bestCombo){
-  var payload={
-    resultId:matchId+"_"+Date.now(),matchId:matchId,outcome:"finished",reason:reason,score:winner.score,correct:correct,errors:wrong,maxCombo:bestCombo,xpGain:matchXp,
-    save:saveData,achievements:newUnlocks.map(function(a){return{id:a.id,title:a.title,description:a.desc,xpReward:a.xp}}),
-    metrics:{winner:winner.name,teams:teams.length,resolvedCells:resolvedCells,totalDamage:saveData.stats.damage},
-    players:[{role:"primary",outcome:"finished",score:winner.score,correct:correct,errors:wrong,maxCombo:bestCombo,xpGain:matchXp,save:saveData,achievements:newUnlocks.map(function(a){return{id:a.id,title:a.title,description:a.desc,xpReward:a.xp}})}]
-  };
-  post("RESULT",payload)
+  if(!bridgeEnabled)return;post("RESULT",{resultId:matchId+"_"+Date.now(),matchId,outcome:setupMode==="practice"?"practice":"finished",reason,score:winner.score,correct,errors:wrong,maxCombo:bestCombo,xpGain:teams[0].matchXp,players:teams.map(t=>({role:t.profileRole,studentId:t.studentId,outcome:setupMode==="practice"?"practice":t.id===winner.id?"victory":"defeat",score:t.score,correct:t.correct,errors:t.wrong,maxCombo:t.maxCombo,xpGain:t.matchXp,save:t.save,achievements:achievementPayload(t)}))})
 }
-function rematch(){
-  document.getElementById("endModal").classList.remove("open");document.getElementById("gameScreen").classList.add("hidden");document.getElementById("setupScreen").classList.remove("hidden");renderSetupTeams()
-}
-function goHome(){document.getElementById("endModal").classList.remove("open");document.getElementById("gameScreen").classList.add("hidden");document.getElementById("setupScreen").classList.remove("hidden");renderSetupTeams()}
+function returnSetup(){$("endModal").classList.remove("open");$("gameScreen").classList.add("hidden");$("setupScreen").classList.remove("hidden");$("exitBtn").classList.add("hidden");matchActive=false;matchEnded=false;teams=[];renderRoster();renderCareer()}
 function requestExit(){
-  if(!matchActive){post("CLOSE_READY");return}
-  if(!confirm("¿Salir de la batalla? Se guardará la actividad realizada, pero no habrá ganador."))return;
-  pendingExit=true;matchActive=false;matchEnded=true;clearTimer();
-  var totalCorrect=teams.reduce(function(s,t){return s+t.correct},0),totalWrong=teams.reduce(function(s,t){return s+t.wrong},0),bestCombo=teams.length?Math.max.apply(null,teams.map(function(t){return t.maxCombo})):0;
-  post("RESULT",{resultId:matchId+"_exit_"+Date.now(),matchId:matchId,outcome:"abandoned",reason:"abandoned",score:teams.reduce(function(m,t){return Math.max(m,t.score)},0),correct:totalCorrect,errors:totalWrong,maxCombo:bestCombo,xpGain:matchXp,save:saveData,achievements:newUnlocks,players:[{role:"primary",outcome:"abandoned",correct:totalCorrect,errors:totalWrong,maxCombo:bestCombo,xpGain:matchXp,save:saveData,achievements:newUnlocks}]})
+  if(!matchActive){post("CLOSE_READY");return}if(!confirm("¿Salir? Se guardará lo realizado, pero la batalla quedará abandonada."))return;pendingExit=true;matchActive=false;matchEnded=true;clearTimer();if(!bridgeEnabled)return returnSetup();
+  post("RESULT",{resultId:matchId+"_exit_"+Date.now(),matchId,outcome:"abandoned",reason:"abandoned",score:teams.reduce((m,t)=>Math.max(m,t.score),0),correct:teams.reduce((s,t)=>s+t.correct,0),errors:teams.reduce((s,t)=>s+t.wrong,0),players:teams.map(t=>({role:t.profileRole,studentId:t.studentId,outcome:"abandoned",score:t.score,correct:t.correct,errors:t.wrong,maxCombo:t.maxCombo,xpGain:t.matchXp,save:t.save,achievements:achievementPayload(t)}))})
+}
+function renderAchievements(){
+  const owner=teams.length?current():primaryProfile?{name:primaryProfile.name,save:primaryProfile.save}: {name:"Jugador",save:localPrimarySave};const start=achievementPage*12,items=ACHIEVEMENTS.slice(start,start+12);$("achievementOwner").textContent="Logros · "+owner.name;$("achievementPageLabel").textContent=(achievementPage+1)+"/2";$("achievementGrid").innerHTML=items.map(a=>{const on=owner.save?.unlocked?.[a.id];return '<div class="achievement '+(on?"":"locked")+'"><div class="ico">'+a.icon+'</div><b>'+escapeHtml(a.title)+'</b><p>'+escapeHtml(a.desc)+'</p></div>'}).join("");$("achievementsModal").classList.add("open")
 }
 
-window.addEventListener("message",function(event){
-  var m=event.data||{};if(m.namespace!==HOST_NAMESPACE||m.channel!==channel)return;
+window.addEventListener("message",event=>{
+  const m=event.data||{};if(m.namespace!==HOST_NAMESPACE||m.channel!==channel)return;
   if(m.type==="INIT"){
-    primaryStudent=m.payload&&m.payload.student||null;if(m.payload&&m.payload.save)saveData=normalizeSave(m.payload.save);persistLocal();renderCareer();renderSetupTeams();post("INITIALIZED",{version:1})
+    const s=m.payload?.student||{};primaryProfile={role:"primary",studentId:String(s.studentId||""),name:profileName(s),classGroup:s.clase||"",classKey:"warrior",save:normalizeSave(m.payload?.save)};renderRoster();renderCareer();post("INITIALIZED",{profileId:primaryProfile.studentId,multiplayer:true,practice:true,version:2})
   }
-  if(m.type==="SAVE_CONFIRMED"){toast("✅ Progreso guardado","La batalla se ha registrado en LenguArcade.");if(pendingExit){pendingExit=false;post("CLOSE_READY")}}
-  if(m.type==="SAVE_FAILED")toast("⚠️ No se pudo guardar",m.payload&&m.payload.message||"Puedes continuar y volver a intentarlo.");
+  if(m.type==="OPPONENT_AUTHENTICATED"){
+    const role=String(m.payload?.role||"opponent_1"),s=m.payload?.student||{};connectedProfiles[role]={role,studentId:String(s.studentId||""),name:profileName(s),classGroup:s.clase||"",classKey:Object.keys(ROLES)[Math.min(3,Object.keys(connectedProfiles).length+1)],save:normalizeSave(m.payload?.save)};toast("Jugador conectado",profileName(s));renderRoster()
+  }
+  if(m.type==="OPPONENT_AUTH_FAILED")toast("No se pudo conectar",m.payload?.message||"Comprueba el código.");
+  if(m.type==="SAVE_CONFIRMED"){toast("Progreso guardado","Los perfiles participantes han recibido su progreso.");if(pendingExit){pendingExit=false;post("CLOSE_READY")}}
+  if(m.type==="SAVE_FAILED")toast("Guardado pendiente",m.payload?.message||"Vuelve a intentarlo.");
   if(m.type==="REQUEST_EXIT")requestExit()
 });
 
-document.getElementById("playerCount").addEventListener("change",renderSetupTeams);
-document.getElementById("startBtn").addEventListener("click",startGame);
-document.getElementById("targetSelect").addEventListener("change",function(){currentTarget=Number(this.value);renderTeams()});
-document.getElementById("revealBtn").addEventListener("click",revealQuestion);
-document.getElementById("correctBtn").addEventListener("click",function(){resolveQuestion(true,false)});
-document.getElementById("wrongBtn").addEventListener("click",function(){resolveQuestion(false,false)});
-document.getElementById("cancelQuestionBtn").addEventListener("click",function(){currentCard=null;closeQuestion()});
-document.getElementById("defenseRevealBtn").addEventListener("click",function(){document.getElementById("defenseAnswer").classList.add("open")});
-document.getElementById("defenseCorrectBtn").addEventListener("click",function(){resolveDefense(true)});
-document.getElementById("defenseWrongBtn").addEventListener("click",function(){resolveDefense(false)});
-document.getElementById("rematchBtn").addEventListener("click",rematch);
-document.getElementById("homeBtn").addEventListener("click",goHome);
-document.getElementById("exitBtn").addEventListener("click",requestExit);
-document.getElementById("achievementsBtn").addEventListener("click",function(){renderAchievements();document.getElementById("achievementsModal").classList.add("open")});
-document.getElementById("closeAchievementsBtn").addEventListener("click",function(){document.getElementById("achievementsModal").classList.remove("open")});
+document.querySelectorAll(".modeCard").forEach(btn=>btn.onclick=()=>setMode(btn.dataset.mode));
+$("playerCount").onchange=renderRoster;
+$("startBtn").onclick=startGame;
+$("targetSelect").onchange=()=>{currentTarget=Number($("targetSelect").value);renderPlayers()};
+$("questionForm").onsubmit=e=>{e.preventDefault();submitAttack()};
+$("defenseForm").onsubmit=e=>{e.preventDefault();submitDefense()};
+document.querySelectorAll(".charRow").forEach(row=>row.querySelectorAll(".charBtn").forEach(btn=>btn.onclick=()=>{const input=$(row.dataset.target),start=input.selectionStart??input.value.length,end=input.selectionEnd??start;input.value=input.value.slice(0,start)+btn.textContent+input.value.slice(end);input.focus();input.setSelectionRange(start+1,start+1)}));
+$("effectContinue").onclick=()=>{const cb=effectCallback;effectCallback=null;$("effectModal").classList.remove("open");if(cb)cb()};
+$("rematchBtn").onclick=returnSetup;$("homeBtn").onclick=returnSetup;$("exitBtn").onclick=requestExit;
+$("achievementsBtn").onclick=()=>{achievementPage=0;renderAchievements()};$("closeAchievements").onclick=()=>$("achievementsModal").classList.remove("open");$("achievementPrev").onclick=()=>{achievementPage=Math.max(0,achievementPage-1);renderAchievements()};$("achievementNext").onclick=()=>{achievementPage=Math.min(1,achievementPage+1);renderAchievements()};
 
-renderCareer();renderSetupTeams();if(bridgeEnabled)announce();else{primaryStudent={nombre:"Equipo 1"}}
+if(!bridgeEnabled){primaryProfile={role:"primary",studentId:"local_primary",name:"Jugador 1",classGroup:"Local",classKey:"warrior",save:localPrimarySave}}
+renderRoster();renderCareer();post("READY",{protocol:3,multiplayer:true,maxPlayers:4,practice:true,version:2});
 })();
 </script>
 </body>
