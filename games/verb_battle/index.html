@@ -258,7 +258,7 @@ const IRREG={
 };
 
 const PARTICIPLES={
-  abrir:"abierto",cubrir:"cubierto",decir:"dicho",escribir:"escrito",hacer:"hecho",morir:"muerto",poner:"puesto",resolver:"resuelto",romper:"roto",ver:"visto",volver:"vuelto",oponer:"opuesto",suponer:"supuesto",proponer:"propuesto",prever:"previsto",satisfacer:"satisfecho",freír:"frito / freído",imprimir:"impreso / imprimido",proveer:"provisto / proveído"
+  abrir:"abierto",cubrir:"cubierto",decir:"dicho",traer:"traído",escribir:"escrito",hacer:"hecho",morir:"muerto",poner:"puesto",resolver:"resuelto",romper:"roto",ver:"visto",volver:"vuelto",oponer:"opuesto",suponer:"supuesto",proponer:"propuesto",prever:"previsto",satisfacer:"satisfecho",freír:"frito / freído",imprimir:"impreso / imprimido",proveer:"provisto / proveído"
 };
 const GERUNDS={ir:"yendo",leer:"leyendo",oír:"oyendo",traer:"trayendo",caer:"cayendo",construir:"construyendo",huir:"huyendo",poder:"pudiendo",morir:"muriendo",dormir:"durmiendo",pedir:"pidiendo",sentir:"sintiendo",servir:"sirviendo",vestir:"vistiendo",reír:"riendo",sonreír:"sonriendo",preferir:"prefiriendo",seguir:"siguiendo",conseguir:"consiguiendo",venir:"viniendo",decir:"diciendo"};
 
@@ -305,8 +305,8 @@ function buildPools(){
       add("compound",5,verb,"Conjuga «"+verb+"» en "+person.label+" del pluscuamperfecto de subjuntivo.",withPronoun(person,HABER.subjImperfect[person.i]+" "+p.participle),"pluscuamperfecto de subjuntivo");
       add("subjunctive",5,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto de subjuntivo.",withPronoun(person,HABER.subjPresent[person.i]+" "+p.participle),"subjuntivo perfecto");
     });
-    add("imperative",1,verb,"Escribe el imperativo afirmativo de «"+verb+"» para tú.","tú "+p.stem+(p.ending==="ar"?"a":"e"),"imperativo afirmativo");
-    add("imperative",2,verb,"Escribe el imperativo afirmativo de «"+verb+"» para vosotros.","vosotros "+p.stem+(p.ending==="ar"?"ad":p.ending==="er"?"ed":"id"),"imperativo afirmativo");
+    add("imperative",1,verb,"Escribe el imperativo afirmativo de «"+verb+"» para tú.",p.stem+(p.ending==="ar"?"a":"e"),"imperativo afirmativo");
+    add("imperative",2,verb,"Escribe el imperativo afirmativo de «"+verb+"» para vosotros.",p.stem+(p.ending==="ar"?"ad":p.ending==="er"?"ed":"id"),"imperativo afirmativo");
     add("imperative",3,verb,"Escribe el imperativo negativo de «"+verb+"» para tú.","no "+regularSimple(verb,"subj",1),"imperativo negativo");
     add("imperative",3,verb,"Escribe el imperativo negativo de «"+verb+"» para vosotros.","no "+regularSimple(verb,"subj",4),"imperativo negativo");
     add("mastery",1,verb,"Escribe el participio de «"+verb+"».",p.participle,"participio regular");
@@ -345,14 +345,15 @@ function buildPools(){
   }));
 
   const imperatives=[
-    ["venir","ven","no vengas","no vengáis"],["decir","di","no digas","no digáis"],["salir","sal","no salgas","no salgáis"],["hacer","haz","no hagas","no hagáis"],
-    ["poner","pon","no pongas","no pongáis"],["tener","ten","no tengas","no tengáis"],["ir","ve","no vayas","no vayáis"],["ser","sé","no seas","no seáis"]
+    ["venir","ven","venid","no vengas","no vengáis"],["decir","di","decid","no digas","no digáis"],["salir","sal","salid","no salgas","no salgáis"],["hacer","haz","haced","no hagas","no hagáis"],
+    ["poner","pon","poned","no pongas","no pongáis"],["tener","ten","tened","no tengas","no tengáis"],["ir","ve","id","no vayas","no vayáis"],["ser","sé","sed","no seas","no seáis"],
+    ["oír","oye","oíd","no oigas","no oigáis"],["traer","trae","traed","no traigas","no traigáis"]
   ];
-  imperatives.forEach(([verb,aff,negTu,negVos])=>{
-    add("imperative",4,verb,"Escribe el imperativo afirmativo de «"+verb+"» para tú.",aff,"imperativo irregular");
-    add("imperative",4,verb,"Escribe el imperativo negativo de «"+verb+"» para tú.",negTu,"imperativo irregular");
-    add("imperative",5,verb,"Escribe el imperativo negativo de «"+verb+"» para vosotros.",negVos,"imperativo irregular");
-    add("imperative",5,verb,"Escribe el imperativo negativo de «"+verb+"» para tú.",negTu,"imperativo irregular")
+  imperatives.forEach(([verb,affTu,affVos,negTu,negVos])=>{
+    add("imperative",4,verb,"Escribe el imperativo afirmativo de «"+verb+"» para tú.",affTu,"imperativo irregular afirmativo");
+    add("imperative",4,verb,"Escribe el imperativo afirmativo de «"+verb+"» para vosotros.",affVos,"imperativo irregular afirmativo");
+    add("imperative",5,verb,"Escribe el imperativo negativo de «"+verb+"» para tú.",negTu,"imperativo irregular negativo");
+    add("imperative",5,verb,"Escribe el imperativo negativo de «"+verb+"» para vosotros.",negVos,"imperativo irregular negativo")
   });
 
   Object.entries(PARTICIPLES).forEach(([verb,form])=>{
