@@ -151,3 +151,15 @@ Al terminar:
 5. no fusionar cambios de núcleo por su cuenta.
 
 Este flujo permite trabajar simultáneamente en Scrabble, Rayuela, Battlegrafía, Tower Defense y cualquier otro juego sin desconfigurar LenguArcade.
+
+## Publicación segura de Apps Script
+
+El comando `npm.cmd run apps:publish -- "descripción"` incorpora una guardia obligatoria:
+
+- solo permite publicar desde `main` o desde una rama `integration/*`;
+- bloquea cualquier publicación desde `game/*`, `feature/*` u otras ramas de trabajo;
+- exige que no haya cambios locales sin commit en `apps-script/` y archivos centrales de publicación;
+- ejecuta `git fetch origin main` y cancela la publicación si la rama no está basada en el `main` remoto más reciente.
+
+Esto evita que dos chats con copias distintas del repositorio sobrescriban el mismo proyecto Apps Script mediante `clasp push --force`.
+
