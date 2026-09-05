@@ -156,7 +156,7 @@ function createScrabbleOpponentCode(accessToken) {
 function loginGameOpponentByCode(primaryAccessToken, code, gameId) {
   const cleanGameId = String(gameId || '').toLowerCase();
   if (LA_PAIRABLE_GAME_IDS_.indexOf(cleanGameId) === -1) {
-    throw new Error('Este juego no admite todavía rival conectado.');
+    throw new Error('Este juego no admite todavía jugadores conectados.');
   }
   const primaryDashboard = callSupabaseStudentDashboard_(primaryAccessToken);
   const primary = primaryDashboard.student || {};
@@ -166,12 +166,12 @@ function loginGameOpponentByCode(primaryAccessToken, code, gameId) {
   const genericKey = 'LA_GAME_PAIR_' + cleanCode;
   const legacyKey = 'LA_SCRABBLE_PAIR_' + cleanCode;
   const raw = cache.get(genericKey) || cache.get(legacyKey);
-  if (!raw) throw new Error('Codigo caducado o incorrecto. Genera uno nuevo desde la cuenta del rival.');
+  if (!raw) throw new Error('Codigo caducado o incorrecto. Genera uno nuevo desde la cuenta del jugador.');
   cache.remove(genericKey);
   cache.remove(legacyKey);
   const data = JSON.parse(raw || '{}');
   if (String(data.student && data.student.studentId || '') === String(primary.studentId || '')) {
-    throw new Error('El contrincante debe ser otro alumno.');
+    throw new Error('El jugador conectado debe ser otro alumno.');
   }
   const opponentDashboard = callSupabaseStudentDashboard_(data.token);
   const opponentStudent = opponentDashboard.student || data.student || {};
