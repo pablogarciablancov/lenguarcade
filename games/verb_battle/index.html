@@ -741,6 +741,7 @@ function resolveQuestion(ok,timeout){
   var damage=card.damage*(attacker.role==="warrior"?1.1:1)*(eventBuff.damage||1);
   if(attacker.ultimate&&attacker.ultimate.type==="nextDamage")damage*=1.6;
   damage=Math.round(damage);
+  if(eventBuff.damage!==1||eventBuff.score!==1)consumeEventBuff();
   gainXp(10+card.row*4,"Reto de nivel "+card.row+" superado");
   activateRune(card,attacker);
   if(attacker.ultimate&&attacker.ultimate.type==="pierce"){
@@ -823,7 +824,7 @@ function triggerArenaEvent(){
 function consumeEventBuff(){eventBuff={damage:1,score:1,label:""};document.getElementById("arenaEventTitle").textContent="Arena estable";document.getElementById("arenaEventText").textContent="Cada quinta casilla puede cambiar las reglas."}
 
 function finalizeTurn(){
-  consumeEventBuff();evaluateAchievements();renderAll();
+  evaluateAchievements();renderAll();
   if(aliveTeams().length<=1){finishMatch("elimination");return}
   if(resolvedCells>=25){saveData.stats.fullBoards++;finishMatch("board");return}
   currentTeam=nextAlive(currentTeam);var available=teams.filter(function(t,i){return i!==currentTeam&&t.alive});currentTarget=available.length?available[0].id:currentTeam;renderAll()
