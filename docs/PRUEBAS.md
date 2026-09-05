@@ -301,3 +301,26 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 3. Aunque el juego enviase por error un `CLOSE_READY` tras un resultado normal, LenguArcade debe ignorarlo.
 4. Pulsar «Salir del juego» durante una partida: el host debe marcar la salida como explícita, pedir al juego que cierre/guarde y después regresar a LenguArcade.
 5. Verificar que Scrabble y el resto de juegos conservan su comportamiento anterior de cierre.
+
+
+## Batalla verbal v1
+1. Ejecutar `npm.cmd run check`: debe terminar con «Batalla verbal v1 correcta».
+2. Abrir Batalla verbal desde LenguArcade y comprobar que aparece como **en pruebas**.
+3. Configurar partidas de 2, 3 y 4 equipos y verificar nombres y clases.
+4. Probar los modos Relámpago (90 PV), Clásica (120 PV) y Épica (160 PV).
+5. Jugar una casilla de cada columna: Indicativo, Tiempos compuestos, Subjuntivo, Imperativo y Maestría irregular.
+6. Comprobar que el tablero cambia al empezar una nueva partida.
+7. Resolver varias casillas y confirmar que no se repite la misma respuesta dentro de un tablero.
+8. Acierto: suma puntuación, combo, energía y abre la defensa del rival.
+9. Fallo: aplica retroceso al atacante, rompe el combo y pasa el turno.
+10. Defensa correcta: reduce a la mitad el daño y carga energía del defensor.
+11. Activar las cuatro clases y comprobar sus habilidades al alcanzar 100 de energía.
+12. Verificar que los escudos absorben daño antes de los PV.
+13. Encontrar una casilla con ✦ y comprobar su runa al acertar.
+14. Resolver cinco casillas y comprobar que se activa un evento de arena.
+15. Activar un frenesí o bote y confirmar que permanece hasta el siguiente ataque correcto.
+16. Probar el temporizador; al llegar a cero debe contabilizar el reto como fallo.
+17. Completar una partida por eliminación y otra agotando las 25 casillas.
+18. Abrir Logros y comprobar que existen 24 y persisten entre partidas.
+19. Terminar una partida desde LenguArcade: debe guardar resultado/XP/logros y permanecer dentro del juego.
+20. Pulsar Salir durante una batalla: debe guardar la actividad como abandono y regresar a LenguArcade después de la confirmación.
