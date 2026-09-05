@@ -289,7 +289,7 @@ button{cursor:pointer}
     <div class="unlocks" id="unlocks"></div>
     <div class="setupActions" style="justify-content:center">
       <button class="btn primary" id="rematchBtn" type="button">Revancha</button>
-      <button class="btn secondary" id="newMatchBtn" type="button">Nueva partida</button>
+      <button class="btn secondary" id="newMatchBtn" type="button">Volver al inicio</button>
       <button class="btn ghost" id="endAchievementsBtn" type="button">Ver logros</button>
     </div>
   </section>
@@ -472,7 +472,104 @@ button{cursor:pointer}
       {verbo:"decir",modo:"forma no personal",tiempo:"gerundio",persona:"—",respuesta:"diciendo"},
       {verbo:"poder",modo:"forma no personal",tiempo:"gerundio",persona:"—",respuesta:"pudiendo"},
       {verbo:"ir",modo:"forma no personal",tiempo:"gerundio",persona:"—",respuesta:"yendo"}
+
   ].map((q,index)=>Object.assign({id:'q'+(index+1)},q));
+
+  const REGULAR_VERBS={
+    ar:['cantar','amar','bailar','trabajar','estudiar','viajar','caminar','saltar','gritar','cocinar','descansar','ayudar','mirar','hablar','comprar','escuchar','preguntar','entrar','llamar','tomar','necesitar','preparar','limpiar','visitar','esperar','dibujar','celebrar','cuidar'],
+    er:['comer','beber','correr','aprender','comprender','responder','vender','deber','temer','prometer','barrer','sorprender'],
+    ir:['vivir','subir','decidir','permitir','recibir','compartir','existir','asistir','partir','unir','sufrir','cumplir','discutir']
+  };
+  const PERSONS=[
+    {key:'1s',label:'1ª singular',pronoun:'yo',index:0},
+    {key:'2s',label:'2ª singular',pronoun:'tú',index:1},
+    {key:'3s',label:'3ª singular',pronoun:'él',index:2},
+    {key:'1p',label:'1ª plural',pronoun:'nosotros',index:3},
+    {key:'2p',label:'2ª plural',pronoun:'vosotros',index:4},
+    {key:'3p',label:'3ª plural',pronoun:'ellos',index:5}
+  ];
+  const AUX={
+    present:['he','has','ha','hemos','habéis','han'],
+    imperfect:['había','habías','había','habíamos','habíais','habían'],
+    future:['habré','habrás','habrá','habremos','habréis','habrán'],
+    conditional:['habría','habrías','habría','habríamos','habríais','habrían'],
+    subjPresent:['haya','hayas','haya','hayamos','hayáis','hayan'],
+    subjImperfect:['hubiera','hubieras','hubiera','hubiéramos','hubierais','hubieran']
+  };
+  function regularParts(verb){
+    const ending=verb.slice(-2),stem=verb.slice(0,-2);
+    return {ending,stem,participle:stem+(ending==='ar'?'ado':'ido'),gerund:stem+(ending==='ar'?'ando':'iendo')};
+  }
+  function regularSimple(verb,tense,index){
+    const {ending,stem}=regularParts(verb);
+    const table={
+      present:{
+        ar:['o','as','a','amos','áis','an'],
+        er:['o','es','e','emos','éis','en'],
+        ir:['o','es','e','imos','ís','en']
+      },
+      imperfect:{
+        ar:['aba','abas','aba','ábamos','abais','aban'],
+        er:['ía','ías','ía','íamos','íais','ían'],
+        ir:['ía','ías','ía','íamos','íais','ían']
+      },
+      future:['é','ás','á','emos','éis','án'],
+      conditional:['ía','ías','ía','íamos','íais','ían'],
+      subjPresent:{
+        ar:['e','es','e','emos','éis','en'],
+        er:['a','as','a','amos','áis','an'],
+        ir:['a','as','a','amos','áis','an']
+      },
+      subjImperfect:{
+        ar:['ara','aras','ara','áramos','arais','aran'],
+        er:['iera','ieras','iera','iéramos','ierais','ieran'],
+        ir:['iera','ieras','iera','iéramos','ierais','ieran']
+      }
+    };
+    if(tense==='future'||tense==='conditional')return verb+table[tense][index];
+    return stem+table[tense][ending][index];
+  }
+  function pushRegularQuestion(target,verb,mode,time,person,response,tier){
+    target.push({verbo:verb,modo:mode,tiempo:time,persona:person,respuesta:response,tier:tier});
+  }
+  function buildRegularExpansion(){
+    const out=[];
+    Object.values(REGULAR_VERBS).flat().forEach(verb=>{
+      const parts=regularParts(verb);
+      PERSONS.forEach(p=>{
+        pushRegularQuestion(out,verb,'indicativo','presente',p.label,p.pronoun+' '+regularSimple(verb,'present',p.index),'basic');
+        pushRegularQuestion(out,verb,'indicativo','pretérito imperfecto',p.label,p.pronoun+' '+regularSimple(verb,'imperfect',p.index),'basic');
+        pushRegularQuestion(out,verb,'indicativo','futuro simple',p.label,p.pronoun+' '+regularSimple(verb,'future',p.index),'basic');
+
+        pushRegularQuestion(out,verb,'indicativo','pretérito perfecto compuesto',p.label,p.pronoun+' '+AUX.present[p.index]+' '+parts.participle,'medium');
+        pushRegularQuestion(out,verb,'indicativo','pretérito pluscuamperfecto',p.label,p.pronoun+' '+AUX.imperfect[p.index]+' '+parts.participle,'medium');
+        pushRegularQuestion(out,verb,'indicativo','condicional simple',p.label,p.pronoun+' '+regularSimple(verb,'conditional',p.index),'medium');
+
+        pushRegularQuestion(out,verb,'subjuntivo','presente',p.label,p.pronoun+' '+regularSimple(verb,'subjPresent',p.index),'advanced');
+        pushRegularQuestion(out,verb,'indicativo','futuro perfecto',p.label,p.pronoun+' '+AUX.future[p.index]+' '+parts.participle,'advanced');
+        pushRegularQuestion(out,verb,'indicativo','condicional compuesto',p.label,p.pronoun+' '+AUX.conditional[p.index]+' '+parts.participle,'advanced');
+
+        pushRegularQuestion(out,verb,'subjuntivo','pretérito imperfecto',p.label,p.pronoun+' '+regularSimple(verb,'subjImperfect',p.index),'expert');
+        pushRegularQuestion(out,verb,'subjuntivo','pretérito perfecto',p.label,p.pronoun+' '+AUX.subjPresent[p.index]+' '+parts.participle,'expert');
+        pushRegularQuestion(out,verb,'subjuntivo','pretérito pluscuamperfecto',p.label,p.pronoun+' '+AUX.subjImperfect[p.index]+' '+parts.participle,'expert');
+      });
+      const {stem,ending}=parts;
+      const affTu=stem+(ending==='ar'?'a':'e');
+      const affVos=stem+(ending==='ar'?'ad':ending==='er'?'ed':'id');
+      pushRegularQuestion(out,verb,'imperativo','afirmativo','2ª singular','tú '+affTu,'advanced');
+      pushRegularQuestion(out,verb,'imperativo','afirmativo','2ª plural','vosotros '+affVos,'advanced');
+      pushRegularQuestion(out,verb,'imperativo','negativo','2ª singular','no '+regularSimple(verb,'subjPresent',1),'advanced');
+      pushRegularQuestion(out,verb,'imperativo','negativo','2ª plural','no '+regularSimple(verb,'subjPresent',4),'advanced');
+      pushRegularQuestion(out,verb,'forma no personal','gerundio','—',parts.gerund,'expert');
+      pushRegularQuestion(out,verb,'forma no personal','participio','—',parts.participle,'expert');
+    });
+    return out;
+  }
+  buildRegularExpansion().forEach((q,index)=>{
+    q.id='r'+(index+1);
+    QUESTION_BANK.push(q);
+  });
+
 
   const ACHIEVEMENTS=[
     {id:'first_correct',icon:'✅',title:'Primera ficha',desc:'Acierta tu primer reto.',xp:20},
@@ -511,7 +608,7 @@ button{cursor:pointer}
 
   const state={
     running:false,ended:false,rounds:8,timerSeconds:30,bankMode:'complete',turnNo:0,currentPlayer:0,
-    selectedTier:'basic',selectedBet:10,currentQuestion:null,questionOpen:false,used:new Set(),timerId:null,timeLeft:0,
+    selectedTier:'basic',selectedBet:10,currentQuestion:null,questionOpen:false,used:new Set(),usedAnswers:new Set(),recentVerbs:[],timerId:null,timeLeft:0,
     insuranceActive:false,hintUsed:false,special:false,matchId:'',players:[],newUnlocks:[]
   };
 
@@ -537,6 +634,7 @@ button{cursor:pointer}
   }
 
   function difficultyOf(q){
+    if(q.tier&&TIERS[q.tier])return q.tier;
     let score=1;
     const mode=String(q.modo).toLowerCase(),time=String(q.tiempo).toLowerCase();
     if(IRREGULAR.has(q.verbo))score++;
@@ -557,14 +655,24 @@ button{cursor:pointer}
   function bankForTier(tier){
     return QUESTION_BANK.filter(q=>q.tier===tier && (state.bankMode==='complete'||!(q.modo==='forma no personal'||(q.modo==='subjuntivo'&&(q.tiempo.includes('imperfecto')||q.tiempo.includes('perfecto'))))));
   }
+  function answerKey(q){return norm(q&&q.respuesta||'')}
   function pickQuestion(tier){
-    let pool=bankForTier(tier).filter(q=>!state.used.has(q.id));
+    const bank=bankForTier(tier);
+    let pool=bank.filter(q=>!state.used.has(q.id)&&!state.usedAnswers.has(answerKey(q))&&!state.recentVerbs.includes(q.verbo));
+    if(!pool.length)pool=bank.filter(q=>!state.used.has(q.id)&&!state.usedAnswers.has(answerKey(q)));
+    if(!pool.length)pool=bank.filter(q=>!state.used.has(q.id));
     if(!pool.length){
-      bankForTier(tier).forEach(q=>state.used.delete(q.id));
-      pool=bankForTier(tier);
+      bank.forEach(q=>state.used.delete(q.id));
+      pool=bank.filter(q=>!state.usedAnswers.has(answerKey(q))&&!state.recentVerbs.includes(q.verbo));
     }
+    if(!pool.length)pool=bank;
     const q=pool[Math.floor(Math.random()*pool.length)];
-    if(q)state.used.add(q.id);
+    if(q){
+      state.used.add(q.id);
+      state.usedAnswers.add(answerKey(q));
+      state.recentVerbs.push(q.verbo);
+      if(state.recentVerbs.length>6)state.recentVerbs.shift();
+    }
     return q;
   }
 
@@ -834,7 +942,7 @@ button{cursor:pointer}
   }
 
   function finishMatch(reason){
-    if(state.ended)return;state.ended=true;state.running=false;clearInterval(state.timerId);
+    if(state.ended)return;state.ended=true;state.running=false;state.finishReason=reason;clearInterval(state.timerId);
     const a=state.players[0],b=state.players[1],abandoned=reason==='abandoned';
     let winner=-1;if(!abandoned){if(a.chips>b.chips)winner=0;else if(b.chips>a.chips)winner=1;}
     state.players.forEach((p,i)=>{
@@ -881,7 +989,7 @@ button{cursor:pointer}
   function startMatch(){
     const n1=String($('name1').value||'').trim(),n2=String($('name2').value||'').trim();
     if(!n1||!n2)return toast('Faltan jugadores','Escribe los dos nombres o conecta al rival.');
-    state.rounds=Number($('rounds').value||8);state.timerSeconds=Number($('timer').value||30);state.bankMode=$('bankMode').value;state.turnNo=0;state.currentPlayer=0;state.selectedTier='basic';state.selectedBet=10;state.currentQuestion=null;state.questionOpen=false;state.used=new Set();state.ended=false;state.running=true;state.matchId='cya_'+uid();state.newUnlocks=[];
+    state.rounds=Number($('rounds').value||8);state.timerSeconds=Number($('timer').value||30);state.bankMode=$('bankMode').value;state.turnNo=0;state.currentPlayer=0;state.selectedTier='basic';state.selectedBet=10;state.currentQuestion=null;state.questionOpen=false;state.used=new Set();state.usedAnswers=new Set();state.recentVerbs=[];state.finishReason='';state.ended=false;state.running=true;state.matchId='cya_'+uid();state.newUnlocks=[];
     const primarySave=Bridge.enabled()?Bridge.primarySave():loadLocalSave(n1);
     const opponentSave=Bridge.hasOpponent()?Bridge.opponentSave():loadLocalSave(n2);
     state.players=[makePlayer(n1,0,primarySave,Bridge.enabled()?'primary':'guest'),makePlayer(n2,1,opponentSave,Bridge.hasOpponent()?'opponent':'guest')];
@@ -937,7 +1045,15 @@ button{cursor:pointer}
       if(m.type==='OPPONENT_AUTHENTICATED')applyOpponent(m.payload||{});
       if(m.type==='OPPONENT_AUTH_FAILED')toast('No se pudo conectar',String(m.payload?.message||'Revisa el código.'));
       if(m.type==='REQUEST_EXIT'){if(state.running&&!state.ended)finishMatch('abandoned');else post('CLOSE_READY');}
-      if(m.type==='SAVE_CONFIRMED'&&state.ended)post('CLOSE_READY');
+      if(m.type==='SAVE_CONFIRMED'&&state.ended){
+        if(state.finishReason==='abandoned')post('CLOSE_READY');
+        else{
+          toast('✅ Progreso guardado','La partida se ha guardado en LenguArcade.');
+          setTimeout(()=>{
+            if(state.ended&&state.finishReason!=='abandoned')newMatch();
+          },2600);
+        }
+      }
     }
     window.addEventListener('message',onMessage);window.addEventListener('load',start);
     return {
