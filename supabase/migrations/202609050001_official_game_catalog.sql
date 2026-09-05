@@ -8,7 +8,7 @@ values
   ('scrabble','Scrabble','Palabras en juego','Léxico','listo',5,'#34d399','🔤','https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/scrabble/','board',true,now()),
   ('conjuga_apuesta','Conjuga y apuesta','Verbos 1 contra 1','Verbos','en revisión',6,'#fb7185','🎲','','dice',true,now()),
   ('verb_battle','Batalla verbal','Combate de verbos por equipos','Verbos','en revisión',7,'#60a5fa','⚔️','','battle',true,now()),
-  ('rayuela','Rayuela','Tu historia. Tus decisiones.','Escritura','en pruebas',8,'#22d3ee','⌗','https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html','rayuela',true,now()),
+  ('rayuela','Rayuela','Tu historia. Tus decisiones.','Escritura','en pruebas',8,'#22d3ee','⌗','https://rawcdn.githack.com/pablogarciablancov/lenguarcade/49ca8564f1dd015c72ad86ba8547fed50a75717e/games/rayuela/index.html','rayuela',true,now()),
   ('entre_lineas','Entre Líneas','Agencia de Investigación Lectora','Comprensión lectora','en pruebas',9,'#d7a942','🔎','https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/','entre_lineas',true,now()),
   ('tower_defense','Tower Defense','Defiende la lengua','Estrategia lingüística','en revisión',10,'#14b8a6','🛡️','','tower_defense',true,now())
 on conflict (id) do update set
