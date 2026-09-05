@@ -25,10 +25,6 @@ const integrations: Record<string, { url:string; integration:string }> = {
     url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/",
     integration:"embedded",
   },
-  versopolis:{
-    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/rimopolis/",
-    integration:"embedded",
-  },
   rayuela:{
     url:"https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html",
     integration:"embedded",
@@ -38,6 +34,16 @@ const integrations: Record<string, { url:string; integration:string }> = {
     integration:"embedded",
   },
 };
+
+function isLockedStatus(status: unknown) {
+  const normalized = String(status || "").trim().toLowerCase();
+  return normalized === "en revisión" ||
+    normalized === "en revision" ||
+    normalized === "próximamente" ||
+    normalized === "proximamente" ||
+    normalized.includes("coming");
+}
+
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers:corsHeaders });
@@ -117,9 +123,7 @@ Deno.serve(async (request) => {
 
     const games = (gamesResult.data || []).map(game => {
       const integration = integrations[game.id] || null;
-      const estado = integration && String(game.status || "").toLowerCase().includes("coming")
-        ? "beta"
-        : game.status;
+      const estado = game.status;
       const row = progressByGame.get(game.id) || {
         game_id:game.id,
         xp:0,
@@ -149,8 +153,8 @@ Deno.serve(async (request) => {
         url:game.url,
         banner:game.banner,
         ...(integration || {}),
-        locked:!integration && String(estado || "").toLowerCase().includes("coming"),
-        buttonLabel:Number(row.sessions || 0) > 0 ? "Continuar" : "Jugar",
+        locked:isLockedStatus(estado),
+        buttonLabel:isLockedStatus(estado) ? "En revisión" : (Number(row.sessions || 0) > 0 ? "Continuar" : "Jugar"),
         progress:{
           studentId:profile.id,
           gameId:row.game_id,
