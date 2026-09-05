@@ -73,8 +73,9 @@ if (!/\.gameOpponentAuth\{[^}]*z-index:(?:1[3-9]\d|[2-9]\d{2,})[^}]*\}/.test(cen
 if (!html.includes("setScrabbleMode('solo')") ||
     !html.includes("Práctica individual") ||
     !html.includes("scrabbleMode === 'solo'") ||
-    !html.includes("outcome:scrabbleMode === 'solo' ? 'practice' : 'finished'")) {
-  errors.push("Scrabble debe permitir práctica individual integrada sin exigir contrincante.");
+    !html.includes("outcome:scrabbleMode === 'solo' ? 'practice' : 'finished'") ||
+    !html.includes("index === 0 && scrabbleMode !== 'solo'")) {
+  errors.push("Scrabble debe permitir práctica individual integrada, sin contrincante y sin contabilizar una victoria.");
 }
 
 if (errors.length) {
