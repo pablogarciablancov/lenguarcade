@@ -232,3 +232,13 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 9. Abrir la ficha de un alumno con datos de Rayuela y Entre Líneas: deben aparecer la rúbrica de Rayuela y el diagnóstico lector.
 10. En Gestión, probar solo con datos de prueba: archivar/restaurar alumno y clase antes de probar cualquier eliminación definitiva.
 11. Confirmar que `apps-script/` contiene únicamente los módulos base y ningún adaptador `zz...`.
+
+
+## Catálogo oficial de 10 juegos
+1. Entrar como alumno y comprobar que aparecen exactamente los diez juegos oficiales, en este orden: Battlegrafía, Maniacgrafía, Narratoria, Versópolis, Scrabble, Conjuga y apuesta, Batalla verbal, Rayuela, Entre Líneas y Tower Defense.
+2. Comprobar que no aparece Rimópolis como juego independiente.
+3. Verificar estados: Maniacgrafía/Narratoria/Scrabble = «listo»; Battlegrafía/Rayuela/Entre Líneas = «en pruebas»; Versópolis/Conjuga y apuesta/Batalla verbal/Tower Defense = «en revisión».
+4. Los cuatro juegos «en revisión» deben aparecer bloqueados y mostrar «En revisión» en lugar de un botón de juego funcional.
+5. Battlegrafía, Maniacgrafía, Narratoria, Scrabble, Rayuela y Entre Líneas deben conservar su URL o integración de lanzamiento.
+6. Abrir el panel docente y comprobar que el taller reconoce los diez IDs oficiales.
+7. Ejecutar `npm.cmd run check`; debe finalizar con «Catálogo oficial LenguArcade: 10 juegos, identidades y estados correctos.».
