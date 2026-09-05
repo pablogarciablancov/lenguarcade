@@ -300,19 +300,8 @@ function getTeacherDashboardV03(filters, token) {
 function upgradeCatalogV03_() {
   const sh = getSheet_(LA_CONFIG.SHEETS.JUEGOS);
   const now = nowIso_();
-  [
-    {gameId:'battlegrafia',nombre:'Battlegrafía',subtitulo:'La aventura de las palabras',categoria:'RPG',competencias:'ortografía,gramática,verbos',estado:'próximamente',orden:1,color:'#f59e0b',icono:'🐉',descripcion:'RPG de Lengua. Integración avanzada pendiente.',banner:'dragon',activo:true,updatedAt:now},
-    {gameId:'maniacgrafia',nombre:'Maniacgrafía',subtitulo:'Atrapa las palabras',categoria:'Ortografía',competencias:'ortografía,acentuación',estado:'beta',orden:2,color:'#d946ef',icono:'⚡',descripcion:'Corrige palabras trampa y mejora tu precisión.',banner:'neon',activo:true,updatedAt:now},
-    {gameId:'narratoria',nombre:'Narratoria',subtitulo:'Escribe. Crea. Cuenta.',categoria:'Escritura',competencias:'narración,creatividad,redacción',estado:'beta',orden:3,color:'#f59e0b',icono:'📚',descripcion:'Construye relatos con cartas, fases y objetivos.',banner:'paper',activo:true,updatedAt:now},
-    {gameId:'versopolis',nombre:'Rimópolis',subtitulo:'RPG de rimas',categoria:'Rimas',competencias:'rimas,poesía,creatividad',estado:'beta',orden:4,color:'#8b5cf6',icono:'🎤',descripcion:'Combate en escenarios de rap y poesía eligiendo rimas correctas.',banner:'city',activo:true,updatedAt:now},
-    {gameId:'scrabble',nombre:'Scrabble',subtitulo:'Palabras en juego',categoria:'Léxico',competencias:'léxico,vocabulario,estrategia',estado:'aula',orden:5,color:'#34d399',icono:'🔤',descripcion:'Forma palabras y compite por equipos.',banner:'board',activo:true,updatedAt:now},
-    {gameId:'conjuga_apuesta',nombre:'Conjuga y apuesta',subtitulo:'Verbos 1 contra 1',categoria:'Verbos',competencias:'verbos,morfología',estado:'aula',orden:6,color:'#fb7185',icono:'🎲',descripcion:'Apuesta puntos conjugando formas verbales.',banner:'dice',activo:true,updatedAt:now},
-    {gameId:'verb_battle',nombre:'Batalla verbal',subtitulo:'Jeopardy verbal RPG',categoria:'Verbos',competencias:'verbos,morfología,equipos',estado:'aula',orden:7,color:'#60a5fa',icono:'⚔️',descripcion:'Batalla por equipos con preguntas de conjugación.',banner:'battle',activo:true,updatedAt:now},
-    {gameId:'rayuela',nombre:'Rayuela',subtitulo:'Tu historia. Tus decisiones.',categoria:'Escritura',competencias:'narración,creatividad,redacción,coherencia,planificación',estado:'beta',orden:8,color:'#22d3ee',icono:'⌗',url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html',descripcion:'Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.',banner:'rayuela',activo:true,updatedAt:now},
-    {gameId:'entre_lineas',nombre:'Entre Líneas',subtitulo:'Agencia de Investigación Lectora',categoria:'Comprensión lectora',competencias:'comprensión,inferencia,síntesis,análisis,coherencia,vocabulario',estado:'beta',orden:9,color:'#d7a942',icono:'🔎',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/',descripcion:'Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.',banner:'entre_lineas',activo:true,updatedAt:now}
-  ].forEach(g => upsertByKeys_(sh, ['gameId'], g));
+  LA_OFFICIAL_GAMES.forEach(game => upsertByKeys_(sh, ['gameId'], Object.assign({}, game, {updatedAt:now})));
 }
-
 function calculateGradeFromRowsV03_(rows, singleGame) {
   rows = (rows || []).map(normalizeProgressRow_);
   if (!rows.length) return { score:0, breakdown:{ progreso:0, dominio:0, misiones:0, constancia:0, variedad:0, logros:0 } };
