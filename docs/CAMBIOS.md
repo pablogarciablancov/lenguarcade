@@ -284,3 +284,13 @@ Cada cambio debe indicar:
 - Versópolis queda como única identidad poética oficial y permanece bloqueado en estado «en revisión» hasta rehacer su versión funcional.
 - Invalidada la caché local del dashboard y la caché pública de Apps Script para impedir que navegadores ya usados sigan mostrando la tarjeta antigua.
 - `check-game-catalog.mjs` falla si reaparece cualquier archivo, carpeta o referencia activa a Rimópolis.
+
+
+## 2026-09-05 · Portadas oficiales de Rayuela y Entre Líneas
+- Creadas dos portadas específicas con una línea visual común de LenguArcade.
+- Assets publicados en `lenguarcade-assets`:
+  - `assets/games/rayuela-banner.jpg`
+  - `assets/games/entre-lineas-banner.jpg`
+- `LenguArcade_Alumno.html` asigna ya ambas imágenes en el mapa `BANNERS`.
+- Se mantiene el sistema de fallback GitHub Raw → jsDelivr para estas imágenes.
+- `check-game-catalog.mjs` falla si Rayuela o Entre Líneas vuelven a utilizar el banner genérico.
