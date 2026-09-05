@@ -70,6 +70,12 @@ for (const required of [
 if (!/\.gameOpponentAuth\{[^}]*z-index:(?:1[3-9]\d|[2-9]\d{2,})[^}]*\}/.test(centralStudent)) {
   errors.push("La ventana del contrincante debe mostrarse por encima del juego.");
 }
+if (!html.includes("setScrabbleMode('solo')") ||
+    !html.includes("Práctica individual") ||
+    !html.includes("scrabbleMode === 'solo'") ||
+    !html.includes("outcome:scrabbleMode === 'solo' ? 'practice' : 'finished'")) {
+  errors.push("Scrabble debe permitir práctica individual integrada sin exigir contrincante.");
+}
 
 if (errors.length) {
   throw new Error(`Comprobaciones de Scrabble fallidas:\n- ${errors.join("\n- ")}`);
