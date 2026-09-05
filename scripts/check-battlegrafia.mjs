@@ -102,7 +102,7 @@ if (!centralServer.includes("gameId:'battlegrafia'") ||
   errors.push("LenguArcade_Code.gs debe mantener BattleGrafia en el catálogo oficial como juego embebido y estado «en pruebas».");
 }
 
-if (!centralStudent.includes("gameRecord?.gameId==='battlegrafia'") ||
+if (!(centralStudent.includes("gameRecord?.gameId==='battlegrafia'") || centralStudent.includes("['battlegrafia','battlegrafia_v2'].includes(gameRecord?.gameId)")) ||
     !centralStudent.includes("defeatedMonsters") ||
     !centralStudent.includes("totalMonsters") ||
     !centralStudent.includes("buildEvaluableSnapshot") ||
@@ -112,7 +112,7 @@ if (!centralStudent.includes("gameRecord?.gameId==='battlegrafia'") ||
 }
 
 if (!centralStudent.includes("getEmbeddedGameConnectionDelay") ||
-    !centralStudent.includes("gameId==='battlegrafia'") ||
+    !(centralStudent.includes("gameId==='battlegrafia'") || centralStudent.includes("gameId==='battlegrafia'||gameId==='battlegrafia_v2'")) ||
     !centralStudent.includes("return 12000")) {
   errors.push("LenguArcade_Alumno.html debe dar mas margen de conexion a BattleGrafia.");
 }

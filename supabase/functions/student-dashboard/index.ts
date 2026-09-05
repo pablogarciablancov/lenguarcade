@@ -13,6 +13,10 @@ const integrations: Record<string, { url:string; integration:string }> = {
     url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/",
     integration:"embedded",
   },
+  battlegrafia_v2:{
+    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia_v2/",
+    integration:"embedded",
+  },
   maniacgrafia:{
     url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/maniacgrafia/",
     integration:"embedded",

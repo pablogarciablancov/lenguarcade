@@ -9,9 +9,12 @@ const student=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Alumno.h
 const migration=fs.readFileSync(path.join(root,"supabase","migrations","202609050001_official_game_catalog.sql"),"utf8");
 const conjugaMigration=fs.readFileSync(path.join(root,"supabase","migrations","202609050002_conjuga_apuesta_v2.sql"),"utf8");
 const verbBattleMigration=fs.readFileSync(path.join(root,"supabase","migrations","202609050003_verb_battle_v1.sql"),"utf8");
+const battlegrafiaV2Migration=fs.readFileSync(path.join(root,"supabase","migrations","20260905144700_battlegrafia_v2.sql"),"utf8");
+const catalogMigrations=migration+"\n"+battlegrafiaV2Migration;
 
 const official=[
   ["battlegrafia","Battlegrafía","en pruebas"],
+  ["battlegrafia_v2","Battlegrafía 2.0","en pruebas"],
   ["maniacgrafia","Maniacgrafía","listo"],
   ["narratoria","Narratoria","listo"],
   ["versopolis","Versópolis","en revisión"],
@@ -27,7 +30,7 @@ for(const [id,name,status] of official){
   if(!code.includes(`gameId:'${id}'`)) throw new Error(`Catálogo Apps Script: falta ${id}`);
   if(!code.includes(`nombre:'${name}'`)) throw new Error(`Catálogo Apps Script: nombre incorrecto para ${id}`);
   if(!code.includes(`estado:'${status}'`)) throw new Error(`Catálogo Apps Script: estado incorrecto para ${id}`);
-  if(!migration.includes(`('${id}'`)) throw new Error(`Migración Supabase: falta ${id}`);
+  if(!catalogMigrations.includes(`('${id}'`)) throw new Error(`Migración Supabase: falta ${id}`);
 }
 
 if(!conjugaMigration.includes("status='en pruebas'") ||
@@ -70,4 +73,4 @@ for(const id of officialIds){
   if(!ids.includes(id)) throw new Error(`No se encontró ${id}`);
 }
 
-console.log("Catálogo oficial LenguArcade: 10 juegos, identidades y estados correctos.");
+console.log("Catálogo oficial LenguArcade: 11 juegos, identidades y estados correctos.");

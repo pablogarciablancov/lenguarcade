@@ -421,3 +421,18 @@ Cada cambio debe indicar:
 - De este modo, un ataque fácil concede al rival una defensa difícil pero muy valiosa; un ataque difícil ofrece una defensa más accesible, aunque reduce una proporción menor del daño.
 - Se corrigen detalles del banco verbal detectados durante la revisión: `traído`, imperativos sin pronombre sujeto artificial y separación real entre imperativos irregulares afirmativos (nivel 4) y negativos (nivel 5).
 - Caché de alumno actualizada a `20260905-verb-battle-v2`.
+
+
+## 2026-09-05 · Battlegrafía 2.0 — Fantasy Arcade
+- Se crea una **segunda versión paralela** en `games/battlegrafia_v2/`; la Battlegrafía clásica de `games/battlegrafia/` no se sobrescribe.
+- La nueva edición reutiliza el motor completo de la versión estable: Aventura, Supervivencia, Práctica, Dominio, Estrategia, héroes, combate, tienda, objetos, reliquias, bancos de preguntas y progresión.
+- La aventura respeta la estructura real de **5 escenarios × 6 enemigos = 30 monstruos**, con cinco guardianes y un jefe por mundo.
+- Se reutilizan todos los sprites originales ya diseñados para los 30 enemigos.
+- Nueva capa visual **Fantasy Arcade**: hub principal, selector de modos, creación de héroe, combate, campamento, mapa, inventario, diario e historia.
+- El combate muestra un riel de progreso con los seis enemigos del mundo actual y una presentación especial al llegar al jefe.
+- El mapa incorpora una alineación visual de los cinco guardianes y el jefe de la zona seleccionada.
+- La interfaz se adapta a 1366×768 como objetivo principal y evita scroll en las pantallas de juego de escritorio.
+- La v2 usa `gameId='battlegrafia_v2'` y claves de localStorage independientes para que sus partidas no colisionen con la Battlegrafía clásica.
+- Se registra `battlegrafia_v2` como juego independiente «en pruebas» en Apps Script y en el catálogo Supabase.
+- `student-dashboard` reconoce la nueva URL como integración embebida.
+- Se añade `scripts/check-battlegrafia-v2.mjs` y se incorpora a `npm run check`.
