@@ -1,0 +1,1 @@
+{\n  "$schema": "lenguarcade-integration-v1",\n  "gameId": "mi_juego",\n  "name": "Mi juego",\n  "status": "laboratorio",\n  "integration": "embedded",\n  "entry": "games/mi_juego/index.html",\n  "banner": "",\n  "requires": {\n    "studentRunner": false,\n    "saveProgress": false,\n    "supabaseCatalog": false\n  },\n  "notes": ""\n}\n
