@@ -19,6 +19,7 @@ for (const name of ["Code.js", "Alumno.html"]) {
 }
 
 const html = fs.readFileSync(path.join(root, "Alumno.html"), "utf8");
+const publicHtml = fs.readFileSync(path.resolve("games", "scrabble", "index.html"), "utf8");
 for (const required of [
   "gameId:'scrabble'",
   "REQUEST_OPPONENT_AUTH",
@@ -70,12 +71,14 @@ for (const required of [
 if (!/\.gameOpponentAuth\{[^}]*z-index:(?:1[3-9]\d|[2-9]\d{2,})[^}]*\}/.test(centralStudent)) {
   errors.push("La ventana del contrincante debe mostrarse por encima del juego.");
 }
-if (!html.includes("setScrabbleMode('solo')") ||
-    !html.includes("Práctica individual") ||
-    !html.includes("scrabbleMode === 'solo'") ||
-    !html.includes("outcome:scrabbleMode === 'solo' ? 'practice' : 'finished'") ||
-    !html.includes("index === 0 && scrabbleMode !== 'solo'")) {
-  errors.push("Scrabble debe permitir práctica individual integrada, sin contrincante y sin contabilizar una victoria.");
+for (const [label, source] of [["Apps Script", html], ["público", publicHtml]]) {
+  if (!source.includes("setScrabbleMode('solo')") ||
+      !source.includes("Práctica individual") ||
+      !source.includes("scrabbleMode === 'solo'") ||
+      !source.includes("outcome:scrabbleMode === 'solo' ? 'practice' : 'finished'") ||
+      !source.includes("index === 0 && scrabbleMode !== 'solo'")) {
+    errors.push(`Scrabble (${label}) debe permitir práctica individual, sin contrincante y sin contabilizar una victoria.`);
+  }
 }
 
 if (errors.length) {
