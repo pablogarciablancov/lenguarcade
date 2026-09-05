@@ -466,6 +466,7 @@ function removePlayerInput() { const c = document.getElementById('player-inputs-
 
 function setScrabbleMode(mode) {
     scrabbleMode = mode === 'solo' ? 'solo' : 'duel';
+    if (scrabbleMode === 'solo' && document.getElementById('setup-win')?.value === 'classic') document.getElementById('setup-win').value = '100';
     document.getElementById('scrabble-duel-mode')?.classList.toggle('active', scrabbleMode === 'duel');
     document.getElementById('scrabble-solo-mode')?.classList.toggle('active', scrabbleMode === 'solo');
     updateIntegratedSetup();
@@ -511,6 +512,10 @@ function updateIntegratedSetup() {
     const startButton = document.getElementById('start-game-btn');
     const connectButton = document.getElementById('connect-opponent-btn');
     const soloNote = document.getElementById('scrabble-solo-note');
+    if (!integratedMode) {
+        if (startButton) startButton.disabled = false;
+        return;
+    }
     if (!primaryCard || !opponentCard || !startButton) return;
     if (primaryProfile) {
         primaryCard.classList.add('ready');
@@ -1073,7 +1078,7 @@ function finishGame(reasonStr) {
         if (index === 0 && scrabbleMode !== 'solo') finalStats.wins++;
         player.lifetime = finalStats;
         player.sessionCommitted = true;
-        checkPlayerAchievements(player, { finished:true, isWinner:index===0, penalty:entry.pen });
+        checkPlayerAchievements(player, { finished:true, isWinner:index===0 && scrabbleMode !== 'solo', penalty:entry.pen });
     });
 
     if (integratedMode) {
