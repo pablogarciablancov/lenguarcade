@@ -135,7 +135,7 @@ function callSupabaseStudentDashboard_(accessToken) {
   return data;
 }
 
-const LA_PAIRABLE_GAME_IDS_ = ['scrabble','conjuga_apuesta'];
+const LA_PAIRABLE_GAME_IDS_ = ['scrabble','conjuga_apuesta','verb_battle'];
 
 function createGameOpponentCode(accessToken) {
   const dashboard = callSupabaseStudentDashboard_(accessToken);
