@@ -378,3 +378,46 @@ Cada cambio debe indicar:
 - Batalla verbal queda marcada como **en pruebas** en Apps Script y Supabase y se abre embebida desde `games/verb_battle/`.
 - Supabase actualizado mediante `202609050003_verb_battle_v1.sql` y `student-dashboard` desplegado con la nueva integración.
 - Nueva comprobación automática `scripts/check-verb-battle.mjs`.
+
+
+## 2026-09-05 · Batalla verbal v2 y práctica individual multijuego
+- Rediseño completo de **Batalla verbal** para que la experiencia principal quepa en una sola pantalla, sin scroll vertical ni paneles internos desplazables.
+- Nueva identidad visual clara, luminosa y más próxima al lenguaje general de LenguArcade: tablero central dominante, jugadores compactos arriba y panel táctico lateral.
+- El concepto de «equipos» se sustituye por **jugadores identificados**:
+  - el jugador principal llega desde su sesión de LenguArcade;
+  - los jugadores 2, 3 y 4 se incorporan con el código general de jugador;
+  - cada perfil conserva su propio XP, estadísticas y logros;
+  - la partida se juega por turnos en el dispositivo que abre el juego.
+- El host central de LenguArcade deja de limitarse a un único `opponent` y admite participantes secundarios por rol mediante `opponents`, manteniendo compatibilidad con Scrabble y Conjuga y apuesta.
+- El código general de jugador funciona ya en **Scrabble, Conjuga y apuesta y Batalla verbal**.
+- Batalla verbal incorpora **Práctica individual**: un único perfil completa el tablero y progresa sin rival, daño ni defensa.
+- Scrabble incorpora también **Práctica individual**:
+  - no exige conectar contrincante;
+  - guarda progreso y logros del jugador principal;
+  - no contabiliza la práctica como victoria;
+  - usa por defecto el objetivo de 100 puntos para que la sesión tenga un final razonable.
+- Se elimina por completo la validación manual «ha acertado / ha fallado» de Batalla verbal.
+- Tanto el **ataque como la defensa exigen escribir la respuesta**.
+- La corrección distingue:
+  - respuesta correcta;
+  - forma verbal correcta con error de tilde;
+  - respuesta incorrecta.
+- Se mantienen botones rápidos para `á é í ó ú ü ñ`.
+- Las **runas** muestran ahora una ventana emergente que indica qué jugador la consiguió, nombre de la runa y efecto concreto.
+- Los **eventos de arena** interrumpen brevemente la acción con una ventana emergente que explica el evento y sus consecuencias.
+- La curva de dificultad se reconstruye para que el valor del tablero represente dificultad real:
+  - 100: formas regulares, frecuentes y mecánicas;
+  - 200: ampliación de personas/tiempos regulares;
+  - 300: tiempos menos inmediatos y negativos;
+  - 400: irregularidades frecuentes;
+  - 500: formas compuestas complejas, irregularidad avanzada y reconocimiento de paradigmas raros.
+- Banco actual verificado de aproximadamente **5.344 retos**, con un mínimo de 20 alternativas incluso en los niveles más pequeños.
+- La defensa adopta una **dificultad inversa al ataque** para equilibrar riesgo y recompensa:
+  - ataque 100 → defensa nivel 5 → bloquea 65 % si acierta;
+  - ataque 200 → defensa nivel 4 → bloquea 60 %;
+  - ataque 300 → defensa nivel 3 → bloquea 55 %;
+  - ataque 400 → defensa nivel 2 → bloquea 50 %;
+  - ataque 500 → defensa nivel 1 → bloquea 45 %.
+- De este modo, un ataque fácil concede al rival una defensa difícil pero muy valiosa; un ataque difícil ofrece una defensa más accesible, aunque reduce una proporción menor del daño.
+- Se corrigen detalles del banco verbal detectados durante la revisión: `traído`, imperativos sin pronombre sujeto artificial y separación real entre imperativos irregulares afirmativos (nivel 4) y negativos (nivel 5).
+- Caché de alumno actualizada a `20260905-verb-battle-v2`.
