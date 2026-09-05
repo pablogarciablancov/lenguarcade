@@ -338,3 +338,12 @@ Cada cambio debe indicar:
 - El sistema de códigos deja de presentarse como «código de Scrabble».
 - La interfaz usa ahora **Código para jugar con otra persona** y explica que es un código general de LenguArcade para cualquier juego compatible.
 - El backend formaliza `LA_PAIRABLE_GAME_IDS_` para los juegos que actualmente consumen ese código: Scrabble y Conjuga y apuesta.
+
+
+## 2026-09-05 · Blindaje del cierre de Conjuga y apuesta
+- Se detecta una segunda vía potencial de cierre en el host de LenguArcade: el runner aceptaba cualquier mensaje `CLOSE_READY` y también podía cerrar tras guardar si `closeRequested` quedaba activo.
+- El runner distingue ahora una **salida explícita del usuario** mediante `explicitExitRequested`.
+- Para **Conjuga y apuesta**, un resultado normal limpia cualquier cierre pendiente accidental.
+- LenguArcade ignora `CLOSE_READY` de Conjuga y apuesta cuando no existe una salida explícita ni un abandono real.
+- El comportamiento del resto de juegos no cambia: el blindaje especial se limita a `conjuga_apuesta`.
+- El cierre automático posterior a guardado exige ahora que la salida haya sido solicitada explícitamente.
