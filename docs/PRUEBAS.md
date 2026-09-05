@@ -293,3 +293,11 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 10. Abrir una partida 1 contra 1. La ventana emergente debe hablar de un «código general para jugar con otra persona» y nunca de un «código de Scrabble».
 11. En Perfil, el generador debe llamarse «Código para jugar con otra persona» y explicar que no pertenece a un juego concreto.
 12. Generar un código y utilizarlo en Scrabble o Conjuga y apuesta; debe funcionar en ambos y caducar tras 10 minutos o un único uso.
+
+
+## Cierre seguro de Conjuga y apuesta
+1. Abrir Conjuga y apuesta desde LenguArcade y completar una partida sin pulsar «Salir del juego».
+2. Tras guardar el resultado, el runner debe seguir abierto y el juego debe volver a su pantalla inicial.
+3. Aunque el juego enviase por error un `CLOSE_READY` tras un resultado normal, LenguArcade debe ignorarlo.
+4. Pulsar «Salir del juego» durante una partida: el host debe marcar la salida como explícita, pedir al juego que cierre/guarde y después regresar a LenguArcade.
+5. Verificar que Scrabble y el resto de juegos conservan su comportamiento anterior de cierre.
