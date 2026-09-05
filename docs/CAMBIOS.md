@@ -378,3 +378,18 @@ Cada cambio debe indicar:
 - Batalla verbal queda marcada como **en pruebas** en Apps Script y Supabase y se abre embebida desde `games/verb_battle/`.
 - Supabase actualizado mediante `202609050003_verb_battle_v1.sql` y `student-dashboard` desplegado con la nueva integración.
 - Nueva comprobación automática `scripts/check-verb-battle.mjs`.
+
+
+## 2026-09-05 · Battlegrafía 2.0 — Fantasy Arcade
+- Se crea una **segunda versión paralela** en `games/battlegrafia_v2/`; la Battlegrafía clásica de `games/battlegrafia/` no se sobrescribe.
+- La nueva edición reutiliza el motor completo de la versión estable: Aventura, Supervivencia, Práctica, Dominio, Estrategia, héroes, combate, tienda, objetos, reliquias, bancos de preguntas y progresión.
+- La aventura respeta la estructura real de **5 escenarios × 6 enemigos = 30 monstruos**, con cinco guardianes y un jefe por mundo.
+- Se reutilizan todos los sprites originales ya diseñados para H-Ghoul, Vampiro de la V, Gargántua G/J, Espectro Agudo, Serpiente Comata, Lexikon, Diacritik, Oxiton, Llanor, Puntor, Kalkor, Paper, Esdrulia, Muxlor, Prosodion, Zarruk, Minotauro, Torvax, Caoskrin, Hiatikus, Momia, Rugiton, Zombie, Sintaxion, Gravikus, Jarkon, Ortograf, Siseus, Cíclope y Don Pablo.
+- Nueva capa visual **Fantasy Arcade**: hub principal, selector de modos, creación de héroe, combate, campamento, mapa, inventario, diario e historia.
+- El combate muestra un riel de progreso con los seis enemigos del mundo actual y una presentación especial al llegar al jefe.
+- El mapa incorpora una alineación visual de los cinco guardianes y el jefe de la zona seleccionada.
+- La interfaz se adapta a 1366×768 como objetivo principal y evita scroll en las pantallas de juego de escritorio.
+- La v2 usa `gameId='battlegrafia_v2'` y claves de localStorage independientes para que sus partidas no colisionen con la Battlegrafía clásica.
+- Se registra `battlegrafia_v2` como juego independiente «en pruebas» en Apps Script y en el catálogo Supabase.
+- `student-dashboard` reconoce la nueva URL como integración embebida.
+- Se añade `scripts/check-battlegrafia-v2.mjs` y se incorpora a `npm run check`.
