@@ -87,6 +87,10 @@
         .profile-card strong, .profile-card span { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .profile-card span { color:var(--text-muted); font-size:1.35vh; margin-top:.3vh; }
         .setup-message { color:var(--text-muted); font-size:1.45vh; margin:-.5vh 0 1.3vh; }
+        .scrabble-mode-switch { display:grid; grid-template-columns:1fr 1fr; gap:1vh; margin-bottom:1.5vh; }
+        .scrabble-mode-btn { border:2px solid var(--border); background:var(--bg); color:var(--text); padding:1vh; border-radius:9px; font-weight:900; }
+        .scrabble-mode-btn.active { border-color:var(--primary); background:#eef2ff; color:var(--primary); }
+        .scrabble-solo-note { padding:1vh; margin-bottom:1.2vh; border-radius:9px; background:#ecfdf5; color:#166534; font-size:1.3vh; }
         .achievement-btn { background:var(--magic); }
         .achievement-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1vh; text-align:left; }
         .achievement-card { min-width:0; padding:1vh; border:2px solid var(--border); border-radius:10px; background:var(--bg); opacity:.45; overflow-wrap:anywhere; }
@@ -124,10 +128,15 @@
     <div class="modal">
         <h2>SCRABBLE</h2>
         <div class="integrated-only">
-            <div class="profile-status">
+            <div class="scrabble-mode-switch">
+                <button type="button" id="scrabble-duel-mode" class="scrabble-mode-btn active" onclick="setScrabbleMode('duel')">⚔️ 1 contra 1</button>
+                <button type="button" id="scrabble-solo-mode" class="scrabble-mode-btn" onclick="setScrabbleMode('solo')">🧠 Práctica individual</button>
+            </div>
+            <div class="profile-status" id="scrabble-profile-status">
                 <div class="profile-card" id="primary-profile-card"><strong>Cargando tu perfil...</strong><span>LenguArcade</span></div>
                 <div class="profile-card" id="opponent-profile-card"><strong>Rival sin conectar</strong><span>Necesita su propia sesión</span></div>
             </div>
+            <div id="scrabble-solo-note" class="scrabble-solo-note hidden">Juega tú solo para practicar vocabulario, estrategia y colocación. Tu progreso y tus logros se guardan igualmente.</div>
             <p class="setup-message" id="integrated-setup-message">Conecta al contrincante para comenzar o continuar una partida.</p>
             <button id="connect-opponent-btn" type="button" style="width:100%; background:var(--magic); margin-bottom:1.5vh;" onclick="requestOpponentLogin()">Conectar contrincante</button>
         </div>
@@ -308,6 +317,7 @@ let pendingScore = 0, pendingWord = "", pendingWords = [], pendingTileCount = 0;
 let gameFinished = false, matchId = '', matchStartedAt = '', boardLayout = 'classic';
 let boardCellMap = {};
 let integratedMode = false, primaryProfile = null, opponentProfile = null;
+let scrabbleMode = 'duel';
 let primarySave = null, opponentSave = null, pendingCloseAfterCheckpoint = false;
 let checkpointTimer = null, lastCheckpointId = '';
 
@@ -454,8 +464,16 @@ const LAYOUTS = {
 function addPlayerInput() { const c = document.getElementById('player-inputs-container'); const i = document.createElement('input'); i.type = 'text'; i.className = 'p-input'; i.placeholder = `Nombre Jugador/Equipo ${c.children.length + 1}`; c.appendChild(i); }
 function removePlayerInput() { const c = document.getElementById('player-inputs-container'); if (c.children.length > 2) c.removeChild(c.lastChild); }
 
+function setScrabbleMode(mode) {
+    scrabbleMode = mode === 'solo' ? 'solo' : 'duel';
+    if (scrabbleMode === 'solo' && document.getElementById('setup-win')?.value === 'classic') document.getElementById('setup-win').value = '100';
+    document.getElementById('scrabble-duel-mode')?.classList.toggle('active', scrabbleMode === 'duel');
+    document.getElementById('scrabble-solo-mode')?.classList.toggle('active', scrabbleMode === 'solo');
+    updateIntegratedSetup();
+}
+
 function requestOpponentLogin() {
-    if (!integratedMode) return;
+    if (!integratedMode || scrabbleMode !== 'duel') return;
     LenguArcadeBridge.requestOpponent();
 }
 
@@ -477,10 +495,14 @@ function buildPlayerFromProfile(profile, saveData) {
 }
 
 function getSavedMatchCandidate() {
-    if (!integratedMode || !primaryProfile || !opponentProfile) return null;
+    if (!integratedMode || !primaryProfile) return null;
     const activeMatch = normalizePlayerSave(primarySave).activeMatch;
     if (!activeMatch || activeMatch.status !== 'active') return null;
     const ids = (activeMatch.players || []).map(player => String(player.studentId || ''));
+    const savedMode = activeMatch.gameMode || ((activeMatch.players || []).length === 1 ? 'solo' : 'duel');
+    if (savedMode !== scrabbleMode) return null;
+    if (scrabbleMode === 'solo') return ids.length === 1 && ids.includes(String(primaryProfile.studentId)) ? activeMatch : null;
+    if (!opponentProfile) return null;
     return ids.includes(String(primaryProfile.studentId)) && ids.includes(String(opponentProfile.studentId)) ? activeMatch : null;
 }
 
@@ -488,6 +510,14 @@ function updateIntegratedSetup() {
     const primaryCard = document.getElementById('primary-profile-card');
     const opponentCard = document.getElementById('opponent-profile-card');
     const startButton = document.getElementById('start-game-btn');
+    const connectButton = document.getElementById('connect-opponent-btn');
+    const soloNote = document.getElementById('scrabble-solo-note');
+    const profileStatus = document.getElementById('scrabble-profile-status');
+    if (!integratedMode) {
+        if (startButton) startButton.disabled = false;
+        return;
+    }
+    if (!primaryCard || !opponentCard || !startButton) return;
     if (primaryProfile) {
         primaryCard.classList.add('ready');
         primaryCard.innerHTML = `<strong>${escHtml(primaryProfile.name)}</strong><span>${escHtml(primaryProfile.classGroup || 'Jugador principal')}</span>`;
@@ -495,15 +525,24 @@ function updateIntegratedSetup() {
     if (opponentProfile) {
         opponentCard.classList.add('ready');
         opponentCard.innerHTML = `<strong>${escHtml(opponentProfile.name)}</strong><span>${escHtml(opponentProfile.classGroup || 'Contrincante')}</span>`;
-        document.getElementById('connect-opponent-btn').textContent = 'Cambiar contrincante';
+        if (connectButton) connectButton.textContent = 'Cambiar contrincante';
+    } else {
+        opponentCard.classList.remove('ready');
+        opponentCard.innerHTML = '<strong>Rival sin conectar</strong><span>Necesita su propia sesión</span>';
+        if (connectButton) connectButton.textContent = 'Conectar contrincante';
     }
-    const ready = !!(primaryProfile && opponentProfile);
+    const solo = scrabbleMode === 'solo';
+    opponentCard.classList.toggle('hidden', solo);
+    if (profileStatus) profileStatus.style.gridTemplateColumns = solo ? '1fr' : '1fr 1fr';
+    if (connectButton) connectButton.classList.toggle('hidden', solo);
+    if (soloNote) soloNote.classList.toggle('hidden', !solo);
+    const ready = !!primaryProfile && (solo || !!opponentProfile);
     startButton.disabled = !ready;
     const savedMatch = ready ? getSavedMatchCandidate() : null;
-    startButton.textContent = savedMatch ? 'Continuar partida guardada' : '¡Comenzar partida!';
-    document.getElementById('integrated-setup-message').textContent = savedMatch
-        ? 'Hay una partida guardada entre estos dos jugadores.'
-        : (ready ? 'Ambas sesiones están conectadas. La partida guardará el progreso de los dos.' : 'Conecta al contrincante para comenzar o continuar una partida.');
+    startButton.textContent = savedMatch ? 'Continuar práctica guardada' : (solo ? 'Comenzar práctica' : '¡Comenzar partida!');
+    document.getElementById('integrated-setup-message').textContent = solo
+        ? (savedMatch ? 'Tienes una práctica individual guardada.' : 'Jugarás con tu propio perfil y el progreso se guardará en LenguArcade.')
+        : (savedMatch ? 'Hay una partida guardada entre estos dos jugadores.' : (ready ? 'Ambas sesiones están conectadas. La partida guardará el progreso de los dos.' : 'Conecta al contrincante para comenzar o continuar una partida.'));
 }
 
 function serializeActiveMatch() {
@@ -511,6 +550,7 @@ function serializeActiveMatch() {
     return {
         version: 1,
         status: 'active',
+        gameMode:scrabbleMode,
         matchId,
         startedAt: matchStartedAt,
         savedAt: new Date().toISOString(),
@@ -542,6 +582,7 @@ function serializeActiveMatch() {
 }
 
 function restoreSavedMatch(savedMatch) {
+    scrabbleMode = savedMatch.gameMode || ((savedMatch.players || []).length === 1 ? 'solo' : 'duel');
     matchId = savedMatch.matchId || `scrabble_${Date.now()}`;
     matchStartedAt = savedMatch.startedAt || new Date().toISOString();
     boardLayout = savedMatch.boardLayout || 'classic';
@@ -577,7 +618,8 @@ function startGame() {
     let savedMatch = null;
     gameFinished = false;
     if (integratedMode) {
-        if (!primaryProfile || !opponentProfile) return showToast('Falta el contrincante', 'Conecta su sesión de LenguArcade antes de comenzar.', '🔐');
+        if (!primaryProfile) return showToast('Falta tu perfil', 'Espera a que LenguArcade termine de conectarlo.', '🔐');
+        if (scrabbleMode === 'duel' && !opponentProfile) return showToast('Falta el contrincante', 'Conecta su sesión de LenguArcade antes de comenzar.', '🔐');
         savedMatch = getSavedMatchCandidate();
     }
 
@@ -589,10 +631,12 @@ function startGame() {
         restoreSavedMatch(savedMatch);
     } else {
         if (integratedMode) {
-            players = [
-                buildPlayerFromProfile(primaryProfile, primarySave),
-                buildPlayerFromProfile(opponentProfile, opponentSave)
-            ].sort(() => Math.random() - 0.5);
+            players = scrabbleMode === 'solo'
+                ? [buildPlayerFromProfile(primaryProfile, primarySave)]
+                : [
+                    buildPlayerFromProfile(primaryProfile, primarySave),
+                    buildPlayerFromProfile(opponentProfile, opponentSave)
+                  ].sort(() => Math.random() - 0.5);
         } else {
             const inputs = document.querySelectorAll('.p-input');
             const names = Array.from(inputs).map(inp => inp.value.trim()).filter(n => n !== "");
@@ -1033,20 +1077,20 @@ function finishGame(reasonStr) {
         const player = entry.player;
         const finalStats = getProjectedStats(player);
         finalStats.games++;
-        if (index === 0) finalStats.wins++;
+        if (index === 0 && scrabbleMode !== 'solo') finalStats.wins++;
         player.lifetime = finalStats;
         player.sessionCommitted = true;
-        checkPlayerAchievements(player, { finished:true, isWinner:index===0, penalty:entry.pen });
+        checkPlayerAchievements(player, { finished:true, isWinner:index===0 && scrabbleMode !== 'solo', penalty:entry.pen });
     });
 
     if (integratedMode) {
         primarySave = buildPlayerSave(players.find(player => player.role === 'primary'), null);
-        opponentSave = buildPlayerSave(players.find(player => player.role === 'opponent'), null);
+        opponentSave = scrabbleMode === 'duel' ? buildPlayerSave(players.find(player => player.role === 'opponent'), null) : opponentSave;
         LenguArcadeBridge.result({
             resultId:`scrabble_${Date.now()}_${Math.random().toString(36).slice(2)}`,
-            outcome:'finished',
+            outcome:scrabbleMode === 'solo' ? 'practice' : 'finished',
             matchId,
-            players:penalizations.map((entry, index) => buildPlayerResult(entry.player, index === 0 ? 'victory' : 'defeat'))
+            players:penalizations.map((entry, index) => buildPlayerResult(entry.player, scrabbleMode === 'solo' ? 'practice' : (index === 0 ? 'victory' : 'defeat')))
         });
     }
 
@@ -1182,7 +1226,7 @@ const LenguArcadeBridge = (() => {
     }
 
     function announceReady() {
-        post('READY', { protocol:2, multiplayer:true, version:1 });
+        post('READY', { protocol:3, multiplayer:true, practice:true, version:2 });
     }
 
     function startBridge(params) {
@@ -1219,7 +1263,7 @@ const LenguArcadeBridge = (() => {
         document.documentElement.classList.add('lenguarcade-embedded');
         document.body.classList.add('lenguarcade-embedded');
         updateIntegratedSetup();
-        post('INITIALIZED', { profileId:primaryProfile.studentId, multiplayer:true });
+        post('INITIALIZED', { profileId:primaryProfile.studentId, multiplayer:true, practice:true });
     }
 
     function applyOpponent(payload) {
@@ -1263,7 +1307,7 @@ const LenguArcadeBridge = (() => {
             showToast('No se pudo guardar la partida', (message.payload && message.payload.message) || 'Vuelve a intentarlo.', '⚠️');
             pendingCloseAfterCheckpoint = false;
         }
-        if (message.type === 'SAVE_CONFIRMED') showToast('Partida guardada', 'Los dos perfiles han recibido su progreso.', '✅');
+        if (message.type === 'SAVE_CONFIRMED') showToast('Progreso guardado', scrabbleMode === 'solo' ? 'Tu práctica se ha guardado en LenguArcade.' : 'Los dos perfiles han recibido su progreso.', '✅');
         if (message.type === 'SAVE_FAILED') showToast('Guardado pendiente', (message.payload && message.payload.message) || 'LenguArcade permitirá reintentarlo.', '⚠️');
         if (message.type === 'REQUEST_EXIT') {
             if (players.length && !gameFinished) requestCheckpoint(true);
