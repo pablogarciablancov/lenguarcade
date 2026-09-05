@@ -47,7 +47,7 @@ if(!code.includes("function isGameLockedStatus_") || !code.includes("LA_OFFICIAL
 if(!auth.includes("LA_OFFICIAL_GAMES.forEach")){
   throw new Error("El catálogo legacy debe sincronizarse desde la lista oficial.");
 }
-if(!student.includes("20260905-rimopolis-removed") || !auth.includes("public_meta_v05_catalog10")){
+if(!student.includes("20260905-catalog10-clean") || !auth.includes("public_meta_v05_catalog10")){
   throw new Error("La retirada de Rimópolis debe invalidar las cachés antiguas del catálogo.");
 }
 
