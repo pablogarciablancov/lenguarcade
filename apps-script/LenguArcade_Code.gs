@@ -101,9 +101,8 @@ function doGet(e) {
   }
 
   const isTeacher = page === 'profesor' || page === 'profe' || page === 'teacher';
-  const isLegacyVersopolis = page === 'rimopolis' || page === 'versopolis';
-  const file = isTeacher ? 'LenguArcade_Profesor' : (isLegacyVersopolis ? 'Rimopolis_Alumno' : 'LenguArcade_Alumno');
-  const title = isTeacher ? 'LenguArcade - Profesor' : (isLegacyVersopolis ? 'Versópolis' : 'LenguArcade - Alumno');
+  const file = isTeacher ? 'LenguArcade_Profesor' : 'LenguArcade_Alumno';
+  const title = isTeacher ? 'LenguArcade - Profesor' : 'LenguArcade - Alumno';
   return buildLenguArcadeHtmlOutput_(file, title);
 }
 
