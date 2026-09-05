@@ -31,72 +31,48 @@ const LA_CONFIG = {
 
 const LA_GAME_INTEGRATIONS = {
   battlegrafia: {
-    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/',
-    integration: 'embedded',
-    estado: 'beta'
+    url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/',
+    integration:'embedded'
   },
   maniacgrafia: {
-    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/maniacgrafia/',
-    integration: 'embedded'
-  },
-  scrabble: {
-    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/scrabble/',
-    integration: 'embedded'
+    url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/maniacgrafia/',
+    integration:'embedded'
   },
   narratoria: {
-    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/',
-    integration: 'embedded'
+    url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/',
+    integration:'embedded'
+  },
+  scrabble: {
+    url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/scrabble/',
+    integration:'embedded'
   },
   rayuela: {
-    url: 'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html',
-    integration: 'embedded',
-    nombre: 'Rayuela',
-    subtitulo: 'Tu historia. Tus decisiones.',
-    categoria: 'Escritura',
-    descripcion: 'Construye una aventura ramificada, prueba sus caminos y crea finales diferentes.',
-    icono: '⌗',
-    estado: 'beta'
-  },
-  versopolis: {
-    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/rimopolis/',
-    integration: 'embedded',
-    nombre: 'Rimópolis',
-    subtitulo: 'RPG de rimas',
-    categoria: 'Rimas',
-    descripcion: 'Combate en escenarios de rap y poesia eligiendo rimas correctas.',
-    icono: '🎤',
-    estado: 'beta'
+    url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html',
+    integration:'embedded'
   },
   entre_lineas: {
-    url: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/',
-    integration: 'embedded',
-    nombre: 'Entre Líneas',
-    subtitulo: 'Agencia de Investigación Lectora',
-    categoria: 'Comprensión lectora',
-    descripcion: 'Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.',
-    icono: '🔎',
-    estado: 'beta'
+    url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/',
+    integration:'embedded'
   }
 };
 
-const LA_FALLBACK_GAMES = {
-  rayuela: {
-    gameId:'rayuela', nombre:'Rayuela', subtitulo:'Tu historia. Tus decisiones.',
-    categoria:'Escritura', competencias:'narracion,creatividad,redaccion,coherencia,planificacion',
-    estado:'beta', orden:8, color:'#22d3ee', icono:'⌗',
-    url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html',
-    descripcion:'Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.',
-    banner:'rayuela', activo:true
-  },
-  entre_lineas: {
-    gameId:'entre_lineas', nombre:'Entre Líneas', subtitulo:'Agencia de Investigación Lectora',
-    categoria:'Comprensión lectora', competencias:'comprension,inferencia,sintesis,analisis,coherencia,vocabulario',
-    estado:'beta', orden:9, color:'#d7a942', icono:'🔎',
-    url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/',
-    descripcion:'Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.',
-    banner:'entre_lineas', activo:true
-  }
-};
+const LA_OFFICIAL_GAMES = [
+  {gameId:'battlegrafia',nombre:'Battlegrafía',subtitulo:'La aventura de las palabras',categoria:'RPG',competencias:'ortografía,verbos,semántica',estado:'en pruebas',orden:1,color:'#f59e0b',icono:'🐉',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/',descripcion:'RPG de Lengua con combates, mundos, criaturas y progresión.',banner:'dragon',activo:true},
+  {gameId:'maniacgrafia',nombre:'Maniacgrafía',subtitulo:'Atrapa las palabras',categoria:'Ortografía',competencias:'ortografía,acentuación,atención',estado:'listo',orden:2,color:'#d946ef',icono:'⚡',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/maniacgrafia/',descripcion:'Atrapa y corrige palabras trampa mientras mejoras rapidez y precisión.',banner:'neon',activo:true},
+  {gameId:'narratoria',nombre:'Narratoria',subtitulo:'Escribe. Crea. Cuenta.',categoria:'Escritura',competencias:'narración,creatividad,redacción',estado:'listo',orden:3,color:'#f59e0b',icono:'📚',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/',descripcion:'Construye relatos por fases con objetivos, decisiones y creatividad.',banner:'paper',activo:true},
+  {gameId:'versopolis',nombre:'Versópolis',subtitulo:'La ciudad de la poesía',categoria:'Poesía',competencias:'poesía,rima,métrica,creatividad',estado:'en revisión',orden:4,color:'#8b5cf6',icono:'✒️',url:'',descripcion:'Crea poemas, supera retos líricos y progresa como autor dentro de la ciudad de la poesía.',banner:'city',activo:true},
+  {gameId:'scrabble',nombre:'Scrabble',subtitulo:'Palabras en juego',categoria:'Léxico',competencias:'léxico,vocabulario,estrategia',estado:'listo',orden:5,color:'#34d399',icono:'🔤',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/scrabble/',descripcion:'Forma palabras, amplía vocabulario y compite usando estrategia verbal.',banner:'board',activo:true},
+  {gameId:'conjuga_apuesta',nombre:'Conjuga y apuesta',subtitulo:'Verbos 1 contra 1',categoria:'Verbos',competencias:'verbos,morfología,conjugación',estado:'en revisión',orden:6,color:'#fb7185',icono:'🎲',url:'',descripcion:'Apuesta puntos y enfréntate a otro jugador dominando la conjugación verbal.',banner:'dice',activo:true},
+  {gameId:'verb_battle',nombre:'Batalla verbal',subtitulo:'Combate de verbos por equipos',categoria:'Verbos',competencias:'verbos,morfología,equipos',estado:'en revisión',orden:7,color:'#60a5fa',icono:'⚔️',url:'',descripcion:'Compite por equipos resolviendo retos verbales en formato de batalla.',banner:'battle',activo:true},
+  {gameId:'rayuela',nombre:'Rayuela',subtitulo:'Tu historia. Tus decisiones.',categoria:'Escritura',competencias:'narración,creatividad,redacción,coherencia,planificación',estado:'en pruebas',orden:8,color:'#22d3ee',icono:'⌗',url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html',descripcion:'Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.',banner:'rayuela',activo:true},
+  {gameId:'entre_lineas',nombre:'Entre Líneas',subtitulo:'Agencia de Investigación Lectora',categoria:'Comprensión lectora',competencias:'comprensión,inferencia,síntesis,análisis,coherencia,vocabulario',estado:'en pruebas',orden:9,color:'#d7a942',icono:'🔎',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/',descripcion:'Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.',banner:'entre_lineas',activo:true},
+  {gameId:'tower_defense',nombre:'Tower Defense',subtitulo:'Defiende la lengua',categoria:'Estrategia lingüística',competencias:'ortografía,verbos,semántica,estrategia',estado:'en revisión',orden:10,color:'#14b8a6',icono:'🛡️',url:'',descripcion:'Detén oleadas de monstruos resolviendo retos lingüísticos antes de que alcancen la base.',banner:'tower_defense',activo:true}
+];
+
+const LA_FALLBACK_GAMES = Object.fromEntries(
+  LA_OFFICIAL_GAMES.filter(game => ['rayuela','entre_lineas'].includes(game.gameId))
+    .map(game => [game.gameId, Object.assign({}, game)])
+);
 
 const LA_HEADERS = {
   Config: ['key','value','updatedAt'],
@@ -125,9 +101,9 @@ function doGet(e) {
   }
 
   const isTeacher = page === 'profesor' || page === 'profe' || page === 'teacher';
-  const isRimopolis = page === 'rimopolis' || page === 'versopolis';
-  const file = isTeacher ? 'LenguArcade_Profesor' : (isRimopolis ? 'Rimopolis_Alumno' : 'LenguArcade_Alumno');
-  const title = isTeacher ? 'LenguArcade - Profesor' : (isRimopolis ? 'Rimópolis' : 'LenguArcade - Alumno');
+  const isLegacyVersopolis = page === 'rimopolis' || page === 'versopolis';
+  const file = isTeacher ? 'LenguArcade_Profesor' : (isLegacyVersopolis ? 'Rimopolis_Alumno' : 'LenguArcade_Alumno');
+  const title = isTeacher ? 'LenguArcade - Profesor' : (isLegacyVersopolis ? 'Versópolis' : 'LenguArcade - Alumno');
   return buildLenguArcadeHtmlOutput_(file, title);
 }
 
@@ -531,7 +507,7 @@ function getStudentDashboardCore_(studentId) {
   progressRows.forEach(r => byGame[r.gameId] = r);
   const gameCards = games.map(g => {
     const p = byGame[g.gameId] || emptyProgressForGame_(student, g);
-    return Object.assign({}, g, { progress:p, locked:String(g.estado).toLowerCase() === 'proximamente', buttonLabel:p.sessions > 0 ? 'Continuar' : 'Jugar' });
+    return Object.assign({}, g, { progress:p, locked:isGameLockedStatus_(g.estado), buttonLabel:isGameLockedStatus_(g.estado) ? 'En revisión' : (p.sessions > 0 ? 'Continuar' : 'Jugar') });
   });
   return {
     ok:true,
@@ -553,8 +529,8 @@ function getStudentGameRecord_(student, game) {
   const decorated = decorateGameIntegration_(game);
   return Object.assign({}, decorated, {
     progress:normalized,
-    locked:String(decorated.estado).toLowerCase() === 'proximamente',
-    buttonLabel:normalized.sessions > 0 ? 'Continuar' : 'Jugar'
+    locked:isGameLockedStatus_(decorated.estado),
+    buttonLabel:isGameLockedStatus_(decorated.estado) ? 'En revisión' : (normalized.sessions > 0 ? 'Continuar' : 'Jugar')
   });
 }
 
@@ -584,7 +560,7 @@ function getTeacherDashboardCore_(filters) {
   const errorSummary = summarizeErrors_(errors);
   return {
     ok:true,
-    summary:{ studentsTotal:students.length, activeStudents:studentSummaries.filter(s => s.sessions > 0).length, sessionsToday:events.filter(e => String(e.timestamp).slice(0,10) === today).length, gamesAvailable:games.filter(g => String(g.estado).toLowerCase() !== 'proximamente').length, achievementsTotal:rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.LOGROS)).length, averageGrade:round1_(average_(studentSummaries.map(s => s.grade))) },
+    summary:{ studentsTotal:students.length, activeStudents:studentSummaries.filter(s => s.sessions > 0).length, sessionsToday:events.filter(e => String(e.timestamp).slice(0,10) === today).length, gamesAvailable:games.filter(g => !isGameLockedStatus_(g.estado)).length, achievementsTotal:rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.LOGROS)).length, averageGrade:round1_(average_(studentSummaries.map(s => s.grade))) },
     students:studentSummaries,
     games:games,
     popularGames:popularGames,
@@ -675,18 +651,7 @@ function seedClasses_() {
 function seedGames_() {
   const sh = getSheet_(LA_CONFIG.SHEETS.JUEGOS);
   if (sh.getLastRow() > 1) return;
-  const games = [
-    ['battlegrafia','Battlegrafia','La aventura de las palabras','RPG','ortografia,gramatica,verbos','beta',1,'#f59e0b','🐉','https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/','RPG de Lengua. Combate contra errores, desbloquea criaturas y guarda progreso en LenguArcade.','dragon'],
-    ['maniacgrafia','Maniacgrafia','Atrapa las palabras','Ortografia','ortografia,acentuacion','beta',2,'#d946ef','⚡','','Corrige palabras trampa y mejora tu precision.','neon'],
-    ['narratoria','Narratoria','Escribe. Crea. Cuenta.','Escritura','narracion,creatividad,redaccion','beta',3,'#f59e0b','📚','','Construye relatos con cartas, fases y objetivos.','paper'],
-    ['rayuela','Rayuela','Tu historia. Tus decisiones.','Escritura','narracion,creatividad,redaccion,coherencia','beta',8,'#22d3ee','⌗','https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html','Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.','rayuela'],
-    ['entre_lineas','Entre Líneas','Agencia de Investigación Lectora','Comprensión lectora','comprension,inferencia,sintesis,analisis,coherencia,vocabulario','beta',9,'#d7a942','🔎','https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/','Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.','entre_lineas'],
-    ['versopolis','Rimópolis','RPG de rimas','Rimas','rimas,poesia,creatividad','beta',4,'#8b5cf6','🎤','','Combate en escenarios de rap y poesia eligiendo rimas correctas.','city'],
-    ['scrabble','Scrabble','Palabras en juego','Lexico','lexico,vocabulario,estrategia','aula',5,'#34d399','🔤','','Forma palabras y compite por equipos.','board'],
-    ['conjuga_apuesta','Conjuga y Apuesta','Verbos 1 contra 1','Verbos','verbos,morfologia','aula',6,'#fb7185','🎲','','Apuesta puntos conjugando formas verbales.','dice'],
-    ['verb_battle','Verb Battle','Jeopardy verbal RPG','Verbos','verbos,morfologia,equipos','aula',7,'#60a5fa','⚔️','','Batalla por equipos con preguntas de conjugacion.','battle']
-  ];
-  games.forEach(g => appendObject_(sh, { gameId:g[0], nombre:g[1], subtitulo:g[2], categoria:g[3], competencias:g[4], estado:g[5], orden:g[6], color:g[7], icono:g[8], url:g[9], descripcion:g[10], banner:g[11], activo:true, updatedAt:nowIso_() }));
+  LA_OFFICIAL_GAMES.forEach(game => appendObject_(sh, Object.assign({}, game, {updatedAt:nowIso_()})));
 }
 function seedMissions_() { const sh = getSheet_(LA_CONFIG.SHEETS.MISIONES); if (sh.getLastRow() > 1) return; [['mision_primera_partida','Primer aterrizaje','Guarda tu primer progreso en cualquier juego.','general','sessions',1,50,5],['mision_explorador','Explorador de LenguArcade','Prueba tres juegos distintos.','general','variety',3,100,10],['mision_precision','Cazador de errores','Supera el 80% de precision en un juego.','general','accuracy',80,80,8]].forEach(m => appendObject_(sh, { missionId:m[0], title:m[1], description:m[2], gameId:m[3], type:m[4], target:m[5], rewardXp:m[6], rewardPlumas:m[7], activeFrom:'', activeTo:'', isActive:true })); }
 function seedDemoStudents_() {
@@ -709,13 +674,16 @@ function requireSession_(token, expectedType) { if (!token) throw new Error('Ses
 function safeStudent_(s) { return { studentId:s.studentId, nombre:s.nombre, apellidos:s.apellidos, email:s.email, clase:s.clase, curso:s.curso, linea:s.linea, avatar:s.avatar, xpGeneral:Number(s.xpGeneral || 0), nivelGeneral:Number(s.nivelGeneral || 1), plumas:Number(s.plumas || 0), ultimaSesion:s.ultimaSesion || '' }; }
 function publicStudent_(s) { return { studentId:s.studentId, nombre:s.nombre, apellidos:s.apellidos, clase:s.clase, avatar:s.avatar }; }
 function getActiveGames_() {
-  const games = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS)).filter(g => isTrue_(g.activo)).slice();
-  Object.keys(LA_FALLBACK_GAMES).forEach(gameId => {
-    if (!games.some(game => String(game.gameId || '').toLowerCase() === gameId)) {
-      games.push(Object.assign({}, LA_FALLBACK_GAMES[gameId]));
-    }
-  });
-  return games.sort((a,b) => Number(a.orden || 0) - Number(b.orden || 0));
+  const rows = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS));
+  const byId = {};
+  rows.forEach(row => { byId[String(row.gameId || '').toLowerCase()] = row; });
+  return LA_OFFICIAL_GAMES
+    .filter(game => {
+      const stored = byId[game.gameId];
+      return !stored || isTrue_(stored.activo);
+    })
+    .map(game => Object.assign({}, byId[game.gameId] || {}, game))
+    .sort((a,b) => Number(a.orden || 0) - Number(b.orden || 0));
 }
 function decorateGameIntegration_(game) {
   const integration = LA_GAME_INTEGRATIONS[String(game.gameId || '').toLowerCase()];
@@ -747,13 +715,24 @@ function registerStudentLoginFailure_(email, previous) {
 function clearStudentLoginFailures_(email) { CacheService.getScriptCache().remove(studentLoginThrottleKey_(email)); }
 function findGame_(gameId) {
   const clean = String(gameId || '').toLowerCase();
-  const found = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS))
-    .find(g => String(g.gameId || '').toLowerCase() === clean);
-  return found || (LA_FALLBACK_GAMES[clean] ? Object.assign({}, LA_FALLBACK_GAMES[clean]) : null);
+  const official = LA_OFFICIAL_GAMES.find(game => game.gameId === clean);
+  if (!official) return null;
+  const stored = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.JUEGOS))
+    .find(game => String(game.gameId || '').toLowerCase() === clean);
+  return Object.assign({}, stored || {}, official);
+}
+
+function isGameLockedStatus_(status) {
+  const normalized = String(status || '').trim().toLowerCase();
+  return normalized === 'en revisión' ||
+    normalized === 'en revision' ||
+    normalized === 'próximamente' ||
+    normalized === 'proximamente' ||
+    normalized.includes('coming');
 }
 function touchStudent_(studentId) { updateStudent_(studentId, { ultimaSesion:nowIso_() }); }
 function recalculateStudentGeneral_(studentId) { const rows = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.PROGRESO)).filter(r => String(r.studentId) === String(studentId)).map(normalizeProgressRow_); const xp = rows.reduce((a,r) => a + Number(r.xp || 0), 0); const plumas = rows.reduce((a,r) => a + Number(r.plumas || 0), 0); updateStudent_(studentId, { xpGeneral:xp, nivelGeneral:Math.floor(xp / 500) + 1, plumas:plumas, ultimaSesion:nowIso_() }); }
-function buildGeneralProgress_(student, progressRows, games) { const xp = progressRows.reduce((a,r) => a + Number(r.xp || 0), 0); const attempts = progressRows.reduce((a,r) => a + Number(r.attempts || 0), 0); const successes = progressRows.reduce((a,r) => a + Number(r.successes || 0), 0); const sessions = progressRows.reduce((a,r) => a + Number(r.sessions || 0), 0); return { xp:xp, level:Math.floor(xp / 500) + 1, nextLevelXp:(Math.floor(xp / 500) + 1) * 500, levelProgress:Math.round((xp % 500) / 5), plumas:progressRows.reduce((a,r) => a + Number(r.plumas || 0), 0), percentage:Math.round(average_(progressRows.map(r => Number(r.percentage || 0))) || 0), accuracy:attempts ? Math.round((successes / attempts) * 100) : 0, sessions:sessions, gamesPlayed:progressRows.filter(r => Number(r.sessions || 0) > 0).length, totalGames:games.filter(g => String(g.estado).toLowerCase() !== 'proximamente').length }; }
+function buildGeneralProgress_(student, progressRows, games) { const xp = progressRows.reduce((a,r) => a + Number(r.xp || 0), 0); const attempts = progressRows.reduce((a,r) => a + Number(r.attempts || 0), 0); const successes = progressRows.reduce((a,r) => a + Number(r.successes || 0), 0); const sessions = progressRows.reduce((a,r) => a + Number(r.sessions || 0), 0); return { xp:xp, level:Math.floor(xp / 500) + 1, nextLevelXp:(Math.floor(xp / 500) + 1) * 500, levelProgress:Math.round((xp % 500) / 5), plumas:progressRows.reduce((a,r) => a + Number(r.plumas || 0), 0), percentage:Math.round(average_(progressRows.map(r => Number(r.percentage || 0))) || 0), accuracy:attempts ? Math.round((successes / attempts) * 100) : 0, sessions:sessions, gamesPlayed:progressRows.filter(r => Number(r.sessions || 0) > 0).length, totalGames:games.filter(g => !isGameLockedStatus_(g.estado)).length }; }
 function emptyProgressForGame_(student, game) { return { studentId:student.studentId, email:student.email, nombre:student.nombre + ' ' + student.apellidos, clase:student.clase, gameId:game.gameId, gameName:game.nombre, xp:0, nivel:1, percentage:0, accuracy:0, attempts:0, successes:0, errors:0, streak:0, sessions:0, achievementsCount:0, missionsCompleted:0, plumas:0, lastActivity:'', rawJson:'{}', updatedAt:'' }; }
 function normalizeProgressRow_(r) { ['xp','nivel','percentage','accuracy','attempts','successes','errors','streak','sessions','achievementsCount','missionsCompleted','plumas'].forEach(k => r[k] = Number(r[k] || 0)); return r; }
 function buildClassRanking_(classCode, limit) { return rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.ALUMNOS)).filter(s => s.clase === classCode).map(s => ({ studentId:s.studentId, nombre:s.nombre + ' ' + s.apellidos, xp:Number(s.xpGeneral || 0), level:Number(s.nivelGeneral || 1), plumas:Number(s.plumas || 0) })).sort((a,b) => b.xp - a.xp).slice(0, limit || 10); }
