@@ -46,6 +46,10 @@ const LA_GAME_INTEGRATIONS = {
     url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/scrabble/',
     integration:'embedded'
   },
+  conjuga_apuesta: {
+    url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/conjuga_apuesta/',
+    integration:'embedded'
+  },
   rayuela: {
     url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html',
     integration:'embedded'
@@ -62,7 +66,7 @@ const LA_OFFICIAL_GAMES = [
   {gameId:'narratoria',nombre:'Narratoria',subtitulo:'Escribe. Crea. Cuenta.',categoria:'Escritura',competencias:'narración,creatividad,redacción',estado:'listo',orden:3,color:'#f59e0b',icono:'📚',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/',descripcion:'Construye relatos por fases con objetivos, decisiones y creatividad.',banner:'paper',activo:true},
   {gameId:'versopolis',nombre:'Versópolis',subtitulo:'La ciudad de la poesía',categoria:'Poesía',competencias:'poesía,rima,métrica,creatividad',estado:'en revisión',orden:4,color:'#8b5cf6',icono:'✒️',url:'',descripcion:'Crea poemas, supera retos líricos y progresa como autor dentro de la ciudad de la poesía.',banner:'city',activo:true},
   {gameId:'scrabble',nombre:'Scrabble',subtitulo:'Palabras en juego',categoria:'Léxico',competencias:'léxico,vocabulario,estrategia',estado:'listo',orden:5,color:'#34d399',icono:'🔤',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/scrabble/',descripcion:'Forma palabras, amplía vocabulario y compite usando estrategia verbal.',banner:'board',activo:true},
-  {gameId:'conjuga_apuesta',nombre:'Conjuga y apuesta',subtitulo:'Verbos 1 contra 1',categoria:'Verbos',competencias:'verbos,morfología,conjugación',estado:'en revisión',orden:6,color:'#fb7185',icono:'🎲',url:'',descripcion:'Apuesta puntos y enfréntate a otro jugador dominando la conjugación verbal.',banner:'dice',activo:true},
+  {gameId:'conjuga_apuesta',nombre:'Conjuga y apuesta',subtitulo:'Conjuga. Arriesga. Remonta.',categoria:'Verbos',competencias:'verbos,morfología,conjugación,estrategia',estado:'en pruebas',orden:6,color:'#fb7185',icono:'🎲',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/conjuga_apuesta/',descripcion:'Duelo de conjugación con fichas, niveles de riesgo, rachas, ayudas tácticas, XP y logros.',banner:'dice',activo:true},
   {gameId:'verb_battle',nombre:'Batalla verbal',subtitulo:'Combate de verbos por equipos',categoria:'Verbos',competencias:'verbos,morfología,equipos',estado:'en revisión',orden:7,color:'#60a5fa',icono:'⚔️',url:'',descripcion:'Compite por equipos resolviendo retos verbales en formato de batalla.',banner:'battle',activo:true},
   {gameId:'rayuela',nombre:'Rayuela',subtitulo:'Tu historia. Tus decisiones.',categoria:'Escritura',competencias:'narración,creatividad,redacción,coherencia,planificación',estado:'en pruebas',orden:8,color:'#22d3ee',icono:'⌗',url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/4e661e74e14ed60adee338c1f4123ac409436f65/games/rayuela/index.html',descripcion:'Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.',banner:'rayuela',activo:true},
   {gameId:'entre_lineas',nombre:'Entre Líneas',subtitulo:'Agencia de Investigación Lectora',categoria:'Comprensión lectora',competencias:'comprensión,inferencia,síntesis,análisis,coherencia,vocabulario',estado:'en pruebas',orden:9,color:'#d7a942',icono:'🔎',url:'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/',descripcion:'Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.',banner:'entre_lineas',activo:true},
