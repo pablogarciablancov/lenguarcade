@@ -135,34 +135,48 @@ function callSupabaseStudentDashboard_(accessToken) {
   return data;
 }
 
-function createScrabbleOpponentCode(accessToken) {
+function createGameOpponentCode(accessToken) {
   const dashboard = callSupabaseStudentDashboard_(accessToken);
   const student = dashboard.student || {};
   const code = String(Math.floor(100000 + Math.random() * 900000));
-  const game = (dashboard.games || []).find(function(item) { return String(item.gameId || '').toLowerCase() === 'scrabble'; }) || { gameId:'scrabble', progress:{} };
-  CacheService.getScriptCache().put('LA_SCRABBLE_PAIR_' + code, JSON.stringify({
+  CacheService.getScriptCache().put('LA_GAME_PAIR_' + code, JSON.stringify({
     token:String(accessToken || ''),
     student:student,
-    game:game,
     createdAt:new Date().toISOString()
   }), 600);
   return { ok:true, code:code, expiresIn:600, student:student };
 }
 
+function createScrabbleOpponentCode(accessToken) {
+  return createGameOpponentCode(accessToken);
+}
+
 function loginGameOpponentByCode(primaryAccessToken, code, gameId) {
-  if (String(gameId || '').toLowerCase() !== 'scrabble') throw new Error('Este codigo solo sirve para Scrabble.');
-  const primary = callSupabaseStudentDashboard_(primaryAccessToken).student || {};
+  const cleanGameId = String(gameId || '').toLowerCase();
+  if (['scrabble','conjuga_apuesta'].indexOf(cleanGameId) === -1) {
+    throw new Error('Este juego no admite todavía rival conectado.');
+  }
+  const primaryDashboard = callSupabaseStudentDashboard_(primaryAccessToken);
+  const primary = primaryDashboard.student || {};
   const cleanCode = String(code || '').replace(/\D+/g, '').slice(0, 6);
   if (!/^\d{6}$/.test(cleanCode)) throw new Error('El codigo debe tener 6 cifras.');
   const cache = CacheService.getScriptCache();
-  const raw = cache.get('LA_SCRABBLE_PAIR_' + cleanCode);
+  const genericKey = 'LA_GAME_PAIR_' + cleanCode;
+  const legacyKey = 'LA_SCRABBLE_PAIR_' + cleanCode;
+  const raw = cache.get(genericKey) || cache.get(legacyKey);
   if (!raw) throw new Error('Codigo caducado o incorrecto. Genera uno nuevo desde la cuenta del rival.');
-  cache.remove('LA_SCRABBLE_PAIR_' + cleanCode);
+  cache.remove(genericKey);
+  cache.remove(legacyKey);
   const data = JSON.parse(raw || '{}');
   if (String(data.student && data.student.studentId || '') === String(primary.studentId || '')) {
     throw new Error('El contrincante debe ser otro alumno.');
   }
-  return { ok:true, token:data.token, student:data.student, game:data.game || { gameId:'scrabble', progress:{} } };
+  const opponentDashboard = callSupabaseStudentDashboard_(data.token);
+  const opponentStudent = opponentDashboard.student || data.student || {};
+  const opponentGame = (opponentDashboard.games || []).find(function(item) {
+    return String(item.gameId || '').toLowerCase() === cleanGameId;
+  }) || { gameId:cleanGameId, progress:{} };
+  return { ok:true, token:data.token, student:opponentStudent, game:opponentGame };
 }
 function loginStudentPanelWithGoogle(supabaseAccessToken) {
   const email = requireActiveGoogleEmail_();
