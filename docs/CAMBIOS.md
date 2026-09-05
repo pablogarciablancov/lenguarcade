@@ -294,3 +294,28 @@ Cada cambio debe indicar:
 - `LenguArcade_Alumno.html` asigna ya ambas imágenes en el mapa `BANNERS`.
 - Se mantiene el sistema de fallback GitHub Raw → jsDelivr para estas imágenes.
 - `check-game-catalog.mjs` falla si Rayuela o Entre Líneas vuelven a utilizar el banner genérico.
+
+
+## 2026-09-05 · Conjuga y apuesta v2
+- Se parte del HTML original «Concurso de verbos» y se conserva su núcleo: dos jugadores, turnos, fichas, apuesta y conjugación escrita.
+- El banco original de 106 retos se conserva y se amplía a **154 retos**, incorporando condicionales, pluscuamperfectos, futuros perfectos, subjuntivo avanzado, imperativo negativo y formas no personales.
+- Nueva dificultad táctica en cuatro niveles con multiplicadores: Básico, Intermedio, Avanzado y Experto.
+- Las preguntas no se repiten dentro del mismo nivel hasta agotar su banco disponible.
+- Rondas especiales de bote cada cuatro rondas con multiplicador adicional.
+- Se añaden tres recursos de juego:
+  - Seguro: reduce a la mitad una pérdida.
+  - Cambio: sustituye el reto manteniendo riesgo y apuesta.
+  - Pista: cuesta fichas y reduce el premio potencial.
+- Se conserva el rescate del juego original, ahora limitado a uno por jugador y automático al llegar a cero.
+- Sistema propio de experiencia y niveles: 250 XP por nivel.
+- **24 logros** persistentes, con retos de rachas, apuestas, subjuntivo, imperativo, irregulares, precisión, victorias y progresión.
+- Se distingue un error de forma verbal de un error únicamente de tilde para dar feedback más útil.
+- Se aceptan pronombres equivalentes de la misma persona y la respuesta sin pronombre; se mantienen las tildes como parte de la corrección.
+- Se aceptan variantes normativas dobles relevantes como `frito/freído`, `impreso/imprimido` y las variantes en `-ra/-se` del imperfecto de subjuntivo incluidas en el banco avanzado.
+- Diseño completamente renovado, responsive y orientado a una experiencia de concurso/duelo.
+- Integración nativa con LenguArcade mediante el bridge `lenguarcade-game`.
+- En modo LenguArcade, el jugador principal carga y guarda su XP/logros. El rival puede autenticarse con un código de seis cifras y guardar también su progreso.
+- El antiguo «Código para Scrabble» se generaliza a **Código para partidas 1 contra 1**, válido para Scrabble y Conjuga y apuesta.
+- Apps Script y Supabase marcan el juego como **en pruebas**, con URL embebida desde `games/conjuga_apuesta/`.
+- Supabase actualizado mediante `202609050002_conjuga_apuesta_v2.sql` y `student-dashboard` desplegado con la nueva integración.
+- Nueva comprobación automática `scripts/check-conjuga-apuesta.mjs`.
