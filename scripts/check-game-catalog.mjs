@@ -5,6 +5,7 @@ const root=process.cwd();
 const code=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Code.gs"),"utf8");
 const auth=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Auth.gs"),"utf8");
 const dashboard=fs.readFileSync(path.join(root,"supabase","functions","student-dashboard","index.ts"),"utf8");
+const student=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Alumno.html"),"utf8");
 const migration=fs.readFileSync(path.join(root,"supabase","migrations","202609050001_official_game_catalog.sql"),"utf8");
 
 const official=[
@@ -28,8 +29,14 @@ for(const [id,name,status] of official){
   if(!migration.includes(`'${status}'`)) throw new Error(`Migración Supabase: falta estado ${status}`);
 }
 
-if(code.includes("nombre:'Rimópolis'") || dashboard.includes("games/rimopolis/")){
-  throw new Error("Rimópolis no debe figurar como juego o integración activa.");
+if(code.includes("Rimópolis") || code.includes("rimopolis") ||
+   dashboard.includes("Rimópolis") || dashboard.includes("rimopolis") ||
+   student.includes("Rimópolis") || student.includes("rimopolis")) {
+  throw new Error("Rimópolis no debe existir en el código activo de LenguArcade.");
+}
+if(fs.existsSync(path.join(root,"apps-script","Rimopolis_Alumno.html")) ||
+   fs.existsSync(path.join(root,"games","rimopolis"))) {
+  throw new Error("Rimópolis no debe conservar archivos o carpetas activas en el proyecto.");
 }
 if(!dashboard.includes("function isLockedStatus") || !dashboard.includes('"en revisión"')){
   throw new Error("El dashboard debe bloquear juegos en revisión.");
