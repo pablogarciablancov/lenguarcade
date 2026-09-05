@@ -275,3 +275,12 @@ Cada cambio debe indicar:
 - Nueva migración `202609050001_official_game_catalog.sql` aplicada en Supabase.
 - `student-dashboard` actualizado y desplegado para respetar el estado «en revisión».
 - Nueva comprobación `scripts/check-game-catalog.mjs`, incluida en `npm run check`.
+
+
+## 2026-09-05 · Retirada completa de Rimópolis
+- Eliminado el override residual del alumno que convertía la tarjeta oficial `versopolis` en «Rimópolis».
+- Eliminada la ruta heredada `?page=rimopolis` y la vista `Rimopolis_Alumno.html`.
+- Eliminada la carpeta `games/rimopolis/`, incluido su prototipo; el historial de Git conserva versiones anteriores si alguna vez hiciera falta consultar algo.
+- Versópolis queda como única identidad poética oficial y permanece bloqueado en estado «en revisión» hasta rehacer su versión funcional.
+- Invalidada la caché local del dashboard y la caché pública de Apps Script para impedir que navegadores ya usados sigan mostrando la tarjeta antigua.
+- `check-game-catalog.mjs` falla si reaparece cualquier archivo, carpeta o referencia activa a Rimópolis.
