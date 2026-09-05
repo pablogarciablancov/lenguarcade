@@ -259,3 +259,19 @@ Cada cambio debe indicar:
 - `check-syntax.mjs` distingue ahora los IDs del HTML estático de los IDs creados dinámicamente por la interfaz.
 - Se conserva el comportamiento funcional existente: login Google, profe-jugador, navegación por pantallas, taller, sesiones, acceso desde casa, Rayuela, Entre Líneas y Gestión.
 - Riesgo principal: al tratarse de una consolidación amplia, la aceptación final debe comprobar tanto alumno como profesor antes de seguir añadiendo funciones.
+
+
+## 2026-09-05 · Catálogo oficial de 10 juegos
+- LenguArcade fija como catálogo oficial: Battlegrafía, Maniacgrafía, Narratoria, Versópolis, Scrabble, Conjuga y apuesta, Batalla verbal, Rayuela, Entre Líneas y Tower Defense.
+- Rimópolis deja de existir como identidad jugable dentro de la plataforma; Versópolis es el nombre canónico del proyecto poético.
+- Estados actuales:
+  - `listo`: Maniacgrafía, Narratoria y Scrabble.
+  - `en pruebas`: Battlegrafía, Rayuela y Entre Líneas.
+  - `en revisión`: Versópolis, Conjuga y apuesta, Batalla verbal y Tower Defense.
+- Los juegos `en revisión` se muestran en el catálogo pero permanecen bloqueados hasta que recuperemos o terminemos su versión funcional.
+- Tower Defense se incorpora ya como décima entrada oficial, aunque todavía sin URL de lanzamiento.
+- Supabase y el catálogo legacy de Apps Script comparten el mismo orden, nombre y estado.
+- La integración antigua que hacía que `versopolis` abriera `games/rimopolis/` se retira del dashboard.
+- Nueva migración `202609050001_official_game_catalog.sql` aplicada en Supabase.
+- `student-dashboard` actualizado y desplegado para respetar el estado «en revisión».
+- Nueva comprobación `scripts/check-game-catalog.mjs`, incluida en `npm run check`.
