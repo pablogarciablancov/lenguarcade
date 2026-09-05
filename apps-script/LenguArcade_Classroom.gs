@@ -135,6 +135,8 @@ function callSupabaseStudentDashboard_(accessToken) {
   return data;
 }
 
+const LA_PAIRABLE_GAME_IDS_ = ['scrabble','conjuga_apuesta'];
+
 function createGameOpponentCode(accessToken) {
   const dashboard = callSupabaseStudentDashboard_(accessToken);
   const student = dashboard.student || {};
@@ -153,7 +155,7 @@ function createScrabbleOpponentCode(accessToken) {
 
 function loginGameOpponentByCode(primaryAccessToken, code, gameId) {
   const cleanGameId = String(gameId || '').toLowerCase();
-  if (['scrabble','conjuga_apuesta'].indexOf(cleanGameId) === -1) {
+  if (LA_PAIRABLE_GAME_IDS_.indexOf(cleanGameId) === -1) {
     throw new Error('Este juego no admite todavía rival conectado.');
   }
   const primaryDashboard = callSupabaseStudentDashboard_(primaryAccessToken);
