@@ -15,7 +15,8 @@ for(const match of game.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)){
   try{new Function(match[1]);}catch(error){errors.push("JavaScript del juego inválido: "+error.message);}
 }
 
-const literalQuestionCount=(game.match(/\{verbo:/g)||[]).length;
+const curatedBlock=(game.match(/const QUESTION_BANK=\[([\s\S]*?)\n  \]\.map\(\(q,index\)/)||[])[1]||"";
+const literalQuestionCount=(curatedBlock.match(/\{verbo:/g)||[]).length;
 const achievementCount=(game.match(/\{id:'[^']+',icon:/g)||[]).length;
 const regularBlock=(game.match(/const REGULAR_VERBS=\{([\s\S]*?)\n  \};/)||[])[1]||"";
 const regularVerbCount=(regularBlock.match(/'[^']+'/g)||[]).length;
