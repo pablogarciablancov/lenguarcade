@@ -324,3 +324,26 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 18. Abrir Logros y comprobar que existen 24 y persisten entre partidas.
 19. Terminar una partida desde LenguArcade: debe guardar resultado/XP/logros y permanecer dentro del juego.
 20. Pulsar Salir durante una batalla: debe guardar la actividad como abandono y regresar a LenguArcade después de la confirmación.
+
+
+## Battlegrafía 2.0 · Fantasy Arcade
+1. Ejecutar `npm.cmd run check`: debe terminar con «Battlegrafía 2.0 correcta: 5 mundos, 30 sprites originales, guardado aislado e integración paralela».
+2. Abrir LenguArcade y comprobar que aparecen **Battlegrafía** y **Battlegrafía 2.0** como dos tarjetas distintas.
+3. Entrar en Battlegrafía 2.0 y verificar que se abre embebida y recibe el perfil del alumno.
+4. Comprobar que la portada muestra la identidad Fantasy Arcade y que Jugar, Perfil, Bestiario, Mercader y Logros siguen abriendo las funciones existentes.
+5. Probar los cinco modos: Aventura, Supervivencia, Práctica, Dominio y Estrategia.
+6. Crear un héroe con Mago, Guerrero, Ninja y Robot y comprobar que los cuatro sprites originales funcionan.
+7. En combate, verificar que el riel superior contiene exactamente **seis posiciones**: cinco guardianes y el jefe del mundo actual.
+8. Montañas: H-Ghoul, Vampiro de la V, Gargántua G/J, Espectro Agudo, Serpiente Comata y Lexikon.
+9. Castillo: Diacritik, Oxiton, Llanor, Puntor, Kalkor y Paper.
+10. Ciénaga: Esdrulia, Muxlor, Prosodion, Zarruk, Minotauro y Torvax.
+11. Acantilados: Caoskrin, Hiatikus, Momia, Rugiton, Zombie y Sintaxion.
+12. Volcán: Gravikus, Jarkon, Ortograf, Siseus, Cíclope y Don Pablo.
+13. Llegar a un jefe y comprobar que aparece la presentación breve del jefe sin modificar el inicio real del combate.
+14. Abrir Mundo/Mapa y cambiar de escenario: el roster debe mostrar los seis sprites correctos de la zona elegida.
+15. Jugar una batalla completa: respuesta correcta, respuesta incorrecta, ataque, daño, habilidad y uso de objeto deben conservar la mecánica clásica.
+16. Abrir Campamento, Mercader, Mochila, Diario, Historia, Bestiario y Logros y verificar que siguen operativos.
+17. Guardar progreso en la v2, cerrar y volver a entrar: debe restaurarse la partida de `battlegrafia_v2`.
+18. Abrir después la Battlegrafía clásica y confirmar que su partida anterior no ha sido modificada por la v2.
+19. Terminar una partida v2 y comprobar que LenguArcade guarda el progreso bajo `gameId='battlegrafia_v2'`, separado de `battlegrafia`.
+20. Probar en 1366×768: Combate, hub, selector de modos, mapa y campamento no deben requerir scroll de página.
