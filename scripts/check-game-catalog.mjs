@@ -51,7 +51,7 @@ if(!code.includes("function isGameLockedStatus_") || !code.includes("LA_OFFICIAL
 if(!auth.includes("LA_OFFICIAL_GAMES.forEach")){
   throw new Error("El catálogo legacy debe sincronizarse desde la lista oficial.");
 }
-if(!student.includes("20260905-catalog10-clean") || !auth.includes("public_meta_v05_catalog10")){
+if(!student.includes("20260905-conjuga-v2") || !auth.includes("public_meta_v06_conjuga_v2")){
   throw new Error("La retirada de Rimópolis debe invalidar las cachés antiguas del catálogo.");
 }
 if(!student.includes("rayuela:'rayuela-banner.webp'") ||
