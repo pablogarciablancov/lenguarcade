@@ -1,0 +1,1 @@
+update public.games\nset active=false, updated_at=now()\nwhere id='battlegrafia_v2';\n
