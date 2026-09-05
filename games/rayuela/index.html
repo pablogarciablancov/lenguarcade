@@ -168,7 +168,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 .footerbar{background:rgba(255,255,255,.95)}
 .modal{background:rgba(31,41,55,.48)}.dialog{background:#fff;color:var(--text)}
 .templateCard,.achievementCard{background:#f8fafc}
-.playModal{background:#edf2f7}.playStage{background:radial-gradient(circle at 50% 0%,rgba(105,87,232,.08),transparent 38%),#f4f7fb}.playTop,.playFoot{background:rgba(255,255,255,.94)}.storyCard{background:#fff;box-shadow:0 25px 65px rgba(51,65,85,.17)}.storyText{color:#28364a}.storyChoice{background:#f6f3ff;color:#392f72;border-color:#d9d0fa}.storyChoice:hover{background:#eee9ff}.endingDot.found{color:#267659}
+.playModal{background:#edf2f7}.playStage{background:radial-gradient(circle at 50% 0%,rgba(105,87,232,.08),transparent 38%),#f4f7fb}.playTop,.playFoot{background:rgba(255,255,255,.94)}.storyCard{background:#fff;box-shadow:0 25px 65px rgba(51,65,85,.17)}.storyText{color:#28364a}.storyChoice{background:#f6f3ff;color:#392f72;border-color:#d9d0fa}.storyChoice:hover{background:#eee9ff}.storyChoice.locked{opacity:1!important;cursor:not-allowed;background:#f3f4f6;color:#7b8798;border-color:#d7dde6;display:grid;gap:4px;transform:none!important}.storyChoice.locked span{font-weight:850}.storyChoice.locked small{font-size:9px;font-weight:650;color:#8a95a5}.lockedChoicesHint{margin-top:5px;padding:10px 12px;border-radius:12px;background:#fff8e7;border:1px solid #f0dfac;color:#795b0d;font-size:10px;line-height:1.45}.lockedScene{text-align:center}.lockedSceneIcon{font-size:58px;margin-bottom:8px}.endingDot.found{color:#267659}
 @media(max-width:1200px){.workspace{grid-template-columns:230px minmax(0,1fr) 350px}}
 @media(max-width:900px){.workspace{display:block}.sceneEditorIntro{padding-top:17px}.stepHeadingWithAction{grid-template-columns:32px 1fr}.stepHeadingWithAction .compactMainBtn{grid-column:1/-1;width:100%}}
 
@@ -296,7 +296,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
             <summary>🧩 Reglas especiales <small>Objetos y variables · opcional</small></summary>
             <div class="fieldHelp" style="margin-top:10px">Estas opciones son para aventuras más avanzadas. Puedes ignorarlas por completo al empezar.</div>
             <div class="field" style="margin-top:10px"><label>Objeto que recibe aquí</label><input id="nodeGiveItem" maxlength="40" placeholder="Ej.: Llave de cobre"></div>
-            <div class="field"><label>Objeto necesario para entrar</label><input id="nodeRequireItem" maxlength="40" placeholder="Déjalo vacío si no hace falta"></div>
+            <div class="field"><label>Objeto necesario para entrar</label><input id="nodeRequireItem" maxlength="40" placeholder="Ej.: Llave de cobre"><div class="fieldHelp">Si el jugador no lo tiene, los caminos que llevan a esta escena aparecerán con 🔒 y no podrá entrar.</div></div>
             <div class="field"><label>Variable que cambia</label><input id="nodeVariable" maxlength="30" placeholder="Ej.: valentia"></div>
             <div class="field"><label>Cambio de variable</label><input id="nodeVariableDelta" type="number" min="-99" max="99" value="0"></div>
           </details>
@@ -402,7 +402,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 (function(){
 "use strict";
 var GAME_ID="rayuela";
-var GAME_VERSION="1.1.0-beta";
+var GAME_VERSION="1.1.1-beta";
 var STORAGE_KEY="LA_RAYUELA_PROJECT_V1";
 var DISCOVERY_KEY="LA_RAYUELA_DISCOVERIES_V1";
 var TUTORIAL_KEY="LA_RAYUELA_TUTORIAL_V1";
@@ -1006,32 +1006,56 @@ function dragEnd(e){
   dragState=null;renderBoard();
 }
 
-function choiceAllowed(c,inventory,vars){
-  if(c.requireItem&&inventory.indexOf(c.requireItem)===-1)return false;
-  if(c.conditionVar){var a=Number(vars[c.conditionVar]||0),b=Number(c.conditionValue||0);if(c.conditionOp===">="&&!(a>=b))return false;if(c.conditionOp===">"&&!(a>b))return false;if(c.conditionOp==="="&&!(a===b))return false;if(c.conditionOp==="<="&&!(a<=b))return false;if(c.conditionOp==="<"&&!(a<b))return false;}
-  return true;
+function normalizeItemName(value){return String(value||"").trim().toLocaleLowerCase("es-ES");}
+function hasItem(inventory,item){
+  var wanted=normalizeItemName(item);if(!wanted)return true;
+  return (inventory||[]).some(function(owned){return normalizeItemName(owned)===wanted;});
 }
+function nodeLockReason(n,inventory){
+  if(n&&n.requireItem&&!hasItem(inventory,n.requireItem))return 'Necesitas el objeto “'+String(n.requireItem).trim()+'” para entrar.';
+  return "";
+}
+function choiceLockReason(c,inventory,vars){
+  if(c.requireItem&&!hasItem(inventory,c.requireItem))return 'Necesitas “'+String(c.requireItem).trim()+'”.';
+  if(c.conditionVar){
+    var a=Number(vars[c.conditionVar]||0),b=Number(c.conditionValue||0),ok=true;
+    if(c.conditionOp===">=")ok=a>=b;else if(c.conditionOp===">")ok=a>b;else if(c.conditionOp==="=")ok=a===b;else if(c.conditionOp==="<=")ok=a<=b;else if(c.conditionOp==="<")ok=a<b;
+    if(!ok)return 'Todavía no cumples la condición de '+String(c.conditionVar)+'.';
+  }
+  var target=getNode(c.targetId),targetReason=nodeLockReason(target,inventory);
+  return targetReason;
+}
+function choiceAllowed(c,inventory,vars){return !choiceLockReason(c,inventory,vars);}
 function startPlay(nodeId){
   var start=getNode(nodeId)||getStart();if(!start)return;
   project.playTests++;ensureBridgeSession();awardAchievement("playtest");scheduleSave("playtest");
   playState={nodeId:start.id,path:[start.id],inventory:[],vars:clone(project.variables||{}),startedAt:now(),testStart:nodeId||""};$("playModal").classList.add("open");$("playProjectTitle").textContent=project.title||"Rayuela";renderPlayNode();
 }
 function applyNodeEffects(n){
-  if(n.requireItem&&playState.inventory.indexOf(n.requireItem)===-1)return false;
-  if(n.giveItem&&playState.inventory.indexOf(n.giveItem)===-1)playState.inventory.push(n.giveItem);
+  if(n.giveItem&&!hasItem(playState.inventory,n.giveItem))playState.inventory.push(String(n.giveItem).trim());
   if(n.variable){playState.vars[n.variable]=Number(playState.vars[n.variable]||0)+Number(n.variableDelta||0);}
-  return true;
+}
+function renderBlockedNode(n,reason){
+  $("playInventory").textContent=playState.inventory.length?"🎒 "+playState.inventory.join(" · "):"🎒 Vacío";
+  $("playContent").innerHTML='<article class="storyCard lockedScene"><div class="lockedSceneIcon">🔒</div><div class="storyEyebrow">Camino bloqueado</div><h1>'+esc(n.title||"No puedes entrar todavía")+'</h1><div class="storyText">'+esc(reason||"Te falta algo para entrar en esta escena.")+'</div><div class="editorActionRow" style="justify-content:center;margin-top:22px"><button id="blockedBackBtn" class="mainBtn">← Volver a la escena anterior</button></div></article>';
+  var back=$("blockedBackBtn");if(back)back.onclick=function(){if(playState.path.length>1)playState.path.pop();playState.nodeId=playState.path[playState.path.length-1];renderPlayNode();};
 }
 function renderPlayNode(){
   if(!playState)return;var n=getNode(playState.nodeId);if(!n)return;
+  var entryLock=nodeLockReason(n,playState.inventory);if(entryLock){renderBlockedNode(n,entryLock);return;}
   applyNodeEffects(n);$("playInventory").textContent=playState.inventory.length?"🎒 "+playState.inventory.join(" · "):"🎒 Vacío";$("playPathLabel").textContent=Math.max(0,playState.path.length-1)+" decisiones";$("playEndingLabel").textContent=project.discoveredEndings.length+" finales descubiertos";
   if(isEnding(n)){renderEnding(n);return;}
-  var allowed=n.choices.filter(function(c){return c.targetId&&getNode(c.targetId)&&choiceAllowed(c,playState.inventory,playState.vars);});
+  var valid=n.choices.filter(function(c){return c.targetId&&getNode(c.targetId);});
   var img=n.image?'<img class="storyImage" src="'+esc(n.image)+'" alt="">':"";
-  var choices=allowed.map(function(c){return '<button class="storyChoice" data-choice="'+esc(c.id)+'">'+esc(c.text||"Continuar")+'</button>';}).join("");
-  if(!allowed.length)choices='<div class="muted" style="margin-top:20px">Este camino se ha quedado sin salida. Vuelve al editor y revisa sus conexiones.</div>';
+  var choices=valid.map(function(c){
+    var reason=choiceLockReason(c,playState.inventory,playState.vars);
+    if(reason)return '<button class="storyChoice locked" type="button" disabled><span>🔒 '+esc(c.text||"Continuar")+'</span><small>'+esc(reason)+'</small></button>';
+    return '<button class="storyChoice" data-choice="'+esc(c.id)+'">'+esc(c.text||"Continuar")+'</button>';
+  }).join("");
+  if(!valid.length)choices='<div class="muted" style="margin-top:20px">Este camino se ha quedado sin salida. Vuelve al editor y revisa sus conexiones.</div>';
+  else if(valid.every(function(c){return !!choiceLockReason(c,playState.inventory,playState.vars);}))choices+='<div class="lockedChoicesHint">🔐 Todos los caminos están bloqueados ahora. Busca otra ruta para conseguir lo que necesitas.</div>';
   $("playContent").innerHTML='<article class="storyCard">'+img+'<div class="storyEyebrow">'+esc(n.chapter||typeDef(n).label)+'</div><h1>'+esc(n.title||"Escena")+'</h1><div class="storyText">'+esc(n.text||"Esta escena todavía no tiene texto.")+'</div><div class="storyChoices">'+choices+'</div></article>';
-  $("playContent").querySelectorAll("[data-choice]").forEach(function(btn){btn.onclick=function(){var c=getChoice(n,btn.dataset.choice);if(!c)return;if(String(c.text||"").trim().toLowerCase()==="no pulses aquí"){awardAchievement("secret_phrase");toast("💥 Lo has pulsado","Tiza te mira con profunda decepción.","achievement");}playState.nodeId=c.targetId;playState.path.push(c.targetId);renderPlayNode();};});
+  $("playContent").querySelectorAll("[data-choice]").forEach(function(btn){btn.onclick=function(){var c=getChoice(n,btn.dataset.choice);if(!c)return;var reason=choiceLockReason(c,playState.inventory,playState.vars);if(reason){toast("🔒 Camino bloqueado",reason);return;}if(String(c.text||"").trim().toLowerCase()==="no pulses aquí"){awardAchievement("secret_phrase");toast("💥 Lo has pulsado","Tiza te mira con profunda decepción.","achievement");}playState.nodeId=c.targetId;playState.path.push(c.targetId);renderPlayNode();};});
 }
 function renderEnding(n){
   if(project.discoveredEndings.indexOf(n.id)===-1){project.discoveredEndings.push(n.id);awardAchievement("ending_found");scheduleSave("ending_discovered");}
