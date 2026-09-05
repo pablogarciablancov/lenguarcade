@@ -324,3 +324,43 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 18. Abrir Logros y comprobar que existen 24 y persisten entre partidas.
 19. Terminar una partida desde LenguArcade: debe guardar resultado/XP/logros y permanecer dentro del juego.
 20. Pulsar Salir durante una batalla: debe guardar la actividad como abandono y regresar a LenguArcade después de la confirmación.
+
+
+## Batalla verbal v2 y práctica individual
+1. Ejecutar `npm.cmd run check`: debe aparecer «Batalla verbal v2 correcta».
+2. Abrir Batalla verbal desde LenguArcade en un portátil/Chromebook habitual: la interfaz completa de juego debe caber en la ventana sin scroll vertical ni scroll interno.
+3. Probar **Práctica individual**: debe poder comenzar solo con el perfil principal y completar 25 retos sin defensa ni eliminación.
+4. Probar Batalla con 2, 3 y 4 jugadores:
+   - cada jugador secundario genera un código general desde su perfil;
+   - se introduce un código distinto para cada plaza;
+   - no debe permitirse duplicar el mismo perfil.
+5. Comprobar que cada jugador conectado muestra su nombre y puede elegir Guerrero, Mago, Arquero o Clérigo.
+6. En un ataque, escribir la respuesta:
+   - correcta → ataque válido;
+   - error solo de tilde → aviso específico y oportunidad de corregir;
+   - forma incorrecta → fallo automático.
+7. En una defensa, repetir la misma prueba: no deben existir botones manuales para declarar acierto/fallo.
+8. Verificar dificultad real por filas:
+   - 100: regulares/frecuentes;
+   - 300: formas intermedias;
+   - 500: irregularidad avanzada o tiempos/formas complejas.
+9. Comprobar la regla inversa de defensa:
+   - 100 → defensa nivel 5 / 65 %;
+   - 200 → nivel 4 / 60 %;
+   - 300 → nivel 3 / 55 %;
+   - 400 → nivel 2 / 50 %;
+   - 500 → nivel 1 / 45 %.
+10. Conseguir una runa: debe abrirse una ventana que muestre jugador, nombre y efecto antes de continuar.
+11. Resolver cinco casillas: el evento de arena debe aparecer en una ventana emergente con su efecto.
+12. Finalizar una batalla multijugador y comprobar que LenguArcade guarda el progreso de todos los perfiles conectados.
+13. Volver a jugar sin cerrar el juego: XP y logros recién conseguidos no deben retroceder.
+14. Pulsar «Salir» durante una partida: debe guardar lo realizado como abandono y regresar a LenguArcade.
+
+## Scrabble · práctica individual
+1. Abrir Scrabble desde LenguArcade.
+2. En la pantalla inicial deben aparecer «1 contra 1» y «Práctica individual».
+3. Elegir práctica: no debe pedir código ni contrincante.
+4. La práctica debe comenzar únicamente con el perfil principal y, al pasar turno, seguir correspondiendo al mismo jugador.
+5. Si la victoria estaba en modo clásico al entrar en práctica, debe proponerse automáticamente el objetivo de 100 puntos.
+6. Completar la práctica: debe guardarse como `practice`, conservar logros/progreso y **no sumar una victoria**.
+7. Volver a «1 contra 1»: debe seguir exigiendo el código general del rival y conservar la mecánica competitiva existente.
