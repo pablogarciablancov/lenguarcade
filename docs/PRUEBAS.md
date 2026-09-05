@@ -242,3 +242,12 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 5. Battlegrafía, Maniacgrafía, Narratoria, Scrabble, Rayuela y Entre Líneas deben conservar su URL o integración de lanzamiento.
 6. Abrir el panel docente y comprobar que el taller reconoce los diez IDs oficiales.
 7. Ejecutar `npm.cmd run check`; debe finalizar con «Catálogo oficial LenguArcade: 10 juegos, identidades y estados correctos.».
+
+
+## Retirada completa de Rimópolis
+1. Ejecutar `npm.cmd run check`: la prueba de catálogo debe pasar y confirmar que no existen archivos o referencias activas de Rimópolis.
+2. Ejecutar `npm.cmd run apps:status`: no debe aparecer `Rimopolis_Alumno.html`.
+3. Publicar Apps Script y abrir LenguArcade como alumno.
+4. La cuarta tarjeta debe llamarse **Versópolis**, con estado **En revisión** y sin botón funcional.
+5. No debe existir ninguna tarjeta, enlace ni ruta visible denominada Rimópolis.
+6. La primera carga tras esta versión debe descartar automáticamente la caché anterior del catálogo.
