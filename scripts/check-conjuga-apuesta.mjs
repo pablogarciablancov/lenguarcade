@@ -21,7 +21,7 @@ if(questionCount<150)errors.push("El banco debe conservar y ampliar el contenido
 if(achievementCount<24)errors.push("Deben existir al menos 24 logros.");
 
 for(const marker of [
-  "Conjuga.\nArriesga.",
+  "Conjuga.<br><span>Arriesga.</span>",
   "const TIERS=",
   "basic:{label:'Básico'",
   "medium:{label:'Intermedio'",
