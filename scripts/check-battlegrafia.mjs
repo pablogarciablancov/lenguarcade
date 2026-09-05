@@ -95,10 +95,11 @@ const staticIndex = fs.readFileSync(path.resolve("games", "battlegrafia", "index
 if (staticIndex.includes("<?!=") || staticIndex.includes("include('")) {
   errors.push("La version GitHub/RawGithack de BattleGrafia debe estar aplanada sin includes de Apps Script.");
 }
-if (!centralServer.includes("battlegrafia") ||
+if (!centralServer.includes("gameId:'battlegrafia'") ||
     !centralServer.includes(githubUrl) ||
-    !centralServer.includes("estado: 'beta'")) {
-  errors.push("LenguArcade_Code.gs debe activar BattleGrafia desde GitHub/RawGithack como juego embebido beta.");
+    !centralServer.includes("estado:'en pruebas'") ||
+    !centralServer.includes("integration:'embedded'")) {
+  errors.push("LenguArcade_Code.gs debe mantener BattleGrafia en el catálogo oficial como juego embebido y estado «en pruebas».");
 }
 
 if (!centralStudent.includes("gameRecord?.gameId==='battlegrafia'") ||
@@ -139,8 +140,9 @@ if (!menuHtml.includes("bg-game-notice") ||
 
 if (!supabaseDashboard.includes("battlegrafia") ||
     !supabaseDashboard.includes(githubUrl) ||
-    !supabaseDashboard.includes("locked:!integration")) {
-  errors.push("student-dashboard debe exponer BattleGrafia desde GitHub/RawGithack y desbloquearlo al tener integracion.");
+    !supabaseDashboard.includes("locked:isLockedStatus(estado)") ||
+    !supabaseDashboard.includes('normalized === "en revisión"')) {
+  errors.push("student-dashboard debe exponer BattleGrafia desde GitHub/RawGithack y aplicar la regla oficial de bloqueo por estado.");
 }
 
 if (errors.length) {
