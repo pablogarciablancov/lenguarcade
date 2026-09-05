@@ -60,8 +60,8 @@ const migrations = fs.readdirSync(path.resolve("supabase","migrations")).filter(
 if (!alumno.includes("gameRecord?.gameId==='rayuela'") || !alumno.includes("projectXp-Number(old.xp||0)")) {
   throw new Error("Rayuela: falta la integración de XP idempotente en el host del alumno.");
 }
-if (!codeGs.includes("rayuela: {") || !codeGs.includes("['rayuela','Rayuela'")) {
-  throw new Error("Rayuela: falta el catálogo de Apps Script.");
+if (!codeGs.includes("rayuela: {") || !codeGs.includes("gameId:'rayuela'")) {
+  throw new Error("Rayuela: falta el catálogo consolidado de Apps Script.");
 }
 if (!profesor.includes("teacher-rayuela-evaluation") || !profesor.includes("Comentarios por escena") || !profesor.includes("__LA_RAYUELA_TEACHER_PATCH__")) {
   throw new Error("Rayuela: falta la rúbrica específica del profesor.");
