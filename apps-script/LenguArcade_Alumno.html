@@ -1459,7 +1459,7 @@ function prepareEmbeddedGame(game){
   url.searchParams.set('lenguarcade','1');
   url.searchParams.set('channel',channel);
   const iframe=$('gameRunnerFrame');
-  activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,pendingResult:null,saving:false,checkpointing:false,opponent:null,opponentAuthBusy:false,initialized:false,visible:false,loading:false,retries:0,primarySessionCounted:false,opponentSessionCounted:false};
+  activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,explicitExitRequested:false,lastResultReason:'',pendingResult:null,saving:false,checkpointing:false,opponent:null,opponentAuthBusy:false,initialized:false,visible:false,loading:false,retries:0,primarySessionCounted:false,opponentSessionCounted:false};
   $('gameRunnerTitle').textContent=game.nombre;
   $('gameRunnerStatus').textContent='Conectando con tu perfil...';
   $('gameRunnerBootText').textContent='Cargando datos del perfil...';
@@ -1522,16 +1522,19 @@ function destroyGameRunner(){
 function requestCloseGameRunner(){
   if(!activeGameRunner)return destroyGameRunner();
   if(activeGameRunner.saving||activeGameRunner.checkpointing){
+    activeGameRunner.explicitExitRequested=true;
     activeGameRunner.closeRequested=true;
     $('gameRunnerStatus').textContent='Terminando de guardar antes de salir...';
     return;
   }
   if(activeGameRunner.sessionActive){
+    activeGameRunner.explicitExitRequested=true;
     activeGameRunner.closeRequested=true;
     $('gameRunnerStatus').textContent='Cerrando la partida y guardando...';
     sendToActiveGame('REQUEST_EXIT');
     return;
   }
+  activeGameRunner.explicitExitRequested=true;
   destroyGameRunner(true);
 }
 
@@ -1758,7 +1761,7 @@ async function persistGameResult(result){
     runner.pendingResult=null;
     $('gameRunnerStatus').textContent='Progreso guardado.';
     sendToActiveGame('SAVE_CONFIRMED',{resultId:result.resultId});
-    if(runner.closeRequested)setTimeout(()=>destroyGameRunner(true),250);
+    if(runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),250);
   }catch(error){
     processedGameResults.delete(result.resultId);
     $('gameRunnerStatus').textContent='No se pudo guardar. Puedes reintentarlo.';
@@ -1817,7 +1820,7 @@ async function persistGameCheckpoint(checkpoint){
     }
     $('gameRunnerStatus').textContent='Partida guardada.';
     sendToActiveGame('CHECKPOINT_CONFIRMED',{checkpointId:checkpoint.checkpointId});
-    if(runner.closeRequested)setTimeout(()=>destroyGameRunner(true),250);
+    if(runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),250);
   }catch(error){
     $('gameRunnerStatus').textContent='No se pudo guardar la partida.';
     sendToActiveGame('CHECKPOINT_FAILED',{checkpointId:checkpoint.checkpointId,message:error.message||String(error)});
@@ -1860,9 +1863,20 @@ window.addEventListener('message',event=>{
     if(!result.resultId||processedGameResults.has(result.resultId))return;
     processedGameResults.add(result.resultId);
     runner.sessionActive=false;
+    runner.lastResultReason=String(result.reason||'');
+    if(runner.game.gameId==='conjuga_apuesta'&&runner.lastResultReason!=='abandoned'&&!runner.explicitExitRequested){
+      runner.closeRequested=false;
+    }
     persistGameResult(result);
   }
-  if(message.type==='CLOSE_READY')destroyGameRunner(true);
+  if(message.type==='CLOSE_READY'){
+    const allowClose=runner.explicitExitRequested||runner.lastResultReason==='abandoned';
+    if(allowClose)destroyGameRunner(true);
+    else{
+      console.warn('LenguArcade ignoró CLOSE_READY sin salida explícita.',runner.game.gameId,runner.lastResultReason);
+      $('gameRunnerStatus').textContent='Partida guardada. Puedes seguir jugando.';
+    }
+  }
 });
 
 const openGameWithoutIntegration=openGame;
