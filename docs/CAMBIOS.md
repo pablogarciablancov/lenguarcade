@@ -411,7 +411,7 @@ Cada cambio debe indicar:
   - 300: tiempos menos inmediatos y negativos;
   - 400: irregularidades frecuentes;
   - 500: formas compuestas complejas, irregularidad avanzada y reconocimiento de paradigmas raros.
-- Banco actual verificado de aproximadamente **5.344 retos**, con un mínimo de 20 alternativas incluso en los niveles más pequeños.
+- Banco actual verificado de aproximadamente **5.347 retos**, con un mínimo de 20 alternativas incluso en los niveles más pequeños.
 - La defensa adopta una **dificultad inversa al ataque** para equilibrar riesgo y recompensa:
   - ataque 100 → defensa nivel 5 → bloquea 65 % si acierta;
   - ataque 200 → defensa nivel 4 → bloquea 60 %;
