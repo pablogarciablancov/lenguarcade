@@ -298,8 +298,8 @@ function buildPools(){
       add("compound",3,verb,"Conjuga «"+verb+"» en "+person.label+" del futuro perfecto.",withPronoun(person,HABER.future[person.i]+" "+p.participle),"futuro perfecto");
       add("compound",4,verb,"Conjuga «"+verb+"» en "+person.label+" del condicional compuesto.",withPronoun(person,HABER.conditional[person.i]+" "+p.participle),"condicional compuesto");
 
-      add("subjunctive",1,verb,"Conjuga «"+verb+"» en "+person.label+" del presente de subjuntivo.",withPronoun(person,regularSimple(verb,"subj",person.i)),"subjuntivo presente");
-      add("subjunctive",2,verb,"Conjuga «"+verb+"» en "+person.label+" del presente de subjuntivo.",withPronoun(person,regularSimple(verb,"subj",person.i)),"subjuntivo presente");
+      if(p.ending==="ar"&&(person.i===0||person.i===2))add("subjunctive",1,verb,"Conjuga «"+verb+"» en "+person.label+" del presente de subjuntivo.",withPronoun(person,regularSimple(verb,"subj",person.i)),"subjuntivo presente básico");
+      add("subjunctive",2,verb,"Conjuga «"+verb+"» en "+person.label+" del presente de subjuntivo.",withPronoun(person,regularSimple(verb,"subj",person.i)),"subjuntivo presente completo");
       add("subjunctive",3,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito imperfecto de subjuntivo.",withPronoun(person,regularSimple(verb,"subjImp",person.i)),"subjuntivo imperfecto");
 
       add("compound",5,verb,"Conjuga «"+verb+"» en "+person.label+" del pluscuamperfecto de subjuntivo.",withPronoun(person,HABER.subjImperfect[person.i]+" "+p.participle),"pluscuamperfecto de subjuntivo");
