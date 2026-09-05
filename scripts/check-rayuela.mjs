@@ -32,7 +32,11 @@ const checks = [
   ['editor sencillo paso 1', 'Escribe la escena'],
   ['editor sencillo paso 2', 'Da opciones al lector'],
   ['tema claro', 'Rayuela 1.1 · Light Classroom UX'],
-  ['final rápido', 'toggleEndingBtn']
+  ['final rápido', 'toggleEndingBtn'],
+  ['bloqueo por objeto en escena', 'function nodeLockReason('],
+  ['bloqueo visible de decisiones', 'class="storyChoice locked"'],
+  ['objetos tolerantes a mayúsculas', 'function normalizeItemName('],
+  ['protección de entrada directa', 'renderBlockedNode(']
 ];
 for (const [label, needle] of checks) {
   if (!html.includes(needle)) throw new Error('Rayuela: falta '+label+' ('+needle+')');
