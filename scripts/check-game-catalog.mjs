@@ -50,8 +50,8 @@ if(!auth.includes("LA_OFFICIAL_GAMES.forEach")){
 if(!student.includes("20260905-catalog10-clean") || !auth.includes("public_meta_v05_catalog10")){
   throw new Error("La retirada de Rimópolis debe invalidar las cachés antiguas del catálogo.");
 }
-if(!student.includes("rayuela:'rayuela-banner.jpg'") ||
-   !student.includes("entre_lineas:'entre-lineas-banner.jpg'")){
+if(!student.includes("rayuela:'rayuela-banner.webp'") ||
+   !student.includes("entre_lineas:'entre-lineas-banner.webp'")){
   throw new Error("Rayuela y Entre Líneas deben usar portadas específicas, no el banner genérico.");
 }
 
