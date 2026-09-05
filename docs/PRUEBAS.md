@@ -278,3 +278,18 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 14. Desde el perfil de otro alumno/profe-jugador, generar un «Código para partidas 1 contra 1» e introducirlo cuando Conjuga y apuesta solicite rival.
 15. Terminar una partida con los dos perfiles conectados: el host debe guardar resultado, XP, precisión, racha y logros para ambos participantes.
 16. Salir durante una partida: debe conservarse lo respondido hasta ese momento sin adjudicar una victoria ficticia.
+
+
+## Conjuga y apuesta v3
+1. Ejecutar `npm.cmd run check`: debe terminar con «Conjuga y apuesta v3 correcto».
+2. Comprobar que el test informa de **4.288 retos posibles**.
+3. Jugar una partida de 10 rondas seleccionando repetidamente la misma dificultad: no debe repetirse la misma respuesta dentro de la partida.
+4. Comprobar que el mismo verbo no reaparece inmediatamente; el selector intenta mantener seis verbos recientes distintos.
+5. Probar los cuatro niveles con banco completo y con banco esencial. Experto debe seguir teniendo preguntas disponibles en ambos modos.
+6. Completar una partida desde LenguArcade. Tras guardar, el iframe no debe cerrarse ni volver al catálogo de LenguArcade.
+7. Después del guardado normal debe volver a la pantalla inicial de Conjuga y apuesta.
+8. Iniciar otra partida sin cerrar el juego y comprobar que conserva el XP y los logros obtenidos en la partida anterior.
+9. Pulsar «Salir» durante una partida y confirmar el abandono: tras guardar, en este caso sí debe cerrarse el juego y regresar a LenguArcade.
+10. Abrir una partida 1 contra 1. La ventana emergente debe hablar de un «código general para jugar con otra persona» y nunca de un «código de Scrabble».
+11. En Perfil, el generador debe llamarse «Código para jugar con otra persona» y explicar que no pertenece a un juego concreto.
+12. Generar un código y utilizarlo en Scrabble o Conjuga y apuesta; debe funcionar en ambos y caducar tras 10 minutos o un único uso.
