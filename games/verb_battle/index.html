@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Battlegrafía Jeopardy RPG</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #17356f 0%, #0b1b3b 55%, #071125 100%);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2.2rem;
+      letter-spacing: 0.5px;
+    }
+    .subtitle {
+      color: #dce7ff;
+      margin-bottom: 18px;
+    }
+    .setup, .panel, .battle-log {
+      max-width: 1100px;
+      margin: 0 auto 18px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.22);
+      backdrop-filter: blur(4px);
+    }
+    .hidden { display: none !important; }
+    .setup select, .setup button, .target-select, .mode-toggle button, .buttons button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 1rem;
+    }
+    .setup button, .mode-toggle button.active {
+      background: #f39c12;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .setup select, .target-select {
+      background: white;
+      color: #111;
+      margin: 0 8px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .badge {
+      background: #102c61;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: bold;
+    }
+    .teams {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .team-card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 14px;
+      border: 2px solid transparent;
+      transition: transform 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    }
+    .team-card.active {
+      border-color: #ffd166;
+      transform: translateY(-2px);
+    }
+    .team-card.dead {
+      opacity: 0.45;
+      filter: grayscale(0.7);
+    }
+    .team-name {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .team-role {
+      color: #cfe0ff;
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+    }
+    .hp-bar-wrap {
+      width: 100%;
+      height: 18px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .hp-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #32cd32, #9cff57);
+      transition: width 0.35s ease;
+    }
+    .hp-text { font-weight: bold; }
+    .board {
+      max-width: 1100px;
+      margin: 0 auto 18px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .category, .cell {
+      border-radius: 10px;
+      padding: 16px 10px;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .category {
+      background: #163d7a;
+      font-weight: bold;
+      font-size: 1.05rem;
+      line-height: 1.25;
+    }
+    .cell {
+      background: #1f6fe5;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease;
+      user-select: none;
+    }
+    .cell:hover {
+      transform: scale(1.03);
+      background: #2a7fff;
+    }
+    .cell.used {
+      background: #8b1e1e;
+      cursor: not-allowed;
+      transform: none;
+      opacity: 0.9;
+    }
+    .battle-log {
+      text-align: left;
+      min-height: 80px;
+      color: #eef5ff;
+      line-height: 1.5;
+    }
+    .battle-log strong { color: #ffd166; }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+    .modal {
+      background: white;
+      color: #111;
+      width: min(860px, 95vw);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .modal h2 {
+      margin-top: 0;
+      color: #163d7a;
+    }
+    .pregunta {
+      font-size: 1.35rem;
+      line-height: 1.45;
+      margin: 18px 0;
+      min-height: 90px;
+    }
+    .respuesta {
+      display: none;
+      margin: 16px 0;
+      padding: 14px;
+      background: #eef5ff;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 18px;
+    }
+    .btn-answer { background: #f39c12; color: white; }
+    .btn-correct { background: #28a745; color: white; }
+    .btn-wrong { background: #dc3545; color: white; }
+    .btn-close { background: #6c757d; color: white; }
+    .btn-defend { background: #6f42c1; color: white; }
+    .legend {
+      max-width: 1100px;
+      margin: 0 auto 14px;
+      color: #dbe7ff;
+      font-size: 0.96rem;
+      line-height: 1.45;
+    }
+    @media (max-width: 900px) {
+      .teams, .board { grid-template-columns: repeat(2, 1fr); }
+      .category, .cell { min-height: 80px; }
+      .cell { font-size: 1.5rem; }
+    }
+    @media (max-width: 560px) {
+      .teams, .board { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Battlegrafía: Jeopardy RPG</h1>
+  <div class="subtitle">Conjuga bien, ataca con cabeza y sobrevive. Aquí los verbos pegan.</div>
+
+  <div class="setup" id="setupScreen">
+    <p><strong>Configura la batalla.</strong></p>
+    <label for="playerCount">Número de equipos:</label>
+    <select id="playerCount">
+      <option value="2">2 equipos</option>
+      <option value="3">3 equipos</option>
+      <option value="4" selected>4 equipos</option>
+    </select>
+    <button onclick="iniciarJuego()">Empezar batalla</button>
+  </div>
+
+  <div class="game hidden" id="gameScreen">
+    <div class="panel">
+      <div class="topbar">
+        <div class="badge">Turno de: <span id="currentTeam">Equipo 1</span></div>
+        <div class="badge">Objetivo: <span id="targetTeamLabel">Equipo 2</span></div>
+        <label>
+          <select id="targetSelect" class="target-select" onchange="cambiarObjetivo()"></select>
+        </label>
+      </div>
+      <div class="teams" id="teamsContainer"></div>
+    </div>
+
+    <div class="legend">
+      <strong>Dificultad real:</strong> Fácil = presente y futuro simple. Media = tiempos compuestos. Difícil = subjuntivo. Muy difícil = imperativos irregulares. Experto = formas no personales e irregularidades serias. Si aciertas, atacas al objetivo. Si fallas, sufres retroceso y pierdes vida. Si el objetivo se defiende y acierta, reduce daño.
+    </div>
+
+    <div class="board" id="board"></div>
+    <div class="battle-log" id="battleLog"></div>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <h2 id="modalCategory">Nivel</h2>
+      <div class="pregunta" id="modalQuestion"></div>
+      <div class="respuesta" id="modalAnswer"></div>
+      <div class="buttons">
+        <button class="btn-answer" onclick="mostrarRespuesta()">Mostrar respuesta correcta</button>
+        <button class="btn-correct" onclick="resolverPregunta(true)">Ha acertado</button>
+        <button class="btn-wrong" onclick="resolverPregunta(false)">Ha fallado</button>
+        <button class="btn-close" onclick="cerrarModalSinPuntuar()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="defenseBackdrop">
+    <div class="modal">
+      <h2 id="defenseTitle">Defensa</h2>
+      <div class="pregunta" id="defenseQuestion"></div>
+      <div class="respuesta" id="defenseAnswer"></div>
+      <div class="buttons">
+        <button class="btn-answer" onclick="mostrarRespuestaDefensa()">Mostrar respuesta correcta</button>
+        <button class="btn-defend" onclick="resolverDefensa(true)">Se ha defendido</button>
+        <button class="btn-wrong" onclick="resolverDefensa(false)">No se ha defendido</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const roles = ['Guerrero', 'Mago', 'Arquero', 'Clérigo'];
+    const maxHp = 100;
+    let playerCount = 4;
+    let teams = [];
+    let currentTeam = 0;
+    let currentTarget = 1;
+    let currentCard = null;
+    let pendingAttack = null;
+
+    const data = [
+      {
+        category: 'Fácil',
+        cards: [
+          { value: 10, damage: 10, selfDamage: 5, question: 'Conjuga "cantar" en 1ª persona singular del presente de indicativo.', answer: 'yo canto' },
+          { value: 20, damage: 15, selfDamage: 8, question: 'Conjuga "comer" en 2ª persona singular del presente de indicativo.', answer: 'tú comes' },
+          { value: 30, damage: 18, selfDamage: 9, question: 'Conjuga "vivir" en 3ª persona plural del presente de indicativo.', answer: 'ellos viven' },
+          { value: 40, damage: 20, selfDamage: 10, question: 'Conjuga "amar" en 1ª persona plural del futuro simple.', answer: 'nosotros amaremos' },
+          { value: 50, damage: 22, selfDamage: 11, question: 'Conjuga "beber" en 2ª persona plural del futuro simple.', answer: 'vosotros beberéis' }
+        ]
+      },
+      {
+        category: 'Media',
+        cards: [
+          { value: 10, damage: 18, selfDamage: 9, question: 'Conjuga "hacer" en 1ª persona singular del pretérito perfecto compuesto.', answer: 'yo he hecho' },
+          { value: 20, damage: 22, selfDamage: 11, question: 'Conjuga "comer" en 3ª persona plural del pretérito perfecto compuesto.', answer: 'ellos han comido' },
+          { value: 30, damage: 25, selfDamage: 12, question: 'Conjuga "vivir" en 1ª persona plural del pluscuamperfecto.', answer: 'nosotros habíamos vivido' },
+          { value: 40, damage: 28, selfDamage: 14, question: 'Conjuga "decir" en 2ª persona singular del pretérito perfecto compuesto.', answer: 'tú has dicho' },
+          { value: 50, damage: 30, selfDamage: 15, question: 'Conjuga "escribir" en 3ª persona singular del pluscuamperfecto.', answer: 'él había escrito' }
+        ]
+      },
+      {
+        category: 'Difícil',
+        cards: [
+          { value: 10, damage: 24, selfDamage: 12, question: 'Conjuga "ser" en 1ª persona singular del presente de subjuntivo.', answer: 'yo sea' },
+          { value: 20, damage: 28, selfDamage: 14, question: 'Conjuga "estar" en 2ª persona singular del presente de subjuntivo.', answer: 'tú estés' },
+          { value: 30, damage: 32, selfDamage: 16, question: 'Conjuga "ir" en 3ª persona plural del presente de subjuntivo.', answer: 'ellos vayan' },
+          { value: 40, damage: 36, selfDamage: 18, question: 'Conjuga "tener" en 1ª persona plural del presente de subjuntivo.', answer: 'nosotros tengamos' },
+          { value: 50, damage: 40, selfDamage: 20, question: 'Conjuga "hacer" en 2ª persona plural del presente de subjuntivo.', answer: 'vosotros hagáis' }
+        ]
+      },
+      {
+        category: 'Muy difícil',
+        cards: [
+          { value: 10, damage: 30, selfDamage: 15, question: 'Imperativo afirmativo de "venir" en 2ª persona singular.', answer: 'ven' },
+          { value: 20, damage: 34, selfDamage: 17, question: 'Imperativo negativo de "decir" en 2ª persona singular.', answer: 'no digas' },
+          { value: 30, damage: 38, selfDamage: 19, question: 'Imperativo afirmativo de "poner" en 2ª persona plural.', answer: 'poned' },
+          { value: 40, damage: 42, selfDamage: 21, question: 'Imperativo negativo de "salir" en 2ª persona singular.', answer: 'no salgas' },
+          { value: 50, damage: 46, selfDamage: 23, question: 'Imperativo afirmativo de "hacer" en 2ª persona singular.', answer: 'haz' }
+        ]
+      },
+      {
+        category: 'Experto',
+        cards: [
+          { value: 10, damage: 36, selfDamage: 18, question: 'Participio de "romper".', answer: 'roto' },
+          { value: 20, damage: 40, selfDamage: 20, question: 'Gerundio de "ir".', answer: 'yendo' },
+          { value: 30, damage: 44, selfDamage: 22, question: 'Participio de "ver".', answer: 'visto' },
+          { value: 40, damage: 48, selfDamage: 24, question: 'Infinitivo de "anduvo".', answer: 'andar' },
+          { value: 50, damage: 52, selfDamage: 26, question: 'Participio de "escribir".', answer: 'escrito' }
+        ]
+      }
+    ];
+
+    const defenseQuestions = [
+      { question: 'Conjuga "amar" en 1ª persona singular del presente.', answer: 'yo amo' },
+      { question: 'Conjuga "comer" en 3ª persona plural del presente.', answer: 'ellos comen' },
+      { question: 'Conjuga "vivir" en 2ª persona singular del presente.', answer: 'tú vives' },
+      { question: 'Conjuga "tener" en 1ª persona singular del futuro simple.', answer: 'yo tendré' },
+      { question: 'Conjuga "ser" en 1ª persona singular del presente de subjuntivo.', answer: 'yo sea' }
+    ];
+
+    const board = document.getElementById('board');
+    const teamsContainer = document.getElementById('teamsContainer');
+    const battleLog = document.getElementById('battleLog');
+    const targetSelect = document.getElementById('targetSelect');
+
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalCategory = document.getElementById('modalCategory');
+    const modalQuestion = document.getElementById('modalQuestion');
+    const modalAnswer = document.getElementById('modalAnswer');
+
+    const defenseBackdrop = document.getElementById('defenseBackdrop');
+    const defenseTitle = document.getElementById('defenseTitle');
+    const defenseQuestion = document.getElementById('defenseQuestion');
+    const defenseAnswer = document.getElementById('defenseAnswer');
+
+    function iniciarJuego() {
+      playerCount = Number(document.getElementById('playerCount').value);
+      teams = Array.from({ length: playerCount }, (_, i) => ({
+        id: i,
+        name: `Equipo ${i + 1}`,
+        role: roles[i],
+        hp: maxHp,
+        alive: true
+      }));
+      currentTeam = 0;
+      currentTarget = playerCount > 1 ? 1 : 0;
+      currentCard = null;
+      pendingAttack = null;
+      resetBoard();
+      document.getElementById('setupScreen').classList.add('hidden');
+      document.getElementById('gameScreen').classList.remove('hidden');
+      updateTurnLabel();
+      renderTeams();
+      renderTargetOptions();
+      renderBoard();
+      setLog('⚔️ La batalla comienza. Elegid una casilla y que los verbos os acompañen.');
+    }
+
+    function resetBoard() {
+      data.forEach(column => column.cards.forEach(card => { card.used = false; }));
+    }
+
+    function renderTeams() {
+      teamsContainer.innerHTML = '';
+      teams.forEach((team, index) => {
+        const percent = Math.max(0, (team.hp / maxHp) * 100);
+        const card = document.createElement('div');
+        card.className = 'team-card' + (index === currentTeam ? ' active' : '') + (!team.alive ? ' dead' : '');
+        card.innerHTML = `
+          <div class="team-name">${team.name}</div>
+          <div class="team-role">${team.role}</div>
+          <div class="hp-bar-wrap"><div class="hp-bar" style="width:${percent}%"></div></div>
+          <div class="hp-text">${team.alive ? `${team.hp} PV` : 'Eliminado'}</div>
+        `;
+        teamsContainer.appendChild(card);
+      });
+    }
+
+    function renderTargetOptions() {
+      targetSelect.innerHTML = '';
+      teams.forEach((team, index) => {
+        if (index !== currentTeam && team.alive) {
+          const option = document.createElement('option');
+          option.value = index;
+          option.textContent = team.name;
+          targetSelect.appendChild(option);
+        }
+      });
+      if (targetSelect.options.length === 0) {
+        const option = document.createElement('option');
+        option.textContent = 'Sin objetivo';
+        option.value = currentTeam;
+        targetSelect.appendChild(option);
+      }
+      currentTarget = Number(targetSelect.value);
+      updateTargetLabel();
+    }
+
+    function cambiarObjetivo() {
+      currentTarget = Number(targetSelect.value);
+      updateTargetLabel();
+    }
+
+    function updateTurnLabel() {
+      document.getElementById('currentTeam').textContent = teams[currentTeam]?.name || '—';
+      updateTargetLabel();
+    }
+
+    function updateTargetLabel() {
+      const team = teams[currentTarget];
+      document.getElementById('targetTeamLabel').textContent = team ? team.name : '—';
+    }
+
+    function renderBoard() {
+      board.innerHTML = '';
+      data.forEach(col => {
+        const header = document.createElement('div');
+        header.className = 'category';
+        header.textContent = col.category;
+        board.appendChild(header);
+      });
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < data.length; col++) {
+          const card = data[col].cards[row];
+          const cell = document.createElement('div');
+          cell.className = 'cell' + (card.used ? ' used' : '');
+          cell.textContent = card.used ? 'X' : card.value;
+          cell.onclick = () => abrirPregunta(col, row);
+          board.appendChild(cell);
+        }
+      }
+    }
+
+    function abrirPregunta(col, row) {
+      const card = data[col].cards[row];
+      if (card.used || !teams[currentTeam].alive) return;
+      if (aliveTeamsCount() <= 1) return;
+      currentCard = { col, row, card };
+      modalCategory.textContent = `${data[col].category} · ${card.value} puntos · ${card.damage} daño`;
+      modalQuestion.textContent = card.question;
+      modalAnswer.textContent = `Respuesta correcta: ${card.answer}`;
+      modalAnswer.style.display = 'none';
+      modalBackdrop.style.display = 'flex';
+    }
+
+    function mostrarRespuesta() {
+      modalAnswer.style.display = 'block';
+    }
+
+    function resolverPregunta(acierta) {
+      if (!currentCard) return;
+      const attacker = teams[currentTeam];
+      const defender = teams[currentTarget];
+      const card = currentCard.card;
+      data[currentCard.col].cards[currentCard.row].used = true;
+      cerrarModal();
+
+      if (!acierta) {
+        attacker.hp = Math.max(0, attacker.hp - card.selfDamage);
+        setLog(`💥 <strong>${attacker.name}</strong> falla y sufre un retroceso de <strong>${card.selfDamage}</strong> PV.`);
+        checkDeath(attacker);
+        finalizeTurn();
+        return;
+      }
+
+      if (!defender || !defender.alive) {
+        setLog(`⚠️ El objetivo ya no está disponible. Se anula el ataque.`);
+        finalizeTurn();
+        return;
+      }
+
+      pendingAttack = {
+        attackerIndex: currentTeam,
+        defenderIndex: currentTarget,
+        damage: card.damage,
+        question: randomDefenseQuestion()
+      };
+
+      openDefenseModal();
+    }
+
+    function randomDefenseQuestion() {
+      return defenseQuestions[Math.floor(Math.random() * defenseQuestions.length)];
+    }
+
+    function openDefenseModal() {
+      const defender = teams[pendingAttack.defenderIndex];
+      defenseTitle.textContent = `Defensa de ${defender.name}`;
+      defenseQuestion.textContent = `¡${defender.name} puede defenderse! ${pendingAttack.question.question}`;
+      defenseAnswer.textContent = `Respuesta correcta: ${pendingAttack.question.answer}`;
+      defenseAnswer.style.display = 'none';
+      defenseBackdrop.style.display = 'flex';
+      setLog(`🛡️ <strong>${defender.name}</strong> intenta defenderse del ataque.`);
+    }
+
+    function mostrarRespuestaDefensa() {
+      defenseAnswer.style.display = 'block';
+    }
+
+    function resolverDefensa(acierta) {
+      if (!pendingAttack) return;
+      const attacker = teams[pendingAttack.attackerIndex];
+      const defender = teams[pendingAttack.defenderIndex];
+      let damage = pendingAttack.damage;
+
+      if (acierta) {
+        damage = Math.ceil(damage / 2);
+        setLog(`🛡️ <strong>${defender.name}</strong> se defiende bien y reduce el daño a <strong>${damage}</strong> PV.`);
+      } else {
+        setLog(`⚔️ <strong>${attacker.name}</strong> acierta y golpea a <strong>${defender.name}</strong> por <strong>${damage}</strong> PV.`);
+      }
+
+      defender.hp = Math.max(0, defender.hp - damage);
+      checkDeath(defender);
+      closeDefenseModal();
+      pendingAttack = null;
+      finalizeTurn();
+    }
+
+    function closeDefenseModal() {
+      defenseBackdrop.style.display = 'none';
+      defenseAnswer.style.display = 'none';
+    }
+
+    function cerrarModalSinPuntuar() {
+      modalBackdrop.style.display = 'none';
+      modalAnswer.style.display = 'none';
+      currentCard = null;
+    }
+
+    function cerrarModal() {
+      modalBackdrop.style.display = 'none';
+      modalAnswer.style.display = 'none';
+      currentCard = null;
+    }
+
+    function checkDeath(team) {
+      if (team.hp <= 0 && team.alive) {
+        team.alive = false;
+        team.hp = 0;
+        setLog(`☠️ <strong>${team.name}</strong> ha sido eliminado.`);
+      }
+    }
+
+    function aliveTeamsCount() {
+      return teams.filter(t => t.alive).length;
+    }
+
+    function nextAliveTeam(fromIndex) {
+      let idx = fromIndex;
+      for (let i = 0; i < teams.length; i++) {
+        idx = (idx + 1) % teams.length;
+        if (teams[idx].alive) return idx;
+      }
+      return fromIndex;
+    }
+
+    function finalizeTurn() {
+      renderTeams();
+      renderBoard();
+      if (aliveTeamsCount() <= 1) {
+        const winner = teams.find(t => t.alive);
+        setLog(`🏆 <strong>${winner.name}</strong> gana la batalla. Fin de partida.`);
+        updateTurnLabel();
+        renderTargetOptions();
+        return;
+      }
+      currentTeam = nextAliveTeam(currentTeam);
+      renderTargetOptions();
+      updateTurnLabel();
+      renderTeams();
+    }
+
+    function setLog(text) {
+      battleLog.innerHTML = text;
+    }
+
+    console.assert(data.length === 5, 'Debe haber 5 columnas.');
+    console.assert(data.every(col => col.cards.length === 5), 'Cada columna debe tener 5 preguntas.');
+    console.assert(defenseQuestions.length >= 5, 'Debe haber preguntas de defensa.');
+  </script>
+</body>
+</html>
