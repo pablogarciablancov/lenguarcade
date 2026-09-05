@@ -319,3 +319,22 @@ Cada cambio debe indicar:
 - Apps Script y Supabase marcan el juego como **en pruebas**, con URL embebida desde `games/conjuga_apuesta/`.
 - Supabase actualizado mediante `202609050002_conjuga_apuesta_v2.sql` y `student-dashboard` desplegado con la nueva integración.
 - Nueva comprobación automática `scripts/check-conjuga-apuesta.mjs`.
+
+
+## 2026-09-05 · Conjuga y apuesta v3: banco masivo, final correcto y código general
+- Se amplía el banco desde 154 retos curados hasta **4.288 retos posibles**.
+- La ampliación añade 53 verbos regulares seguros y genera paradigmas de:
+  - presente, imperfecto y futuro;
+  - perfecto compuesto, pluscuamperfecto y condicional;
+  - subjuntivo presente, imperfecto, perfecto y pluscuamperfecto;
+  - futuro perfecto y condicional compuesto;
+  - imperativos afirmativos y negativos;
+  - gerundio y participio.
+- Reparto de la expansión generada: 954 retos básicos, 954 intermedios, 530 avanzados y 1.696 expertos.
+- La selección ya no evita solo repetir la misma pregunta: también evita repetir la **misma respuesta** durante la partida y procura no repetir un verbo entre los seis retos más recientes.
+- Se corrige el cierre del juego: al terminar una partida normal, el guardado en LenguArcade ya no provoca `CLOSE_READY`.
+- Tras guardar una partida normal, Conjuga y apuesta permanece dentro del juego y vuelve a su propia pantalla inicial; solo una salida voluntaria/abandono cierra el juego y regresa a LenguArcade.
+- Se conserva el estado de XP y logros actualizado entre revancha/nueva partida dentro de la misma sesión, evitando volver a cargar una copia anterior del progreso.
+- El sistema de códigos deja de presentarse como «código de Scrabble».
+- La interfaz usa ahora **Código para jugar con otra persona** y explica que es un código general de LenguArcade para cualquier juego compatible.
+- El backend formaliza `LA_PAIRABLE_GAME_IDS_` para los juegos que actualmente consumen ese código: Scrabble y Conjuga y apuesta.
