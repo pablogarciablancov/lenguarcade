@@ -82,3 +82,18 @@ Estética tipo launcher/Steam educativo:
 - XP, niveles y moneda
 - panel del alumno atractivo
 - panel del profesor muy visual y claro
+
+## Trabajo concurrente obligatorio
+
+Cuando varios chats/agentes trabajen en juegos simultáneamente:
+
+1. Cada juego debe usar una rama `game/<gameId>/<cambio>`.
+2. Una rama `game/*` solo puede modificar su carpeta `games/<gameId>/`, sus pruebas/notas propias y migraciones inequívocamente propias.
+3. Las ramas de juego NO pueden editar el núcleo compartido: catálogo, `LenguArcade_Alumno.html`, `LenguArcade_Code.gs`, Edge Functions comunes, `package.json` ni scripts de publicación.
+4. Si el juego necesita cambios centrales, debe declararlos en `games/<gameId>/lenguarcade.integration.json`.
+5. Solo una rama `integration/YYYY-MM-DD`, creada desde el `main` más reciente, puede tocar y desplegar el núcleo compartido.
+6. No aplicar cambios a Supabase ni publicar Apps Script desde una rama de juego.
+7. No empujar directamente a `main` desde trabajos de juego: abrir PR y dejar que `.github/workflows/game-scope-guard.yml` valide el ámbito.
+8. Antes de integrar, leer `docs/TRABAJO_CONCURRENTE_JUEGOS.md`.
+
+Esta regla tiene prioridad sobre el antiguo flujo «integrar un juego cada vez» cuando haya trabajo simultáneo.

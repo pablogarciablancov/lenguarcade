@@ -1,0 +1,15 @@
+{
+  "$schema": "lenguarcade-integration-v1",
+  "gameId": "mi_juego",
+  "name": "Mi juego",
+  "status": "laboratorio",
+  "integration": "embedded",
+  "entry": "games/mi_juego/index.html",
+  "banner": "",
+  "requires": {
+    "studentRunner": false,
+    "saveProgress": false,
+    "supabaseCatalog": false
+  },
+  "notes": ""
+}
