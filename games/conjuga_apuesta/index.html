@@ -973,7 +973,7 @@ button{cursor:pointer}
       '<div class="statGrid"><div class="stat"><b>'+p.correct+'</b><span>Aciertos</span></div><div class="stat"><b>'+accuracy+'%</b><span>Precisión</span></div><div class="stat"><b>'+p.maxStreak+'</b><span>Mejor racha</span></div><div class="stat"><b>+'+p.xpGain+'</b><span>XP</span></div></div></article>';
     }).join('');
     $('unlocks').innerHTML=state.newUnlocks.length?'<h3>Nuevos logros</h3>'+state.newUnlocks.map(x=>'<div class="unlock"><div class="unlockIcon">'+x.achievement.icon+'</div><div><strong>'+escapeHtml(x.player)+' · '+escapeHtml(x.achievement.title)+'</strong><div style="color:var(--muted);font-size:.85rem">'+escapeHtml(x.achievement.desc)+' · +'+x.achievement.xp+' XP</div></div></div>').join(''):'';
-    renderProfileHeader();Bridge.sendResult(buildResultPayload(winner,reason));
+    renderProfileHeader();Bridge.commitSaves(a.save,b.save);Bridge.sendResult(buildResultPayload(winner,reason));
   }
 
   function buildParticipant(p,role,outcome){
@@ -1020,7 +1020,7 @@ button{cursor:pointer}
   const Bridge=(()=>{
     let isEnabled=false,channel='',hostWindow=null,initialized=false,readyTimer=null,primary={student:null,save:defaultSave()},opponent={student:null,save:defaultSave()};
     function post(type,payload={}){if(!isEnabled||!channel)return;const msg={namespace:'lenguarcade-game',channel,gameId:GAME_ID,type,payload};if(hostWindow)hostWindow.postMessage(msg,'*');else if(window.parent!==window)window.parent.postMessage(msg,'*');}
-    function announce(){post('READY',{protocol:2,multiplayer:true,version:2})}
+    function announce(){post('READY',{protocol:2,multiplayer:true,version:3})}
     function start(){
       const params=Object.fromEntries(new URLSearchParams(location.search).entries());isEnabled=String(params.lenguarcade||'')==='1'&&window.parent!==window;channel=String(params.channel||'');
       if(!isEnabled||!channel)return;
@@ -1059,6 +1059,7 @@ button{cursor:pointer}
     return {
       enabled:()=>isEnabled,hasOpponent:()=>!!opponent.student,primarySave:()=>normalizeSave(primary.save),opponentSave:()=>normalizeSave(opponent.save),
       requestOpponent:()=>post('REQUEST_OPPONENT_AUTH'),sessionStarted:()=>post('SESSION_STARTED',{mode:'duel',matchId:state.matchId}),
+      commitSaves:(primarySave,opponentSave)=>{primary.save=normalizeSave(primarySave);if(opponent.student)opponent.save=normalizeSave(opponentSave)},
       sendResult:payload=>{if(isEnabled)post('RESULT',payload)},closeReady:()=>post('CLOSE_READY')
     };
   })();
