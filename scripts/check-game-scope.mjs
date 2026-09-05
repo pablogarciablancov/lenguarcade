@@ -1,1 +1,86 @@
-import { execFileSync } from "node:child_process";\n\nconst branchName=process.env.BRANCH_NAME || process.env.GITHUB_HEAD_REF || "";\nconst baseSha=process.env.BASE_SHA || process.env.GITHUB_BASE_SHA || "HEAD^";\nconst headSha=process.env.HEAD_SHA || process.env.GITHUB_SHA || "HEAD";\n\nfunction fail(message){\n  console.error("\n❌ LenguArcade concurrent-game guard\n"+message+"\n");\n  process.exit(1);\n}\n\nif(!branchName.startsWith("game/")){\n  console.log("Concurrent-game guard: rama de integración o rama general; sin restricciones de juego individual.");\n  process.exit(0);\n}\n\nconst parts=branchName.split("/");\nif(parts.length<2 || !parts[1]) fail("Usa ramas con formato game/<gameId>/<cambio>.");\nconst gameId=parts[1];\nconst gameIdDash=gameId.replaceAll("_","-");\nconst gameIdUnderscore=gameId.replaceAll("-","_");\n\nlet changed=[];\ntry{\n  changed=execFileSync("git",["diff","--name-only",baseSha+"..."+headSha],{encoding:"utf8"})\n    .split(/\r?\n/).map(v=>v.trim()).filter(Boolean);\n}catch(error){\n  fail("No se pudo calcular el diff de la rama. "+(error?.message||error));\n}\n\nconst sharedCore=new Set([\n  "apps-script/LenguArcade_Alumno.html",\n  "apps-script/LenguArcade_Code.gs",\n  "apps-script/LenguArcade_Auth.gs",\n  "supabase/functions/student-dashboard/index.ts",\n  "supabase/functions/save-progress/index.ts",\n  "package.json",\n  "scripts/check-game-catalog.mjs",\n  "docs/CAMBIOS.md",\n  "docs/PRUEBAS.md",\n  ".clasp.json",\n  "scripts/publish-apps-script.ps1"\n]);\n\nconst allowedExact=new Set([\n  "scripts/check-"+gameId+".mjs",\n  "scripts/check-"+gameIdDash+".mjs",\n  "scripts/check-"+gameIdUnderscore+".mjs",\n  "docs/game-notes/"+gameId+".md",\n  "docs/game-notes/"+gameIdDash+".md",\n  "docs/game-notes/"+gameIdUnderscore+".md"\n]);\n\nfunction migrationBelongsToGame(path){\n  if(!path.startsWith("supabase/migrations/")) return false;\n  const name=path.toLowerCase();\n  return [gameId,gameIdDash,gameIdUnderscore].some(id=>name.includes(id.toLowerCase()));\n}\n\nfunction allowed(path){\n  if(path.startsWith("games/"+gameId+"/")) return true;\n  if(path.startsWith("docs/game-notes/"+gameId+"/")) return true;\n  if(allowedExact.has(path)) return true;\n  if(migrationBelongsToGame(path)) return true;\n  return false;\n}\n\nconst coreHits=changed.filter(path=>sharedCore.has(path));\nif(coreHits.length){\n  fail("La rama "+branchName+" intenta modificar el núcleo compartido:\n- "+coreHits.join("\n- ")+"\n\nLos chats de un juego NO deben tocar catálogo, runner, Apps Script central ni despliegues. Guarda la necesidad de integración en games/<gameId>/lenguarcade.integration.json y hazla después desde una rama integration/<fecha>.");\n}\n\nconst gameDirs=[...new Set(changed.map(path=>path.match(/^games\/([^/]+)\//)?.[1]).filter(Boolean))];\nconst foreignGames=gameDirs.filter(id=>id!==gameId);\nif(foreignGames.length){\n  fail("La rama de "+gameId+" también modifica otros juegos: "+foreignGames.join(", ")+".");\n}\n\nconst outside=changed.filter(path=>!allowed(path));\nif(outside.length){\n  fail("La rama "+branchName+" contiene archivos fuera de su ámbito:\n- "+outside.join("\n- ")+"\n\nÁmbito permitido: games/"+gameId+"/, comprobaciones propias, notas propias y migraciones cuyo nombre incluya "+gameId+".");\n}\n\nconsole.log("✅ Rama aislada correctamente: "+branchName);\nconsole.log("Juego: "+gameId);\nconsole.log("Archivos comprobados: "+changed.length);\n
+import { execFileSync } from "node:child_process";
+
+const branchName=process.env.BRANCH_NAME || process.env.GITHUB_HEAD_REF || "";
+const baseSha=process.env.BASE_SHA || process.env.GITHUB_BASE_SHA || "HEAD^";
+const headSha=process.env.HEAD_SHA || process.env.GITHUB_SHA || "HEAD";
+
+function fail(message){
+  console.error("\n❌ LenguArcade concurrent-game guard\n"+message+"\n");
+  process.exit(1);
+}
+
+if(!branchName.startsWith("game/")){
+  console.log("Concurrent-game guard: rama de integración o rama general; sin restricciones de juego individual.");
+  process.exit(0);
+}
+
+const parts=branchName.split("/");
+if(parts.length<2 || !parts[1]) fail("Usa ramas con formato game/<gameId>/<cambio>.");
+const gameId=parts[1];
+const gameIdDash=gameId.replaceAll("_","-");
+const gameIdUnderscore=gameId.replaceAll("-","_");
+
+let changed=[];
+try{
+  changed=execFileSync("git",["diff","--name-only",baseSha+"..."+headSha],{encoding:"utf8"})
+    .split(/\r?\n/).map(v=>v.trim()).filter(Boolean);
+}catch(error){
+  fail("No se pudo calcular el diff de la rama. "+(error?.message||error));
+}
+
+const sharedCore=new Set([
+  "apps-script/LenguArcade_Alumno.html",
+  "apps-script/LenguArcade_Code.gs",
+  "apps-script/LenguArcade_Auth.gs",
+  "supabase/functions/student-dashboard/index.ts",
+  "supabase/functions/save-progress/index.ts",
+  "package.json",
+  "scripts/check-game-catalog.mjs",
+  "docs/CAMBIOS.md",
+  "docs/PRUEBAS.md",
+  ".clasp.json",
+  "scripts/publish-apps-script.ps1"
+]);
+
+const allowedExact=new Set([
+  "scripts/check-"+gameId+".mjs",
+  "scripts/check-"+gameIdDash+".mjs",
+  "scripts/check-"+gameIdUnderscore+".mjs",
+  "docs/game-notes/"+gameId+".md",
+  "docs/game-notes/"+gameIdDash+".md",
+  "docs/game-notes/"+gameIdUnderscore+".md"
+]);
+
+function migrationBelongsToGame(path){
+  if(!path.startsWith("supabase/migrations/")) return false;
+  const name=path.toLowerCase();
+  return [gameId,gameIdDash,gameIdUnderscore].some(id=>name.includes(id.toLowerCase()));
+}
+
+function allowed(path){
+  if(path.startsWith("games/"+gameId+"/")) return true;
+  if(path.startsWith("docs/game-notes/"+gameId+"/")) return true;
+  if(allowedExact.has(path)) return true;
+  if(migrationBelongsToGame(path)) return true;
+  return false;
+}
+
+const coreHits=changed.filter(path=>sharedCore.has(path));
+if(coreHits.length){
+  fail("La rama "+branchName+" intenta modificar el núcleo compartido:\n- "+coreHits.join("\n- ")+"\n\nLos chats de un juego NO deben tocar catálogo, runner, Apps Script central ni despliegues. Guarda la necesidad de integración en games/<gameId>/lenguarcade.integration.json y hazla después desde una rama integration/<fecha>.");
+}
+
+const gameDirs=[...new Set(changed.map(path=>path.match(/^games\/([^/]+)\//)?.[1]).filter(Boolean))];
+const foreignGames=gameDirs.filter(id=>id!==gameId);
+if(foreignGames.length){
+  fail("La rama de "+gameId+" también modifica otros juegos: "+foreignGames.join(", ")+".");
+}
+
+const outside=changed.filter(path=>!allowed(path));
+if(outside.length){
+  fail("La rama "+branchName+" contiene archivos fuera de su ámbito:\n- "+outside.join("\n- ")+"\n\nÁmbito permitido: games/"+gameId+"/, comprobaciones propias, notas propias y migraciones cuyo nombre incluya "+gameId+".");
+}
+
+console.log("✅ Rama aislada correctamente: "+branchName);
+console.log("Juego: "+gameId);
+console.log("Archivos comprobados: "+changed.length);
