@@ -72,8 +72,12 @@ if(!student.includes("gameRecord?.gameId==='conjuga_apuesta'") ||
    !student.includes("Código para jugar con otra persona") ||
    !student.includes("código general para jugar con otra persona") ||
    student.includes("genera un código de Scrabble") ||
-   !student.includes("createGameOpponentCode")){
-  errors.push("El host del alumno no integra progreso y emparejamiento de Conjuga y apuesta.");
+   !student.includes("createGameOpponentCode") ||
+   !student.includes("explicitExitRequested:false") ||
+   !student.includes("runner.game.gameId!=='conjuga_apuesta'") ||
+   !student.includes("LenguArcade ignoró CLOSE_READY de Conjuga y apuesta sin salida explícita.") ||
+   !student.includes("runner.closeRequested&&runner.explicitExitRequested")){
+  errors.push("El host del alumno no integra correctamente progreso, emparejamiento y cierre seguro de Conjuga y apuesta.");
 }
 if(!classroom.includes("function createGameOpponentCode") ||
    !classroom.includes("const LA_PAIRABLE_GAME_IDS_ = ['scrabble','conjuga_apuesta']") ||
