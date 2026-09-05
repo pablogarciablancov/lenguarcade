@@ -545,7 +545,7 @@ function gainXp(team,amount,reason){
   amount=Math.max(0,Math.round(amount));team.matchXp+=amount;team.save.xp+=amount;syncProfileSave(team);if(reason)toast("+"+amount+" XP · "+team.name,reason);evaluateAchievements(team)
 }
 function evaluateAchievements(team){
-  const s=team.save.stats;ACHIEVEMENTS.forEach(a=>{if(team.save.unlocked[a.id])return;if(a.check(Object.assign({xp:team.save.xp},s))){team.save.unlocked[a.id]={at:new Date().toISOString(),xp:a.xp};team.save.xp+=a.xp;team.newUnlocks.push(a);toast("🏅 "+a.title,team.name+" · "+a.desc)}});if(!bridgeEnabled&&team.profileRole==="primary"){localPrimarySave=team.save;persistLocal()}renderCareer()
+  const s=team.save.stats;ACHIEVEMENTS.forEach(a=>{if(team.save.unlocked[a.id])return;if(a.check(Object.assign({xp:team.save.xp},s))){team.save.unlocked[a.id]={at:new Date().toISOString(),xp:a.xp};team.save.xp+=a.xp;team.newUnlocks.push(a);toast("🏅 "+a.title,team.name+" · "+a.desc)}});syncProfileSave(team);renderCareer()
 }
 function activateRune(card,team,baseDamage,onDone){
   if(!card.rune)return onDone(baseDamage);team.save.stats.runes++;let icon="✦",title="",text="",damage=baseDamage;
