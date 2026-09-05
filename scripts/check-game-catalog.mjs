@@ -8,6 +8,7 @@ const dashboard=fs.readFileSync(path.join(root,"supabase","functions","student-d
 const student=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Alumno.html"),"utf8");
 const migration=fs.readFileSync(path.join(root,"supabase","migrations","202609050001_official_game_catalog.sql"),"utf8");
 const conjugaMigration=fs.readFileSync(path.join(root,"supabase","migrations","202609050002_conjuga_apuesta_v2.sql"),"utf8");
+const verbBattleMigration=fs.readFileSync(path.join(root,"supabase","migrations","202609050003_verb_battle_v1.sql"),"utf8");
 
 const official=[
   ["battlegrafia","Battlegrafía","en pruebas"],
@@ -16,7 +17,7 @@ const official=[
   ["versopolis","Versópolis","en revisión"],
   ["scrabble","Scrabble","listo"],
   ["conjuga_apuesta","Conjuga y apuesta","en pruebas"],
-  ["verb_battle","Batalla verbal","en revisión"],
+  ["verb_battle","Batalla verbal","en pruebas"],
   ["rayuela","Rayuela","en pruebas"],
   ["entre_lineas","Entre Líneas","en pruebas"],
   ["tower_defense","Tower Defense","en revisión"],
@@ -32,6 +33,10 @@ for(const [id,name,status] of official){
 if(!conjugaMigration.includes("status='en pruebas'") ||
    !conjugaMigration.includes("games/conjuga_apuesta/")){
   throw new Error("La migración de Conjuga y apuesta debe activarlo como juego en pruebas.");
+}
+if(!verbBattleMigration.includes("status='en pruebas'") ||
+   !verbBattleMigration.includes("games/verb_battle/")){
+  throw new Error("La migración de Batalla verbal debe activarla como juego en pruebas.");
 }
 if(code.includes("Rimópolis") || code.includes("rimopolis") ||
    dashboard.includes("Rimópolis") || dashboard.includes("rimopolis") ||
@@ -51,7 +56,7 @@ if(!code.includes("function isGameLockedStatus_") || !code.includes("LA_OFFICIAL
 if(!auth.includes("LA_OFFICIAL_GAMES.forEach")){
   throw new Error("El catálogo legacy debe sincronizarse desde la lista oficial.");
 }
-if(!student.includes("20260905-conjuga-v4") || !auth.includes("public_meta_v07_paircode")){
+if(!student.includes("20260905-verb-battle-v1") || !auth.includes("public_meta_v08_verb_battle")){
   throw new Error("La retirada de Rimópolis debe invalidar las cachés antiguas del catálogo.");
 }
 if(!student.includes("rayuela:'rayuela-banner.webp'") ||
