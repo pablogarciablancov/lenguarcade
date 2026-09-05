@@ -259,3 +259,22 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 3. Comprobar que la tarjeta de **Entre Líneas** muestra su portada propia de investigación lectora.
 4. Ninguna de las dos tarjetas debe utilizar la imagen genérica de Maniacgrafía.
 5. Ejecutar `npm.cmd run check`; la comprobación del catálogo debe validar ambos nombres de asset.
+
+
+## Conjuga y apuesta v2
+1. Ejecutar `npm.cmd run check`: debe terminar con «Conjuga y apuesta v2 correcto».
+2. Abrir `games/conjuga_apuesta/index.html` directamente y comprobar que permite una partida local entre dos jugadores.
+3. Verificar configuraciones de 5, 8 y 10 rondas y temporizadores de 20, 30, 45 segundos y sin límite.
+4. Comprobar los cuatro niveles de dificultad y sus multiplicadores.
+5. Elegir apuestas de 10, 20, 30, 50 y todo lo disponible cuando corresponda.
+6. Comprobar que una respuesta correcta suma fichas y XP, una incorrecta resta fichas y un error solo de tilde muestra feedback específico.
+7. Verificar los botones de caracteres `á é í ó ú ü ñ`.
+8. Usar Pista, Cambio y Seguro y comprobar sus costes/consumos.
+9. Llevar un jugador a cero: debe recibir un único rescate de 40 fichas; una segunda bancarrota termina la partida.
+10. Jugar suficientes turnos para comprobar que una ronda múltiplo de cuatro muestra el bote ×1,5.
+11. Abrir Logros y comprobar que existen 24 y que los nuevos se desbloquean sin repetirse.
+12. Entrar desde LenguArcade: la tarjeta debe aparecer como «en pruebas» y abrirse embebida.
+13. Iniciar una partida: el nombre del jugador principal debe llegar desde su perfil de LenguArcade.
+14. Desde el perfil de otro alumno/profe-jugador, generar un «Código para partidas 1 contra 1» e introducirlo cuando Conjuga y apuesta solicite rival.
+15. Terminar una partida con los dos perfiles conectados: el host debe guardar resultado, XP, precisión, racha y logros para ambos participantes.
+16. Salir durante una partida: debe conservarse lo respondido hasta ese momento sin adjudicar una victoria ficticia.
