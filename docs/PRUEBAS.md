@@ -251,3 +251,11 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 4. La cuarta tarjeta debe llamarse **Versópolis**, con estado **En revisión** y sin botón funcional.
 5. No debe existir ninguna tarjeta, enlace ni ruta visible denominada Rimópolis.
 6. La primera carga tras esta versión debe descartar automáticamente la caché anterior del catálogo.
+
+
+## Portadas de Rayuela y Entre Líneas
+1. Publicar Apps Script y entrar como alumno.
+2. Comprobar que la tarjeta de **Rayuela** muestra su portada propia con el mapa de decisiones.
+3. Comprobar que la tarjeta de **Entre Líneas** muestra su portada propia de investigación lectora.
+4. Ninguna de las dos tarjetas debe utilizar la imagen genérica de Maniacgrafía.
+5. Ejecutar `npm.cmd run check`; la comprobación del catálogo debe validar ambos nombres de asset.
