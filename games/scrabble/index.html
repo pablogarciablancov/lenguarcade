@@ -512,6 +512,7 @@ function updateIntegratedSetup() {
     const startButton = document.getElementById('start-game-btn');
     const connectButton = document.getElementById('connect-opponent-btn');
     const soloNote = document.getElementById('scrabble-solo-note');
+    const profileStatus = document.getElementById('scrabble-profile-status');
     if (!integratedMode) {
         if (startButton) startButton.disabled = false;
         return;
@@ -532,6 +533,7 @@ function updateIntegratedSetup() {
     }
     const solo = scrabbleMode === 'solo';
     opponentCard.classList.toggle('hidden', solo);
+    if (profileStatus) profileStatus.style.gridTemplateColumns = solo ? '1fr' : '1fr 1fr';
     if (connectButton) connectButton.classList.toggle('hidden', solo);
     if (soloNote) soloNote.classList.toggle('hidden', !solo);
     const ready = !!primaryProfile && (solo || !!opponentProfile);
