@@ -67,7 +67,7 @@ if(!student.includes("rayuela:'rayuela-banner.webp'") ||
   throw new Error("Rayuela y Entre Líneas deben usar portadas específicas, no el banner genérico.");
 }
 
-const ids=[...code.matchAll(/gameId:'([a-z_]+)'/g)].map(match=>match[1]);
+const ids=[...code.matchAll(/gameId:'([a-z0-9_]+)'/g)].map(match=>match[1]);
 const officialIds=official.map(row=>row[0]);
 for(const id of officialIds){
   if(!ids.includes(id)) throw new Error(`No se encontró ${id}`);
