@@ -1,1 +1,24 @@
-name: Guard concurrent game work\n\non:\n  pull_request:\n    branches: [main]\n\npermissions:\n  contents: read\n\njobs:\n  game-scope:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout full history\n        uses: actions/checkout@v4\n        with:\n          fetch-depth: 0\n\n      - name: Enforce isolated game branch scope\n        env:\n          BRANCH_NAME: ${{ github.head_ref }}\n          BASE_SHA: ${{ github.event.pull_request.base.sha }}\n          HEAD_SHA: ${{ github.event.pull_request.head.sha }}\n        run: node scripts/check-game-scope.mjs\n
+name: Guard concurrent game work
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  game-scope:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enforce isolated game branch scope
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: node scripts/check-game-scope.mjs
