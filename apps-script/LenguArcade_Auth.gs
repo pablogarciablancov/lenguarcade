@@ -195,7 +195,7 @@ function setupLenguArcadeV03_() {
 }
 
 function getPublicMetaV03() {
-  return cachedJsonV03_('public_meta_v07_paircode', function(){
+  return cachedJsonV03_('public_meta_v08_verb_battle', function(){
     return {ok:true, version:'0.4.0', classes:rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.CLASES)).filter(c => isTrue_(c.activa)), games:getActiveGames_().map(decorateGameIntegration_), activeUserEmail:getActiveUserEmail_()};
   }, 300);
 }
@@ -339,6 +339,6 @@ function cachedJsonV03_(key, builder, seconds) {
 
 function clearCacheV03_() {
   try {
-    CacheService.getScriptCache().removeAll(['public_meta_v03','public_meta_v04','public_meta_v07_paircode','students_v03_1ESO_A','students_v03_1ESO_B','students_v03_2ESO_A','students_v03_2ESO_B','students_v03_3ESO_A','students_v03_3ESO_B','students_v03_4ESO_A','students_v03_4ESO_B']);
+    CacheService.getScriptCache().removeAll(['public_meta_v03','public_meta_v04','public_meta_v08_verb_battle','students_v03_1ESO_A','students_v03_1ESO_B','students_v03_2ESO_A','students_v03_2ESO_B','students_v03_3ESO_A','students_v03_3ESO_B','students_v03_4ESO_A','students_v03_4ESO_B']);
   } catch(e) {}
 }
