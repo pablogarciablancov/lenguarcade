@@ -315,10 +315,9 @@ function buildPools(){
 
   Object.entries(IRREG).forEach(([verb,forms])=>{
     PERSONS.forEach(person=>{
-      add("indicative",4,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto simple.",withPronoun(person,forms.preterite[person.i]),"pretérito irregular");
-      add("indicative",4,verb,"Conjuga «"+verb+"» en "+person.label+" del futuro simple.",withPronoun(person,forms.future[person.i]),"futuro irregular");
-      add("indicative",5,verb,"Conjuga «"+verb+"» en "+person.label+" del condicional simple.",withPronoun(person,forms.conditional[person.i]),"condicional irregular");
-      add("indicative",5,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto simple.",withPronoun(person,forms.preterite[person.i]),"pretérito irregular");
+      add("indicative",4,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto simple.",withPronoun(person,forms.preterite[person.i]),"pretérito irregular frecuente");
+      add("indicative",4,verb,"Conjuga «"+verb+"» en "+person.label+" del futuro simple.",withPronoun(person,forms.future[person.i]),"futuro irregular frecuente");
+      add("indicative",4,verb,"Conjuga «"+verb+"» en "+person.label+" del condicional simple.",withPronoun(person,forms.conditional[person.i]),"condicional irregular frecuente");
 
       add("subjunctive",4,verb,"Conjuga «"+verb+"» en "+person.label+" del presente de subjuntivo.",withPronoun(person,forms.subj[person.i]),"subjuntivo irregular");
       add("subjunctive",4,verb,"Conjuga «"+verb+"» en "+person.label+" del imperfecto de subjuntivo.",withPronoun(person,forms.subjImp[person.i]),"subjuntivo irregular");
@@ -328,6 +327,22 @@ function buildPools(){
       add("compound",5,verb,"Conjuga «"+verb+"» en "+person.label+" del condicional compuesto.",withPronoun(person,HABER.conditional[person.i]+" "+(PARTICIPLES[verb]||parts(verb).participle).split(" / ")[0]),"compuesto irregular")
     })
   });
+
+  const ADVANCED_INDICATIVE={
+    andar:["anduve","anduviste","anduvo","anduvimos","anduvisteis","anduvieron"],
+    conducir:["conduje","condujiste","condujo","condujimos","condujisteis","condujeron"],
+    traducir:["traduje","tradujiste","tradujo","tradujimos","tradujisteis","tradujeron"],
+    producir:["produje","produjiste","produjo","produjimos","produjisteis","produjeron"],
+    mantener:["mantuve","mantuviste","mantuvo","mantuvimos","mantuvisteis","mantuvieron"],
+    obtener:["obtuve","obtuviste","obtuvo","obtuvimos","obtuvisteis","obtuvieron"],
+    contener:["contuve","contuviste","contuvo","contuvimos","contuvisteis","contuvieron"],
+    intervenir:["intervine","interviniste","intervino","intervinimos","intervinisteis","intervinieron"],
+    deshacer:["deshice","deshiciste","deshizo","deshicimos","deshicisteis","deshicieron"],
+    proponer:["propuse","propusiste","propuso","propusimos","propusisteis","propusieron"]
+  };
+  Object.entries(ADVANCED_INDICATIVE).forEach(([verb,forms])=>PERSONS.forEach(person=>{
+    add("indicative",5,verb,"Conjuga «"+verb+"» en "+person.label+" del pretérito perfecto simple.",withPronoun(person,forms[person.i]),"pretérito irregular avanzado")
+  }));
 
   const imperatives=[
     ["venir","ven","no vengas","no vengáis"],["decir","di","no digas","no digáis"],["salir","sal","no salgas","no salgáis"],["hacer","haz","no hagas","no hagáis"],
@@ -521,8 +536,13 @@ function submitAttack(){
   if(result==="wrong"){$("questionFeedback").className="feedback bad";$("questionFeedback").textContent="No es correcta. Respuesta: "+currentCard.question.answer;clearTimer();setTimeout(()=>resolveAttack(false,false),850);return}
   $("questionFeedback").className="feedback good";$("questionFeedback").textContent="Correcto.";clearTimer();setTimeout(()=>resolveAttack(true,false),350)
 }
+function syncProfileSave(team){
+  if(team.profileRole==="primary"&&primaryProfile)primaryProfile.save=team.save;
+  else if(connectedProfiles[team.profileRole])connectedProfiles[team.profileRole].save=team.save;
+  if(!bridgeEnabled&&team.profileRole==="primary"){localPrimarySave=team.save;persistLocal()}
+}
 function gainXp(team,amount,reason){
-  amount=Math.max(0,Math.round(amount));team.matchXp+=amount;team.save.xp+=amount;if(!bridgeEnabled&&team.profileRole==="primary"){localPrimarySave=team.save;persistLocal()}if(reason)toast("+"+amount+" XP · "+team.name,reason);evaluateAchievements(team)
+  amount=Math.max(0,Math.round(amount));team.matchXp+=amount;team.save.xp+=amount;syncProfileSave(team);if(reason)toast("+"+amount+" XP · "+team.name,reason);evaluateAchievements(team)
 }
 function evaluateAchievements(team){
   const s=team.save.stats;ACHIEVEMENTS.forEach(a=>{if(team.save.unlocked[a.id])return;if(a.check(Object.assign({xp:team.save.xp},s))){team.save.unlocked[a.id]={at:new Date().toISOString(),xp:a.xp};team.save.xp+=a.xp;team.newUnlocks.push(a);toast("🏅 "+a.title,team.name+" · "+a.desc)}});if(!bridgeEnabled&&team.profileRole==="primary"){localPrimarySave=team.save;persistLocal()}renderCareer()
