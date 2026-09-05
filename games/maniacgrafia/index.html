@@ -1640,5 +1640,48 @@
             LenguArcadeBridge.result(outcome);
         }
     </script>
+
+<script id="la-early-profile-bridge-v1">
+(function(){
+  'use strict';
+  if(window.__LA_EARLY_PROFILE_BRIDGE_V1__)return;
+  var params=new URLSearchParams(window.location.search||'');
+  var channel=String(params.get('channel')||'');
+  var embedded=String(params.get('lenguarcade')||'')==='1'&&window.parent!==window;
+  if(!embedded||!channel)return;
+  window.__LA_EARLY_PROFILE_BRIDGE_V1__=true;
+  var gameId='maniacgrafia';
+  var stopped=false;
+  var timer=null;
+  function postReady(){
+    if(stopped)return;
+    var message={namespace:'lenguarcade-game',channel:channel,gameId:gameId,type:'READY',payload:{protocol:0,rescue:true}};
+    var target=window;
+    for(var depth=0;depth<5;depth+=1){
+      try{
+        if(!target.parent||target.parent===target)break;
+        target=target.parent;
+        target.postMessage(message,'*');
+      }catch(error){break;}
+    }
+  }
+  function stop(){
+    stopped=true;
+    if(timer)clearInterval(timer);
+  }
+  window.addEventListener('message',function(event){
+    var message=event.data||{};
+    if(message.namespace!=='lenguarcade-host'||message.channel!==channel)return;
+    if(message.type==='INIT'){
+      window.__LA_EARLY_PROFILE_INIT__=message.payload||{};
+      setTimeout(stop,1200);
+    }
+  });
+  setTimeout(postReady,0);
+  timer=setInterval(postReady,700);
+  setTimeout(stop,8000);
+})();
+</script>
+
 </body>
 </html>
