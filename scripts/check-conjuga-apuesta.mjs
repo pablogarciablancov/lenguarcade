@@ -15,9 +15,15 @@ for(const match of game.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)){
   try{new Function(match[1]);}catch(error){errors.push("JavaScript del juego inválido: "+error.message);}
 }
 
-const questionCount=(game.match(/\{verbo:/g)||[]).length;
+const literalQuestionCount=(game.match(/\{verbo:/g)||[]).length;
 const achievementCount=(game.match(/\{id:'[^']+',icon:/g)||[]).length;
-if(questionCount<150)errors.push("El banco debe conservar y ampliar el contenido hasta al menos 150 retos.");
+const regularBlock=(game.match(/const REGULAR_VERBS=\{([\s\S]*?)\n  \};/)||[])[1]||"";
+const regularVerbCount=(regularBlock.match(/'[^']+'/g)||[]).length;
+const generatedPerVerb=78;
+const questionCount=literalQuestionCount+(regularVerbCount*generatedPerVerb);
+if(literalQuestionCount<150)errors.push("El banco curado original debe conservar al menos 150 retos.");
+if(regularVerbCount<50)errors.push("La ampliación regular debe incluir al menos 50 verbos.");
+if(questionCount<4000)errors.push("El banco total debe superar 4000 retos posibles.");
 if(achievementCount<24)errors.push("Deben existir al menos 24 logros.");
 
 for(const marker of [
@@ -31,12 +37,21 @@ for(const marker of [
   "swap:1",
   "Rescate automático",
   "state.used=new Set()",
+  "usedAnswers:new Set()",
+  "recentVerbs:[]",
+  "function answerKey",
+  "!state.usedAnswers.has(answerKey(q))",
+  "state.recentVerbs.length>6",
   "function accentless",
   "const ALTERNATIVES=",
   "REQUEST_OPPONENT_AUTH",
   "namespace:'lenguarcade-game'",
   "gameId:GAME_ID",
   "players:[buildParticipant",
+  "Bridge.commitSaves(a.save,b.save)",
+  "state.finishReason==='abandoned'",
+  "setTimeout(()=>{",
+  "newMatch();",
   "xpGain",
   "achievements",
 ]){
@@ -53,12 +68,14 @@ if(!dashboard.includes("conjuga_apuesta:{") ||
   errors.push("student-dashboard no expone la integración de Conjuga y apuesta.");
 }
 if(!student.includes("gameRecord?.gameId==='conjuga_apuesta'") ||
-   !student.includes("Código para partidas 1 contra 1") ||
+   !student.includes("Código para jugar con otra persona") ||
+   !student.includes("código general para jugar con otra persona") ||
+   student.includes("genera un código de Scrabble") ||
    !student.includes("createGameOpponentCode")){
   errors.push("El host del alumno no integra progreso y emparejamiento de Conjuga y apuesta.");
 }
 if(!classroom.includes("function createGameOpponentCode") ||
-   !classroom.includes("['scrabble','conjuga_apuesta']") ||
+   !classroom.includes("const LA_PAIRABLE_GAME_IDS_ = ['scrabble','conjuga_apuesta']") ||
    !classroom.includes("'LA_GAME_PAIR_'")){
   errors.push("El backend de Apps Script no admite códigos genéricos para los dos juegos 1v1.");
 }
@@ -70,4 +87,4 @@ if(!migration.includes("status='en pruebas'") ||
 if(errors.length){
   throw new Error("Comprobaciones de Conjuga y apuesta fallidas:\n- "+errors.join("\n- "));
 }
-console.log("Conjuga y apuesta v2 correcto: "+questionCount+" retos, "+achievementCount+" logros e integración 1v1.");
+console.log("Conjuga y apuesta v3 correcto: "+questionCount+" retos posibles, "+achievementCount+" logros, antirrepetición y código general 1v1.");
