@@ -289,8 +289,8 @@ Cada cambio debe indicar:
 ## 2026-09-05 · Portadas oficiales de Rayuela y Entre Líneas
 - Creadas dos portadas específicas con una línea visual común de LenguArcade.
 - Assets publicados en `lenguarcade-assets`:
-  - `assets/games/rayuela-banner.jpg`
-  - `assets/games/entre-lineas-banner.jpg`
+  - `assets/games/rayuela-banner.webp`
+  - `assets/games/entre-lineas-banner.webp`
 - `LenguArcade_Alumno.html` asigna ya ambas imágenes en el mapa `BANNERS`.
 - Se mantiene el sistema de fallback GitHub Raw → jsDelivr para estas imágenes.
 - `check-game-catalog.mjs` falla si Rayuela o Entre Líneas vuelven a utilizar el banner genérico.
