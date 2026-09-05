@@ -7,6 +7,7 @@ const auth=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Auth.gs"),"
 const dashboard=fs.readFileSync(path.join(root,"supabase","functions","student-dashboard","index.ts"),"utf8");
 const student=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Alumno.html"),"utf8");
 const migration=fs.readFileSync(path.join(root,"supabase","migrations","202609050001_official_game_catalog.sql"),"utf8");
+const conjugaMigration=fs.readFileSync(path.join(root,"supabase","migrations","202609050002_conjuga_apuesta_v2.sql"),"utf8");
 
 const official=[
   ["battlegrafia","Battlegrafía","en pruebas"],
@@ -14,7 +15,7 @@ const official=[
   ["narratoria","Narratoria","listo"],
   ["versopolis","Versópolis","en revisión"],
   ["scrabble","Scrabble","listo"],
-  ["conjuga_apuesta","Conjuga y apuesta","en revisión"],
+  ["conjuga_apuesta","Conjuga y apuesta","en pruebas"],
   ["verb_battle","Batalla verbal","en revisión"],
   ["rayuela","Rayuela","en pruebas"],
   ["entre_lineas","Entre Líneas","en pruebas"],
@@ -26,9 +27,12 @@ for(const [id,name,status] of official){
   if(!code.includes(`nombre:'${name}'`)) throw new Error(`Catálogo Apps Script: nombre incorrecto para ${id}`);
   if(!code.includes(`estado:'${status}'`)) throw new Error(`Catálogo Apps Script: estado incorrecto para ${id}`);
   if(!migration.includes(`('${id}'`)) throw new Error(`Migración Supabase: falta ${id}`);
-  if(!migration.includes(`'${status}'`)) throw new Error(`Migración Supabase: falta estado ${status}`);
 }
 
+if(!conjugaMigration.includes("status='en pruebas'") ||
+   !conjugaMigration.includes("games/conjuga_apuesta/")){
+  throw new Error("La migración de Conjuga y apuesta debe activarlo como juego en pruebas.");
+}
 if(code.includes("Rimópolis") || code.includes("rimopolis") ||
    dashboard.includes("Rimópolis") || dashboard.includes("rimopolis") ||
    student.includes("Rimópolis") || student.includes("rimopolis")) {
