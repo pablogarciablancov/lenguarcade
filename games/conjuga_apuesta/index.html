@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conjuga y apuesta · LenguArcade</title>
+<style>
+:root{
+  --bg:#f6f7fb;--panel:#ffffff;--panel2:#fff7f2;--text:#20243a;--muted:#68708a;
+  --line:#e5e7ef;--coral:#ff664d;--coral2:#ff8a64;--gold:#f5b83d;--violet:#6f5cff;
+  --cyan:#1fb7c9;--green:#23a66a;--red:#d74b57;--shadow:0 18px 50px rgba(38,42,70,.12);
+  --radius:24px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:
+radial-gradient(circle at 12% 10%,rgba(255,102,77,.12),transparent 28%),
+radial-gradient(circle at 86% 5%,rgba(111,92,255,.12),transparent 24%),var(--bg);color:var(--text)}
+body{padding:18px}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.app{max-width:1320px;margin:0 auto;display:grid;gap:16px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:22px;padding:14px 18px;box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+.brand{display:flex;align-items:center;gap:12px;text-align:left}
+.brandMark{width:48px;height:48px;border-radius:16px;background:linear-gradient(145deg,var(--coral),var(--gold));display:grid;place-items:center;color:white;font-size:25px;box-shadow:0 10px 24px rgba(255,102,77,.25)}
+.brand h1{font-size:1.15rem;margin:0;font-weight:900;letter-spacing:-.02em}
+.brand p{margin:3px 0 0;color:var(--muted);font-size:.88rem}
+.topStats{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 11px;font-size:.82rem;font-weight:800}
+.screen{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.setup{display:grid;grid-template-columns:1.08fr .92fr;min-height:620px}
+.setupHero{padding:42px;background:linear-gradient(145deg,#fff6ef 0%,#fff 54%,#f4f1ff 100%);display:flex;flex-direction:column;justify-content:center;text-align:left}
+.eyebrow{display:inline-flex;width:max-content;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 11px;color:var(--coral);font-weight:900;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}
+.setupHero h2{font-size:clamp(2.3rem,5vw,4.6rem);line-height:.94;margin:18px 0 14px;letter-spacing:-.055em}
+.setupHero h2 span{color:var(--coral)}
+.setupHero>p{max-width:680px;color:var(--muted);font-size:1.04rem;line-height:1.7}
+.featureRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.feature{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;font-weight:800;font-size:.9rem}
+.setupForm{padding:28px;display:grid;align-content:center;gap:18px}
+.cardTitle{font-size:1.25rem;font-weight:900;text-align:left}
+.fieldGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:grid;gap:7px;text-align:left}
+.field.wide{grid-column:1/-1}
+.field label{font-size:.8rem;color:var(--muted);font-weight:800}
+.field input,.field select{width:100%;border:1px solid var(--line);background:#fbfbfd;border-radius:14px;padding:13px 14px;outline:none}
+.field input:focus,.field select:focus{border-color:var(--violet);box-shadow:0 0 0 4px rgba(111,92,255,.08)}
+.integratedBox{background:#f4f8ff;border:1px solid #dce8ff;border-radius:18px;padding:14px;text-align:left}
+.integratedBox strong{display:block;margin-bottom:4px}
+.integratedBox small{color:var(--muted);line-height:1.5}
+.btn{border:0;border-radius:15px;padding:13px 16px;font-weight:900;transition:.18s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,var(--coral),#ff7b54);color:white;box-shadow:0 10px 24px rgba(255,102,77,.22)}
+.btn.secondary{background:#f1f3f8;color:var(--text)}
+.btn.violet{background:var(--violet);color:#fff}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.setupActions{display:flex;gap:10px;flex-wrap:wrap}
+.gameScreen{padding:16px}
+.matchHeader{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}
+.playerCard{border:1px solid var(--line);border-radius:22px;padding:15px;background:#fff;text-align:left;position:relative;overflow:hidden}
+.playerCard.active{border-color:rgba(255,102,77,.5);box-shadow:0 0 0 4px rgba(255,102,77,.08)}
+.playerCard::after{content:"";position:absolute;inset:auto -40px -55px auto;width:150px;height:150px;border-radius:50%;background:rgba(111,92,255,.06)}
+.playerTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.playerName{font-weight:950;font-size:1.05rem}
+.playerBadges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.mini{background:#f4f5f8;border-radius:999px;padding:5px 8px;font-size:.75rem;font-weight:800;color:var(--muted)}
+.chips{font-size:2rem;font-weight:950;color:var(--coral);margin:10px 0 6px}
+.xpMini{height:7px;background:#eef0f5;border-radius:999px;overflow:hidden}
+.xpMini>div{height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan));width:0}
+.centerRound{min-width:180px;display:grid;place-items:center;text-align:center;background:linear-gradient(145deg,#262d4b,#181d32);color:white;border-radius:22px;padding:15px}
+.roundBig{font-size:1.65rem;font-weight:950}
+.roundSmall{font-size:.78rem;color:#d6dcf3;margin-top:3px}
+.specialFlag{margin-top:8px;background:rgba(245,184,61,.18);color:#ffd46c;border:1px solid rgba(245,184,61,.32);padding:6px 9px;border-radius:999px;font-weight:900;font-size:.72rem}
+.arena{display:grid;grid-template-columns:285px minmax(0,1fr) 285px;gap:14px;margin-top:14px}
+.sidePanel,.challenge{background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px}
+.sidePanel h3{margin:0 0 12px;font-size:.92rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.tierList,.betList{display:grid;gap:8px}
+.choice{border:1px solid var(--line);background:#fafafe;border-radius:15px;padding:11px 12px;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.choice.selected{border-color:var(--violet);background:#f2f0ff;box-shadow:0 0 0 3px rgba(111,92,255,.08)}
+.choice:disabled{opacity:.4;cursor:not-allowed}
+.choice strong{font-size:.9rem}
+.choice span{font-size:.75rem;color:var(--muted);font-weight:800}
+.betChoice{justify-content:center;font-size:1rem;font-weight:950}
+.powerList{display:grid;gap:8px}
+.power{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:14px;padding:10px;background:#fff}
+.power button{padding:7px 9px;border:0;border-radius:10px;background:#f0f2f8;font-weight:900}
+.power button:disabled{opacity:.38}
+.challenge{min-height:500px;display:flex;flex-direction:column;justify-content:center;text-align:center;position:relative;overflow:hidden}
+.challenge::before{content:"";position:absolute;width:250px;height:250px;border-radius:50%;background:rgba(255,102,77,.055);left:-120px;top:-100px}
+.turnLabel{font-size:.75rem;font-weight:950;text-transform:uppercase;letter-spacing:.1em;color:var(--coral)}
+.challenge h2{font-size:clamp(1.8rem,4vw,3.2rem);margin:10px 0 8px;letter-spacing:-.035em}
+.metaRow{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:10px 0 18px}
+.metaTag{background:#f4f5f8;border-radius:999px;padding:7px 10px;color:var(--muted);font-size:.78rem;font-weight:850}
+.prompt{font-size:1.2rem;line-height:1.55;max-width:700px;margin:0 auto 18px}
+.preQuestion{color:var(--muted);line-height:1.7;max-width:650px;margin:0 auto 20px}
+.answerArea{display:grid;gap:10px;max-width:660px;width:100%;margin:0 auto}
+.answerInput{width:100%;border:2px solid #e5e7ef;border-radius:16px;padding:15px 16px;font-size:1.08rem;text-align:center;outline:none}
+.answerInput:focus{border-color:var(--coral);box-shadow:0 0 0 4px rgba(255,102,77,.09)}
+.accentRow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.accentRow button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 9px;font-weight:850}
+.timerWrap{height:9px;background:#eef0f5;border-radius:999px;overflow:hidden;max-width:660px;width:100%;margin:0 auto 14px}
+.timerFill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold),var(--red));width:100%;transition:width .25s linear}
+.challengeActions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.feedback{max-width:720px;margin:18px auto 0;border-radius:18px;padding:14px 16px;text-align:left;line-height:1.55;border:1px solid transparent}
+.feedback.ok{background:#edf9f3;border-color:#cceedd}
+.feedback.bad{background:#fff0f1;border-color:#ffd5d9}
+.feedback.near{background:#fff8e9;border-color:#ffe7ae}
+.feedback strong{display:block;margin-bottom:4px}
+.statusLine{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.statusLine span{font-size:.76rem;color:var(--muted);background:#f6f7fa;border-radius:999px;padding:6px 9px;font-weight:800}
+.bottomBar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;padding:12px 14px;background:#fbfbfd;border:1px solid var(--line);border-radius:18px}
+.log{color:var(--muted);font-size:.86rem;text-align:left;max-width:760px}
+.endScreen{padding:30px}
+.endHero{text-align:center;padding:24px}
+.trophy{font-size:4.8rem}
+.endHero h2{font-size:2.5rem;margin:8px 0}
+.resultsGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px auto;max-width:900px}
+.resultCard{border:1px solid var(--line);border-radius:20px;padding:18px;background:#fff;text-align:left}
+.resultCard.winner{border-color:#ffd66d;background:#fffbef}
+.statGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.stat{background:#f6f7fa;border-radius:14px;padding:10px;text-align:center}
+.stat b{display:block;font-size:1.15rem}
+.stat span{font-size:.72rem;color:var(--muted)}
+.unlocks{max-width:900px;margin:16px auto;display:grid;gap:8px}
+.unlock{display:flex;gap:12px;align-items:center;border:1px solid #ffe4a3;background:#fff9e8;border-radius:16px;padding:12px;text-align:left}
+.unlockIcon{font-size:1.8rem}
+.achievementsModal{position:fixed;inset:0;background:rgba(24,29,50,.72);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
+.achievementsModal.open{display:flex}
+.modalCard{width:min(940px,96vw);max-height:88vh;overflow:auto;background:#fff;border-radius:24px;padding:22px;box-shadow:0 26px 80px rgba(0,0,0,.3)}
+.modalHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.achievementGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ach{border:1px solid var(--line);border-radius:17px;padding:13px;text-align:left;background:#fafafe}
+.ach.locked{filter:grayscale(1);opacity:.5}
+.ach .icon{font-size:1.6rem}
+.ach strong{display:block;margin:6px 0 3px}
+.ach small{color:var(--muted);line-height:1.4}
+.toastStack{position:fixed;right:18px;bottom:18px;display:grid;gap:8px;z-index:150}
+.toast{background:#20243a;color:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 12px 32px rgba(0,0,0,.24);max-width:330px;text-align:left;animation:toastIn .22s ease}
+.toast.gold{background:#8b6412}
+@keyframes toastIn{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+@media(max-width:1050px){
+  .setup{grid-template-columns:1fr}
+  .setupHero{padding:30px}
+  .arena{grid-template-columns:1fr 1fr}
+  .challenge{grid-column:1/-1;grid-row:1}
+  .matchHeader{grid-template-columns:1fr 140px 1fr}
+}
+@media(max-width:720px){
+  body{padding:8px}
+  .topbar{align-items:flex-start}
+  .topStats{display:none}
+  .fieldGrid{grid-template-columns:1fr}
+  .field.wide{grid-column:auto}
+  .matchHeader{grid-template-columns:1fr 1fr}
+  .centerRound{grid-column:1/-1;grid-row:1}
+  .arena{grid-template-columns:1fr}
+  .challenge{grid-column:auto;grid-row:auto;min-height:430px}
+  .resultsGrid{grid-template-columns:1fr}
+  .statGrid{grid-template-columns:repeat(2,1fr)}
+  .achievementGrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brandMark">🎲</div>
+      <div><h1>Conjuga y apuesta</h1><p>Verbos · estrategia · riesgo · progresión</p></div>
+    </div>
+    <div class="topStats">
+      <span class="pill" id="profileLevel">Nivel 1</span>
+      <span class="pill" id="profileXp">0 XP</span>
+      <button class="btn ghost" id="achievementsBtn" type="button">🏆 Logros</button>
+    </div>
+  </header>
+
+  <section class="screen setup" id="setupScreen">
+    <div class="setupHero">
+      <span class="eyebrow">⚡ Duelo verbal</span>
+      <h2>Conjuga.<br><span>Arriesga.</span><br>Remonta.</h2>
+      <p>La idea original sigue intacta: dos jugadores, fichas y verbos. Ahora cada turno añade dificultad, multiplicadores, rachas, ayudas tácticas, experiencia y logros. Elegir cuánto arriesgar importa tanto como saber conjugar.</p>
+      <div class="featureRow">
+        <span class="feature">154 retos</span>
+        <span class="feature">4 niveles de riesgo</span>
+        <span class="feature">24 logros</span>
+        <span class="feature">XP persistente</span>
+        <span class="feature">sin preguntas repetidas</span>
+      </div>
+    </div>
+    <div class="setupForm">
+      <div class="cardTitle">Prepara la partida</div>
+      <div class="integratedBox hidden" id="integratedBox">
+        <strong>🔗 Conectado a LenguArcade</strong>
+        <small id="integratedStatus">Tu perfil está listo. Puedes conectar también al rival para guardar el progreso de ambos.</small>
+      </div>
+      <div class="fieldGrid">
+        <div class="field"><label>Jugador 1</label><input id="name1" maxlength="24" placeholder="Jugador 1"></div>
+        <div class="field"><label>Jugador 2</label><input id="name2" maxlength="24" placeholder="Jugador 2"></div>
+        <div class="field"><label>Rondas</label>
+          <select id="rounds"><option value="5">5 rondas · rápida</option><option value="8" selected>8 rondas · estándar</option><option value="10">10 rondas · completa</option></select>
+        </div>
+        <div class="field"><label>Tiempo por respuesta</label>
+          <select id="timer"><option value="20">20 s · intensa</option><option value="30" selected>30 s · normal</option><option value="45">45 s · tranquila</option><option value="0">Sin límite</option></select>
+        </div>
+        <div class="field wide"><label>Banco de retos</label>
+          <select id="bankMode"><option value="complete" selected>Completo · todos los tiempos y modos</option><option value="course">Curso · sin formas avanzadas de subjuntivo</option></select>
+        </div>
+      </div>
+      <div class="setupActions">
+        <button class="btn violet hidden" id="connectOpponentBtn" type="button">🔐 Conectar rival de LenguArcade</button>
+        <button class="btn primary" id="startBtn" type="button">Empezar duelo</button>
+      </div>
+      <small style="color:var(--muted);line-height:1.55">Las fichas son puntos ficticios del juego. No hay dinero real ni compras.</small>
+    </div>
+  </section>
+
+  <section class="screen gameScreen hidden" id="gameScreen">
+    <div class="matchHeader">
+      <article class="playerCard" id="playerCard0"></article>
+      <div class="centerRound">
+        <div><div class="roundBig" id="roundLabel">Ronda 1/8</div><div class="roundSmall" id="turnCounter">Turno 1/16</div><div class="specialFlag hidden" id="specialFlag">✨ RONDA BOTE ×1,5</div></div>
+      </div>
+      <article class="playerCard" id="playerCard1"></article>
+    </div>
+
+    <div class="arena">
+      <aside class="sidePanel">
+        <h3>1 · Elige dificultad</h3>
+        <div class="tierList" id="tierList"></div>
+        <h3 style="margin-top:20px">2 · Elige apuesta</h3>
+        <div class="betList" id="betList"></div>
+      </aside>
+
+      <main class="challenge">
+        <div class="turnLabel" id="turnLabel">Turno de…</div>
+        <div id="preQuestionState">
+          <h2>¿Cuánto te la juegas?</h2>
+          <p class="preQuestion">Elige una dificultad y una cantidad. Las preguntas más difíciles multiplican más las ganancias, pero si fallas pierdes la apuesta.</p>
+          <button class="btn primary" id="revealBtn" type="button">Revelar reto</button>
+        </div>
+        <div id="questionState" class="hidden">
+          <h2 id="verbTitle">VERBO</h2>
+          <div class="metaRow" id="metaRow"></div>
+          <div class="timerWrap" id="timerWrap"><div class="timerFill" id="timerFill"></div></div>
+          <p class="prompt" id="prompt"></p>
+          <div class="answerArea">
+            <input class="answerInput" id="answerInput" autocomplete="off" spellcheck="false" placeholder="Escribe la forma verbal…">
+            <div class="accentRow" id="accentRow"></div>
+            <div class="challengeActions">
+              <button class="btn secondary" id="hintBtn" type="button">💡 Pista · −5</button>
+              <button class="btn secondary" id="swapBtn" type="button">🔁 Cambio</button>
+              <button class="btn secondary" id="insuranceBtn" type="button">🛡️ Seguro</button>
+              <button class="btn primary" id="submitBtn" type="button">Comprobar</button>
+            </div>
+          </div>
+          <div class="feedback hidden" id="feedback"></div>
+          <div class="statusLine" id="statusLine"></div>
+        </div>
+      </main>
+
+      <aside class="sidePanel">
+        <h3>Tu mochila táctica</h3>
+        <div class="powerList" id="powerList"></div>
+        <h3 style="margin-top:20px">Cómo puntúa</h3>
+        <div style="font-size:.86rem;color:var(--muted);line-height:1.7;text-align:left">
+          <b>Básico</b> ×1<br>
+          <b>Intermedio</b> ×1,35<br>
+          <b>Avanzado</b> ×1,7<br>
+          <b>Experto</b> ×2,1<br>
+          <b>Ronda bote</b> ×1,5 adicional<br><br>
+          Una racha aumenta la XP, pero nunca cambia la respuesta correcta.
+        </div>
+      </aside>
+    </div>
+
+    <div class="bottomBar">
+      <div class="log" id="battleLog">La partida está lista.</div>
+      <button class="btn ghost" id="exitBtn" type="button">Salir</button>
+    </div>
+  </section>
+
+  <section class="screen endScreen hidden" id="endScreen">
+    <div class="endHero">
+      <div class="trophy">🏆</div>
+      <h2 id="winnerTitle">Fin de partida</h2>
+      <p id="winnerSubtitle" style="color:var(--muted)"></p>
+    </div>
+    <div class="resultsGrid" id="resultsGrid"></div>
+    <div class="unlocks" id="unlocks"></div>
+    <div class="setupActions" style="justify-content:center">
+      <button class="btn primary" id="rematchBtn" type="button">Revancha</button>
+      <button class="btn secondary" id="newMatchBtn" type="button">Nueva partida</button>
+      <button class="btn ghost" id="endAchievementsBtn" type="button">Ver logros</button>
+    </div>
+  </section>
+</div>
+
+<div class="achievementsModal" id="achievementsModal" role="dialog" aria-modal="true">
+  <div class="modalCard">
+    <div class="modalHead"><div><strong style="font-size:1.35rem">🏆 Logros de Conjuga y apuesta</strong><div style="color:var(--muted);font-size:.86rem;margin-top:4px" id="achievementSummary"></div></div><button class="btn secondary" id="closeAchievementsBtn" type="button">Cerrar</button></div>
+    <div class="achievementGrid" id="achievementGrid"></div>
+  </div>
+</div>
+<div class="toastStack" id="toastStack"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  const GAME_ID='conjuga_apuesta';
+  const SAVE_KEY_PREFIX='CYA_SAVE_V2_';
+  const TIERS={
+    basic:{label:'Básico',mult:1,desc:'Formas frecuentes',color:'#23a66a'},
+    medium:{label:'Intermedio',mult:1.35,desc:'Irregularidades y compuestos',color:'#1fb7c9'},
+    advanced:{label:'Avanzado',mult:1.7,desc:'Subjuntivo e imperativo',color:'#6f5cff'},
+    expert:{label:'Experto',mult:2.1,desc:'Formas avanzadas',color:'#d74b57'}
+  };
+  const IRREGULAR=new Set(['ser','estar','ir','haber','tener','hacer','decir','venir','poner','salir','poder','querer','saber','caber','andar','traer','conducir','traducir','dormir','morir','pedir','seguir','conseguir','sentir','mentir','preferir','reír','sonreír','ver','dar','oír','huir','construir','medir','elegir','corregir','divertir','advertir','servir','vestir','jugar','freír','prever']);
+
+  const QUESTION_BANK=[
+      {verbo:"romper",modo:"indicativo",tiempo:"pretérito perfecto compuesto",persona:"2ª plural",respuesta:"vosotros habéis roto"},
+      {verbo:"mentir",modo:"subjuntivo",tiempo:"presente",persona:"3ª plural",respuesta:"ellos mientan"},
+      {verbo:"caer",modo:"indicativo",tiempo:"pretérito imperfecto",persona:"1ª singular",respuesta:"yo caía"},
+      {verbo:"traer",modo:"indicativo",tiempo:"futuro simple",persona:"2ª singular",respuesta:"tú traerás"},
+      {verbo:"dar",modo:"subjuntivo",tiempo:"presente",persona:"1ª plural",respuesta:"nosotros demos"},
+      {verbo:"morir",modo:"indicativo",tiempo:"pretérito perfecto compuesto",persona:"3ª plural",respuesta:"ellos han muerto"},
+      {verbo:"traducir",modo:"indicativo",tiempo:"presente",persona:"1ª singular",respuesta:"yo traduzco"},
+      {verbo:"crecer",modo:"subjuntivo",tiempo:"presente",persona:"2ª plural",respuesta:"vosotros crezcáis"},
+      {verbo:"huir",modo:"indicativo",tiempo:"pretérito perfecto simple",persona:"3ª plural",respuesta:"ellos huyeron"},
+      {verbo:"construir",modo:"indicativo",tiempo:"presente",persona:"3ª singular",respuesta:"él construye"},
+      {verbo:"conducir",modo:"indicativo",tiempo:"pretérito perfecto compuesto",persona:"1ª singular",respuesta:"yo he conducido"},
+      {verbo:"medir",modo:"subjuntivo",tiempo:"presente",persona:"2ª singular",respuesta:"tú midas"},
+      {verbo:"sentir",modo:"indicativo",tiempo:"pretérito imperfecto",persona:"3ª plural",respuesta:"ellos sentían"},
+      {verbo:"repetir",modo:"indicativo",tiempo:"presente",persona:"1ª plural",respuesta:"nosotros repetimos"},
+      {verbo:"enviar",modo:"indicativo",tiempo:"futuro simple",persona:"2ª plural",respuesta:"vosotros enviaréis"},
+      {verbo:"divertir",modo:"subjuntivo",tiempo:"presente",persona:"3ª singular",respuesta:"él divierta"},
+      {verbo:"advertir",modo:"indicativo",tiempo:"pretérito perfecto simple",persona:"1ª plural",respuesta:"nosotros advertimos"},
+      {verbo:"preferir",modo:"subjuntivo",tiempo:"presente",persona:"2ª plural",respuesta:"vosotros prefiráis"},
+      {verbo:"servir",modo:"indicativo",tiempo:"presente",persona:"1ª singular",respuesta:"yo sirvo"},
+      {verbo:"vestir",modo:"indicativo",tiempo:"pretérito imperfecto",persona:"3ª plural",respuesta:"ellos vestían"},
+      {verbo:"reír",modo:"subjuntivo",tiempo:"presente",persona:"3ª plural",respuesta:"ellos rían"},
+      {verbo:"sonreír",modo:"indicativo",tiempo:"futuro simple",persona:"1ª singular",respuesta:"yo sonreiré"},
+      {verbo:"pedir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"tú pide"},
+      {verbo:"seguir",modo:"subjuntivo",tiempo:"presente",persona:"3ª plural",respuesta:"ellos sigan"},
+      {verbo:"conseguir",modo:"indicativo",tiempo:"presente",persona:"2ª plural",respuesta:"vosotros conseguís"},
+      {verbo:"convertir",modo:"subjuntivo",tiempo:"presente",persona:"1ª plural",respuesta:"nosotros convirtamos"},
+      {verbo:"elegir",modo:"indicativo",tiempo:"pretérito perfecto compuesto",persona:"2ª singular",respuesta:"tú has elegido"},
+      {verbo:"corregir",modo:"indicativo",tiempo:"presente",persona:"3ª singular",respuesta:"él corrige"},
+      {verbo:"seguir",modo:"indicativo",tiempo:"futuro simple",persona:"3ª plural",respuesta:"ellos seguirán"},
+      {verbo:"repetir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª plural",respuesta:"vosotros repetid"},
+      {verbo:"medir",modo:"indicativo",tiempo:"pretérito perfecto compuesto",persona:"1ª singular",respuesta:"yo he medido"},
+      {verbo:"construir",modo:"subjuntivo",tiempo:"presente",persona:"2ª plural",respuesta:"vosotros construyáis"},
+      {verbo:"reír",modo:"indicativo",tiempo:"presente",persona:"2ª singular",respuesta:"tú ríes"},
+      {verbo:"divertir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª plural",respuesta:"vosotros divertid"},
+      {verbo:"mentir",modo:"indicativo",tiempo:"pretérito perfecto compuesto",persona:"3ª plural",respuesta:"ellos han mentido"},
+      {verbo:"sentir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"tú siente"},
+      {verbo:"advertir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª plural",respuesta:"vosotros advertid"},
+      {verbo:"preferir",modo:"indicativo",tiempo:"presente",persona:"1ª plural",respuesta:"nosotros preferimos"},
+      {verbo:"vestir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª plural",respuesta:"vosotros vestid"},
+      {verbo:"conseguir",modo:"subjuntivo",tiempo:"presente",persona:"2ª singular",respuesta:"tú consigas"},
+      {verbo:"pedir",modo:"subjuntivo",tiempo:"presente",persona:"3ª plural",respuesta:"ellos pidan"},
+      {verbo:"cantar",modo:"indicativo",tiempo:"pretérito perfecto simple",persona:"3ª plural",respuesta:"ellos cantaron"},
+      {verbo:"comer",modo:"indicativo",tiempo:"presente",persona:"1ª singular",respuesta:"yo como"},
+      {verbo:"vivir",modo:"indicativo",tiempo:"futuro simple",persona:"2ª plural",respuesta:"vosotros viviréis"},
+      {verbo:"amar",modo:"subjuntivo",tiempo:"presente",persona:"1ª plural",respuesta:"nosotros amemos"},
+      {verbo:"correr",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"tú corre"},
+      {verbo:"leer",modo:"indicativo",tiempo:"pretérito imperfecto",persona:"3ª singular",respuesta:"él leía"},
+      {verbo:"escribir",modo:"indicativo",tiempo:"pretérito perfecto compuesto",persona:"1ª plural",respuesta:"nosotros hemos escrito"},
+      {verbo:"beber",modo:"subjuntivo",tiempo:"presente",persona:"2ª plural",respuesta:"vosotros bebáis"},
+      {verbo:"salir",modo:"indicativo",tiempo:"futuro simple",persona:"1ª singular",respuesta:"yo saldré"},
+      {verbo:"abrir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª plural",respuesta:"vosotros abrid"},
+      {verbo:"ver",modo:"subjuntivo",tiempo:"presente",persona:"3ª plural",respuesta:"ellos vean"},
+      {verbo:"tener",modo:"indicativo",tiempo:"pretérito perfecto simple",persona:"2ª singular",respuesta:"tú tuviste"},
+      {verbo:"hacer",modo:"indicativo",tiempo:"presente",persona:"3ª singular",respuesta:"él hace"},
+      {verbo:"decir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"tú di"},
+      {verbo:"pensar",modo:"indicativo",tiempo:"futuro simple",persona:"1ª plural",respuesta:"nosotros pensaremos"},
+      {verbo:"trabajar",modo:"indicativo",tiempo:"pretérito imperfecto",persona:"1ª plural",respuesta:"nosotros trabajábamos"},
+      {verbo:"viajar",modo:"indicativo",tiempo:"futuro simple",persona:"2ª plural",respuesta:"vosotros viajaréis"},
+      {verbo:"conocer",modo:"subjuntivo",tiempo:"presente",persona:"1ª singular",respuesta:"yo conozca"},
+      {verbo:"jugar",modo:"indicativo",tiempo:"presente",persona:"2ª singular",respuesta:"tú juegas"},
+      {verbo:"dormir",modo:"subjuntivo",tiempo:"presente",persona:"3ª plural",respuesta:"ellos duerman"},
+      {verbo:"estudiar",modo:"indicativo",tiempo:"pretérito perfecto compuesto",persona:"1ª singular",respuesta:"yo he estudiado"},
+      {verbo:"creer",modo:"indicativo",tiempo:"pretérito imperfecto",persona:"3ª plural",respuesta:"ellos creían"},
+      {verbo:"bailar",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"tú baila"},
+      {verbo:"nadar",modo:"subjuntivo",tiempo:"presente",persona:"2ª plural",respuesta:"vosotros nadéis"},
+      {verbo:"ayudar",modo:"indicativo",tiempo:"presente",persona:"3ª singular",respuesta:"él ayuda"},
+      {verbo:"leer",modo:"subjuntivo",tiempo:"presente",persona:"1ª plural",respuesta:"nosotros leamos"},
+      {verbo:"vivir",modo:"subjuntivo",tiempo:"presente",persona:"1ª singular",respuesta:"yo viva"},
+      {verbo:"abrir",modo:"subjuntivo",tiempo:"presente",persona:"2ª plural",respuesta:"vosotros abráis"},
+      {verbo:"decidir",modo:"indicativo",tiempo:"futuro simple",persona:"3ª singular",respuesta:"él decidirá"},
+      {verbo:"pensar",modo:"subjuntivo",tiempo:"presente",persona:"2ª singular",respuesta:"tú pienses"},
+      {verbo:"seguir",modo:"indicativo",tiempo:"presente",persona:"1ª plural",respuesta:"nosotros seguimos"},
+      {verbo:"esquiar",modo:"indicativo",tiempo:"futuro simple",persona:"3ª plural",respuesta:"ellos esquiarán"},
+      {verbo:"viajar",modo:"subjuntivo",tiempo:"presente",persona:"1ª plural",respuesta:"nosotros viajemos"},
+      {verbo:"saltar",modo:"imperativo",tiempo:"afirmativo",persona:"2ª plural",respuesta:"vosotros saltad"},
+      {verbo:"caminar",modo:"indicativo",tiempo:"pretérito imperfecto",persona:"1ª plural",respuesta:"nosotros caminábamos"},
+      {verbo:"gritar",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"tú grita"},
+      {verbo:"cocinar",modo:"indicativo",tiempo:"presente",persona:"2ª plural",respuesta:"vosotros cocináis"},
+      {verbo:"descansar",modo:"subjuntivo",tiempo:"presente",persona:"3ª singular",respuesta:"él descanse"},
+      {verbo:"beber",modo:"indicativo",tiempo:"futuro simple",persona:"2ª singular",respuesta:"tú beberás"},
+      {verbo:"reír",modo:"subjuntivo",tiempo:"presente",persona:"1ª plural",respuesta:"nosotros riamos"},
+      {verbo:"jugar",modo:"subjuntivo",tiempo:"presente",persona:"2ª plural",respuesta:"vosotros juguéis"},
+      {verbo:"leer",modo:"indicativo",tiempo:"pretérito perfecto compuesto",persona:"3ª plural",respuesta:"ellos han leído"},
+      {verbo:"viajar",modo:"imperativo",tiempo:"afirmativo",persona:"2ª plural",respuesta:"vosotros viajad"},
+      {verbo:"escribir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"tú escribe"},
+      {verbo:"soñar",modo:"indicativo",tiempo:"presente",persona:"1ª singular",respuesta:"yo sueño"},
+      {verbo:"subir",modo:"indicativo",tiempo:"futuro simple",persona:"3ª plural",respuesta:"ellos subirán"},
+      {verbo:"ver",modo:"indicativo",tiempo:"pretérito imperfecto",persona:"2ª singular",respuesta:"tú veías"},
+      {verbo:"tener",modo:"subjuntivo",tiempo:"presente",persona:"3ª plural",respuesta:"ellos tengan"},
+      {verbo:"decir",modo:"indicativo",tiempo:"pretérito perfecto compuesto",persona:"1ª singular",respuesta:"yo he dicho"},
+      {verbo:"abrir",modo:"indicativo",tiempo:"presente",persona:"2ª singular",respuesta:"tú abres"},
+      {verbo:"cantar",modo:"subjuntivo",tiempo:"presente",persona:"3ª plural",respuesta:"ellos canten"},
+      {verbo:"caminar",modo:"subjuntivo",tiempo:"presente",persona:"2ª plural",respuesta:"vosotros caminéis"},
+      {verbo:"saltar",modo:"indicativo",tiempo:"presente",persona:"1ª singular",respuesta:"yo salto"},
+      {verbo:"leer",modo:"imperativo",tiempo:"afirmativo",persona:"2ª plural",respuesta:"vosotros leed"},
+      {verbo:"pensar",modo:"imperativo",tiempo:"afirmativo",persona:"2ª plural",respuesta:"vosotros pensad"},
+      {verbo:"ver",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"tú ve"},
+      {verbo:"hacer",modo:"imperativo",tiempo:"afirmativo",persona:"2ª plural",respuesta:"vosotros haced"},
+      {verbo:"ir",modo:"indicativo",tiempo:"pretérito perfecto simple",persona:"1ª plural",respuesta:"nosotros fuimos"},
+      {verbo:"ir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"tú ve"},
+      {verbo:"tener",modo:"imperativo",tiempo:"afirmativo",persona:"2ª plural",respuesta:"vosotros tened"},
+      {verbo:"ser",modo:"indicativo",tiempo:"presente",persona:"1ª singular",respuesta:"yo soy"},
+      {verbo:"estar",modo:"subjuntivo",tiempo:"presente",persona:"2ª singular",respuesta:"tú estés"},
+      {verbo:"poder",modo:"indicativo",tiempo:"presente",persona:"3ª plural",respuesta:"ellos pueden"},
+      {verbo:"dormir",modo:"indicativo",tiempo:"pretérito perfecto compuesto",persona:"1ª plural",respuesta:"nosotros hemos dormido"},
+      {verbo:"leer",modo:"indicativo",tiempo:"futuro simple",persona:"3ª plural",respuesta:"ellos leerán"},
+      {verbo:"tener",modo:"indicativo",tiempo:"condicional simple",persona:"1ª singular",respuesta:"yo tendría"},
+      {verbo:"hacer",modo:"indicativo",tiempo:"condicional simple",persona:"1ª plural",respuesta:"nosotros haríamos"},
+      {verbo:"decir",modo:"indicativo",tiempo:"futuro simple",persona:"2ª plural",respuesta:"vosotros diréis"},
+      {verbo:"poder",modo:"indicativo",tiempo:"pretérito pluscuamperfecto",persona:"3ª plural",respuesta:"ellos habían podido"},
+      {verbo:"ver",modo:"indicativo",tiempo:"futuro perfecto",persona:"1ª singular",respuesta:"yo habré visto"},
+      {verbo:"escribir",modo:"indicativo",tiempo:"condicional compuesto",persona:"3ª singular",respuesta:"él habría escrito"},
+      {verbo:"venir",modo:"indicativo",tiempo:"pretérito pluscuamperfecto",persona:"1ª plural",respuesta:"nosotros habíamos venido"},
+      {verbo:"poner",modo:"indicativo",tiempo:"futuro perfecto",persona:"3ª plural",respuesta:"ellos habrán puesto"},
+      {verbo:"querer",modo:"indicativo",tiempo:"condicional simple",persona:"2ª singular",respuesta:"tú querrías"},
+      {verbo:"saber",modo:"indicativo",tiempo:"futuro simple",persona:"1ª singular",respuesta:"yo sabré"},
+      {verbo:"caber",modo:"indicativo",tiempo:"futuro simple",persona:"3ª singular",respuesta:"él cabrá"},
+      {verbo:"haber",modo:"indicativo",tiempo:"condicional simple",persona:"1ª singular",respuesta:"yo habría"},
+      {verbo:"hacer",modo:"indicativo",tiempo:"pretérito perfecto simple",persona:"1ª singular",respuesta:"yo hice"},
+      {verbo:"andar",modo:"indicativo",tiempo:"pretérito perfecto simple",persona:"3ª plural",respuesta:"ellos anduvieron"},
+      {verbo:"traer",modo:"indicativo",tiempo:"pretérito perfecto simple",persona:"1ª singular",respuesta:"yo traje"},
+      {verbo:"conducir",modo:"indicativo",tiempo:"pretérito perfecto simple",persona:"1ª plural",respuesta:"nosotros condujimos"},
+      {verbo:"tener",modo:"subjuntivo",tiempo:"pretérito imperfecto",persona:"1ª singular",respuesta:"yo tuviera"},
+      {verbo:"ser",modo:"subjuntivo",tiempo:"pretérito imperfecto",persona:"1ª plural",respuesta:"nosotros fuéramos"},
+      {verbo:"ir",modo:"subjuntivo",tiempo:"pretérito imperfecto",persona:"3ª plural",respuesta:"ellos fueran"},
+      {verbo:"haber",modo:"subjuntivo",tiempo:"presente",persona:"3ª singular",respuesta:"él haya"},
+      {verbo:"hacer",modo:"subjuntivo",tiempo:"pretérito perfecto",persona:"2ª singular",respuesta:"tú hayas hecho"},
+      {verbo:"ver",modo:"subjuntivo",tiempo:"pretérito pluscuamperfecto",persona:"3ª plural",respuesta:"ellos hubieran visto"},
+      {verbo:"decir",modo:"subjuntivo",tiempo:"pretérito imperfecto",persona:"2ª plural",respuesta:"vosotros dijerais"},
+      {verbo:"poder",modo:"subjuntivo",tiempo:"pretérito perfecto",persona:"1ª plural",respuesta:"nosotros hayamos podido"},
+      {verbo:"venir",modo:"subjuntivo",tiempo:"pretérito imperfecto",persona:"3ª singular",respuesta:"él viniera"},
+      {verbo:"poner",modo:"subjuntivo",tiempo:"pretérito perfecto",persona:"1ª singular",respuesta:"yo haya puesto"},
+      {verbo:"salir",modo:"subjuntivo",tiempo:"pretérito imperfecto",persona:"2ª plural",respuesta:"vosotros salierais"},
+      {verbo:"querer",modo:"subjuntivo",tiempo:"pretérito perfecto",persona:"3ª plural",respuesta:"ellos hayan querido"},
+      {verbo:"ir",modo:"imperativo",tiempo:"negativo",persona:"2ª singular",respuesta:"no vayas"},
+      {verbo:"decir",modo:"imperativo",tiempo:"negativo",persona:"2ª plural",respuesta:"no digáis"},
+      {verbo:"hacer",modo:"imperativo",tiempo:"negativo",persona:"2ª singular",respuesta:"no hagas"},
+      {verbo:"poner",modo:"imperativo",tiempo:"negativo",persona:"2ª singular",respuesta:"no pongas"},
+      {verbo:"tener",modo:"imperativo",tiempo:"negativo",persona:"2ª plural",respuesta:"no tengáis"},
+      {verbo:"venir",modo:"imperativo",tiempo:"negativo",persona:"2ª singular",respuesta:"no vengas"},
+      {verbo:"salir",modo:"imperativo",tiempo:"negativo",persona:"2ª plural",respuesta:"no salgáis"},
+      {verbo:"ser",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"sé"},
+      {verbo:"ir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª plural",respuesta:"id"},
+      {verbo:"poner",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"pon"},
+      {verbo:"venir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"ven"},
+      {verbo:"salir",modo:"imperativo",tiempo:"afirmativo",persona:"2ª singular",respuesta:"sal"},
+      {verbo:"freír",modo:"forma no personal",tiempo:"participio",persona:"—",respuesta:"frito"},
+      {verbo:"imprimir",modo:"forma no personal",tiempo:"participio",persona:"—",respuesta:"impreso"},
+      {verbo:"prever",modo:"forma no personal",tiempo:"participio",persona:"—",respuesta:"previsto"},
+      {verbo:"dormir",modo:"forma no personal",tiempo:"gerundio",persona:"—",respuesta:"durmiendo"},
+      {verbo:"leer",modo:"forma no personal",tiempo:"gerundio",persona:"—",respuesta:"leyendo"},
+      {verbo:"decir",modo:"forma no personal",tiempo:"gerundio",persona:"—",respuesta:"diciendo"},
+      {verbo:"poder",modo:"forma no personal",tiempo:"gerundio",persona:"—",respuesta:"pudiendo"},
+      {verbo:"ir",modo:"forma no personal",tiempo:"gerundio",persona:"—",respuesta:"yendo"}
+  ].map((q,index)=>Object.assign({id:'q'+(index+1)},q));
+
+  const ACHIEVEMENTS=[
+    {id:'first_correct',icon:'✅',title:'Primera ficha',desc:'Acierta tu primer reto.',xp:20},
+    {id:'first_win',icon:'🏆',title:'Primer duelo',desc:'Gana una partida.',xp:35},
+    {id:'streak3',icon:'🔥',title:'En racha',desc:'Encadena 3 aciertos.',xp:25},
+    {id:'streak5',icon:'🔥',title:'Imparable',desc:'Encadena 5 aciertos.',xp:45},
+    {id:'streak8',icon:'🌋',title:'Modo leyenda',desc:'Encadena 8 aciertos.',xp:80},
+    {id:'big_bet',icon:'💰',title:'Sin miedo',desc:'Gana una apuesta de 50 fichas o más.',xp:30},
+    {id:'all_in',icon:'🎲',title:'Todo o nada',desc:'Gana apostando todas tus fichas.',xp:60},
+    {id:'bank500',icon:'💎',title:'Caja fuerte',desc:'Alcanza 500 fichas en una partida.',xp:40},
+    {id:'bank1000',icon:'👑',title:'Magnate verbal',desc:'Alcanza 1000 fichas en una partida.',xp:90},
+    {id:'perfect5',icon:'🎯',title:'Precisión total',desc:'Termina una partida de 5+ rondas sin fallar.',xp:70},
+    {id:'no_rescue',icon:'🛟',title:'Sin salvavidas',desc:'Gana sin necesitar rescate.',xp:35},
+    {id:'rescue_win',icon:'🌊',title:'De vuelta a flote',desc:'Gana después de usar un rescate.',xp:50},
+    {id:'subj5',icon:'🌙',title:'Subjuntivo dominado',desc:'Acierta 5 retos de subjuntivo.',xp:45},
+    {id:'imperative5',icon:'📣',title:'A tus órdenes',desc:'Acierta 5 imperativos.',xp:45},
+    {id:'irregular10',icon:'⚡',title:'Cazairregulares',desc:'Acierta 10 verbos irregulares.',xp:60},
+    {id:'expert3',icon:'🧠',title:'Zona experta',desc:'Acierta 3 retos expertos.',xp:55},
+    {id:'accent10',icon:'´',title:'Tildes de acero',desc:'10 respuestas correctas seguidas sin error de tilde.',xp:45},
+    {id:'games5',icon:'🎮',title:'Habitual de la mesa',desc:'Completa 5 partidas.',xp:40},
+    {id:'games20',icon:'🕹️',title:'Veterano',desc:'Completa 20 partidas.',xp:100},
+    {id:'wins5',icon:'🥇',title:'Quíntuple campeón',desc:'Gana 5 partidas.',xp:75},
+    {id:'correct50',icon:'📚',title:'Conjugador',desc:'Alcanza 50 aciertos acumulados.',xp:60},
+    {id:'correct150',icon:'📖',title:'Maestro verbal',desc:'Alcanza 150 aciertos acumulados.',xp:120},
+    {id:'level5',icon:'⭐',title:'Nivel 5',desc:'Alcanza el nivel 5.',xp:50},
+    {id:'level10',icon:'🌟',title:'Nivel 10',desc:'Alcanza el nivel 10.',xp:100}
+  ];
+  const ACH_MAP=Object.fromEntries(ACHIEVEMENTS.map(a=>[a.id,a]));
+
+  const $=id=>document.getElementById(id);
+  const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
+  const round2=n=>Math.round(n*100)/100;
+  const escapeHtml=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const slug=s=>String(s||'jugador').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,36)||'jugador';
+  const uid=()=>Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);
+
+  const state={
+    running:false,ended:false,rounds:8,timerSeconds:30,bankMode:'complete',turnNo:0,currentPlayer:0,
+    selectedTier:'basic',selectedBet:10,currentQuestion:null,questionOpen:false,used:new Set(),timerId:null,timeLeft:0,
+    insuranceActive:false,hintUsed:false,special:false,matchId:'',players:[],newUnlocks:[]
+  };
+
+  function defaultSave(){
+    return {version:2,xp:0,achievements:[],lifetime:{games:0,wins:0,losses:0,draws:0,attempts:0,correct:0,errors:0,accentErrors:0,rescues:0,maxStreak:0,subjCorrect:0,imperativeCorrect:0,irregularCorrect:0,expertCorrect:0},best:{chips:100,streak:0},updatedAt:''};
+  }
+  function normalizeSave(raw){
+    const base=defaultSave(),src=raw&&typeof raw==='object'?raw:{};
+    base.xp=Math.max(0,Number(src.xp||0));
+    base.achievements=Array.isArray(src.achievements)?src.achievements.map(String):[];
+    Object.assign(base.lifetime,src.lifetime||{});
+    Object.assign(base.best,src.best||{});
+    return base;
+  }
+  function levelFromXp(xp){return 1+Math.floor(Math.max(0,Number(xp||0))/250)}
+  function xpIntoLevel(xp){return Math.max(0,Number(xp||0))%250}
+  function loadLocalSave(name){try{return normalizeSave(JSON.parse(localStorage.getItem(SAVE_KEY_PREFIX+slug(name))||'null'))}catch(e){return defaultSave()}}
+  function persistPlayer(player){
+    player.save.updatedAt=new Date().toISOString();
+    if(player.role==='primary'&&Bridge.enabled())return;
+    if(player.role==='opponent'&&Bridge.hasOpponent())return;
+    try{localStorage.setItem(SAVE_KEY_PREFIX+slug(player.name),JSON.stringify(player.save))}catch(e){}
+  }
+
+  function difficultyOf(q){
+    let score=1;
+    const mode=String(q.modo).toLowerCase(),time=String(q.tiempo).toLowerCase();
+    if(IRREGULAR.has(q.verbo))score++;
+    if(time.includes('perfecto compuesto')||time.includes('pluscuamperfecto')||time.includes('perfecto simple'))score++;
+    if(time.includes('condicional')||time.includes('futuro perfecto'))score++;
+    if(mode==='subjuntivo')score+=2;
+    if(mode==='imperativo')score+=2;
+    if(mode==='forma no personal')score+=3;
+    if(time.includes('imperfecto')&&mode==='subjuntivo')score++;
+    if(time.includes('pluscuamperfecto')&&mode==='subjuntivo')score++;
+    if(score<=2)return 'basic';
+    if(score===3)return 'medium';
+    if(score<=5)return 'advanced';
+    return 'expert';
+  }
+  QUESTION_BANK.forEach(q=>q.tier=difficultyOf(q));
+
+  function bankForTier(tier){
+    return QUESTION_BANK.filter(q=>q.tier===tier && (state.bankMode==='complete'||!(q.modo==='forma no personal'||(q.modo==='subjuntivo'&&(q.tiempo.includes('imperfecto')||q.tiempo.includes('perfecto'))))));
+  }
+  function pickQuestion(tier){
+    let pool=bankForTier(tier).filter(q=>!state.used.has(q.id));
+    if(!pool.length){
+      bankForTier(tier).forEach(q=>state.used.delete(q.id));
+      pool=bankForTier(tier);
+    }
+    const q=pool[Math.floor(Math.random()*pool.length)];
+    if(q)state.used.add(q.id);
+    return q;
+  }
+
+  function allowedPronouns(person){
+    if(person==='1ª singular')return ['yo'];
+    if(person==='2ª singular')return ['tú','tu'];
+    if(person==='3ª singular')return ['él','el','ella','usted'];
+    if(person==='1ª plural')return ['nosotros','nosotras'];
+    if(person==='2ª plural')return ['vosotros','vosotras'];
+    if(person==='3ª plural')return ['ellos','ellas','ustedes'];
+    return [];
+  }
+  function norm(s){return String(s||'').normalize('NFC').toLowerCase().trim().replace(/[.,;:¡!¿?]+/g,'').replace(/\s+/g,' ')}
+  function accentless(s){return norm(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+  const ALTERNATIVES={
+    'freír|forma no personal|participio':['freído'],
+    'imprimir|forma no personal|participio':['imprimido'],
+    'tener|subjuntivo|pretérito imperfecto':['yo tuviese'],
+    'ser|subjuntivo|pretérito imperfecto':['nosotros fuésemos'],
+    'ir|subjuntivo|pretérito imperfecto':['ellos fuesen'],
+    'ver|subjuntivo|pretérito pluscuamperfecto':['ellos hubiesen visto'],
+    'decir|subjuntivo|pretérito imperfecto':['vosotros dijeseis'],
+    'venir|subjuntivo|pretérito imperfecto':['él viniese'],
+    'salir|subjuntivo|pretérito imperfecto':['vosotros salieseis']
+  };
+  function expectedForms(q){
+    const base=norm(q.respuesta);
+    const forms=new Set([base]);
+    (ALTERNATIVES[q.verbo+'|'+q.modo+'|'+q.tiempo]||[]).forEach(v=>forms.add(norm(v)));
+    const pronouns=allowedPronouns(q.persona);
+    let stem=base;
+    for(const p of ['nosotros','nosotras','vosotros','vosotras','ustedes','ellos','ellas','usted','ella','él','el','tú','tu','yo']){
+      if(stem.startsWith(p+' ')){stem=stem.slice(p.length+1);break}
+    }
+    forms.add(stem);
+    pronouns.forEach(p=>forms.add(norm(p+' '+stem)));
+    if(q.modo==='imperativo'&&stem.startsWith('no ')){
+      const bare=stem.slice(3);
+      forms.add('no '+bare);
+      pronouns.forEach(p=>forms.add(norm('no '+p+' '+bare)));
+    }
+    return Array.from(forms);
+  }
+  function checkAnswer(q,user){
+    const u=norm(user),forms=expectedForms(q);
+    if(forms.includes(u))return {ok:true,kind:'correct'};
+    if(forms.some(f=>accentless(f)===accentless(u)))return {ok:false,kind:'accent'};
+    return {ok:false,kind:'form'};
+  }
+  function hintFor(q){
+    const t=q.tiempo.toLowerCase();
+    if(t.includes('compuesto')||t.includes('perfecto'))return 'Piensa primero en el auxiliar «haber» y después en el participio.';
+    if(q.modo==='subjuntivo')return 'Busca la raíz verbal y recuerda las terminaciones propias del subjuntivo.';
+    if(q.modo==='imperativo'&&t==='negativo')return 'El imperativo negativo se construye con «no» y una forma de subjuntivo.';
+    if(q.modo==='imperativo')return 'Fíjate en la persona: tú y vosotros tienen formas muy reconocibles.';
+    if(q.modo==='forma no personal')return 'No necesitas persona gramatical: piensa en infinitivo, gerundio o participio.';
+    return 'Di la persona en voz alta y completa la forma verbal antes de escribirla.';
+  }
+
+  function makePlayer(name,index,save,role){
+    return {index,name:name||('Jugador '+(index+1)),role:role||'guest',chips:100,correct:0,errors:0,accentErrors:0,streak:0,maxStreak:0,rescues:0,insurance:1,swap:1,xpGain:0,allInWins:0,bigBetWins:0,subjCorrect:0,imperativeCorrect:0,irregularCorrect:0,expertCorrect:0,save:normalizeSave(save),newAchievements:[]};
+  }
+
+  function current(){return state.players[state.currentPlayer]}
+  function totalTurns(){return state.rounds*2}
+  function currentRound(){return Math.floor(state.turnNo/2)+1}
+  function currentIsSpecial(){return currentRound()%4===0}
+  function opponentIndex(){return state.currentPlayer===0?1:0}
+
+  function renderProfileHeader(){
+    const save=state.players[0]?.save||(Bridge.enabled()?Bridge.primarySave():loadLocalSave($('name1').value||'jugador'));
+    const level=levelFromXp(save.xp);
+    $('profileLevel').textContent='Nivel '+level;
+    $('profileXp').textContent=Math.round(save.xp)+' XP';
+  }
+
+  function renderTierChoices(){
+    $('tierList').innerHTML=Object.entries(TIERS).map(([key,t])=>'<button type="button" class="choice '+(state.selectedTier===key?'selected':'')+'" data-tier="'+key+'" '+(state.questionOpen?'disabled':'')+'><div><strong>'+t.label+'</strong><br><span>'+t.desc+'</span></div><b>×'+String(t.mult).replace('.',',')+'</b></button>').join('');
+    $('tierList').querySelectorAll('[data-tier]').forEach(btn=>btn.onclick=()=>{state.selectedTier=btn.dataset.tier;renderTierChoices();});
+  }
+  function availableBets(){
+    const chips=Math.max(0,current()?.chips||0);
+    const values=[10,20,30,50].filter(v=>v<=chips);
+    if(chips>0&&!values.includes(chips))values.push(chips);
+    return Array.from(new Set(values)).sort((a,b)=>a-b);
+  }
+  function renderBetChoices(){
+    const chips=Math.max(0,current()?.chips||0),bets=availableBets();
+    if(!bets.includes(state.selectedBet))state.selectedBet=bets[0]||0;
+    $('betList').innerHTML=bets.map(v=>'<button type="button" class="choice betChoice '+(state.selectedBet===v?'selected':'')+'" data-bet="'+v+'" '+(state.questionOpen?'disabled':'')+'>'+v+(v===chips&&chips>50?' · TODO':'')+' 🟠</button>').join('')||'<div style="color:var(--muted);font-size:.85rem">Sin fichas disponibles.</div>';
+    $('betList').querySelectorAll('[data-bet]').forEach(btn=>btn.onclick=()=>{state.selectedBet=Number(btn.dataset.bet);renderBetChoices();});
+  }
+  function renderPlayerCards(){
+    state.players.forEach((p,i)=>{
+      const level=levelFromXp(p.save.xp),prog=xpIntoLevel(p.save.xp)/250*100;
+      const el=$('playerCard'+i);
+      el.className='playerCard'+(i===state.currentPlayer&&!state.ended?' active':'');
+      el.innerHTML='<div class="playerTop"><div class="playerName">'+escapeHtml(p.name)+'</div><span class="mini">'+(p.role==='guest'?'Invitado':'LenguArcade')+'</span></div>'+
+        '<div class="chips">'+Math.max(0,Math.round(p.chips))+' fichas</div>'+
+        '<div class="playerBadges"><span class="mini">🔥 '+p.streak+'</span><span class="mini">✅ '+p.correct+'</span><span class="mini">❌ '+p.errors+'</span><span class="mini">⭐ Nv. '+level+'</span></div>'+
+        '<div class="xpMini" style="margin-top:10px"><div style="width:'+prog+'%"></div></div>';
+    });
+  }
+  function renderPowerList(){
+    const p=current();
+    $('powerList').innerHTML=
+      '<div class="power"><div><b>🛡️ Seguro</b><div style="font-size:.72rem;color:var(--muted)">Reduce a la mitad una pérdida</div></div><b>'+p.insurance+'</b></div>'+
+      '<div class="power"><div><b>🔁 Cambio</b><div style="font-size:.72rem;color:var(--muted)">Cambia el reto actual</div></div><b>'+p.swap+'</b></div>'+
+      '<div class="power"><div><b>🛟 Rescate</b><div style="font-size:.72rem;color:var(--muted)">40 fichas si te quedas a cero</div></div><b>'+(p.rescues?'Usado':'1')+'</b></div>';
+    if(state.questionOpen){
+      $('swapBtn').disabled=p.swap<=0;
+      $('insuranceBtn').disabled=p.insurance<=0||state.insuranceActive;
+    }
+  }
+  function renderRound(){
+    $('roundLabel').textContent='Ronda '+currentRound()+'/'+state.rounds;
+    $('turnCounter').textContent='Turno '+(state.turnNo+1)+'/'+totalTurns();
+    state.special=currentIsSpecial();
+    $('specialFlag').classList.toggle('hidden',!state.special);
+    $('turnLabel').textContent='Turno de '+current().name;
+  }
+  function renderAll(){
+    renderPlayerCards();renderRound();renderTierChoices();renderBetChoices();renderPowerList();
+  }
+
+  function log(text){$('battleLog').innerHTML=text}
+  function toast(title,text,gold){
+    const div=document.createElement('div');div.className='toast'+(gold?' gold':'');div.innerHTML='<strong>'+escapeHtml(title)+'</strong><div style="font-size:.82rem;margin-top:3px;opacity:.88">'+escapeHtml(text)+'</div>';
+    $('toastStack').appendChild(div);setTimeout(()=>div.remove(),3600);
+  }
+  function sfx(type){
+    try{
+      const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+      const ctx=new C(),o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=type==='ok'?660:type==='bad'?190:420;g.gain.setValueAtTime(.035,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.18);o.start();o.stop(ctx.currentTime+.19);
+    }catch(e){}
+  }
+
+  function revealQuestion(){
+    const p=current();
+    if(!state.selectedBet||state.selectedBet>p.chips)return toast('Apuesta no válida','Elige una cantidad que tengas disponible.');
+    state.currentQuestion=pickQuestion(state.selectedTier);
+    if(!state.currentQuestion)return toast('Sin retos','No hay preguntas disponibles para esta configuración.');
+    state.questionOpen=true;state.insuranceActive=false;state.hintUsed=false;
+    $('preQuestionState').classList.add('hidden');$('questionState').classList.remove('hidden');$('feedback').className='feedback hidden';
+    $('verbTitle').textContent=state.currentQuestion.verbo.toUpperCase();
+    $('metaRow').innerHTML=[state.currentQuestion.modo,state.currentQuestion.tiempo,state.currentQuestion.persona,TIERS[state.selectedTier].label].map(v=>'<span class="metaTag">'+escapeHtml(v)+'</span>').join('');
+    $('prompt').textContent='Conjuga «'+state.currentQuestion.verbo+'» en '+state.currentQuestion.persona+', '+state.currentQuestion.tiempo+' de '+state.currentQuestion.modo+'.';
+    if(state.currentQuestion.modo==='forma no personal')$('prompt').textContent='Escribe el '+state.currentQuestion.tiempo+' del verbo «'+state.currentQuestion.verbo+'».';
+    $('answerInput').value='';$('answerInput').disabled=false;$('submitBtn').disabled=false;$('hintBtn').disabled=p.chips<5;
+    $('statusLine').innerHTML='<span>Apuesta: '+state.selectedBet+'</span><span>Multiplicador: ×'+String(TIERS[state.selectedTier].mult).replace('.',',')+'</span>'+(state.special?'<span>Bote ×1,5</span>':'');
+    renderPowerList();startTimer();setTimeout(()=>$('answerInput').focus(),40);
+    log('🎯 <b>'+escapeHtml(p.name)+'</b> ha apostado <b>'+state.selectedBet+'</b> fichas en nivel <b>'+TIERS[state.selectedTier].label+'</b>.');
+  }
+
+  function startTimer(){
+    clearInterval(state.timerId);state.timeLeft=state.timerSeconds;
+    $('timerWrap').classList.toggle('hidden',state.timerSeconds===0);
+    if(!state.timerSeconds)return;
+    updateTimer();
+    state.timerId=setInterval(()=>{state.timeLeft-=.25;updateTimer();if(state.timeLeft<=0){clearInterval(state.timerId);resolveAnswer('',true);}},250);
+  }
+  function updateTimer(){
+    const pct=clamp(state.timeLeft/state.timerSeconds*100,0,100);$('timerFill').style.width=pct+'%';
+  }
+  function insertAccent(ch){
+    const input=$('answerInput'),start=input.selectionStart,end=input.selectionEnd;
+    input.value=input.value.slice(0,start)+ch+input.value.slice(end);input.focus();input.selectionStart=input.selectionEnd=start+ch.length;
+  }
+  function useHint(){
+    if(!state.questionOpen||state.hintUsed||current().chips<5)return;
+    current().chips=Math.max(0,current().chips-5);state.hintUsed=true;$('hintBtn').disabled=true;
+    toast('Pista',hintFor(state.currentQuestion));renderPlayerCards();renderBetChoices();
+    $('statusLine').insertAdjacentHTML('beforeend','<span>💡 Pista usada · premio −25%</span>');
+  }
+  function useSwap(){
+    const p=current();if(!state.questionOpen||p.swap<=0)return;
+    p.swap--;state.currentQuestion=pickQuestion(state.selectedTier);state.insuranceActive=false;state.hintUsed=false;
+    $('verbTitle').textContent=state.currentQuestion.verbo.toUpperCase();
+    $('metaRow').innerHTML=[state.currentQuestion.modo,state.currentQuestion.tiempo,state.currentQuestion.persona,TIERS[state.selectedTier].label].map(v=>'<span class="metaTag">'+escapeHtml(v)+'</span>').join('');
+    $('prompt').textContent=state.currentQuestion.modo==='forma no personal'?'Escribe el '+state.currentQuestion.tiempo+' del verbo «'+state.currentQuestion.verbo+'».':'Conjuga «'+state.currentQuestion.verbo+'» en '+state.currentQuestion.persona+', '+state.currentQuestion.tiempo+' de '+state.currentQuestion.modo+'.';
+    $('answerInput').value='';$('hintBtn').disabled=p.chips<5;renderPowerList();startTimer();toast('Cambio usado','Nuevo reto, misma apuesta y dificultad.');
+  }
+  function useInsurance(){
+    const p=current();if(!state.questionOpen||p.insurance<=0||state.insuranceActive)return;
+    p.insurance--;state.insuranceActive=true;renderPowerList();toast('Seguro activado','Si fallas, perderás solo la mitad de la apuesta.');
+    $('statusLine').insertAdjacentHTML('beforeend','<span>🛡️ Seguro activo</span>');
+  }
+
+  function addXp(p,amount){
+    amount=Math.max(0,Math.round(amount));p.xpGain+=amount;p.save.xp+=amount;
+  }
+  function unlock(p,id){
+    if(p.save.achievements.includes(id))return false;
+    const a=ACH_MAP[id];if(!a)return false;
+    p.save.achievements.push(id);p.newAchievements.push(a);state.newUnlocks.push({player:p.name,achievement:a});
+    addXp(p,a.xp);toast('🏆 '+a.title,p.name+' · +'+a.xp+' XP',true);return true;
+  }
+  function evaluateLiveAchievements(p,bet,wasAllIn){
+    if(p.correct>=1)unlock(p,'first_correct');
+    if(p.streak>=3)unlock(p,'streak3');
+    if(p.streak>=5)unlock(p,'streak5');
+    if(p.streak>=8)unlock(p,'streak8');
+    if(p.bigBetWins>=1)unlock(p,'big_bet');
+    if(wasAllIn&&p.allInWins>=1)unlock(p,'all_in');
+    if(p.chips>=500)unlock(p,'bank500');
+    if(p.chips>=1000)unlock(p,'bank1000');
+    if(p.subjCorrect>=5)unlock(p,'subj5');
+    if(p.imperativeCorrect>=5)unlock(p,'imperative5');
+    if(p.irregularCorrect>=10)unlock(p,'irregular10');
+    if(p.expertCorrect>=3)unlock(p,'expert3');
+    const life=p.save.lifetime;
+    if(life.correct>=50)unlock(p,'correct50');
+    if(life.correct>=150)unlock(p,'correct150');
+    if(levelFromXp(p.save.xp)>=5)unlock(p,'level5');
+    if(levelFromXp(p.save.xp)>=10)unlock(p,'level10');
+  }
+
+  function resolveAnswer(user,timeout){
+    if(!state.questionOpen)return;
+    clearInterval(state.timerId);
+    const p=current(),q=state.currentQuestion,bet=state.selectedBet,wasAllIn=bet===p.chips;
+    const result=timeout?{ok:false,kind:'timeout'}:checkAnswer(q,user);
+    p.save.lifetime.attempts++;state.questionOpen=false;$('answerInput').disabled=true;$('submitBtn').disabled=true;
+    let feedbackClass='bad',title='',body='',xp=0;
+    if(result.ok){
+      const mult=TIERS[state.selectedTier].mult*(state.special?1.5:1)*(state.hintUsed?.75:1);
+      const gain=Math.max(1,Math.round(bet*mult));
+      p.chips+=gain;p.correct++;p.streak++;p.maxStreak=Math.max(p.maxStreak,p.streak);p.save.lifetime.correct++;p.save.lifetime.maxStreak=Math.max(Number(p.save.lifetime.maxStreak||0),p.streak);p.save.best.streak=Math.max(Number(p.save.best.streak||0),p.streak);
+      if(q.modo==='subjuntivo'){p.subjCorrect++;p.save.lifetime.subjCorrect++;}
+      if(q.modo==='imperativo'){p.imperativeCorrect++;p.save.lifetime.imperativeCorrect++;}
+      if(IRREGULAR.has(q.verbo)){p.irregularCorrect++;p.save.lifetime.irregularCorrect++;}
+      if(state.selectedTier==='expert'){p.expertCorrect++;p.save.lifetime.expertCorrect++;}
+      if(bet>=50)p.bigBetWins++;if(wasAllIn)p.allInWins++;
+      p.save.best.chips=Math.max(Number(p.save.best.chips||100),p.chips);
+      xp=8+({basic:0,medium:4,advanced:8,expert:12}[state.selectedTier]||0)+Math.min(10,Math.floor(bet/10))+Math.min(15,Math.max(0,p.streak-1)*3);
+      addXp(p,xp);feedbackClass='ok';title='✅ ¡Correcto!';body='La forma es «'+q.respuesta+'». Ganas '+gain+' fichas y '+xp+' XP.';
+      sfx('ok');
+    }else{
+      let loss=bet;if(state.insuranceActive)loss=Math.ceil(loss/2);
+      p.chips=Math.max(0,p.chips-loss);p.errors++;p.streak=0;p.save.lifetime.errors++;
+      if(result.kind==='accent'){p.accentErrors++;p.save.lifetime.accentErrors++;feedbackClass='near';title='✍️ Casi: revisa la tilde';body='La conjugación correcta es «'+q.respuesta+'». Pierdes '+loss+' fichas.';}
+      else if(timeout){title='⏱️ Tiempo agotado';body='La respuesta era «'+q.respuesta+'». Pierdes '+loss+' fichas.';}
+      else{title='❌ No es esa forma';body='La respuesta correcta es «'+q.respuesta+'». Pierdes '+loss+' fichas.';}
+      addXp(p,2);sfx('bad');
+    }
+    evaluateLiveAchievements(p,bet,wasAllIn);persistPlayer(p);
+    $('feedback').className='feedback '+feedbackClass;$('feedback').innerHTML='<strong>'+title+'</strong>'+escapeHtml(body);
+    renderPlayerCards();renderPowerList();
+    if(p.chips<=0){
+      if(p.rescues===0){
+        p.rescues=1;p.save.lifetime.rescues++;p.chips=40;toast('🛟 Rescate automático',p.name+' vuelve con 40 fichas. Es el único rescate de la partida.');renderPlayerCards();
+      }else{
+        setTimeout(()=>finishMatch('bankrupt'),1500);return;
+      }
+    }
+    setTimeout(nextTurn,2400);
+  }
+
+  function nextTurn(){
+    if(state.ended)return;
+    state.turnNo++;
+    if(state.turnNo>=totalTurns())return finishMatch('complete');
+    state.currentPlayer=state.turnNo%2;state.selectedTier='basic';state.selectedBet=Math.min(10,current().chips);state.currentQuestion=null;state.questionOpen=false;state.insuranceActive=false;state.hintUsed=false;
+    $('questionState').classList.add('hidden');$('preQuestionState').classList.remove('hidden');$('feedback').className='feedback hidden';
+    renderAll();log('🎲 Turno de <b>'+escapeHtml(current().name)+'</b>. Elige riesgo y apuesta.');
+  }
+
+  function finishMatch(reason){
+    if(state.ended)return;state.ended=true;state.running=false;clearInterval(state.timerId);
+    const a=state.players[0],b=state.players[1],abandoned=reason==='abandoned';
+    let winner=-1;if(!abandoned){if(a.chips>b.chips)winner=0;else if(b.chips>a.chips)winner=1;}
+    state.players.forEach((p,i)=>{
+      if(!abandoned){
+        p.save.lifetime.games++;
+        if(winner===-1)p.save.lifetime.draws++;else if(i===winner)p.save.lifetime.wins++;else p.save.lifetime.losses++;
+        if(i===winner){addXp(p,35);unlock(p,'first_win');}
+        else if(winner===-1)addXp(p,18);else addXp(p,8);
+      }
+      if(!abandoned){
+        if(i===winner&&p.rescues===0)unlock(p,'no_rescue');
+        if(i===winner&&p.rescues>0)unlock(p,'rescue_win');
+        if(p.errors===0&&state.rounds>=5)unlock(p,'perfect5');
+        if(p.save.lifetime.games>=5)unlock(p,'games5');
+        if(p.save.lifetime.games>=20)unlock(p,'games20');
+        if(p.save.lifetime.wins>=5)unlock(p,'wins5');
+      }
+      if(levelFromXp(p.save.xp)>=5)unlock(p,'level5');
+      if(levelFromXp(p.save.xp)>=10)unlock(p,'level10');
+      persistPlayer(p);
+    });
+    $('gameScreen').classList.add('hidden');$('endScreen').classList.remove('hidden');
+    $('winnerTitle').textContent=abandoned?'Partida guardada':winner===-1?'Empate técnico':'¡'+state.players[winner].name+' gana!';
+    $('winnerSubtitle').textContent=abandoned?'Has salido antes del final. Se conserva la XP obtenida en los retos respondidos.':reason==='bankrupt'?'La partida termina porque un jugador se ha quedado sin fichas después de usar su rescate.':'Duelo completado. La XP y los logros ya están calculados.';
+    $('resultsGrid').innerHTML=state.players.map((p,i)=>{
+      const accuracy=(p.correct+p.errors)?Math.round(p.correct/(p.correct+p.errors)*100):0;
+      return '<article class="resultCard '+(i===winner?'winner':'')+'"><div class="playerTop"><div class="playerName">'+escapeHtml(p.name)+'</div><b>'+Math.round(p.chips)+' fichas</b></div>'+
+      '<div class="statGrid"><div class="stat"><b>'+p.correct+'</b><span>Aciertos</span></div><div class="stat"><b>'+accuracy+'%</b><span>Precisión</span></div><div class="stat"><b>'+p.maxStreak+'</b><span>Mejor racha</span></div><div class="stat"><b>+'+p.xpGain+'</b><span>XP</span></div></div></article>';
+    }).join('');
+    $('unlocks').innerHTML=state.newUnlocks.length?'<h3>Nuevos logros</h3>'+state.newUnlocks.map(x=>'<div class="unlock"><div class="unlockIcon">'+x.achievement.icon+'</div><div><strong>'+escapeHtml(x.player)+' · '+escapeHtml(x.achievement.title)+'</strong><div style="color:var(--muted);font-size:.85rem">'+escapeHtml(x.achievement.desc)+' · +'+x.achievement.xp+' XP</div></div></div>').join(''):'';
+    renderProfileHeader();Bridge.sendResult(buildResultPayload(winner,reason));
+  }
+
+  function buildParticipant(p,role,outcome){
+    return {role,outcome,score:Math.round(p.chips),correct:p.correct,errors:p.errors,maxCombo:p.maxStreak,xpGain:p.xpGain,achievements:p.newAchievements.map(a=>({id:a.id,title:a.title,description:a.desc,xpReward:a.xp})),save:p.save};
+  }
+  function buildResultPayload(winner,reason){
+    const primaryOutcome=reason==='abandoned'?'abandoned':winner===-1?'draw':winner===0?'victory':'defeat';
+    const payload={resultId:'conjuga_'+uid(),matchId:state.matchId,outcome:primaryOutcome,score:Math.round(state.players[0].chips),correct:state.players[0].correct,errors:state.players[0].errors,maxCombo:state.players[0].maxStreak,xpGain:state.players[0].xpGain,save:state.players[0].save,achievements:state.players[0].newAchievements.map(a=>({id:a.id,title:a.title,description:a.desc,xpReward:a.xp})),reason,players:[buildParticipant(state.players[0],'primary',primaryOutcome)]};
+    if(Bridge.hasOpponent())payload.players.push(buildParticipant(state.players[1],'opponent',reason==='abandoned'?'abandoned':winner===-1?'draw':winner===1?'victory':'defeat'));
+    return payload;
+  }
+
+  function startMatch(){
+    const n1=String($('name1').value||'').trim(),n2=String($('name2').value||'').trim();
+    if(!n1||!n2)return toast('Faltan jugadores','Escribe los dos nombres o conecta al rival.');
+    state.rounds=Number($('rounds').value||8);state.timerSeconds=Number($('timer').value||30);state.bankMode=$('bankMode').value;state.turnNo=0;state.currentPlayer=0;state.selectedTier='basic';state.selectedBet=10;state.currentQuestion=null;state.questionOpen=false;state.used=new Set();state.ended=false;state.running=true;state.matchId='cya_'+uid();state.newUnlocks=[];
+    const primarySave=Bridge.enabled()?Bridge.primarySave():loadLocalSave(n1);
+    const opponentSave=Bridge.hasOpponent()?Bridge.opponentSave():loadLocalSave(n2);
+    state.players=[makePlayer(n1,0,primarySave,Bridge.enabled()?'primary':'guest'),makePlayer(n2,1,opponentSave,Bridge.hasOpponent()?'opponent':'guest')];
+    $('setupScreen').classList.add('hidden');$('endScreen').classList.add('hidden');$('gameScreen').classList.remove('hidden');
+    $('questionState').classList.add('hidden');$('preQuestionState').classList.remove('hidden');
+    renderAll();log('⚔️ Empieza el duelo. <b>'+escapeHtml(n1)+'</b> abre la partida.');Bridge.sessionStarted();
+  }
+  function rematch(){
+    $('endScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');startMatch();
+  }
+  function newMatch(){
+    $('endScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');renderProfileHeader();
+  }
+  function requestExit(){
+    if(state.running&&!state.ended){
+      if(confirm('¿Salir de la partida? Se guardará lo jugado hasta ahora.'))finishMatch('abandoned');
+    }else Bridge.closeReady();
+  }
+
+  function renderAchievements(){
+    const save=state.players[0]?.save||(Bridge.enabled()?Bridge.primarySave():loadLocalSave($('name1').value||'jugador'));
+    const unlocked=new Set(save.achievements||[]);
+    $('achievementSummary').textContent=unlocked.size+' de '+ACHIEVEMENTS.length+' desbloqueados · Nivel '+levelFromXp(save.xp)+' · '+Math.round(save.xp)+' XP';
+    $('achievementGrid').innerHTML=ACHIEVEMENTS.map(a=>'<article class="ach '+(unlocked.has(a.id)?'':'locked')+'"><div class="icon">'+(unlocked.has(a.id)?a.icon:'🔒')+'</div><strong>'+escapeHtml(a.title)+'</strong><small>'+escapeHtml(a.desc)+' · +'+a.xp+' XP</small></article>').join('');
+    $('achievementsModal').classList.add('open');
+  }
+
+  const Bridge=(()=>{
+    let isEnabled=false,channel='',hostWindow=null,initialized=false,readyTimer=null,primary={student:null,save:defaultSave()},opponent={student:null,save:defaultSave()};
+    function post(type,payload={}){if(!isEnabled||!channel)return;const msg={namespace:'lenguarcade-game',channel,gameId:GAME_ID,type,payload};if(hostWindow)hostWindow.postMessage(msg,'*');else if(window.parent!==window)window.parent.postMessage(msg,'*');}
+    function announce(){post('READY',{protocol:2,multiplayer:true,version:2})}
+    function start(){
+      const params=Object.fromEntries(new URLSearchParams(location.search).entries());isEnabled=String(params.lenguarcade||'')==='1'&&window.parent!==window;channel=String(params.channel||'');
+      if(!isEnabled||!channel)return;
+      document.documentElement.classList.add('lenguarcade-embedded');$('integratedBox').classList.remove('hidden');$('connectOpponentBtn').classList.remove('hidden');
+      announce();readyTimer=setInterval(()=>{if(initialized)clearInterval(readyTimer);else announce()},650);
+    }
+    function applyContext(ctx){
+      const s=(ctx&&ctx.student)||{};primary.student=s;primary.save=normalizeSave(ctx&&ctx.save);initialized=true;clearInterval(readyTimer);
+      const name=[s.nombre,s.apellidos].filter(Boolean).join(' ')||'Jugador 1';$('name1').value=name;$('name1').disabled=true;
+      $('integratedStatus').textContent='Perfil conectado: '+name+'. Conecta al rival si quieres guardar también su progreso.';
+      renderProfileHeader();post('INITIALIZED',{profileId:s.studentId||'',multiplayer:true});
+    }
+    function applyOpponent(payload){
+      const s=(payload&&payload.student)||{};opponent.student=s;opponent.save=normalizeSave(payload&&payload.save);
+      const name=[s.nombre,s.apellidos].filter(Boolean).join(' ')||'Jugador 2';$('name2').value=name;$('name2').disabled=true;
+      $('integratedStatus').textContent='Dos perfiles conectados: '+$('name1').value+' y '+name+'.';
+      $('connectOpponentBtn').textContent='✅ Rival conectado';$('connectOpponentBtn').disabled=true;toast('Rival conectado',name+' también guardará XP y logros.');
+    }
+    function onMessage(event){
+      if(!isEnabled)return;const m=event.data||{};if(m.namespace!=='lenguarcade-host'||m.channel!==channel)return;if(hostWindow&&event.source!==hostWindow)return;
+      if(m.type==='INIT'){hostWindow=event.source;if(!initialized)applyContext(m.payload||{});else post('INITIALIZED',{profileId:primary.student?.studentId||'',multiplayer:true});}
+      if(m.type==='OPPONENT_AUTHENTICATED')applyOpponent(m.payload||{});
+      if(m.type==='OPPONENT_AUTH_FAILED')toast('No se pudo conectar',String(m.payload?.message||'Revisa el código.'));
+      if(m.type==='REQUEST_EXIT'){if(state.running&&!state.ended)finishMatch('abandoned');else post('CLOSE_READY');}
+      if(m.type==='SAVE_CONFIRMED'&&state.ended)post('CLOSE_READY');
+    }
+    window.addEventListener('message',onMessage);window.addEventListener('load',start);
+    return {
+      enabled:()=>isEnabled,hasOpponent:()=>!!opponent.student,primarySave:()=>normalizeSave(primary.save),opponentSave:()=>normalizeSave(opponent.save),
+      requestOpponent:()=>post('REQUEST_OPPONENT_AUTH'),sessionStarted:()=>post('SESSION_STARTED',{mode:'duel',matchId:state.matchId}),
+      sendResult:payload=>{if(isEnabled)post('RESULT',payload)},closeReady:()=>post('CLOSE_READY')
+    };
+  })();
+
+  function wire(){
+    $('startBtn').onclick=startMatch;$('revealBtn').onclick=revealQuestion;$('submitBtn').onclick=()=>resolveAnswer($('answerInput').value,false);
+    $('answerInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();resolveAnswer($('answerInput').value,false)}});
+    $('hintBtn').onclick=useHint;$('swapBtn').onclick=useSwap;$('insuranceBtn').onclick=useInsurance;$('exitBtn').onclick=requestExit;
+    $('connectOpponentBtn').onclick=()=>Bridge.requestOpponent();$('rematchBtn').onclick=rematch;$('newMatchBtn').onclick=newMatch;
+    $('achievementsBtn').onclick=renderAchievements;$('endAchievementsBtn').onclick=renderAchievements;$('closeAchievementsBtn').onclick=()=>$('achievementsModal').classList.remove('open');
+    $('achievementsModal').addEventListener('click',e=>{if(e.target===$('achievementsModal'))$('achievementsModal').classList.remove('open')});
+    ['á','é','í','ó','ú','ü','ñ'].forEach(ch=>{const b=document.createElement('button');b.type='button';b.textContent=ch;b.onclick=()=>insertAccent(ch);$('accentRow').appendChild(b)});
+    $('name1').addEventListener('input',renderProfileHeader);
+  }
+
+  wire();renderProfileHeader();renderTierChoices();
+})();
+</script>
+</body>
+</html>
