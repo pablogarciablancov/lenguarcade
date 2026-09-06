@@ -1456,16 +1456,54 @@ async function authenticateGameOpponent(){
     if($('gameOpponentCode'))$('gameOpponentCode').value='';
   }
 }
-function sendToActiveGame(type,payload={}){
-  const runner=activeGameRunner;
-  const target=runner?.gameWindow||runner?.iframe?.contentWindow;
-  if(!target)return;
+function buildGameInitPayload(runner){
+  return {
+    student:currentDashboard.student,
+    save:parseStoredGameSave(runner.game),
+    feedback:(currentDashboard.evaluations||[]).find(item=>item.gameId===runner.game.gameId)||null
+  };
+}
+
+function postToGameWindow(runner,target,type,payload={}){
+  if(!runner||!target)return;
   target.postMessage({
     namespace:'lenguarcade-host',
     channel:runner.channel,
     type,
     payload
   },'*');
+}
+
+function sendToActiveGame(type,payload={}){
+  const runner=activeGameRunner;
+  const target=runner?.gameWindow||runner?.iframe?.contentWindow;
+  if(!target)return;
+  postToGameWindow(runner,target,type,payload);
+}
+
+function stopGameInitHandshake(runner){
+  if(!runner)return;
+  if(runner.initTimer)clearInterval(runner.initTimer);
+  runner.initTimer=null;
+}
+
+function pulseGameInitHandshake(runner){
+  if(!runner||runner!==activeGameRunner||runner.initialized||!currentDashboard)return;
+  const payload=buildGameInitPayload(runner);
+  const targets=[];
+  const iframeWindow=runner.iframe?.contentWindow||null;
+  if(iframeWindow)targets.push(iframeWindow);
+  if(runner.gameWindow&&runner.gameWindow!==iframeWindow)targets.push(runner.gameWindow);
+  targets.forEach(target=>{
+    try{postToGameWindow(runner,target,'INIT',payload);}catch(error){}
+  });
+}
+
+function startGameInitHandshake(runner){
+  if(!runner||runner!==activeGameRunner||runner.initialized)return;
+  pulseGameInitHandshake(runner);
+  if(runner.initTimer)return;
+  runner.initTimer=setInterval(()=>pulseGameInitHandshake(runner),650);
 }
 
 function prepareEmbeddedGame(game){
@@ -1481,7 +1519,7 @@ function prepareEmbeddedGame(game){
   url.searchParams.set('lenguarcade','1');
   url.searchParams.set('channel',channel);
   const iframe=$('gameRunnerFrame');
-  activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,explicitExitRequested:false,lastResultReason:'',pendingResult:null,saving:false,checkpointing:false,opponent:null,opponents:{},pendingOpponentRequest:null,opponentAuthBusy:false,initialized:false,visible:false,loading:false,retries:0,primarySessionCounted:false,opponentSessionCounted:false,sessionCountedByRole:{}};
+  activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,explicitExitRequested:false,lastResultReason:'',pendingResult:null,saving:false,checkpointing:false,opponent:null,opponents:{},pendingOpponentRequest:null,opponentAuthBusy:false,initialized:false,visible:false,loading:false,retries:0,initTimer:null,primarySessionCounted:false,opponentSessionCounted:false,sessionCountedByRole:{}};
   $('gameRunnerTitle').textContent=game.nombre;
   $('gameRunnerStatus').textContent='Conectando con tu perfil...';
   $('gameRunnerBootText').textContent='Cargando datos del perfil...';
@@ -1494,7 +1532,13 @@ function prepareEmbeddedGame(game){
 function startEmbeddedGameLoad(runner){
   if(!runner||runner!==activeGameRunner||runner.loading||runner.initialized)return;
   runner.loading=true;
+  runner.iframe.onload=()=>{
+    if(runner!==activeGameRunner||runner.initialized)return;
+    runner.loading=false;
+    pulseGameInitHandshake(runner);
+  };
   runner.iframe.src=runner.url;
+  startGameInitHandshake(runner);
   runner.connectionTimer=setTimeout(retryGameConnection,getEmbeddedGameConnectionDelay(runner.game));
 }
 
@@ -1526,12 +1570,15 @@ function retryGameConnection(){
   runner.loading=true;
   $('gameRunnerStatus').textContent='Reintentando conexión...';
   runner.iframe.src=runner.iframe.src;
+  startGameInitHandshake(runner);
   runner.connectionTimer=setTimeout(retryGameConnection,getEmbeddedGameConnectionDelay(runner.game));
 }
 
 function destroyGameRunner(){
   if(!$('gameRunner'))return;
   if(activeGameRunner?.connectionTimer)clearTimeout(activeGameRunner.connectionTimer);
+  stopGameInitHandshake(activeGameRunner);
+  if($('gameRunnerFrame'))$('gameRunnerFrame').onload=null;
   $('gameRunner').classList.remove('open');
   $('gameRunnerFrame').src='about:blank';
   $('gameRunnerRetry').classList.add('hidden');
@@ -1891,17 +1938,14 @@ window.addEventListener('message',event=>{
   if(runner.gameWindow&&event.source!==runner.gameWindow&&message.type!=='READY')return;
   if(message.type==='READY'){
     runner.gameWindow=event.source;
-    clearTimeout(runner.connectionTimer);
     $('gameRunnerStatus').textContent='Cargando tu progreso...';
-    sendToActiveGame('INIT',{
-      student:currentDashboard.student,
-      save:parseStoredGameSave(runner.game),
-      feedback:(currentDashboard.evaluations||[]).find(item=>item.gameId===runner.game.gameId)||null
-    });
+    pulseGameInitHandshake(runner);
   }
   if(message.type==='INITIALIZED'){
     runner.initialized=true;
     runner.gameWindow=event.source;
+    clearTimeout(runner.connectionTimer);
+    stopGameInitHandshake(runner);
     $('gameRunnerStatus').textContent='Perfil conectado.';
     $('gameRunnerBoot').classList.add('hidden');
   }
