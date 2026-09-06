@@ -79,16 +79,22 @@ https://pablogarciablancov.github.io/lenguarcade/games/<gameId>/
 Se añadió una migración posterior que registra estas URL sin reescribir migraciones
 históricas que usaron Githack.
 
-## Pendiente opcional · fase 2
+## Fase 2 completada · catálogo canónico
 
-No se hizo en esta limpieza porque implicaría una refactorización funcional:
+La consolidación del catálogo se realizó después de esta limpieza:
 
-1. convertir el catálogo de juegos en una única fuente canónica generadora de Apps
-   Script + Supabase;
-2. podar manualmente ramas `integration/*` ya fusionadas;
-3. borrar desde el panel de Supabase las tres Edge Functions temporales desactivadas,
+- `config/game-catalog.json` es la única fuente editable;
+- Apps Script recibe un archivo generado;
+- Supabase recibe un snapshot SQL generado;
+- `student-dashboard` lee directamente `public.games`;
+- el HTML del alumno ya no contiene overrides de identidad, URL o estado.
+
+Siguen como tareas opcionales:
+
+1. podar manualmente ramas `integration/*` ya fusionadas;
+2. borrar desde el panel de Supabase las tres Edge Functions temporales desactivadas,
    si se desea que desaparezcan también de la lista;
-4. revisar si el workflow `harden-assets.yml` puede simplificarse en una futura
+3. revisar si el workflow `harden-assets.yml` puede simplificarse en una futura
    migración de assets a un único host.
 
 La limpieza de esta fase no modifica ningún `index.html` de juego ni sus mecánicas.
