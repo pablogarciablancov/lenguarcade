@@ -149,8 +149,10 @@ if (!studentHtml.includes("GAME_BRIDGE_NAMESPACE='lenguarcade-game'") ||
     !studentHtml.includes("startGameInitHandshake") ||
     !studentHtml.includes("pulseGameInitHandshake") ||
     !studentHtml.includes("buildGameInitPayload") ||
+    !studentHtml.includes("installGameBootstrapContext") ||
+    !studentHtml.includes("namespace:'lenguarcade-bootstrap'") ||
     !studentHtml.includes("sessionVerificationPromise")) {
-  errors.push("La integración de juegos debe validar el canal, iniciar el perfil desde el host y guardar el progreso desde la sesión de LenguArcade.");
+  errors.push("La integración de juegos debe validar el canal, iniciar el perfil desde el host, preparar un bootstrap independiente de postMessage y guardar el progreso desde la sesión de LenguArcade.");
 }
 if (studentHtml.includes("setTimeout(preloadIntegratedGame") ||
     studentHtml.includes("renderDashboardWithGamePreload")) {
