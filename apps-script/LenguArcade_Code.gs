@@ -31,49 +31,49 @@ const LA_CONFIG = {
 
 const LA_GAME_INTEGRATIONS = {
   battlegrafia: {
-    url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/battlegrafia/index.html',
+    url:'https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia/',
     integration:'embedded'
   },
   maniacgrafia: {
-    url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/maniacgrafia/index.html',
+    url:'https://pablogarciablancov.github.io/lenguarcade/games/maniacgrafia/',
     integration:'embedded'
   },
   narratoria: {
-    url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/narratoria/index.html',
+    url:'https://pablogarciablancov.github.io/lenguarcade/games/narratoria/',
     integration:'embedded'
   },
   scrabble: {
-    url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/scrabble/index.html',
+    url:'https://pablogarciablancov.github.io/lenguarcade/games/scrabble/',
     integration:'embedded'
   },
   conjuga_apuesta: {
-    url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/conjuga_apuesta/index.html',
+    url:'https://pablogarciablancov.github.io/lenguarcade/games/conjuga_apuesta/',
     integration:'embedded'
   },
   verb_battle: {
-    url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/verb_battle/index.html',
+    url:'https://pablogarciablancov.github.io/lenguarcade/games/verb_battle/',
     integration:'embedded'
   },
   rayuela: {
-    url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/49ca8564f1dd015c72ad86ba8547fed50a75717e/games/rayuela/index.html',
+    url:'https://pablogarciablancov.github.io/lenguarcade/games/rayuela/',
     integration:'embedded'
   },
   entre_lineas: {
-    url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/entre_lineas/index.html',
+    url:'https://pablogarciablancov.github.io/lenguarcade/games/entre_lineas/',
     integration:'embedded'
   }
 };
 
 const LA_OFFICIAL_GAMES = [
-  {gameId:'battlegrafia',nombre:'Battlegrafía',subtitulo:'La aventura de las palabras',categoria:'RPG',competencias:'ortografía,verbos,semántica',estado:'en pruebas',orden:1,color:'#f59e0b',icono:'🐉',url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/battlegrafia/index.html',descripcion:'RPG de Lengua con combates, mundos, criaturas y progresión.',banner:'dragon',activo:true},
-  {gameId:'maniacgrafia',nombre:'Maniacgrafía',subtitulo:'Atrapa las palabras',categoria:'Ortografía',competencias:'ortografía,acentuación,atención',estado:'listo',orden:2,color:'#d946ef',icono:'⚡',url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/maniacgrafia/index.html',descripcion:'Atrapa y corrige palabras trampa mientras mejoras rapidez y precisión.',banner:'neon',activo:true},
-  {gameId:'narratoria',nombre:'Narratoria',subtitulo:'Escribe. Crea. Cuenta.',categoria:'Escritura',competencias:'narración,creatividad,redacción',estado:'listo',orden:3,color:'#f59e0b',icono:'📚',url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/narratoria/index.html',descripcion:'Construye relatos por fases con objetivos, decisiones y creatividad.',banner:'paper',activo:true},
+  {gameId:'battlegrafia',nombre:'Battlegrafía',subtitulo:'La aventura de las palabras',categoria:'RPG',competencias:'ortografía,verbos,semántica',estado:'en pruebas',orden:1,color:'#f59e0b',icono:'🐉',url:'https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia/',descripcion:'RPG de Lengua con combates, mundos, criaturas y progresión.',banner:'dragon',activo:true},
+  {gameId:'maniacgrafia',nombre:'Maniacgrafía',subtitulo:'Atrapa las palabras',categoria:'Ortografía',competencias:'ortografía,acentuación,atención',estado:'listo',orden:2,color:'#d946ef',icono:'⚡',url:'https://pablogarciablancov.github.io/lenguarcade/games/maniacgrafia/',descripcion:'Atrapa y corrige palabras trampa mientras mejoras rapidez y precisión.',banner:'neon',activo:true},
+  {gameId:'narratoria',nombre:'Narratoria',subtitulo:'Escribe. Crea. Cuenta.',categoria:'Escritura',competencias:'narración,creatividad,redacción',estado:'listo',orden:3,color:'#f59e0b',icono:'📚',url:'https://pablogarciablancov.github.io/lenguarcade/games/narratoria/',descripcion:'Construye relatos por fases con objetivos, decisiones y creatividad.',banner:'paper',activo:true},
   {gameId:'versopolis',nombre:'Versópolis',subtitulo:'La ciudad de la poesía',categoria:'Poesía',competencias:'poesía,rima,métrica,creatividad',estado:'en revisión',orden:4,color:'#8b5cf6',icono:'✒️',url:'',descripcion:'Crea poemas, supera retos líricos y progresa como autor dentro de la ciudad de la poesía.',banner:'city',activo:true},
-  {gameId:'scrabble',nombre:'Scrabble',subtitulo:'Palabras en juego',categoria:'Léxico',competencias:'léxico,vocabulario,estrategia',estado:'listo',orden:5,color:'#34d399',icono:'🔤',url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/scrabble/index.html',descripcion:'Forma palabras, amplía vocabulario y compite usando estrategia verbal.',banner:'board',activo:true},
-  {gameId:'conjuga_apuesta',nombre:'Conjuga y apuesta',subtitulo:'Conjuga. Arriesga. Remonta.',categoria:'Verbos',competencias:'verbos,morfología,conjugación,estrategia',estado:'en pruebas',orden:6,color:'#fb7185',icono:'🎲',url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/conjuga_apuesta/index.html',descripcion:'Duelo de conjugación con fichas, niveles de riesgo, rachas, ayudas tácticas, XP y logros.',banner:'dice',activo:true},
-  {gameId:'verb_battle',nombre:'Batalla verbal',subtitulo:'Arena táctica de los verbos',categoria:'Verbos',competencias:'verbos,morfología,conjugación,estrategia,equipos',estado:'en pruebas',orden:7,color:'#60a5fa',icono:'⚔️',url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/verb_battle/index.html',descripcion:'Combate por equipos con tablero variable, clases, energía, defensas, runas, eventos, XP y logros.',banner:'battle',activo:true},
-  {gameId:'rayuela',nombre:'Rayuela',subtitulo:'Tu historia. Tus decisiones.',categoria:'Escritura',competencias:'narración,creatividad,redacción,coherencia,planificación',estado:'en pruebas',orden:8,color:'#22d3ee',icono:'⌗',url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/49ca8564f1dd015c72ad86ba8547fed50a75717e/games/rayuela/index.html',descripcion:'Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.',banner:'rayuela',activo:true},
-  {gameId:'entre_lineas',nombre:'Entre Líneas',subtitulo:'Agencia de Investigación Lectora',categoria:'Comprensión lectora',competencias:'comprensión,inferencia,síntesis,análisis,coherencia,vocabulario',estado:'en pruebas',orden:9,color:'#d7a942',icono:'🔎',url:'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/entre_lineas/index.html',descripcion:'Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.',banner:'entre_lineas',activo:true},
+  {gameId:'scrabble',nombre:'Scrabble',subtitulo:'Palabras en juego',categoria:'Léxico',competencias:'léxico,vocabulario,estrategia',estado:'listo',orden:5,color:'#34d399',icono:'🔤',url:'https://pablogarciablancov.github.io/lenguarcade/games/scrabble/',descripcion:'Forma palabras, amplía vocabulario y compite usando estrategia verbal.',banner:'board',activo:true},
+  {gameId:'conjuga_apuesta',nombre:'Conjuga y apuesta',subtitulo:'Conjuga. Arriesga. Remonta.',categoria:'Verbos',competencias:'verbos,morfología,conjugación,estrategia',estado:'en pruebas',orden:6,color:'#fb7185',icono:'🎲',url:'https://pablogarciablancov.github.io/lenguarcade/games/conjuga_apuesta/',descripcion:'Duelo de conjugación con fichas, niveles de riesgo, rachas, ayudas tácticas, XP y logros.',banner:'dice',activo:true},
+  {gameId:'verb_battle',nombre:'Batalla verbal',subtitulo:'Arena táctica de los verbos',categoria:'Verbos',competencias:'verbos,morfología,conjugación,estrategia,equipos',estado:'en pruebas',orden:7,color:'#60a5fa',icono:'⚔️',url:'https://pablogarciablancov.github.io/lenguarcade/games/verb_battle/',descripcion:'Combate por equipos con tablero variable, clases, energía, defensas, runas, eventos, XP y logros.',banner:'battle',activo:true},
+  {gameId:'rayuela',nombre:'Rayuela',subtitulo:'Tu historia. Tus decisiones.',categoria:'Escritura',competencias:'narración,creatividad,redacción,coherencia,planificación',estado:'en pruebas',orden:8,color:'#22d3ee',icono:'⌗',url:'https://pablogarciablancov.github.io/lenguarcade/games/rayuela/',descripcion:'Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.',banner:'rayuela',activo:true},
+  {gameId:'entre_lineas',nombre:'Entre Líneas',subtitulo:'Agencia de Investigación Lectora',categoria:'Comprensión lectora',competencias:'comprensión,inferencia,síntesis,análisis,coherencia,vocabulario',estado:'en pruebas',orden:9,color:'#d7a942',icono:'🔎',url:'https://pablogarciablancov.github.io/lenguarcade/games/entre_lineas/',descripcion:'Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.',banner:'entre_lineas',activo:true},
   {gameId:'tower_defense',nombre:'Tower Defense',subtitulo:'Defiende la lengua',categoria:'Estrategia lingüística',competencias:'ortografía,verbos,semántica,estrategia',estado:'en revisión',orden:10,color:'#14b8a6',icono:'🛡️',url:'',descripcion:'Detén oleadas de monstruos resolviendo retos lingüísticos antes de que alcancen la base.',banner:'tower_defense',activo:true}
 ];
 
@@ -103,7 +103,7 @@ function doGet(e) {
 
   if (page === 'narratoria') {
     return buildExternalRedirectHtmlOutput_(
-      'https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/narratoria/index.html',
+      'https://pablogarciablancov.github.io/lenguarcade/games/narratoria/',
       'Narratoria'
     );
   }
