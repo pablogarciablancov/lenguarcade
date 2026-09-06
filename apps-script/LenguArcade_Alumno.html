@@ -1506,6 +1506,22 @@ function startGameInitHandshake(runner){
   runner.initTimer=setInterval(()=>pulseGameInitHandshake(runner),650);
 }
 
+function installGameBootstrapContext(runner){
+  if(!runner?.iframe||!currentDashboard)return;
+  try{
+    runner.iframe.name=JSON.stringify({
+      namespace:'lenguarcade-bootstrap',
+      version:1,
+      channel:runner.channel,
+      gameId:runner.game.gameId,
+      payload:buildGameInitPayload(runner)
+    });
+  }catch(error){
+    console.warn('No se pudo preparar el contexto de arranque del juego.',error);
+    runner.iframe.name='';
+  }
+}
+
 function prepareEmbeddedGame(game){
   if(!token||!currentDashboard)return setStatus('Inicia sesión antes de abrir un juego.');
   if(activeGameRunner?.game?.gameId===game.gameId){
@@ -1520,6 +1536,7 @@ function prepareEmbeddedGame(game){
   url.searchParams.set('channel',channel);
   const iframe=$('gameRunnerFrame');
   activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,explicitExitRequested:false,lastResultReason:'',pendingResult:null,saving:false,checkpointing:false,opponent:null,opponents:{},pendingOpponentRequest:null,opponentAuthBusy:false,initialized:false,visible:false,loading:false,retries:0,initTimer:null,primarySessionCounted:false,opponentSessionCounted:false,sessionCountedByRole:{}};
+  installGameBootstrapContext(activeGameRunner);
   $('gameRunnerTitle').textContent=game.nombre;
   $('gameRunnerStatus').textContent='Conectando con tu perfil...';
   $('gameRunnerBootText').textContent='Cargando datos del perfil...';
@@ -1578,7 +1595,10 @@ function destroyGameRunner(){
   if(!$('gameRunner'))return;
   if(activeGameRunner?.connectionTimer)clearTimeout(activeGameRunner.connectionTimer);
   stopGameInitHandshake(activeGameRunner);
-  if($('gameRunnerFrame'))$('gameRunnerFrame').onload=null;
+  if($('gameRunnerFrame')){
+    $('gameRunnerFrame').onload=null;
+    $('gameRunnerFrame').name='';
+  }
   $('gameRunner').classList.remove('open');
   $('gameRunnerFrame').src='about:blank';
   $('gameRunnerRetry').classList.add('hidden');
