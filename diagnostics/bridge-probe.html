@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnóstico puente LenguArcade</title>
+<style>
+  :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#17203a;background:#f4f7fb}
+  body{margin:0;padding:24px}
+  main{max-width:980px;margin:auto}
+  h1{margin:0 0 8px}
+  .card{background:#fff;border:1px solid #dbe3ef;border-radius:18px;padding:18px;margin:16px 0;box-shadow:0 8px 26px rgba(30,55,90,.08)}
+  .status{font-size:20px;font-weight:800}
+  .ok{color:#087f5b}.bad{color:#c92a2a}.wait{color:#5f3dc4}
+  ol{padding-left:22px}.stage{margin:8px 0}.stage b{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+  iframe{width:100%;height:540px;border:1px solid #cfd8e6;border-radius:16px;background:#fff}
+  button{border:0;border-radius:12px;padding:11px 16px;font-weight:800;cursor:pointer;background:#5f3dc4;color:#fff}
+  small{color:#68758a}
+</style>
+</head>
+<body>
+<main>
+  <h1>Diagnóstico del puente de perfil</h1>
+  <p>Esta página usa un perfil ficticio y no necesita iniciar sesión.</p>
+
+  <div class="card">
+    <div id="result" class="status wait">Preparando prueba…</div>
+    <ol id="log"></ol>
+    <button id="restart" type="button">Repetir prueba</button>
+    <p><small>Resultado esperado: READY → INIT → INITIALIZED.</small></p>
+  </div>
+
+  <div class="card">
+    <iframe id="game" title="Scrabble de diagnóstico" allow="autoplay; fullscreen"></iframe>
+  </div>
+</main>
+<script>
+(function(){
+  const GAME_ID='scrabble';
+  const GAME_URL='https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/scrabble/index.html';
+  const DIAG='https://spqcztbuwcbmsengeluz.supabase.co/functions/v1/bridge-diagnostic';
+  const frame=document.getElementById('game');
+  const log=document.getElementById('log');
+  const result=document.getElementById('result');
+  let channel='';
+  let timer=null;
+  let timeout=null;
+  let initialized=false;
+  let readySeen=false;
+
+  function trace(stage,detail=''){
+    try{
+      const img=new Image();
+      img.src=DIAG+'?trace='+encodeURIComponent(channel)+'&game='+GAME_ID+'&stage='+encodeURIComponent(stage)+'&detail='+encodeURIComponent(detail)+'&_='+Date.now();
+    }catch(e){}
+  }
+
+  function add(stage,text,cls=''){
+    const li=document.createElement('li');
+    li.className='stage '+cls;
+    li.innerHTML='<b>'+stage+'</b> · '+text;
+    log.appendChild(li);
+  }
+
+  function initPayload(){
+    return {
+      student:{
+        studentId:'probe-student',
+        nombre:'Prueba',
+        apellidos:'LenguArcade',
+        email:'',
+        clase:'DIAG'
+      },
+      save:null,
+      feedback:null
+    };
+  }
+
+  function postInit(){
+    if(initialized||!frame.contentWindow)return;
+    try{
+      frame.contentWindow.postMessage({
+        namespace:'lenguarcade-host',
+        channel,
+        type:'INIT',
+        payload:initPayload()
+      },'*');
+      trace('host_init_pulse','probe');
+    }catch(e){
+      add('ERROR','No se pudo enviar INIT: '+e.message,'bad');
+    }
+  }
+
+  function start(){
+    clearInterval(timer);
+    clearTimeout(timeout);
+    initialized=false;
+    readySeen=false;
+    log.innerHTML='';
+    channel='probe_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10);
+    result.className='status wait';
+    result.textContent='Probando…';
+
+    const bootstrap={
+      namespace:'lenguarcade-bootstrap',
+      version:1,
+      channel,
+      gameId:GAME_ID,
+      payload:initPayload()
+    };
+    frame.name=JSON.stringify(bootstrap);
+    trace('host_runner_created','probe');
+    add('HOST','Canal creado y bootstrap preparado.');
+
+    const url=new URL(GAME_URL);
+    url.searchParams.set('lenguarcade','1');
+    url.searchParams.set('channel',channel);
+    url.searchParams.set('la_trace',channel);
+
+    frame.onload=()=>{
+      add('IFRAME','El HTML de Scrabble terminó de cargar.');
+      trace('host_iframe_load','probe');
+      postInit();
+    };
+    trace('host_iframe_start','probe');
+    frame.src=url.toString();
+
+    timer=setInterval(postInit,650);
+    timeout=setTimeout(()=>{
+      if(initialized)return;
+      clearInterval(timer);
+      result.className='status bad';
+      if(!readySeen){
+        result.textContent='FALLO A · Scrabble no envió READY.';
+        add('DIAGNÓSTICO','El problema ocurre antes del handshake del juego.','bad');
+      }else{
+        result.textContent='FALLO B · READY llegó, pero no INITIALIZED.';
+        add('DIAGNÓSTICO','Scrabble arrancó, pero no completó la aplicación del perfil.','bad');
+      }
+      trace('host_timeout',readySeen?'probe-ready-no-init':'probe-no-ready');
+    },15000);
+  }
+
+  window.addEventListener('message',event=>{
+    const m=event.data||{};
+    if(m.namespace!=='lenguarcade-game'||m.channel!==channel||m.gameId!==GAME_ID)return;
+    if(m.type==='READY'){
+      if(!readySeen)add('READY','Scrabble ha anunciado que está listo.','ok');
+      readySeen=true;
+      trace('host_ready_received','probe');
+      postInit();
+    }
+    if(m.type==='INITIALIZED'){
+      initialized=true;
+      clearInterval(timer);
+      clearTimeout(timeout);
+      add('INITIALIZED','Scrabble recibió el perfil y confirmó la inicialización.','ok');
+      result.className='status ok';
+      result.textContent='ÉXITO · El puente funciona fuera de Apps Script.';
+      trace('host_initialized_received','probe');
+    }
+  });
+
+  document.getElementById('restart').onclick=start;
+  start();
+})();
+</script>
+</body>
+</html>
