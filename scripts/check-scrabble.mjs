@@ -55,9 +55,9 @@ if (!opponentLoginSource ||
 if (!/function saveGameCheckpoint\(payload\)[\s\S]*?requireSession_\(payload\.sessionToken,\s*'student'\)/.test(centralServer)) {
   errors.push("Los puntos de control de Scrabble deben exigir una sesión de alumno.");
 }
-if (!centralServer.includes("https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/scrabble/") ||
+if (!centralServer.includes("https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/scrabble/index.html") ||
     !centralServer.includes("const resultId = String(payload.resultId")) {
-  errors.push("Scrabble debe abrir desde GitHub/RawGithack y guardar resultados multijugador de forma idempotente.");
+  errors.push("Scrabble debe abrir desde una versión inmutable de GitHub/RawCDN y guardar resultados multijugador de forma idempotente.");
 }
 for (const required of [
   "gameOpponentAuth",

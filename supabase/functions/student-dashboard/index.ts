@@ -10,27 +10,27 @@ function average(values: number[]) {
 
 const integrations: Record<string, { url:string; integration:string }> = {
   battlegrafia:{
-    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/",
+    url:"https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/battlegrafia/index.html",
     integration:"embedded",
   },
   maniacgrafia:{
-    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/maniacgrafia/",
+    url:"https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/maniacgrafia/index.html",
     integration:"embedded",
   },
   scrabble:{
-    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/scrabble/",
+    url:"https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/scrabble/index.html",
     integration:"embedded",
   },
   conjuga_apuesta:{
-    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/conjuga_apuesta/",
+    url:"https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/conjuga_apuesta/index.html",
     integration:"embedded",
   },
   verb_battle:{
-    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/verb_battle/",
+    url:"https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/verb_battle/index.html",
     integration:"embedded",
   },
   narratoria:{
-    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/narratoria/",
+    url:"https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/narratoria/index.html",
     integration:"embedded",
   },
   rayuela:{
@@ -38,7 +38,7 @@ const integrations: Record<string, { url:string; integration:string }> = {
     integration:"embedded",
   },
   entre_lineas:{
-    url:"https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/entre_lineas/",
+    url:"https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/entre_lineas/index.html",
     integration:"embedded",
   },
 };

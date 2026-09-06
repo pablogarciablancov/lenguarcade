@@ -90,10 +90,10 @@ for (const required of [
   if (!bridgeHtml.includes(required)) errors.push(`Falta el puente de BattleGrafia: ${required}`);
 }
 
-const githubUrl = "https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/battlegrafia/";
+const githubUrl = "https://rawcdn.githack.com/pablogarciablancov/lenguarcade/328a8ee790fb31c9731c00bce693cd31a2f283a4/games/battlegrafia/index.html";
 const staticIndex = fs.readFileSync(path.resolve("games", "battlegrafia", "index.html"), "utf8");
 if (staticIndex.includes("<?!=") || staticIndex.includes("include('")) {
-  errors.push("La version GitHub/RawGithack de BattleGrafia debe estar aplanada sin includes de Apps Script.");
+  errors.push("La version GitHub/RawCDN de BattleGrafia debe estar aplanada sin includes de Apps Script.");
 }
 if (!centralServer.includes("gameId:'battlegrafia'") ||
     !centralServer.includes(githubUrl) ||
