@@ -1,10 +1,12 @@
-# Instalación de LenguArcade
+# Instalación y publicación de LenguArcade
 
 ## Requisitos
 
 - Node.js
 - Git
-- acceso autorizado al proyecto de Apps Script
+- acceso autorizado al proyecto central de Google Apps Script
+- acceso al repositorio de GitHub
+- acceso al proyecto de Supabase cuando haya cambios de backend
 
 ## Preparación local
 
@@ -12,11 +14,12 @@
 npm.cmd install
 npx.cmd clasp login
 npm.cmd run apps:status
+npm.cmd run check
 ```
 
-La autorización de `clasp` solo se repite si Google invalida o revoca la sesión.
+## Portal de producción
 
-## Publicación
+El portal central se publica con:
 
 ```powershell
 npm.cmd run apps:publish -- "descripcion del cambio"
@@ -24,9 +27,12 @@ npm.cmd run apps:publish -- "descripcion del cambio"
 
 Este comando:
 
-1. sube `apps-script/`
-2. crea una versión inmutable
-3. actualiza el despliegue web estable
+1. ejecuta las comprobaciones;
+2. verifica que la rama sea `main` o `integration/*`;
+3. comprueba que la copia local esté basada en el `origin/main` más reciente;
+4. sube únicamente `apps-script/`;
+5. crea una versión inmutable;
+6. actualiza el despliegue web estable.
 
 URL estable:
 
@@ -34,56 +40,54 @@ URL estable:
 https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec
 ```
 
-Paneles:
+No ejecutar `clasp push --force` directamente para publicar producción.
+
+## Juegos
+
+Los juegos públicos viven en `games/<gameId>/` y se sirven con GitHub Pages:
 
 ```text
-URL_ESTABLE?page=alumno
-URL_ESTABLE?page=profesor
+https://pablogarciablancov.github.io/lenguarcade/games/<gameId>/
 ```
+
+El workflow `.github/workflows/deploy-pages.yml` publica los juegos tras los cambios
+en `main`.
+
+Las carpetas `games/*/apps-script/` son fuentes históricas/originales de algunos
+juegos. No deben publicarse como aplicaciones independientes.
 
 ## Backend
 
-La decisión técnica del proyecto es usar un único Google Sheets central para todo el progreso:
+Supabase es la fuente principal para:
 
-```text
-LenguArcade_DB
-```
+- perfiles y sesiones;
+- catálogo vivo;
+- progreso;
+- guardados;
+- logros;
+- evaluaciones;
+- gestión de clases y alumnado.
 
-La version publicada usa Supabase como base de datos principal. El portal del
-alumno mantiene temporalmente una copia de respaldo en este Sheets para poder
-comparar resultados durante la transicion. Google Classroom aporta cursos,
-alumnos y borradores de calificaciones desde el panel del profesor.
+El Google Sheet central se mantiene solo como capa legacy/respaldo para las partes que
+todavía lo necesitan. No debe considerarse la fuente principal.
 
-Tras publicar por primera vez el servicio de Classroom:
+Las migraciones de `supabase/migrations/` forman parte del historial del esquema:
+**no se borran ni se reescriben una vez aplicadas**. Los cambios nuevos se añaden como
+una migración posterior.
 
-1. Abre el editor de Apps Script.
-2. Ejecuta `autorizarClassroom`.
-3. Acepta los permisos solicitados por Google.
-4. Usa `Sincronizar alumnado` desde el panel del profesor.
+## Google Classroom
 
-Consulta `docs/SUPABASE_CLASSROOM.md` para el funcionamiento completo.
+Classroom se conecta desde el panel del profesor mediante Apps Script. La primera
+autorización puede requerir ejecutar `autorizarClassroom` desde el editor de Apps
+Script y aceptar los permisos solicitados.
 
-## Alumnos de prueba
-
-El sistema debe poder generar alumnos ficticios para:
-
-- 1º ESO A
-- 1º ESO B
-- 2º ESO A
-- 2º ESO B
-- 3º ESO A
-- 3º ESO B
-- 4º ESO A
-- 4º ESO B
-
-Con máximo 30 alumnos por clase y correos terminados en:
-
-```text
-@alumno.fomento.edu
-```
+Consulta `docs/SUPABASE_CLASSROOM.md`.
 
 ## Precauciones
 
-- No ejecutar `clasp pull` con cambios locales pendientes.
-- No crear despliegues nuevos; actualizar el estable.
-- No ejecutar funciones de inicialización o migración sin revisar su efecto sobre la hoja central.
+- No publicar Apps Script desde una rama `game/*`.
+- No editar el proyecto online de Apps Script mientras haya cambios locales pendientes.
+- No ejecutar `clasp pull` con cambios locales sin guardar.
+- No usar RawGitHack/RawCDN como alojamiento de producción.
+- No volver a activar publicadores independientes de Maniacgrafía, Scrabble o Battlegrafía.
+- No aplicar migraciones o inicializaciones destructivas sin revisar antes su efecto.
