@@ -68,10 +68,10 @@ function renderApps(catalog){
 function renderSql(catalog){
   const all=catalog.games.map(game=>resolvedGame(catalog,game));
   const values=all.map(game=>"  ("+[
-    "sql(game.id)","sql(game.name)","sql(game.subtitle)","sql(game.category)","sql(game.status)",
-    "sql(game.sortOrder)","sql(game.color)","sql(game.icon)","sql(game.url)","sql(game.banner)",
-    "sql(game.active)","sql(game.description)","sql(game.competencies.join(\",\"))","sql(game.integration)","sql(game.official)"
-  ].join("+","+")+")").join(",\n");
+    sql(game.id),sql(game.name),sql(game.subtitle),sql(game.category),sql(game.status),
+    sql(game.sortOrder),sql(game.color),sql(game.icon),sql(game.url),sql(game.banner),
+    sql(game.active),sql(game.description),sql(game.competencies.join(",")),sql(game.integration),sql(game.official)
+  ].join(", ")+")").join(",\n");
   return "-- AUTO-GENERATED from config/game-catalog.json. DO NOT EDIT BY HAND.\n"+
     "insert into public.games\n"+
     "  (id,name,subtitle,category,status,sort_order,color,icon,url,banner,active,description,competencies,integration,official,updated_at)\n"+
