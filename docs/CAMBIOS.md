@@ -449,3 +449,16 @@ Cada cambio debe indicar:
 - Se refuerza `check-consolidated-architecture.mjs` para impedir que vuelvan Githack, publicadores independientes o carpetas obsoletas.
 - No se modifica ningún `games/*/index.html` ni mecánica de juego.
 
+
+
+## 2026-09-06 · Catálogo canónico único
+
+- Se crea `config/game-catalog.json` como única fuente editable del catálogo.
+- `scripts/sync-game-catalog.mjs` genera Apps Script y el snapshot SQL de Supabase.
+- Se añade `catalog:sync` y `catalog:check`; `npm run check` empieza por comprobar deriva.
+- `LenguArcade_Code.gs` deja de contener `LA_OFFICIAL_GAMES` y `LA_GAME_INTEGRATIONS` manuales.
+- El HTML del alumno deja de contener `LA_EMBEDDED_GAME_OVERRIDES` y normalizaciones de URL de Narratoria.
+- `student-dashboard` deja de mantener su propio mapa de integraciones y lee todo de `public.games`.
+- Supabase añade `description`, `competencies`, `integration` y `official` a `public.games`.
+- Battlegrafía 2.0 queda dentro de la fuente canónica como laboratorio no oficial e inactivo.
+

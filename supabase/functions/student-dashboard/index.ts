@@ -8,41 +8,6 @@ function average(values: number[]) {
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 }
 
-const integrations: Record<string, { url:string; integration:string }> = {
-  battlegrafia:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia/",
-    integration:"embedded",
-  },
-  maniacgrafia:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/maniacgrafia/",
-    integration:"embedded",
-  },
-  scrabble:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/scrabble/",
-    integration:"embedded",
-  },
-  conjuga_apuesta:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/conjuga_apuesta/",
-    integration:"embedded",
-  },
-  verb_battle:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/verb_battle/",
-    integration:"embedded",
-  },
-  narratoria:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/narratoria/",
-    integration:"embedded",
-  },
-  rayuela:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/rayuela/",
-    integration:"embedded",
-  },
-  entre_lineas:{
-    url:"https://pablogarciablancov.github.io/lenguarcade/games/entre_lineas/",
-    integration:"embedded",
-  },
-};
-
 function isLockedStatus(status: unknown) {
   const normalized = String(status || "").trim().toLowerCase();
   return normalized === "en revisión" ||
@@ -74,8 +39,9 @@ Deno.serve(async (request) => {
         .eq("id", profileId)
         .single(),
       admin.from("games")
-        .select("id,name,subtitle,category,status,sort_order,color,icon,url,banner,active")
+        .select("id,name,subtitle,category,status,sort_order,color,icon,url,banner,active,description,competencies,integration,official")
         .eq("active", true)
+        .eq("official", true)
         .order("sort_order"),
       admin.from("game_progress")
         .select("game_id,xp,level,percentage,accuracy,attempts,successes,errors,streak,sessions,achievements_count,missions_completed,feathers,last_activity_at,raw_data")
@@ -130,8 +96,9 @@ Deno.serve(async (request) => {
     const classroom = Array.isArray(classroomRelation) ? classroomRelation[0] : classroomRelation || null;
 
     const games = (gamesResult.data || []).map(game => {
-      const integration = integrations[game.id] || null;
       const estado = game.status;
+      const integration = String(game.integration || "none");
+      const locked = isLockedStatus(estado) || !game.url || integration === "none";
       const row = progressByGame.get(game.id) || {
         game_id:game.id,
         xp:0,
@@ -160,9 +127,11 @@ Deno.serve(async (request) => {
         icono:game.icon,
         url:game.url,
         banner:game.banner,
-        ...(integration || {}),
-        locked:isLockedStatus(estado),
-        buttonLabel:isLockedStatus(estado) ? "En revisión" : (Number(row.sessions || 0) > 0 ? "Continuar" : "Jugar"),
+        descripcion:game.description || "",
+        competencias:game.competencies || "",
+        integration,
+        locked,
+        buttonLabel:locked ? (isLockedStatus(estado) ? "En revisión" : "No disponible") : (Number(row.sessions || 0) > 0 ? "Continuar" : "Jugar"),
         progress:{
           studentId:profile.id,
           gameId:row.game_id,

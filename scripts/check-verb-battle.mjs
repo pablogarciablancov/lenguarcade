@@ -4,6 +4,7 @@ import path from "node:path";
 const root=process.cwd();
 const game=fs.readFileSync(path.join(root,"games","verb_battle","index.html"),"utf8");
 const code=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Code.gs"),"utf8");
+const generatedCatalog=fs.readFileSync(path.join(root,"apps-script","LenguArcade_GameCatalog.gs"),"utf8");
 const student=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Alumno.html"),"utf8");
 const classroom=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Classroom.gs"),"utf8");
 const dashboard=fs.readFileSync(path.join(root,"supabase","functions","student-dashboard","index.ts"),"utf8");
@@ -55,8 +56,11 @@ if(game.includes("Ha acertado") || game.includes("Mostrar solución") || game.in
 const personCount=(game.match(/label:"[123]\.ª persona/g)||[]).length;
 if(personCount<6)errors.push("Faltan las seis personas gramaticales.");
 
-if(!code.includes("verb_battle: {") || !code.includes("estado:'en pruebas'"))errors.push("Catálogo Apps Script incorrecto.");
-if(!dashboard.includes("verb_battle:{"))errors.push("student-dashboard no expone Batalla verbal.");
+if(!generatedCatalog.includes('gameId:"verb_battle"') ||
+   !generatedCatalog.includes('integration:"embedded"') ||
+   !generatedCatalog.includes('estado:"en pruebas"'))errors.push("Catálogo canónico de Batalla verbal incorrecto.");
+if(!dashboard.includes('.eq("official", true)') ||
+   !dashboard.includes('const integration = String(game.integration || "none")'))errors.push("student-dashboard debe obtener Batalla verbal desde public.games.");
 if(!student.includes("gameRecord?.gameId==='verb_battle'"))errors.push("El host no guarda progreso de Batalla verbal.");
 if(!student.includes("opponents:{}") ||
    !student.includes("pendingOpponentRequest") ||

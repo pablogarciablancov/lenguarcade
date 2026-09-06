@@ -24,6 +24,7 @@ const bridgeHtml = fs.readFileSync(path.join(root, "lenguarcade_bridge.html"), "
 const arenaUiHtml = fs.readFileSync(path.join(root, "arena_ui.html"), "utf8");
 const centralServer = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Code.gs"), "utf8");
 const centralStudent = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Alumno.html"), "utf8");
+const generatedCatalog = fs.readFileSync(path.resolve("apps-script", "LenguArcade_GameCatalog.gs"), "utf8");
 const supabaseDashboard = fs.readFileSync(path.resolve("supabase", "functions", "student-dashboard", "index.ts"), "utf8");
 
 for (const required of [
@@ -95,19 +96,18 @@ const staticIndex = fs.readFileSync(path.resolve("games", "battlegrafia", "index
 if (staticIndex.includes("<?!=") || staticIndex.includes("include('")) {
   errors.push("La version GitHub Pages de BattleGrafia debe estar aplanada sin includes de Apps Script.");
 }
-if (!centralServer.includes("gameId:'battlegrafia'") ||
-    !centralServer.includes(githubUrl) ||
-    !centralServer.includes("estado:'en pruebas'") ||
-    !centralServer.includes("integration:'embedded'")) {
-  errors.push("LenguArcade_Code.gs debe mantener BattleGrafia en el catálogo oficial como juego embebido y estado «en pruebas».");
+if (!generatedCatalog.includes('gameId:"battlegrafia"') ||
+    !generatedCatalog.includes('estado:"en pruebas"') ||
+    !generatedCatalog.includes('integration:"embedded"') ||
+    !generatedCatalog.includes(githubUrl)) {
+  errors.push("El catálogo generado debe mantener BattleGrafia como juego embebido y estado «en pruebas».");
 }
 
 if (!centralStudent.includes("gameRecord?.gameId==='battlegrafia'") ||
     !centralStudent.includes("defeatedMonsters") ||
     !centralStudent.includes("totalMonsters") ||
     !centralStudent.includes("buildEvaluableSnapshot") ||
-    !centralStudent.includes("lenguarcade-save-v3") ||
-    !centralStudent.includes("LA_EMBEDDED_GAME_OVERRIDES")) {
+    !centralStudent.includes("lenguarcade-save-v3")) {
   errors.push("El runner de alumno debe calcular el progreso especifico de BattleGrafia.");
 }
 
@@ -138,11 +138,11 @@ if (!menuHtml.includes("bg-game-notice") ||
   errors.push("BattleGrafia debe mostrar avisos de menu dentro del juego, no con alertas del navegador.");
 }
 
-if (!supabaseDashboard.includes("battlegrafia") ||
-    !supabaseDashboard.includes(githubUrl) ||
-    !supabaseDashboard.includes("locked:isLockedStatus(estado)") ||
+if (!supabaseDashboard.includes('.eq("official", true)') ||
+    !supabaseDashboard.includes('const integration = String(game.integration || "none")') ||
+    !supabaseDashboard.includes('const locked = isLockedStatus(estado) || !game.url || integration === "none"') ||
     !supabaseDashboard.includes('normalized === "en revisión"')) {
-  errors.push("student-dashboard debe exponer BattleGrafia desde GitHub Pages y aplicar la regla oficial de bloqueo por estado.");
+  errors.push("student-dashboard debe derivar integración y bloqueo desde public.games, sin catálogo paralelo.");
 }
 
 if (errors.length) {

@@ -50,6 +50,30 @@ No ejecutar funciones de inicialización o migración de datos sin petición exp
 - Integrar un juego cada vez.
 - Si algo falla, corregir lo mínimo necesario.
 
+## Catálogo canónico obligatorio
+
+La única fuente editable del catálogo de juegos es:
+
+```text
+config/game-catalog.json
+```
+
+Después de cualquier cambio de nombre, estado, orden, URL, banner, integración o
+metadatos:
+
+```powershell
+npm.cmd run catalog:sync
+npm.cmd run check
+```
+
+No editar manualmente:
+
+- `apps-script/LenguArcade_GameCatalog.gs`;
+- `supabase/catalog/game-catalog.sql`.
+
+No crear listas paralelas de juegos en `LenguArcade_Code.gs`,
+`LenguArcade_Alumno.html` ni `student-dashboard`.
+
 ## Modelo de integración
 
 Cada juego debe poder enviar progreso a LenguArcade mediante un payload común:

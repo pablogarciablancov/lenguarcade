@@ -48,6 +48,33 @@ docs/                        arquitectura, pruebas y procedimientos
 Las carpetas `games/*/apps-script/` se conservan como fuente o referencia cuando un
 juego nació como proyecto Apps Script. **No son destinos de publicación de producción.**
 
+## Catálogo único de juegos
+
+La fuente de verdad del catálogo es:
+
+```text
+config/game-catalog.json
+```
+
+No se escriben manualmente listas de juegos en Apps Script, el HTML del alumno ni
+`student-dashboard`.
+
+Después de modificar el catálogo:
+
+```powershell
+npm.cmd run catalog:sync
+npm.cmd run check
+```
+
+`catalog:sync` genera:
+
+- `apps-script/LenguArcade_GameCatalog.gs`;
+- `supabase/catalog/game-catalog.sql`.
+
+Esos archivos generados se versionan, pero no se editan a mano. Supabase almacena
+además `description`, `competencies`, `integration` y `official`, de modo que
+el dashboard puede construir cada juego directamente desde `public.games`.
+
 ## Comandos habituales
 
 ```powershell

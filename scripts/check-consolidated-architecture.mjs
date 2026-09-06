@@ -99,11 +99,17 @@ const centralSources=[
   student,
   fs.readFileSync(path.resolve("supabase","functions","student-dashboard","index.ts"),"utf8"),
 ].join("\n");
-if(/raw(?:cdn)?\.githack\.com/i.test(centralSources)){
+const catalogSource=fs.readFileSync(path.resolve("config","game-catalog.json"),"utf8");
+const generatedCatalog=fs.readFileSync(path.join(appsDir,"LenguArcade_GameCatalog.gs"),"utf8");
+if(/raw(?:cdn)?\.githack\.com/i.test(centralSources+"\n"+catalogSource+"\n"+generatedCatalog)){
   throw new Error("Arquitectura: producción no debe volver a usar RawGitHack/RawCDN.");
 }
-if(!centralSources.includes("pablogarciablancov.github.io/lenguarcade/games/")){
-  throw new Error("Arquitectura: falta el alojamiento consolidado de GitHub Pages.");
+if(centralSources.includes("pablogarciablancov.github.io/lenguarcade/games/")){
+  throw new Error("Arquitectura: el núcleo no debe hardcodear URLs de juegos.");
+}
+if(!catalogSource.includes("https://pablogarciablancov.github.io/lenguarcade/") ||
+   !generatedCatalog.includes("AUTO-GENERATED from config/game-catalog.json")){
+  throw new Error("Arquitectura: falta la fuente canónica de catálogo o su salida generada.");
 }
 
-console.log("Arquitectura LenguArcade consolidada: núcleo único, publicación protegida y juegos en GitHub Pages.");
+console.log("Arquitectura LenguArcade consolidada: núcleo único, catálogo canónico y publicación protegida.");

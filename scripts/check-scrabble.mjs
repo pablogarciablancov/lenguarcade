@@ -42,6 +42,7 @@ if (/@import\s+url\(['"]https:\/\/fonts\.googleapis\.com/.test(html) ||
 
 const centralServer = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Code.gs"), "utf8");
 const centralStudent = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Alumno.html"), "utf8");
+const generatedCatalog = fs.readFileSync(path.resolve("apps-script", "LenguArcade_GameCatalog.gs"), "utf8");
 
 if (!/function loginGameOpponent\(primaryToken,\s*email,\s*pin,\s*gameId\)[\s\S]*?requireSession_\(primaryToken,\s*'student'\)/.test(centralServer)) {
   errors.push("El acceso del contrincante debe exigir la sesión del jugador principal.");
@@ -55,9 +56,11 @@ if (!opponentLoginSource ||
 if (!/function saveGameCheckpoint\(payload\)[\s\S]*?requireSession_\(payload\.sessionToken,\s*'student'\)/.test(centralServer)) {
   errors.push("Los puntos de control de Scrabble deben exigir una sesión de alumno.");
 }
-if (!centralServer.includes("https://pablogarciablancov.github.io/lenguarcade/games/scrabble/") ||
+if (!generatedCatalog.includes('gameId:"scrabble"') ||
+    !generatedCatalog.includes('integration:"embedded"') ||
+    !generatedCatalog.includes('https://pablogarciablancov.github.io/lenguarcade/games/scrabble/') ||
     !centralServer.includes("const resultId = String(payload.resultId")) {
-  errors.push("Scrabble debe abrir desde una versión inmutable de GitHub Pages y guardar resultados multijugador de forma idempotente.");
+  errors.push("Scrabble debe estar en el catálogo generado como juego embebido y guardar resultados multijugador de forma idempotente.");
 }
 for (const required of [
   "gameOpponentAuth",

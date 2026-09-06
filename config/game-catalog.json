@@ -1,0 +1,248 @@
+{
+  "schema": "lenguarcade-game-catalog-v1",
+  "version": 1,
+  "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
+  "games": [
+    {
+      "id": "battlegrafia",
+      "official": true,
+      "name": "Battlegrafía",
+      "subtitle": "La aventura de las palabras",
+      "category": "RPG",
+      "competencies": [
+        "ortografía",
+        "verbos",
+        "semántica"
+      ],
+      "status": "en pruebas",
+      "sortOrder": 1,
+      "color": "#f59e0b",
+      "icon": "🐉",
+      "entry": "games/battlegrafia/",
+      "description": "RPG de Lengua con combates, mundos, criaturas y progresión.",
+      "banner": "dragon",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "battlegrafia_v2",
+      "official": false,
+      "name": "Battlegrafía 2.0",
+      "subtitle": "Fantasy Arcade · versión alternativa",
+      "category": "RPG",
+      "competencies": [
+        "ortografía",
+        "verbos",
+        "semántica"
+      ],
+      "status": "en pruebas",
+      "sortOrder": 1,
+      "color": "#68d9ff",
+      "icon": "⚔️",
+      "entry": "games/battlegrafia_v2/",
+      "description": "Versión alternativa de Battlegrafía en laboratorio, separada de la clásica.",
+      "banner": "dragon",
+      "active": false,
+      "integration": "embedded"
+    },
+    {
+      "id": "maniacgrafia",
+      "official": true,
+      "name": "Maniacgrafía",
+      "subtitle": "Atrapa las palabras",
+      "category": "Ortografía",
+      "competencies": [
+        "ortografía",
+        "acentuación",
+        "atención"
+      ],
+      "status": "listo",
+      "sortOrder": 2,
+      "color": "#d946ef",
+      "icon": "⚡",
+      "entry": "games/maniacgrafia/",
+      "description": "Atrapa y corrige palabras trampa mientras mejoras rapidez y precisión.",
+      "banner": "neon",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "narratoria",
+      "official": true,
+      "name": "Narratoria",
+      "subtitle": "Escribe. Crea. Cuenta.",
+      "category": "Escritura",
+      "competencies": [
+        "narración",
+        "creatividad",
+        "redacción"
+      ],
+      "status": "listo",
+      "sortOrder": 3,
+      "color": "#f59e0b",
+      "icon": "📚",
+      "entry": "games/narratoria/",
+      "description": "Construye relatos por fases con objetivos, decisiones y creatividad.",
+      "banner": "paper",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "versopolis",
+      "official": true,
+      "name": "Versópolis",
+      "subtitle": "La ciudad de la poesía",
+      "category": "Poesía",
+      "competencies": [
+        "poesía",
+        "rima",
+        "métrica",
+        "creatividad"
+      ],
+      "status": "en revisión",
+      "sortOrder": 4,
+      "color": "#8b5cf6",
+      "icon": "✒️",
+      "entry": "",
+      "description": "Crea poemas, supera retos líricos y progresa como autor dentro de la ciudad de la poesía.",
+      "banner": "city",
+      "active": true,
+      "integration": "none"
+    },
+    {
+      "id": "scrabble",
+      "official": true,
+      "name": "Scrabble",
+      "subtitle": "Palabras en juego",
+      "category": "Léxico",
+      "competencies": [
+        "léxico",
+        "vocabulario",
+        "estrategia"
+      ],
+      "status": "listo",
+      "sortOrder": 5,
+      "color": "#34d399",
+      "icon": "🔤",
+      "entry": "games/scrabble/",
+      "description": "Forma palabras, amplía vocabulario y compite usando estrategia verbal.",
+      "banner": "board",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "conjuga_apuesta",
+      "official": true,
+      "name": "Conjuga y apuesta",
+      "subtitle": "Conjuga. Arriesga. Remonta.",
+      "category": "Verbos",
+      "competencies": [
+        "verbos",
+        "morfología",
+        "conjugación",
+        "estrategia"
+      ],
+      "status": "en pruebas",
+      "sortOrder": 6,
+      "color": "#fb7185",
+      "icon": "🎲",
+      "entry": "games/conjuga_apuesta/",
+      "description": "Duelo de conjugación con fichas, niveles de riesgo, rachas, ayudas tácticas, XP y logros.",
+      "banner": "dice",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "verb_battle",
+      "official": true,
+      "name": "Batalla verbal",
+      "subtitle": "Arena táctica de los verbos",
+      "category": "Verbos",
+      "competencies": [
+        "verbos",
+        "morfología",
+        "conjugación",
+        "estrategia",
+        "equipos"
+      ],
+      "status": "en pruebas",
+      "sortOrder": 7,
+      "color": "#60a5fa",
+      "icon": "⚔️",
+      "entry": "games/verb_battle/",
+      "description": "Combate por equipos con tablero variable, clases, energía, defensas, runas, eventos, XP y logros.",
+      "banner": "battle",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "rayuela",
+      "official": true,
+      "name": "Rayuela",
+      "subtitle": "Tu historia. Tus decisiones.",
+      "category": "Escritura",
+      "competencies": [
+        "narración",
+        "creatividad",
+        "redacción",
+        "coherencia",
+        "planificación"
+      ],
+      "status": "en pruebas",
+      "sortOrder": 8,
+      "color": "#22d3ee",
+      "icon": "⌗",
+      "entry": "games/rayuela/",
+      "description": "Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.",
+      "banner": "rayuela",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "entre_lineas",
+      "official": true,
+      "name": "Entre Líneas",
+      "subtitle": "Agencia de Investigación Lectora",
+      "category": "Comprensión lectora",
+      "competencies": [
+        "comprensión",
+        "inferencia",
+        "síntesis",
+        "análisis",
+        "coherencia",
+        "vocabulario"
+      ],
+      "status": "en pruebas",
+      "sortOrder": 9,
+      "color": "#d7a942",
+      "icon": "🔎",
+      "entry": "games/entre_lineas/",
+      "description": "Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.",
+      "banner": "entre_lineas",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "tower_defense",
+      "official": true,
+      "name": "Tower Defense",
+      "subtitle": "Defiende la lengua",
+      "category": "Estrategia lingüística",
+      "competencies": [
+        "ortografía",
+        "verbos",
+        "semántica",
+        "estrategia"
+      ],
+      "status": "en revisión",
+      "sortOrder": 10,
+      "color": "#14b8a6",
+      "icon": "🛡️",
+      "entry": "",
+      "description": "Detén oleadas de monstruos resolviendo retos lingüísticos antes de que alcancen la base.",
+      "banner": "tower_defense",
+      "active": true,
+      "integration": "none"
+    }
+  ]
+}

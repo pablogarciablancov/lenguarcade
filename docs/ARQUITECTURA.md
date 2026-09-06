@@ -38,6 +38,29 @@ Supabase sigue siendo la fuente principal para autenticación de aplicación, pe
 progreso, guardados, evaluaciones y gestión. Las Edge Functions sensibles exigen una
 sesión válida y realizan las operaciones con privilegios de servidor.
 
+
+## Catálogo canónico
+
+`config/game-catalog.json` es la única fuente editable de identidad, estado,
+orden, URL, integración y metadatos de los juegos.
+
+El comando:
+
+```powershell
+npm.cmd run catalog:sync
+```
+
+genera la representación compatible con Apps Script y el snapshot SQL de Supabase.
+`npm run check` ejecuta `catalog:check` y falla si una salida generada ha sido
+editada a mano o está desincronizada.
+
+`student-dashboard` no contiene un mapa de integraciones: lee `url`,
+`integration`, `description`, `competencies` y `official` directamente de
+`public.games`.
+
+El HTML del alumno tampoco contiene overrides de URL o estado. Solo conserva lógica
+específica de mecánicas cuando un juego la necesita.
+
 ## Regla para nuevas funciones
 
 1. Si es lógica de servidor, añadirla al módulo `.gs` correspondiente.

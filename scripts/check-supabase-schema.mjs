@@ -19,6 +19,10 @@ const teacherLogin = fs.readFileSync(
   path.resolve("supabase", "functions", "teacher-login", "index.ts"),
   "utf8",
 );
+const catalogMigration = fs.readFileSync(
+  path.resolve("supabase", "migrations", "202609060002_canonical_game_catalog.sql"),
+  "utf8",
+);
 const errors = [];
 
 for (const table of [
@@ -92,8 +96,18 @@ if (!teacherLogin.includes('userClient.auth.getUser()') ||
   errors.push("La Edge Function del profesor debe validar Auth sin incrustar secretos.");
 }
 
+for (const column of ["description","competencies","integration","official"]) {
+  if (!catalogMigration.includes("add column if not exists " + column)) {
+    errors.push("El catálogo canónico de Supabase debe añadir public.games." + column + ".");
+  }
+}
+if (!catalogMigration.includes("games_integration_check") ||
+    !catalogMigration.includes("integration in ('none','embedded','external')")) {
+  errors.push("public.games.integration debe quedar restringido a integraciones válidas.");
+}
+
 if (errors.length) {
   throw new Error(`Comprobacion de Supabase fallida:\n- ${errors.join("\n- ")}`);
 }
 
-console.log("Esquema inicial de Supabase comprobado: tablas, RLS y limites de escritura presentes.");
+console.log("Esquema de Supabase comprobado: seguridad y catálogo canónico presentes.");
