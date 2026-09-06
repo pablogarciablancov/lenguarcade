@@ -14,9 +14,9 @@ La prioridad es que el profesor pueda probar versiones funcionales sin tener que
 4. Integrar mediante adaptadores pequeños y reversibles.
 5. Cada cambio debe terminar con algo que se pueda probar.
 6. Preferir archivos completos listos para copiar/probar antes que instrucciones dispersas.
-7. Mantener compatibilidad con navegador, Google Apps Script, Google Sheets, Google Sites y GitHub Pages cuando sea posible.
+7. Mantener compatibilidad con navegador, Google Apps Script, Supabase y GitHub Pages; Google Sheets queda solo como capa legacy cuando todavía sea necesaria.
 8. Separar siempre el núcleo de LenguArcade de los juegos individuales.
-9. Battlegrafía se trata como integración avanzada posterior. No tocarla sin petición expresa.
+9. La Battlegrafía clásica está integrada y estable. Battlegrafía 2.0 se mantiene aislada en `games/battlegrafia_v2/` y no sustituye a la clásica sin una integración explícita.
 10. Documentar cambios en `docs/CAMBIOS.md` y añadir pasos de prueba en `docs/PRUEBAS.md`.
 11. `lenguarcade-assets` es el repositorio de recursos visuales. Mantener estables las rutas públicas de los archivos ya utilizados.
 12. No editar manualmente el proyecto online de Apps Script mientras haya cambios locales pendientes.
@@ -29,13 +29,15 @@ El proyecto está conectado con Google Apps Script mediante `clasp`.
 - Despliegue web estable: `AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa`
 - Código sincronizado: `apps-script/`
 
-Flujo obligatorio al terminar un cambio solicitado:
+Flujo obligatorio para cambios del núcleo:
 
 1. Ejecutar las comprobaciones disponibles.
-2. Revisar `npm.cmd run apps:status`.
-3. Publicar con `npm.cmd run apps:publish -- "descripcion breve"`.
-4. Comprobar la URL `/exec` en alumno y profesor.
-5. Confirmar los cambios en Git y subirlos a GitHub.
+2. Trabajar desde `main` o `integration/*`, nunca desde `game/*`.
+3. Fusionar el cambio probado en GitHub.
+4. Confirmar que GitHub Pages ha publicado los juegos afectados.
+5. Revisar `npm.cmd run apps:status`.
+6. Publicar el núcleo con `npm.cmd run apps:publish -- "descripcion breve"`.
+7. Comprobar la URL `/exec` en alumno y profesor.
 
 No crear un despliegue web nuevo. Actualizar siempre el despliegue estable indicado arriba.
 No ejecutar funciones de inicialización o migración de datos sin petición expresa.
