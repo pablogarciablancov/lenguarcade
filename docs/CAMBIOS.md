@@ -436,3 +436,16 @@ Cada cambio debe indicar:
 - Se registra `battlegrafia_v2` como juego independiente «en pruebas» en Apps Script y en el catálogo Supabase.
 - `student-dashboard` reconoce la nueva URL como integración embebida.
 - Se añade `scripts/check-battlegrafia-v2.mjs` y se incorpora a `npm run check`.
+
+
+## 2026-09-06 · Limpieza y consolidación del repositorio
+
+- Se retiran diagnósticos temporales, banners locales duplicados, placeholders vacíos y redirects duplicados de Narratoria.
+- Se eliminan los publicadores independientes de Maniacgrafía, Scrabble y Battlegrafía y sus `.clasp.json` locales.
+- `apps:publish` queda como único camino de publicación del núcleo; los juegos se sirven desde GitHub Pages.
+- Las migraciones históricas de Python se mueven a `scripts/archive/legacy-migrations/`.
+- Se actualizan README, instalación, bridge y reglas de trabajo concurrente a la arquitectura real.
+- Se añade una migración que registra las URL de GitHub Pages sin reescribir migraciones históricas.
+- Se refuerza `check-consolidated-architecture.mjs` para impedir que vuelvan Githack, publicadores independientes o carpetas obsoletas.
+- No se modifica ningún `games/*/index.html` ni mecánica de juego.
+
