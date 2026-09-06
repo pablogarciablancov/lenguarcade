@@ -185,11 +185,16 @@ function validateGamesInsert(statement,label){
     }
   });
 }
+function normalizeLineEndings(source){
+  return String(source).replace(/\r\n/g,"\n");
+}
 function checkOrWrite(file,expected,label){
   if(checkOnly){
     if(!fs.existsSync(file))fail("falta generado: "+label);
     const current=fs.readFileSync(file,"utf8");
-    if(current!==expected)fail(label+" no está sincronizado. Ejecuta: npm run catalog:sync");
+    if(normalizeLineEndings(current)!==normalizeLineEndings(expected)){
+      fail(label+" no está sincronizado. Ejecuta: npm run catalog:sync");
+    }
   }else{
     fs.mkdirSync(path.dirname(file),{recursive:true});
     fs.writeFileSync(file,expected,"utf8");
