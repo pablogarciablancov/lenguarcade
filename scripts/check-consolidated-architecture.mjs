@@ -58,4 +58,52 @@ for(const marker of [
   if(!teacher.includes(marker)) throw new Error("Arquitectura: profesor no contiene "+marker);
 }
 
-console.log("Arquitectura LenguArcade consolidada: sin capas zz ni inyección dinámica de HTML.");
+
+
+const packageJson=JSON.parse(fs.readFileSync(path.resolve("package.json"),"utf8"));
+for(const forbiddenScript of ["maniac:publish","scrabble:publish","battlegrafia:publish","apps:push"]){
+  if(Object.prototype.hasOwnProperty.call(packageJson.scripts||{},forbiddenScript)){
+    throw new Error("Arquitectura: comando de publicación obsoleto: "+forbiddenScript);
+  }
+}
+
+for(const obsoletePath of [
+  path.resolve("diagnostics"),
+  path.resolve("shared"),
+  path.resolve("assets","games"),
+]){
+  if(fs.existsSync(obsoletePath)){
+    throw new Error("Arquitectura: sigue existiendo una carpeta obsoleta: "+path.relative(process.cwd(),obsoletePath));
+  }
+}
+
+for(const gameId of ["battlegrafia","maniacgrafia","scrabble"]){
+  const clasp=path.resolve("games",gameId,"apps-script",".clasp.json");
+  if(fs.existsSync(clasp)){
+    throw new Error("Arquitectura: "+gameId+" conserva una .clasp.json independiente.");
+  }
+}
+
+for(const standalonePublisher of [
+  "publish-battlegrafia.ps1",
+  "publish-maniacgrafia.ps1",
+  "publish-scrabble.ps1",
+]){
+  if(fs.existsSync(path.resolve("scripts",standalonePublisher))){
+    throw new Error("Arquitectura: sigue existiendo el publicador independiente "+standalonePublisher);
+  }
+}
+
+const centralSources=[
+  fs.readFileSync(path.join(appsDir,"LenguArcade_Code.gs"),"utf8"),
+  student,
+  fs.readFileSync(path.resolve("supabase","functions","student-dashboard","index.ts"),"utf8"),
+].join("\n");
+if(/raw(?:cdn)?\.githack\.com/i.test(centralSources)){
+  throw new Error("Arquitectura: producción no debe volver a usar RawGitHack/RawCDN.");
+}
+if(!centralSources.includes("pablogarciablancov.github.io/lenguarcade/games/")){
+  throw new Error("Arquitectura: falta el alojamiento consolidado de GitHub Pages.");
+}
+
+console.log("Arquitectura LenguArcade consolidada: núcleo único, publicación protegida y juegos en GitHub Pages.");
