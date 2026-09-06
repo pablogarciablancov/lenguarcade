@@ -7,9 +7,7 @@ const index=fs.readFileSync(path.join(v2Root,"index.html"),"utf8");
 const theme=fs.readFileSync(path.join(v2Root,"theme-v2.css"),"utf8");
 const enhance=fs.readFileSync(path.join(v2Root,"enhance-v2.js"),"utf8");
 const classic=fs.readFileSync(path.join(root,"games","battlegrafia","index.html"),"utf8");
-const code=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Code.gs"),"utf8");
-const student=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Alumno.html"),"utf8");
-const dashboard=fs.readFileSync(path.join(root,"supabase","functions","student-dashboard","index.ts"),"utf8");
+const catalog=JSON.parse(fs.readFileSync(path.join(root,"config","game-catalog.json"),"utf8"));
 const migration=fs.readFileSync(path.join(root,"supabase","migrations","20260905144700_battlegrafia_v2.sql"),"utf8");
 
 const errors=[];
@@ -71,23 +69,18 @@ for(const required of [
   if(!theme.includes(required)) errors.push("Falta capa visual v2: "+required);
 }
 
-if(!code.includes("battlegrafia_v2: {") ||
-   !code.includes("gameId:'battlegrafia_v2'") ||
-   !code.includes("games/battlegrafia_v2/")){
-  errors.push("Apps Script no registra Battlegrafía 2.0 como juego embebido.");
-}
-if(!student.includes("battlegrafia_v2:'battlegrafia-banner.jpg'") ||
-   !student.includes("battlegrafia_v2:{") ||
-   !student.includes("gameId==='battlegrafia'||gameId==='battlegrafia_v2'") ||
-   !student.includes("['battlegrafia','battlegrafia_v2'].includes(gameRecord?.gameId)")){
-  errors.push("El runner de alumno no trata Battlegrafía 2.0 como versión integrada.");
-}
-if(!dashboard.includes("battlegrafia_v2:{") || !dashboard.includes("games/battlegrafia_v2/")){
-  errors.push("student-dashboard no expone la integración v2.");
+const catalogEntry=catalog.games.find(game=>game.id==="battlegrafia_v2");
+if(!catalogEntry){
+  errors.push("El catálogo canónico no registra Battlegrafía 2.0.");
+}else{
+  if(catalogEntry.official!==false) errors.push("Battlegrafía 2.0 debe seguir fuera del catálogo oficial.");
+  if(catalogEntry.active!==false) errors.push("Battlegrafía 2.0 debe seguir inactiva en producción.");
+  if(catalogEntry.integration!=="embedded") errors.push("Battlegrafía 2.0 debe conservar su integración embebida de laboratorio.");
+  if(catalogEntry.entry!=="games/battlegrafia_v2/") errors.push("Battlegrafía 2.0 debe apuntar a su directorio aislado.");
 }
 if(!migration.includes("'battlegrafia_v2'") || !migration.includes("on conflict (id) do update")){
   errors.push("Falta la migración idempotente de Battlegrafía 2.0.");
 }
 
 if(errors.length) throw new Error("Comprobaciones de Battlegrafía 2.0 fallidas:\n- "+errors.join("\n- "));
-console.log("Battlegrafía 2.0 correcta: 5 mundos, 30 sprites originales, guardado aislado e integración paralela.");
+console.log("Battlegrafía 2.0 correcta: 5 mundos, 30 sprites originales, guardado aislado y laboratorio fuera de producción.");

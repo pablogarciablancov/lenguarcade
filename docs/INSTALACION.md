@@ -10,6 +10,19 @@
 
 ## Preparación local
 
+Se mantienen dos repositorios locales, uno junto al otro:
+
+```text
+LenguArcade/
+├── lenguarcade/          código, juegos, Apps Script y Supabase
+└── lenguarcade-assets/   recursos visuales públicos compartidos
+```
+
+No fusionar ni borrar `lenguarcade-assets`: el portal de alumno/profesor carga desde
+ese repositorio el logo, el banner general, avatares, fondos y banners del launcher.
+
+Desde `lenguarcade/`:
+
 ```powershell
 npm.cmd install
 npx.cmd clasp login

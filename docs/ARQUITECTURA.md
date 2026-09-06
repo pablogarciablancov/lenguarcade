@@ -38,6 +38,22 @@ Supabase sigue siendo la fuente principal para autenticación de aplicación, pe
 progreso, guardados, evaluaciones y gestión. Las Edge Functions sensibles exigen una
 sesión válida y realizan las operaciones con privilegios de servidor.
 
+## Assets públicos
+
+Los recursos visuales compartidos no viven dentro del repositorio principal. Se
+mantienen en el repositorio independiente `pablogarciablancov/lenguarcade-assets`:
+
+- `assets/brand/`: logo, favicon y banner general;
+- `assets/avatars/`: personajes del perfil;
+- `assets/avatar-backgrounds/`: fondos del perfil;
+- `assets/games/`: banners de las tarjetas del launcher.
+
+El portal carga primero desde GitHub Raw y dispone de jsDelivr como fallback. Los
+`index.html` de los juegos conservan sus propios recursos internos y no dependen de
+este repositorio salvo que se documente expresamente lo contrario.
+
+En local, la estructura recomendada es mantener ambos repositorios como carpetas
+hermanas: `LenguArcade/lenguarcade` y `LenguArcade/lenguarcade-assets`.
 
 ## Catálogo canónico
 
