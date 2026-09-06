@@ -168,9 +168,10 @@ if (!/function verifyStudentSession\(token\)\s*\{[^}]*requireSession_\(token,\s*
 if (/function getPublicMetaV03\(\)\s*\{\s*ensureSheets_/.test(serverSource)) {
   errors.push("La carga publica no debe revisar todas las hojas en cada visita.");
 }
-if (!serverSource.includes("https://pablogarciablancov.github.io/lenguarcade/games/maniacgrafia/") ||
+if (!serverSource.includes("LA_GAME_CATALOG_VERSION") ||
+    !serverSource.includes("https://pablogarciablancov.github.io/lenguarcade/games/maniacgrafia/") ||
     !serverSource.includes("decorateGameIntegration_")) {
-  errors.push("Maniacgrafia debe estar enlazada a una versión inmutable de GitHub Pages mediante el catálogo integrado.");
+  errors.push("Apps Script debe cargar el catálogo generado y conservar la integración de juegos.");
 }
 
 const publicStudentMatch = serverSource.match(/function publicStudent_\(s\)\s*\{([^}]+)\}/);
