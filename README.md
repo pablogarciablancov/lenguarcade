@@ -1,89 +1,93 @@
 # LenguArcade
 
-Plataforma unificada tipo launcher/Steam educativo para juegos de Lengua.
+Plataforma educativa que reúne en un único portal los juegos de Lengua y Literatura.
 
-## Objetivo
+## Producción
 
-Centralizar los juegos educativos existentes sin rehacerlos desde cero, con:
+LenguArcade tiene tres piezas claramente separadas:
 
-- identificación común de alumno
-- catálogo visual de juegos
-- progreso general de LenguArcade
-- progreso específico por juego
-- panel de profesor
-- evaluación automática orientativa
-- arquitectura modular mediante adaptadores
+- **Portal y panel del profesor:** Google Apps Script.
+- **Juegos estáticos:** GitHub Pages.
+- **Datos, sesiones y progreso:** Supabase.
 
-## Estructura del repositorio
+URL estable del portal:
 
 ```text
-apps-script/
-  LenguArcade_Code.gs
-  LenguArcade_Alumno.html
-  LenguArcade_Profesor.html
-  zz_LenguArcade_v0_3_patch.gs
-  appsscript.json
-
-games/
-  maniacgrafia/
-    apps-script/
-      Code.js
-      Alumno.html
-      Profesor.html
-      appsscript.json
-
-shared/
-  lenguarcade-core.js
-  lenguarcade-theme.css
-  lenguarcade-adapters.js
-
-docs/
-  INSTALACION.md
-  CAMBIOS.md
-  PRUEBAS.md
+https://script.google.com/macros/s/AKfycbyYW1m5zkvLc87XHUqCqNZpY59ZVA6wv6GyxqB_g7u19tRbE22eYZINSV7BHZLkbLpa/exec
 ```
 
-## Desarrollo y publicación
+Base pública de los juegos:
 
-El repositorio está conectado al proyecto de Google Apps Script mediante `clasp`.
+```text
+https://pablogarciablancov.github.io/lenguarcade/games/
+```
+
+Los recursos visuales generales se mantienen en el repositorio independiente
+`pablogarciablancov/lenguarcade-assets`.
+
+## Estructura actual
+
+```text
+apps-script/                 núcleo del portal
+games/                       un directorio por juego
+  <gameId>/index.html        entrada pública del juego
+  <gameId>/apps-script/      fuentes históricas/originales cuando existen
+supabase/
+  functions/                 backend activo
+  migrations/                historial de esquema; no borrar migraciones aplicadas
+scripts/
+  check-*.mjs                validaciones
+  archive/                   herramientas históricas no operativas
+docs/                        arquitectura, pruebas y procedimientos
+.github/workflows/
+  deploy-pages.yml           publicación de los juegos en GitHub Pages
+  game-scope-guard.yml       protege el trabajo simultáneo por juego
+  harden-assets.yml          endurecimiento de recursos
+```
+
+Las carpetas `games/*/apps-script/` se conservan como fuente o referencia cuando un
+juego nació como proyecto Apps Script. **No son destinos de publicación de producción.**
+
+## Comandos habituales
 
 ```powershell
 npm.cmd install
+npm.cmd run check
 npm.cmd run apps:status
 npm.cmd run apps:publish -- "descripcion del cambio"
-npm.cmd run maniac:publish -- "descripcion del cambio"
-npm.cmd run scrabble:publish -- "descripcion del cambio"
 ```
 
-Maniacgrafía es el primer juego integrado: se abre dentro de LenguArcade, recibe la identidad del alumno autenticado y devuelve el resultado de la partida al progreso central. El token de sesión nunca se entrega al juego.
+`apps:publish` es el único comando admitido para publicar el núcleo de Apps Script.
+Tiene una guardia que impide publicar desde ramas de juego o desde una copia local
+desactualizada.
 
-Scrabble incorpora integración multijugador presencial: el jugador principal usa su sesión abierta y el contrincante se identifica en un modal seguro de LenguArcade. El portal conserva ambos tokens, guarda partidas en curso y registra puntuaciones y logros por separado.
+Los juegos no se publican con `clasp`: GitHub Pages despliega `games/` desde
+`main`.
 
-El protocolo reutilizable para los siguientes juegos se describe en `docs/INTEGRACION_JUEGOS.md`.
+## Trabajo simultáneo
 
-Supabase es el backend principal del portal de alumno y del panel del profesor:
-guarda sesiones, progreso, partidas, logros y errores con baja latencia. Durante
-la transicion, las escrituras del alumno se copian tambien en Sheets como
-respaldo.
-
-Google Classroom se conecta desde el panel del profesor mediante Apps Script:
-permite importar cursos y alumnos y enviar la nota global a una tarea de
-LenguArcade como borrador. La primera sincronizacion requiere que el propietario
-autorice los permisos de Classroom. La arquitectura y las instrucciones estan
-en `docs/SUPABASE_CLASSROOM.md`.
-
-Los comandos de publicación suben el código, crean una versión inmutable y actualizan el despliegue web estable correspondiente.
-
-La carpeta `.codex/rules/` permite a Codex ejecutar estos comandos concretos sin solicitar permisos repetidos cuando el repositorio está abierto como proyecto confiable.
-
-Los recursos visuales públicos se mantienen en:
+Cada juego se desarrolla en:
 
 ```text
-https://github.com/pablogarciablancov/lenguarcade-assets
+game/<gameId>/<cambio>
 ```
 
-Battlegrafía se mantiene como proyecto independiente y no se modifica desde este repositorio salvo petición expresa.
+Una rama de juego solo modifica su propio juego. Los cambios de catálogo, runner,
+Apps Script o Supabase se hacen exclusivamente desde una rama `integration/*`.
 
-## Regla de oro
+Consulta `docs/TRABAJO_CONCURRENTE_JUEGOS.md`.
 
-No rehacer juegos desde cero. Integrar mediante adaptadores y cambios pequeños, conservando lo que ya funciona.
+## Principios
+
+1. No rehacer un juego que ya funciona.
+2. No romper mecánicas, bancos, guardados ni progreso.
+3. Mantener el núcleo separado de los juegos.
+4. Integrar mediante el bridge de LenguArcade sin entregar tokens de sesión al juego.
+5. Toda publicación de producción debe ser reproducible desde el repositorio.
+6. No usar RawGitHack/RawCDN como alojamiento de producción.
+
+## Battlegrafía 2.0
+
+`games/battlegrafia_v2/` se conserva como versión independiente en laboratorio.
+No sustituye a la Battlegrafía clásica y permanece fuera del catálogo activo hasta
+una integración posterior.
