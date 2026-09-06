@@ -5,6 +5,7 @@ const root=process.cwd();
 const catalogPath=path.join(root,"config","game-catalog.json");
 const appsPath=path.join(root,"apps-script","LenguArcade_GameCatalog.gs");
 const sqlPath=path.join(root,"supabase","catalog","game-catalog.sql");
+const migrationPath=path.join(root,"supabase","migrations","202609060002_canonical_game_catalog.sql");
 const checkOnly=process.argv.includes("--check");
 
 function fail(message){
@@ -70,7 +71,7 @@ function renderSql(catalog){
   const values=all.map(game=>"  ("+[
     sql(game.id),sql(game.name),sql(game.subtitle),sql(game.category),sql(game.status),
     sql(game.sortOrder),sql(game.color),sql(game.icon),sql(game.url),sql(game.banner),
-    sql(game.active),sql(game.description),sql(game.competencies.join(",")),sql(game.integration),sql(game.official)
+    sql(game.active),sql(game.description),sql(game.competencies.join(",")),sql(game.integration),sql(game.official),"now()"
   ].join(", ")+")").join(",\n");
   return "-- AUTO-GENERATED from config/game-catalog.json. DO NOT EDIT BY HAND.\n"+
     "insert into public.games\n"+
@@ -93,6 +94,97 @@ function renderSql(catalog){
     "  official=excluded.official,\n"+
     "  updated_at=now();\n";
 }
+function splitSqlCsv(source){
+  const parts=[];
+  let current="";
+  let quote=false;
+  let depth=0;
+  for(let i=0;i<source.length;i++){
+    const ch=source[i];
+    if(quote){
+      current+=ch;
+      if(ch==="'"&&source[i+1]==="'"){
+        current+=source[++i];
+      }else if(ch==="'"){
+        quote=false;
+      }
+      continue;
+    }
+    if(ch==="'"){
+      quote=true;
+      current+=ch;
+      continue;
+    }
+    if(ch==="("){
+      depth++;
+      current+=ch;
+      continue;
+    }
+    if(ch===")"){
+      depth--;
+      current+=ch;
+      continue;
+    }
+    if(ch===","&&depth===0){
+      parts.push(current.trim());
+      current="";
+      continue;
+    }
+    current+=ch;
+  }
+  if(quote||depth!==0)fail("SQL canónico: expresión desbalanceada");
+  if(current.trim())parts.push(current.trim());
+  return parts;
+}
+function extractSqlRows(source){
+  const rows=[];
+  let quote=false;
+  let depth=0;
+  let start=-1;
+  for(let i=0;i<source.length;i++){
+    const ch=source[i];
+    if(quote){
+      if(ch==="'"&&source[i+1]==="'"){
+        i++;
+      }else if(ch==="'"){
+        quote=false;
+      }
+      continue;
+    }
+    if(ch==="'"){
+      quote=true;
+      continue;
+    }
+    if(ch==="("){
+      if(depth===0)start=i+1;
+      depth++;
+      continue;
+    }
+    if(ch===")"){
+      depth--;
+      if(depth<0)fail("SQL canónico: paréntesis de valores desbalanceados");
+      if(depth===0&&start>=0){
+        rows.push(source.slice(start,i));
+        start=-1;
+      }
+    }
+  }
+  if(quote||depth!==0)fail("SQL canónico: filas de valores desbalanceadas");
+  return rows;
+}
+function validateGamesInsert(statement,label){
+  const match=statement.match(/insert\s+into\s+public\.games\s*\(([\s\S]*?)\)\s*values\s*([\s\S]*?)\s*on\s+conflict\s*\(\s*id\s*\)/i);
+  if(!match)fail(label+": no se reconoce el INSERT canónico en public.games");
+  const columns=splitSqlCsv(match[1]);
+  const rows=extractSqlRows(match[2]);
+  if(!columns.length||!rows.length)fail(label+": INSERT canónico vacío");
+  rows.forEach((row,index)=>{
+    const values=splitSqlCsv(row);
+    if(values.length!==columns.length){
+      fail(label+": fila "+(index+1)+" declara "+values.length+" valores para "+columns.length+" columnas");
+    }
+  });
+}
 function checkOrWrite(file,expected,label){
   if(checkOnly){
     if(!fs.existsSync(file))fail("falta generado: "+label);
@@ -104,6 +196,14 @@ function checkOrWrite(file,expected,label){
   }
 }
 const catalog=loadCatalog();
-checkOrWrite(appsPath,renderApps(catalog),"apps-script/LenguArcade_GameCatalog.gs");
-checkOrWrite(sqlPath,renderSql(catalog),"supabase/catalog/game-catalog.sql");
+const expectedApps=renderApps(catalog);
+const expectedSql=renderSql(catalog);
+validateGamesInsert(expectedSql,"SQL generado");
+checkOrWrite(appsPath,expectedApps,"apps-script/LenguArcade_GameCatalog.gs");
+checkOrWrite(sqlPath,expectedSql,"supabase/catalog/game-catalog.sql");
+if(checkOnly){
+  validateGamesInsert(fs.readFileSync(sqlPath,"utf8"),"supabase/catalog/game-catalog.sql");
+  if(!fs.existsSync(migrationPath))fail("falta migración canónica: supabase/migrations/202609060002_canonical_game_catalog.sql");
+  validateGamesInsert(fs.readFileSync(migrationPath,"utf8"),"migración 202609060002_canonical_game_catalog.sql");
+}
 console.log("Catálogo LenguArcade OK: "+catalog.games.filter(g=>g.official).length+" oficiales, "+catalog.games.length+" entradas totales.");
