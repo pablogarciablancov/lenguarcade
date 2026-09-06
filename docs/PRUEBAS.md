@@ -401,3 +401,18 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 8. Verificar que ningún `games/*/index.html` aparece modificado en el PR de limpieza.
 9. Verificar que GitHub Pages vuelve a desplegar correctamente tras fusionar.
 
+
+
+## Catálogo canónico · 2026-09-06
+
+1. Ejecutar `npm.cmd run catalog:check`: debe confirmar 10 juegos oficiales y 11 entradas totales.
+2. Ejecutar `npm.cmd run check`: todas las pruebas deben pasar.
+3. Confirmar que `LenguArcade_Code.gs` no contiene `const LA_OFFICIAL_GAMES` ni `LA_GAME_INTEGRATIONS`.
+4. Confirmar que `LenguArcade_Alumno.html` no contiene `LA_EMBEDDED_GAME_OVERRIDES`, `normalizeNarratoriaUrl` ni URL de juegos.
+5. Confirmar que `student-dashboard/index.ts` no contiene `const integrations` ni URLs hardcodeadas.
+6. Confirmar que `apps-script/LenguArcade_GameCatalog.gs` y `supabase/catalog/game-catalog.sql` coinciden con `catalog:sync`.
+7. Aplicar la migración `202609060002_canonical_game_catalog.sql` y comprobar las nuevas columnas.
+8. Desplegar `student-dashboard` antes de publicar Apps Script.
+9. Publicar Apps Script y probar Scrabble, Battlegrafía, Narratoria, Rayuela y Entre Líneas desde el portal.
+10. Confirmar que Battlegrafía 2.0 sigue inactiva y no aparece en el catálogo del alumno.
+
