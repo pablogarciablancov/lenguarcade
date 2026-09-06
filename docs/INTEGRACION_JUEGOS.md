@@ -1,19 +1,47 @@
-# Integracion de juegos
+# Integración de juegos
 
-LenguArcade abre los juegos integrados dentro de un visor comun y precarga el
-primer juego disponible despues de validar la sesion del alumno.
+LenguArcade abre los juegos dentro de un visor común y mantiene la identidad y el
+guardado fuera del código del juego.
 
-## Protocolo v1
+## Alojamiento
 
-Cada juego recibe en su URL:
+Los juegos de producción se sirven desde GitHub Pages:
+
+```text
+https://pablogarciablancov.github.io/lenguarcade/games/<gameId>/
+```
+
+No usar RawGitHack/RawCDN como alojamiento de producción.
+
+## Arranque
+
+El portal crea un iframe con:
 
 - `lenguarcade=1`
 - `channel=<identificador aleatorio>`
 
-En Google Apps Script estos parametros deben leerse con
-`google.script.url.getLocation`, no con `location.search`.
+Además prepara un bootstrap de contexto en `iframe.name` con:
 
-El juego envia mensajes `postMessage` con:
+- perfil básico del alumno;
+- guardado previo del juego;
+- feedback/evaluación cuando proceda.
+
+El bootstrap **no contiene el token de sesión**.
+
+## Protocolo de mensajes
+
+El host usa:
+
+```js
+{
+  namespace: "lenguarcade-host",
+  channel,
+  type,
+  payload
+}
+```
+
+El juego usa:
 
 ```js
 {
@@ -25,32 +53,51 @@ El juego envia mensajes `postMessage` con:
 }
 ```
 
-Mensajes del juego:
+### Del host al juego
 
-- `READY`: el motor puede recibir el perfil.
-- `INITIALIZED`: el perfil y la partida guardada ya estan aplicados.
-- `SESSION_STARTED`: ha comenzado una partida.
-- `RESULT`: resultado normalizado al terminar, ganar o salir.
+- `INIT`: perfil, guardado y feedback.
+- `REQUEST_EXIT`: solicita consolidar y cerrar la partida.
+- `OPPONENT_AUTHENTICATED` / `OPPONENT_AUTH_FAILED`: multijugador.
+- `SAVE_CONFIRMED` / `SAVE_FAILED`: resultado de guardado.
+- `CHECKPOINT_CONFIRMED` / `CHECKPOINT_FAILED`: puntos de control.
+
+### Del juego al host
+
+- `READY`: el bridge del juego está disponible.
+- `INITIALIZED`: perfil y guardado ya se aplicaron.
+- `SESSION_STARTED`: comenzó una sesión.
+- `RESULT`: resultado normalizado.
+- `CHECKPOINT`: guardado intermedio.
+- `REQUEST_OPPONENT_AUTH`: solicita identificar a otro jugador.
 - `CLOSE_READY`: el visor puede cerrarse.
 
-LenguArcade responde con:
+## Handshake robusto
 
-- `INIT`: alumno autenticado y guardado anterior del juego.
-- `REQUEST_EXIT`: solicita cerrar y consolidar la partida.
-- `SAVE_CONFIRMED` o `SAVE_FAILED`: resultado del guardado central.
+El portal no depende de que `READY` llegue primero.
 
-El juego nunca recibe el token de sesion. LenguArcade conserva el token y
-realiza la llamada a `saveProgress`.
+1. Crea el iframe y prepara el bootstrap.
+2. Empieza a enviar `INIT` de forma breve y repetida.
+3. El juego puede leer el bootstrap desde `window.name` como fallback.
+4. El juego aplica el contexto.
+5. El juego envía `INITIALIZED`.
+6. El portal detiene los reintentos y oculta la pantalla de conexión.
 
-## Perfil
+`READY` sigue siendo útil, pero no es un punto único de fallo.
 
-Mientras espera `INIT`, el juego muestra `Cargando datos del perfil`. Tras
-`INITIALIZED`, sustituye ese estado por el nombre y la clase recibidos. Los
-campos editables de identidad no se muestran en el modo integrado.
+## Seguridad
 
-## Apps Script
+- El token de sesión nunca se entrega al iframe.
+- El portal valida `namespace`, `channel`, `gameId` y la ventana de origen.
+- El portal realiza las llamadas de guardado central.
+- El juego solo recibe los datos mínimos necesarios para jugar.
 
-Las aplicaciones HTML de Apps Script usan un iframe interno adicional. Por
-eso el juego anuncia `READY` a sus ventanas antecesoras y el portal fija la
-ventana exacta que responde con el canal aleatorio. Los mensajes posteriores
-solo se aceptan desde esa ventana.
+## Reglas para un juego nuevo
+
+1. Debe funcionar de forma independiente en `games/<gameId>/index.html`.
+2. Debe conservar su mecánica original.
+3. Debe implementar el bridge sin depender de Apps Script.
+4. Debe responder a `INIT` con `INITIALIZED`.
+5. Debe enviar resultados idempotentes cuando sea posible.
+6. Si necesita cambios del núcleo, declararlos en
+   `games/<gameId>/lenguarcade.integration.json` y hacer la integración desde una
+   rama `integration/*`.
