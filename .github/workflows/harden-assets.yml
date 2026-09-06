@@ -151,6 +151,8 @@ jobs:
               'assets/games/scrabble-banner.jpg',
               'assets/games/conjuga-apuesta-banner.jpg',
               'assets/games/verb-battle-banner.jpg',
+              'assets/games/rayuela-banner.webp',
+              'assets/games/entre-lineas-banner.webp',
           }
           expected.update(f'assets/avatars/avatar-{index:02d}.webp' for index in range(1, 17))
           expected.update(f'assets/avatar-backgrounds/background-{index:02d}.webp' for index in range(1, 13))
