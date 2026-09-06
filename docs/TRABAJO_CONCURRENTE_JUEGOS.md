@@ -82,6 +82,29 @@ Formato recomendado:
 
 Esto convierte la integración en una petición declarativa, no en una edición simultánea del núcleo.
 
+
+## Cambios de catálogo
+
+Una rama `game/*` no modifica el catálogo central.
+
+Si un juego necesita cambiar nombre, estado, URL, integración, orden o metadatos, lo
+declara en su `lenguarcade.integration.json`. La rama `integration/*` aplica el
+cambio únicamente en:
+
+```text
+config/game-catalog.json
+```
+
+y después ejecuta:
+
+```powershell
+npm.cmd run catalog:sync
+npm.cmd run check
+```
+
+No editar a mano `LenguArcade_GameCatalog.gs`, el SQL generado ni crear mapas de
+juegos dentro del HTML o de Edge Functions.
+
 ## Rama de integración
 
 Cuando se quiera publicar uno o varios juegos se crea una única rama:
