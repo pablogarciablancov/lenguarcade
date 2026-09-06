@@ -108,10 +108,12 @@ La rama de integración parte siempre del `main` más reciente y procesa una pet
 3. Leer los `lenguarcade.integration.json` pendientes.
 4. Aplicar adaptadores al núcleo común.
 5. Ejecutar todas las comprobaciones.
-6. Actualizar Supabase.
-7. Publicar Apps Script.
-8. Probar el `/exec` estable.
-9. Fusionar la rama de integración.
+6. Preparar juntos los cambios de Supabase y Apps Script.
+7. Fusionar la rama de integración cuando las comprobaciones sean correctas.
+8. Confirmar que GitHub Pages ha publicado los juegos afectados.
+9. Actualizar Supabase.
+10. Publicar Apps Script.
+11. Probar el `/exec` estable.
 
 **Nunca se actualiza Supabase antes de que el host compatible esté preparado para publicarse en la misma integración.**
 
@@ -121,17 +123,19 @@ Un juego nuevo puede existir en GitHub sin estar en el catálogo vivo.
 
 Estados recomendados:
 
-- **laboratorio**: solo URL de prueba fijada a un commit; no aparece en LenguArcade;
-- **en pruebas**: integrado y visible, tras publicación coordinada;
+- **laboratorio**: se prueba desde su rama o en local y no aparece en LenguArcade;
+- **en pruebas**: integrado y visible tras publicación coordinada;
 - **listo**: versión estable.
 
-Para laboratorios se usa preferentemente una URL fijada a commit:
+Producción usa exclusivamente GitHub Pages:
 
 ```
-https://rawcdn.githack.com/<owner>/<repo>/<commit>/games/<gameId>/index.html
+https://pablogarciablancov.github.io/lenguarcade/games/<gameId>/
 ```
 
-Así una modificación posterior de `main` no cambia el prototipo que se está probando.
+No usar RawGitHack/RawCDN como alojamiento de producción. En laboratorio, probar el
+`index.html` de la rama de juego o una vista temporal aislada; no cambiar el catálogo
+vivo para enseñar un prototipo.
 
 ## Qué debe hacer cada chat
 
