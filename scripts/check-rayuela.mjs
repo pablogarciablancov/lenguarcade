@@ -55,6 +55,7 @@ console.log('Rayuela OK · '+checks.length+' contratos · '+scripts.length+' scr
 
 const alumno = fs.readFileSync(path.resolve("apps-script","LenguArcade_Alumno.html"),"utf8");
 const codeGs = fs.readFileSync(path.resolve("apps-script","LenguArcade_Code.gs"),"utf8");
+const generatedCatalog = fs.readFileSync(path.resolve("apps-script","LenguArcade_GameCatalog.gs"),"utf8");
 const profesor = fs.readFileSync(path.resolve("apps-script","LenguArcade_Profesor.html"),"utf8");
 const evaluation = fs.readFileSync(path.resolve("supabase","functions","teacher-rayuela-evaluation","index.ts"),"utf8");
 const dashboard = fs.readFileSync(path.resolve("supabase","functions","student-dashboard","index.ts"),"utf8");
@@ -64,8 +65,10 @@ const migrations = fs.readdirSync(path.resolve("supabase","migrations")).filter(
 if (!alumno.includes("gameRecord?.gameId==='rayuela'") || !alumno.includes("projectXp-Number(old.xp||0)")) {
   throw new Error("Rayuela: falta la integración de XP idempotente en el host del alumno.");
 }
-if (!codeGs.includes("rayuela: {") || !codeGs.includes("gameId:'rayuela'")) {
-  throw new Error("Rayuela: falta el catálogo consolidado de Apps Script.");
+if (!generatedCatalog.includes('gameId:"rayuela"') ||
+    !generatedCatalog.includes('integration:"embedded"') ||
+    !generatedCatalog.includes('estado:"en pruebas"')) {
+  throw new Error("Rayuela: falta en el catálogo canónico generado.");
 }
 if (!profesor.includes("teacher-rayuela-evaluation") || !profesor.includes("Comentarios por escena") || !profesor.includes("__LA_RAYUELA_TEACHER_PATCH__")) {
   throw new Error("Rayuela: falta la rúbrica específica del profesor.");
