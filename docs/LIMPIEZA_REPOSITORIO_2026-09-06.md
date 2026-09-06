@@ -49,7 +49,7 @@ No forman parte del flujo operativo.
   historial de esquema y no deben borrarse.
 - `docs/CAMBIOS.md` y `docs/PRUEBAS.md`: historial útil aunque contengan referencias
   a etapas antiguas.
-- ramas `feature/*`: pueden contener trabajo no fusionado y no se consideran basura.
+- las ramas de trabajo se conservaron mientras podían contener cambios exclusivos; tras comparar su contenido con `main`, se podaron cuando quedó demostrado que no aportaban trabajo no integrado.
 
 ## Supabase
 
@@ -65,8 +65,8 @@ Las Edge Functions temporales creadas durante el diagnóstico:
 - `game-static`
 - `diagnose-game-host`
 
-no se pueden borrar mediante la API disponible en esta sesión. Se redeplegaron para
-responder siempre `404 Not found`, por lo que quedan desactivadas.
+se eliminaron definitivamente del proyecto una vez comprobado que ningún código de
+producción las referenciaba.
 
 ## Alojamiento consolidado
 
@@ -89,12 +89,26 @@ La consolidación del catálogo se realizó después de esta limpieza:
 - `student-dashboard` lee directamente `public.games`;
 - el HTML del alumno ya no contiene overrides de identidad, URL o estado.
 
-Siguen como tareas opcionales:
+## Fase 3 completada · cierre estructural
 
-1. podar manualmente ramas `integration/*` ya fusionadas;
-2. borrar desde el panel de Supabase las tres Edge Functions temporales desactivadas,
-   si se desea que desaparezcan también de la lista;
-3. revisar si el workflow `harden-assets.yml` puede simplificarse en una futura
-   migración de assets a un único host.
+La tercera fase dejó el entorno en su estado consolidado:
 
-La limpieza de esta fase no modifica ningún `index.html` de juego ni sus mecánicas.
+- el repositorio `pablogarciablancov/lenguarcade` conserva únicamente la rama `main`;
+- el repositorio `pablogarciablancov/lenguarcade-assets` conserva únicamente la rama `main`;
+- `lenguarcade-assets` queda documentado como segundo repositorio oficial y dependencia
+  activa para logo, identidad visual, avatares, fondos y banners del launcher;
+- `npm run check` vuelve a validar Battlegrafía 2.0 como laboratorio aislado;
+- `harden-assets.yml` comprueba también los banners de Rayuela y Entre Líneas;
+- las funciones de diagnóstico temporales de Supabase han sido eliminadas;
+- las migraciones históricas de Supabase se conservan como historial reproducible;
+- las herramientas antiguas permanecen archivadas fuera del flujo operativo.
+
+En local, la estructura final recomendada es:
+
+```text
+LenguArcade/
+├── lenguarcade/
+└── lenguarcade-assets/
+```
+
+La limpieza de estas fases no modifica ningún `index.html` de juego ni sus mecánicas.
