@@ -4,6 +4,7 @@ import path from "node:path";
 const root=process.cwd();
 const game=fs.readFileSync(path.join(root,"games","conjuga_apuesta","index.html"),"utf8");
 const code=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Code.gs"),"utf8");
+const generatedCatalog=fs.readFileSync(path.join(root,"apps-script","LenguArcade_GameCatalog.gs"),"utf8");
 const student=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Alumno.html"),"utf8");
 const classroom=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Classroom.gs"),"utf8");
 const dashboard=fs.readFileSync(path.join(root,"supabase","functions","student-dashboard","index.ts"),"utf8");
@@ -59,14 +60,14 @@ for(const marker of [
   if(!game.includes(marker))errors.push("Falta contrato del juego: "+marker);
 }
 
-if(!code.includes("conjuga_apuesta: {") ||
-   !code.includes("games/conjuga_apuesta/") ||
-   !code.includes("estado:'en pruebas'")){
-  errors.push("Apps Script no activa Conjuga y apuesta como juego embebido en pruebas.");
+if(!generatedCatalog.includes('gameId:"conjuga_apuesta"') ||
+   !generatedCatalog.includes('integration:"embedded"') ||
+   !generatedCatalog.includes('estado:"en pruebas"')){
+  errors.push("El catálogo canónico no activa Conjuga y apuesta como juego embebido en pruebas.");
 }
-if(!dashboard.includes("conjuga_apuesta:{") ||
-   !dashboard.includes("games/conjuga_apuesta/")){
-  errors.push("student-dashboard no expone la integración de Conjuga y apuesta.");
+if(!dashboard.includes('.eq("official", true)') ||
+   !dashboard.includes('const integration = String(game.integration || "none")')){
+  errors.push("student-dashboard debe obtener la integración desde public.games.");
 }
 if(!student.includes("gameRecord?.gameId==='conjuga_apuesta'") ||
    !student.includes("Código para jugar con otra persona") ||
