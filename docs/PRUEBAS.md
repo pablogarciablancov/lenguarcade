@@ -387,3 +387,17 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 18. Abrir después la Battlegrafía clásica y confirmar que su partida anterior no ha sido modificada por la v2.
 19. Terminar una partida v2 y comprobar que LenguArcade guarda el progreso bajo `gameId='battlegrafia_v2'`, separado de `battlegrafia`.
 20. Probar en 1366×768: Combate, hub, selector de modos, mapa y campamento no deben requerir scroll de página.
+
+
+## Limpieza y consolidación del repositorio · 2026-09-06
+
+1. Ejecutar `npm.cmd run check`: todas las comprobaciones deben terminar correctamente.
+2. Confirmar que no existen `scripts/publish-maniacgrafia.ps1`, `publish-scrabble.ps1` ni `publish-battlegrafia.ps1`.
+3. Confirmar que Maniacgrafía, Scrabble y Battlegrafía no contienen una `.clasp.json` dentro de `games/*/apps-script/`.
+4. Confirmar que no existen las carpetas activas `diagnostics/`, `shared/` ni `assets/games/`.
+5. Confirmar que `package.json` no expone `maniac:publish`, `scrabble:publish`, `battlegrafia:publish` ni `apps:push`.
+6. Confirmar que el núcleo no contiene referencias a `raw.githack.com` ni `rawcdn.githack.com`.
+7. Abrir Scrabble y Battlegrafía desde GitHub Pages y desde LenguArcade.
+8. Verificar que ningún `games/*/index.html` aparece modificado en el PR de limpieza.
+9. Verificar que GitHub Pages vuelve a desplegar correctamente tras fusionar.
+
