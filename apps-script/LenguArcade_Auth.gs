@@ -8,8 +8,7 @@ const LA_GOOGLE_AUTH_CONFIG = {
   STUDENT_DOMAIN: '@alumno.fomento.edu',
   TEACHER_DOMAIN: '@fomento.edu',
   TEACHER_ALLOWED_CONFIG_KEY: 'TEACHER_ALLOWED_EMAILS',
-  TEACHER_PLAYER_CLASS: 'PROFES',
-  GITHUB_PAGES_GAMES_BASE: 'https://raw.githack.com/pablogarciablancov/lenguarcade/main/games/'
+  TEACHER_PLAYER_CLASS: 'PROFES'
 };
 
 function buildExternalRedirectHtmlOutput_(url, title) {
@@ -22,28 +21,11 @@ function buildExternalRedirectHtmlOutput_(url, title) {
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<title>' + safeTitle + '</title>' +
     '<style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,Segoe UI,Arial,sans-serif;background:#0b1020;color:#f5f7ff}.box{max-width:520px;padding:28px;border-radius:24px;background:#17213d;box-shadow:0 18px 46px rgba(0,0,0,.34)}a{color:#7dd3fc}</style>' +
-    '</head><body><div class="box"><h1>Cargando ' + safeTitle + '...</h1><p>Abriendo el juego desde GitHub/RawGithack.</p><p><a href="' + safeUrl + '">Abrir manualmente</a></p></div>' +
+    '</head><body><div class="box"><h1>Cargando ' + safeTitle + '...</h1><p>Abriendo el juego desde GitHub Pages.</p><p><a href="' + safeUrl + '">Abrir manualmente</a></p></div>' +
     '<script>window.top.location.href="' + safeUrl + '";<\/script></body></html>'
   )
     .setTitle(safeTitle)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
-
-function getGithubGameUrl_(gameId) {
-  const cleanGameId = String(gameId || '').replace(/^\/+|\/+$/g, '');
-  return LA_GOOGLE_AUTH_CONFIG.GITHUB_PAGES_GAMES_BASE + cleanGameId + '/';
-}
-
-function normalizeDashboardGameUrlsForGithub_(dashboard) {
-  if (!dashboard || !Array.isArray(dashboard.games)) return dashboard;
-  dashboard.games = dashboard.games.map(function(game) {
-    if (!game || String(game.gameId || '').toLowerCase() !== 'narratoria') return game;
-    const copy = Object.assign({}, game);
-    copy.url = getGithubGameUrl_('narratoria');
-    copy.embedUrl = getGithubGameUrl_('narratoria');
-    return copy;
-  });
-  return dashboard;
 }
 
 function getWebAppUrl() {
@@ -85,7 +67,7 @@ function loginStudentWithGoogle() {
   if (!isTrue_(student.activo)) throw new Error('Tu usuario aparece como inactivo. Habla con tu profesor.');
   touchStudent_(student.studentId);
   const token = createSession_('student', student.studentId);
-  return {ok:true, role:'student', token, activeUserEmail:email, student:safeStudent_(student), dashboard:normalizeDashboardGameUrlsForGithub_(getStudentDashboardCore_(student.studentId))};
+  return {ok:true, role:'student', token, activeUserEmail:email, student:safeStudent_(student), dashboard:getStudentDashboardCore_(student.studentId)};
 }
 
 function loginTeacherAsStudentWithGoogle() {
@@ -96,7 +78,7 @@ function loginTeacherAsStudentWithGoogle() {
   const student = ensureTeacherPlayerStudent_(email);
   touchStudent_(student.studentId);
   const token = createSession_('student', student.studentId);
-  return {ok:true, role:'student', teacherPlayer:true, token, activeUserEmail:email, student:safeStudent_(student), dashboard:normalizeDashboardGameUrlsForGithub_(getStudentDashboardCore_(student.studentId))};
+  return {ok:true, role:'student', teacherPlayer:true, token, activeUserEmail:email, student:safeStudent_(student), dashboard:getStudentDashboardCore_(student.studentId)};
 }
 
 function loginTeacherWithGoogle() {
