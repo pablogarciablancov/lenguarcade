@@ -16954,6 +16954,29 @@ function getUnlockedSet(){
       setTimeout(stop,1200);
     }
   });
+  function readBootstrap(){
+    try{
+      var data=JSON.parse(String(window.name||''));
+      if(!data||data.namespace!=='lenguarcade-bootstrap')return null;
+      if(String(data.channel||'')!==channel||String(data.gameId||'')!==gameId)return null;
+      return data;
+    }catch(error){return null;}
+  }
+  function injectBootstrap(){
+    var data=readBootstrap();
+    if(!data)return;
+    try{
+      window.dispatchEvent(new MessageEvent('message',{data:{
+        namespace:'lenguarcade-host',
+        channel:channel,
+        type:'INIT',
+        payload:data.payload||{}
+      }}));
+    }catch(error){}
+  }
+  setTimeout(injectBootstrap,0);
+  setTimeout(injectBootstrap,250);
+  setTimeout(injectBootstrap,900);
   setTimeout(postReady,0);
   timer=setInterval(postReady,700);
   setTimeout(stop,8000);
