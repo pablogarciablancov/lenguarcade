@@ -177,18 +177,68 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 @media(max-width:680px){.inventoryGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.itemPickup{top:72px;min-width:260px}.inventoryPanel{padding:16px}}
 @media(max-width:430px){.inventoryGrid{grid-template-columns:1fr}}
 
+
+.libraryHome{min-height:100vh;background:radial-gradient(circle at 15% 0%,rgba(105,87,232,.10),transparent 30%),radial-gradient(circle at 90% 5%,rgba(8,127,156,.08),transparent 27%),#f4f7fb;color:#172033}.libraryTop{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px clamp(18px,4vw,54px);background:rgba(255,255,255,.94);border-bottom:1px solid rgba(30,41,59,.1);position:sticky;top:0;z-index:20;backdrop-filter:blur(14px)}.libraryTopActions{display:flex;align-items:center;gap:9px}.libraryMain{width:min(1260px,calc(100% - 36px));margin:0 auto;padding:clamp(25px,4vw,50px) 0 60px}.libraryHero{display:flex;align-items:flex-end;justify-content:space-between;gap:25px;padding:26px 28px;border:1px solid #dde3ec;border-radius:25px;background:linear-gradient(145deg,#fff,#f8f7ff);box-shadow:0 18px 45px rgba(51,65,85,.09)}.libraryHero h2{font-size:clamp(30px,5vw,48px);margin:5px 0 8px;letter-spacing:-.035em}.libraryHero p{max-width:640px;margin:0;color:#64748b;font-size:13px;line-height:1.55}.libraryNewBtn{padding:12px 18px;font-size:12px;white-space:nowrap}.librarySummary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0 28px}.librarySummaryCard{padding:13px 15px;border:1px solid #dde3ec;border-radius:15px;background:#fff}.librarySummaryCard span{display:block;color:#7a8799;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}.librarySummaryCard b{display:block;margin-top:3px;font-size:20px;color:#243248}.librarySections{display:grid;gap:27px}.librarySection{min-width:0}.librarySectionHead{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #dde3ec;padding:0 2px 9px}.librarySectionHead>div{display:flex;align-items:center;gap:8px}.librarySectionHead h3{margin:0;font-size:18px}.statusDot{width:11px;height:11px;border-radius:50%;box-shadow:0 0 0 4px rgba(100,116,139,.08)}.statusDot.draft{background:#8b5cf6}.statusDot.testing{background:#e59b23}.statusDot.submitted{background:#1a9b6b}.libraryCount{min-width:28px;height:25px;padding:0 8px;border-radius:999px;display:grid;place-items:center;background:#eef2f7;color:#526176;font-size:10px;font-weight:900}.librarySectionHelp{margin:7px 2px 12px;color:#7a8799;font-size:10px}.storyLibraryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.storyProjectCard{position:relative;display:grid;grid-template-rows:auto auto auto 1fr auto;min-height:230px;padding:17px;border:1px solid #dce3ec;border-radius:19px;background:#fff;box-shadow:0 6px 18px rgba(51,65,85,.055);transition:.2s transform,.2s box-shadow,.2s border-color}.storyProjectCard:hover{transform:translateY(-2px);box-shadow:0 13px 26px rgba(51,65,85,.10);border-color:#cbc5ee}.storyProjectTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.storyStatus{padding:5px 8px;border-radius:999px;font-size:8px;font-weight:950;text-transform:uppercase;letter-spacing:.06em}.storyStatus.draft{background:#f2eeff;color:#684bc7}.storyStatus.testing{background:#fff5df;color:#94610c}.storyStatus.submitted{background:#eaf8f1;color:#217354}.storyDate{font-size:8px;color:#93a0b1}.storyProjectCard h4{font-size:17px;margin:13px 0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.storyProjectMeta{color:#748196;font-size:9px;line-height:1.4;min-height:26px}.storyProjectStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:14px 0}.storyMiniStat{padding:8px;border-radius:10px;background:#f7f9fc;text-align:center}.storyMiniStat b{display:block;font-size:13px}.storyMiniStat span{display:block;margin-top:2px;color:#8794a5;font-size:7px;text-transform:uppercase;font-weight:850}.storyProjectActions{display:flex;gap:7px;align-self:end}.storyProjectActions .mainBtn,.storyProjectActions .smallBtn{flex:1;justify-content:center}.libraryEmptyState{padding:55px 20px;text-align:center;border:1px dashed #cfd8e4;border-radius:24px;background:rgba(255,255,255,.7);margin-top:22px}.libraryEmptyIcon{font-size:60px;color:#7d6eea}.libraryEmptyState h3{font-size:22px;margin:8px 0}.libraryEmptyState p{max-width:520px;margin:0 auto 18px;color:#718095;line-height:1.5}.backLibraryBtn{white-space:nowrap;background:#f5f7fa!important}@media(max-width:1050px){.storyLibraryGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.librarySummary{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:700px){.libraryTop{align-items:flex-start}.libraryTopActions .profileBadge{display:none}.libraryHero{align-items:stretch;flex-direction:column}.libraryNewBtn{width:100%}.storyLibraryGrid{grid-template-columns:1fr}.librarySummary{grid-template-columns:repeat(2,minmax(0,1fr))}.backLibraryBtn{font-size:0}.backLibraryBtn::after{content:"←";font-size:14px}.topProject{min-width:0}}
+
 @media(max-width:1200px){.workspace{grid-template-columns:230px minmax(0,1fr) 350px}}
 @media(max-width:900px){.workspace{display:block}.sceneEditorIntro{padding-top:17px}.stepHeadingWithAction{grid-template-columns:32px 1fr}.stepHeadingWithAction .compactMainBtn{grid-column:1/-1;width:100%}}
 
 </style>
 </head>
 <body>
-<div class="app">
+<div id="libraryHome" class="libraryHome">
+  <header class="libraryTop">
+    <div class="brand">
+      <div class="brandMark" aria-hidden="true">⌗</div>
+      <div><h1>RAYUELA</h1><small>Tu historia. Tus decisiones.</small></div>
+    </div>
+    <div class="libraryTopActions">
+      <span id="libraryProfileBadge" class="profileBadge">👤 Autor local</span>
+      <span class="xpBadge">✨ <b id="libraryXpValue">0</b> XP</span>
+    </div>
+  </header>
+  <main class="libraryMain">
+    <section class="libraryHero">
+      <div>
+        <div class="eyebrow">Tu biblioteca narrativa</div>
+        <h2>Mis historias</h2>
+        <p>Empieza una aventura, vuelve a una que estés escribiendo o prueba las que ya has terminado.</p>
+      </div>
+      <button id="newStoryBtn" class="mainBtn libraryNewBtn">＋ Nueva historia</button>
+    </section>
+    <section id="librarySummary" class="librarySummary"></section>
+    <section id="libraryEmpty" class="libraryEmptyState hidden">
+      <div class="libraryEmptyIcon">⌗</div>
+      <h3>Aquí aparecerán tus historias</h3>
+      <p>Empieza con una sola casilla. Después verás crecer tu mapa, tus caminos y tus finales.</p>
+      <button id="emptyNewStoryBtn" class="mainBtn">Crear mi primera historia</button>
+    </section>
+    <section id="librarySections" class="librarySections">
+      <div class="librarySection">
+        <div class="librarySectionHead"><div><span class="statusDot draft"></span><h3>Empezadas</h3></div><span id="draftCount" class="libraryCount">0</span></div>
+        <p class="librarySectionHelp">Historias que todavía estás construyendo.</p>
+        <div id="libraryDrafts" class="storyLibraryGrid"></div>
+      </div>
+      <div class="librarySection">
+        <div class="librarySectionHead"><div><span class="statusDot testing"></span><h3>En pruebas</h3></div><span id="testingCount" class="libraryCount">0</span></div>
+        <p class="librarySectionHelp">Ya las has jugado y estás comprobando si todos los caminos funcionan.</p>
+        <div id="libraryTesting" class="storyLibraryGrid"></div>
+      </div>
+      <div class="librarySection">
+        <div class="librarySectionHead"><div><span class="statusDot submitted"></span><h3>Terminadas</h3></div><span id="submittedCount" class="libraryCount">0</span></div>
+        <p class="librarySectionHelp">Historias entregadas con una versión congelada para evaluación.</p>
+        <div id="librarySubmitted" class="storyLibraryGrid"></div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="app" id="editorApp" style="display:none">
   <header class="topbar">
     <div class="brand">
       <div class="brandMark" aria-hidden="true">⌗</div>
       <div><h1>RAYUELA</h1><small>Tu historia. Tus decisiones.</small></div>
     </div>
+    <button id="backToLibraryBtn" class="smallBtn backLibraryBtn">← Mis historias</button>
     <div class="topProject">
       <input id="projectTitle" class="projectTitleInput" maxlength="80" aria-label="Título de la historia" value="Mi aventura">
       <span id="saveBadge" class="saveBadge ok">✓ Guardado</span>
@@ -369,7 +419,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 
 <div id="projectModal" class="modal" role="dialog" aria-modal="true">
   <div class="dialog">
-    <div class="dialogHead"><div><h2>Proyecto Rayuela</h2><p>Empieza otra aventura, importa una copia o descarga tu trabajo.</p></div><button class="iconBtn" data-close="projectModal">✕</button></div>
+    <div class="dialogHead"><div><h2>Nueva historia</h2><p>Elige cómo quieres empezar. Tu historia actual se guardará y seguirá en “Mis historias”.</p></div><button class="iconBtn" data-close="projectModal">✕</button></div>
     <div class="templateGrid">
       <div class="templateCard" data-template="blank"><strong>🧱 En blanco</strong><span>Una sola casilla central. El resto lo construyes tú.</span></div>
       <div class="templateCard" data-template="simple"><strong>🌱 Historia sencilla</strong><span>Una bifurcación y dos finales para empezar rápido.</span></div>
@@ -433,8 +483,9 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 (function(){
 "use strict";
 var GAME_ID="rayuela";
-var GAME_VERSION="1.2.0-beta";
+var GAME_VERSION="1.3.0-beta";
 var STORAGE_KEY="LA_RAYUELA_PROJECT_V1";
+var LIBRARY_STORAGE_KEY="LA_RAYUELA_LIBRARY_V1";
 var DISCOVERY_KEY="LA_RAYUELA_DISCOVERIES_V1";
 var TUTORIAL_KEY="LA_RAYUELA_TUTORIAL_V1";
 var BRIDGE_NS_GAME="lenguarcade-game";
@@ -561,6 +612,52 @@ function defaultProject(){
   };
 }
 var project=defaultProject();
+var library={schema:"rayuela-library-v1",version:GAME_VERSION,activeProjectId:"",projects:[],updatedAt:now(),xpFloor:0};
+var currentView="library";
+
+function defaultLibrary(){
+  return {schema:"rayuela-library-v1",version:GAME_VERSION,activeProjectId:"",projects:[],updatedAt:now(),xpFloor:0};
+}
+function normalizeLibrary(raw){
+  var lib=defaultLibrary();
+  if(raw&&typeof raw==="object"&&Array.isArray(raw.projects)){
+    lib=Object.assign(lib,raw);
+    lib.projects=raw.projects.map(normalizeProject);
+  }else if(raw&&typeof raw==="object"&&Array.isArray(raw.nodes)){
+    var legacy=normalizeProject(raw);lib.projects=[legacy];lib.activeProjectId=legacy.id;lib.xpFloor=Math.max(0,Number(legacy.xp||0));
+  }
+  var seen={};lib.projects=lib.projects.filter(function(p){if(!p||!p.id||seen[p.id])return false;seen[p.id]=true;return true;});
+  if(lib.activeProjectId&&!lib.projects.some(function(p){return p.id===lib.activeProjectId;}))lib.activeProjectId="";
+  lib.xpFloor=Math.max(0,Number(lib.xpFloor||0),lib.projects.reduce(function(max,p){return Math.max(max,Number(p.xp||0));},0));
+  return lib;
+}
+function syncProjectIntoLibrary(){
+  if(!project||!project.id)return;
+  project.updatedAt=now();project.lastSavedAt=now();
+  var idx=library.projects.findIndex(function(p){return p.id===project.id;});
+  if(idx>=0)library.projects[idx]=clone(project);else library.projects.push(clone(project));
+  library.activeProjectId=project.id;library.updatedAt=now();
+}
+function libraryXp(){
+  var achievementIds={},objectiveIds={};
+  library.projects.forEach(function(p){
+    (p.unlockedAchievements||[]).forEach(function(id){achievementIds[id]=true;});
+    (p.objectiveRewards||[]).forEach(function(id){objectiveIds[id]=true;});
+  });
+  var achievementsXp=Object.keys(achievementIds).reduce(function(sum,id){var a=ACHIEVEMENTS.find(function(x){return x.id===id;});return sum+Number(a&&a.xp||0);},0);
+  var objectivesXp=Object.keys(objectiveIds).reduce(function(sum,id){var o=OBJECTIVES.find(function(x){return x.id===id;});return sum+Number(o&&o.xp||0);},0);
+  return Math.max(Number(library.xpFloor||0),achievementsXp+objectivesXp);
+}
+function libraryPayload(){syncProjectIntoLibrary();var payload=clone(library);payload.xp=libraryXp();payload.activeProjectId=project&&project.id?project.id:library.activeProjectId;return payload;}
+function projectSummary(p){
+  var nodes=Array.isArray(p.nodes)?p.nodes:[],wordCount=nodes.reduce(function(sum,n){return sum+words(n.text);},0),choices=0,endings=0;
+  nodes.forEach(function(n){choices+=(Array.isArray(n.choices)?n.choices:[]).filter(function(ch){return ch.targetId;}).length;if(isEnding(n))endings++;});
+  return {nodes:nodes.length,words:wordCount,choices:choices,endings:endings};
+}
+function displayProjectStatus(p){return p.status==="submitted"?"submitted":p.status==="testing"||Number(p.playTests||0)>0?"testing":"draft";}
+function statusLabel(status){return status==="submitted"?"Terminada":status==="testing"?"En pruebas":"Empezada";}
+function formatStoryDate(value){try{return new Intl.DateTimeFormat("es-ES",{day:"2-digit",month:"short"}).format(new Date(value||Date.now()));}catch(e){return "";}}
+
 
 function normalizeProject(raw){
   if(!raw||typeof raw!=="object")return defaultProject();
@@ -590,14 +687,21 @@ function normalizeProject(raw){
 
 function loadLocal(){
   try{
-    var raw=localStorage.getItem(STORAGE_KEY);
-    if(raw)project=normalizeProject(JSON.parse(raw));
-  }catch(error){console.warn("No se pudo cargar Rayuela",error);project=defaultProject();}
+    var libraryRaw=localStorage.getItem(LIBRARY_STORAGE_KEY),legacyRaw=localStorage.getItem(STORAGE_KEY);
+    if(libraryRaw)library=normalizeLibrary(JSON.parse(libraryRaw));
+    else if(legacyRaw)library=normalizeLibrary(JSON.parse(legacyRaw));
+    else library=defaultLibrary();
+    var active=library.projects.find(function(p){return p.id===library.activeProjectId;})||library.projects[0]||null;
+    if(active){project=normalizeProject(active);library.activeProjectId=project.id;}
+  }catch(error){console.warn("No se pudo cargar Rayuela",error);library=defaultLibrary();project=defaultProject();}
 }
 function localPersist(){
-  project.updatedAt=now();project.lastSavedAt=now();
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(project));setSaveStatus("ok","✓ Guardado");}
-  catch(error){console.warn(error);setSaveStatus("error","⚠ Sin guardar");}
+  syncProjectIntoLibrary();
+  try{
+    localStorage.setItem(LIBRARY_STORAGE_KEY,JSON.stringify(libraryPayload()));
+    if(project&&project.id)localStorage.setItem(STORAGE_KEY,JSON.stringify(project));
+    if($("saveBadge"))setSaveStatus("ok","✓ Guardado");
+  }catch(error){console.warn(error);if($("saveBadge"))setSaveStatus("error","⚠ Sin guardar");}
 }
 function setSaveStatus(cls,text){var el=$("saveBadge");el.className="saveBadge "+cls;el.textContent=text;}
 function scheduleSave(reason){
@@ -646,11 +750,18 @@ function applyHostInit(payload){
   var student=payload.student||{};
   var label=student.nombre||student.name||student.displayName||student.email||"Autor conectado";
   $("profileBadge").textContent="👤 "+label+(student.clase?" · "+student.clase:"");
-  if(payload.save&&typeof payload.save==="object")project=normalizeProject(payload.save);
-  else loadLocal();
-  if(payload.feedback&&typeof payload.feedback==="object")project.teacherFeedback=payload.feedback;
+  if(payload.save&&typeof payload.save==="object"){
+    library=normalizeLibrary(payload.save);
+    var active=library.projects.find(function(p){return p.id===library.activeProjectId;})||library.projects[0]||null;
+    if(active)project=normalizeProject(active);
+  }else loadLocal();
+  if(payload.feedback&&typeof payload.feedback==="object"){
+    var feedbackProjectId=payload.feedback.breakdown&&payload.feedback.breakdown.projectId||"";
+    var target=feedbackProjectId?library.projects.find(function(p){return p.id===feedbackProjectId;}):null;
+    if(target)target.teacherFeedback=payload.feedback;else if(project)project.teacherFeedback=payload.feedback;
+  }
   bridgeInitialized=true;
-  postToHost("INITIALIZED",{projectId:project.id});
+  postToHost("INITIALIZED",{projectId:project&&project.id||"",projects:library.projects.length});
   bootProject();
 }
 window.addEventListener("message",function(event){
@@ -678,12 +789,12 @@ function sendCheckpoint(reason,force){
   var checkpointId="ray_cp_"+Date.now()+"_"+Math.random().toString(36).slice(2,6);
   var ids=Array.from(pendingAchievementIds);
   checkpointInFlight[checkpointId]=ids.slice();
-  postToHost("CHECKPOINT",{checkpointId:checkpointId,reason:reason||"autosave",players:[{role:"primary",save:clone(project),achievements:buildAchievementPayload(ids),metrics:bridgeMetrics()}]});
+  postToHost("CHECKPOINT",{checkpointId:checkpointId,reason:reason||"autosave",players:[{role:"primary",save:libraryPayload(),achievements:buildAchievementPayload(ids),metrics:bridgeMetrics()}]});
   if(force)setSaveStatus("saving","Guardando…");
 }
 function bridgeMetrics(){
   var s=computeStats();var issues=validateStory();
-  return {words:s.words,nodes:s.nodes,choices:s.connectedChoices,endings:s.endings,depth:s.depth,complexity:s.stars,quality:qualityScore(issues,s),structuralErrors:issues.filter(function(i){return i.severity==="error";}).length,submitted:project.status==="submitted",percentage:objectiveState().percent};
+  return {words:s.words,nodes:s.nodes,choices:s.connectedChoices,endings:s.endings,depth:s.depth,complexity:s.stars,quality:qualityScore(issues,s),structuralErrors:issues.filter(function(i){return i.severity==="error";}).length,submitted:project.status==="submitted",percentage:objectiveState().percent,projectId:project.id,projectStatus:displayProjectStatus(project),libraryProjects:library.projects.length,libraryXp:libraryXp()};
 }
 function sendSubmissionResult(){
   if(!integrated)return;
@@ -691,7 +802,7 @@ function sendSubmissionResult(){
   var ids=Array.from(pendingAchievementIds);
   postToHost("RESULT",{
     resultId:"rayuela_"+project.id+"_"+Date.now(),outcome:"submitted",score:quality*10,totalWords:s.words,correct:Math.max(0,12-issues.filter(function(i){return i.severity==="error";}).length),
-    errors:issues.length,percentage:objectiveState().percent,xpGain:project.xp,finalGrade:Math.round(quality)/10,achievements:buildAchievementPayload(ids),save:clone(project),
+    errors:issues.length,percentage:objectiveState().percent,xpGain:project.xp,finalGrade:Math.round(quality)/10,achievements:buildAchievementPayload(ids),save:libraryPayload(),
     metrics:bridgeMetrics()
   });
 }
@@ -824,11 +935,50 @@ function qualityScore(issues,stats){
   return clamp(Math.round(score),0,100);
 }
 
+function renderLibrary(){
+  var groups={draft:[],testing:[],submitted:[]},totalWords=0,totalNodes=0;
+  library.projects.slice().sort(function(a,b){return String(b.updatedAt||"").localeCompare(String(a.updatedAt||""));}).forEach(function(p){
+    var st=displayProjectStatus(p),summary=projectSummary(p);groups[st].push({project:p,summary:summary});totalWords+=summary.words;totalNodes+=summary.nodes;
+  });
+  $("draftCount").textContent=groups.draft.length;$("testingCount").textContent=groups.testing.length;$("submittedCount").textContent=groups.submitted.length;
+  $("libraryXpValue").textContent=libraryXp();
+  $("librarySummary").innerHTML=[
+    ["Historias",library.projects.length],["En pruebas",groups.testing.length],["Terminadas",groups.submitted.length],["Palabras escritas",totalWords.toLocaleString("es-ES")]
+  ].map(function(x){return '<div class="librarySummaryCard"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>';}).join("");
+  function cards(items){
+    return items.map(function(item){
+      var p=item.project,s=item.summary,status=displayProjectStatus(p),action=status==="submitted"?"Abrir":"Continuar",playLabel=status==="submitted"?"▶ Jugar":"▶ Probar";
+      return '<article class="storyProjectCard"><div class="storyProjectTop"><span class="storyStatus '+status+'">'+statusLabel(status)+'</span><span class="storyDate">'+formatStoryDate(p.updatedAt||p.createdAt)+'</span></div><h4 title="'+esc(p.title||"Mi aventura")+'">'+esc(p.title||"Mi aventura")+'</h4><div class="storyProjectMeta">'+esc(p.genre||"Aventura")+(p.submittedAt?' · entregada '+formatStoryDate(p.submittedAt):'')+'</div><div class="storyProjectStats"><div class="storyMiniStat"><b>'+s.nodes+'</b><span>Escenas</span></div><div class="storyMiniStat"><b>'+s.words.toLocaleString("es-ES")+'</b><span>Palabras</span></div><div class="storyMiniStat"><b>'+s.endings+'</b><span>Finales</span></div></div><div class="storyProjectActions"><button class="mainBtn" data-open-story="'+esc(p.id)+'">'+action+'</button><button class="smallBtn" data-play-story="'+esc(p.id)+'">'+playLabel+'</button></div></article>';
+    }).join("");
+  }
+  $("libraryDrafts").innerHTML=cards(groups.draft);$("libraryTesting").innerHTML=cards(groups.testing);$("librarySubmitted").innerHTML=cards(groups.submitted);
+  var empty=!library.projects.length;$("libraryEmpty").classList.toggle("hidden",!empty);$("librarySections").classList.toggle("hidden",empty);
+  document.querySelectorAll("[data-open-story]").forEach(function(btn){btn.onclick=function(){openStory(btn.dataset.openStory,false);};});
+  document.querySelectorAll("[data-play-story]").forEach(function(btn){btn.onclick=function(){openStory(btn.dataset.playStory,true);};});
+}
+function showLibraryHome(){
+  if(currentView==="editor")localPersist();
+  closeInventory();if($("playModal"))$("playModal").classList.remove("open");playState=null;
+  currentView="library";$("editorApp").style.display="none";$("libraryHome").style.display="block";renderLibrary();
+}
+function openStory(id,playImmediately){
+  if(currentView==="editor")localPersist();
+  var found=library.projects.find(function(p){return p.id===id;});if(!found)return;
+  project=normalizeProject(found);library.activeProjectId=project.id;historyStack=[];futureStack=[];selectedNodeId=(getStart()||{}).id||"";
+  currentView="editor";$("libraryHome").style.display="none";$("editorApp").style.display="grid";renderAll();localPersist();
+  setTimeout(function(){centerOnNode(selectedNodeId);if(playImmediately)startPlay();else if(!localStorage.getItem(TUTORIAL_KEY))maybeTutorial();},120);
+}
+function createStoryFromTemplate(kind){
+  if(currentView==="editor")localPersist();
+  project=templateProject(kind||"blank");project.status="draft";project.createdAt=now();project.updatedAt=now();library.projects.push(clone(project));library.activeProjectId=project.id;
+  closeModal("projectModal");openStory(project.id,false);toast("Nueva historia","Ya tienes una nueva Rayuela en tu biblioteca.");
+}
+function openNewStoryChooser(){$("projectModal").classList.add("open");}
 function renderAll(){
-  $("projectTitle").value=project.title||"Mi aventura";$("xpValue").textContent=project.xp;
+  $("projectTitle").value=project.title||"Mi aventura";$("xpValue").textContent=libraryXp();
   renderBoard();renderEditor();renderCompass();renderMetrics();renderInspectorPreview();renderAchievementPreview();updateHistoryButtons();
   evaluateObjectives();var issues=validateStory(),s=computeStats();evaluateAchievements(s,issues);
-  $("xpValue").textContent=project.xp;
+  $("xpValue").textContent=libraryXp();
 }
 function renderCompass(){
   var st=objectiveState();$("objectiveList").innerHTML=OBJECTIVES.map(function(o){
@@ -1128,6 +1278,7 @@ function choiceLockReason(c,inventory,vars){
 function choiceAllowed(c,inventory,vars){return !choiceLockReason(c,inventory,vars);}
 function startPlay(nodeId){
   var start=getNode(nodeId)||getStart();if(!start)return;
+  if(project.status!=="submitted")project.status="testing";
   project.playTests++;ensureBridgeSession();awardAchievement("playtest");scheduleSave("playtest");
   playState={nodeId:start.id,path:[start.id],inventory:[],vars:clone(project.variables||{}),startedAt:now(),testStart:nodeId||""};$("playModal").classList.add("open");$("playProjectTitle").textContent=project.title||"Rayuela";updateInventoryButton();renderPlayNode();
 }
@@ -1193,7 +1344,7 @@ function openSubmit(){
 }
 function confirmSubmit(){
   pushHistory();project.status="submitted";project.submittedAt=now();var frozen=clone(project);frozen.submissions=[];var snapshot={id:uid("submission"),at:project.submittedAt,project:frozen,stats:computeStats(),quality:qualityScore(validateStory(),computeStats())};project.submissions.push(snapshot);
-  awardAchievement("submitted");localPersist();renderAll();closeModal("submitModal");sendCheckpoint("submission",true);setTimeout(sendSubmissionResult,350);toast("📬 Aventura entregada","Se ha congelado una versión para evaluación.","achievement");
+  awardAchievement("submitted");localPersist();renderAll();closeModal("submitModal");renderLibrary();sendCheckpoint("submission",true);setTimeout(sendSubmissionResult,350);toast("📬 Aventura entregada","Se ha congelado una versión para evaluación.","achievement");
 }
 function closeModal(id){$(id).classList.remove("open");}
 function download(filename,text,type){
@@ -1205,7 +1356,12 @@ function exportText(){
   download((project.title||"rayuela").replace(/[^\w\-áéíóúñ]+/gi,"_")+".txt",lines.join("\n"));
 }
 function importJson(file){
-  var reader=new FileReader();reader.onload=function(){try{var raw=JSON.parse(reader.result);pushHistory();project=normalizeProject(raw);selectedNodeId=(getStart()||{}).id||"";localPersist();renderAll();closeModal("projectModal");toast("Proyecto importado","La copia se ha cargado correctamente.");}catch(error){toast("No se pudo importar","El archivo no parece un proyecto Rayuela válido.");}};reader.readAsText(file);
+  var reader=new FileReader();reader.onload=function(){try{
+    var raw=JSON.parse(reader.result),imported=[];
+    if(raw&&Array.isArray(raw.projects))imported=normalizeLibrary(raw).projects;else imported=[normalizeProject(raw)];
+    imported.forEach(function(p){if(library.projects.some(function(existing){return existing.id===p.id;}))p.id=uid("rayuela");p.updatedAt=now();library.projects.push(p);});
+    localPersist();closeModal("projectModal");renderLibrary();if(imported[0])openStory(imported[0].id,false);toast("Proyecto importado","La copia se ha añadido a Mis historias.");
+  }catch(error){toast("No se pudo importar","El archivo no parece un proyecto Rayuela válido.");}};reader.readAsText(file);
 }
 function templateProject(kind){
   var p=defaultProject(),s=p.nodes[0];p.title=kind==="blank"?"Mi aventura":kind==="mystery"?"El misterio sin resolver":kind==="adventure"?"La ruta imposible":"Una decisión inesperada";s.text=kind==="blank"?"":"Todo parecía normal hasta que algo cambió. Ahora debes decidir qué hacer.";
@@ -1216,9 +1372,7 @@ function templateProject(kind){
   if(kind==="adventure"){var l=add("story",4,2,"Sendero del río","El río bloquea el paso."),r=add("story",4,6,"Sendero del bosque","Entre los árboles escuchas un silbido."),meet=add("decision",2,4,"El refugio","Los dos caminos terminan en el mismo refugio."),e1=add("ending",0,3,"Regreso a casa","Decides que ya has tenido suficiente aventura."),e2=add("ending",0,5,"Más allá del mapa","Cruzas el último umbral.");choice(s,"Seguir el río",l);choice(s,"Entrar en el bosque",r);choice(l,"Buscar refugio",meet);choice(r,"Seguir el silbido",meet);choice(meet,"Regresar",e1);choice(meet,"Continuar",e2);}
   return p;
 }
-function replaceWithTemplate(kind){
-  pushHistory();project=templateProject(kind);selectedNodeId=(getStart()||{}).id||"";localPersist();renderAll();closeModal("projectModal");centerOnNode(selectedNodeId);toast("Nueva Rayuela","Todo comienza en una casilla.");
-}
+function replaceWithTemplate(kind){createStoryFromTemplate(kind);}
 function showTutorial(){
   tutorialIndex=0;$("tutorialModal").classList.add("open");renderTutorial();
 }
@@ -1238,6 +1392,7 @@ function nextTutorial(){if(tutorialIndex<TUTORIAL.length-1){tutorialIndex++;rend
 function maybeTutorial(){if(!localStorage.getItem(TUTORIAL_KEY))showTutorial();}
 
 function bindUi(){
+  $("newStoryBtn").onclick=openNewStoryChooser;$("emptyNewStoryBtn").onclick=openNewStoryChooser;$("backToLibraryBtn").onclick=showLibraryHome;
   $("projectTitle").oninput=function(e){project.title=e.target.value;project.editCount++;scheduleSave("project_title");renderAchievementPreview();};
   $("undoBtn").onclick=undo;$("redoBtn").onclick=redo;$("moreBtn").onclick=function(){$("projectModal").classList.add("open");};
   $("addNodeBtn").onclick=startGenericPlacement;$("centerBtn").onclick=function(){var s=getStart();if(s){selectNode(s.id,false);centerOnNode(s.id);}};$("expandBtn").onclick=expandMap;
@@ -1261,8 +1416,13 @@ function bindUi(){
   bindEditor();
 }
 function bootProject(){
-  selectedNodeId=(getStart()||{}).id||"";bindUi();renderAll();localPersist();setTimeout(function(){centerOnNode(selectedNodeId);},160);maybeTutorial();
-  $("footerStatus").textContent=integrated?"Perfil conectado a LenguArcade · guardado automático activado":"Modo local · tu proyecto se guarda en este navegador";
+  bindUi();
+  if(library.projects.length){
+    var active=library.projects.find(function(p){return p.id===library.activeProjectId;})||library.projects[0];project=normalizeProject(active);library.activeProjectId=project.id;
+  }
+  if($("libraryProfileBadge"))$("libraryProfileBadge").textContent=$("profileBadge").textContent||"👤 Autor";
+  showLibraryHome();
+  $("footerStatus").textContent=integrated?"Perfil conectado a LenguArcade · biblioteca y guardado automático activados":"Modo local · tus historias se guardan en este navegador";
 }
 startBridge();
 })();
