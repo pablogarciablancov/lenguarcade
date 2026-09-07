@@ -257,34 +257,11 @@
   let lastBossKey = '';
 
   function renderWorldStrip() {
-    const strip = buildWorldStrip();
-    if (!strip) return;
+    // La ruta completa de monstruos pertenece al MAPA, no al combate.
+    // Conservamos aquí únicamente la detección de jefe para su intro.
+    const strip = document.getElementById('bg2-world-strip');
+    if (strip) strip.remove();
     const current = resolveCurrentMonster();
-    const worldId = current?.worldId || 'montanas';
-    const world = WORLDS[worldId];
-    const defeated = defeatedSet();
-
-    strip.innerHTML = '';
-    const label = document.createElement('div');
-    label.className = 'bg2-world-name';
-    label.innerHTML = world.short + '<span>5 guardianes + jefe</span>';
-    strip.appendChild(label);
-
-    const rail = document.createElement('div');
-    rail.className = 'bg2-stage-rail';
-    world.monsters.forEach((monster, index) => {
-      const record = BY_ID.get(monster[0]);
-      const node = document.createElement('div');
-      node.className = 'bg2-stage-node ' + nodeState(record, current, defeated) + (record.boss ? ' boss' : '');
-      node.title = (index + 1) + '/6 · ' + record.name + (record.boss ? ' · JEFE' : '');
-      const img = document.createElement('img');
-      img.src = record.sprite;
-      img.alt = record.name;
-      node.appendChild(img);
-      rail.appendChild(node);
-    });
-    strip.appendChild(rail);
-
     if (current?.boss) maybeShowBoss(current);
   }
 
