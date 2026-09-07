@@ -347,6 +347,17 @@ for(const required of [
 if(!enhance.includes("El roster v2 duplicaba esa misma información y rompía la cuadrícula del mapa.")){
   errors.push("El mapa v2 debe eliminar el roster duplicado.");
 }
+
+for(const required of [
+  "Montañas de Lexikon",
+  "Castillo de Paper",
+  "Ciénaga de Torvax",
+  "Acantilados de Sintaxion",
+  "Volcán de Don Pablo",
+  "Cartografía del Reino",
+]){
+  if(!index.includes(required)) errors.push("Falta nomenclatura v2 coherente en mapa: "+required);
+}
 if(enhance.includes("roster.appendChild(card);")){
   errors.push("El mapa v2 sigue renderizando un segundo roster de monstruos.");
 }
