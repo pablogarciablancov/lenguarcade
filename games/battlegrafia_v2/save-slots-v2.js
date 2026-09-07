@@ -26,6 +26,7 @@
   const legacyKey = mode => 'battlegrafia_v2_player_pixel_historia_v6_' + mode;
   const slotId = index => PREFIX + index;
   const isEmbedded = () => !!window.__LENGUARCADE_EMBEDDED;
+  let pendingNewSlotId = null;
 
   function rawSlots(mode='adventure') {
     const slots = safeParse(localStorage.getItem(modeKey(mode)), []);
@@ -143,11 +144,13 @@
   }
 
   function prepareNew(index, mode='adventure') {
+    const id = slotId(index);
     setActive(index, mode);
     erase(index, mode);
     setActive(index, mode);
+    pendingNewSlotId = id;
     try { localStorage.removeItem(legacyKey(mode)); } catch (error) {}
-    return slotId(index);
+    return id;
   }
 
   function touchName(index, name, mode='adventure') {
@@ -170,6 +173,20 @@
   }
 
   normalizeAdventureSlots();
+
+  /* El motor clásico crea IDs aleatorios al iniciar partida. En v2 respetamos
+     la ranura elegida sin tocar su lógica interna. */
+  try {
+    const originalMakeSlotId = typeof window.makeSlotId === 'function' ? window.makeSlotId : null;
+    window.makeSlotId = function(){
+      if (pendingNewSlotId) {
+        const id = pendingNewSlotId;
+        pendingNewSlotId = null;
+        return id;
+      }
+      return originalMakeSlotId ? originalMakeSlotId.apply(this, arguments) : ('slot_' + Date.now());
+    };
+  } catch (error) {}
 
   window.BG2Slots = {
     SLOT_COUNT, PREFIX, all, meta, getSlot, setActive, erase, prepareNew,
