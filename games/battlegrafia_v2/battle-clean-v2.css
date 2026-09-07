@@ -170,9 +170,27 @@ body.bg2-battle-clean.bg2-in-battle #battle-screen .monster-box{
   order:2;
 }
 body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-box::before{
+  /* El estilo RPG convierte ::before en una pequeña etiqueta.
+     Hay que anular el inset:0 heredado del HUD original para que
+     no se extienda sobre el nombre y el tipo de la criatura. */
+  inset:auto!important;
   top:-7px!important;
+  left:9px!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:auto!important;
+  height:auto!important;
   padding:2px 5px!important;
   font-size:6px!important;
+  opacity:1!important;
+  z-index:1!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-name,
+body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-tag,
+body.bg2-battle-clean.bg2-in-battle #battle-screen .hp-bar-wrap,
+body.bg2-battle-clean.bg2-in-battle #battle-screen .hp-text{
+  position:relative!important;
+  z-index:2!important;
 }
 body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-name{
   font:900 13px/1.1 "Courier New",Consolas,monospace!important;
@@ -184,10 +202,12 @@ body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-name{
      0 2px 4px #000!important;
 }
 body.bg2-battle-clean.bg2-in-battle #battle-screen .hero-box .entity-name{
-  color:#7dd3fc!important;
+  color:#ffffff!important;
+  -webkit-text-fill-color:#ffffff!important;
 }
 body.bg2-battle-clean.bg2-in-battle #battle-screen .monster-box .entity-name{
-  color:#fca5a5!important;
+  color:#ffd166!important;
+  -webkit-text-fill-color:#ffd166!important;
 }
 body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-tag{
   margin:3px 0 6px!important;
