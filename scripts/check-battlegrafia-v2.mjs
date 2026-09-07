@@ -11,6 +11,8 @@ const saveSlots=fs.readFileSync(path.join(v2Root,"save-slots-v2.js"),"utf8");
 const rpgCss=fs.readFileSync(path.join(v2Root,"rpg-ui-v2.css"),"utf8");
 const unifiedUi=fs.readFileSync(path.join(v2Root,"rpg-unified-v2.js"),"utf8");
 const unifiedCss=fs.readFileSync(path.join(v2Root,"rpg-unified-v2.css"),"utf8");
+const battleUi=fs.readFileSync(path.join(v2Root,"battle-clean-v2.js"),"utf8");
+const battleCss=fs.readFileSync(path.join(v2Root,"battle-clean-v2.css"),"utf8");
 const classic=fs.readFileSync(path.join(root,"games","battlegrafia","index.html"),"utf8");
 const catalog=JSON.parse(fs.readFileSync(path.join(root,"config","game-catalog.json"),"utf8"));
 const migration=fs.readFileSync(path.join(root,"supabase","migrations","20260905144700_battlegrafia_v2.sql"),"utf8");
@@ -21,11 +23,13 @@ try{ new Function(enhance); }catch(error){ errors.push("enhance-v2.js no compila
 try{ new Function(rpgUi); }catch(error){ errors.push("rpg-ui-v2.js no compila: "+error.message); }
 try{ new Function(saveSlots); }catch(error){ errors.push("save-slots-v2.js no compila: "+error.message); }
 try{ new Function(unifiedUi); }catch(error){ errors.push("rpg-unified-v2.js no compila: "+error.message); }
+try{ new Function(battleUi); }catch(error){ errors.push("battle-clean-v2.js no compila: "+error.message); }
 
 for(const required of [
   "./save-slots-v2.js",
   "./rpg-ui-v2.js",
   "./rpg-unified-v2.js",
+  "./battle-clean-v2.js",
 ]){
   if(!index.includes(required)) errors.push("Falta carga de interfaz RPG v2: "+required);
 }
@@ -173,6 +177,38 @@ for(const required of [
   if(!unifiedCss.includes(required)) errors.push("Falta estilo RPG unificado: "+required);
 }
 
+for(const required of [
+  "bg2-battle-clean",
+  "bg2-in-battle",
+  "function updateBattleState",
+  "CORRIGE ESTE DESAFÍO",
+  "CORREGIR Y ATACAR",
+  "removeBattleNoise",
+]){
+  if(!battleUi.includes(required)) errors.push("Falta interfaz de combate limpia: "+required);
+}
+
+for(const required of [
+  "#bg2-world-strip",
+  "#nav-map",
+  "#nav-diary",
+  "#nav-history",
+  "grid-template-columns:minmax(0,1fr) 390px",
+  "#battle-screen .battle-sprites-row",
+  "#input-panel",
+  "#attack-btn",
+  "#log-panel",
+]){
+  if(!battleCss.includes(required)) errors.push("Falta layout de combate limpio: "+required);
+}
+
+if(!enhance.includes("La ruta completa de monstruos pertenece al MAPA, no al combate.")){
+  errors.push("El combate v2 debe retirar el riel de monstruos y dejarlo solo en el mapa.");
+}
+if(enhance.includes("strip.appendChild(rail);")){
+  errors.push("El combate v2 sigue construyendo el riel de monstruos dentro de battle-screen.");
+}
+
 if(index.includes("const menu = document.getElementById('start-choice');\n    if(menu) menu.classList.add('is-active');")){
   errors.push("El listener demo legacy todavía puede superponer start-choice al menú principal.");
 }
@@ -210,4 +246,4 @@ if(!migration.includes("'battlegrafia_v2'") || !migration.includes("on conflict 
 }
 
 if(errors.length) throw new Error("Comprobaciones de Battlegrafía 2.0 fallidas:\n- "+errors.join("\n- "));
-console.log("Battlegrafía 2.0 correcta: RPG pixel UI unificada, fondos nítidos, tres ranuras seguras, 5 mundos, 30 sprites, guardado aislado y modo de prueba directa.");
+console.log("Battlegrafía 2.0 correcta: batalla limpia y enfocada, RPG pixel UI unificada, tres ranuras seguras, 5 mundos, 30 sprites, guardado aislado y modo de prueba directa.");
