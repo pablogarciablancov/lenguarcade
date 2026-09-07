@@ -15,6 +15,16 @@ const errors=[];
 try{ new Function(enhance); }catch(error){ errors.push("enhance-v2.js no compila: "+error.message); }
 
 for(const required of [
+  "const TEST_MODE = (() =>",
+  "params.get('test') === '1'",
+  "function enableDirectTestMode()",
+  "pruebas@lenguarcade.local",
+  "Modo prueba · Fantasy Arcade v2",
+]){
+  if(!enhance.includes(required)) errors.push("Falta modo de prueba directa en v2: "+required);
+}
+
+for(const required of [
   "const GAME_ID = 'battlegrafia_v2'",
   "battlegrafia_v2_player_pixel_historia_v6",
   "battlegrafia_v2_save_slots_v1",
@@ -83,4 +93,4 @@ if(!migration.includes("'battlegrafia_v2'") || !migration.includes("on conflict 
 }
 
 if(errors.length) throw new Error("Comprobaciones de Battlegrafía 2.0 fallidas:\n- "+errors.join("\n- "));
-console.log("Battlegrafía 2.0 correcta: 5 mundos, 30 sprites originales, guardado aislado y laboratorio fuera de producción.");
+console.log("Battlegrafía 2.0 correcta: 5 mundos, 30 sprites originales, guardado aislado, laboratorio fuera de producción y modo de prueba directa.");
