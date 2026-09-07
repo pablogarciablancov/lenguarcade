@@ -137,7 +137,7 @@ for(const required of [
 
 for(const required of [
   "bg2-unified-rpg",
-  "data-rpg-kicker",
+  "dataset.rpgKicker",
   "annotateNavigation",
   "annotateOverlays",
 ]){
