@@ -15,6 +15,8 @@ const battleUi=fs.readFileSync(path.join(v2Root,"battle-clean-v2.js"),"utf8");
 const battleCss=fs.readFileSync(path.join(v2Root,"battle-clean-v2.css"),"utf8");
 const battleRouter=fs.readFileSync(path.join(v2Root,"battle-router-v2.js"),"utf8");
 const battleRouterCss=fs.readFileSync(path.join(v2Root,"battle-router-v2.css"),"utf8");
+const tabsPolish=fs.readFileSync(path.join(v2Root,"tabs-polish-v2.js"),"utf8");
+const tabsPolishCss=fs.readFileSync(path.join(v2Root,"tabs-polish-v2.css"),"utf8");
 const classic=fs.readFileSync(path.join(root,"games","battlegrafia","index.html"),"utf8");
 const catalog=JSON.parse(fs.readFileSync(path.join(root,"config","game-catalog.json"),"utf8"));
 const migration=fs.readFileSync(path.join(root,"supabase","migrations","20260905144700_battlegrafia_v2.sql"),"utf8");
@@ -27,6 +29,7 @@ try{ new Function(saveSlots); }catch(error){ errors.push("save-slots-v2.js no co
 try{ new Function(unifiedUi); }catch(error){ errors.push("rpg-unified-v2.js no compila: "+error.message); }
 try{ new Function(battleUi); }catch(error){ errors.push("battle-clean-v2.js no compila: "+error.message); }
 try{ new Function(battleRouter); }catch(error){ errors.push("battle-router-v2.js no compila: "+error.message); }
+try{ new Function(tabsPolish); }catch(error){ errors.push("tabs-polish-v2.js no compila: "+error.message); }
 
 for(const required of [
   "./save-slots-v2.js",
@@ -34,6 +37,7 @@ for(const required of [
   "./rpg-unified-v2.js",
   "./battle-clean-v2.js",
   "./battle-router-v2.js",
+  "./tabs-polish-v2.js",
 ]){
   if(!index.includes(required)) errors.push("Falta carga de interfaz RPG v2: "+required);
 }
@@ -316,6 +320,31 @@ try{
   }
 }catch(error){
   errors.push("Smoke test router batalla/mapa fallido: "+error.message);
+}
+
+for(const required of [
+  "bg2-tabs-polished",
+  "camp-screen",
+  "map-screen",
+  "inventory-screen",
+  "diary-screen",
+  "history-screen",
+]){
+  if(!tabsPolish.includes(required)) errors.push("Falta pulido de pestañas v2: "+required);
+}
+
+for(const required of [
+  'width:min(1240px,calc(100vw - 24px))',
+  'height:min(650px,calc(100vh - 76px))',
+  'grid-template-columns:minmax(0,1fr) 345px',
+  'width:min(1140px,calc(100% - 12px))',
+  '#camp-screen .camp-container',
+  '[data-bg2-view="map"] #map-screen',
+  '#inventory-screen .inventory-layout',
+  '#diary-screen .diary-layout',
+  '#history-screen #history-gallery',
+]){
+  if(!tabsPolishCss.includes(required)) errors.push("Falta layout alineado/escala contenida v2: "+required);
 }
 
 if(index.includes("const menu = document.getElementById('start-choice');\n    if(menu) menu.classList.add('is-active');")){
