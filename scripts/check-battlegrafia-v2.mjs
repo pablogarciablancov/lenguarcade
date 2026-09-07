@@ -286,11 +286,14 @@ try{
   };
   const oldDocument=globalThis.document, oldWindow=globalThis.window, oldGet=globalThis.getComputedStyle;
   const oldMutation=globalThis.MutationObserver, oldRaf=globalThis.requestAnimationFrame;
+  const oldSetTimeout=globalThis.setTimeout, oldClearTimeout=globalThis.clearTimeout;
   globalThis.document=documentMock;
   globalThis.window=globalThis;
   globalThis.getComputedStyle=(el)=>({display:el.style.display||"block",visibility:el.style.visibility||"visible"});
   globalThis.MutationObserver=class{ observe(){} };
   globalThis.requestAnimationFrame=(fn)=>{ fn(); return 1; };
+  globalThis.setTimeout=(fn)=>{ fn(); return 1; };
+  globalThis.clearTimeout=()=>{};
   try{
     new Function(battleRouter)();
     const router=globalThis.BG2BattleRouter;
@@ -308,6 +311,7 @@ try{
   }finally{
     globalThis.document=oldDocument; globalThis.window=oldWindow; globalThis.getComputedStyle=oldGet;
     globalThis.MutationObserver=oldMutation; globalThis.requestAnimationFrame=oldRaf;
+    globalThis.setTimeout=oldSetTimeout; globalThis.clearTimeout=oldClearTimeout;
     try{ delete globalThis.BG2BattleRouter; }catch{}
   }
 }catch(error){
