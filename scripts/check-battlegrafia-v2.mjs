@@ -142,7 +142,7 @@ for(const required of [
   "annotateOverlays",
   "annotateSubmenus",
   "ensureSingleActiveScreen",
-  "data-rpg-description",
+  "dataset.rpgDescription",
 ]){
   if(!unifiedUi.includes(required)) errors.push("Falta unificación de pantallas RPG: "+required);
 }
