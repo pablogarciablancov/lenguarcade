@@ -8,7 +8,7 @@
     const link=document.createElement('link');
     link.id='bg2-unified-rpg-css';
     link.rel='stylesheet';
-    link.href='./rpg-unified-v2.css?v=20260907-rpg6';
+    link.href='./rpg-unified-v2.css?v=20260907-rpg7';
     document.head.appendChild(link);
   }
 
@@ -144,6 +144,38 @@
     active.forEach(screen=>{ if(screen!==preferred) screen.classList.remove('is-active'); });
   }
 
+  function finishPreboot(){
+    ensureSingleActiveScreen();
+
+    // El modo de prueba debe revelar directamente el HUB, nunca una pantalla legacy.
+    try{
+      const params=new URLSearchParams(location.search || '');
+      const isTest=params.get('test')==='1' || params.get('mode')==='test';
+      if(isTest){
+        document.querySelectorAll('.app-screen.is-active').forEach(screen=>screen.classList.remove('is-active'));
+        const main=$('main-menu');
+        if(main) main.classList.add('is-active');
+        const login=$('login-screen');
+        if(login){
+          login.classList.remove('is-active');
+          login.style.display='none';
+        }
+      }
+    }catch(error){}
+
+    // Espera dos frames completos para que CSS, estados y sprites estén resueltos
+    // antes de permitir el primer paint de la interfaz real.
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        document.documentElement.classList.remove('bg2-preboot');
+        document.body.classList.add('bg2-ready');
+        const loader=$('bg2-preboot-screen');
+        if(loader) loader.remove();
+        try{ clearTimeout(window.__BG2_PREBOOT_FAILSAFE); }catch(error){}
+      });
+    });
+  }
+
   function apply(){
     loadUnifiedCss();
     document.body.classList.add('bg2-unified-rpg');
@@ -154,6 +186,10 @@
     annotateForms();
     annotateOverlays();
     ensureSingleActiveScreen();
+
+    // Los listeners heredados del modo demo realizan sus últimos ajustes
+    // durante los primeros ~350 ms. Mantenemos la cortina RPG hasta que terminen.
+    setTimeout(finishPreboot, 430);
   }
 
   if(document.readyState === 'loading') {
