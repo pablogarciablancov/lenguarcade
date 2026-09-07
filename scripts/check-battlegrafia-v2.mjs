@@ -6,6 +6,9 @@ const v2Root=path.join(root,"games","battlegrafia_v2");
 const index=fs.readFileSync(path.join(v2Root,"index.html"),"utf8");
 const theme=fs.readFileSync(path.join(v2Root,"theme-v2.css"),"utf8");
 const enhance=fs.readFileSync(path.join(v2Root,"enhance-v2.js"),"utf8");
+const rpgUi=fs.readFileSync(path.join(v2Root,"rpg-ui-v2.js"),"utf8");
+const saveSlots=fs.readFileSync(path.join(v2Root,"save-slots-v2.js"),"utf8");
+const rpgCss=fs.readFileSync(path.join(v2Root,"rpg-ui-v2.css"),"utf8");
 const classic=fs.readFileSync(path.join(root,"games","battlegrafia","index.html"),"utf8");
 const catalog=JSON.parse(fs.readFileSync(path.join(root,"config","game-catalog.json"),"utf8"));
 const migration=fs.readFileSync(path.join(root,"supabase","migrations","20260905144700_battlegrafia_v2.sql"),"utf8");
@@ -13,6 +16,15 @@ const migration=fs.readFileSync(path.join(root,"supabase","migrations","20260905
 const errors=[];
 
 try{ new Function(enhance); }catch(error){ errors.push("enhance-v2.js no compila: "+error.message); }
+try{ new Function(rpgUi); }catch(error){ errors.push("rpg-ui-v2.js no compila: "+error.message); }
+try{ new Function(saveSlots); }catch(error){ errors.push("save-slots-v2.js no compila: "+error.message); }
+
+for(const required of [
+  "./save-slots-v2.js",
+  "./rpg-ui-v2.js",
+]){
+  if(!index.includes(required)) errors.push("Falta carga de interfaz RPG v2: "+required);
+}
 
 for(const required of [
   "const TEST_MODE = (() =>",
@@ -79,6 +91,39 @@ for(const required of [
   if(!theme.includes(required)) errors.push("Falta capa visual v2: "+required);
 }
 
+for(const required of [
+  "rpg_slot_",
+  "SLOT_COUNT = 3",
+  "save_slots_backup_v1_adventure",
+  "pendingNewSlotId",
+  "function prepareNew",
+]){
+  if(!saveSlots.includes(required)) errors.push("Falta sistema de tres ranuras v2: "+required);
+}
+
+for(const required of [
+  "bg2-rpg-hub",
+  "CONTINUAR AVENTURA",
+  "NUEVA AVENTURA",
+  "MODOS DE JUEGO",
+  "bg2-slots-modal",
+  "function continueSlot",
+  "function newSlot",
+]){
+  if(!rpgUi.includes(required)) errors.push("Falta shell RPG v2: "+required);
+}
+
+for(const required of [
+  "#bg2-rpg-hub",
+  ".bg2-rpg-action",
+  "#bg2-slots-grid",
+  "#battle-screen",
+  "#mode-screen",
+  "#start-screen",
+]){
+  if(!rpgCss.includes(required)) errors.push("Falta dirección visual RPG v2: "+required);
+}
+
 const catalogEntry=catalog.games.find(game=>game.id==="battlegrafia_v2");
 if(!catalogEntry){
   errors.push("El catálogo canónico no registra Battlegrafía 2.0.");
@@ -93,4 +138,4 @@ if(!migration.includes("'battlegrafia_v2'") || !migration.includes("on conflict 
 }
 
 if(errors.length) throw new Error("Comprobaciones de Battlegrafía 2.0 fallidas:\n- "+errors.join("\n- "));
-console.log("Battlegrafía 2.0 correcta: 5 mundos, 30 sprites originales, guardado aislado, laboratorio fuera de producción y modo de prueba directa.");
+console.log("Battlegrafía 2.0 correcta: RPG pixel UI, tres ranuras seguras, 5 mundos, 30 sprites, guardado aislado y modo de prueba directa.");
