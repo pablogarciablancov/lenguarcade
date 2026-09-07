@@ -1,0 +1,986 @@
+/* Battlegrafía 2.0 · RPG Pixel UI
+   Capa visual final: no contiene lógica de juego. */
+
+:root{
+  --rpg-ink:#070b14;
+  --rpg-night:#0a1020;
+  --rpg-panel:#111827;
+  --rpg-panel-2:#182238;
+  --rpg-steel:#2c3953;
+  --rpg-line:#07090f;
+  --rpg-gold:#d8ad45;
+  --rpg-gold-2:#f3d77d;
+  --rpg-cyan:#67d8e8;
+  --rpg-wine:#8d2f3d;
+  --rpg-emerald:#4eaf78;
+  --rpg-paper:#f1e8d1;
+  --rpg-muted:#98a8bd;
+  --rpg-shadow:0 14px 0 rgba(2,4,9,.8),0 28px 70px rgba(0,0,0,.56);
+  --rpg-pixel:polygon(0 8px,8px 8px,8px 0,calc(100% - 8px) 0,calc(100% - 8px) 8px,100% 8px,100% calc(100% - 8px),calc(100% - 8px) calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,8px calc(100% - 8px),0 calc(100% - 8px));
+}
+
+html,body{
+  background:#04070d!important;
+  color:var(--rpg-paper)!important;
+}
+body.bg2-rpg{
+  min-height:100vh;
+  font-family:Inter,Segoe UI,Arial,sans-serif!important;
+  letter-spacing:.01em;
+}
+body.bg2-rpg::before{
+  background:
+    linear-gradient(180deg,rgba(4,7,13,.24),rgba(4,7,13,.62)),
+    radial-gradient(circle at 50% 20%,rgba(103,216,232,.10),transparent 40%)!important;
+}
+body.bg2-rpg button{
+  font-family:"Courier New",Consolas,monospace;
+}
+body.bg2-rpg :focus-visible{
+  outline:3px solid var(--rpg-cyan)!important;
+  outline-offset:3px!important;
+}
+
+/* ===== HUB PRINCIPAL ===== */
+body.bg2-rpg #main-menu{
+  padding:0!important;
+  align-items:stretch!important;
+  justify-content:stretch!important;
+  overflow:hidden!important;
+  background:
+    linear-gradient(90deg,rgba(3,7,13,.83) 0 40%,rgba(3,7,13,.24) 64%,rgba(3,7,13,.64) 100%),
+    url("https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/menus/menu_fondo.png") center/cover no-repeat!important;
+}
+body.bg2-rpg #main-menu::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 4px),
+    radial-gradient(circle at 74% 22%,rgba(243,215,125,.12),transparent 17%),
+    linear-gradient(180deg,transparent 72%,rgba(2,5,11,.67));
+  mix-blend-mode:screen;
+}
+body.bg2-rpg #main-menu>.menu-panel{
+  width:100%!important;
+  height:100vh!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+body.bg2-rpg #main-menu>.menu-panel>.menu-header,
+body.bg2-rpg #main-menu>.menu-panel>.menu-grid,
+body.bg2-rpg #main-menu>.menu-panel>.menu-footer,
+body.bg2-rpg #main-menu>.menu-panel>#hub-backpack{
+  display:none!important;
+}
+#bg2-rpg-hub{
+  position:relative;
+  z-index:3;
+  width:100%;
+  height:100%;
+  min-height:620px;
+  padding:clamp(20px,4vh,40px) clamp(22px,4vw,62px) 24px;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  gap:20px;
+}
+.bg2-hub-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+}
+.bg2-brand-lockup{max-width:680px}
+.bg2-kicker,.bg2-label{
+  font-family:"Courier New",Consolas,monospace;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.22em;
+  color:var(--rpg-gold-2);
+}
+.bg2-brand-lockup h1{
+  margin:4px 0 0;
+  font-family:"Courier New",Consolas,monospace;
+  font-size:clamp(42px,6.7vw,84px);
+  line-height:.88;
+  letter-spacing:-.075em;
+  color:#fff7de;
+  text-shadow:4px 4px 0 #111827,8px 8px 0 #07090f,0 0 34px rgba(216,173,69,.18);
+}
+.bg2-brand-lockup h1 b{
+  color:var(--rpg-gold);
+  font-size:.56em;
+  letter-spacing:-.04em;
+  vertical-align:top;
+  margin-left:.12em;
+}
+.bg2-brand-sub{
+  margin-top:10px;
+  color:#c6d3e5;
+  font:700 15px/1.2 "Courier New",Consolas,monospace;
+  letter-spacing:.08em;
+}
+.bg2-build-badge{
+  padding:8px 12px;
+  clip-path:var(--rpg-pixel);
+  background:#121d2f;
+  border:0;
+  box-shadow:inset 0 0 0 2px rgba(103,216,232,.35);
+  color:#bdf5ff;
+  font:900 10px/1 "Courier New",Consolas,monospace;
+  letter-spacing:.14em;
+}
+.bg2-hub-body{
+  display:grid;
+  grid-template-columns:minmax(270px,340px) minmax(520px,720px);
+  gap:clamp(28px,5vw,76px);
+  align-items:end;
+}
+.bg2-hero-card{
+  position:relative;
+  min-height:340px;
+  padding:18px;
+  clip-path:var(--rpg-pixel);
+  background:
+    linear-gradient(180deg,rgba(24,34,56,.96),rgba(8,13,24,.97));
+  box-shadow:inset 0 0 0 3px #07090f,inset 0 0 0 5px #33415c,var(--rpg-shadow);
+}
+.bg2-hero-card::before{
+  content:"PLAYER DATA";
+  position:absolute;
+  top:10px;
+  right:14px;
+  color:#72829a;
+  font:900 8px "Courier New",monospace;
+  letter-spacing:.18em;
+}
+.bg2-portrait-frame{
+  height:170px;
+  margin-bottom:14px;
+  display:grid;
+  place-items:center;
+  clip-path:var(--rpg-pixel);
+  background:
+    radial-gradient(circle at 50% 35%,rgba(103,216,232,.12),transparent 45%),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 8px),
+    #09111f;
+  box-shadow:inset 0 0 0 3px #07090f,inset 0 0 0 5px #26344f;
+}
+.bg2-portrait-frame img{
+  width:150px;
+  height:150px;
+  object-fit:contain;
+  image-rendering:pixelated;
+  filter:drop-shadow(8px 12px 0 rgba(0,0,0,.38));
+}
+.bg2-hero-copy{display:flex;flex-direction:column;gap:3px}
+.bg2-hero-copy strong{
+  font:900 18px "Courier New",Consolas,monospace;
+  color:#fff4cf;
+  text-transform:uppercase;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.bg2-hero-copy>span:last-child{
+  font-size:12px;
+  color:#a9b8cd;
+}
+.bg2-hero-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin-top:14px;
+}
+.bg2-hero-stats div{
+  padding:8px 6px;
+  background:#0b1322;
+  box-shadow:inset 0 0 0 2px #05070c,inset 0 0 0 3px #2d3b54;
+  text-align:center;
+}
+.bg2-hero-stats span{display:block;color:#778aa4;font:900 8px "Courier New",monospace}
+.bg2-hero-stats b{display:block;margin-top:3px;color:#e9f3ff;font:900 14px "Courier New",monospace}
+.bg2-xp-track{
+  height:8px;
+  margin-top:13px;
+  background:#050810;
+  box-shadow:inset 0 0 0 2px #000;
+  overflow:hidden;
+}
+.bg2-xp-track span{
+  display:block;
+  height:100%;
+  width:0;
+  background:repeating-linear-gradient(90deg,var(--rpg-cyan) 0 8px,#3ea6b9 8px 10px);
+  transition:width .35s steps(8,end);
+}
+
+.bg2-rpg-menu{
+  width:100%;
+  max-width:720px;
+  align-self:end;
+  display:grid;
+  gap:9px;
+}
+.bg2-rpg-action{
+  position:relative;
+  min-height:70px!important;
+  display:grid!important;
+  grid-template-columns:34px 1fr!important;
+  align-items:center!important;
+  gap:8px!important;
+  padding:10px 16px!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:linear-gradient(180deg,#18263d,#101a2b)!important;
+  box-shadow:inset 0 0 0 3px #05070c,inset 0 0 0 5px #344665,0 7px 0 #03050a!important;
+  color:#e8eff9!important;
+  text-align:left!important;
+  transition:transform .08s steps(2,end),filter .1s linear!important;
+}
+.bg2-rpg-action::after{
+  content:"";
+  position:absolute;
+  left:7px;right:7px;top:7px;
+  height:1px;
+  background:rgba(255,255,255,.10);
+}
+.bg2-rpg-action:hover,.bg2-rpg-action:focus-visible{
+  transform:translateX(7px)!important;
+  filter:brightness(1.18)!important;
+}
+.bg2-rpg-action:active{transform:translate(7px,3px)!important}
+.bg2-rpg-action.primary{
+  background:linear-gradient(180deg,#6a5220,#3c2d11)!important;
+  box-shadow:inset 0 0 0 3px #080604,inset 0 0 0 5px #b99037,0 7px 0 #03050a!important;
+}
+.bg2-rpg-action.new{background:linear-gradient(180deg,#163446,#102435)!important}
+.bg2-rpg-action .bg2-cursor{
+  color:var(--rpg-gold-2);
+  font:900 20px "Courier New",monospace;
+  text-shadow:2px 2px 0 #000;
+}
+.bg2-rpg-action b{
+  display:block;
+  font:900 15px/1 "Courier New",Consolas,monospace;
+  letter-spacing:.03em;
+}
+.bg2-rpg-action small{
+  display:block;
+  margin-top:5px;
+  color:#9dafc7;
+  font:600 10px/1.15 "Courier New",Consolas,monospace;
+  text-transform:none;
+  letter-spacing:0;
+}
+.bg2-menu-mini{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+}
+.bg2-menu-mini button{
+  min-height:58px!important;
+  padding:7px!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#101a2b!important;
+  box-shadow:inset 0 0 0 2px #05070c,inset 0 0 0 4px #2d3e59,0 5px 0 #03050a!important;
+  color:#dce7f5!important;
+}
+.bg2-menu-mini button:hover{filter:brightness(1.22);transform:translateY(-2px)}
+.bg2-menu-mini b{display:block;font:900 10px "Courier New",monospace}
+.bg2-menu-mini small{display:block;margin-top:4px;color:#8192aa;font:700 8px "Courier New",monospace;text-transform:none}
+.bg2-hub-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  color:#6f819b;
+  font:900 9px "Courier New",monospace;
+  letter-spacing:.12em;
+}
+.bg2-hub-footer button{
+  border:0!important;
+  background:transparent!important;
+  color:#8093ad!important;
+  box-shadow:none!important;
+  padding:4px 0!important;
+  font-size:9px!important;
+}
+
+/* Atmósfera pixel */
+.bg2-hub-atmosphere{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.bg2-hub-atmosphere i{
+  position:absolute;
+  width:3px;height:3px;
+  background:#e7cf88;
+  box-shadow:0 0 10px #e7cf88;
+  animation:bg2Float 7s linear infinite;
+  opacity:.35;
+}
+.bg2-hub-atmosphere i:nth-child(1){left:61%;top:83%;animation-delay:-1s}
+.bg2-hub-atmosphere i:nth-child(2){left:72%;top:72%;animation-delay:-3s}
+.bg2-hub-atmosphere i:nth-child(3){left:84%;top:88%;animation-delay:-5s}
+.bg2-hub-atmosphere i:nth-child(4){left:55%;top:67%;animation-delay:-2s}
+.bg2-hub-atmosphere i:nth-child(5){left:91%;top:58%;animation-delay:-4s}
+.bg2-hub-atmosphere i:nth-child(6){left:67%;top:92%;animation-delay:-6s}
+@keyframes bg2Float{0%{transform:translateY(20px);opacity:0}20%{opacity:.42}100%{transform:translateY(-160px);opacity:0}}
+
+/* ===== OVERLAYS / RANURAS ===== */
+.bg2-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1000001;
+  display:none;
+  place-items:center;
+  padding:24px;
+  background:rgba(2,5,10,.84);
+  backdrop-filter:blur(5px);
+}
+.bg2-overlay.open{display:grid;animation:bg2OverlayIn .14s ease-out both}
+@keyframes bg2OverlayIn{from{opacity:0}to{opacity:1}}
+.bg2-overlay-card{
+  width:min(1080px,96vw);
+  max-height:92vh;
+  overflow:auto;
+  padding:22px;
+  clip-path:var(--rpg-pixel);
+  background:
+    linear-gradient(180deg,#172238,#0a111f);
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 6px #394760,var(--rpg-shadow);
+}
+.bg2-overlay-top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
+.bg2-overlay-top h2,.bg2-confirm-card h2{
+  margin:3px 0 0;
+  color:#fff1c7;
+  font:900 clamp(24px,3vw,38px) "Courier New",monospace;
+  letter-spacing:-.05em;
+}
+.bg2-overlay-card>p{margin:8px 0 18px;color:#9db0c8;font-size:13px}
+.bg2-close{
+  width:38px;height:38px;padding:0!important;
+  display:grid;place-items:center;
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#222f44!important;
+  color:#d8e2f0!important;
+  box-shadow:inset 0 0 0 2px #04060b,inset 0 0 0 4px #4a5870!important;
+  font-size:24px!important;
+}
+#bg2-slots-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.bg2-slot{
+  min-height:348px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  clip-path:var(--rpg-pixel);
+  background:linear-gradient(180deg,#131f33,#0b1321);
+  box-shadow:inset 0 0 0 3px #03050a,inset 0 0 0 5px #2c3c56;
+}
+.bg2-slot.occupied{box-shadow:inset 0 0 0 3px #03050a,inset 0 0 0 5px #7e6529}
+.bg2-slot-number{
+  margin-bottom:10px;
+  color:#8092aa;
+  font:900 9px "Courier New",monospace;
+  letter-spacing:.16em;
+}
+.bg2-slot-main{display:grid;grid-template-columns:88px 1fr;gap:10px;align-items:center}
+.bg2-slot-portrait{
+  width:88px;height:100px;
+  display:grid;place-items:center;
+  background:#07101c;
+  box-shadow:inset 0 0 0 2px #000,inset 0 0 0 4px #2f405b;
+}
+.bg2-slot-portrait img{width:82px;height:82px;object-fit:contain;image-rendering:pixelated}
+.bg2-slot-portrait span{font:900 28px "Courier New",monospace;color:#52647d}
+.bg2-slot-copy{min-width:0}
+.bg2-slot-copy strong{
+  display:block;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:#fff1c9;
+  font:900 14px "Courier New",monospace;
+  text-transform:uppercase;
+}
+.bg2-slot-copy span{display:block;margin-top:7px;color:#b5c4d8;font-size:11px}
+.bg2-slot-copy small{display:block;margin-top:5px;color:#7689a3;font-size:9px}
+.bg2-slot-progress{height:9px;margin:16px 0 10px;background:#050810;box-shadow:inset 0 0 0 2px #000}
+.bg2-slot-progress span{display:block;height:100%;background:repeating-linear-gradient(90deg,var(--rpg-gold) 0 9px,#7d6326 9px 11px)}
+.bg2-slot-meta{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+  margin-bottom:14px;
+  color:#899bb3;
+  font:800 9px "Courier New",monospace;
+}
+.bg2-slot-meta span:last-child{grid-column:1/-1}
+.bg2-slot-button{
+  margin-top:auto!important;
+  min-height:42px!important;
+  padding:8px!important;
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#27364e!important;
+  color:#eef5ff!important;
+  box-shadow:inset 0 0 0 2px #03050a,inset 0 0 0 4px #596981,0 5px 0 #03050a!important;
+  font:900 10px "Courier New",monospace!important;
+}
+.bg2-slot-button.new{background:#4b3a18!important;color:#fff0b4!important;box-shadow:inset 0 0 0 2px #03050a,inset 0 0 0 4px #9c7a30,0 5px 0 #03050a!important}
+.bg2-slot-button:disabled{filter:grayscale(1);opacity:.35}
+.bg2-slots-note{margin-top:12px;color:#61748e;font:800 9px "Courier New",monospace;text-align:center}
+.bg2-confirm-card{width:min(520px,92vw);text-align:center}
+.bg2-label.danger{color:#ff8b97}
+.bg2-confirm-card p{color:#aebed1;line-height:1.5}
+.bg2-confirm-actions{display:flex;justify-content:center;gap:10px;margin-top:18px}
+.bg2-confirm-actions button{
+  min-width:130px;
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#26354c!important;color:#e7effb!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #5d6b7e,0 5px 0 #020409!important;
+}
+.bg2-confirm-actions button.danger{
+  background:#612631!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #aa5260,0 5px 0 #020409!important;
+}
+
+/* ===== MODO DE JUEGO ===== */
+body.bg2-rpg #mode-screen{
+  padding:24px!important;
+  overflow:hidden!important;
+  background:
+    linear-gradient(180deg,rgba(4,8,15,.45),rgba(4,8,15,.78)),
+    url("https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/menus/menu_fondo.png") center/cover!important;
+}
+body.bg2-rpg #mode-screen .mode-content{
+  width:min(1180px,96vw)!important;
+  height:min(680px,calc(100vh - 44px))!important;
+  padding:20px!important;
+  clip-path:var(--rpg-pixel);
+  border:0!important;
+  border-radius:0!important;
+  background:linear-gradient(180deg,rgba(16,25,41,.97),rgba(7,12,22,.98))!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 6px #35445f,var(--rpg-shadow)!important;
+}
+body.bg2-rpg #mode-screen .mode-header{align-items:flex-start!important}
+body.bg2-rpg #mode-screen .mode-title{
+  color:#fff0c5!important;
+  font:900 31px "Courier New",monospace!important;
+  letter-spacing:-.04em!important;
+}
+body.bg2-rpg #mode-screen .mode-title::before{
+  content:"ESCOGE TU DESTINO";
+  display:block;
+  margin-bottom:5px;
+  color:var(--rpg-gold);
+  font:900 9px "Courier New",monospace;
+  letter-spacing:.2em;
+}
+body.bg2-rpg #mode-screen .mode-grid{
+  height:calc(100% - 86px)!important;
+  margin-top:15px!important;
+  display:grid!important;
+  grid-template-columns:repeat(5,1fr)!important;
+  gap:9px!important;
+}
+body.bg2-rpg #mode-screen .mode-card{
+  position:relative!important;
+  min-width:0!important;
+  height:100%!important;
+  padding:10px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:flex-end!important;
+  overflow:hidden!important;
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#0b1423!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 5px #2d3d58,0 7px 0 #020409!important;
+  text-align:left!important;
+}
+body.bg2-rpg #mode-screen .mode-card:hover{
+  transform:translateY(-6px)!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 5px #b38b34,0 13px 0 #020409!important;
+}
+body.bg2-rpg #mode-screen .mode-card[data-mode="adventure"]{
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 5px #9c7a2d,0 7px 0 #020409!important;
+}
+body.bg2-rpg #mode-screen .mode-img{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;height:100%!important;
+  object-fit:cover!important;
+  opacity:.58!important;
+  filter:saturate(.78) contrast(1.08)!important;
+}
+body.bg2-rpg #mode-screen .mode-card::after{
+  content:"";
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(5,8,13,.04),rgba(5,8,13,.94) 75%);
+}
+.bg2-mode-roman{
+  position:absolute;z-index:3;top:12px;left:12px;
+  width:28px;height:28px;display:grid;place-items:center;
+  background:rgba(5,9,16,.84);
+  box-shadow:inset 0 0 0 2px #000,inset 0 0 0 3px #73602f;
+  color:#e8cf89;font:900 10px "Courier New",monospace;
+}
+body.bg2-rpg #mode-screen .mode-name,
+body.bg2-rpg #mode-screen .mode-rule{position:relative!important;z-index:2!important}
+body.bg2-rpg #mode-screen .mode-name{
+  margin-top:auto!important;
+  color:#fff1ca!important;
+  font:900 14px/1.05 "Courier New",monospace!important;
+}
+body.bg2-rpg #mode-screen .mode-rule{
+  margin-top:7px!important;
+  color:#aabbd0!important;
+  font:600 10px/1.35 Arial,sans-serif!important;
+}
+body.bg2-rpg #mode-screen .mode-footer{position:relative;z-index:3}
+
+/* ===== CREACIÓN DE HÉROE ===== */
+body.bg2-rpg #start-screen{
+  z-index:250!important;
+  padding:20px!important;
+  background:
+    linear-gradient(90deg,rgba(4,8,15,.88),rgba(4,8,15,.56)),
+    url("https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/menus/menu_aventura.webp") center/cover!important;
+}
+body.bg2-rpg #start-screen .start-panel{
+  width:min(1120px,95vw)!important;
+  max-width:none!important;
+  max-height:calc(100vh - 40px)!important;
+  overflow:auto!important;
+  margin:0!important;
+  padding:20px!important;
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:linear-gradient(180deg,rgba(18,27,44,.97),rgba(8,13,23,.98))!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 6px #37465f,var(--rpg-shadow)!important;
+}
+body.bg2-rpg #start-screen .start-title{
+  color:#fff0c6!important;
+  font:900 30px "Courier New",monospace!important;
+  letter-spacing:-.04em!important;
+}
+body.bg2-rpg #start-screen .start-sub{color:#9eafc5!important}
+body.bg2-rpg #start-screen .avatar-grid{
+  grid-template-columns:repeat(4,1fr)!important;
+  gap:10px!important;
+}
+body.bg2-rpg #start-screen .avatar-option{
+  position:relative!important;
+  min-height:164px!important;
+  padding:12px!important;
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#0b1423!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 5px #2c3d57!important;
+}
+body.bg2-rpg #start-screen .avatar-option::before{
+  content:attr(data-hero-title);
+  position:absolute;top:9px;left:10px;
+  color:#7185a0;font:900 8px "Courier New",monospace;letter-spacing:.12em;
+}
+body.bg2-rpg #start-screen .avatar-option.selected{
+  transform:translateY(-4px)!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 5px #c29a3d,0 8px 0 #020409!important;
+}
+body.bg2-rpg #start-screen .avatar-thumb{
+  width:104px!important;height:104px!important;margin-top:12px!important;
+  image-rendering:pixelated!important;
+}
+
+/* ===== GAME SHELL / NAV ===== */
+body.bg2-rpg .game-shell{
+  max-width:none!important;
+  width:100%!important;
+  height:100vh!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  background:#050913!important;
+  box-shadow:none!important;
+}
+body.bg2-rpg .top-nav{
+  position:relative!important;
+  z-index:500!important;
+  height:54px!important;
+  padding:7px 10px!important;
+  margin:0!important;
+  justify-content:flex-start!important;
+  gap:5px!important;
+  background:#080e19!important;
+  border-bottom:3px solid #020409!important;
+  box-shadow:inset 0 -1px 0 #2b3950!important;
+}
+body.bg2-rpg .top-nav .nav-btn{
+  height:37px!important;
+  padding:0 11px!important;
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#111c2d!important;
+  color:#aab8ca!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #2e3d55!important;
+  font:900 9px "Courier New",monospace!important;
+}
+body.bg2-rpg .top-nav .nav-btn.nav-active{
+  background:#4c3c18!important;
+  color:#ffeeb8!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #a27e2e!important;
+}
+body.bg2-rpg #bg2-version-pill{
+  border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#0b202b!important;
+  border:0!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #285a67!important;
+}
+
+/* ===== COMBATE ===== */
+body.bg2-rpg .layout{
+  height:calc(100vh - 54px)!important;
+  padding:0!important;
+  gap:0!important;
+  grid-template-columns:minmax(0,1fr) 340px!important;
+  background:#050912!important;
+}
+body.bg2-rpg .battle-column{height:100%!important}
+body.bg2-rpg #battle-screen{
+  height:100%!important;
+  min-height:0!important;
+  padding:0!important;
+  gap:0!important;
+  border:0!important;border-radius:0!important;
+  box-shadow:none!important;
+}
+body.bg2-rpg #battle-screen::after{
+  background:
+    linear-gradient(180deg,rgba(5,8,13,.05),rgba(5,8,13,.18) 55%,rgba(5,8,13,.62)),
+    radial-gradient(circle at 50% 35%,transparent 0 45%,rgba(2,4,9,.26) 85%)!important;
+}
+body.bg2-rpg #battle-screen .battle-top{
+  padding:68px 18px 0!important;
+  grid-template-columns:minmax(210px,310px) minmax(210px,310px)!important;
+  justify-content:space-between!important;
+  gap:20px!important;
+}
+body.bg2-rpg #battle-screen .entity-box{
+  position:relative!important;
+  padding:11px 12px 9px!important;
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:rgba(7,12,22,.91)!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #33445f,0 6px 0 rgba(0,0,0,.45)!important;
+  backdrop-filter:none!important;
+}
+body.bg2-rpg #battle-screen .entity-box::before{
+  content:attr(data-badge);
+  position:absolute;top:-9px;left:9px;
+  padding:3px 6px;
+  background:#0b1321;
+  color:#a7b6ca;
+  box-shadow:inset 0 0 0 1px #314058;
+  font:900 7px "Courier New",monospace;
+  letter-spacing:.13em;
+}
+body.bg2-rpg #battle-screen .entity-name{font:900 15px "Courier New",monospace!important;color:#fff0c7!important}
+body.bg2-rpg #battle-screen .entity-tag{font-size:9px!important;color:#91a2b8!important}
+body.bg2-rpg #battle-screen .hp-bar-wrap{
+  height:10px!important;
+  border-radius:0!important;
+  background:#030509!important;
+  box-shadow:inset 0 0 0 2px #000!important;
+}
+body.bg2-rpg #battle-screen .hp-bar-fill{border-radius:0!important}
+body.bg2-rpg #battle-screen .battle-sprites-row{
+  inset:118px 0 96px!important;
+  padding:0 clamp(7%,10vw,14%)!important;
+}
+body.bg2-rpg #hero-sprite-img,
+body.bg2-rpg #monster-sprite-img{
+  height:min(39vh,310px)!important;
+  image-rendering:pixelated!important;
+  filter:drop-shadow(10px 16px 0 rgba(0,0,0,.30))!important;
+}
+body.bg2-rpg #battle-screen .speech{
+  left:14px!important;
+  right:14px!important;
+  bottom:12px!important;
+  transform:none!important;
+  width:auto!important;
+  min-height:75px!important;
+  padding:12px 15px!important;
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:rgba(7,12,22,.96)!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 5px #43536e,0 8px 0 rgba(0,0,0,.55)!important;
+}
+body.bg2-rpg #battle-screen .speech-label{
+  color:var(--rpg-gold)!important;
+  font:900 8px "Courier New",monospace!important;
+  letter-spacing:.18em!important;
+}
+body.bg2-rpg #wrong-phrase{
+  color:#fff8e8!important;
+  font-size:clamp(18px,2vw,25px)!important;
+  line-height:1.25!important;
+  font-weight:800!important;
+}
+body.bg2-rpg #bg2-world-strip{
+  top:10px!important;
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:rgba(6,10,18,.94)!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #35445d!important;
+}
+body.bg2-rpg .bg2-stage-node{
+  border:0!important;border-radius:0!important;
+  background:#111a29!important;
+  box-shadow:inset 0 0 0 1px #2f3b50!important;
+}
+body.bg2-rpg .bg2-stage-node.current{
+  background:#493817!important;
+  box-shadow:inset 0 0 0 1px #bd9341,0 0 0 2px rgba(216,173,69,.16)!important;
+}
+
+/* Panel de comandos lateral */
+body.bg2-rpg .panel-right{
+  padding:9px!important;
+  border-left:3px solid #020409;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 4px),
+    #0a111e!important;
+}
+body.bg2-rpg .hero-panel,
+body.bg2-rpg .input-box,
+body.bg2-rpg .log-box{
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#111b2c!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #33435c!important;
+}
+body.bg2-rpg .box-title,
+body.bg2-rpg .log-title{
+  color:#dec47b!important;
+  font:900 9px "Courier New",monospace!important;
+  letter-spacing:.14em!important;
+}
+body.bg2-rpg #attack-btn,
+body.bg2-rpg #use-item-btn,
+body.bg2-rpg #ability-btn{
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #8a6b28,0 5px 0 #020409!important;
+  font:900 11px "Courier New",monospace!important;
+}
+
+/* ===== PANTALLAS RPG SECUNDARIAS ===== */
+body.bg2-rpg #camp-screen,
+body.bg2-rpg #map-screen,
+body.bg2-rpg #inventory-screen,
+body.bg2-rpg #diary-screen,
+body.bg2-rpg #history-screen{
+  border:0!important;border-radius:0!important;
+  padding:15px!important;
+  background:
+    linear-gradient(180deg,rgba(12,19,32,.94),rgba(7,11,19,.98))!important;
+  box-shadow:inset 0 0 0 3px #020409!important;
+}
+body.bg2-rpg #camp-screen{
+  background:
+    radial-gradient(circle at 26% 72%,rgba(209,111,44,.19),transparent 18%),
+    linear-gradient(180deg,rgba(12,19,32,.92),rgba(7,11,19,.98))!important;
+}
+body.bg2-rpg #camp-screen .camp-container{padding:10px!important}
+body.bg2-rpg .camp-title-main,
+body.bg2-rpg .map-header,
+body.bg2-rpg .diary-header,
+body.bg2-rpg .history-header{
+  color:#fff0c8!important;
+  font:900 25px "Courier New",monospace!important;
+  letter-spacing:-.04em!important;
+}
+body.bg2-rpg .camp-rest,
+body.bg2-rpg .camp-box,
+body.bg2-rpg .diary-panel,
+body.bg2-rpg .inventory-column,
+body.bg2-rpg .inventory-section{
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#101a2a!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #33425a!important;
+}
+body.bg2-rpg .camp-fire-visual{
+  font-size:0!important;
+  width:110px;height:110px;
+  position:relative;
+}
+body.bg2-rpg .camp-fire-visual::before,
+body.bg2-rpg .camp-fire-visual::after{
+  content:"";
+  position:absolute;
+  left:50%;bottom:10px;
+  transform:translateX(-50%);
+  clip-path:polygon(50% 0,72% 32%,62% 33%,82% 66%,59% 58%,50% 100%,40% 60%,18% 68%,36% 34%,27% 34%);
+}
+body.bg2-rpg .camp-fire-visual::before{width:70px;height:88px;background:#b34a23;filter:drop-shadow(0 0 18px #b34a23)}
+body.bg2-rpg .camp-fire-visual::after{width:42px;height:62px;background:#e7b84d;bottom:13px}
+
+/* mapa */
+body.bg2-rpg #map-world-select{
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#101a2b!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #3c4d68!important;
+  color:#e7eef8!important;
+}
+body.bg2-rpg #map-canvas{
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 5px #35445e!important;
+}
+body.bg2-rpg #bg2-map-roster{gap:6px!important}
+body.bg2-rpg .bg2-roster-card{
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#101927!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #34435b!important;
+}
+body.bg2-rpg .bg2-roster-card.boss{
+  background:#34280f!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #9a762c!important;
+}
+
+/* HUB secundario */
+body.bg2-rpg [id^="hub-"]:not(#hub-status):not(#hub-backpack){
+  background:
+    linear-gradient(180deg,rgba(4,8,15,.64),rgba(4,8,15,.88)),
+    url("https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/menus/menu_fondo.png") center/cover!important;
+}
+body.bg2-rpg [id^="hub-"] .menu-panel,
+body.bg2-rpg [id^="hub-"] .hub-panel{
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:linear-gradient(180deg,rgba(18,27,44,.98),rgba(8,13,23,.99))!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 6px #37465f,var(--rpg-shadow)!important;
+}
+body.bg2-rpg .screen-card{
+  border:0!important;border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+body.bg2-rpg .screen-title{
+  color:#fff0c8!important;
+  font:900 27px "Courier New",monospace!important;
+  letter-spacing:-.04em!important;
+}
+body.bg2-rpg .shop-item,
+body.bg2-rpg .collection-monster,
+body.bg2-rpg .ach-card,
+body.bg2-rpg .inv-card{
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#101a2a!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #33435b!important;
+}
+body.bg2-rpg .shop-item:hover,
+body.bg2-rpg .collection-monster:hover,
+body.bg2-rpg .ach-card:hover,
+body.bg2-rpg .inv-card:hover{
+  transform:translateY(-3px)!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #9d7b2f,0 6px 0 #020409!important;
+}
+
+/* jefe */
+body.bg2-rpg #bg2-boss-intro{background:rgba(2,5,10,.90)!important;backdrop-filter:none!important}
+body.bg2-rpg .bg2-boss-card{
+  border:0!important;border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#111b2c!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 6px #9a762e,0 18px 0 rgba(0,0,0,.55),0 38px 90px rgba(0,0,0,.7)!important;
+}
+body.bg2-rpg .bg2-boss-title{font-family:"Courier New",monospace!important;color:#fff0c4!important;text-shadow:4px 4px 0 #000}
+
+/* Toast */
+#bg2-rpg-toast{
+  position:fixed;
+  z-index:1000010;
+  left:50%;
+  top:72px;
+  transform:translate(-50%,-16px);
+  padding:9px 15px;
+  opacity:0;
+  pointer-events:none;
+  clip-path:var(--rpg-pixel);
+  background:#2d2715;
+  color:#fff1b6;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #8d7130,0 6px 0 rgba(0,0,0,.5);
+  font:900 10px "Courier New",monospace;
+  letter-spacing:.08em;
+  transition:.16s ease;
+}
+#bg2-rpg-toast.show{opacity:1;transform:translate(-50%,0)}
+#bg2-rpg-toast[data-tone="cyan"]{background:#12303a;color:#c8f7ff;box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #397989,0 6px 0 rgba(0,0,0,.5)}
+#bg2-rpg-toast[data-tone="green"]{background:#163524;color:#c9ffdc;box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #4a9367,0 6px 0 rgba(0,0,0,.5)}
+#bg2-rpg-toast[data-tone="red"]{background:#481c25;color:#ffd6dc;box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #9c4655,0 6px 0 rgba(0,0,0,.5)}
+
+/* Microinteracciones */
+body.bg2-rpg button:active{transform:translateY(2px)}
+body.bg2-rpg img{user-select:none}
+@media (prefers-reduced-motion:reduce){
+  .bg2-hub-atmosphere i{animation:none!important}
+  *{scroll-behavior:auto!important;transition-duration:.01ms!important}
+}
+
+/* Chromebook 1366x768 */
+@media (max-height:800px) and (min-width:1000px){
+  #bg2-rpg-hub{padding-top:22px;padding-bottom:15px;gap:12px}
+  .bg2-brand-lockup h1{font-size:58px}
+  .bg2-hub-body{grid-template-columns:270px minmax(520px,680px);gap:38px}
+  .bg2-hero-card{min-height:290px;padding:14px}
+  .bg2-portrait-frame{height:135px}
+  .bg2-portrait-frame img{width:120px;height:120px}
+  .bg2-rpg-action{min-height:59px!important}
+  .bg2-menu-mini button{min-height:49px!important}
+  body.bg2-rpg #mode-screen .mode-content{height:calc(100vh - 32px)!important}
+}
+
+/* Responsive razonable */
+@media(max-width:1000px){
+  body.bg2-rpg #main-menu{overflow:auto!important}
+  #bg2-rpg-hub{height:auto;min-height:100vh}
+  .bg2-hub-body{grid-template-columns:280px 1fr;gap:24px}
+  .bg2-menu-mini{grid-template-columns:repeat(2,1fr)}
+  #bg2-slots-grid{grid-template-columns:1fr;max-height:66vh;overflow:auto}
+  .bg2-slot{min-height:250px}
+  body.bg2-rpg #mode-screen{overflow:auto!important}
+  body.bg2-rpg #mode-screen .mode-content{height:auto!important;min-height:calc(100vh - 40px)!important}
+  body.bg2-rpg #mode-screen .mode-grid{grid-template-columns:repeat(2,1fr)!important;height:auto!important}
+  body.bg2-rpg #mode-screen .mode-card{min-height:220px!important}
+}
+@media(max-width:720px){
+  .bg2-hub-header{display:block}
+  .bg2-build-badge{display:inline-block;margin-top:12px}
+  .bg2-hub-body{grid-template-columns:1fr}
+  .bg2-hero-card{min-height:260px}
+  .bg2-menu-mini{grid-template-columns:1fr 1fr}
+  body.bg2-rpg .layout{grid-template-columns:1fr!important;height:auto!important}
+  body.bg2-rpg .panel-right{border-left:0;border-top:3px solid #020409}
+}
