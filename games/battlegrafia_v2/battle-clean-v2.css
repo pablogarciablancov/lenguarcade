@@ -1,0 +1,577 @@
+/* Battlegrafía 2.0 · Clean Battle UI
+   Foco de combate: enemigo, héroe, desafío y acción. */
+
+body.bg2-battle-clean{
+  --bc-bg:#050911;
+  --bc-panel:#0c1422;
+  --bc-panel-2:#111c2e;
+  --bc-line:#020409;
+  --bc-line-2:#33445f;
+  --bc-gold:#d8ad45;
+  --bc-gold-soft:#f3dda0;
+  --bc-cyan:#68d8e8;
+  --bc-red:#a54250;
+  --bc-green:#56b77d;
+  --bc-muted:#8ea0b8;
+  --bc-paper:#f4ead5;
+  --bc-pixel:polygon(0 8px,8px 8px,8px 0,calc(100% - 8px) 0,calc(100% - 8px) 8px,100% 8px,100% calc(100% - 8px),calc(100% - 8px) calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,8px calc(100% - 8px),0 calc(100% - 8px));
+}
+
+/* En combate desaparece todo lo que pertenece a mapa/progresión extensa. */
+body.bg2-battle-clean.bg2-in-battle #bg2-world-strip,
+body.bg2-battle-clean.bg2-in-battle #bg2-map-roster{
+  display:none!important;
+}
+body.bg2-battle-clean.bg2-in-battle :is(#nav-map,#nav-diary,#nav-history){
+  display:none!important;
+}
+body.bg2-battle-clean.bg2-in-battle .game-title,
+body.bg2-battle-clean.bg2-in-battle .copyright{
+  display:none!important;
+}
+
+/* Shell: ocupa realmente la pantalla disponible. */
+body.bg2-battle-clean.bg2-in-battle .game-shell{
+  width:100vw!important;
+  max-width:none!important;
+  height:100vh!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:var(--bc-bg)!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+body.bg2-battle-clean.bg2-in-battle .top-nav{
+  height:48px!important;
+  min-height:48px!important;
+  margin:0!important;
+  padding:6px 10px!important;
+  display:flex!important;
+  justify-content:flex-start!important;
+  align-items:center!important;
+  gap:6px!important;
+  border:0!important;
+  border-bottom:3px solid #020409!important;
+  background:#070d17!important;
+  box-shadow:inset 0 -1px 0 #26354b!important;
+}
+body.bg2-battle-clean.bg2-in-battle .top-nav::before{
+  content:"BATTLEGRAFÍA 2.0  /  COMBATE";
+  margin-right:10px;
+  color:#71839b;
+  font:900 8px "Courier New",Consolas,monospace;
+  letter-spacing:.16em;
+}
+body.bg2-battle-clean.bg2-in-battle .top-nav .nav-btn{
+  min-width:auto!important;
+  height:34px!important;
+  padding:7px 10px!important;
+  font-size:8px!important;
+}
+body.bg2-battle-clean.bg2-in-battle #nav-battle{
+  display:none!important;
+}
+body.bg2-battle-clean.bg2-in-battle #nav-home{
+  order:-3;
+}
+body.bg2-battle-clean.bg2-in-battle #nav-camp{
+  order:-2;
+}
+body.bg2-battle-clean.bg2-in-battle #nav-inventory{
+  order:-1;
+}
+body.bg2-battle-clean.bg2-in-battle :is(#saveIndicator,#runInfo,#bg2-version-pill){
+  margin-left:auto!important;
+  max-width:230px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* Layout de batalla: escena + consola. */
+body.bg2-battle-clean.bg2-in-battle .layout{
+  width:100%!important;
+  height:calc(100vh - 48px)!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 390px!important;
+  gap:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:#050911!important;
+}
+body.bg2-battle-clean.bg2-in-battle .battle-column{
+  min-width:0!important;
+  min-height:0!important;
+  height:100%!important;
+  overflow:hidden!important;
+  border-right:3px solid #020409;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen{
+  position:relative!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+
+/* La imagen del mundo es escenario, no panel de información. */
+body.bg2-battle-clean.bg2-in-battle #battle-screen::before{
+  inset:0!important;
+  background-position:center!important;
+  background-size:cover!important;
+  filter:saturate(.96) contrast(1.07) brightness(.82)!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen::after{
+  inset:0!important;
+  background:
+    linear-gradient(180deg,rgba(3,6,11,.38) 0%,rgba(3,6,11,.03) 25%,rgba(3,6,11,.04) 63%,rgba(3,6,11,.70) 100%),
+    radial-gradient(circle at 50% 44%,transparent 0 46%,rgba(2,4,9,.22) 86%)!important;
+}
+
+/* HUD de vida: dos placas pequeñas y legibles. */
+body.bg2-battle-clean.bg2-in-battle #battle-screen .battle-top{
+  position:absolute!important;
+  z-index:20!important;
+  top:14px!important;
+  left:14px!important;
+  right:14px!important;
+  padding:0!important;
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:flex-start!important;
+  gap:24px!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-box{
+  width:min(320px,42%)!important;
+  max-width:320px!important;
+  min-width:220px!important;
+  padding:9px 11px 8px!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--bc-pixel);
+  background:rgba(8,14,25,.94)!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 4px #34445f,
+    0 5px 0 rgba(0,0,0,.44)!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .hero-box{
+  order:1;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .monster-box{
+  order:2;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-box::before{
+  top:-7px!important;
+  padding:2px 5px!important;
+  font-size:6px!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-name{
+  font:900 13px/1.1 "Courier New",Consolas,monospace!important;
+  color:var(--bc-paper)!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .monster-box .entity-name{
+  color:#f2dda0!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-tag{
+  margin:3px 0 6px!important;
+  min-height:0!important;
+  font-size:8px!important;
+  line-height:1.15!important;
+  color:#8fa2ba!important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .hp-bar-wrap{
+  height:10px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#020409!important;
+  box-shadow:inset 0 0 0 2px #000!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .hp-bar-fill{
+  border-radius:0!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .hp-text{
+  margin-top:4px!important;
+  font:900 8px "Courier New",monospace!important;
+  color:#aebfd3!important;
+}
+
+/* Arena: sprites grandes, sin marcos visibles. */
+body.bg2-battle-clean.bg2-in-battle #battle-screen .battle-sprites-row{
+  position:absolute!important;
+  z-index:7!important;
+  inset:84px 0 132px!important;
+  padding:0 clamp(7%,9vw,12%)!important;
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:flex-end!important;
+  gap:40px!important;
+  pointer-events:none;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen :is(.hero-visual,.monster-visual){
+  width:42%!important;
+  height:100%!important;
+  display:flex!important;
+  align-items:flex-end!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .hero-visual{
+  justify-content:flex-start!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .monster-visual{
+  justify-content:flex-end!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .sprite-frame{
+  width:100%!important;
+  height:100%!important;
+  display:flex!important;
+  align-items:flex-end!important;
+  justify-content:center!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+body.bg2-battle-clean.bg2-in-battle #hero-sprite-img{
+  width:auto!important;
+  max-width:78%!important;
+  height:min(40vh,300px)!important;
+  max-height:82%!important;
+  object-fit:contain!important;
+  image-rendering:pixelated!important;
+  filter:drop-shadow(9px 14px 0 rgba(0,0,0,.28))!important;
+}
+body.bg2-battle-clean.bg2-in-battle #monster-sprite-img{
+  width:auto!important;
+  max-width:92%!important;
+  height:min(47vh,350px)!important;
+  max-height:96%!important;
+  object-fit:contain!important;
+  image-rendering:pixelated!important;
+  filter:drop-shadow(10px 16px 0 rgba(0,0,0,.30))!important;
+}
+
+/* El desafío es el foco inferior de la escena. */
+body.bg2-battle-clean.bg2-in-battle #battle-screen .speech{
+  position:absolute!important;
+  z-index:25!important;
+  left:18px!important;
+  right:18px!important;
+  bottom:16px!important;
+  width:auto!important;
+  min-height:98px!important;
+  margin:0!important;
+  padding:13px 16px 14px!important;
+  transform:none!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--bc-pixel);
+  background:rgba(7,12,22,.97)!important;
+  box-shadow:
+    inset 0 0 0 3px #020409,
+    inset 0 0 0 5px #465873,
+    0 8px 0 rgba(0,0,0,.5)!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .speech-label{
+  margin-bottom:6px!important;
+  color:var(--bc-gold)!important;
+  font:900 8px "Courier New",Consolas,monospace!important;
+  letter-spacing:.18em!important;
+}
+body.bg2-battle-clean.bg2-in-battle #wrong-phrase{
+  margin:0!important;
+  max-width:100%!important;
+  color:#fff8e9!important;
+  font-size:clamp(18px,2vw,26px)!important;
+  line-height:1.25!important;
+  font-weight:800!important;
+  text-wrap:balance;
+}
+
+/* Consola derecha: tres bloques, sin ruido. */
+body.bg2-battle-clean.bg2-in-battle .panel-right{
+  width:390px!important;
+  height:100%!important;
+  min-height:0!important;
+  padding:10px!important;
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+  align-content:stretch!important;
+  gap:8px!important;
+  overflow:hidden!important;
+  border:0!important;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px),
+    #080e18!important;
+}
+body.bg2-battle-clean.bg2-in-battle :is(#hero-panel,#input-panel,#log-panel){
+  margin:0!important;
+  min-width:0!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--bc-pixel);
+  background:linear-gradient(180deg,#111c2e,#0b1321)!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #33445e!important;
+}
+
+/* Estado del héroe compacto: solo recursos útiles. */
+body.bg2-battle-clean.bg2-in-battle #hero-panel{
+  min-height:92px!important;
+  padding:10px 11px!important;
+}
+body.bg2-battle-clean.bg2-in-battle #hero-panel>.box-title{
+  display:none!important;
+}
+body.bg2-battle-clean.bg2-in-battle #hero-panel .hero-top{
+  display:grid!important;
+  grid-template-columns:48px 1fr!important;
+  gap:9px!important;
+  align-items:center!important;
+}
+body.bg2-battle-clean.bg2-in-battle #hero-panel .hero-avatar{
+  width:48px!important;
+  height:48px!important;
+  display:grid!important;
+  place-items:center!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--bc-pixel);
+  background:#07101c!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #34455f!important;
+}
+body.bg2-battle-clean.bg2-in-battle #hero-panel .hero-avatar-mini{
+  width:42px!important;
+  height:42px!important;
+  object-fit:contain!important;
+  image-rendering:pixelated!important;
+}
+body.bg2-battle-clean.bg2-in-battle #hero-panel .hero-name{
+  color:#f2df9a!important;
+  font:900 11px "Courier New",Consolas,monospace!important;
+}
+body.bg2-battle-clean.bg2-in-battle #hero-panel .hero-meta{
+  margin-top:2px!important;
+  color:#7f92aa!important;
+  font-size:8px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+body.bg2-battle-clean.bg2-in-battle #hero-panel .xp-bar-wrap{
+  height:6px!important;
+  margin-top:5px!important;
+}
+body.bg2-battle-clean.bg2-in-battle #hero-panel .hero-xp-text{
+  display:none!important;
+}
+body.bg2-battle-clean.bg2-in-battle #hero-panel .hero-stats{
+  margin-top:7px!important;
+  padding-top:6px!important;
+  display:flex!important;
+  justify-content:space-between!important;
+  border-top:1px solid #273750!important;
+}
+body.bg2-battle-clean.bg2-in-battle #hero-panel .hero-stats span{
+  color:#a9b9cc!important;
+  font:900 8px "Courier New",monospace!important;
+}
+
+/* Tu turno: la caja principal de interacción. */
+body.bg2-battle-clean.bg2-in-battle #input-panel{
+  min-height:0!important;
+  padding:13px!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+body.bg2-battle-clean.bg2-in-battle #input-panel>.box-title{
+  margin:0 0 8px!important;
+  color:#f4df9b!important;
+  font:900 14px "Courier New",Consolas,monospace!important;
+  letter-spacing:.02em!important;
+}
+body.bg2-battle-clean.bg2-in-battle #input-panel>.box-title::before{
+  content:"TU TURNO";
+  display:block;
+  margin-bottom:4px;
+  color:#637892;
+  font:900 7px "Courier New",monospace;
+  letter-spacing:.18em;
+}
+body.bg2-battle-clean.bg2-in-battle #answer{
+  flex:1 1 auto!important;
+  width:100%!important;
+  min-height:142px!important;
+  max-height:none!important;
+  margin:0 0 9px!important;
+  padding:12px!important;
+  resize:none!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--bc-pixel);
+  background:#070e19!important;
+  color:#f4ecdc!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #31425d!important;
+  font:600 15px/1.45 Inter,Segoe UI,Arial,sans-serif!important;
+}
+body.bg2-battle-clean.bg2-in-battle #answer::placeholder{
+  color:#61748d!important;
+}
+body.bg2-battle-clean.bg2-in-battle #answer:focus{
+  outline:none!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #5a8e99,0 0 0 2px rgba(104,216,232,.12)!important;
+}
+body.bg2-battle-clean.bg2-in-battle #input-panel .buttons-row{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 82px!important;
+  gap:7px!important;
+}
+body.bg2-battle-clean.bg2-in-battle #attack-btn{
+  grid-column:1/-1!important;
+  min-height:48px!important;
+  padding:10px!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--bc-pixel);
+  background:#4e3b16!important;
+  color:#fff0b6!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #a27e30,0 5px 0 #020409!important;
+  font:900 12px "Courier New",Consolas,monospace!important;
+  letter-spacing:.08em!important;
+}
+body.bg2-battle-clean.bg2-in-battle #attack-btn::before{
+  content:"⚔  ";
+}
+body.bg2-battle-clean.bg2-in-battle #battle-item-select{
+  grid-column:1!important;
+  width:100%!important;
+  min-width:0!important;
+  height:38px!important;
+  padding:7px 9px!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--bc-pixel);
+  background:#09111e!important;
+  color:#c6d2e1!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #30415a!important;
+  font-size:9px!important;
+}
+body.bg2-battle-clean.bg2-in-battle #use-item-btn{
+  grid-column:2!important;
+  min-width:0!important;
+  height:38px!important;
+  padding:7px!important;
+}
+body.bg2-battle-clean.bg2-in-battle #ability-btn{
+  grid-column:1/-1!important;
+  min-height:38px!important;
+  padding:7px 10px!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--bc-pixel);
+  background:#12303b!important;
+  color:#c8f4fb!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #326d79,0 4px 0 #020409!important;
+  font:900 9px "Courier New",Consolas,monospace!important;
+}
+
+/* Registro: solo el resultado actual, no un panel protagonista. */
+body.bg2-battle-clean.bg2-in-battle #log-panel{
+  min-height:72px!important;
+  max-height:96px!important;
+  padding:9px 11px!important;
+}
+body.bg2-battle-clean.bg2-in-battle #log-panel .log-title{
+  margin:0 0 4px!important;
+  color:#6d829b!important;
+  font:900 7px "Courier New",Consolas,monospace!important;
+  letter-spacing:.16em!important;
+}
+body.bg2-battle-clean.bg2-in-battle #log-panel .log-title::before{
+  display:none!important;
+}
+body.bg2-battle-clean.bg2-in-battle #log{
+  max-height:54px!important;
+  overflow:auto!important;
+  color:#b7c5d7!important;
+  font-size:10px!important;
+  line-height:1.35!important;
+}
+
+/* Estado de respuesta: feedback sin desplazar la interfaz. */
+body.bg2-battle-clean.bg2-in-battle #answer.answer-good{
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #3c8a5e!important;
+}
+body.bg2-battle-clean.bg2-in-battle #answer.answer-medium{
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #8e7733!important;
+}
+body.bg2-battle-clean.bg2-in-battle #answer.answer-bad{
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #92404e!important;
+}
+
+/* 1366x768: objetivo principal. */
+@media(min-width:1100px) and (max-height:800px){
+  body.bg2-battle-clean.bg2-in-battle .layout{
+    grid-template-columns:minmax(0,1fr) 370px!important;
+  }
+  body.bg2-battle-clean.bg2-in-battle .panel-right{
+    width:370px!important;
+    padding:8px!important;
+    gap:7px!important;
+  }
+  body.bg2-battle-clean.bg2-in-battle #hero-panel{
+    min-height:82px!important;
+    padding:8px 10px!important;
+  }
+  body.bg2-battle-clean.bg2-in-battle #input-panel{
+    padding:10px!important;
+  }
+  body.bg2-battle-clean.bg2-in-battle #answer{
+    min-height:118px!important;
+  }
+  body.bg2-battle-clean.bg2-in-battle #log-panel{
+    min-height:64px!important;
+    max-height:78px!important;
+  }
+  body.bg2-battle-clean.bg2-in-battle #battle-screen .battle-sprites-row{
+    inset:76px 0 120px!important;
+  }
+  body.bg2-battle-clean.bg2-in-battle #battle-screen .speech{
+    min-height:88px!important;
+    bottom:12px!important;
+  }
+}
+
+/* Tablet / ancho pequeño: escena arriba, acciones abajo. */
+@media(max-width:900px){
+  body.bg2-battle-clean.bg2-in-battle .game-shell{
+    height:auto!important;
+    min-height:100vh!important;
+    overflow:auto!important;
+  }
+  body.bg2-battle-clean.bg2-in-battle .layout{
+    height:auto!important;
+    grid-template-columns:1fr!important;
+  }
+  body.bg2-battle-clean.bg2-in-battle .battle-column{
+    height:62vh!important;
+    min-height:460px!important;
+    border-right:0!important;
+    border-bottom:3px solid #020409!important;
+  }
+  body.bg2-battle-clean.bg2-in-battle .panel-right{
+    width:100%!important;
+    height:auto!important;
+    grid-template-rows:auto auto auto!important;
+  }
+}
