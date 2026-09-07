@@ -15,7 +15,7 @@
     const link = document.createElement('link');
     link.id = 'bg2-rpg-css';
     link.rel = 'stylesheet';
-    link.href = './rpg-ui-v2.css';
+    link.href = './rpg-ui-v2.css?v=20260907-rpg1';
     document.head.appendChild(link);
   }
 
