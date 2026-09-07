@@ -27,6 +27,49 @@
     ['history-screen','.history-header','CRÓNICAS DESBLOQUEADAS']
   ];
 
+  const submenuScreens = {
+    'start-choice':['01','PARTIDAS'],
+    'mode-screen':['02','MODOS'],
+    'start-screen':['03','HÉROE'],
+    'hub-account':['P','PERFIL'],
+    'hub-achievements':['L','LOGROS'],
+    'hub-shop':['M','MERCADER'],
+    'hub-collection':['B','BESTIARIO'],
+    'hub-credits':['C','CRÉDITOS'],
+    'camp-screen':['04','CAMPAMENTO'],
+    'map-screen':['05','MAPA'],
+    'diary-screen':['06','DIARIO'],
+    'history-screen':['07','HISTORIA'],
+    'inventory-screen':['08','MOCHILA']
+  };
+
+  function annotateSubmenus(){
+    Object.entries(submenuScreens).forEach(([id,meta]) => {
+      const screen=$(id);
+      if(!screen) return;
+      screen.classList.add(id.startsWith('hub-') || ['start-choice','mode-screen','start-screen'].includes(id) ? 'bg2-rpg-submenu' : 'bg2-rpg-game-submenu');
+      screen.dataset.rpgCode=meta[0];
+      screen.dataset.rpgSection=meta[1];
+    });
+
+    const newBtn=$('start-choice-new');
+    if(newBtn){
+      newBtn.dataset.rpgDescription='Empieza una nueva expedición en una ranura segura';
+      newBtn.dataset.rpgNumber='I';
+    }
+    const continueBtn=$('start-choice-continue');
+    if(continueBtn){
+      continueBtn.dataset.rpgDescription='Recupera una aventura guardada';
+      continueBtn.dataset.rpgNumber='II';
+    }
+
+    document.querySelectorAll('#start-choice-back,#mode-back,#hub-account-back,#hub-achievements-back,#hub-shop-back,#hub-collection-back,#hub-credits-back').forEach(btn=>{
+      btn.classList.add('bg2-rpg-back');
+      if(!btn.dataset.rpgOriginal) btn.dataset.rpgOriginal=btn.textContent || 'Atrás';
+      btn.textContent='← VOLVER';
+    });
+  }
+
   function annotateTitles(){
     titleMeta.forEach(([screenId, selector, kicker]) => {
       const screen = $(screenId);
@@ -95,6 +138,7 @@
   function apply(){
     loadUnifiedCss();
     document.body.classList.add('bg2-unified-rpg');
+    annotateSubmenus();
     annotateTitles();
     annotateAccount();
     annotateNavigation();
@@ -110,6 +154,6 @@
 
   // Los overlays de Práctica/Estrategia se crean bajo demanda.
   document.addEventListener('click', () => {
-    requestAnimationFrame(annotateOverlays);
+    requestAnimationFrame(()=>{ annotateSubmenus(); annotateOverlays(); });
   }, {passive:true});
 })();
