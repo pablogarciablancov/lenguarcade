@@ -41,7 +41,14 @@ const checks = [
   ['contador de inventario', 'id="inventoryCount"'],
   ['animación al recoger objeto', 'function showItemPickup('],
   ['iconos automáticos de objetos', 'function itemVisual('],
-  ['inventario visual', 'function renderInventory(']
+  ['inventario visual', 'function renderInventory('],
+  ['biblioteca inicial', 'id="libraryHome"'],
+  ['registro de historias', 'function renderLibrary('],
+  ['migración proyecto antiguo', 'function normalizeLibrary('],
+  ['estados de historias', 'function displayProjectStatus('],
+  ['guardado multihistoria', 'save:libraryPayload()'],
+  ['volver a mis historias', 'id="backToLibraryBtn"'],
+  ['estado en pruebas automático', 'project.status!=="submitted")project.status="testing"']
 ];
 for (const [label, needle] of checks) {
   if (!html.includes(needle)) throw new Error('Rayuela: falta '+label+' ('+needle+')');
@@ -86,6 +93,9 @@ if (!dashboard.includes("evaluations:(evaluationsResult.data || [])")) {
 }
 if (!saveProgress.includes("authoritativeRayuelaXp") || !saveProgress.includes('gameId === "rayuela"')) {
   throw new Error("Rayuela: falta el blindaje server-side del XP y los checkpoints.");
+}
+if (!saveProgress.includes("saveRecord.projects") || !saveProgress.includes("activeProjectId")) {
+  throw new Error("Rayuela: el backend no reconoce la biblioteca de varias historias.");
 }
 if (migrations.length !== 1) {
   throw new Error("Rayuela: debe existir exactamente una migración de alta; encontradas "+migrations.length+".");
