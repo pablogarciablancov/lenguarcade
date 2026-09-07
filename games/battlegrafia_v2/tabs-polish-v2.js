@@ -7,7 +7,7 @@
     const link=document.createElement('link');
     link.id='bg2-tabs-polish-css';
     link.rel='stylesheet';
-    link.href='./tabs-polish-v2.css?v=20260907-rpg12';
+    link.href='./tabs-polish-v2.css?v=20260907-rpg14';
     document.head.appendChild(link);
   }
 
