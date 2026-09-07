@@ -11860,11 +11860,11 @@ function removeOneItem(itemName) {
 
   
   const WORLDS = [
-    { id:"montanas", name:"Montañas de la Concordancia", tone:"montanas", emoji:"🏔️" },
-    { id:"castillo", name:"Castillo de la Puntuación", tone:"castillo", emoji:"🏰" },
-    { id:"cienaga", name:"Ciénaga de la Acentuación", tone:"cienaga", emoji:"🟢" },
-    { id:"acantilados", name:"Acantilados del Caos", tone:"acantilados", emoji:"🌊" },
-    { id:"volcan", name:"Volcán de la Ortografía", tone:"volcan", emoji:"🌋" }
+    { id:"montanas", name:"Montañas de Lexikon", tone:"montanas", emoji:"🏔️" },
+    { id:"castillo", name:"Castillo de Paper", tone:"castillo", emoji:"🏰" },
+    { id:"cienaga", name:"Ciénaga de Torvax", tone:"cienaga", emoji:"🟢" },
+    { id:"acantilados", name:"Acantilados de Sintaxion", tone:"acantilados", emoji:"🌊" },
+    { id:"volcan", name:"Volcán de Don Pablo", tone:"volcan", emoji:"🌋" }
   ];
 
   const mapHeaderEl = document.getElementById("map-header");
@@ -12523,7 +12523,7 @@ function applyBattleWorldBackground(worldId){
 
     const world = getWorldById(selectedWorldId);
 
-    if(mapHeaderEl) mapHeaderEl.textContent = `Mapa de Ortographia · ${world.name}`;
+    if(mapHeaderEl) mapHeaderEl.textContent = `Cartografía del Reino · ${world.name}`;
     if(mapSubEl){
       const boss = monsters.filter(m=>m.world===world.id).slice(-1)[0];
       mapSubEl.innerHTML = `Zona actual: <strong>${world.emoji} ${world.name}</strong>. Tu próximo rival es <strong>${(getMonsterAt(currentMonsterIndex)||boss).name}</strong>.`;
