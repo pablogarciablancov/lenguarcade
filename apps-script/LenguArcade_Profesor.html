@@ -1279,6 +1279,11 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
   function getProject(row){
     var raw=readRaw(row||{});
     var save=raw.save||(raw.rawGameData&&raw.rawGameData.save)||{};
+    if(save&&typeof save==='object'&&Array.isArray(save.projects)){
+      var projects=save.projects.filter(function(item){return item&&typeof item==='object';});
+      var submitted=projects.filter(function(item){return String(item.status)==='submitted';}).sort(function(a,b){return String(a.submittedAt||a.updatedAt||'').localeCompare(String(b.submittedAt||b.updatedAt||''));});
+      return submitted[submitted.length-1]||projects.find(function(item){return String(item.id)===String(save.activeProjectId||'');})||projects[0]||{};
+    }
     return save&&typeof save==='object'?save:{};
   }
   function projectMetrics(project,row){
