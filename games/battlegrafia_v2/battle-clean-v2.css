@@ -176,10 +176,14 @@ body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-box::before{
 }
 body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-name{
   font:900 13px/1.1 "Courier New",Consolas,monospace!important;
-  color:var(--bc-paper)!important;
+  color:#f8fbff!important;
+  text-shadow:0 2px 2px #000,0 0 7px rgba(255,255,255,.18)!important;
+}
+body.bg2-battle-clean.bg2-in-battle #battle-screen .hero-box .entity-name{
+  color:#dffaff!important;
 }
 body.bg2-battle-clean.bg2-in-battle #battle-screen .monster-box .entity-name{
-  color:#f2dda0!important;
+  color:#ffe3e7!important;
 }
 body.bg2-battle-clean.bg2-in-battle #battle-screen .entity-tag{
   margin:3px 0 6px!important;
