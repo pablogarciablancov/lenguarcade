@@ -69,3 +69,25 @@ Rayuela tiene XP interno para mantener motivación durante la escritura. LenguAr
 ## Publicación
 
 La migración y las funciones Supabase están preparadas en el repositorio. Antes de publicar en producción deben aplicarse en el proyecto Supabase autorizado y después publicarse Apps Script/portal con el procedimiento habitual de LenguArcade.
+
+
+## Biblioteca de historias (Rayuela 1.3)
+
+Rayuela ya no abre directamente un único proyecto. La primera pantalla es **Mis historias**, con tres estados automáticos:
+
+- **Empezada**: proyecto en edición que todavía no se ha probado.
+- **En pruebas**: el alumno ya ha iniciado al menos una prueba jugable.
+- **Terminada**: existe una entrega congelada para evaluación.
+
+Cada tarjeta muestra título, última edición, número de escenas, palabras y finales, y permite continuar o probar/jugar la historia.
+
+### Persistencia
+
+El guardado principal usa `schema: rayuela-library-v1` con:
+
+- `projects[]`: todos los proyectos narrativos del alumno.
+- `activeProjectId`: proyecto activo.
+- `xp`: XP global no decreciente de Rayuela.
+- una proyección compatible del proyecto activo (`id`, `nodes`, `status`, `submissions`, etc.) para consumidores antiguos.
+
+Los guardados anteriores con `schema: rayuela-project-v1` se migran automáticamente a una biblioteca con una sola historia. No se destruye el proyecto anterior.
