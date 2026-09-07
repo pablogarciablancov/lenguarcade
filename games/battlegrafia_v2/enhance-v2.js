@@ -2,6 +2,14 @@
   'use strict';
 
   const ASSET = 'https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/';
+  const TEST_MODE = (() => {
+    try {
+      const params = new URLSearchParams(window.location.search || '');
+      return params.get('test') === '1' || params.get('mode') === 'test';
+    } catch (error) {
+      return false;
+    }
+  })();
   const MONSTERS = ASSET + 'monsters/';
   const WORLDS = {
     montanas: {
@@ -172,13 +180,43 @@
   }
 
   function mountVersionPill() {
-    if (document.getElementById('bg2-version-pill')) return;
     const nav = document.querySelector('.top-nav');
     if (!nav) return;
-    const pill = document.createElement('span');
-    pill.id = 'bg2-version-pill';
-    pill.textContent = 'Fantasy Arcade · v2';
-    nav.appendChild(pill);
+    let pill = document.getElementById('bg2-version-pill');
+    if (!pill) {
+      pill = document.createElement('span');
+      pill.id = 'bg2-version-pill';
+      nav.appendChild(pill);
+    }
+    pill.textContent = TEST_MODE ? 'Modo prueba · Fantasy Arcade v2' : 'Fantasy Arcade · v2';
+    pill.dataset.testMode = TEST_MODE ? '1' : '0';
+  }
+
+  function enableDirectTestMode() {
+    if (!TEST_MODE || window.__LENGUARCADE_EMBEDDED) return;
+    document.documentElement.classList.add('bg2-test-mode');
+    document.body.classList.add('bg2-test-mode');
+    try {
+      localStorage.setItem('bg_user_email', 'pruebas@lenguarcade.local');
+      localStorage.setItem('bg_is_demo', 'true');
+    } catch (error) {}
+
+    const enterDemo = () => {
+      const login = document.getElementById('login-screen');
+      if (!login || !login.classList.contains('is-active')) return;
+      const demo = document.getElementById('btn-modo-demo');
+      if (demo) demo.click();
+      else {
+        login.classList.remove('is-active');
+        login.style.display = 'none';
+        const intro = document.getElementById('intro-continue');
+        if (intro) intro.click();
+      }
+    };
+
+    enterDemo();
+    setTimeout(enterDemo, 80);
+    setTimeout(enterDemo, 350);
   }
 
   function defeatedSet() {
@@ -362,6 +400,7 @@
     document.body.classList.add('bg2-theme');
     relabelInterface();
     mountVersionPill();
+    enableDirectTestMode();
     addScreenClassHints();
     renderWorldStrip();
     renderMapRoster();
