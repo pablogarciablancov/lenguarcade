@@ -180,6 +180,22 @@ if(!index.includes("document.querySelectorAll('.app-screen.is-active').forEach(s
   errors.push("Falta normalización del arranque para evitar dos app-screen activas.");
 }
 
+for(const required of [
+  "bg2-preboot",
+  "bg2-preboot-screen",
+  "ABRIENDO LAS PUERTAS DEL REINO",
+  "__BG2_PREBOOT_FAILSAFE",
+]){
+  if(!index.includes(required)) errors.push("Falta cortina anti-FOUC v2: "+required);
+}
+for(const required of [
+  "function finishPreboot",
+  "setTimeout(finishPreboot, 430)",
+  "document.documentElement.classList.remove('bg2-preboot')",
+]){
+  if(!unifiedUi.includes(required)) errors.push("Falta cierre de arranque anti-flash: "+required);
+}
+
 const catalogEntry=catalog.games.find(game=>game.id==="battlegrafia_v2");
 if(!catalogEntry){
   errors.push("El catálogo canónico no registra Battlegrafía 2.0.");
