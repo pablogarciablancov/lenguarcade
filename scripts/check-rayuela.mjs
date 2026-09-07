@@ -43,6 +43,8 @@ const checks = [
   ['iconos automáticos de objetos', 'function itemVisual('],
   ['inventario visual', 'function renderInventory('],
   ['biblioteca inicial', 'id="libraryHome"'],
+  ['scroll de biblioteca', 'body.libraryMode{overflow-y:auto!important'],
+  ['modo scroll al volver a historias', 'document.body.classList.add("libraryMode")'],
   ['registro de historias', 'function renderLibrary('],
   ['migración proyecto antiguo', 'function normalizeLibrary('],
   ['estados de historias', 'function displayProjectStatus('],
