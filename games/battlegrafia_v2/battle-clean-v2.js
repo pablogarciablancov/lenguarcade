@@ -8,7 +8,7 @@
     const link=document.createElement('link');
     link.id='bg2-clean-battle-css';
     link.rel='stylesheet';
-    link.href='./battle-clean-v2.css?v=20260907-rpg16';
+    link.href='./battle-clean-v2.css?v=20260907-rpg17';
     document.head.appendChild(link);
   }
 
@@ -33,7 +33,29 @@
     }
   }
 
+  function enforceBattleNameContrast(){
+    const heroName=$('hero-name-label');
+    const monsterName=$('monster-name');
+
+    if(heroName){
+      heroName.style.setProperty('color','#ffffff','important');
+      heroName.style.setProperty('-webkit-text-fill-color','#ffffff','important');
+      heroName.style.setProperty('opacity','1','important');
+      heroName.style.setProperty('filter','none','important');
+      heroName.style.setProperty('text-shadow','-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 2px 4px #000','important');
+    }
+
+    if(monsterName){
+      monsterName.style.setProperty('color','#ffd166','important');
+      monsterName.style.setProperty('-webkit-text-fill-color','#ffd166','important');
+      monsterName.style.setProperty('opacity','1','important');
+      monsterName.style.setProperty('filter','none','important');
+      monsterName.style.setProperty('text-shadow','-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 2px 4px #000','important');
+    }
+  }
+
   function cleanLabels(){
+    enforceBattleNameContrast();
     const speech=document.querySelector('#battle-screen .speech-label');
     if(speech) speech.textContent='CORRIGE ESTE DESAFÍO';
 
@@ -89,13 +111,14 @@
       observer.observe(node,{attributes:true,attributeFilter:['style','class']});
     });
 
-    const monster=$('monster-name');
-    if(monster){
+    const watchedNames=[$('hero-name-label'),$('monster-name')].filter(Boolean);
+    watchedNames.forEach(nameNode=>{
       new MutationObserver(()=>{
+        enforceBattleNameContrast();
         cleanLabels();
         removeBattleNoise();
-      }).observe(monster,{childList:true,subtree:true,characterData:true});
-    }
+      }).observe(nameNode,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['style','class']});
+    });
   }
 
   function boot(){
