@@ -140,6 +140,9 @@ for(const required of [
   "dataset.rpgKicker",
   "annotateNavigation",
   "annotateOverlays",
+  "annotateSubmenus",
+  "ensureSingleActiveScreen",
+  "data-rpg-description",
 ]){
   if(!unifiedUi.includes(required)) errors.push("Falta unificación de pantallas RPG: "+required);
 }
@@ -157,8 +160,19 @@ for(const required of [
   "#monster-modal",
   ".strategy-choice",
   ".end-overlay",
+  ".bg2-rpg-submenu",
+  ".bg2-rpg-game-submenu",
+  ".app-screen:not(.is-active)",
+  "#start-choice-new",
 ]){
   if(!unifiedCss.includes(required)) errors.push("Falta estilo RPG unificado: "+required);
+}
+
+if(index.includes("const menu = document.getElementById('start-choice');\n    if(menu) menu.classList.add('is-active');")){
+  errors.push("El listener demo legacy todavía puede superponer start-choice al menú principal.");
+}
+if(!index.includes("document.querySelectorAll('.app-screen.is-active').forEach(screen => screen.classList.remove('is-active'));")){
+  errors.push("Falta normalización del arranque para evitar dos app-screen activas.");
 }
 
 const catalogEntry=catalog.games.find(game=>game.id==="battlegrafia_v2");
