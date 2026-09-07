@@ -265,7 +265,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
     const SUPABASE_KEY='sb_publishable_zScSYh0tbpXLcY_5iyzsqQ_wepkdqKe';
     const SESSION_KEY='LA_TEACHER_SUPABASE_SESSION';
     const ASSET_BASE='https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/games/';
-    const BANNERS={battlegrafia:'battlegrafia-banner.jpg',maniacgrafia:'maniacgrafia-banner.jpg',narratoria:'narratoria-banner.jpg',versopolis:'versopolis-banner.jpg',scrabble:'scrabble-banner.jpg',conjuga_apuesta:'conjuga-apuesta-banner.jpg',verb_battle:'verb-battle-banner.jpg'};
+    const BANNERS={battlegrafia:'battlegrafia-banner.jpg',maniacgrafia:'maniacgrafia-banner.jpg',narratoria:'narratoria-banner.jpg',versopolis:'versopolis-banner.jpg',scrabble:'scrabble-banner.jpg',conjuga_apuesta:'conjuga-apuesta-banner.jpg',verb_battle:'verb-battle-banner.jpg',rayuela:'rayuela-banner.webp',entre_lineas:'entre-lineas-banner.webp'};
     const $=id=>document.getElementById(id);
     let session=null,currentTeacher=null,busy=false;
     let rosterState={classes:[],students:[],summary:{}};
@@ -599,7 +599,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
 .workshopGameRow{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.14)}
 body.light .workshopGameRow{background:rgba(94,53,177,.04)}
 .workshopGameRow.isClosed{opacity:.67;filter:saturate(.55)}
-.workshopGameIcon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:25px;background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(124,77,255,.2));border:1px solid var(--line)}
+.workshopGameIcon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:25px;background-image:linear-gradient(135deg,rgba(8,13,28,.20),rgba(8,13,28,.54)),var(--workshop-img),linear-gradient(135deg,rgba(0,212,255,.18),rgba(124,77,255,.2));background-size:cover;background-position:center;border:1px solid var(--line);overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}.workshopGameIcon span{filter:drop-shadow(0 2px 4px rgba(0,0,0,.75));text-shadow:0 1px 5px rgba(0,0,0,.8)}
 .workshopGameInfo{min-width:0}.workshopGameInfo strong{display:block;font-size:14px}.workshopGameInfo span{display:block;margin-top:3px;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .workshopToggle{width:112px!important;margin:0!important;padding:10px 12px!important;box-shadow:none!important}
 .workshopToggle.isOpen{background:linear-gradient(135deg,#1fa66f,#36d399)!important}.workshopToggle.isClosed{background:linear-gradient(135deg,#586174,#30384a)!important}
@@ -738,7 +738,7 @@ body.light .workshopGameRow{background:rgba(94,53,177,.04)}
     grid.innerHTML=(state.games||[]).map(function(game){
       var open=!!game.enabled;
       return '<div class="workshopGameRow '+(open?'':'isClosed')+'" data-workshop-game="'+workshopEsc(game.gameId)+'">'+
-        '<div class="workshopGameIcon">'+workshopEsc(game.icono||'🎮')+'</div>'+
+        '<div class="workshopGameIcon" style="--workshop-img:url(\''+workshopEsc(typeof bannerUrl==='function'?bannerUrl(game.gameId):'')+'\')"><span>'+workshopEsc(game.icono||'🎮')+'</span></div>'+
         '<div class="workshopGameInfo"><strong>'+workshopEsc(game.nombre)+'</strong><span>'+workshopEsc(teacherGameLabel(game))+'</span></div>'+
         '<button type="button" class="workshopToggle '+(open?'isOpen':'isClosed')+'" data-workshop-toggle="'+workshopEsc(game.gameId)+'" data-enabled="'+(open?'1':'0')+'">'+(open?'✓ Abierto':'🔒 Cerrado')+'</button>'+
       '</div>';
@@ -1249,6 +1249,7 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
 
 <style>
 .rayuelaTeacherBox{margin-top:14px;padding:16px;border:1px solid rgba(34,211,238,.28);border-radius:18px;background:linear-gradient(135deg,rgba(34,211,238,.07),rgba(139,92,246,.07))}
+.rayuelaTeacherHero{height:118px;margin:-16px -16px 14px;border-radius:18px 18px 14px 14px;background-image:linear-gradient(90deg,rgba(10,15,30,.10),rgba(10,15,30,.48)),url('https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/games/rayuela-banner.webp');background-size:cover;background-position:center;position:relative;overflow:hidden}.rayuelaTeacherHero::after{content:"RAYUELA · Tu historia. Tus decisiones.";position:absolute;left:14px;bottom:11px;padding:6px 9px;border-radius:999px;background:rgba(10,15,30,.68);color:#fff;font-size:10px;font-weight:900;letter-spacing:.04em;backdrop-filter:blur(5px)}
 .rayuelaTeacherHead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
 .rayuelaTeacherGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:12px}
 .rayuelaTeacherMetric{padding:9px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.13)}
@@ -1343,7 +1344,7 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
     var commentRows=comments.map(function(item,index){
       return '<div class="rayuelaNodeComment" data-r-node-comment="'+index+'"><select data-r-node>'+nodeOptions(project,item.nodeId)+'</select><textarea data-r-node-text placeholder="Comentario para esta escena">'+escR(item.comment||'')+'</textarea><button type="button" class="ghost" data-r-remove-comment>Quitar</button></div>';
     }).join('');
-    box.innerHTML='<div class="rayuelaTeacherHead"><div><strong>🧭 Rayuela · proyecto narrativo</strong><div class="sub">Mapa, proceso y rúbrica de esta aventura. La nota la decides tú.</div></div><div><span class="sub">Nota Rayuela</span><div class="rayuelaRubricScore" id="rayuelaRubricScore">'+(ev?Number(ev.score||0).toFixed(2):'—')+'</div></div></div>'+
+    box.innerHTML='<div class="rayuelaTeacherHero" role="img" aria-label="Portada de Rayuela"></div><div class="rayuelaTeacherHead"><div><strong>🧭 Rayuela · proyecto narrativo</strong><div class="sub">Mapa, proceso y rúbrica de esta aventura. La nota la decides tú.</div></div><div><span class="sub">Nota Rayuela</span><div class="rayuelaRubricScore" id="rayuelaRubricScore">'+(ev?Number(ev.score||0).toFixed(2):'—')+'</div></div></div>'+
       '<div class="rayuelaTeacherGrid">'+metrics.map(function(x){return '<div class="rayuelaTeacherMetric"><span>'+escR(x[0])+'</span><b>'+escR(x[1])+'</b></div>';}).join('')+'</div>'+
       '<div class="rayuelaRubric"><h3>Rúbrica de evaluación</h3><div class="sub">Puedes cambiar criterios, pesos, puntuaciones y comentarios.</div><div class="rayuelaRubricLabels"><span>Criterio</span><span>Peso %</span><span>Nota /10</span><span>Comentario</span></div><div id="rayuelaCriteria">'+criterionRows+'</div>'+
       '<label class="sub" for="rayuelaOverall">Comentario general</label><textarea id="rayuelaOverall" class="rayuelaOverall" rows="3" placeholder="Comentario general para el alumno">'+escR(breakdown.overallComment||'')+'</textarea>'+
