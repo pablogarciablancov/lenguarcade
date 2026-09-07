@@ -793,3 +793,185 @@ body.bg2-unified-rpg *::-webkit-scrollbar-thumb{background:#6f5928;border:2px so
   body.bg2-unified-rpg #camp-screen :is(.camp-title-main,.camp-sub,.camp-message,.camp-footer){grid-column:auto}
   body.bg2-unified-rpg #start-choice .screen-card>div[style*="display:grid"]{grid-template-columns:1fr!important}
 }
+
+
+/* 28. SUBMENÚS RPG — mismo lenguaje que el HUB principal */
+body.bg2-unified-rpg .bg2-rpg-submenu{
+  position:fixed!important;
+  inset:0!important;
+  padding:clamp(18px,3vh,30px)!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:auto!important;
+}
+body.bg2-unified-rpg .bg2-rpg-submenu::after,
+body.bg2-unified-rpg .bg2-rpg-game-submenu::after{
+  content:attr(data-rpg-code) " · " attr(data-rpg-section);
+  position:absolute;
+  top:14px;
+  right:18px;
+  z-index:8;
+  padding:5px 8px;
+  clip-path:var(--u-pixel);
+  background:#0c1524;
+  color:#7f91aa;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #2f4058;
+  font:900 8px "Courier New",Consolas,monospace;
+  letter-spacing:.14em;
+}
+body.bg2-unified-rpg .bg2-rpg-submenu>.menu-bg{
+  display:none!important;
+}
+body.bg2-unified-rpg .bg2-rpg-submenu :is(.menu-panel,.mode-content,.start-panel){
+  position:relative!important;
+}
+body.bg2-unified-rpg .bg2-rpg-submenu :is(.menu-panel,.mode-content,.start-panel)::before{
+  content:"BATTLEGRAFÍA 2.0";
+  position:absolute;
+  top:12px;
+  left:16px;
+  z-index:5;
+  color:#546984;
+  font:900 8px "Courier New",Consolas,monospace;
+  letter-spacing:.18em;
+}
+body.bg2-unified-rpg .bg2-rpg-submenu :is(.screen-head,.mode-header){
+  padding-top:18px!important;
+}
+body.bg2-unified-rpg .bg2-rpg-back{
+  min-width:104px!important;
+  background:#111b2c!important;
+  color:#9fb0c5!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #33445e,0 5px 0 #020409!important;
+}
+body.bg2-unified-rpg .bg2-rpg-back:hover{
+  color:#fff0bd!important;
+  background:#3d321b!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #8f7130,0 5px 0 #020409!important;
+}
+
+/* Comenzar: tarjetas de decisión, no botones genéricos */
+body.bg2-unified-rpg #start-choice .screen-card>div[style*="display:grid"]{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:12px!important;
+}
+body.bg2-unified-rpg #start-choice :is(#start-choice-new,#start-choice-continue){
+  position:relative!important;
+  min-height:132px!important;
+  padding:24px 18px 18px 64px!important;
+  text-align:left!important;
+  font-size:15px!important;
+  overflow:hidden!important;
+}
+body.bg2-unified-rpg #start-choice :is(#start-choice-new,#start-choice-continue)::before{
+  content:attr(data-rpg-number);
+  position:absolute;
+  left:16px;
+  top:50%;
+  transform:translateY(-50%);
+  width:34px;height:34px;
+  display:grid;place-items:center;
+  background:#08101c;
+  color:#e4c96f;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #76602b;
+  font:900 12px "Courier New",monospace;
+}
+body.bg2-unified-rpg #start-choice :is(#start-choice-new,#start-choice-continue)::after{
+  content:attr(data-rpg-description);
+  display:block;
+  margin-top:10px;
+  color:#91a3ba;
+  font:700 10px/1.35 "Courier New",Consolas,monospace;
+  text-transform:none;
+  letter-spacing:0;
+}
+body.bg2-unified-rpg #start-choice #start-choice-hint{
+  margin-top:14px!important;
+  padding:9px 11px!important;
+  min-height:36px;
+  border:0!important;
+  clip-path:var(--u-pixel);
+  background:#0b1422!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #293a52!important;
+  color:#8295ae!important;
+  font:800 9px "Courier New",monospace!important;
+}
+
+/* Pantalla de modos: remate de submenú */
+body.bg2-unified-rpg #mode-screen .mode-content{
+  padding-top:34px!important;
+}
+body.bg2-unified-rpg #mode-screen .mode-card{
+  border-image:none!important;
+}
+body.bg2-unified-rpg #mode-screen .mode-card .mode-name{
+  padding-top:8px!important;
+  border-top:1px solid rgba(214,173,73,.18);
+}
+body.bg2-unified-rpg #mode-screen .mode-footer{
+  margin-top:10px!important;
+  padding:8px 10px!important;
+  clip-path:var(--u-pixel);
+  background:#0b1422!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #293a52!important;
+}
+
+/* Submenús de hub: colección, tienda, logros, perfil, créditos */
+body.bg2-unified-rpg :is(#hub-account,#hub-achievements,#hub-shop,#hub-collection,#hub-credits) .screen-card{
+  position:relative;
+  padding-top:42px!important;
+}
+body.bg2-unified-rpg :is(#hub-account,#hub-achievements,#hub-shop,#hub-collection,#hub-credits) .screen-card::before{
+  content:"BATTLEGRAFÍA 2.0 // " attr(data-rpg-section);
+  position:absolute;
+  top:14px;
+  left:18px;
+  color:#566b86;
+  font:900 8px "Courier New",Consolas,monospace;
+  letter-spacing:.16em;
+}
+body.bg2-unified-rpg :is(#hub-account,#hub-achievements,#hub-shop,#hub-collection,#hub-credits) .screen-head{
+  margin-top:2px!important;
+}
+body.bg2-unified-rpg #hub-shop-list,
+body.bg2-unified-rpg #hub-collection-grid,
+body.bg2-unified-rpg #hub-achievements-grid{
+  margin-top:14px!important;
+}
+
+/* Pantallas internas del juego como submenús de RPG */
+body.bg2-unified-rpg .bg2-rpg-game-submenu{
+  position:relative!important;
+}
+body.bg2-unified-rpg .bg2-rpg-game-submenu::before{
+  content:"";
+  position:absolute;
+  top:0;left:0;right:0;
+  height:3px;
+  z-index:6;
+  background:linear-gradient(90deg,#6f5928,#d6ad49 35%,#6f5928 70%,transparent);
+}
+body.bg2-unified-rpg .bg2-rpg-game-submenu :is(.camp-container,.screen-inner,.inventory-container){
+  padding-top:24px!important;
+}
+
+/* Garantía: jamás dos app-screen visibles simultáneamente */
+body.bg2-unified-rpg .app-screen:not(.is-active){
+  display:none!important;
+}
+body.bg2-unified-rpg .app-screen.is-active{
+  display:flex!important;
+}
+body.bg2-unified-rpg #start-screen:not([style*="display: flex"]){
+  display:none!important;
+}
+
+@media(max-width:760px){
+  body.bg2-unified-rpg #start-choice .screen-card>div[style*="display:grid"]{
+    grid-template-columns:1fr!important;
+  }
+  body.bg2-unified-rpg #start-choice :is(#start-choice-new,#start-choice-continue){
+    min-height:112px!important;
+  }
+}
