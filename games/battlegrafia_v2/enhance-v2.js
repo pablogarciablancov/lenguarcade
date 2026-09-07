@@ -406,17 +406,18 @@
     renderMapRoster();
     observeGame();
 
-    // Algunas pantallas se reconstruyen al cargar/continuar partida.
+    // Algunas pantallas se reconstruyen al arrancar. Reintentamos solo los
+    // enlaces ligeros durante unos segundos; no recreamos roster/rail en bucle.
     let rounds = 0;
     const timer = setInterval(() => {
       relabelInterface();
       mountVersionPill();
-      renderWorldStrip();
-      renderMapRoster();
       observeGame();
+      if (!document.getElementById('bg2-world-strip')) renderWorldStrip();
+      if (!document.getElementById('bg2-map-roster')) renderMapRoster();
       rounds += 1;
-      if (rounds >= 24) clearInterval(timer);
-    }, 750);
+      if (rounds >= 8) clearInterval(timer);
+    }, 500);
   }
 
   if (document.readyState === 'loading') {
