@@ -117,7 +117,7 @@
         enforceBattleNameContrast();
         cleanLabels();
         removeBattleNoise();
-      }).observe(nameNode,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['style','class']});
+      }).observe(nameNode,{childList:true,subtree:true,characterData:true});
     });
   }
 
