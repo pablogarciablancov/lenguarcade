@@ -113,6 +113,13 @@ for(const required of [
   if(!rpgUi.includes(required)) errors.push("Falta shell RPG v2: "+required);
 }
 
+if(!rpgUi.includes("observer.observe(document.body,{subtree:true,childList:true});")){
+  errors.push("La UI RPG debe observar solo inserciones DOM para evitar bucles de carga.");
+}
+if(rpgUi.includes("attributeFilter:['class','style']")){
+  errors.push("La UI RPG no debe observar style/class globalmente: puede saturar la carga.");
+}
+
 for(const required of [
   "#bg2-rpg-hub",
   ".bg2-rpg-action",
