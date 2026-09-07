@@ -632,9 +632,8 @@ function normalizeLibrary(raw){
   return lib;
 }
 function syncProjectIntoLibrary(){
-  if(!project||!project.id)return;
+  if(!project||!project.id||currentView!=="editor")return;
   var idx=library.projects.findIndex(function(p){return p.id===project.id;});
-  if(currentView!=="editor"&&idx<0&&library.activeProjectId!==project.id)return;
   project.updatedAt=now();project.lastSavedAt=now();
   if(idx>=0)library.projects[idx]=clone(project);else library.projects.push(clone(project));
   library.activeProjectId=project.id;library.updatedAt=now();
