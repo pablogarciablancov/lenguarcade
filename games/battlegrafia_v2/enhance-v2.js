@@ -307,36 +307,17 @@
   }
 
   function mountMapRoster() {
-    const map = document.getElementById('map-screen');
-    if (!map) return null;
-    let roster = document.getElementById('bg2-map-roster');
-    if (roster) return roster;
-    roster = document.createElement('div');
-    roster.id = 'bg2-map-roster';
-    const row = document.querySelector('#map-screen .map-world-row');
-    if (row) row.insertAdjacentElement('afterend', roster);
-    else map.prepend(roster);
-    return roster;
+    // v12: el motor ya dispone de #map-stages con los seis enemigos.
+    // El roster v2 duplicaba esa misma información y rompía la cuadrícula del mapa.
+    const legacy = document.getElementById('bg2-map-roster');
+    if (legacy) legacy.remove();
+    return null;
   }
 
   function renderMapRoster() {
-    const roster = mountMapRoster();
-    if (!roster) return;
-    const worldId = resolveWorldFromSelect();
-    const world = WORLDS[worldId];
-    const defeated = defeatedSet();
-    roster.innerHTML = '';
-
-    world.monsters.forEach((monster, index) => {
-      const record = BY_ID.get(monster[0]);
-      const card = document.createElement('div');
-      card.className = 'bg2-roster-card' + (record.boss ? ' boss' : '') + (defeated.has(record.id) ? ' cleared' : '');
-      card.title = record.name + (record.boss ? ' · Jefe' : '');
-      card.innerHTML =
-        '<img src="' + record.sprite + '" alt="' + record.name + '">' +
-        '<strong>' + (index + 1) + '. ' + record.name + '</strong>';
-      roster.appendChild(card);
-    });
+    // Intencionadamente vacío: una única progresión visual en #map-stages.
+    const legacy = document.getElementById('bg2-map-roster');
+    if (legacy) legacy.remove();
   }
 
   function observeGame() {
