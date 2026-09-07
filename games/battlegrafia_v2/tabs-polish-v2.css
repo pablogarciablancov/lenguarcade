@@ -236,7 +236,7 @@ body.bg2-tabs-polished #camp-screen .camp-footer{
 }
 
 /* ===== MAPA ===== */
-body.bg2-tabs-polished #map-screen{
+body.bg2-tabs-polished.bg2-battle-router[data-bg2-view="map"] #map-screen{
   display:grid!important;
   grid-template-columns:minmax(0,1fr) 250px!important;
   grid-template-areas:
