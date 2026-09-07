@@ -648,7 +648,17 @@ function libraryXp(){
   var objectivesXp=Object.keys(objectiveIds).reduce(function(sum,id){var o=OBJECTIVES.find(function(x){return x.id===id;});return sum+Number(o&&o.xp||0);},0);
   return Math.max(Number(library.xpFloor||0),achievementsXp+objectivesXp);
 }
-function libraryPayload(){syncProjectIntoLibrary();var payload=clone(library);payload.xp=libraryXp();var activeId=library.activeProjectId;if(currentView==="editor"&&project&&project.id&&library.projects.some(function(p){return p.id===project.id;}))activeId=project.id;payload.activeProjectId=activeId||"";return payload;}
+function libraryPayload(){
+  syncProjectIntoLibrary();var payload=clone(library);payload.xp=libraryXp();
+  var activeId=library.activeProjectId;if(currentView==="editor"&&project&&project.id&&library.projects.some(function(p){return p.id===project.id;}))activeId=project.id;
+  payload.activeProjectId=activeId||"";
+  var active=library.projects.find(function(p){return p.id===activeId;})||null;
+  if(active){
+    payload.activeProject=clone(active);
+    ["id","title","genre","createdAt","updatedAt","status","submittedAt","grid","nodes","objectiveRewards","playTests","submissions","teacherFeedback"].forEach(function(key){payload[key]=clone(active[key]);});
+  }
+  return payload;
+}
 function projectSummary(p){
   var nodes=Array.isArray(p.nodes)?p.nodes:[],wordCount=nodes.reduce(function(sum,n){return sum+words(n.text);},0),choices=0,endings=0;
   nodes.forEach(function(n){choices+=(Array.isArray(n.choices)?n.choices:[]).filter(function(ch){return ch.targetId;}).length;if(isEnding(n))endings++;});
