@@ -219,7 +219,7 @@ for(const required of [
   "function applyView",
   "function syncFromEngine",
   "BG2BattleRouter",
-  "data-bg2-view",
+  "dataset.bg2View",
 ]){
   if(!battleRouter.includes(required)) errors.push("Falta router visual interno v2: "+required);
 }
