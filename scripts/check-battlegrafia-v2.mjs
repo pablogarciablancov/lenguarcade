@@ -334,6 +334,24 @@ for(const required of [
 }
 
 for(const required of [
+  "width:min(1320px,calc(100vw - 34px))",
+  "grid-template-columns:minmax(0,1fr) 330px",
+  '"canvas stages"',
+  "#map-screen #map-stages::before",
+  "#bg2-map-roster",
+  "grid-template-columns:370px minmax(0,1fr)",
+]){
+  if(!tabsPolishCss.includes(required)) errors.push("Falta ensanchado/mapa estable v12: "+required);
+}
+
+if(!enhance.includes("El roster v2 duplicaba esa misma información y rompía la cuadrícula del mapa.")){
+  errors.push("El mapa v2 debe eliminar el roster duplicado.");
+}
+if(enhance.includes("roster.appendChild(card);")){
+  errors.push("El mapa v2 sigue renderizando un segundo roster de monstruos.");
+}
+
+for(const required of [
   'width:min(1240px,calc(100vw - 24px))',
   'height:min(650px,calc(100vh - 76px))',
   'grid-template-columns:minmax(0,1fr) 345px',
