@@ -120,7 +120,15 @@ Deno.serve(async (request) => {
     }
 
     if (gameId === "rayuela" && save) {
-      const nodes = Array.isArray(save.nodes) ? save.nodes as Record<string, unknown>[] : [];
+      const saveRecord = save as Record<string, unknown>;
+      const projects = Array.isArray(saveRecord.projects)
+        ? saveRecord.projects.filter(item => item && typeof item === "object") as Record<string, unknown>[]
+        : [];
+      const activeProjectId = String(saveRecord.activeProjectId || "");
+      const rayuelaProject = projects.length
+        ? (projects.find(item => String(item.id || "") === activeProjectId) || projects[0])
+        : saveRecord;
+      const nodes = Array.isArray(rayuelaProject.nodes) ? rayuelaProject.nodes as Record<string, unknown>[] : [];
       const choices = nodes.reduce((sum, node) => {
         const nodeChoices = Array.isArray(node.choices) ? node.choices as Record<string, unknown>[] : [];
         return sum + nodeChoices.filter(choice => String(choice.targetId || "")).length;
@@ -151,11 +159,20 @@ Deno.serve(async (request) => {
         if (start && !reachable.has(String(node.id || ""))) structuralErrors += 1;
       }
       const attempts = Math.max(1, nodes.length + choices);
-      const objectiveRewards = Array.isArray(save.objectiveRewards) ? save.objectiveRewards.length : 0;
-      const percentage = String(save.status || "") === "submitted"
+      const objectiveRewards = Array.isArray(rayuelaProject.objectiveRewards) ? rayuelaProject.objectiveRewards.length : 0;
+      const percentage = String(rayuelaProject.status || "") === "submitted"
         ? 100
         : Math.min(99, Math.round((objectiveRewards / 8) * 100));
-      authoritativeRayuelaXp = Math.max(0, Math.round(boundedNumber(save.xp, 0, 100000000, oldXp)));
+      const libraryXp = Math.max(
+        0,
+        Math.round(boundedNumber(
+          saveRecord.xp ?? rayuelaProject.xp,
+          0,
+          100000000,
+          oldXp,
+        )),
+      );
+      authoritativeRayuelaXp = libraryXp;
       const eventType = String(body.eventType || "").toLowerCase();
       rayuelaSubmissionFeathers = !body.checkpoint && eventType.includes("submitted") ? 3 : 0;
       progress = {
@@ -165,7 +182,7 @@ Deno.serve(async (request) => {
         attempts,
         successes:Math.max(0, attempts - structuralErrors),
         errors:structuralErrors,
-        streak:Math.max(endings, Number(old?.streak || 0)),
+        streak:Math.max(endings, projects.length, Number(old?.streak || 0)),
       };
     }
 
