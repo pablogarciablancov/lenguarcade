@@ -193,7 +193,7 @@
       "color": "#22d3ee",
       "icon": "⌗",
       "entry": "games/rayuela/",
-      "description": "Crea una aventura interactiva con decisiones, caminos alternativos y múltiples finales.",
+      "description": "Crea y gestiona varias aventuras interactivas con decisiones, objetos, caminos alternativos, pruebas y múltiples finales.",
       "banner": "rayuela",
       "active": true,
       "integration": "embedded"
