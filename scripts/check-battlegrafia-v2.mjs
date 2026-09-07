@@ -13,6 +13,8 @@ const unifiedUi=fs.readFileSync(path.join(v2Root,"rpg-unified-v2.js"),"utf8");
 const unifiedCss=fs.readFileSync(path.join(v2Root,"rpg-unified-v2.css"),"utf8");
 const battleUi=fs.readFileSync(path.join(v2Root,"battle-clean-v2.js"),"utf8");
 const battleCss=fs.readFileSync(path.join(v2Root,"battle-clean-v2.css"),"utf8");
+const battleRouter=fs.readFileSync(path.join(v2Root,"battle-router-v2.js"),"utf8");
+const battleRouterCss=fs.readFileSync(path.join(v2Root,"battle-router-v2.css"),"utf8");
 const classic=fs.readFileSync(path.join(root,"games","battlegrafia","index.html"),"utf8");
 const catalog=JSON.parse(fs.readFileSync(path.join(root,"config","game-catalog.json"),"utf8"));
 const migration=fs.readFileSync(path.join(root,"supabase","migrations","20260905144700_battlegrafia_v2.sql"),"utf8");
@@ -24,12 +26,14 @@ try{ new Function(rpgUi); }catch(error){ errors.push("rpg-ui-v2.js no compila: "
 try{ new Function(saveSlots); }catch(error){ errors.push("save-slots-v2.js no compila: "+error.message); }
 try{ new Function(unifiedUi); }catch(error){ errors.push("rpg-unified-v2.js no compila: "+error.message); }
 try{ new Function(battleUi); }catch(error){ errors.push("battle-clean-v2.js no compila: "+error.message); }
+try{ new Function(battleRouter); }catch(error){ errors.push("battle-router-v2.js no compila: "+error.message); }
 
 for(const required of [
   "./save-slots-v2.js",
   "./rpg-ui-v2.js",
   "./rpg-unified-v2.js",
   "./battle-clean-v2.js",
+  "./battle-router-v2.js",
 ]){
   if(!index.includes(required)) errors.push("Falta carga de interfaz RPG v2: "+required);
 }
@@ -207,6 +211,107 @@ if(!enhance.includes("La ruta completa de monstruos pertenece al MAPA, no al com
 }
 if(enhance.includes("strip.appendChild(rail);")){
   errors.push("El combate v2 sigue construyendo el riel de monstruos dentro de battle-screen.");
+}
+
+for(const required of [
+  "VIEW_MAP",
+  "SCREEN_MAP",
+  "function applyView",
+  "function syncFromEngine",
+  "BG2BattleRouter",
+  "data-bg2-view",
+]){
+  if(!battleRouter.includes(required)) errors.push("Falta router visual interno v2: "+required);
+}
+for(const required of [
+  '[data-bg2-view="battle"] #battle-screen',
+  '[data-bg2-view="map"] #map-screen',
+  '[data-bg2-view="camp"] #camp-screen',
+  '[data-bg2-view="inventory"] #inventory-screen',
+  '.top-nav .nav-btn',
+  '#nav-map',
+  '#nav-diary',
+  '#nav-history',
+]){
+  if(!battleRouterCss.includes(required)) errors.push("Falta contrato de visibilidad/navegación: "+required);
+}
+if(index.includes("      display:flex;\n      flex-direction:column;\n      gap:.6rem;\n    }\n\n   /* Fondo de batalla */")){
+  errors.push("El CSS base v2 aún fuerza display:flex a todas las pantallas internas.");
+}
+
+// Smoke test del router con DOM mínimo: battle -> map -> camp -> inventory -> battle.
+try{
+  class FakeClassList{
+    constructor(...tokens){ this.s=new Set(tokens); }
+    contains(t){ return this.s.has(t); }
+    add(...t){ t.forEach(x=>this.s.add(x)); }
+    remove(...t){ t.forEach(x=>this.s.delete(x)); }
+    toggle(t,on){ if(on===undefined){ on=!this.s.has(t); } on?this.s.add(t):this.s.delete(t); return on; }
+  }
+  class FakeEl{
+    constructor(id="",classes=[]){
+      this.id=id; this.classList=new FakeClassList(...classes); this.style={display:"",visibility:""};
+      this.dataset={}; this.attrs={}; this.listeners={};
+    }
+    setAttribute(k,v){ this.attrs[k]=String(v); }
+    addEventListener(k,fn){ (this.listeners[k]||(this.listeners[k]=[])).push(fn); }
+    dispatch(k){ for(const fn of (this.listeners[k]||[])) fn({target:this}); }
+  }
+  const ids={};
+  const mk=(id,classes=[])=>ids[id]=new FakeEl(id,classes);
+  const body=new FakeEl("body",[]);
+  body.removeAttribute=function(k){ if(k==="data-bg2-view") delete this.dataset.bg2View; };
+  const head={appendChild(){}};
+  const shell=new FakeEl("shell",["game-shell"]); shell.style.display="block";
+  const topNav=new FakeEl("top",["top-nav"]);
+  const panel=new FakeEl("panel",["panel-right"]);
+  const start=mk("start-screen",[]); start.style.display="none";
+  for(const [nav,screen] of [
+    ["nav-battle","battle-screen"],["nav-camp","camp-screen"],["nav-map","map-screen"],
+    ["nav-diary","diary-screen"],["nav-history","history-screen"],["nav-inventory","inventory-screen"]
+  ]){
+    mk(nav, nav==="nav-battle"?["nav-active"]:[]);
+    const el=mk(screen,[]); el.style.display=screen==="battle-screen"?"flex":"none";
+  }
+  const documentMock={
+    readyState:"complete", body, head,
+    getElementById(id){ return ids[id]||null; },
+    createElement(){ return new FakeEl(); },
+    querySelector(sel){
+      if(sel===".game-shell") return shell;
+      if(sel===".top-nav") return topNav;
+      if(sel===".panel-right") return panel;
+      return null;
+    }
+  };
+  const oldDocument=globalThis.document, oldWindow=globalThis.window, oldGet=globalThis.getComputedStyle;
+  const oldMutation=globalThis.MutationObserver, oldRaf=globalThis.requestAnimationFrame;
+  globalThis.document=documentMock;
+  globalThis.window=globalThis;
+  globalThis.getComputedStyle=(el)=>({display:el.style.display||"block",visibility:el.style.visibility||"visible"});
+  globalThis.MutationObserver=class{ observe(){} };
+  globalThis.requestAnimationFrame=(fn)=>{ fn(); return 1; };
+  try{
+    new Function(battleRouter)();
+    const router=globalThis.BG2BattleRouter;
+    if(!router) throw new Error("BG2BattleRouter no expuesto");
+    const assertView=(mode)=>{
+      router.applyView(mode);
+      if(body.dataset.bg2View!==mode) throw new Error("dataset incorrecto para "+mode);
+      for(const [view,id] of Object.entries({battle:"battle-screen",camp:"camp-screen",map:"map-screen",diary:"diary-screen",history:"history-screen",inventory:"inventory-screen"})){
+        const expected=view===mode?"1":"0";
+        if(ids[id].dataset.bg2Visible!==expected) throw new Error(id+" visible="+ids[id].dataset.bg2Visible+" esperado "+expected);
+      }
+      if(panel.dataset.bg2Visible!==(mode==="battle"?"1":"0")) throw new Error("panel-right incorrecto en "+mode);
+    };
+    ["battle","map","battle","camp","inventory","battle"].forEach(assertView);
+  }finally{
+    globalThis.document=oldDocument; globalThis.window=oldWindow; globalThis.getComputedStyle=oldGet;
+    globalThis.MutationObserver=oldMutation; globalThis.requestAnimationFrame=oldRaf;
+    try{ delete globalThis.BG2BattleRouter; }catch{}
+  }
+}catch(error){
+  errors.push("Smoke test router batalla/mapa fallido: "+error.message);
 }
 
 if(index.includes("const menu = document.getElementById('start-choice');\n    if(menu) menu.classList.add('is-active');")){
