@@ -169,6 +169,14 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 .modal{background:rgba(31,41,55,.48)}.dialog{background:#fff;color:var(--text)}
 .templateCard,.achievementCard{background:#f8fafc}
 .playModal{background:#edf2f7}.playStage{background:radial-gradient(circle at 50% 0%,rgba(105,87,232,.08),transparent 38%),#f4f7fb}.playTop,.playFoot{background:rgba(255,255,255,.94)}.storyCard{background:#fff;box-shadow:0 25px 65px rgba(51,65,85,.17)}.storyText{color:#28364a}.storyChoice{background:#f6f3ff;color:#392f72;border-color:#d9d0fa}.storyChoice:hover{background:#eee9ff}.storyChoice.locked{opacity:1!important;cursor:not-allowed;background:#f3f4f6;color:#7b8798;border-color:#d7dde6;display:grid;gap:4px;transform:none!important}.storyChoice.locked span{font-weight:850}.storyChoice.locked small{font-size:9px;font-weight:650;color:#8a95a5}.lockedChoicesHint{margin-top:5px;padding:10px 12px;border-radius:12px;background:#fff8e7;border:1px solid #f0dfac;color:#795b0d;font-size:10px;line-height:1.45}.lockedScene{text-align:center}.lockedSceneIcon{font-size:58px;margin-bottom:8px}.endingDot.found{color:#267659}
+
+.inventoryPill{cursor:pointer;display:inline-flex;align-items:center;gap:7px;padding:8px 11px!important;border-radius:999px!important;background:#eefaf4!important;border:1px solid #cce8d9!important;color:#216d52!important;font-weight:850!important;transition:.18s transform,.18s background,.18s box-shadow}.inventoryPill:hover{background:#e4f7ed!important;transform:translateY(-1px);box-shadow:0 5px 14px rgba(33,109,82,.1)}.inventoryCount{min-width:21px;height:21px;padding:0 6px;border-radius:999px;display:grid;place-items:center;background:#fff;color:#216d52;border:1px solid #cce8d9;font-size:9px;font-weight:950}
+.inventoryOverlay{position:fixed;inset:0;z-index:180;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(31,41,55,.42);backdrop-filter:blur(8px)}.inventoryOverlay.open{display:flex}.inventoryPanel{width:min(720px,96vw);max-height:min(78vh,720px);overflow:auto;background:#fff;border:1px solid #d8e0ea;border-radius:25px;box-shadow:0 28px 75px rgba(51,65,85,.22);padding:20px}.inventoryHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:14px;border-bottom:1px solid #e5eaf0}.inventoryHead h2{margin:3px 0 4px;font-size:23px}.inventoryHead p{margin:0;color:#66758d;font-size:10px;line-height:1.45}
+.inventoryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-top:16px}.inventoryCard{min-height:142px;padding:15px;border-radius:17px;border:1px solid #dbe2eb;background:linear-gradient(155deg,#fff,#f8fafc);display:grid;grid-template-rows:auto auto 1fr;box-shadow:0 5px 16px rgba(51,65,85,.06)}.inventoryCardIcon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#f4f0ff,#ebf9fc);font-size:27px;border:1px solid #e2ddf6}.inventoryCard strong{font-size:12px;margin-top:10px}.inventoryCard span{font-size:9px;color:#738197;line-height:1.45;margin-top:4px}.inventoryEmpty{display:none;justify-items:center;text-align:center;padding:36px 20px;color:#66758d}.inventoryEmpty.show{display:grid}.inventoryEmpty>div{font-size:55px;opacity:.75}.inventoryEmpty strong{font-size:13px;color:#3f4d61;margin-top:8px}.inventoryEmpty span{font-size:10px;line-height:1.5;max-width:380px;margin-top:5px}
+.itemPickup{position:absolute;z-index:90;left:50%;top:82px;transform:translate(-50%,-18px) scale(.96);opacity:0;pointer-events:none;display:flex;align-items:center;gap:12px;min-width:290px;max-width:min(430px,90vw);padding:13px 16px;border-radius:18px;background:rgba(255,255,255,.97);border:1px solid #cfe7da;box-shadow:0 18px 45px rgba(51,65,85,.18);transition:.28s opacity,.28s transform}.itemPickup.active{opacity:1;transform:translate(-50%,0) scale(1)}.itemPickupIcon{width:50px;height:50px;flex:none;border-radius:15px;display:grid;place-items:center;font-size:29px;background:linear-gradient(145deg,#f4f0ff,#e8f9f2);border:1px solid #dcd9ed;animation:itemPop .5s ease}.itemPickupEyebrow{font-size:8px;color:#16845d;text-transform:uppercase;letter-spacing:.1em;font-weight:950}.itemPickup strong{display:block;font-size:14px;color:#263548;margin-top:2px}.itemPickup span{display:block;font-size:9px;color:#738197;margin-top:2px}@keyframes itemPop{0%{transform:scale(.5) rotate(-10deg)}65%{transform:scale(1.15) rotate(4deg)}100%{transform:none}}
+@media(max-width:680px){.inventoryGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.itemPickup{top:72px;min-width:260px}.inventoryPanel{padding:16px}}
+@media(max-width:430px){.inventoryGrid{grid-template-columns:1fr}}
+
 @media(max-width:1200px){.workspace{grid-template-columns:230px minmax(0,1fr) 350px}}
 @media(max-width:900px){.workspace{display:block}.sceneEditorIntro{padding-top:17px}.stepHeadingWithAction{grid-template-columns:32px 1fr}.stepHeadingWithAction .compactMainBtn{grid-column:1/-1;width:100%}}
 
@@ -324,15 +332,38 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 
 <div id="playModal" class="modal playModal" role="dialog" aria-modal="true">
   <div class="playStage">
+    <div id="itemPickup" class="itemPickup" aria-live="polite">
+      <div id="itemPickupIcon" class="itemPickupIcon">🎁</div>
+      <div><div class="itemPickupEyebrow">¡Has conseguido!</div><strong id="itemPickupName">Objeto</strong><span>Guardado en tu mochila</span></div>
+    </div>
     <div class="playTop">
       <button id="closePlayBtn" class="iconBtn" aria-label="Cerrar">✕</button>
       <div><div class="eyebrow">Modo jugador</div><h2 id="playProjectTitle">Rayuela</h2></div>
       <div class="spacer"></div>
-      <span id="playInventory" class="inventoryPill">🎒 Vacío</span>
+      <button id="playInventory" class="inventoryPill" type="button" aria-haspopup="dialog" aria-controls="inventoryModal">🎒 Mochila <span id="inventoryCount" class="inventoryCount">0</span></button>
       <button id="fullscreenBtn" class="smallBtn">⛶ Pantalla completa</button>
     </div>
     <div id="playContent" class="playContent"></div>
     <div class="playFoot"><span id="playPathLabel">0 decisiones</span><span>·</span><span id="playEndingLabel">0 finales descubiertos</span></div>
+  </div>
+</div>
+ 
+<div id="inventoryModal" class="inventoryOverlay" role="dialog" aria-modal="true" aria-labelledby="inventoryTitle">
+  <div class="inventoryPanel">
+    <div class="inventoryHead">
+      <div>
+        <div class="eyebrow">Tu aventura</div>
+        <h2 id="inventoryTitle">🎒 Mochila</h2>
+        <p id="inventorySubtitle">Los objetos que encuentres durante esta partida aparecerán aquí.</p>
+      </div>
+      <button id="closeInventoryBtn" class="iconBtn" aria-label="Cerrar mochila">✕</button>
+    </div>
+    <div id="inventoryGrid" class="inventoryGrid"></div>
+    <div id="inventoryEmpty" class="inventoryEmpty">
+      <div>🎒</div>
+      <strong>Tu mochila está vacía… de momento.</strong>
+      <span>Explora otros caminos: algunos objetos abren rutas que antes estaban bloqueadas.</span>
+    </div>
   </div>
 </div>
 
@@ -402,7 +433,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 (function(){
 "use strict";
 var GAME_ID="rayuela";
-var GAME_VERSION="1.1.1-beta";
+var GAME_VERSION="1.2.0-beta";
 var STORAGE_KEY="LA_RAYUELA_PROJECT_V1";
 var DISCOVERY_KEY="LA_RAYUELA_DISCOVERIES_V1";
 var TUTORIAL_KEY="LA_RAYUELA_TUTORIAL_V1";
@@ -1006,6 +1037,75 @@ function dragEnd(e){
   dragState=null;renderBoard();
 }
 
+function itemVisual(name){
+  var value=normalizeItemName(name),icon="🎒",type="Objeto de aventura";
+  var rules=[
+    ["llave","🔑","Llave"],
+    ["mapa","🗺️","Mapa"],
+    ["carta","✉️","Carta"],
+    ["mensaje","✉️","Mensaje"],
+    ["nota","📝","Pista escrita"],
+    ["libro","📕","Libro"],
+    ["diario","📓","Diario"],
+    ["gema","💎","Gema"],
+    ["joya","💎","Joya"],
+    ["diamante","💎","Gema"],
+    ["moneda","🪙","Moneda"],
+    ["dinero","🪙","Moneda"],
+    ["poción","🧪","Poción"],
+    ["pocion","🧪","Poción"],
+    ["frasco","🧪","Frasco"],
+    ["linterna","🔦","Herramienta"],
+    ["antorcha","🔥","Antorcha"],
+    ["espada","⚔️","Arma"],
+    ["cuchillo","🗡️","Herramienta"],
+    ["escudo","🛡️","Protección"],
+    ["anillo","💍","Joya"],
+    ["corona","👑","Objeto especial"],
+    ["flor","🌸","Objeto"],
+    ["pluma","🪶","Objeto"],
+    ["brújula","🧭","Herramienta"],
+    ["brujula","🧭","Herramienta"],
+    ["reloj","⌚","Objeto"],
+    ["botella","🍶","Recipiente"],
+    ["comida","🍎","Comida"],
+    ["manzana","🍎","Comida"],
+    ["pan","🥖","Comida"],
+    ["cofre","🧰","Tesoro"],
+    ["tesoro","🏆","Tesoro"],
+    ["código","🔢","Código"],
+    ["codigo","🔢","Código"],
+    ["piedra","🪨","Objeto"],
+    ["cristal","🔮","Objeto especial"]
+  ];
+  for(var i=0;i<rules.length;i++){if(value.indexOf(rules[i][0])!==-1){icon=rules[i][1];type=rules[i][2];break;}}
+  return {icon:icon,type:type};
+}
+var itemPickupTimer=null;
+function updateInventoryButton(){
+  if(!playState)return;
+  var count=playState.inventory.length,button=$("playInventory"),badge=$("inventoryCount");
+  if(button)button.childNodes[0].nodeValue=count?"🎒 Mochila ":"🎒 Mochila ";
+  if(badge)badge.textContent=count;
+}
+function showItemPickup(name){
+  var box=$("itemPickup"),meta=itemVisual(name);if(!box)return;
+  $("itemPickupIcon").textContent=meta.icon;$("itemPickupName").textContent=String(name||"Objeto");
+  clearTimeout(itemPickupTimer);box.classList.remove("active");void box.offsetWidth;box.classList.add("active");
+  itemPickupTimer=setTimeout(function(){box.classList.remove("active");},2300);
+}
+function renderInventory(){
+  var inventory=playState&&Array.isArray(playState.inventory)?playState.inventory:[];
+  var grid=$("inventoryGrid"),empty=$("inventoryEmpty"),subtitle=$("inventorySubtitle");
+  if(subtitle)subtitle.textContent=inventory.length?inventory.length+" objeto"+(inventory.length===1?"":"s")+" recogido"+(inventory.length===1?"":"s")+" durante esta partida.":"Los objetos que encuentres durante esta partida aparecerán aquí.";
+  if(grid)grid.innerHTML=inventory.map(function(name){
+    var meta=itemVisual(name);
+    return '<article class="inventoryCard"><div class="inventoryCardIcon">'+meta.icon+'</div><strong>'+esc(name)+'</strong><span>'+esc(meta.type)+' · puede servir para abrir nuevos caminos.</span></article>';
+  }).join("");
+  if(empty)empty.classList.toggle("show",!inventory.length);
+}
+function openInventory(){if(!playState)return;renderInventory();$("inventoryModal").classList.add("open");}
+function closeInventory(){$("inventoryModal").classList.remove("open");}
 function normalizeItemName(value){return String(value||"").trim().toLocaleLowerCase("es-ES");}
 function hasItem(inventory,item){
   var wanted=normalizeItemName(item);if(!wanted)return true;
@@ -1029,21 +1129,25 @@ function choiceAllowed(c,inventory,vars){return !choiceLockReason(c,inventory,va
 function startPlay(nodeId){
   var start=getNode(nodeId)||getStart();if(!start)return;
   project.playTests++;ensureBridgeSession();awardAchievement("playtest");scheduleSave("playtest");
-  playState={nodeId:start.id,path:[start.id],inventory:[],vars:clone(project.variables||{}),startedAt:now(),testStart:nodeId||""};$("playModal").classList.add("open");$("playProjectTitle").textContent=project.title||"Rayuela";renderPlayNode();
+  playState={nodeId:start.id,path:[start.id],inventory:[],vars:clone(project.variables||{}),startedAt:now(),testStart:nodeId||""};$("playModal").classList.add("open");$("playProjectTitle").textContent=project.title||"Rayuela";updateInventoryButton();renderPlayNode();
 }
 function applyNodeEffects(n){
-  if(n.giveItem&&!hasItem(playState.inventory,n.giveItem))playState.inventory.push(String(n.giveItem).trim());
+  var collected="";
+  if(n.giveItem&&!hasItem(playState.inventory,n.giveItem)){collected=String(n.giveItem).trim();playState.inventory.push(collected);}
   if(n.variable){playState.vars[n.variable]=Number(playState.vars[n.variable]||0)+Number(n.variableDelta||0);}
+  updateInventoryButton();
+  if(collected)showItemPickup(collected);
+  return collected;
 }
 function renderBlockedNode(n,reason){
-  $("playInventory").textContent=playState.inventory.length?"🎒 "+playState.inventory.join(" · "):"🎒 Vacío";
+  updateInventoryButton();
   $("playContent").innerHTML='<article class="storyCard lockedScene"><div class="lockedSceneIcon">🔒</div><div class="storyEyebrow">Camino bloqueado</div><h1>'+esc(n.title||"No puedes entrar todavía")+'</h1><div class="storyText">'+esc(reason||"Te falta algo para entrar en esta escena.")+'</div><div class="editorActionRow" style="justify-content:center;margin-top:22px"><button id="blockedBackBtn" class="mainBtn">← Volver a la escena anterior</button></div></article>';
   var back=$("blockedBackBtn");if(back)back.onclick=function(){if(playState.path.length>1)playState.path.pop();playState.nodeId=playState.path[playState.path.length-1];renderPlayNode();};
 }
 function renderPlayNode(){
   if(!playState)return;var n=getNode(playState.nodeId);if(!n)return;
   var entryLock=nodeLockReason(n,playState.inventory);if(entryLock){renderBlockedNode(n,entryLock);return;}
-  applyNodeEffects(n);$("playInventory").textContent=playState.inventory.length?"🎒 "+playState.inventory.join(" · "):"🎒 Vacío";$("playPathLabel").textContent=Math.max(0,playState.path.length-1)+" decisiones";$("playEndingLabel").textContent=project.discoveredEndings.length+" finales descubiertos";
+  applyNodeEffects(n);updateInventoryButton();$("playPathLabel").textContent=Math.max(0,playState.path.length-1)+" decisiones";$("playEndingLabel").textContent=project.discoveredEndings.length+" finales descubiertos";
   if(isEnding(n)){renderEnding(n);return;}
   var valid=n.choices.filter(function(c){return c.targetId&&getNode(c.targetId);});
   var img=n.image?'<img class="storyImage" src="'+esc(n.image)+'" alt="">':"";
@@ -1064,7 +1168,7 @@ function renderEnding(n){
   $("playContent").innerHTML='<article class="storyCard endingBox"><div class="endingIcon">'+et.icon+'</div><div class="storyEyebrow">Has descubierto</div><h1>'+esc(n.title||et.label)+'</h1><div class="storyText">'+esc(n.text||"Aquí termina este camino.")+'</div><div class="endingCollection">'+dots+'</div><div class="editorActionRow" style="justify-content:center"><button id="replayBtn" class="mainBtn">↻ Volver a jugar</button><button id="closeEndingBtn" class="ghostBtn">Salir</button></div></article>';
   $("playEndingLabel").textContent=project.discoveredEndings.length+" de "+s.endings+" finales descubiertos";$("replayBtn").onclick=function(){startPlay();};$("closeEndingBtn").onclick=closePlay;
 }
-function closePlay(){$("playModal").classList.remove("open");playState=null;renderAll();}
+function closePlay(){closeInventory();$("playModal").classList.remove("open");playState=null;renderAll();}
 
 function openInspector(){
   var issues=validateStory(),s=computeStats(),score=qualityScore(issues,s);$("qualityRing").style.setProperty("--score",score);$("qualityScore").textContent=score;
@@ -1123,6 +1227,7 @@ var TUTORIAL=[
   {icon:"✍️",title:"Haz clic y escribe",text:"Haz clic una vez en una casilla para abrirla en el editor. Para moverla, arrastra solo desde el asa ⋮⋮. Primero escribe la escena y después añade las decisiones."},
   {icon:"🔀",title:"Crea una decisión",text:"Añade entre una y cuatro opciones. Cada una puede crear una escena nueva o conectar con una que ya exista."},
   {icon:"🗺",title:"Haz crecer el mapa",text:"Acércate a los bordes y Rayuela ampliará el mundo. Puedes crear bifurcaciones, reencuentros, bucles y caminos secretos."},
+  {icon:"🎒",title:"Encuentra objetos",text:"Algunas escenas pueden darte objetos. Cuando encuentres uno, Rayuela te avisará. Pulsa la mochila durante la partida para ver tu inventario y descubrir qué caminos puedes desbloquear."},
   {icon:"▶",title:"Conviértela en juego",text:"Pulsa «Jugar mi historia» para vivirla como lector. Encuentra finales, prueba rutas y corrige lo que no funcione."}
 ];
 function renderTutorial(){
@@ -1138,7 +1243,7 @@ function bindUi(){
   $("addNodeBtn").onclick=startGenericPlacement;$("centerBtn").onclick=function(){var s=getStart();if(s){selectNode(s.id,false);centerOnNode(s.id);}};$("expandBtn").onclick=expandMap;
   $("cancelModeBtn").onclick=cancelModes;$("zoomOutBtn").onclick=function(){zoom=clamp(Math.round((zoom-.1)*10)/10,.5,1.5);renderBoard();};$("zoomInBtn").onclick=function(){zoom=clamp(Math.round((zoom+.1)*10)/10,.5,1.5);renderBoard();};
   $("addChoiceBtn").onclick=addChoice;$("deleteNodeBtn").onclick=deleteSelected;$("duplicateNodeBtn").onclick=duplicateSelected;$("testFromNodeBtn").onclick=function(){startPlay(selectedNodeId);};
-  $("playBtn").onclick=function(){startPlay();};$("testBtn").onclick=function(){startPlay();};$("closePlayBtn").onclick=closePlay;$("submitBtn").onclick=openSubmit;$("openInspectorBtn").onclick=openInspector;$("openAchievementsBtn").onclick=renderAchievementsModal;
+  $("playBtn").onclick=function(){startPlay();};$("testBtn").onclick=function(){startPlay();};$("closePlayBtn").onclick=closePlay;$("playInventory").onclick=openInventory;$("closeInventoryBtn").onclick=closeInventory;$("inventoryModal").onclick=function(e){if(e.target===$("inventoryModal"))closeInventory();};$("submitBtn").onclick=openSubmit;$("openInspectorBtn").onclick=openInspector;$("openAchievementsBtn").onclick=renderAchievementsModal;
   $("fullscreenBtn").onclick=function(){var el=$("playModal");if(!document.fullscreenElement&&el.requestFullscreen)el.requestFullscreen();else if(document.exitFullscreen)document.exitFullscreen();};
   $("exportBtn").onclick=function(){$("projectModal").classList.add("open");};$("downloadJsonBtn").onclick=function(){download((project.title||"rayuela").replace(/[^\w\-áéíóúñ]+/gi,"_")+".json",JSON.stringify(project,null,2),"application/json");};$("downloadTextBtn").onclick=exportText;
   $("importInput").onchange=function(e){if(e.target.files&&e.target.files[0])importJson(e.target.files[0]);e.target.value="";};
@@ -1151,7 +1256,7 @@ function bindUi(){
   window.addEventListener("keydown",function(e){
     if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();e.shiftKey?redo():undo();}
     if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();redo();}
-    if(e.key==="Escape"){cancelModes();["projectModal","inspectorModal","achievementsModal","submitModal","tutorialModal"].forEach(closeModal);}
+    if(e.key==="Escape"){closeInventory();cancelModes();["projectModal","inspectorModal","achievementsModal","submitModal","tutorialModal"].forEach(closeModal);}
   });
   bindEditor();
 }
