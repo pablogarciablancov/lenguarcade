@@ -1,0 +1,795 @@
+/* Battlegrafía 2.0 · Unified RPG UI
+   Extiende el lenguaje visual del menú principal a todas las pantallas.
+   Capa puramente visual: no altera mecánicas. */
+
+body.bg2-unified-rpg{
+  --u-bg:#060a12;
+  --u-panel:#101827;
+  --u-panel-2:#172238;
+  --u-line:#020409;
+  --u-line-2:#31415b;
+  --u-gold:#d6ad49;
+  --u-gold-soft:#f1d98c;
+  --u-cyan:#6bd8e6;
+  --u-green:#59b87e;
+  --u-red:#a44250;
+  --u-paper:#f5ecd8;
+  --u-muted:#91a2b9;
+  --u-pixel:polygon(0 8px,8px 8px,8px 0,calc(100% - 8px) 0,calc(100% - 8px) 8px,100% 8px,100% calc(100% - 8px),calc(100% - 8px) calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,8px calc(100% - 8px),0 calc(100% - 8px));
+}
+
+/* 1. CRISP PIXEL: elimina el desenfoque heredado de theme-v2 */
+body.bg2-unified-rpg #main-menu>.menu-panel,
+body.bg2-unified-rpg .screen-card,
+body.bg2-unified-rpg .menu-panel,
+body.bg2-unified-rpg .entity-box,
+body.bg2-unified-rpg #battle-screen .speech,
+body.bg2-unified-rpg #bg2-world-strip,
+body.bg2-unified-rpg #bg2-boss-intro,
+body.bg2-unified-rpg .modal,
+body.bg2-unified-rpg .modal-card,
+body.bg2-unified-rpg .overlay,
+body.bg2-unified-rpg .overlay-card,
+body.bg2-unified-rpg .bg2-overlay,
+body.bg2-unified-rpg #achievements-screen{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+body.bg2-unified-rpg #main-menu,
+body.bg2-unified-rpg #start-choice,
+body.bg2-unified-rpg #mode-screen,
+body.bg2-unified-rpg #hub-account,
+body.bg2-unified-rpg #hub-achievements,
+body.bg2-unified-rpg #hub-shop,
+body.bg2-unified-rpg #hub-collection,
+body.bg2-unified-rpg #hub-credits{
+  background-image:
+    linear-gradient(90deg,rgba(3,7,13,.82),rgba(3,7,13,.30) 58%,rgba(3,7,13,.70)),
+    url("https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/menus/menu_fondo.png")!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+}
+body.bg2-unified-rpg #main-menu::before,
+body.bg2-unified-rpg .app-screen::before{
+  filter:none!important;
+}
+
+/* 2. CABECERAS UNIFICADAS */
+body.bg2-unified-rpg :is(.screen-title,.mode-title,.start-title,.camp-title-main,.map-header,.diary-header,.history-header,.inventory-container>.box-title){
+  position:relative;
+  color:var(--u-paper)!important;
+  font-family:"Courier New",Consolas,monospace!important;
+  font-weight:900!important;
+  letter-spacing:-.045em!important;
+  text-shadow:3px 3px 0 #03050a!important;
+}
+body.bg2-unified-rpg :is(.screen-title,.mode-title,.start-title,.camp-title-main,.map-header,.diary-header,.history-header,.inventory-container>.box-title)::before{
+  content:attr(data-rpg-kicker);
+  display:block;
+  min-height:10px;
+  margin-bottom:5px;
+  color:var(--u-gold)!important;
+  font:900 9px/1 "Courier New",Consolas,monospace!important;
+  letter-spacing:.20em!important;
+  text-shadow:none!important;
+}
+body.bg2-unified-rpg :is(.screen-sub,.mode-footer,.start-sub,.camp-sub,.map-sub,.diary-sub,.history-sub,.inventory-sub){
+  color:#aebdd1!important;
+  line-height:1.45!important;
+}
+
+/* 3. PANELES GENERALES */
+body.bg2-unified-rpg :is(
+  #start-choice .menu-panel,
+  #hub-account .menu-panel,
+  #hub-achievements .menu-panel,
+  #hub-shop .menu-panel,
+  #hub-collection .menu-panel,
+  #hub-credits .menu-panel
+){
+  width:min(1120px,94vw)!important;
+  max-width:none!important;
+  max-height:calc(100vh - 42px)!important;
+  margin:auto!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--u-pixel);
+  background:linear-gradient(180deg,rgba(18,28,46,.98),rgba(7,12,22,.99))!important;
+  box-shadow:
+    inset 0 0 0 3px #020409,
+    inset 0 0 0 6px #34445e,
+    0 12px 0 rgba(1,3,7,.82),
+    0 30px 90px rgba(0,0,0,.56)!important;
+}
+body.bg2-unified-rpg :is(
+  #start-choice .screen-card,
+  #hub-account .screen-card,
+  #hub-achievements .screen-card,
+  #hub-shop .screen-card,
+  #hub-collection .screen-card,
+  #hub-credits .screen-card
+){
+  max-height:calc(100vh - 42px)!important;
+  overflow:auto!important;
+  padding:clamp(18px,3vw,32px)!important;
+  background:transparent!important;
+}
+body.bg2-unified-rpg .screen-head{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:18px!important;
+  margin-bottom:10px!important;
+  padding-bottom:14px!important;
+  border-bottom:2px solid #263650!important;
+}
+body.bg2-unified-rpg .screen-title{font-size:clamp(25px,3.2vw,39px)!important}
+
+/* 4. BOTONERÍA RPG GLOBAL */
+body.bg2-unified-rpg :is(
+  .btn,.ghost,.secondary,.primary,
+  #start-new-btn,#continue-btn,#new-from-saved-btn,#camp-rest-btn,
+  .ach-filter,.ach-tab,.merchant-actions button,.merchant-buy,
+  .end-overlay-actions button,.overlay-card button,.modal-card button
+){
+  border-radius:0!important;
+  border:0!important;
+  clip-path:var(--u-pixel);
+  min-height:40px;
+  padding:9px 13px!important;
+  background:#152238!important;
+  color:#e7eff9!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 4px #3c4d68,
+    0 5px 0 #020409!important;
+  font:900 10px/1.05 "Courier New",Consolas,monospace!important;
+  letter-spacing:.03em!important;
+  text-transform:uppercase;
+}
+body.bg2-unified-rpg :is(
+  .btn,.ghost,.secondary,.primary,
+  #start-new-btn,#continue-btn,#new-from-saved-btn,#camp-rest-btn,
+  .ach-filter,.ach-tab,.merchant-actions button,.merchant-buy,
+  .end-overlay-actions button,.overlay-card button,.modal-card button
+):hover:not(:disabled){
+  transform:translateY(-2px)!important;
+  filter:brightness(1.16)!important;
+}
+body.bg2-unified-rpg :is(
+  .btn,.ghost,.secondary,.primary,
+  #start-new-btn,#continue-btn,#new-from-saved-btn,#camp-rest-btn,
+  .ach-filter,.ach-tab,.merchant-actions button,.merchant-buy,
+  .end-overlay-actions button,.overlay-card button,.modal-card button
+):active:not(:disabled){
+  transform:translateY(2px)!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #3c4d68,0 2px 0 #020409!important;
+}
+body.bg2-unified-rpg :is(.btn.primary,.primary,#start-new-btn,#continue-btn,#camp-rest-btn,.merchant-buy,#attack-btn){
+  background:#4c3b16!important;
+  color:#fff0ba!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 4px #a98332,
+    0 5px 0 #020409!important;
+}
+body.bg2-unified-rpg button:disabled{opacity:.38!important;filter:grayscale(1)!important}
+
+/* 5. FORMULARIOS */
+body.bg2-unified-rpg :is(input[type="text"],input[type="search"],textarea,select,.strategy-select,.input,.ach-search){
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--u-pixel);
+  background:#080f1c!important;
+  color:#f4eddc!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 4px #31425d!important;
+  font-family:Inter,Segoe UI,Arial,sans-serif!important;
+}
+body.bg2-unified-rpg :is(input[type="text"],input[type="search"],textarea,select,.strategy-select,.input,.ach-search):focus{
+  outline:none!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 4px #5f98a4,
+    0 0 0 2px rgba(107,216,230,.18)!important;
+}
+body.bg2-unified-rpg #answer{
+  min-height:120px!important;
+  resize:none!important;
+  padding:12px!important;
+  font-size:15px!important;
+  line-height:1.4!important;
+}
+
+/* 6. ELECCIÓN NUEVA / CONTINUAR */
+body.bg2-unified-rpg #start-choice .screen-card{
+  min-height:430px;
+  display:flex;
+  flex-direction:column;
+}
+body.bg2-unified-rpg #start-choice .screen-sub{max-width:650px}
+body.bg2-unified-rpg #start-choice .screen-card>div[style*="display:grid"]{
+  margin-top:auto!important;
+  padding-top:24px!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:12px!important;
+}
+body.bg2-unified-rpg #start-choice-new,
+body.bg2-unified-rpg #start-choice-continue{
+  min-height:82px!important;
+  font-size:13px!important;
+}
+body.bg2-unified-rpg #start-choice-new{background:#153246!important;box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #3c7987,0 6px 0 #020409!important}
+body.bg2-unified-rpg #start-choice-continue{background:#4a3917!important;box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #9e7b2f,0 6px 0 #020409!important}
+
+/* 7. FORJA DEL HÉROE */
+body.bg2-unified-rpg #start-screen{
+  background:
+    linear-gradient(90deg,rgba(4,8,15,.90),rgba(4,8,15,.48)),
+    url("https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/menus/menu_aventura.webp") center/cover no-repeat!important;
+}
+body.bg2-unified-rpg #start-screen .start-panel{
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:linear-gradient(180deg,rgba(16,25,42,.985),rgba(7,12,22,.99))!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 6px #34455f,0 12px 0 #020409,0 30px 90px rgba(0,0,0,.56)!important;
+}
+body.bg2-unified-rpg #start-screen .start-section-title{
+  margin-top:16px!important;
+  padding-bottom:7px!important;
+  border-bottom:2px solid #263650!important;
+  color:var(--u-gold-soft)!important;
+  font:900 10px "Courier New",Consolas,monospace!important;
+  letter-spacing:.14em!important;
+  text-transform:uppercase;
+}
+body.bg2-unified-rpg #start-screen .input-row{gap:7px!important}
+body.bg2-unified-rpg #start-screen label{
+  color:#8fa2ba!important;
+  font:800 10px "Courier New",Consolas,monospace!important;
+}
+body.bg2-unified-rpg #start-screen .avatar-option{
+  overflow:hidden!important;
+  transition:transform .08s steps(2,end),filter .1s!important;
+}
+body.bg2-unified-rpg #start-screen .avatar-option:hover{transform:translateY(-4px)!important;filter:brightness(1.13)}
+body.bg2-unified-rpg #start-screen .avatar-option span{
+  color:#dce7f5!important;
+  font:900 10px "Courier New",Consolas,monospace!important;
+}
+body.bg2-unified-rpg #hero-details{
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#0d1727!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #34455f!important;
+}
+
+/* 8. BARRA DE NAVEGACIÓN DEL JUEGO */
+body.bg2-unified-rpg .top-nav{
+  height:58px!important;
+  padding:8px 10px!important;
+  background:#060b13!important;
+  border-bottom:3px solid #020409!important;
+}
+body.bg2-unified-rpg .top-nav .nav-btn{
+  position:relative!important;
+  min-width:84px!important;
+  height:40px!important;
+  padding:12px 10px 7px!important;
+  overflow:visible!important;
+}
+body.bg2-unified-rpg .top-nav .nav-btn::before{
+  content:attr(data-rpg-index);
+  position:absolute;
+  top:3px;left:8px;
+  color:#596d88;
+  font:900 7px "Courier New",monospace;
+}
+body.bg2-unified-rpg .top-nav .nav-btn.nav-active::before{color:#d3b35f}
+body.bg2-unified-rpg .top-nav .nav-btn.nav-active{
+  background:#4b3a17!important;
+  color:#fff0bd!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #9d7c31!important;
+}
+
+/* 9. SIDEBAR / COMANDOS DE BATALLA */
+body.bg2-unified-rpg .panel-right{
+  gap:8px!important;
+  padding:8px!important;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px),
+    #080e18!important;
+}
+body.bg2-unified-rpg :is(#hero-panel,#input-panel,#log-panel){
+  position:relative!important;
+  padding:12px!important;
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:linear-gradient(180deg,#111c2e,#0b1321)!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #34445f!important;
+}
+body.bg2-unified-rpg :is(#hero-panel .box-title,#input-panel .box-title,#log-panel .log-title){
+  margin-bottom:9px!important;
+  color:#f2df9b!important;
+  font:900 10px "Courier New",Consolas,monospace!important;
+  letter-spacing:.09em!important;
+}
+body.bg2-unified-rpg :is(#hero-panel .box-title,#input-panel .box-title,#log-panel .log-title)::before{
+  content:attr(data-rpg-kicker);
+  display:block;
+  margin-bottom:3px;
+  color:#60748f;
+  font:900 7px "Courier New",monospace;
+  letter-spacing:.17em;
+}
+body.bg2-unified-rpg #hero-panel .hero-avatar-mini{
+  image-rendering:pixelated!important;
+  filter:drop-shadow(4px 6px 0 rgba(0,0,0,.35));
+}
+body.bg2-unified-rpg #hero-panel .hero-name{
+  color:#fff0c7!important;
+  font:900 13px "Courier New",monospace!important;
+}
+body.bg2-unified-rpg #hero-panel .hero-meta,
+body.bg2-unified-rpg #hero-panel .hero-xp-text{color:#8395ad!important}
+body.bg2-unified-rpg #hero-panel .xp-bar-wrap{
+  height:8px!important;border-radius:0!important;background:#04070d!important;
+  box-shadow:inset 0 0 0 2px #000!important;
+}
+body.bg2-unified-rpg #hero-panel .xp-bar-fill{border-radius:0!important}
+body.bg2-unified-rpg #input-panel .buttons-row{
+  display:grid!important;
+  grid-template-columns:1fr auto!important;
+  gap:7px!important;
+}
+body.bg2-unified-rpg #attack-btn{
+  grid-column:1/-1!important;
+  min-height:48px!important;
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#523f17!important;
+  color:#fff2bd!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #a98532,0 5px 0 #020409!important;
+  font:900 13px "Courier New",Consolas,monospace!important;
+}
+body.bg2-unified-rpg #battle-item-select{
+  min-width:0!important;
+  width:100%!important;
+  padding:9px!important;
+}
+body.bg2-unified-rpg #ability-btn{grid-column:1/-1!important}
+body.bg2-unified-rpg #log-panel .log-text{
+  max-height:92px!important;
+  overflow:auto!important;
+  color:#b9c7d9!important;
+  font-size:11px!important;
+  line-height:1.45!important;
+}
+
+/* 10. CAMPAMENTO */
+body.bg2-unified-rpg #camp-screen{
+  overflow:auto!important;
+  background:
+    radial-gradient(circle at 18% 78%,rgba(218,118,44,.17),transparent 17%),
+    linear-gradient(180deg,#101724,#060a12)!important;
+}
+body.bg2-unified-rpg #camp-screen .camp-container{
+  width:min(1100px,100%)!important;
+  margin:0 auto!important;
+  display:grid!important;
+  grid-template-columns:1fr 1.45fr!important;
+  gap:12px!important;
+}
+body.bg2-unified-rpg #camp-screen :is(.camp-title-main,.camp-sub,.camp-message,.camp-footer){
+  grid-column:1/-1;
+}
+body.bg2-unified-rpg #camp-screen .camp-title-main{font-size:30px!important}
+body.bg2-unified-rpg #camp-screen .camp-rest,
+body.bg2-unified-rpg #camp-screen .camp-box{
+  margin:0!important;
+  padding:14px!important;
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:linear-gradient(180deg,#111c2e,#0b1321)!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #34445f!important;
+}
+body.bg2-unified-rpg #camp-screen .camp-rest{min-height:260px!important}
+body.bg2-unified-rpg #camp-screen .camp-box-title,
+body.bg2-unified-rpg #camp-screen .camp-rest-info-title{
+  color:#f0dc98!important;
+  font:900 12px "Courier New",Consolas,monospace!important;
+}
+body.bg2-unified-rpg #camp-screen .camp-text,
+body.bg2-unified-rpg #camp-screen .camp-rest-text{color:#9dafc5!important;line-height:1.45!important}
+body.bg2-unified-rpg #camp-screen .camp-message{
+  padding:10px 12px!important;
+  background:#0b1422!important;
+  border:0!important;border-radius:0!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #2d3e59!important;
+}
+body.bg2-unified-rpg #camp-screen .camp-footer{color:#596c84!important;font-size:10px!important}
+
+/* 11. MAPA */
+body.bg2-unified-rpg #map-screen{
+  overflow:auto!important;
+  background:
+    linear-gradient(180deg,rgba(8,14,24,.92),rgba(5,9,16,.98))!important;
+}
+body.bg2-unified-rpg #map-screen .map-header{font-size:30px!important}
+body.bg2-unified-rpg #map-screen .map-world-row{
+  padding:9px 11px!important;
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#101a2a!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #34445f!important;
+}
+body.bg2-unified-rpg #map-world-select{min-height:38px!important}
+body.bg2-unified-rpg #map-canvas{
+  min-height:300px!important;
+  background-color:#09101b!important;
+}
+body.bg2-unified-rpg #map-stages{
+  border:0!important;border-radius:0!important;
+  background:#0b1321!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #2e3d56!important;
+}
+body.bg2-unified-rpg .map-legend{
+  padding:8px 10px!important;
+  color:#8fa2ba!important;
+  font:800 9px "Courier New",monospace!important;
+}
+
+/* 12. INVENTARIO */
+body.bg2-unified-rpg #inventory-screen{overflow:auto!important}
+body.bg2-unified-rpg #inventory-screen .inventory-container{
+  width:min(1100px,100%)!important;
+  margin:0 auto!important;
+}
+body.bg2-unified-rpg #inventory-screen .inventory-layout{
+  gap:10px!important;
+}
+body.bg2-unified-rpg #inventory-screen :is(.inventory-column,.inventory-section){
+  padding:13px!important;
+}
+body.bg2-unified-rpg #inventory-screen .box-title{
+  color:#f0dc98!important;
+  font:900 11px "Courier New",monospace!important;
+}
+body.bg2-unified-rpg :is(.inv-card,.inventory-item,.card-item){
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#101a2a!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #34445e!important;
+}
+
+/* 13. DIARIO + HISTORIA */
+body.bg2-unified-rpg :is(#diary-screen,#history-screen){
+  overflow:auto!important;
+}
+body.bg2-unified-rpg :is(#diary-screen,#history-screen) .screen-inner{
+  width:min(1120px,100%)!important;
+  margin:0 auto!important;
+}
+body.bg2-unified-rpg #diary-screen .diary-layout{
+  gap:10px!important;
+}
+body.bg2-unified-rpg #diary-screen .diary-panel,
+body.bg2-unified-rpg #history-screen .history-entry{
+  padding:13px!important;
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#101a2a!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #34445e!important;
+}
+body.bg2-unified-rpg #diary-screen .diary-icon{
+  width:28px;height:28px;
+  overflow:hidden;
+  font-size:0!important;
+  background:#0a1321;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #6d5b2d;
+}
+body.bg2-unified-rpg #diary-screen .diary-icon::after{
+  content:"◆";
+  display:grid;place-items:center;width:100%;height:100%;
+  color:#d6b95f;font:900 12px "Courier New",monospace;
+}
+body.bg2-unified-rpg .diary-panel-title{
+  color:#f0dc98!important;
+  font:900 11px "Courier New",monospace!important;
+}
+
+/* 14. PERFIL */
+body.bg2-unified-rpg #hub-account .screen-card{min-height:430px}
+body.bg2-unified-rpg .bg2-account-seal{
+  margin:26px auto 0!important;
+  width:min(620px,100%)!important;
+  min-height:170px!important;
+  display:grid!important;
+  place-content:center!important;
+  gap:8px!important;
+  padding:20px!important;
+  text-align:center!important;
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:
+    radial-gradient(circle at center,rgba(89,184,126,.10),transparent 54%),
+    #0c1824!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #326548!important;
+}
+body.bg2-unified-rpg .bg2-account-seal>div:first-child{
+  color:#78d49c!important;
+  font:900 10px "Courier New",Consolas,monospace!important;
+  letter-spacing:.14em!important;
+  text-transform:uppercase;
+}
+body.bg2-unified-rpg #hub-account-email{
+  color:#eaf7ee!important;
+  font:900 16px "Courier New",monospace!important;
+}
+
+/* 15. MERCADER */
+body.bg2-unified-rpg :is(.merchant-screen,.merchant-home){
+  width:100%!important;
+  max-width:none!important;
+}
+body.bg2-unified-rpg .merchant-screen{
+  padding:0!important;
+  border:0!important;border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+body.bg2-unified-rpg .merchant-topbar{
+  padding:10px!important;
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#0e1828!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #33445f!important;
+}
+body.bg2-unified-rpg .merchant-title{
+  color:#f0dc98!important;
+  font:900 12px "Courier New",monospace!important;
+}
+body.bg2-unified-rpg .merchant-badge{
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#3d3117!important;
+  color:#ffe8a2!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #846a2a!important;
+}
+body.bg2-unified-rpg .merchant-grid{
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr))!important;
+  gap:8px!important;
+}
+body.bg2-unified-rpg .merchant-card{
+  padding:11px!important;
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#101a2a!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #34445e!important;
+}
+body.bg2-unified-rpg .merchant-card:hover{
+  transform:translateY(-2px);
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #8f7130,0 5px 0 #020409!important;
+}
+body.bg2-unified-rpg .merchant-icon{
+  border:0!important;border-radius:0!important;image-rendering:pixelated!important;
+  background:#08101c!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #35455f!important;
+}
+
+/* 16. BESTIARIO */
+body.bg2-unified-rpg #hub-collection-grid{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr))!important;
+  gap:8px!important;
+}
+body.bg2-unified-rpg .collection-monster{
+  min-height:190px!important;
+  padding:10px!important;
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#0f1929!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #34445e!important;
+}
+body.bg2-unified-rpg .collection-monster img{
+  image-rendering:pixelated!important;
+  filter:drop-shadow(5px 7px 0 rgba(0,0,0,.32));
+}
+body.bg2-unified-rpg .collection-monster:hover{
+  transform:translateY(-3px)!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #92732f,0 6px 0 #020409!important;
+}
+
+/* 17. LOGROS */
+body.bg2-unified-rpg .ach-controls{
+  padding:9px!important;
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#0d1726!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #31415a!important;
+}
+body.bg2-unified-rpg .ach-filter.is-active,
+body.bg2-unified-rpg .ach-tab.is-active{
+  background:#4c3b17!important;
+  color:#ffeeb5!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #9b792e!important;
+}
+body.bg2-unified-rpg .ach-card{
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#101a2a!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #34445e!important;
+}
+body.bg2-unified-rpg .ach-card.unlocked{
+  background:linear-gradient(180deg,#2f2814,#151a21)!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #9b792e!important;
+}
+
+/* 18. CRÉDITOS */
+body.bg2-unified-rpg #hub-credits .screen-card{
+  min-height:360px;
+  display:flex!important;
+  flex-direction:column!important;
+}
+body.bg2-unified-rpg #hub-credits .screen-sub{
+  max-width:700px;
+  font-size:15px!important;
+}
+body.bg2-unified-rpg #hub-credits .screen-sub:last-child{
+  margin-top:auto!important;
+  padding-top:30px!important;
+  color:#657990!important;
+  font:800 9px "Courier New",monospace!important;
+}
+
+/* 19. MODAL DE MONSTRUO */
+body.bg2-unified-rpg #monster-modal .modal-backdrop{
+  background:rgba(2,5,10,.88)!important;
+}
+body.bg2-unified-rpg #monster-modal .modal-card{
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:linear-gradient(180deg,#141f32,#09111e)!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 6px #384861,0 14px 0 #020409,0 34px 90px rgba(0,0,0,.62)!important;
+}
+body.bg2-unified-rpg #monster-modal .modal-head{
+  padding-bottom:10px!important;border-bottom:2px solid #263650!important;
+}
+body.bg2-unified-rpg #monster-modal .modal-title{
+  color:#fff0c4!important;
+  font:900 24px "Courier New",monospace!important;
+}
+body.bg2-unified-rpg #monster-modal .modal-title::before{
+  content:attr(data-rpg-kicker);
+  display:block;margin-bottom:4px;color:#d6ad49;
+  font:900 8px "Courier New",monospace;letter-spacing:.18em;
+}
+body.bg2-unified-rpg #monster-modal .monster-sprite-big{
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#08111e!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #33445e!important;
+}
+body.bg2-unified-rpg #monster-modal img{image-rendering:pixelated!important}
+body.bg2-unified-rpg #monster-modal .monster-field,
+body.bg2-unified-rpg #monster-modal .monster-examples{
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#0e1828!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #2f4059!important;
+}
+
+/* 20. OVERLAYS PRÁCTICA + ESTRATEGIA */
+body.bg2-unified-rpg .overlay-backdrop{
+  background:rgba(2,5,10,.89)!important;
+}
+body.bg2-unified-rpg .overlay-card{
+  width:min(900px,94vw)!important;
+  max-height:90vh!important;
+  overflow:auto!important;
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:linear-gradient(180deg,#151f32,#09111e)!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 6px #384861,0 14px 0 #020409,0 34px 90px rgba(0,0,0,.62)!important;
+}
+body.bg2-unified-rpg .overlay-head{
+  padding-bottom:10px!important;border-bottom:2px solid #263650!important;
+}
+body.bg2-unified-rpg .overlay-title{
+  color:#fff0c4!important;
+  font:900 24px "Courier New",monospace!important;
+}
+body.bg2-unified-rpg .overlay-title::before{
+  content:attr(data-rpg-kicker);
+  display:block;margin-bottom:4px;color:#d6ad49;
+  font:900 8px "Courier New",monospace;letter-spacing:.18em;
+}
+body.bg2-unified-rpg .strategy-choice,
+body.bg2-unified-rpg .strategy-item-row{
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#0e1828!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #31415a!important;
+}
+body.bg2-unified-rpg .strategy-pill{
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:#3a3017!important;color:#ffe8a6!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #826929!important;
+}
+
+/* 21. LOGROS INYECTADOS DEL JUEGO */
+body.bg2-unified-rpg #achievements-screen{
+  background:rgba(2,5,10,.89)!important;
+}
+body.bg2-unified-rpg #achievements-card{
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:linear-gradient(180deg,#151f32,#09111e)!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 6px #384861,0 14px 0 #020409,0 34px 90px rgba(0,0,0,.62)!important;
+}
+body.bg2-unified-rpg #achievements-head{
+  border-bottom:2px solid #263650!important;
+}
+body.bg2-unified-rpg #achievements-head h2{
+  color:#fff0c4!important;
+  font:900 24px "Courier New",monospace!important;
+}
+
+/* 22. VICTORIA / DERROTA */
+body.bg2-unified-rpg .end-overlay{
+  background:rgba(2,5,10,.92)!important;
+}
+body.bg2-unified-rpg .end-overlay-inner{
+  width:min(980px,94vw)!important;
+  padding:16px!important;
+  clip-path:var(--u-pixel);
+  background:linear-gradient(180deg,#151f32,#09111e)!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 6px #6c5929,0 14px 0 #020409,0 34px 90px rgba(0,0,0,.62)!important;
+}
+body.bg2-unified-rpg .end-overlay-img{
+  image-rendering:pixelated!important;
+  filter:drop-shadow(7px 10px 0 rgba(0,0,0,.42))!important;
+}
+body.bg2-unified-rpg .end-overlay-note{
+  border:0!important;border-radius:0!important;
+  background:#0d1726!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #31415a!important;
+}
+
+/* 23. BOSS INTRO */
+body.bg2-unified-rpg #bg2-boss-intro{
+  background:rgba(2,5,10,.92)!important;
+}
+body.bg2-unified-rpg .bg2-boss-card{
+  border:0!important;border-radius:0!important;clip-path:var(--u-pixel);
+  background:linear-gradient(180deg,#1a2232,#0a101b)!important;
+  box-shadow:inset 0 0 0 3px #020409,inset 0 0 0 6px #9c7930,0 15px 0 #020409,0 38px 100px rgba(0,0,0,.68)!important;
+}
+body.bg2-unified-rpg .bg2-boss-card img{image-rendering:pixelated!important}
+
+/* 24. CRISP PARA HUD DE COMBATE */
+body.bg2-unified-rpg #battle-screen .entity-box,
+body.bg2-unified-rpg #battle-screen .speech,
+body.bg2-unified-rpg #bg2-world-strip{
+  background:rgba(7,12,22,.95)!important;
+}
+body.bg2-unified-rpg #hero-sprite-img,
+body.bg2-unified-rpg #monster-sprite-img,
+body.bg2-unified-rpg .bg2-stage-node img,
+body.bg2-unified-rpg .bg2-roster-card img{
+  image-rendering:pixelated!important;
+}
+
+/* 25. SCROLLS INTERNOS */
+body.bg2-unified-rpg *{
+  scrollbar-width:thin;
+  scrollbar-color:#8f7230 #09111e;
+}
+body.bg2-unified-rpg *::-webkit-scrollbar{width:9px;height:9px}
+body.bg2-unified-rpg *::-webkit-scrollbar-track{background:#09111e}
+body.bg2-unified-rpg *::-webkit-scrollbar-thumb{background:#6f5928;border:2px solid #09111e}
+
+/* 26. CHROMEBOOK 1366x768 */
+@media (min-width:1100px) and (max-height:800px){
+  body.bg2-unified-rpg :is(#camp-screen,#map-screen,#inventory-screen,#diary-screen,#history-screen){
+    height:calc(100vh - 58px)!important;
+    min-height:0!important;
+  }
+  body.bg2-unified-rpg #camp-screen .camp-container{
+    grid-template-columns:330px 1fr!important;
+  }
+  body.bg2-unified-rpg #camp-screen .camp-rest{min-height:225px!important}
+  body.bg2-unified-rpg #map-canvas{min-height:255px!important}
+  body.bg2-unified-rpg #answer{min-height:104px!important}
+  body.bg2-unified-rpg #log-panel .log-text{max-height:72px!important}
+}
+
+/* 27. TABLET / PANTALLA ESTRECHA */
+@media(max-width:980px){
+  body.bg2-unified-rpg #camp-screen .camp-container{grid-template-columns:1fr!important}
+  body.bg2-unified-rpg #camp-screen :is(.camp-title-main,.camp-sub,.camp-message,.camp-footer){grid-column:auto}
+  body.bg2-unified-rpg #start-choice .screen-card>div[style*="display:grid"]{grid-template-columns:1fr!important}
+}
