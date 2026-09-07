@@ -42,6 +42,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .mainBtn:hover{transform:translateY(-1px);filter:brightness(1.07)}
 .dangerBtn{background:rgba(251,113,133,.11);color:#fecdd3}
 .workspace{min-height:0;display:grid;grid-template-columns:270px minmax(0,1fr) 340px}
+.workspace.leftCollapsed{grid-template-columns:0 minmax(0,1fr) 340px}.workspace.leftCollapsed #leftPanel{display:none}.compassToggleBtn{white-space:nowrap;min-width:92px}.workspace.leftCollapsed .compassToggleBtn{background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.22)}
 .panel{min-height:0;background:rgba(15,23,42,.74);backdrop-filter:blur(12px);border-right:1px solid var(--line);overflow:auto}
 .panel.right{border-right:0;border-left:1px solid var(--line)}
 .panelSection{padding:15px;border-bottom:1px solid var(--line)}
@@ -145,7 +146,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 .nodeDragHandle{touch-action:none;position:absolute;right:6px;top:10px;z-index:8;width:27px;height:25px;border-radius:8px;border:1px solid rgba(51,65,85,.13);background:rgba(255,255,255,.88);color:#748298;font-size:16px;line-height:1;cursor:grab;padding:0;display:grid;place-items:center;letter-spacing:-3px}.nodeDragHandle:hover{background:#eef2f7;color:#334155}.nodeDragHandle:active{cursor:grabbing}
 .nodeEditStatus{position:absolute;right:38px;top:11px;z-index:7;padding:3px 6px;border-radius:999px;background:#e6f7fb;color:#08718b;font-size:7px;font-weight:950;letter-spacing:.08em}
 .tizaHint{font-family:ui-rounded,"Segoe UI",sans-serif;color:#64748b;border-color:#64748b;opacity:.16}.emptyMessage{color:rgba(71,85,105,.23)}
-.workspace{grid-template-columns:250px minmax(0,1fr) 380px}
+.workspace{grid-template-columns:250px minmax(0,1fr) 380px}.workspace.leftCollapsed{grid-template-columns:0 minmax(0,1fr) 380px}.workspace.leftCollapsed .compassToggleBtn{background:#e8f8fb!important;border-color:#b9e1e9!important;color:#126176!important}
 .sceneEditorIntro{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:linear-gradient(145deg,#faf9ff,#f2fbfd)}
 .sceneEditorIntro h2{font-size:20px;margin:4px 0 3px}.editorIntroHelp{font-size:10px;line-height:1.45;color:var(--muted);margin:0;max-width:245px}
 .editorStep{padding-top:17px;padding-bottom:17px}.editorStepPrimary{background:#fff}
@@ -182,7 +183,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 .libraryHome{min-height:100vh;height:auto;overflow:visible;background:radial-gradient(circle at 15% 0%,rgba(105,87,232,.10),transparent 30%),radial-gradient(circle at 90% 5%,rgba(8,127,156,.08),transparent 27%),#f4f7fb;color:#172033}.libraryTop{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px clamp(18px,4vw,54px);background:rgba(255,255,255,.94);border-bottom:1px solid rgba(30,41,59,.1);position:sticky;top:0;z-index:20;backdrop-filter:blur(14px)}.libraryTopActions{display:flex;align-items:center;gap:9px}.libraryMain{width:min(1260px,calc(100% - 36px));margin:0 auto;padding:clamp(25px,4vw,50px) 0 60px}.libraryHero{display:flex;align-items:flex-end;justify-content:space-between;gap:25px;padding:26px 28px;border:1px solid #dde3ec;border-radius:25px;background:linear-gradient(145deg,#fff,#f8f7ff);box-shadow:0 18px 45px rgba(51,65,85,.09)}.libraryHero h2{font-size:clamp(30px,5vw,48px);margin:5px 0 8px;letter-spacing:-.035em}.libraryHero p{max-width:640px;margin:0;color:#64748b;font-size:13px;line-height:1.55}.libraryNewBtn{padding:12px 18px;font-size:12px;white-space:nowrap}.librarySummary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0 28px}.librarySummaryCard{padding:13px 15px;border:1px solid #dde3ec;border-radius:15px;background:#fff}.librarySummaryCard span{display:block;color:#7a8799;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}.librarySummaryCard b{display:block;margin-top:3px;font-size:20px;color:#243248}.librarySections{display:grid;gap:27px}.librarySection{min-width:0}.librarySectionHead{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #dde3ec;padding:0 2px 9px}.librarySectionHead>div{display:flex;align-items:center;gap:8px}.librarySectionHead h3{margin:0;font-size:18px}.statusDot{width:11px;height:11px;border-radius:50%;box-shadow:0 0 0 4px rgba(100,116,139,.08)}.statusDot.draft{background:#8b5cf6}.statusDot.testing{background:#e59b23}.statusDot.submitted{background:#1a9b6b}.libraryCount{min-width:28px;height:25px;padding:0 8px;border-radius:999px;display:grid;place-items:center;background:#eef2f7;color:#526176;font-size:10px;font-weight:900}.librarySectionHelp{margin:7px 2px 12px;color:#7a8799;font-size:10px}.storyLibraryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.storyProjectCard{position:relative;display:grid;grid-template-rows:auto auto auto 1fr auto;min-height:230px;padding:17px;border:1px solid #dce3ec;border-radius:19px;background:#fff;box-shadow:0 6px 18px rgba(51,65,85,.055);transition:.2s transform,.2s box-shadow,.2s border-color}.storyProjectCard:hover{transform:translateY(-2px);box-shadow:0 13px 26px rgba(51,65,85,.10);border-color:#cbc5ee}.storyProjectTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.storyStatus{padding:5px 8px;border-radius:999px;font-size:8px;font-weight:950;text-transform:uppercase;letter-spacing:.06em}.storyStatus.draft{background:#f2eeff;color:#684bc7}.storyStatus.testing{background:#fff5df;color:#94610c}.storyStatus.submitted{background:#eaf8f1;color:#217354}.storyDate{font-size:8px;color:#93a0b1}.storyProjectCard h4{font-size:17px;margin:13px 0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.storyProjectMeta{color:#748196;font-size:9px;line-height:1.4;min-height:26px}.storyProjectStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:14px 0}.storyMiniStat{padding:8px;border-radius:10px;background:#f7f9fc;text-align:center}.storyMiniStat b{display:block;font-size:13px}.storyMiniStat span{display:block;margin-top:2px;color:#8794a5;font-size:7px;text-transform:uppercase;font-weight:850}.storyProjectActions{display:flex;gap:7px;align-self:end}.storyProjectActions .mainBtn,.storyProjectActions .smallBtn{flex:1;justify-content:center}.libraryEmptyState{padding:55px 20px;text-align:center;border:1px dashed #cfd8e4;border-radius:24px;background:rgba(255,255,255,.7);margin-top:22px}.libraryEmptyIcon{font-size:60px;color:#7d6eea}.libraryEmptyState h3{font-size:22px;margin:8px 0}.libraryEmptyState p{max-width:520px;margin:0 auto 18px;color:#718095;line-height:1.5}.backLibraryBtn{white-space:nowrap;background:#f5f7fa!important}@media(max-width:1050px){.storyLibraryGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.librarySummary{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:700px){.libraryTop{align-items:flex-start}.libraryTopActions .profileBadge{display:none}.libraryHero{align-items:stretch;flex-direction:column}.libraryNewBtn{width:100%}.storyLibraryGrid{grid-template-columns:1fr}.librarySummary{grid-template-columns:repeat(2,minmax(0,1fr))}.backLibraryBtn{font-size:0}.backLibraryBtn::after{content:"←";font-size:14px}.topProject{min-width:0}}
 
 @media(max-width:1200px){.workspace{grid-template-columns:230px minmax(0,1fr) 350px}}
-@media(max-width:900px){.workspace{display:block}.sceneEditorIntro{padding-top:17px}.stepHeadingWithAction{grid-template-columns:32px 1fr}.stepHeadingWithAction .compactMainBtn{grid-column:1/-1;width:100%}}
+@media(max-width:900px){.workspace,.workspace.leftCollapsed{display:block}.workspace.leftCollapsed #leftPanel{display:block}.compassToggleBtn{display:none!important}.sceneEditorIntro{padding-top:17px}.stepHeadingWithAction{grid-template-columns:32px 1fr}.stepHeadingWithAction .compactMainBtn{grid-column:1/-1;width:100%}}
 
 </style>
 </head>
@@ -280,6 +281,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 
     <section class="boardShell">
       <div class="boardToolbar">
+        <button id="toggleLeftPanelBtn" class="smallBtn compassToggleBtn" type="button" title="Ocultar la Brújula del autor" aria-controls="leftPanel" aria-expanded="true">◀ Brújula</button>
         <button id="addNodeBtn" class="smallBtn">＋ Nueva escena</button>
         <button id="centerBtn" class="smallBtn">◎ Inicio</button>
         <button id="expandBtn" class="smallBtn">↗ Ampliar mapa</button>
@@ -484,11 +486,12 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 (function(){
 "use strict";
 var GAME_ID="rayuela";
-var GAME_VERSION="1.3.1-beta";
+var GAME_VERSION="1.3.2-beta";
 var STORAGE_KEY="LA_RAYUELA_PROJECT_V1";
 var LIBRARY_STORAGE_KEY="LA_RAYUELA_LIBRARY_V1";
 var DISCOVERY_KEY="LA_RAYUELA_DISCOVERIES_V1";
 var TUTORIAL_KEY="LA_RAYUELA_TUTORIAL_V1";
+var LEFT_PANEL_KEY="LA_RAYUELA_LEFT_PANEL_COLLAPSED_V1";
 var BRIDGE_NS_GAME="lenguarcade-game";
 var BRIDGE_NS_HOST="lenguarcade-host";
 var channel="";
@@ -976,7 +979,7 @@ function openStory(id,playImmediately){
   if(currentView==="editor")localPersist();
   var found=library.projects.find(function(p){return p.id===id;});if(!found)return;
   project=normalizeProject(found);library.activeProjectId=project.id;historyStack=[];futureStack=[];selectedNodeId=(getStart()||{}).id||"";
-  currentView="editor";document.body.classList.remove("libraryMode");window.scrollTo(0,0);$("libraryHome").style.display="none";$("editorApp").style.display="grid";renderAll();localPersist();
+  currentView="editor";document.body.classList.remove("libraryMode");window.scrollTo(0,0);$("libraryHome").style.display="none";$("editorApp").style.display="grid";applyLeftPanelPreference();renderAll();localPersist();
   setTimeout(function(){centerOnNode(selectedNodeId);if(playImmediately)startPlay();else if(!localStorage.getItem(TUTORIAL_KEY))maybeTutorial();},120);
 }
 function createStoryFromTemplate(kind){
@@ -1402,8 +1405,25 @@ function renderTutorial(){
 function nextTutorial(){if(tutorialIndex<TUTORIAL.length-1){tutorialIndex++;renderTutorial();}else{localStorage.setItem(TUTORIAL_KEY,"1");closeModal("tutorialModal");}}
 function maybeTutorial(){if(!localStorage.getItem(TUTORIAL_KEY))showTutorial();}
 
+function leftPanelIsCollapsed(){
+  try{return localStorage.getItem(LEFT_PANEL_KEY)==="1";}catch(error){return false;}
+}
+function applyLeftPanelPreference(){
+  var workspace=document.querySelector("#editorApp .workspace"),button=$("toggleLeftPanelBtn");if(!workspace||!button)return;
+  var desktop=window.matchMedia("(min-width:901px)").matches,collapsed=desktop&&leftPanelIsCollapsed();
+  workspace.classList.toggle("leftCollapsed",collapsed);
+  button.textContent=collapsed?"🧭 Mostrar":"◀ Brújula";
+  button.title=collapsed?"Mostrar la Brújula del autor":"Ocultar la Brújula del autor";
+  button.setAttribute("aria-expanded",collapsed?"false":"true");
+}
+function toggleLeftPanel(){
+  if(!window.matchMedia("(min-width:901px)").matches)return;
+  var next=!leftPanelIsCollapsed();
+  try{localStorage.setItem(LEFT_PANEL_KEY,next?"1":"0");}catch(error){}
+  applyLeftPanelPreference();
+}
 function bindUi(){
-  $("newStoryBtn").onclick=openNewStoryChooser;$("emptyNewStoryBtn").onclick=openNewStoryChooser;$("backToLibraryBtn").onclick=showLibraryHome;
+  $("newStoryBtn").onclick=openNewStoryChooser;$("emptyNewStoryBtn").onclick=openNewStoryChooser;$("backToLibraryBtn").onclick=showLibraryHome;$("toggleLeftPanelBtn").onclick=toggleLeftPanel;
   $("projectTitle").oninput=function(e){project.title=e.target.value;project.editCount++;scheduleSave("project_title");renderAchievementPreview();};
   $("undoBtn").onclick=undo;$("redoBtn").onclick=redo;$("moreBtn").onclick=function(){$("projectModal").classList.add("open");};
   $("addNodeBtn").onclick=startGenericPlacement;$("centerBtn").onclick=function(){var s=getStart();if(s){selectNode(s.id,false);centerOnNode(s.id);}};$("expandBtn").onclick=expandMap;
@@ -1419,6 +1439,7 @@ function bindUi(){
   document.querySelectorAll("[data-template]").forEach(function(card){card.onclick=function(){replaceWithTemplate(card.dataset.template);};});
   $("mobileLeftBtn").onclick=function(){$("leftPanel").classList.toggle("mobileOpen");$("rightPanel").classList.remove("mobileOpen");};
   $("mobileRightBtn").onclick=function(){$("rightPanel").classList.toggle("mobileOpen");$("leftPanel").classList.remove("mobileOpen");};
+  window.addEventListener("resize",applyLeftPanelPreference);
   window.addEventListener("keydown",function(e){
     if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();e.shiftKey?redo():undo();}
     if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();redo();}
