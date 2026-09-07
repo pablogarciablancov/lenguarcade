@@ -37,7 +37,7 @@
     const link=document.createElement('link');
     link.id='bg2-catalog-polish-css';
     link.rel='stylesheet';
-    link.href='./catalog-polish-v2.css?v=20260907-rpg20';
+    link.href='./catalog-polish-v2.css?v=20260907-rpg21';
     document.head.appendChild(link);
   }
 
@@ -50,7 +50,11 @@
   }
 
   function getGold(){
-    const p=window.BG?.getPlayer?.() || window.BG?.player || null;
+    let p=null;
+    try{
+      if(window.BG && typeof window.BG.getPlayer==='function') p=window.BG.getPlayer();
+      if(!p && window.BG) p=window.BG.player || null;
+    }catch(e){ p=window.BG?.player || null; }
     const gold=Number(p?.gold);
     return Number.isFinite(gold) ? gold : null;
   }
@@ -370,44 +374,79 @@
     if(training?.parentElement) training.parentElement.classList.add('bg2-training-panel');
   }
 
-  function watchGrid(node,callback){
-    if(!node || node.dataset.catalogObserver) return;
-    node.dataset.catalogObserver='1';
-    new MutationObserver(()=>requestAnimationFrame(callback)).observe(node,{childList:true});
+  function afterPaint(fn){
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      try{ fn(); }catch(error){ console.warn('[BG2 catalog]',error); }
+    }));
+  }
+
+  function wrapBgUi(name,decorator){
+    const ui=window.BG_UI;
+    if(!ui || typeof ui[name]!=='function') return false;
+    const original=ui[name];
+    if(original.__bg2CatalogWrapped) return true;
+
+    const wrapped=function(...args){
+      const result=original.apply(this,args);
+      afterPaint(decorator);
+      return result;
+    };
+    wrapped.__bg2CatalogWrapped=true;
+    wrapped.__bg2CatalogOriginal=original;
+    ui[name]=wrapped;
+    return true;
+  }
+
+  function wrapGlobal(name,decorator){
+    const original=window[name];
+    if(typeof original!=='function' || original.__bg2CatalogWrapped) return false;
+
+    const wrapped=function(...args){
+      const result=original.apply(this,args);
+      afterPaint(decorator);
+      return result;
+    };
+    wrapped.__bg2CatalogWrapped=true;
+    wrapped.__bg2CatalogOriginal=original;
+    window[name]=wrapped;
+    return true;
   }
 
   function bind(){
-    const collection=$('hub-collection-grid');
-    const campShop=$('shop-list');
-    const hubShop=$('hub-shop-list');
-
-    watchGrid(collection,decorateCollection);
-    watchGrid(campShop,()=>decorateShop(campShop));
-    watchGrid(hubShop,()=>decorateShop(hubShop));
+    /*
+      Importante: esta capa NO observa globalmente el DOM.
+      Solo se ejecuta después de las funciones nativas que renderizan
+      Bestiario/Tienda, para no interferir con combate, pestañas ni guardado.
+    */
+    wrapBgUi('renderCollection',decorateCollection);
+    wrapBgUi('renderHubShop',()=>decorateShop($('hub-shop-list')));
+    wrapGlobal('renderShop',()=>decorateShop($('shop-list')));
 
     decorateCollection();
-    decorateShop(campShop);
-    decorateShop(hubShop);
+    decorateShop($('shop-list'));
+    decorateShop($('hub-shop-list'));
     polishMonsterModal();
 
-    const root=$('appRoot') || document.body;
-    new MutationObserver(()=>{
-      const h=$('hub-shop-list');
-      const c=$('shop-list');
-      if(h){
-        watchGrid(h,()=>decorateShop(h));
-        decorateShop(h);
+    document.addEventListener('click',e=>{
+      const target=e.target.closest?.('#menu-shop,#menu-collection,#nav-camp,.shop-tab-btn,.shop-buy-btn,.shop-sell-btn');
+      if(!target) return;
+
+      if(target.matches('#menu-collection')){
+        afterPaint(decorateCollection);
+      }else if(target.matches('#menu-shop')){
+        afterPaint(()=>decorateShop($('hub-shop-list')));
+      }else if(target.matches('#nav-camp')){
+        afterPaint(()=>decorateShop($('shop-list')));
+      }else if(target.closest('#hub-shop-list')){
+        afterPaint(()=>decorateShop($('hub-shop-list')));
+      }else if(target.closest('#shop-list')){
+        afterPaint(()=>decorateShop($('shop-list')));
       }
-      if(c){
-        watchGrid(c,()=>decorateShop(c));
-        decorateShop(c);
-      }
-      if($('hub-collection')?.style.display!=='none') decorateCollection();
-    }).observe(root,{attributes:true,attributeFilter:['style','class'],subtree:true});
+    },{passive:true});
 
     window.addEventListener('bg2:player-updated',()=>{
-      decorateShop($('shop-list'));
-      decorateShop($('hub-shop-list'));
+      afterPaint(()=>decorateShop($('shop-list')));
+      afterPaint(()=>decorateShop($('hub-shop-list')));
     });
   }
 
@@ -419,11 +458,13 @@
     }else{
       bind();
     }
+
+    /* Segundo intento únicamente por si BG_UI se registra un instante después. */
     setTimeout(()=>{
-      decorateCollection();
-      decorateShop($('shop-list'));
-      decorateShop($('hub-shop-list'));
-    },350);
+      wrapBgUi('renderCollection',decorateCollection);
+      wrapBgUi('renderHubShop',()=>decorateShop($('hub-shop-list')));
+      wrapGlobal('renderShop',()=>decorateShop($('shop-list')));
+    },250);
   }
 
   boot();
