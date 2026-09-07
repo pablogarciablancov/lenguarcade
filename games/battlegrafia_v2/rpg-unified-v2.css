@@ -975,3 +975,328 @@ body.bg2-unified-rpg #start-screen:not([style*="display: flex"]){
     min-height:112px!important;
   }
 }
+
+
+/* 29. MERCADER + TIENDA DE CAMPAMENTO — RPG PIXEL DEFINITIVO */
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list){
+  display:grid!important;
+  align-items:stretch!important;
+  gap:9px!important;
+  margin-top:12px!important;
+  padding:0!important;
+  background:transparent!important;
+}
+body.bg2-unified-rpg #hub-shop-list{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+body.bg2-unified-rpg #shop-list{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+
+/* La cabecera deja de ser una tarjeta más y pasa a ser el mostrador */
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-merchant-header{
+  grid-column:1/-1!important;
+  width:100%!important;
+  min-height:116px!important;
+  margin:0 0 5px!important;
+  padding:12px 14px 12px 128px!important;
+  position:relative!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:flex-start!important;
+  text-align:left!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--u-pixel);
+  background:
+    linear-gradient(90deg,rgba(67,49,18,.54),rgba(14,24,40,.96) 34%,rgba(8,14,24,.98))!important;
+  box-shadow:
+    inset 0 0 0 3px #020409,
+    inset 0 0 0 6px #665327,
+    0 7px 0 #020409!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-merchant-header::before{
+  content:"MERCADER DEL REINO";
+  display:block;
+  margin-bottom:6px;
+  color:#f0d787;
+  font:900 15px/1 "Courier New",Consolas,monospace;
+  letter-spacing:.04em;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-merchant-header::after{
+  content:"Compra provisiones, vende lo que ya no necesites y prepara la siguiente batalla.";
+  display:block;
+  max-width:650px;
+  margin-bottom:10px;
+  color:#98aac1;
+  font:700 10px/1.35 "Courier New",Consolas,monospace;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-merchant-header>img{
+  position:absolute!important;
+  left:16px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:92px!important;
+  height:92px!important;
+  object-fit:cover!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--u-pixel);
+  background:#08101c!important;
+  box-shadow:
+    inset 0 0 0 3px #020409,
+    inset 0 0 0 5px #9a762e!important;
+  image-rendering:pixelated!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-merchant-header>div{
+  margin:0!important;
+  display:flex!important;
+  justify-content:flex-start!important;
+  gap:7px!important;
+}
+
+/* Pestañas Comprar/Vender como comando RPG */
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-tab-btn{
+  min-width:116px!important;
+  min-height:36px!important;
+  padding:8px 12px!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--u-pixel);
+  background:#111c2e!important;
+  color:#9caec4!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 4px #34445f,
+    0 4px 0 #020409!important;
+  font:900 10px "Courier New",Consolas,monospace!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-tab-btn[style*="background: #fbbf24"]{
+  background:#4d3b17!important;
+  color:#fff0b8!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 4px #9d7b30,
+    0 4px 0 #020409!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-tab-btn:hover{
+  filter:brightness(1.15)!important;
+  transform:translateY(-1px)!important;
+}
+
+/* Mensajes de compra */
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) :is(.shop-msg,#hub-shop-msg,.shop-empty){
+  grid-column:1/-1!important;
+  width:100%!important;
+  margin:0!important;
+  padding:9px 11px!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--u-pixel);
+  background:#0b1422!important;
+  color:#91a3ba!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #293a52!important;
+  font:800 9px/1.35 "Courier New",Consolas,monospace!important;
+}
+
+/* Tarjeta de objeto: inventario de RPG, no ecommerce */
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-item{
+  position:relative!important;
+  min-width:0!important;
+  min-height:168px!important;
+  margin:0!important;
+  padding:12px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--u-pixel);
+  background:
+    linear-gradient(180deg,#111c2e,#0a1220)!important;
+  box-shadow:
+    inset 0 0 0 3px #020409,
+    inset 0 0 0 5px #34445e,
+    0 5px 0 #020409!important;
+  transition:transform .08s steps(2,end),filter .1s linear!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-item::before{
+  content:"PROVISIÓN";
+  position:absolute;
+  top:8px;
+  right:10px;
+  color:#50647f;
+  font:900 7px "Courier New",monospace;
+  letter-spacing:.13em;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-item:hover{
+  transform:translateY(-3px)!important;
+  filter:brightness(1.08)!important;
+  box-shadow:
+    inset 0 0 0 3px #020409,
+    inset 0 0 0 5px #8d7130,
+    0 8px 0 #020409!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-item-main{
+  display:grid!important;
+  grid-template-columns:48px 1fr!important;
+  align-items:start!important;
+  gap:10px!important;
+  min-width:0!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-item-icon{
+  width:48px!important;
+  height:48px!important;
+  margin:0!important;
+  padding:5px!important;
+  object-fit:contain!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--u-pixel);
+  background:#07101c!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 4px #35455f!important;
+  image-rendering:pixelated!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-item-text{
+  min-width:0!important;
+  padding-right:34px!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-item-name{
+  margin:1px 0 5px!important;
+  color:#f2df9a!important;
+  font:900 11px/1.2 "Courier New",Consolas,monospace!important;
+  letter-spacing:.02em!important;
+  text-transform:uppercase!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-item-desc{
+  margin:0!important;
+  color:#9eb0c7!important;
+  font:600 10px/1.4 Inter,Segoe UI,Arial,sans-serif!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-owned{
+  margin:8px 0 0!important;
+  padding:5px 7px!important;
+  align-self:flex-start!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--u-pixel);
+  background:#0b1921!important;
+  color:#79b89a!important;
+  box-shadow:inset 0 0 0 1px #284c3a!important;
+  font:800 8px "Courier New",Consolas,monospace!important;
+}
+
+/* Pie: precio y acción quedan integrados */
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-item-footer{
+  width:100%!important;
+  margin-top:12px!important;
+  padding-top:9px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+  flex-wrap:nowrap!important;
+  border-top:1px solid #273750!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-price,
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-price[style]{
+  flex:0 0 auto!important;
+  padding:5px 8px!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--u-pixel);
+  background:#332a13!important;
+  color:#f4d97d!important;
+  box-shadow:inset 0 0 0 1px #755e27!important;
+  font:900 9px "Courier New",Consolas,monospace!important;
+  white-space:nowrap!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-sell-btn~*{display:none}
+
+/* Botones de compra/venta: compactos y coherentes con los menús */
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) :is(.shop-buy-btn,.shop-sell-btn),
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) :is(.shop-buy-btn,.shop-sell-btn)[style]{
+  min-width:92px!important;
+  min-height:34px!important;
+  padding:7px 10px!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--u-pixel);
+  background:#4a3917!important;
+  color:#fff0b7!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 4px #96752e,
+    0 4px 0 #020409!important;
+  font:900 9px "Courier New",Consolas,monospace!important;
+  letter-spacing:.05em!important;
+  text-shadow:none!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-sell-btn,
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-sell-btn[style]{
+  background:#522630!important;
+  color:#ffd9df!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 4px #934452,
+    0 4px 0 #020409!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) :is(.shop-buy-btn,.shop-sell-btn):hover{
+  transform:translateY(-2px)!important;
+  filter:brightness(1.16)!important;
+}
+body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) :is(.shop-buy-btn,.shop-sell-btn):active{
+  transform:translateY(2px)!important;
+}
+
+/* Hub Mercader: más aire; Campamento: versión compacta */
+body.bg2-unified-rpg #hub-shop .screen-card{
+  padding-bottom:20px!important;
+}
+body.bg2-unified-rpg #hub-shop-list{
+  max-height:calc(100vh - 210px)!important;
+  overflow:auto!important;
+  padding-right:5px!important;
+}
+body.bg2-unified-rpg #camp-screen #shop-list{
+  max-height:430px!important;
+  overflow:auto!important;
+  padding-right:5px!important;
+}
+body.bg2-unified-rpg #camp-screen #shop-list .shop-merchant-header{
+  min-height:100px!important;
+  padding-left:110px!important;
+}
+body.bg2-unified-rpg #camp-screen #shop-list .shop-merchant-header>img{
+  width:76px!important;
+  height:76px!important;
+}
+body.bg2-unified-rpg #camp-screen #shop-list .shop-merchant-header::before{
+  font-size:12px;
+}
+body.bg2-unified-rpg #camp-screen #shop-list .shop-merchant-header::after{
+  font-size:8px;
+  max-width:440px;
+}
+
+/* En 1366x768: tres productos por fila en HUB, dos en campamento */
+@media(max-width:1100px){
+  body.bg2-unified-rpg #hub-shop-list{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:720px){
+  body.bg2-unified-rpg :is(#hub-shop-list,#shop-list){grid-template-columns:1fr!important}
+  body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-merchant-header{
+    padding:106px 12px 12px!important;
+    align-items:center!important;
+    text-align:center!important;
+  }
+  body.bg2-unified-rpg :is(#hub-shop-list,#shop-list) .shop-merchant-header>img{
+    left:50%!important;
+    top:12px!important;
+    transform:translateX(-50%)!important;
+  }
+}
