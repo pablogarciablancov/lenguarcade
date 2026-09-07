@@ -429,3 +429,338 @@ body.bg2-tabs-polished .bg2-tab-screen button{
     grid-template-columns:1fr!important;
   }
 }
+
+
+/* ===== v12 · PESTAÑAS ANCHAS + MAPA RECONSTRUIDO ===== */
+
+/* Lienzo casi completo: las pestañas ya no parecen tarjetas pequeñas flotando */
+body.bg2-tabs-polished .bg2-tab-screen{
+  padding:10px 14px!important;
+}
+body.bg2-tabs-polished .bg2-tab-screen > :is(.camp-container,.screen-inner,.inventory-container),
+body.bg2-tabs-polished.bg2-battle-router[data-bg2-view="map"] #map-screen{
+  width:min(1320px,calc(100vw - 34px))!important;
+  max-width:none!important;
+  margin:0 auto!important;
+}
+body.bg2-tabs-polished .bg2-tab-screen > :is(.camp-container,.screen-inner,.inventory-container){
+  padding:18px 16px 16px!important;
+}
+body.bg2-tabs-polished :is(
+  #camp-screen .camp-sub,
+  #map-screen .map-sub,
+  #diary-screen .diary-sub,
+  #history-screen .history-sub,
+  #inventory-screen .inventory-sub
+){
+  max-width:980px!important;
+}
+
+/* CAMPAMENTO: más ancho y útil */
+body.bg2-tabs-polished #camp-screen .camp-container{
+  grid-template-columns:370px minmax(0,1fr)!important;
+  grid-template-areas:
+    "title title"
+    "sub sub"
+    "rest shop"
+    "message message"
+    "footer footer"!important;
+  gap:12px!important;
+}
+body.bg2-tabs-polished #camp-screen .camp-rest{
+  min-height:360px!important;
+}
+body.bg2-tabs-polished #camp-screen .camp-box.camp-shop{
+  min-height:360px!important;
+}
+body.bg2-tabs-polished #camp-screen #shop-list{
+  max-height:440px!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+body.bg2-tabs-polished #camp-screen .shop-item{
+  min-height:150px!important;
+}
+body.bg2-tabs-polished #camp-screen .camp-fire-visual{
+  width:100px!important;
+  height:100px!important;
+  margin:4px auto 12px!important;
+}
+
+/* MAPA: una sola arquitectura, sin roster duplicado */
+body.bg2-tabs-polished.bg2-battle-router[data-bg2-view="map"] #map-screen{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 330px!important;
+  grid-template-areas:
+    "title title"
+    "sub sub"
+    "controls controls"
+    "canvas stages"
+    "legend stages"!important;
+  grid-template-rows:auto auto auto minmax(0,1fr) auto!important;
+  align-content:stretch!important;
+  gap:10px!important;
+  padding:18px 16px 16px!important;
+  overflow:hidden!important;
+}
+body.bg2-tabs-polished #map-screen .map-header{
+  grid-area:title!important;
+}
+body.bg2-tabs-polished #map-screen .map-sub{
+  grid-area:sub!important;
+  max-width:980px!important;
+  margin-bottom:2px!important;
+}
+body.bg2-tabs-polished #map-screen .map-world-row{
+  grid-area:controls!important;
+  width:100%!important;
+  min-height:48px!important;
+  margin:0!important;
+  padding:8px 10px!important;
+  display:grid!important;
+  grid-template-columns:90px minmax(0,1fr)!important;
+  align-items:center!important;
+  justify-content:stretch!important;
+  gap:10px!important;
+  clip-path:var(--tp-pixel);
+  background:#0d1726!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #304159!important;
+}
+body.bg2-tabs-polished #map-screen .map-world-label{
+  min-width:0!important;
+  color:#d2bb73!important;
+  font:900 9px "Courier New",Consolas,monospace!important;
+  letter-spacing:.12em!important;
+}
+body.bg2-tabs-polished #map-screen #map-world-select{
+  width:100%!important;
+  max-width:none!important;
+  min-height:34px!important;
+  padding:7px 10px!important;
+}
+
+/* Escenario principal */
+body.bg2-tabs-polished #map-screen #map-canvas{
+  grid-area:canvas!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:390px!important;
+  height:100%!important;
+  max-height:500px!important;
+  margin:0!important;
+  aspect-ratio:auto!important;
+  position:relative!important;
+  overflow:hidden!important;
+  clip-path:var(--tp-pixel);
+  background:#07101b!important;
+  box-shadow:
+    inset 0 0 0 3px #020409,
+    inset 0 0 0 5px #34445e!important;
+}
+body.bg2-tabs-polished #map-screen #map-canvas .map-bg{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  display:block!important;
+  image-rendering:pixelated!important;
+}
+body.bg2-tabs-polished #map-screen #map-canvas :is(#map-fx,.fx-layer){
+  position:absolute!important;
+  inset:0!important;
+}
+
+/* Progresión: seis filas claras, no una nube de iconos */
+body.bg2-tabs-polished #map-screen #map-stages{
+  grid-area:stages!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:390px!important;
+  height:100%!important;
+  max-height:500px!important;
+  margin:0!important;
+  padding:10px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  flex-wrap:nowrap!important;
+  justify-content:flex-start!important;
+  align-items:stretch!important;
+  gap:6px!important;
+  overflow:auto!important;
+  clip-path:var(--tp-pixel);
+  background:#0b1422!important;
+  box-shadow:
+    inset 0 0 0 3px #020409,
+    inset 0 0 0 5px #304159!important;
+}
+body.bg2-tabs-polished #map-screen #map-stages::before{
+  content:"RUTA DEL MUNDO";
+  flex:0 0 auto;
+  margin:2px 2px 4px;
+  padding-bottom:8px;
+  border-bottom:1px solid #2f4058;
+  color:#d9bd69;
+  font:900 9px "Courier New",Consolas,monospace;
+  letter-spacing:.15em;
+}
+body.bg2-tabs-polished #map-screen .map-stage,
+body.bg2-tabs-polished #map-screen .map-stage.boss{
+  flex:0 0 auto!important;
+  width:100%!important;
+  min-width:0!important;
+  text-align:left!important;
+  position:relative!important;
+  opacity:1!important;
+}
+body.bg2-tabs-polished #map-screen .map-stage-inner{
+  min-height:56px!important;
+  width:100%!important;
+  padding:7px 8px!important;
+  display:grid!important;
+  grid-template-columns:46px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:9px!important;
+  clip-path:var(--tp-pixel);
+  background:#101a2a!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #33445e!important;
+}
+body.bg2-tabs-polished #map-screen .map-stage-icon,
+body.bg2-tabs-polished #map-screen .map-stage.boss .map-stage-icon{
+  width:42px!important;
+  height:42px!important;
+  min-width:42px!important;
+  margin:0!important;
+  padding:3px!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--tp-pixel);
+  background:#07101b!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #40516a!important;
+}
+body.bg2-tabs-polished #map-screen .map-stage-icon img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  image-rendering:pixelated!important;
+}
+body.bg2-tabs-polished #map-screen .map-stage-label{
+  min-width:0!important;
+  color:#b8c6d8!important;
+  font:900 9px/1.2 "Courier New",Consolas,monospace!important;
+  white-space:normal!important;
+}
+body.bg2-tabs-polished #map-screen .map-stage.stage-cleared .map-stage-inner{
+  background:#0f231d!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #37684d!important;
+}
+body.bg2-tabs-polished #map-screen .map-stage.stage-cleared .map-stage-label{
+  color:#a9e0bc!important;
+}
+body.bg2-tabs-polished #map-screen .map-stage.stage-current .map-stage-inner{
+  background:#332913!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 3px #a37f2e,
+    0 0 0 1px rgba(216,173,69,.16)!important;
+}
+body.bg2-tabs-polished #map-screen .map-stage.stage-current .map-stage-label{
+  color:#ffe9a6!important;
+}
+body.bg2-tabs-polished #map-screen .map-stage.stage-locked .map-stage-inner{
+  opacity:.52!important;
+  filter:saturate(.55)!important;
+}
+body.bg2-tabs-polished #map-screen .map-stage.boss .map-stage-inner{
+  background:linear-gradient(90deg,#3b2b13,#171827)!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #a77f2d!important;
+}
+body.bg2-tabs-polished #map-screen .map-stage.boss .map-stage-label::after{
+  content:" · JEFE";
+  color:#d9bd69;
+}
+body.bg2-tabs-polished #map-screen .map-stage-tooltip{
+  display:none!important;
+}
+
+/* Leyenda limpia */
+body.bg2-tabs-polished #map-screen .map-legend{
+  grid-area:legend!important;
+  width:100%!important;
+  margin:0!important;
+  padding:8px 10px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:18px!important;
+  clip-path:var(--tp-pixel);
+  background:#0b1422!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #293a52!important;
+}
+body.bg2-tabs-polished #map-screen .map-dot{
+  border-radius:0!important;
+}
+
+/* El antiguo roster inyectado nunca participa del layout */
+body.bg2-tabs-polished #bg2-map-roster{
+  display:none!important;
+}
+
+/* MOCHILA / DIARIO / HISTORIA: más ancho efectivo */
+body.bg2-tabs-polished #inventory-screen .inventory-layout{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  gap:12px!important;
+}
+body.bg2-tabs-polished #inventory-screen :is(.inventory-column,.inventory-section){
+  padding:15px!important;
+}
+body.bg2-tabs-polished #diary-screen .diary-layout{
+  grid-template-columns:minmax(0,.9fr) minmax(0,1.6fr)!important;
+  gap:12px!important;
+}
+body.bg2-tabs-polished #history-screen #history-gallery{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:12px!important;
+}
+
+/* 1366×768: aprovechar casi todo el ancho */
+@media(min-width:1100px) and (max-height:800px){
+  body.bg2-tabs-polished .bg2-tab-screen > :is(.camp-container,.screen-inner,.inventory-container),
+  body.bg2-tabs-polished.bg2-battle-router[data-bg2-view="map"] #map-screen{
+    width:min(1288px,calc(100vw - 26px))!important;
+  }
+  body.bg2-tabs-polished #camp-screen .camp-container{
+    grid-template-columns:350px minmax(0,1fr)!important;
+  }
+  body.bg2-tabs-polished #camp-screen #shop-list{
+    max-height:390px!important;
+  }
+  body.bg2-tabs-polished #map-screen #map-canvas,
+  body.bg2-tabs-polished #map-screen #map-stages{
+    min-height:360px!important;
+    max-height:430px!important;
+  }
+}
+
+/* Tablet: mapa apilado, sin desconfigurarse */
+@media(max-width:900px){
+  body.bg2-tabs-polished.bg2-battle-router[data-bg2-view="map"] #map-screen{
+    grid-template-columns:1fr!important;
+    grid-template-areas:
+      "title"
+      "sub"
+      "controls"
+      "canvas"
+      "stages"
+      "legend"!important;
+    overflow:auto!important;
+  }
+  body.bg2-tabs-polished #map-screen #map-canvas{
+    min-height:320px!important;
+    height:320px!important;
+  }
+  body.bg2-tabs-polished #map-screen #map-stages{
+    min-height:0!important;
+    height:auto!important;
+    max-height:none!important;
+  }
+}
