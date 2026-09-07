@@ -164,6 +164,11 @@ for(const required of [
   ".bg2-rpg-game-submenu",
   ".app-screen:not(.is-active)",
   "#start-choice-new",
+  "#hub-shop-list",
+  "#shop-list",
+  ".shop-merchant-header",
+  ".shop-buy-btn",
+  ".shop-sell-btn",
 ]){
   if(!unifiedCss.includes(required)) errors.push("Falta estilo RPG unificado: "+required);
 }
