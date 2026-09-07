@@ -1576,8 +1576,11 @@ function buildCentralProgress(result,gameRecord){
   const old=gameRecord?.progress||{};
   if(gameRecord?.gameId==='rayuela'){
     const save=result.save||{};
+    const activeSave=Array.isArray(save.projects)
+      ? (save.projects.find(item=>item?.id===save.activeProjectId)||save.projects[0]||{})
+      : save;
     const metrics=result.metrics||{};
-    const nodes=Math.max(1,Number(metrics.nodes||save.nodes?.length||1));
+    const nodes=Math.max(1,Number(metrics.nodes||activeSave.nodes?.length||1));
     const choices=Math.max(0,Number(metrics.choices||0));
     const endings=Math.max(0,Number(metrics.endings||0));
     const depth=Math.max(0,Number(metrics.depth||0));
@@ -1586,7 +1589,7 @@ function buildCentralProgress(result,gameRecord){
     const quality=Math.max(0,Math.min(100,Number(metrics.quality||result.quality||0)));
     const percentage=Math.max(Number(old.percentage||0),Math.max(0,Math.min(100,Number(metrics.percentage||result.percentage||0))));
     const achievementXp=(result.achievements||[]).reduce((sum,item)=>sum+Math.max(0,Number(item?.xpReward||0)),0);
-    const projectXp=Math.max(0,Number(save.xp||result.xpGain||0));
+    const projectXp=Math.max(0,Number(save.xp??activeSave.xp??result.xpGain??0));
     const xpDelta=Math.min(500,Math.max(0,projectXp-Number(old.xp||0),projectXp?0:achievementXp));
     const attempts=Math.max(Number(old.attempts||0),nodes+choices);
     return {
