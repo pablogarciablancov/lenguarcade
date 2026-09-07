@@ -8,7 +8,7 @@
     const link=document.createElement('link');
     link.id='bg2-unified-rpg-css';
     link.rel='stylesheet';
-    link.href='./rpg-unified-v2.css?v=20260907-rpg7';
+    link.href='./rpg-unified-v2.css?v=20260907-rpg10';
     document.head.appendChild(link);
   }
 
