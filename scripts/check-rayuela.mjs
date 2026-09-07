@@ -36,7 +36,12 @@ const checks = [
   ['bloqueo por objeto en escena', 'function nodeLockReason('],
   ['bloqueo visible de decisiones', 'class="storyChoice locked"'],
   ['objetos tolerantes a mayúsculas', 'function normalizeItemName('],
-  ['protección de entrada directa', 'renderBlockedNode(']
+  ['protección de entrada directa', 'renderBlockedNode('],
+  ['mochila clicable', 'id="inventoryModal"'],
+  ['contador de inventario', 'id="inventoryCount"'],
+  ['animación al recoger objeto', 'function showItemPickup('],
+  ['iconos automáticos de objetos', 'function itemVisual('],
+  ['inventario visual', 'function renderInventory(']
 ];
 for (const [label, needle] of checks) {
   if (!html.includes(needle)) throw new Error('Rayuela: falta '+label+' ('+needle+')');
