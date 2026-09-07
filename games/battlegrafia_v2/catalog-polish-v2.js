@@ -37,7 +37,7 @@
     const link=document.createElement('link');
     link.id='bg2-catalog-polish-css';
     link.rel='stylesheet';
-    link.href='./catalog-polish-v2.css?v=20260907-rpg21';
+    link.href='./catalog-polish-v2.css?v=20260907-rpg22';
     document.head.appendChild(link);
   }
 
