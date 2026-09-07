@@ -17,6 +17,8 @@ const battleRouter=fs.readFileSync(path.join(v2Root,"battle-router-v2.js"),"utf8
 const battleRouterCss=fs.readFileSync(path.join(v2Root,"battle-router-v2.css"),"utf8");
 const tabsPolish=fs.readFileSync(path.join(v2Root,"tabs-polish-v2.js"),"utf8");
 const tabsPolishCss=fs.readFileSync(path.join(v2Root,"tabs-polish-v2.css"),"utf8");
+const stableTabs=fs.readFileSync(path.join(v2Root,"stable-tabs-v2.js"),"utf8");
+const stableTabsCss=fs.readFileSync(path.join(v2Root,"stable-tabs-v2.css"),"utf8");
 const classic=fs.readFileSync(path.join(root,"games","battlegrafia","index.html"),"utf8");
 const catalog=JSON.parse(fs.readFileSync(path.join(root,"config","game-catalog.json"),"utf8"));
 const migration=fs.readFileSync(path.join(root,"supabase","migrations","20260905144700_battlegrafia_v2.sql"),"utf8");
@@ -30,6 +32,7 @@ try{ new Function(unifiedUi); }catch(error){ errors.push("rpg-unified-v2.js no c
 try{ new Function(battleUi); }catch(error){ errors.push("battle-clean-v2.js no compila: "+error.message); }
 try{ new Function(battleRouter); }catch(error){ errors.push("battle-router-v2.js no compila: "+error.message); }
 try{ new Function(tabsPolish); }catch(error){ errors.push("tabs-polish-v2.js no compila: "+error.message); }
+try{ new Function(stableTabs); }catch(error){ errors.push("stable-tabs-v2.js no compila: "+error.message); }
 
 for(const required of [
   "./save-slots-v2.js",
@@ -38,6 +41,7 @@ for(const required of [
   "./battle-clean-v2.js",
   "./battle-router-v2.js",
   "./tabs-polish-v2.js",
+  "./stable-tabs-v2.js",
 ]){
   if(!index.includes(required)) errors.push("Falta carga de interfaz RPG v2: "+required);
 }
@@ -346,6 +350,38 @@ for(const required of [
 
 if(!enhance.includes("El roster v2 duplicaba esa misma información y rompía la cuadrícula del mapa.")){
   errors.push("El mapa v2 debe eliminar el roster duplicado.");
+}
+
+for(const required of [
+  "bg2-stable-tabs",
+  "nav-home",
+  "nav-battle",
+  "nav-camp",
+  "nav-map",
+  "nav-diary",
+  "nav-history",
+  "nav-inventory",
+]){
+  if(!stableTabs.includes(required)) errors.push("Falta navegación fija v13: "+required);
+}
+
+for(const required of [
+  "flex:0 0 88px!important",
+  "width:88px!important",
+  "height:38px!important",
+  "#nav-home{order:1!important}",
+  "#nav-battle{order:2!important}",
+  "#nav-camp{order:3!important}",
+  "#nav-map{order:4!important}",
+  "#nav-diary{order:5!important}",
+  "#nav-history{order:6!important}",
+  "#nav-inventory{order:7!important}",
+]){
+  if(!stableTabsCss.includes(required)) errors.push("Falta geometría estable de pestañas v13: "+required);
+}
+
+if(!stableTabsCss.includes('@media(min-width:1100px) and (max-height:800px)')){
+  errors.push("Falta cobertura Chromebook para pestañas estables.");
 }
 
 for(const required of [
