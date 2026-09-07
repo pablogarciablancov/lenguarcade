@@ -8,7 +8,7 @@
     const link=document.createElement('link');
     link.id='bg2-unified-rpg-css';
     link.rel='stylesheet';
-    link.href='./rpg-unified-v2.css?v=20260907-rpg4';
+    link.href='./rpg-unified-v2.css?v=20260907-rpg5';
     document.head.appendChild(link);
   }
 
@@ -50,6 +50,8 @@
       screen.classList.add(id.startsWith('hub-') || ['start-choice','mode-screen','start-screen'].includes(id) ? 'bg2-rpg-submenu' : 'bg2-rpg-game-submenu');
       screen.dataset.rpgCode=meta[0];
       screen.dataset.rpgSection=meta[1];
+      const card=screen.querySelector('.screen-card,.mode-content,.start-panel,.camp-container,.screen-inner,.inventory-container');
+      if(card){ card.dataset.rpgCode=meta[0]; card.dataset.rpgSection=meta[1]; }
     });
 
     const newBtn=$('start-choice-new');
@@ -135,6 +137,13 @@
     });
   }
 
+  function ensureSingleActiveScreen(){
+    const active=[...document.querySelectorAll('.app-screen.is-active')];
+    if(active.length <= 1) return;
+    const preferred=active.find(screen=>screen.id==='main-menu') || active[active.length-1];
+    active.forEach(screen=>{ if(screen!==preferred) screen.classList.remove('is-active'); });
+  }
+
   function apply(){
     loadUnifiedCss();
     document.body.classList.add('bg2-unified-rpg');
@@ -144,6 +153,7 @@
     annotateNavigation();
     annotateForms();
     annotateOverlays();
+    ensureSingleActiveScreen();
   }
 
   if(document.readyState === 'loading') {
@@ -154,6 +164,6 @@
 
   // Los overlays de Práctica/Estrategia se crean bajo demanda.
   document.addEventListener('click', () => {
-    requestAnimationFrame(()=>{ annotateSubmenus(); annotateOverlays(); });
+    requestAnimationFrame(()=>{ annotateSubmenus(); annotateOverlays(); ensureSingleActiveScreen(); });
   }, {passive:true});
 })();
