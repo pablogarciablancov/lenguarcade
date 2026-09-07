@@ -3,6 +3,15 @@
 
   const $ = id => document.getElementById(id);
 
+  function loadUnifiedCss(){
+    if(document.getElementById('bg2-unified-rpg-css')) return;
+    const link=document.createElement('link');
+    link.id='bg2-unified-rpg-css';
+    link.rel='stylesheet';
+    link.href='./rpg-unified-v2.css?v=20260907-rpg4';
+    document.head.appendChild(link);
+  }
+
   const titleMeta = [
     ['start-choice','.screen-title','ARCHIVO DE AVENTURAS'],
     ['mode-screen','.mode-title','ESCOGE TU DESTINO'],
@@ -84,6 +93,7 @@
   }
 
   function apply(){
+    loadUnifiedCss();
     document.body.classList.add('bg2-unified-rpg');
     annotateTitles();
     annotateAccount();
