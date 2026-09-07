@@ -4,7 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Anti-FOUC v2: bloquea cualquier pantalla heredada antes del primer paint. -->
-  <script>document.documentElement.classList.add('bg2-preboot');</script>
+  <script>
+    document.documentElement.classList.add('bg2-preboot');
+    window.__BG2_PREBOOT_FAILSAFE=setTimeout(function(){
+      document.documentElement.classList.remove('bg2-preboot');
+      var loader=document.getElementById('bg2-preboot-screen');
+      if(loader) loader.remove();
+    },8000);
+  </script>
   <link rel="preload" as="image" href="https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/menus/menu_fondo.png">
   <style id="bg2-preboot-style">
     html.bg2-preboot body{
@@ -17011,9 +17018,9 @@ function getUnlockedSet(){
 
 
 <!-- Battlegrafía 2.0: capas v2; el motor original permanece intacto. -->
-<script src="./enhance-v2.js?v=20260907-rpg6"></script>
-<script src="./save-slots-v2.js?v=20260907-rpg6"></script>
-<script src="./rpg-ui-v2.js?v=20260907-rpg6"></script>
-<script src="./rpg-unified-v2.js?v=20260907-rpg6"></script>
+<script src="./enhance-v2.js?v=20260907-rpg7"></script>
+<script src="./save-slots-v2.js?v=20260907-rpg7"></script>
+<script src="./rpg-ui-v2.js?v=20260907-rpg7"></script>
+<script src="./rpg-unified-v2.js?v=20260907-rpg7"></script>
 </body>
 </html>
