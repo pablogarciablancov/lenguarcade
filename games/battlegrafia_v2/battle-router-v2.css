@@ -1,0 +1,283 @@
+/* Battlegrafía 2.0 · Internal Screen Router
+   Última palabra de visibilidad: una sola pantalla interna visible. */
+
+body.bg2-battle-router{
+  --br-bg:#050911;
+  --br-panel:#0b1321;
+  --br-line:#020409;
+  --br-steel:#33445f;
+  --br-gold:#d8ad45;
+  --br-paper:#f4ead5;
+  --br-muted:#8ea0b8;
+  --br-pixel:polygon(0 8px,8px 8px,8px 0,calc(100% - 8px) 0,calc(100% - 8px) 8px,100% 8px,100% calc(100% - 8px),calc(100% - 8px) calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,8px calc(100% - 8px),0 calc(100% - 8px));
+}
+
+/* Contrato de visibilidad: por defecto, todas ocultas cuando el router está activo. */
+body.bg2-battle-router[data-bg2-view] :is(
+  #battle-screen,
+  #camp-screen,
+  #map-screen,
+  #diary-screen,
+  #history-screen,
+  #inventory-screen
+){
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* Solo una puede volver a existir visualmente. */
+body.bg2-battle-router[data-bg2-view="battle"] #battle-screen,
+body.bg2-battle-router[data-bg2-view="camp"] #camp-screen,
+body.bg2-battle-router[data-bg2-view="map"] #map-screen,
+body.bg2-battle-router[data-bg2-view="diary"] #diary-screen,
+body.bg2-battle-router[data-bg2-view="history"] #history-screen,
+body.bg2-battle-router[data-bg2-view="inventory"] #inventory-screen{
+  display:flex!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+
+/* La columna de acciones solo existe en combate. */
+body.bg2-battle-router[data-bg2-view] .panel-right{
+  display:none!important;
+}
+body.bg2-battle-router[data-bg2-view="battle"] .panel-right{
+  display:grid!important;
+}
+
+/* En pantallas no-batalla, todo el ancho es para el contenido elegido. */
+body.bg2-battle-router[data-bg2-view]:not([data-bg2-view="battle"]) .layout{
+  display:block!important;
+  width:100%!important;
+  height:calc(100vh - 58px)!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  padding:0!important;
+}
+body.bg2-battle-router[data-bg2-view]:not([data-bg2-view="battle"]) .battle-column{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  border:0!important;
+}
+body.bg2-battle-router[data-bg2-view]:not([data-bg2-view="battle"]) :is(
+  #camp-screen,#map-screen,#diary-screen,#history-screen,#inventory-screen
+){
+  width:100%!important;
+  max-width:none!important;
+  height:100%!important;
+  max-height:none!important;
+  margin:0!important;
+  overflow:auto!important;
+}
+
+/* Menú superior completo y estable en TODAS las vistas internas. */
+body.bg2-battle-router[data-bg2-view] .top-nav{
+  height:58px!important;
+  min-height:58px!important;
+  margin:0!important;
+  padding:8px 10px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  flex-wrap:nowrap!important;
+  gap:5px!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-bottom:3px solid #020409!important;
+  background:#070d17!important;
+  box-shadow:inset 0 -1px 0 #26354b!important;
+}
+body.bg2-battle-router[data-bg2-view] .top-nav::before{
+  content:"BATTLEGRAFÍA 2.0";
+  flex:0 0 auto;
+  margin-right:6px;
+  color:#6e829c;
+  font:900 8px "Courier New",Consolas,monospace;
+  letter-spacing:.13em;
+}
+body.bg2-battle-router[data-bg2-view] .top-nav .nav-btn,
+body.bg2-battle-router[data-bg2-view="battle"] :is(
+  #nav-home,#nav-battle,#nav-camp,#nav-map,#nav-diary,#nav-history,#nav-inventory
+){
+  display:inline-flex!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  flex:0 0 auto!important;
+  min-width:0!important;
+  height:38px!important;
+  padding:10px 9px 6px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--br-pixel);
+  background:#111c2d!important;
+  color:#9fb0c4!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #2e3d55!important;
+  font:900 8px "Courier New",Consolas,monospace!important;
+  letter-spacing:.02em!important;
+  white-space:nowrap!important;
+}
+body.bg2-battle-router[data-bg2-view] .top-nav .nav-btn.nav-active{
+  background:#4c3a17!important;
+  color:#fff0ba!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 3px #9e7b2f!important;
+}
+body.bg2-battle-router[data-bg2-view] .top-nav .nav-btn::before{
+  top:2px!important;
+  left:6px!important;
+  font-size:6px!important;
+}
+body.bg2-battle-router[data-bg2-view] :is(#saveIndicator,#runInfo,#bg2-version-pill){
+  flex:0 1 auto!important;
+  min-width:0!important;
+  margin-left:auto!important;
+  padding:5px 7px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:7px!important;
+}
+
+/* La batalla vuelve a usar dos columnas, pero sin ocultar navegación. */
+body.bg2-battle-router[data-bg2-view="battle"] .game-shell{
+  width:100vw!important;
+  max-width:none!important;
+  height:100vh!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+body.bg2-battle-router[data-bg2-view="battle"] .layout{
+  width:100%!important;
+  height:calc(100vh - 58px)!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 380px!important;
+  gap:0!important;
+  overflow:hidden!important;
+}
+body.bg2-battle-router[data-bg2-view="battle"] .battle-column{
+  min-width:0!important;
+  min-height:0!important;
+  height:100%!important;
+  overflow:hidden!important;
+  border-right:3px solid #020409!important;
+}
+body.bg2-battle-router[data-bg2-view="battle"] #battle-screen{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+}
+body.bg2-battle-router[data-bg2-view="battle"] .panel-right{
+  width:380px!important;
+  height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+/* El mapa nunca puede colarse como segundo bloque de batalla. */
+body.bg2-battle-router[data-bg2-view="battle"] :is(
+  #map-screen,#camp-screen,#diary-screen,#history-screen,#inventory-screen
+){
+  display:none!important;
+  visibility:hidden!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+
+/* El antiguo riel de guardianes queda reservado al mapa. */
+body.bg2-battle-router[data-bg2-view="battle"] #bg2-world-strip{
+  display:none!important;
+}
+body.bg2-battle-router[data-bg2-view="map"] #bg2-map-roster{
+  display:grid!important;
+}
+
+/* En mapa/campamento/etc. la navegación permanece arriba y el contenido empieza limpio. */
+body.bg2-battle-router[data-bg2-view]:not([data-bg2-view="battle"]) .game-shell{
+  width:100vw!important;
+  max-width:none!important;
+  height:100vh!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:#060a12!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+body.bg2-battle-router[data-bg2-view]:not([data-bg2-view="battle"]) .game-title,
+body.bg2-battle-router[data-bg2-view] .copyright{
+  display:none!important;
+}
+
+/* 1366x768: todo cabe sin scroll global. */
+@media(min-width:1100px) and (max-height:800px){
+  body.bg2-battle-router[data-bg2-view] .top-nav{
+    height:52px!important;
+    min-height:52px!important;
+    padding:6px 8px!important;
+    gap:4px!important;
+  }
+  body.bg2-battle-router[data-bg2-view] .top-nav::before{
+    font-size:7px!important;
+    margin-right:4px!important;
+  }
+  body.bg2-battle-router[data-bg2-view] .top-nav .nav-btn{
+    height:36px!important;
+    padding:9px 7px 5px!important;
+    font-size:7px!important;
+  }
+  body.bg2-battle-router[data-bg2-view="battle"] .layout{
+    height:calc(100vh - 52px)!important;
+    grid-template-columns:minmax(0,1fr) 365px!important;
+  }
+  body.bg2-battle-router[data-bg2-view="battle"] .panel-right{
+    width:365px!important;
+  }
+  body.bg2-battle-router[data-bg2-view]:not([data-bg2-view="battle"]) .layout{
+    height:calc(100vh - 52px)!important;
+  }
+}
+
+/* Tablet: navegación con desplazamiento horizontal, nunca desaparece. */
+@media(max-width:900px){
+  body.bg2-battle-router[data-bg2-view] .top-nav{
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    scrollbar-width:none;
+  }
+  body.bg2-battle-router[data-bg2-view] .top-nav::-webkit-scrollbar{display:none}
+  body.bg2-battle-router[data-bg2-view] :is(#saveIndicator,#runInfo,#bg2-version-pill){
+    display:none!important;
+  }
+  body.bg2-battle-router[data-bg2-view="battle"] .game-shell{
+    height:auto!important;
+    min-height:100vh!important;
+    overflow:auto!important;
+  }
+  body.bg2-battle-router[data-bg2-view="battle"] .layout{
+    height:auto!important;
+    grid-template-columns:1fr!important;
+  }
+  body.bg2-battle-router[data-bg2-view="battle"] .battle-column{
+    height:62vh!important;
+    min-height:460px!important;
+    border-right:0!important;
+    border-bottom:3px solid #020409!important;
+  }
+  body.bg2-battle-router[data-bg2-view="battle"] .panel-right{
+    width:100%!important;
+    height:auto!important;
+  }
+}
