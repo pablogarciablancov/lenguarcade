@@ -4231,9 +4231,15 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function accederAlJuego() {
-    document.getElementById('login-screen').classList.remove('is-active');
-    // Forzamos la aparición del menú principal
-    const menu = document.getElementById('start-choice');
+    // Compatibilidad con el antiguo segundo listener de demo:
+    // una sola pantalla puede quedar activa y el arranque siempre aterriza en el HUB.
+    document.querySelectorAll('.app-screen.is-active').forEach(screen => screen.classList.remove('is-active'));
+    const login = document.getElementById('login-screen');
+    if(login){
+      login.classList.remove('is-active');
+      login.style.display = 'none';
+    }
+    const menu = document.getElementById('main-menu');
     if(menu) menu.classList.add('is-active');
   }
 });
