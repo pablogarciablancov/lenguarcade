@@ -30,20 +30,25 @@ body.bg2-catalog-polish .bg2-kicker{
    HUB · marco general
    ========================= */
 body.bg2-catalog-polish :is(#hub-collection,#hub-shop).app-screen{
-  padding:4vh 18px 24px!important;
-  overflow:auto!important;
-  align-items:flex-start!important;
+  padding:clamp(14px,3vh,28px) 16px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  align-items:center!important;
 }
 body.bg2-catalog-polish :is(#hub-collection,#hub-shop) .hub-panel{
-  width:min(1220px,96vw)!important;
-  max-width:1220px!important;
+  width:min(1120px,calc(100vw - 32px))!important;
+  max-width:1120px!important;
+  max-height:calc(100vh - 32px)!important;
+  overflow:hidden!important;
 }
 body.bg2-catalog-polish :is(#hub-collection,#hub-shop) .screen-card{
   width:100%!important;
   max-width:none!important;
-  min-height:min(780px,90vh);
+  min-height:0!important;
+  max-height:calc(100vh - 32px)!important;
   padding:22px!important;
-  overflow:visible!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
   background:
     linear-gradient(180deg,rgba(18,31,50,.97),rgba(7,13,24,.98))!important;
   box-shadow:
@@ -198,8 +203,9 @@ body.bg2-catalog-polish #hub-collection-grid.collection-grid{
   gap:12px!important;
   max-height:none!important;
   overflow:visible!important;
-  padding:0!important;
+  padding:0 2px 8px 0!important;
   margin:0!important;
+  align-items:stretch!important;
 }
 body.bg2-catalog-polish #hub-collection-grid .mon-card{
   position:relative;
@@ -477,7 +483,11 @@ body.bg2-catalog-polish .camp-shop .camp-text{
   line-height:1.4;
 }
 body.bg2-catalog-polish .camp-shop #shop-list{
-  max-height:none!important;
+  max-height:clamp(300px,46vh,440px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  align-content:start!important;
+  padding-right:4px!important;
 }
 
 body.bg2-catalog-polish .bg2-merchant-header{
@@ -784,13 +794,15 @@ body.bg2-catalog-polish .shop-msg{
   color:#b6c4d3!important;
 }
 
-/* Compactación específica dentro del campamento */
-body.bg2-catalog-polish #camp-screen .camp-container{
-  max-width:1020px!important;
+/* Compactación específica dentro del campamento.
+   No modificar ancho/arquitectura de .camp-container: la controla tabs-polish-v2. */
+body.bg2-catalog-polish #camp-screen .camp-shop{
+  min-width:0!important;
+  overflow:hidden!important;
 }
 body.bg2-catalog-polish #camp-screen .camp-shop .bg2-merchant-header{
   min-height:106px;
-  grid-template-columns:82px minmax(180px,1fr) auto!important;
+  grid-template-columns:82px minmax(0,1fr) auto!important;
 }
 body.bg2-catalog-polish #camp-screen .camp-shop .bg2-merchant-avatar{
   width:74px!important;
@@ -799,11 +811,13 @@ body.bg2-catalog-polish #camp-screen .camp-shop .bg2-merchant-avatar{
 body.bg2-catalog-polish #camp-screen .camp-shop .bg2-merchant-copy strong{
   font-size:13px;
 }
-body.bg2-catalog-polish #camp-screen :is(#shop-list).shop-grid{
-  grid-template-columns:repeat(auto-fill,minmax(190px,1fr))!important;
+body.bg2-catalog-polish #camp-screen #shop-list.shop-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
 }
 body.bg2-catalog-polish #camp-screen .shop-item.bg2-shop-card{
-  min-height:235px;
+  min-width:0!important;
+  min-height:215px!important;
 }
 body.bg2-catalog-polish #camp-screen .bg2-shop-art{
   height:102px;
@@ -887,5 +901,57 @@ body.bg2-catalog-polish .bg2-catalog-empty[hidden]{
   }
   body.bg2-catalog-polish :is(#hub-shop-list,#shop-list) .shop-item.bg2-shop-card{
     min-height:230px;
+  }
+}
+
+
+/* ===== rpg22 · aislamiento anti-colisiones ===== */
+body.bg2-catalog-polish #hub-collection .screen-card,
+body.bg2-catalog-polish #hub-shop .screen-card{
+  box-sizing:border-box!important;
+  overscroll-behavior:contain;
+}
+body.bg2-catalog-polish #hub-collection-grid,
+body.bg2-catalog-polish #hub-shop-list,
+body.bg2-catalog-polish #camp-screen #shop-list{
+  min-width:0!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+body.bg2-catalog-polish #camp-screen .bg2-merchant-header{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+body.bg2-catalog-polish #camp-screen .bg2-merchant-copy,
+body.bg2-catalog-polish #camp-screen .bg2-shop-tabs,
+body.bg2-catalog-polish #camp-screen .bg2-shop-filters{
+  min-width:0!important;
+  max-width:100%!important;
+}
+body.bg2-catalog-polish #camp-screen .bg2-shop-tabs{
+  flex-wrap:wrap!important;
+}
+body.bg2-catalog-polish #camp-screen .bg2-shop-filters{
+  overflow:hidden!important;
+}
+body.bg2-catalog-polish #camp-screen .bg2-shop-filter{
+  flex:0 1 auto!important;
+}
+body.bg2-catalog-polish #camp-screen .shop-item-text,
+body.bg2-catalog-polish #hub-collection-grid :is(.mon-name,.mon-rule){
+  min-width:0!important;
+  overflow-wrap:anywhere!important;
+}
+
+@media(max-width:900px){
+  body.bg2-catalog-polish #camp-screen #shop-list.shop-grid{
+    grid-template-columns:1fr!important;
+  }
+  body.bg2-catalog-polish #camp-screen .camp-shop #shop-list{
+    max-height:none!important;
+    overflow:visible!important;
+    padding-right:0!important;
   }
 }
