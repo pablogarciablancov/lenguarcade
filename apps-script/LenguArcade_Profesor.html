@@ -1465,7 +1465,7 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
     document.getElementById('missionGame').innerHTML=games.join('');document.getElementById('missionGame').value=mission.gameId||'';
     document.getElementById('missionType').value=mission.missionType||'sessions';
     document.getElementById('missionTarget').value=Number(mission.target||1);
-    document.getElementById('missionFrom').value=dtLocal(mission.activeFrom);
+    document.getElementById('missionFrom').value=mission.id?dtLocal(mission.activeFrom):dtLocal(new Date().toISOString());
     document.getElementById('missionTo').value=dtLocal(mission.activeTo);
     document.getElementById('missionFeatured').checked=!!mission.featured;
     syncMissionGameAvailability();

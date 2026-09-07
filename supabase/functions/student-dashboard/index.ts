@@ -20,10 +20,29 @@ function isLockedStatus(status: unknown) {
 function missionProgressValue(
   mission: Record<string, unknown>,
   progress: Array<Record<string, unknown>>,
+  missionEvents: Array<Record<string, unknown>>,
 ) {
   const gameId = String(mission.game_id || "");
-  const scoped = gameId ? progress.filter(row => String(row.game_id) === gameId) : progress;
   const type = String(mission.mission_type || "");
+  const activeFrom = mission.active_from ? Date.parse(String(mission.active_from)) : Number.NaN;
+  const activeTo = mission.active_to ? Date.parse(String(mission.active_to)) : Number.NaN;
+
+  if (Number.isFinite(activeFrom)) {
+    const events = missionEvents.filter(row => {
+      if (gameId && String(row.game_id) !== gameId) return false;
+      const occurredAt = Date.parse(String(row.occurred_at || ""));
+      if (!Number.isFinite(occurredAt) || occurredAt < activeFrom) return false;
+      if (Number.isFinite(activeTo) && occurredAt > activeTo) return false;
+      return true;
+    });
+    if (type === "sessions") return events.length;
+    if (type === "variety") return new Set(events.map(row => String(row.game_id || "")).filter(Boolean)).size;
+    if (type === "xp") return events.reduce((sum, row) => sum + Math.max(0, Number(row.xp_delta || 0)), 0);
+    if (type === "accuracy") return events.reduce((max, row) => Math.max(max, Number(row.accuracy || 0)), 0);
+    return 0;
+  }
+
+  const scoped = gameId ? progress.filter(row => String(row.game_id) === gameId) : progress;
   if (type === "sessions") {
     return scoped.reduce((sum, row) => sum + Number(row.sessions || 0), 0);
   }
@@ -64,6 +83,7 @@ Deno.serve(async (request) => {
       achievementsResult,
       enrollmentsResult,
       missionsResult,
+      missionEventsResult,
       evaluationsResult,
     ] = await Promise.all([
       admin.from("profiles")
@@ -96,6 +116,11 @@ Deno.serve(async (request) => {
         .select("id,title,description,game_id,mission_type,target,reward_xp,reward_feathers,active_from,active_to,classroom_id,featured,priority,organization_id")
         .eq("organization_id", organizationId)
         .eq("active", true),
+      admin.from("game_events")
+        .select("game_id,xp_delta,accuracy,occurred_at")
+        .eq("profile_id", profileId)
+        .order("occurred_at", { ascending:false })
+        .limit(500),
       admin.from("evaluations")
         .select("scope,game_id,score,breakdown,updated_at")
         .eq("profile_id", profileId),
@@ -109,6 +134,7 @@ Deno.serve(async (request) => {
       achievementsResult.error,
       enrollmentsResult.error,
       missionsResult.error,
+      missionEventsResult.error,
       evaluationsResult.error,
     ].find(Boolean);
     if (failure || !profileResult.data) {
@@ -200,7 +226,7 @@ Deno.serve(async (request) => {
         return true;
       })
       .map(mission => {
-        const current = missionProgressValue(mission, progress);
+        const current = missionProgressValue(mission, progress, missionEventsResult.data || []);
         const target = Math.max(0, Number(mission.target || 0));
         const completed = target > 0 && current >= target;
         const gameId = String(mission.game_id || "");

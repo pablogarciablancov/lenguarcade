@@ -26,6 +26,7 @@ const teacherHtml=read("apps-script/LenguArcade_Profesor.html");
   ["misiones por organización",'.eq("organization_id", organizationId)'],
   ["filtro por clase","classroomIds.has"],
   ["orden pendientes/completadas","a.completed !== b.completed"],
+  ["ventana temporal de misión","missionEvents"],
 ].forEach(([label,needle])=>{
   if(!studentDashboard.includes(needle))errors.push(`student-dashboard no cubre ${label}.`);
 });
@@ -34,6 +35,7 @@ const teacherHtml=read("apps-script/LenguArcade_Profesor.html");
   ["guardar misión",'action === "saveMission"'],
   ["cerrar misión",'action === "archiveMission"'],
   ["validación de tipos","MISSION_TYPES"],
+  ["inicio automático de misiones nuevas","!mission.id && !activeFrom"],
   ["resolución de clase","resolveMissionClassroom"],
   ["listado de misiones","missionsResult"],
 ].forEach(([label,needle])=>{

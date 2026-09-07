@@ -177,6 +177,9 @@ async function handleMissionAction(
   if (!Number.isFinite(target) || target <= 0 || target > 1000000) {
     return jsonResponse({ ok:false, error:"invalid_mission_target" }, 400);
   }
+  if (missionType === "accuracy" && target > 100) {
+    return jsonResponse({ ok:false, error:"invalid_mission_target" }, 400);
+  }
 
   let gameId = cleanMissionText(mission.gameId, 80) || null;
   if (missionType === "variety") gameId = null;
@@ -218,6 +221,7 @@ async function handleMissionAction(
   try {
     activeFrom = dateOrNull(mission.activeFrom);
     activeTo = dateOrNull(mission.activeTo);
+    if (!mission.id && !activeFrom) activeFrom = new Date().toISOString();
   } catch {
     return jsonResponse({ ok:false, error:"invalid_mission_date" }, 400);
   }
