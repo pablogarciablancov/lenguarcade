@@ -100,6 +100,180 @@ async function resetPinsForFilter(admin: any, organizationId: string, classCode:
   return { ok:true, action:"resetPins", count:credentials.length, credentials };
 }
 
+
+const MISSION_TYPES = new Set(["sessions", "variety", "xp", "accuracy"]);
+
+function cleanMissionText(value: unknown, max = 500) {
+  return String(value || "").trim().slice(0, max);
+}
+
+function missionTypeLabel(value: unknown) {
+  return ({
+    sessions:"Partidas",
+    variety:"Juegos distintos",
+    xp:"XP conseguido",
+    accuracy:"Precisión",
+  } as Record<string, string>)[String(value || "")] || "Objetivo";
+}
+
+function missionStatus(row: Record<string, unknown>) {
+  const now = Date.now();
+  const from = row.active_from ? Date.parse(String(row.active_from)) : Number.NaN;
+  const to = row.active_to ? Date.parse(String(row.active_to)) : Number.NaN;
+  if (Number.isFinite(from) && from > now) return "scheduled";
+  if (Number.isFinite(to) && to <= now) return "expired";
+  return "active";
+}
+
+async function resolveMissionClassroom(
+  admin: any,
+  organizationId: string,
+  classCode: string,
+) {
+  const clean = cleanMissionText(classCode, 120);
+  if (!clean) return null;
+  const { data, error } = await admin.from("classrooms")
+    .select("id,legacy_class_code")
+    .eq("organization_id", organizationId)
+    .eq("active", true);
+  if (error) throw error;
+  const classroom = (data || []).find((row: Record<string, unknown>) =>
+    String(row.id) === clean || String(row.legacy_class_code || "") === clean
+  );
+  if (!classroom) throw new Error("mission_class_not_found");
+  return classroom.id;
+}
+
+async function handleMissionAction(
+  admin: any,
+  organizationId: string,
+  body: Record<string, unknown>,
+) {
+  const action = String(body.action || "");
+  if (action === "archiveMission") {
+    const missionId = cleanMissionText(body.missionId, 160);
+    if (!missionId) return jsonResponse({ ok:false, error:"missing_mission_id" }, 400);
+    const { data, error } = await admin.from("mission_definitions")
+      .update({ active:false, updated_at:new Date().toISOString() })
+      .eq("organization_id", organizationId)
+      .eq("id", missionId)
+      .select("id")
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return jsonResponse({ ok:false, error:"mission_not_found" }, 404);
+    return jsonResponse({ ok:true, action:"archiveMission", missionId });
+  }
+
+  if (action !== "saveMission") return null;
+  const mission = body.mission && typeof body.mission === "object"
+    ? body.mission as Record<string, unknown>
+    : {};
+  const title = cleanMissionText(mission.title, 180);
+  const description = cleanMissionText(mission.description, 800);
+  const missionType = cleanMissionText(mission.missionType, 40);
+  const target = Number(mission.target || 0);
+  if (title.length < 3) return jsonResponse({ ok:false, error:"mission_title_required" }, 400);
+  if (!MISSION_TYPES.has(missionType)) return jsonResponse({ ok:false, error:"invalid_mission_type" }, 400);
+  if (!Number.isFinite(target) || target <= 0 || target > 1000000) {
+    return jsonResponse({ ok:false, error:"invalid_mission_target" }, 400);
+  }
+
+  let gameId = cleanMissionText(mission.gameId, 80) || null;
+  if (missionType === "variety") gameId = null;
+  if (gameId) {
+    const { data:game, error:gameError } = await admin.from("games")
+      .select("id")
+      .eq("id", gameId)
+      .eq("official", true)
+      .eq("active", true)
+      .maybeSingle();
+    if (gameError) throw gameError;
+    if (!game) return jsonResponse({ ok:false, error:"mission_game_not_found" }, 400);
+  }
+
+  let classroomId: string | null = null;
+  try {
+    classroomId = await resolveMissionClassroom(
+      admin,
+      organizationId,
+      cleanMissionText(mission.classCode, 120),
+    );
+  } catch (error) {
+    if (String((error as Error)?.message || error) === "mission_class_not_found") {
+      return jsonResponse({ ok:false, error:"mission_class_not_found" }, 400);
+    }
+    throw error;
+  }
+
+  function dateOrNull(value: unknown) {
+    const text = cleanMissionText(value, 80);
+    if (!text) return null;
+    const parsed = new Date(text);
+    if (Number.isNaN(parsed.getTime())) throw new Error("invalid_mission_date");
+    return parsed.toISOString();
+  }
+
+  let activeFrom: string | null = null;
+  let activeTo: string | null = null;
+  try {
+    activeFrom = dateOrNull(mission.activeFrom);
+    activeTo = dateOrNull(mission.activeTo);
+  } catch {
+    return jsonResponse({ ok:false, error:"invalid_mission_date" }, 400);
+  }
+  if (activeFrom && activeTo && Date.parse(activeTo) <= Date.parse(activeFrom)) {
+    return jsonResponse({ ok:false, error:"invalid_mission_window" }, 400);
+  }
+
+  const featured = Boolean(mission.featured);
+  const priority = featured ? 100 : Math.max(-100, Math.min(99, Math.round(Number(mission.priority || 0))));
+  const id = cleanMissionText(mission.id, 160) ||
+    `mission_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
+  const record = {
+    id,
+    title,
+    description,
+    game_id:gameId,
+    mission_type:missionType,
+    target,
+    reward_xp:0,
+    reward_feathers:0,
+    active_from:activeFrom,
+    active_to:activeTo,
+    active:true,
+    organization_id:organizationId,
+    classroom_id:classroomId,
+    featured,
+    priority,
+    updated_at:new Date().toISOString(),
+  };
+
+  if (mission.id) {
+    const { data:existing, error:existingError } = await admin.from("mission_definitions")
+      .select("id")
+      .eq("organization_id", organizationId)
+      .eq("id", id)
+      .maybeSingle();
+    if (existingError) throw existingError;
+    if (!existing) return jsonResponse({ ok:false, error:"mission_not_found" }, 404);
+    const { data, error } = await admin.from("mission_definitions")
+      .update(record)
+      .eq("organization_id", organizationId)
+      .eq("id", id)
+      .select("*")
+      .single();
+    if (error) throw error;
+    return jsonResponse({ ok:true, action:"saveMission", mission:data });
+  }
+
+  const { data, error } = await admin.from("mission_definitions")
+    .insert(record)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return jsonResponse({ ok:true, action:"saveMission", mission:data });
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers:corsHeaders });
   if (request.method !== "POST") return jsonResponse({ ok:false, error:"method_not_allowed" }, 405);
@@ -110,6 +284,10 @@ Deno.serve(async (request) => {
     const classCode = String(body.classCode || "");
     const gameId = String(body.gameId || "");
     const action = String(body.action || "");
+    if (action === "saveMission" || action === "archiveMission") {
+      const missionResult = await handleMissionAction(admin, organizationId, body);
+      if (missionResult) return missionResult;
+    }
     if (action === "resetPins") {
       if (String(body.confirmText || "") !== "RESET PIN") {
         return jsonResponse({ ok:false, error:"confirmation_required" }, 400);
@@ -129,6 +307,7 @@ Deno.serve(async (request) => {
       eventsResult,
       achievementsResult,
       errorsResult,
+      missionsResult,
     ] = await Promise.all([
       admin.from("profiles")
         .select("id,email,first_name,last_name,last_login_at")
@@ -144,8 +323,9 @@ Deno.serve(async (request) => {
         .select("classroom_id,profile_id")
         .eq("active", true),
       admin.from("games")
-        .select("id,name,icon,color,status,sort_order")
+        .select("id,name,icon,color,status,sort_order,integration,official")
         .eq("active", true)
+        .eq("official", true)
         .order("sort_order"),
       admin.from("game_progress")
         .select("profile_id,game_id,xp,level,percentage,accuracy,attempts,successes,errors,streak,sessions,achievements_count,missions_completed,feathers,last_activity_at"),
@@ -156,11 +336,17 @@ Deno.serve(async (request) => {
         .select("profile_id,game_id"),
       admin.from("game_errors")
         .select("profile_id,game_id,skill,error_type,error_count"),
+      admin.from("mission_definitions")
+        .select("id,title,description,game_id,mission_type,target,active_from,active_to,classroom_id,featured,priority,active,updated_at")
+        .eq("organization_id", organizationId)
+        .eq("active", true)
+        .order("priority", { ascending:false })
+        .order("active_to", { ascending:true, nullsFirst:false }),
     ]);
     const failure = [
       profilesResult.error, classroomsResult.error, enrollmentsResult.error,
       gamesResult.error, progressResult.error, eventsResult.error,
-      achievementsResult.error, errorsResult.error,
+      achievementsResult.error, errorsResult.error, missionsResult.error,
     ].find(Boolean);
     if (failure) throw failure;
 
@@ -298,6 +484,24 @@ Deno.serve(async (request) => {
       recommendations,
       focus,
       focusProgress,
+      missions:(missionsResult.data || []).map(row => ({
+        id:row.id,
+        title:row.title,
+        description:row.description,
+        gameId:row.game_id || "",
+        gameName:(gamesResult.data || []).find(game => game.id === row.game_id)?.name || "",
+        missionType:row.mission_type,
+        typeLabel:missionTypeLabel(row.mission_type),
+        target:Number(row.target || 0),
+        activeFrom:row.active_from || null,
+        activeTo:row.active_to || null,
+        classCode:row.classroom_id ? String(classroomById.get(row.classroom_id)?.legacy_class_code || row.classroom_id) : "",
+        className:row.classroom_id ? String(classroomById.get(row.classroom_id)?.name || "") : "Todas las clases",
+        featured:Boolean(row.featured),
+        priority:Number(row.priority || 0),
+        status:missionStatus(row),
+        updatedAt:row.updated_at,
+      })),
       classes:classrooms.map(row => ({
         classCode:row.legacy_class_code || row.id,
         nombreVisible:row.name,
