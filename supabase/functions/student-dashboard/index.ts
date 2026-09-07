@@ -17,13 +17,45 @@ function isLockedStatus(status: unknown) {
     normalized.includes("coming");
 }
 
+function missionProgressValue(
+  mission: Record<string, unknown>,
+  progress: Array<Record<string, unknown>>,
+) {
+  const gameId = String(mission.game_id || "");
+  const scoped = gameId ? progress.filter(row => String(row.game_id) === gameId) : progress;
+  const type = String(mission.mission_type || "");
+  if (type === "sessions") {
+    return scoped.reduce((sum, row) => sum + Number(row.sessions || 0), 0);
+  }
+  if (type === "variety") {
+    return scoped.filter(row => Number(row.sessions || 0) > 0).length;
+  }
+  if (type === "xp") {
+    return scoped.reduce((sum, row) => sum + Number(row.xp || 0), 0);
+  }
+  if (type === "accuracy") {
+    const attempts = scoped.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
+    const successes = scoped.reduce((sum, row) => sum + Number(row.successes || 0), 0);
+    return attempts ? Math.round((successes / attempts) * 100) : 0;
+  }
+  return 0;
+}
+
+function missionTypeLabel(type: unknown) {
+  return ({
+    sessions:"Partidas",
+    variety:"Juegos distintos",
+    xp:"XP conseguido",
+    accuracy:"Precisión",
+  } as Record<string, string>)[String(type || "")] || "Objetivo";
+}
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers:corsHeaders });
   if (request.method !== "POST") return jsonResponse({ ok:false, error:"method_not_allowed" }, 405);
 
   try {
-    const { admin, profileId } = await requireProfileSession(request);
+    const { admin, profileId, organizationId } = await requireProfileSession(request);
     const [
       profileResult,
       gamesResult,
@@ -61,7 +93,8 @@ Deno.serve(async (request) => {
         .eq("profile_id", profileId)
         .eq("active", true),
       admin.from("mission_definitions")
-        .select("id,title,description,game_id,mission_type,target,reward_xp,reward_feathers")
+        .select("id,title,description,game_id,mission_type,target,reward_xp,reward_feathers,active_from,active_to,classroom_id,featured,priority,organization_id")
+        .eq("organization_id", organizationId)
         .eq("active", true),
       admin.from("evaluations")
         .select("scope,game_id,score,breakdown,updated_at")
@@ -154,22 +187,51 @@ Deno.serve(async (request) => {
       };
     });
 
-    const missionProgress = (missionsResult.data || []).map(mission => {
-      let current = 0;
-      if (mission.mission_type === "sessions") current = sessions;
-      if (mission.mission_type === "variety") current = progress.filter(row => Number(row.sessions || 0) > 0).length;
-      if (mission.mission_type === "accuracy") current = Math.max(0, ...progress.map(row => Number(row.accuracy || 0)));
-      return {
-        id:mission.id,
-        title:mission.title,
-        description:mission.description,
-        progress:Math.min(current, Number(mission.target || 0)),
-        target:Number(mission.target || 0),
-        completed:current >= Number(mission.target || 0),
-        rewardXp:Number(mission.reward_xp || 0),
-        rewardPlumas:Number(mission.reward_feathers || 0),
-      };
-    });
+    const nowMs = Date.now();
+    const classroomIds = new Set((enrollmentsResult.data || []).map(row => String(row.classroom_id || "")));
+    const gameNameById = new Map((gamesResult.data || []).map(game => [String(game.id), String(game.name || game.id)]));
+    const missionProgress = (missionsResult.data || [])
+      .filter(mission => {
+        if (mission.classroom_id && !classroomIds.has(String(mission.classroom_id))) return false;
+        const from = mission.active_from ? Date.parse(String(mission.active_from)) : Number.NaN;
+        const to = mission.active_to ? Date.parse(String(mission.active_to)) : Number.NaN;
+        if (Number.isFinite(from) && from > nowMs) return false;
+        if (Number.isFinite(to) && to <= nowMs) return false;
+        return true;
+      })
+      .map(mission => {
+        const current = missionProgressValue(mission, progress);
+        const target = Math.max(0, Number(mission.target || 0));
+        const completed = target > 0 && current >= target;
+        const gameId = String(mission.game_id || "");
+        return {
+          id:mission.id,
+          title:mission.title,
+          description:mission.description,
+          missionType:String(mission.mission_type || ""),
+          typeLabel:missionTypeLabel(mission.mission_type),
+          gameId,
+          gameName:gameId ? (gameNameById.get(gameId) || gameId) : "",
+          progress:Math.min(current, target),
+          rawProgress:current,
+          target,
+          completed,
+          featured:Boolean(mission.featured),
+          priority:Number(mission.priority || 0),
+          dueAt:mission.active_to || null,
+          scope:mission.classroom_id ? "classroom" : "global",
+          rewardXp:Number(mission.reward_xp || 0),
+          rewardPlumas:Number(mission.reward_feathers || 0),
+        };
+      })
+      .sort((a, b) => {
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+        const aDue = a.dueAt ? Date.parse(String(a.dueAt)) : Number.POSITIVE_INFINITY;
+        const bDue = b.dueAt ? Date.parse(String(b.dueAt)) : Number.POSITIVE_INFINITY;
+        if (aDue !== bDue) return aDue - bDue;
+        if (a.featured !== b.featured) return a.featured ? -1 : 1;
+        return b.priority - a.priority;
+      });
 
     const percentage = Math.round(average(progress.map(row => Number(row.percentage || 0))));
     const accuracy = attempts ? Math.round((successes / attempts) * 100) : 0;

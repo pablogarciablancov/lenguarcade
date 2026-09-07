@@ -37,7 +37,7 @@ for (const marker of [
   "deleteClass",
   "ELIMINAR",
   "teacher-roster-management",
-  "var allowed=['resumen','taller','alumnos','juegos','errores','gestion','classroom']",
+  "var allowed=['resumen','taller','alumnos','juegos','errores','misiones','gestion','classroom']",
 ]) {
   if (!teacher.includes(marker)) throw new Error(`Falta interfaz consolidada de gestión: ${marker}`);
 }
