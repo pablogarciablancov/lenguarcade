@@ -348,6 +348,17 @@ for(const required of [
   if(!tabsPolishCss.includes(required)) errors.push("Falta ensanchado/mapa estable v12: "+required);
 }
 
+for(const required of [
+  "#inventory-screen #monster-collection",
+  "width:46px!important",
+  "height:46px!important",
+  "width:38px!important",
+  "height:38px!important",
+  "min-height:0!important",
+]){
+  if(!tabsPolishCss.includes(required)) errors.push("Falta colección compacta de criaturas en Mochila v14: "+required);
+}
+
 if(!enhance.includes("El roster v2 duplicaba esa misma información y rompía la cuadrícula del mapa.")){
   errors.push("El mapa v2 debe eliminar el roster duplicado.");
 }
