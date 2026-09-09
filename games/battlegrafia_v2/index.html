@@ -8838,7 +8838,7 @@ window.BG.hasSaveForMode = function(modeId){
   }catch(e){ return false; }
 };
 window.BG.listContinuableModes = function(){
-  return ["adventure","survival"].filter(m=>window.BG.hasSaveForMode(m));
+  return ["adventure","survival","dominio","strategy"].filter(m=>window.BG.hasSaveForMode(m));
 };
 
 
@@ -10656,6 +10656,62 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
     // Refrescar indicador en UI
     try{ updateRunInfo(); }catch(e){}
   }
+
+  function snapshotRunState(){
+    const src = runState || {};
+    const out = {
+      modeId: runModeId || getSelectedModeId(),
+      startedAt: Number(src.startedAt || Date.now())
+    };
+
+    if(Number.isFinite(Number(src.perfectStreak))) out.perfectStreak = Number(src.perfectStreak);
+    if(Number.isFinite(Number(src.endsAt))) out.endsAt = Number(src.endsAt);
+
+    if(src.strategyConfig && typeof src.strategyConfig === "object"){
+      try{ out.strategyConfig = JSON.parse(JSON.stringify(src.strategyConfig)); }catch(e){}
+    }
+    if(src.allowedItemCounts && typeof src.allowedItemCounts === "object"){
+      try{ out.allowedItemCounts = JSON.parse(JSON.stringify(src.allowedItemCounts)); }catch(e){}
+    }
+    if(Array.isArray(src.allowedItems)) out.allowedItems = src.allowedItems.slice();
+
+    const strategyIds = Array.isArray(src.strategyMonsterObjs)
+      ? src.strategyMonsterObjs.map(m=>m && m.id).filter(Boolean)
+      : (Array.isArray(src.strategyMonsterIds) ? src.strategyMonsterIds.slice() : []);
+    if(strategyIds.length) out.strategyMonsterIds = strategyIds;
+
+    return out;
+  }
+
+  function restoreRunStateFromPlayer(savedPlayer){
+    runModeId = getSelectedModeId();
+    runRules = getModeRules(runModeId);
+
+    const saved = savedPlayer && savedPlayer.__runState;
+    if(saved && typeof saved === "object" && String(saved.modeId || runModeId) === runModeId){
+      try{ runState = JSON.parse(JSON.stringify(saved)); }
+      catch(e){ runState = { modeId:runModeId, startedAt:Date.now() }; }
+    }else{
+      runState = { modeId:runModeId, startedAt:Date.now() };
+    }
+
+    runState.modeId = runModeId;
+    if(!Number.isFinite(Number(runState.startedAt))) runState.startedAt = Date.now();
+    if(runRules.winByPerfectStreak && !Number.isFinite(Number(runState.perfectStreak))){
+      runState.perfectStreak = 0;
+    }
+
+    if(runModeId === "strategy"){
+      const ids = Array.isArray(runState.strategyMonsterIds)
+        ? runState.strategyMonsterIds
+        : (Array.isArray(runState.strategyConfig?.monsterIds) ? runState.strategyConfig.monsterIds : []);
+      runState.strategyMonsterIds = ids.slice();
+      runState.strategyMonsterObjs = monsters.filter(m=>ids.includes(m.id));
+    }
+
+    try{ updateRunInfo(); }catch(e){}
+    return runState;
+  }
   function getActiveMonsters(){
     try{
       if(runModeId === "strategy" && runState && Array.isArray(runState.strategyMonsterObjs) && runState.strategyMonsterObjs.length){
@@ -11111,6 +11167,8 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
   function savePlayer(){
     // Modo demo: no guardamos progreso
     try{ if(window.BG?.isDemo && window.BG.isDemo()) return; }catch(e){}
+    // Práctica es entrenamiento: nunca crea ni sobrescribe una partida.
+    try{ if(getSelectedModeId() === "practice") return; }catch(e){}
     // Persistimos también el progreso de batalla actual (p.ej. vida del monstruo en curso)
     try{
       if(!player && window.player) player = window.player;
@@ -11118,6 +11176,8 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
         player.currentMonsterIndex = currentMonsterIndex;
         player.currentMonsterId = (monsters && getMonsterAt(currentMonsterIndex)) ? getMonsterAt(currentMonsterIndex).id : null;
         player.currentMonsterHp = currentMonsterHp;
+        player.modeId = runModeId || getSelectedModeId();
+        player.__runState = snapshotRunState();
         window.player = player;
         window.BG = window.BG || {};
         window.BG.getPlayer = function(){ return window.player || player || null; };
@@ -13623,7 +13683,26 @@ campRestBtn.addEventListener("click", ()=>{
       return preset.monsters;
     };
 
-    const state = { minutes: Number(timeSel?.value||3), need: 0, selectedMonsterIds: new Set(), itemCounts: {} };
+    const previousConfig = (runState && runState.strategyConfig && typeof runState.strategyConfig === "object")
+      ? runState.strategyConfig
+      : null;
+    const previousMinutes = Number(previousConfig?.minutes || timeSel?.value || 3);
+    if(timeSel && STRATEGY_TIME_PRESETS.some(p=>p.minutes===previousMinutes)){
+      timeSel.value = String(previousMinutes);
+    }
+    const startingNeed = timeToNeed(previousMinutes);
+    const unlockedIds = new Set(unlocked.map(m=>m.id));
+    const previousMonsterIds = Array.isArray(previousConfig?.monsterIds)
+      ? previousConfig.monsterIds.filter(id=>unlockedIds.has(id)).slice(0,startingNeed)
+      : [];
+    const state = {
+      minutes: previousMinutes,
+      need: startingNeed,
+      selectedMonsterIds: new Set(previousMonsterIds),
+      itemCounts: (previousConfig?.itemCounts && typeof previousConfig.itemCounts === "object")
+        ? JSON.parse(JSON.stringify(previousConfig.itemCounts))
+        : {}
+    };
 
     function renderMonsters(){
       listEl.innerHTML = "";
@@ -13762,8 +13841,9 @@ campRestBtn.addEventListener("click", ()=>{
         }
       });
 
-      // Guardamos la cola de monstruos del run (objetos)
+      // Guardamos la cola de monstruos del run (objetos + ids serializables)
       runState.strategyMonsterObjs = selected.slice();
+      runState.strategyMonsterIds = ids.slice();
 
       // Reinicio indices/HP
       currentMonsterIndex = 0;
@@ -13774,6 +13854,7 @@ campRestBtn.addEventListener("click", ()=>{
       ov.classList.remove("is-open");
       loadMonsterStrategy(selected);
       startStrategyTimer();
+      savePlayer();
     };
 
     syncUI();
@@ -14848,6 +14929,7 @@ if(currentMonsterHp <= 0 || forceWinByStreak){
       player = {
         name,
         avatarId,
+        modeId: runModeId,
         contentId: getActiveContentId(),
         level:1,
         xp:0,
@@ -14913,10 +14995,76 @@ if(currentMonsterHp <= 0 || forceWinByStreak){
       switchTo("battle");
     }
 
-    // Configurar botones del splash
+    async function continueSelectedMode(){
+      try{ initRunMode(); }catch(e){}
+      if(splashScreen) splashScreen.style.display = "none";
+      window.BG_PENDING_CONTINUE = false;
+
+      const loadedPlayer = await loadSavedPlayer();
+      if(!loadedPlayer){
+        try{ window.showToast("No hay partida guardada en este modo."); }catch(e){}
+        return false;
+      }
+
+      player = loadedPlayer;
+      try{ restoreRunStateFromPlayer(player); }catch(e){}
+
+      // Contenidos: recuperar los guardados (o mantener el selector)
+      try{
+        const savedContent = (player && player.contentId) ? player.contentId : getActiveContentId();
+        setActiveContentId(savedContent);
+        if(contentSelect) contentSelect.value = savedContent;
+      }catch(e){}
+
+      if(startScreen) startScreen.style.display = "none";
+      currentMonsterIndex = Number(player.currentMonsterIndex || 0);
+      currentMonsterHp = Number.isFinite(Number(player.currentMonsterHp)) ? Number(player.currentMonsterHp) : 0;
+      if(player.hp <= 0) player.hp = player.maxHp;
+
+      updateHeroUi();
+      try{ applyRunModeUI(); }catch(e){}
+
+      if(runModeId === "strategy"){
+        const ids = Array.isArray(runState.strategyMonsterIds)
+          ? runState.strategyMonsterIds
+          : (Array.isArray(runState.strategyConfig?.monsterIds) ? runState.strategyConfig.monsterIds : []);
+        const selected = monsters.filter(m=>ids.includes(m.id));
+        const hasLiveRun = selected.length > 0 && Number(runState.endsAt || 0) > Date.now();
+
+        if(hasLiveRun){
+          runState.strategyMonsterObjs = selected.slice();
+          loadMonsterStrategy(selected);
+          startStrategyTimer();
+        }else{
+          // Mantiene la última configuración para poder reconstruir el reto,
+          // pero un cronómetro ya vencido no se "resucita".
+          runState.endsAt = 0;
+          updateHpBars();
+          switchTo("battle");
+          openStrategySetup();
+        }
+        return true;
+      }
+
+      if(runModeId === "practice"){
+        // Práctica no es continuable; esta rama queda solo como cinturón de seguridad.
+        updateHpBars();
+        switchTo("battle");
+        openPracticeSetup();
+        return true;
+      }
+
+      if(runRules && runRules.hasMap) renderBigMap();
+      loadMonster();
+      if(runRules && runRules.allowShop) renderShop();
+      updateHpBars();
+      switchTo("battle");
+      return true;
+    }
+
+    // Configurar botones del splash (compatibilidad con el motor antiguo).
     if(splashStartBtn){
       splashStartBtn.onclick = ()=>{
-        // Empezar juego: ir a nombre + héroe
         if(splashScreen) splashScreen.style.display = "none";
         if(startScreen) startScreen.style.display = "flex";
         if(continueBlock) continueBlock.style.display = "none";
@@ -14925,112 +15073,35 @@ if(currentMonsterHp <= 0 || forceWinByStreak){
       };
     }
 
+    const currentModeHasSave = (window.BG && typeof window.BG.hasSaveForMode === "function")
+      ? window.BG.hasSaveForMode(getSelectedModeId())
+      : !!saved;
+
     if(splashContinueBtn){
-      if(saved || (getSaveSlots && getSaveSlots().length)){
-        splashContinueBtn.disabled = false;
-        splashContinueBtn.classList.remove("secondary");
-        splashContinueBtn.classList.add("primary");
-        if(splashNote) splashNote.textContent = "Partida guardada encontrada. ¡Listo para continuar!";
-        splashContinueBtn.onclick = async ()=>{
-          // Continuar: cargar guardado y saltar a batalla
-          try{ initRunMode(); }catch(e){}
-          window.BG_PENDING_CONTINUE = false; player = await loadSavedPlayer();
-
-          // Contenidos: recuperar los guardados (o mantener el selector)
-          try{
-            const c = (player && player.contentId) ? player.contentId : getActiveContentId();
-            setActiveContentId(c);
-            if(contentSelect) contentSelect.value = c;
-          }catch(e){}
-          if(splashScreen) splashScreen.style.display = "none";
-          if(startScreen) startScreen.style.display = "none";
-          currentMonsterIndex = player.currentMonsterIndex || 0;
-          if(player.hp <= 0) player.hp = player.maxHp;
-
-          updateHeroUi();
-          try{ applyRunModeUI(); }catch(e){}
-
-          if(runModeId === "practice"){
-            updateHpBars();
-            switchTo("battle");
-            openPracticeSetup();
-            return;
-          }
-
-          if(runModeId === "strategy"){
-            updateHpBars();
-            switchTo("battle");
-            openStrategySetup();
-            return;
-          }
-
-          renderBigMap();
-          loadMonster();
-          renderShop();
-          updateHpBars();
-          switchTo("battle");
-        };
-      } else {
-        splashContinueBtn.disabled = true;
-        splashContinueBtn.classList.add("secondary");
-        if(splashNote) splashNote.textContent = "No hay partida guardada todavía.";
+      splashContinueBtn.disabled = !currentModeHasSave;
+      splashContinueBtn.classList.toggle("primary", currentModeHasSave);
+      splashContinueBtn.classList.toggle("secondary", !currentModeHasSave);
+      if(splashNote){
+        splashNote.textContent = currentModeHasSave
+          ? "Partida guardada encontrada. ¡Listo para continuar!"
+          : "No hay partida guardada todavía.";
       }
+      splashContinueBtn.onclick = currentModeHasSave ? continueSelectedMode : null;
     }
 
-    // Botones originales de start-screen (por si los usas)
-    if(saved){
-      continueBlock.style.display = "block";
-      continueBtn.onclick = async ()=>{
-        try{ initRunMode(); }catch(e){}
-        if(splashScreen) splashScreen.style.display = "none";
-        window.BG_PENDING_CONTINUE = false; player = await loadSavedPlayer();
+    if(continueBlock) continueBlock.style.display = currentModeHasSave ? "block" : "none";
+    if(continueBtn) continueBtn.onclick = continueSelectedMode;
 
-        // Contenidos: recuperar los guardados (o mantener el selector)
-        try{
-          const c = (player && player.contentId) ? player.contentId : getActiveContentId();
-          setActiveContentId(c);
-          if(contentSelect) contentSelect.value = c;
-        }catch(e){}
-        startScreen.style.display = "none";
-        currentMonsterIndex = player.currentMonsterIndex || 0;
-        if(player.hp <= 0) player.hp = player.maxHp;
-
-        updateHeroUi();
-        try{ applyRunModeUI(); }catch(e){}
-
-        if(runModeId === "practice"){
-          updateHpBars();
-          switchTo("battle");
-          openPracticeSetup();
-          return;
-        }
-
-        if(runModeId === "strategy"){
-          updateHpBars();
-          switchTo("battle");
-          openStrategySetup();
-          return;
-        }
-
-        if(runRules && runRules.hasMap) renderBigMap();
-        loadMonster();
-        if(runRules && runRules.allowShop) renderShop();
-        updateHpBars();
-        switchTo("battle");
+    // "Empezar nueva" desde bloque de guardado: solo prepara la creación visual.
+    if(newFromSavedBtn){
+      newFromSavedBtn.onclick = ()=>{
+        if(startScreen) startScreen.style.display = "flex";
+        if(continueBlock) continueBlock.style.display = "none";
+        if(playerNameInput) playerNameInput.value = "";
+        player = { avatarId:"mago" };
+        bindAvatarGrid();
+        try{ playerNameInput?.focus?.(); }catch(e){}
       };
-      // "Empezar nueva" desde bloque de guardado
-      if(newFromSavedBtn){
-        newFromSavedBtn.onclick = async ()=>{
-          try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
-          if(startScreen) startScreen.style.display = "flex";
-          if(continueBlock) continueBlock.style.display = "none";
-          if(playerNameInput) playerNameInput.value = "";
-          // preparar selección
-          player = { avatarId:"mago" };
-          bindAvatarGrid();
-          try{ playerNameInput?.focus?.(); }catch(e){}
-        };
-      }
     }
 
     // Empezar aventura (botón de la pantalla de inicio)
@@ -15042,7 +15113,14 @@ if(currentMonsterHp <= 0 || forceWinByStreak){
     // Exponer hooks al menú externo (menu.js)
     window.BG = window.BG || {};
     window.BG._startNewGame = startNewGame;
-    window.BG._triggerContinue = function(){ try{ window.BG_PENDING_CONTINUE = true; continueBtn?.click?.(); }catch(e){} };
+    window.BG._triggerContinue = function(){
+      try{
+        window.BG_PENDING_CONTINUE = true;
+        return continueSelectedMode();
+      }catch(e){
+        console.warn("No se pudo continuar el modo seleccionado:", e);
+      }
+    };
 
     bindAvatarGrid();
   }
@@ -16408,7 +16486,7 @@ localStorage.setItem = function(key, value) {
       newModeChosen = false;
       const hint = $('start-choice-hint');
       if(hint) hint.textContent = 'Elige un modo con partida guardada.';
-      const cont = (window.BG && typeof window.BG.listContinuableModes==='function') ? window.BG.listContinuableModes() : ['adventure','survival'];
+      const cont = (window.BG && typeof window.BG.listContinuableModes==='function') ? window.BG.listContinuableModes() : ['adventure','survival','dominio','strategy'];
       document.querySelectorAll("[data-mode]").forEach(b=>{
         const m = b.getAttribute("data-mode");
         b.style.display = cont.includes(m) ? "" : "none";
@@ -16451,10 +16529,10 @@ localStorage.setItem = function(key, value) {
 
         // Continuar solo aplica a modos con guardado
         if(startIntent === 'continue'){
-          const canContinue = (mode === 'adventure' || mode === 'survival');
+          const canContinue = ['adventure','survival','dominio','strategy'].includes(mode);
           if(!canContinue){
             try{
-              window.showToast('Este modo no tiene continuar. Elige Aventura o Supervivencia.');
+              window.showToast('Práctica es entrenamiento y no crea una partida guardada.');
             }catch(e){}
             return;
           }
@@ -17148,8 +17226,8 @@ function getUnlockedSet(){
 
 <!-- Battlegrafía 2.0: capas v2; el motor original permanece intacto. -->
 <script src="./enhance-v2.js?v=20260907-rpg14"></script>
-<script src="./save-slots-v2.js?v=20260907-rpg14"></script>
-<script src="./rpg-ui-v2.js?v=20260907-rpg14"></script>
+<script src="./save-slots-v2.js?v=20260909-rpg26"></script>
+<script src="./rpg-ui-v2.js?v=20260909-rpg26"></script>
 <script src="./rpg-unified-v2.js?v=20260907-rpg14"></script>
 <script src="./battle-clean-v2.js?v=20260907-rpg19"></script>
 <script src="./battle-router-v2.js?v=20260907-rpg14"></script>
