@@ -1248,3 +1248,170 @@ body.bg2-catalog-polish #camp-screen #shop-list .bg2-shop-art .shop-item-icon{
     height:90px!important;
   }
 }
+
+
+/* ==========================================================
+   rpg24 · TIENDA Y FILTROS
+   Última capa autoritativa: evita colisiones con rpg-unified.
+   ========================================================== */
+
+/* La cabecera del mercader usa una sola arquitectura, sin pseudo-cabeceras
+   heredadas ni posicionamiento absoluto del avatar. */
+body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+  .shop-merchant-header.bg2-merchant-header{
+  width:100%!important;
+  min-width:0!important;
+  min-height:120px!important;
+  display:grid!important;
+  grid-template-columns:96px minmax(180px,1fr) auto!important;
+  grid-template-rows:auto auto auto!important;
+  align-items:center!important;
+  justify-content:stretch!important;
+  gap:10px 14px!important;
+  margin:0 0 4px!important;
+  padding:12px 14px!important;
+  overflow:visible!important;
+  text-align:left!important;
+}
+body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+  .shop-merchant-header.bg2-merchant-header::before,
+body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+  .shop-merchant-header.bg2-merchant-header::after{
+  content:none!important;
+  display:none!important;
+}
+body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+  .shop-merchant-header.bg2-merchant-header > img.bg2-merchant-avatar{
+  position:static!important;
+  left:auto!important;
+  top:auto!important;
+  transform:none!important;
+  grid-column:1!important;
+  grid-row:1/3!important;
+  width:88px!important;
+  height:88px!important;
+  margin:0!important;
+}
+body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+  .shop-merchant-header.bg2-merchant-header > .bg2-merchant-copy{
+  grid-column:2!important;
+  grid-row:1!important;
+  display:block!important;
+  min-width:0!important;
+  margin:0!important;
+}
+body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+  .shop-merchant-header.bg2-merchant-header > .bg2-shop-gold{
+  grid-column:3!important;
+  grid-row:1!important;
+  display:grid!important;
+  margin:0!important;
+}
+body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+  .shop-merchant-header.bg2-merchant-header > .bg2-shop-tabs{
+  grid-column:2/4!important;
+  grid-row:2!important;
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:wrap!important;
+  justify-content:flex-end!important;
+  align-items:center!important;
+  margin:0!important;
+}
+body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+  .shop-merchant-header.bg2-merchant-header > .bg2-shop-filters{
+  grid-column:1/-1!important;
+  grid-row:3!important;
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  margin:2px 0 0!important;
+}
+
+/* El fallo visible de rpg23 venía de .shop-item-main: rpg-unified lo
+   convertía de nuevo en una rejilla de 48 px. Aquí los hijos vuelven
+   a participar en la rejilla completa de la tarjeta. */
+body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+  .shop-item.bg2-shop-card > .shop-item-main{
+  display:contents!important;
+  grid-template-columns:none!important;
+  gap:0!important;
+}
+body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+  .shop-item.bg2-shop-card > .shop-item-main > .bg2-shop-art{
+  grid-column:1/-1!important;
+  grid-row:1!important;
+  width:100%!important;
+  min-width:0!important;
+}
+body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+  .shop-item.bg2-shop-card > .shop-item-main > .shop-item-text{
+  grid-column:1/-1!important;
+  grid-row:2!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:10px 12px 8px!important;
+  writing-mode:horizontal-tb!important;
+  word-break:normal!important;
+}
+
+/* Campamento: misma cabecera, compactada dentro de su columna. */
+body.bg2-catalog-polish.bg2-unified-rpg #camp-screen #shop-list
+  .shop-merchant-header.bg2-merchant-header{
+  grid-template-columns:82px minmax(0,1fr) auto!important;
+  min-height:106px!important;
+}
+body.bg2-catalog-polish.bg2-unified-rpg #camp-screen #shop-list
+  .shop-merchant-header.bg2-merchant-header > img.bg2-merchant-avatar{
+  width:74px!important;
+  height:74px!important;
+}
+
+/* Los estilos rpg23 fuerzan display:grid en las tarjetas. Por eso el atributo
+   hidden necesitaba una regla todavía más específica para que los filtros
+   de Bestiario (y los de tienda) oculten de verdad los elementos. */
+body.bg2-catalog-polish #hub-collection-grid.collection-grid > .mon-card[hidden],
+body.bg2-catalog-polish #hub-shop-list.shop-grid > .shop-item[hidden],
+body.bg2-catalog-polish #camp-screen #shop-list.shop-grid > .shop-item[hidden],
+body.bg2-catalog-polish #hub-collection .bg2-catalog-empty[hidden],
+body.bg2-catalog-polish #hub-shop .bg2-catalog-empty[hidden],
+body.bg2-catalog-polish #camp-screen .bg2-catalog-empty[hidden]{
+  display:none!important;
+}
+
+@media(max-width:850px){
+  body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+    .shop-merchant-header.bg2-merchant-header{
+    grid-template-columns:76px minmax(0,1fr)!important;
+  }
+  body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+    .shop-merchant-header.bg2-merchant-header > img.bg2-merchant-avatar{
+    grid-column:1!important;
+    grid-row:1/3!important;
+    width:68px!important;
+    height:68px!important;
+  }
+  body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+    .shop-merchant-header.bg2-merchant-header > .bg2-merchant-copy{
+    grid-column:2!important;
+    grid-row:1!important;
+  }
+  body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+    .shop-merchant-header.bg2-merchant-header > .bg2-shop-gold{
+    grid-column:2!important;
+    grid-row:2!important;
+    justify-self:start!important;
+  }
+  body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+    .shop-merchant-header.bg2-merchant-header > .bg2-shop-tabs{
+    grid-column:1/-1!important;
+    grid-row:3!important;
+    justify-content:flex-start!important;
+  }
+  body.bg2-catalog-polish.bg2-unified-rpg :is(#hub-shop-list,#shop-list)
+    .shop-merchant-header.bg2-merchant-header > .bg2-shop-filters{
+    grid-column:1/-1!important;
+    grid-row:4!important;
+  }
+}
