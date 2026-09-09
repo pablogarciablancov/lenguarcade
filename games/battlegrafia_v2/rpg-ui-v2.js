@@ -284,6 +284,11 @@
   }
 
   function legacySelectMode(mode, intent) {
+    if(window.BG && typeof window.BG.startMode === 'function'){
+      return window.BG.startMode(mode, intent);
+    }
+
+    // Fallback para builds antiguos: conserva compatibilidad sin ser la ruta normal.
     try { localStorage.setItem('bg_modeId', mode); } catch (e) {}
     click('menu-start');
     setTimeout(()=>click(intent === 'continue' ? 'start-choice-continue' : 'start-choice-new'), 25);
