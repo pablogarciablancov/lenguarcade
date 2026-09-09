@@ -19,6 +19,7 @@ const tabsPolish=fs.readFileSync(path.join(v2Root,"tabs-polish-v2.js"),"utf8");
 const tabsPolishCss=fs.readFileSync(path.join(v2Root,"tabs-polish-v2.css"),"utf8");
 const stableTabs=fs.readFileSync(path.join(v2Root,"stable-tabs-v2.js"),"utf8");
 const stableTabsCss=fs.readFileSync(path.join(v2Root,"stable-tabs-v2.css"),"utf8");
+const catalogPolish=fs.readFileSync(path.join(v2Root,"catalog-polish-v2.js"),"utf8");
 const classic=fs.readFileSync(path.join(root,"games","battlegrafia","index.html"),"utf8");
 const catalog=JSON.parse(fs.readFileSync(path.join(root,"config","game-catalog.json"),"utf8"));
 const migration=fs.readFileSync(path.join(root,"supabase","migrations","20260905144700_battlegrafia_v2.sql"),"utf8");
@@ -33,6 +34,7 @@ try{ new Function(battleUi); }catch(error){ errors.push("battle-clean-v2.js no c
 try{ new Function(battleRouter); }catch(error){ errors.push("battle-router-v2.js no compila: "+error.message); }
 try{ new Function(tabsPolish); }catch(error){ errors.push("tabs-polish-v2.js no compila: "+error.message); }
 try{ new Function(stableTabs); }catch(error){ errors.push("stable-tabs-v2.js no compila: "+error.message); }
+try{ new Function(catalogPolish); }catch(error){ errors.push("catalog-polish-v2.js no compila: "+error.message); }
 
 for(const required of [
   "./save-slots-v2.js",
@@ -508,6 +510,51 @@ const battleSelectFn = battleSelectStart >= 0 && battleSelectEnd > battleSelectS
 if(!battleSelectFn || battleSelectFn.includes("innerHTML = `<div") || battleSelectFn.includes("html += `<div")){
   errors.push("El selector de objetos no puede insertar <div> dentro de un <select>.");
 }
+
+// Bestiario canónico: mismo roster de 30 criaturas que la aventura.
+const rawCatalogStart=index.indexOf("  const rawCatalog = [");
+const rawCatalogEnd=index.indexOf("\n  ];", rawCatalogStart);
+const rawCatalogBlock=rawCatalogStart >= 0 && rawCatalogEnd > rawCatalogStart ? index.slice(rawCatalogStart,rawCatalogEnd) : "";
+const rawCatalogLines=rawCatalogBlock.split("\n").filter(line=>line.includes('{ id:"'));
+const rawCatalogEntries=rawCatalogLines.map(line=>({
+  id:(line.match(/id:"([^"]+)"/)||[])[1] || "",
+  world:(line.match(/world:"([^"]+)"/)||[])[1] || "",
+  worldIndex:Number((line.match(/worldIndex:(\d+)/)||[])[1] || 0),
+  boss:/boss:true/.test(line)
+}));
+if(rawCatalogEntries.length!==30) errors.push("El bestiario v2 debe contener exactamente 30 criaturas canónicas.");
+if(new Set(rawCatalogEntries.map(x=>x.id)).size!==30) errors.push("El bestiario v2 contiene ids duplicados.");
+for(const [worldId,ids] of Object.entries(worlds)){
+  const entries=rawCatalogEntries.filter(x=>x.world===worldId);
+  if(entries.length!==6) errors.push("El bestiario v2 debe tener 6 criaturas en "+worldId+".");
+  const actualBoss=entries.filter(x=>x.boss).map(x=>x.id);
+  if(actualBoss.length!==1 || actualBoss[0]!==ids[5]) errors.push("Jefe incorrecto en bestiario v2 para "+worldId+".");
+  for(const id of ids){ if(!rawCatalogEntries.some(x=>x.id===id)) errors.push("Falta criatura canónica en bestiario v2: "+id); }
+}
+const loreStart=index.indexOf("const MONSTER_LORE = {");
+const loreEnd=index.indexOf("\n};\n\nfunction getMonsterLore", loreStart);
+const loreBlock=loreStart >= 0 && loreEnd > loreStart ? index.slice(loreStart,loreEnd) : "";
+for(const id of all){
+  if(!loreBlock.includes("\n  "+id+": {")) errors.push("Falta descripción propia en bestiario v2: "+id);
+}
+if(index.includes('desc:"Criatura del bestiario linguistico de Battlegrafia."')) errors.push("El bestiario v2 conserva la descripción genérica antigua.");
+for(const required of [
+  'card.dataset.monsterWorld = m.world || ""',
+  'card.dataset.monsterBoss = m.boss ? "1" : "0"',
+  'monster.boss ? "JEFE" : "CRIATURA"',
+  'monster.worldName || "Mundo desconocido"',
+  './catalog-polish-v2.js?v=20260909-rpg28'
+]){ if(!index.includes(required)) errors.push("Falta metadata canónica del bestiario v2: "+required); }
+for(const required of [
+  "card.dataset.monsterWorld",
+  "card.dataset.monsterBoss",
+  "world-montanas",
+  "world-castillo",
+  "world-cienaga",
+  "world-acantilados",
+  "world-volcan",
+  "const boss=card.dataset.monsterBoss === '1'"
+]){ if(!catalogPolish.includes(required)) errors.push("La capa visual del bestiario no usa metadata real: "+required); }
 
 for(const required of [
   "function getInventorySaleDef(itemName)",
