@@ -459,5 +459,20 @@ if(!migration.includes("'battlegrafia_v2'") || !migration.includes("on conflict 
   errors.push("Falta la migración idempotente de Battlegrafía 2.0.");
 }
 
+for(const required of [
+  "function getInventorySaleDef(itemName)",
+  "function renderInventorySaleHtml()",
+  "sellShopItem(root.dataset.itemName || root.dataset.id)",
+  "BOSS_RELICS.includes(name)",
+  "sellValue:6",
+  "Fragmento de Diccionario",
+  "battleState.precisionBoost",
+  "battleState.noPenaltyTurns",
+  "El Cristal Vocálico anula por completo el contraataque",
+  "SHOP_ITEMS.forEach(item=>",
+]){
+  if(!index.includes(required)) errors.push("Falta auditoría funcional de objetos v2: "+required);
+}
+
 if(errors.length) throw new Error("Comprobaciones de Battlegrafía 2.0 fallidas:\n- "+errors.join("\n- "));
 console.log("Battlegrafía 2.0 correcta: batalla limpia y enfocada, RPG pixel UI unificada, tres ranuras seguras, 5 mundos, 30 sprites, guardado aislado y modo de prueba directa.");
