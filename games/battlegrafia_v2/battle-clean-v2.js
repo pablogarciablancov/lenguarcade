@@ -8,7 +8,7 @@
     const link=document.createElement('link');
     link.id='bg2-clean-battle-css';
     link.rel='stylesheet';
-    link.href='./battle-clean-v2.css?v=20260907-rpg19';
+    link.href='./battle-clean-v2.css?v=20260910-rpg31';
     document.head.appendChild(link);
   }
 
