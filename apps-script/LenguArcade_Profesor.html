@@ -859,21 +859,27 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
 </script>
 
 <style id="la-workshop-session-style">
-.workshopSessionEditor{margin:0 0 18px;padding:16px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(135deg,rgba(0,212,255,.06),rgba(124,77,255,.08))}
-.workshopSessionTop{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}.workshopSessionTop h3{margin:0 0 4px;font-size:18px}
-.workshopSessionState{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);font-size:11px;font-weight:900;white-space:nowrap}
-.workshopSessionState.open{background:rgba(54,211,153,.12);color:#aef0d4}.workshopSessionState.home{background:rgba(0,212,255,.10);color:#b8f2ff}.workshopSessionState.closed{background:rgba(255,255,255,.06);color:var(--muted)}
-body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionState.home{color:#0d6580}
-.workshopSessionForm{display:grid;grid-template-columns:1fr 160px;gap:10px}.workshopSessionForm .wide{grid-column:1/-1}.workshopSessionForm textarea{width:100%;min-height:74px;resize:vertical;padding:12px 13px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.22);color:var(--text)}body.light .workshopSessionForm textarea{background:#fff}
-.workshopSessionHome{grid-column:1/-1;padding:12px;border:1px dashed var(--line);border-radius:16px}.workshopSessionHomeHead{display:flex;justify-content:space-between;gap:12px;align-items:center}.workshopSessionHomeHead label{display:flex;align-items:center;gap:7px;font-weight:800}.workshopSessionHomeHead input{width:auto}
-.workshopSessionHomeTimes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.workshopGamePicker{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.workshopPick{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.10);cursor:pointer}.workshopPick input{width:18px;height:18px}.workshopPick span{min-width:0}.workshopPick strong{display:block;font-size:13px}.workshopPick small{display:block;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.workshopSessionActions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}.workshopSessionActions button{margin:0!important}.workshopSessionHelp{grid-column:1/-1;color:var(--muted);font-size:11px;line-height:1.45}
+.workshopPlannerEmpty{padding:34px 20px;border:1px dashed var(--line);border-radius:20px;text-align:center;color:var(--muted)}.workshopPlannerEmpty strong{display:block;color:var(--text);font-size:17px;margin-bottom:5px}
+.workshopActiveCard{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:15px 16px;margin-bottom:16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,rgba(54,211,153,.10),rgba(0,212,255,.06))}
+.workshopActiveCard.isClosed{background:rgba(255,255,255,.035)}.workshopActiveEyebrow{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.workshopActiveTitle{font-size:18px;font-weight:900;margin:3px 0 5px}.workshopActiveMeta{display:flex;flex-wrap:wrap;gap:7px}.workshopActiveMeta span{padding:5px 8px;border-radius:999px;border:1px solid var(--line);font-size:10px;color:var(--muted)}
+.workshopActiveActions{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end}.workshopActiveActions button{width:auto;padding:8px 10px;font-size:11px;box-shadow:none}
+.workshopSessionState{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border-radius:999px;border:1px solid var(--line);font-size:10px;font-weight:900;white-space:nowrap}.workshopSessionState.open{background:rgba(54,211,153,.14);color:#aef0d4}.workshopSessionState.home{background:rgba(0,212,255,.14);color:#b8f2ff}.workshopSessionState.closed{background:rgba(255,255,255,.06);color:var(--muted)}body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionState.home{color:#0d6580}
+.workshopPlannerGrid{display:grid;grid-template-columns:minmax(270px,.72fr) minmax(0,1.45fr);gap:16px;align-items:start}.workshopPlanLibrary,.workshopPlanEditor{border:1px solid var(--line);border-radius:20px;background:rgba(0,0,0,.10);overflow:hidden}body.light .workshopPlanLibrary,body.light .workshopPlanEditor{background:rgba(94,53,177,.025)}
+.workshopPanelTitle{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:15px 16px;border-bottom:1px solid var(--line)}.workshopPanelTitle h3{margin:0 0 3px;font-size:16px}.workshopPanelTitle button{width:auto;padding:8px 10px;font-size:11px;box-shadow:none}
+.workshopPlanList{display:grid;gap:8px;padding:12px;max-height:680px;overflow:auto}.workshopPlanCard{padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.035);cursor:pointer;transition:.16s ease}.workshopPlanCard:hover,.workshopPlanCard.isEditing{border-color:rgba(0,212,255,.36);background:rgba(0,212,255,.055);transform:translateY(-1px)}.workshopPlanCard.isActive{border-color:rgba(54,211,153,.42);box-shadow:inset 3px 0 0 rgba(54,211,153,.8)}
+.workshopPlanCardTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.workshopPlanCard strong{font-size:13px}.workshopPlanDate{font-size:10px;color:var(--muted);margin-top:4px}.workshopPlanMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.workshopPlanMeta span{padding:4px 6px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:9px;color:var(--muted)}.workshopPlanCardActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.workshopPlanCardActions button{width:auto;padding:6px 8px;font-size:10px;box-shadow:none}.workshopPlanCardActions .ghostPlan{background:rgba(255,255,255,.07)}
+.workshopPlanEditorBody{padding:16px}.workshopEditorIntro{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.workshopEditorIntro h3{font-size:18px;margin:0 0 4px}.workshopEditorSteps{display:grid;gap:14px}.workshopEditorStep{padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025)}.workshopStepHead{display:flex;gap:10px;align-items:flex-start;margin-bottom:11px}.workshopStepNo{width:27px;height:27px;flex:0 0 27px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,var(--secondary),var(--primary));color:#fff;font-size:11px;font-weight:900}.workshopStepHead strong{display:block;font-size:13px}.workshopStepHead span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.workshopFormGrid{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:10px}.workshopFormGrid .wide{grid-column:1/-1}.workshopFormGrid textarea{width:100%;min-height:82px;resize:vertical;padding:12px 13px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.22);color:var(--text)}body.light .workshopFormGrid textarea{background:#fff}
+.workshopGamePicker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.workshopPick{position:relative;display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.10);cursor:pointer}.workshopPick:has(input:checked){border-color:rgba(54,211,153,.45);background:rgba(54,211,153,.07)}.workshopPickArt{width:42px;height:42px;border-radius:11px;background-image:linear-gradient(135deg,rgba(8,13,28,.2),rgba(8,13,28,.58)),var(--pick-img);background-size:cover;background-position:center;display:grid;place-items:center;font-size:20px;border:1px solid var(--line)}.workshopPick input{width:18px;height:18px}.workshopPick strong{display:block;font-size:12px}.workshopPick small{display:block;color:var(--muted);font-size:9px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.workshopHomeBox{border:1px dashed var(--line);border-radius:14px;padding:12px}.workshopHomeHead{display:flex;justify-content:space-between;gap:12px;align-items:center}.workshopHomeHead label{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:900}.workshopHomeHead input{width:auto}.workshopHomeTimes{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.workshopHomeTimes.isDisabled{opacity:.42;pointer-events:none}
+.workshopEditorActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.workshopEditorActions button{width:auto;box-shadow:none}.workshopEditorActions .secondaryAction{background:rgba(255,255,255,.08);border:1px solid var(--line);color:var(--text)}.workshopEditorActions .homeAction{background:linear-gradient(135deg,#0288d1,#5e35b1)}
+.workshopPlannerStatus{min-height:18px;margin-top:10px;font-size:11px;color:var(--muted)}
 .studentMissionCard{margin:0 0 16px;padding:16px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,rgba(124,77,255,.16),rgba(0,212,255,.10));box-shadow:0 12px 34px rgba(0,0,0,.12)}
 .studentMissionHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.studentMissionHead h2{margin:0 0 5px;font-size:20px}.studentMissionBadge{display:inline-flex;padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900;border:1px solid var(--line);white-space:nowrap}.studentMissionBadge.open{background:rgba(54,211,153,.14)}.studentMissionBadge.home{background:rgba(0,212,255,.14)}.studentMissionBadge.closed{background:rgba(255,255,255,.07);color:var(--muted)}
 .studentMissionMessage{margin-top:10px;line-height:1.5}.studentMissionMeta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.studentMissionMeta span{padding:6px 9px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted)}
 .game.sessionLocked{filter:saturate(.2);opacity:.56}.game.sessionLocked .play{background:rgba(255,255,255,.10)!important;color:#d8deef!important;box-shadow:none!important}
-@media(max-width:760px){.workshopSessionForm{grid-template-columns:1fr}.workshopSessionForm .wide,.workshopSessionHome,.workshopGamePicker,.workshopSessionActions,.workshopSessionHelp{grid-column:auto}.workshopGamePicker,.workshopSessionHomeTimes{grid-template-columns:1fr}.studentMissionHead,.workshopSessionTop{flex-direction:column}}
+@media(max-width:1050px){.workshopPlannerGrid{grid-template-columns:1fr}.workshopPlanList{max-height:none}.workshopActiveCard{grid-template-columns:1fr}.workshopActiveActions{justify-content:flex-start}}
+@media(max-width:700px){.workshopFormGrid,.workshopGamePicker,.workshopHomeTimes{grid-template-columns:1fr}.workshopFormGrid .wide{grid-column:auto}.studentMissionHead,.workshopHomeHead{flex-direction:column;align-items:flex-start}.workshopPick{grid-template-columns:38px minmax(0,1fr) auto}.workshopPickArt{width:38px;height:38px}}
 </style>
 <script>
 (function(){
@@ -924,30 +930,175 @@ body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionS
     setTimeout(function(){refreshStudentSession(false);},500);setInterval(function(){refreshStudentSession(true);},30000);return true;
   }
 
-  function teacherCurrentClass(){var select=document.getElementById('workshopClassSelect');var value=select?String(select.value||''):'';return value==='*'?'':value;}
-  function teacherSessionPayload(){var editor=document.getElementById('workshopSessionEditor');return {title:(document.getElementById('workshopSessionTitle')||{}).value||'',message:(document.getElementById('workshopSessionMessage')||{}).value||'',targetXp:Number((document.getElementById('workshopSessionXp')||{}).value||0),homeEnabled:!!((document.getElementById('workshopHomeEnabled')||{}).checked),homeStart:(document.getElementById('workshopHomeStart')||{}).value||'',homeEnd:(document.getElementById('workshopHomeEnd')||{}).value||'',gameIds:editor?[].slice.call(editor.querySelectorAll('[data-session-game]:checked')).map(function(input){return input.value;}):[]};}
-  function setTeacherSessionStatus(text,isError){var status=document.getElementById('workshopSessionStatus');if(status){status.textContent=text||'';status.style.color=isError?'#ff9b9b':'';}}
-  function setTeacherSessionBusy(busy){teacherSessionBusy=!!busy;var editor=document.getElementById('workshopSessionEditor');if(!editor)return;[].slice.call(editor.querySelectorAll('button')).forEach(function(button){button.disabled=!!busy;});}
+  function teacherCurrentClass(){var select=document.getElementById('workshopClassSelect');return select?String(select.value||''):'';}
+  var workshopPlannerState=null;
+  var workshopEditingPlanId='';
+  function plannerStatus(text,isError){var el=document.getElementById('workshopPlannerStatus');if(el){el.textContent=text||'';el.style.color=isError?'#ff9b9b':'';}}
+  function setTeacherSessionBusy(busy){teacherSessionBusy=!!busy;var root=document.getElementById('workshopPlannerMount');if(!root)return;[].slice.call(root.querySelectorAll('button')).forEach(function(button){button.disabled=!!busy;});}
+  function plannerDateText(value){if(!value)return 'Sin fecha prevista';var parts=String(value).split('T');if(parts.length<2)return String(value);var d=parts[0].split('-');return d.length===3?d[2]+'/'+d[1]+'/'+d[0]+' · '+parts[1]:String(value).replace('T',' · ');}
+  function plannerCatalogGame(id){var list=workshopPlannerState&&workshopPlannerState.catalog||[];return list.find(function(game){return String(game.gameId)===String(id);})||null;}
+  function plannerPlan(planId){return (workshopPlannerState&&workshopPlannerState.plans||[]).find(function(plan){return String(plan.planId)===String(planId);})||null;}
+  function plannerGameCountLabel(ids){var count=(ids||[]).length;return count===1?'1 juego':count+' juegos';}
+  function plannerHomeText(plan){if(!plan||!plan.homeEnabled)return '';return plan.homeStart&&plan.homeEnd?'Casa: '+plannerDateText(plan.homeStart)+' → '+plannerDateText(plan.homeEnd):'Acceso en casa';}
+  function plannerSessionModeLabel(s){return sessionModeLabel(s);}
+  function plannerSessionModeClass(s){return sessionModeClass(s);}
 
-  function renderTeacherSession(result){
-    var s=result&&result.session;if(!s)return;
-    document.getElementById('workshopSessionTitle').value=s.title||'';document.getElementById('workshopSessionMessage').value=s.message||'';document.getElementById('workshopSessionXp').value=Number(s.targetXp||0);document.getElementById('workshopHomeEnabled').checked=!!s.homeEnabled;document.getElementById('workshopHomeStart').value=s.homeStart||'';document.getElementById('workshopHomeEnd').value=s.homeEnd||'';
-    var state=document.getElementById('workshopSessionState');state.className='workshopSessionState '+sessionModeClass(s);state.textContent=sessionModeLabel(s);
-    var selected={};(s.gameIds||[]).forEach(function(id){selected[String(id)]=true;});var picker=document.getElementById('workshopSessionGames');picker.innerHTML=(s.catalog||[]).map(function(game){return '<label class="workshopPick"><input type="checkbox" data-session-game value="'+sessionEsc(game.gameId)+'" '+(selected[String(game.gameId)]?'checked':'')+'><span><strong>'+sessionEsc((game.icono||'🎮')+' '+game.nombre)+'</strong><small>'+sessionEsc(game.categoria||game.subtitulo||'Juego LenguArcade')+'</small></span></label>';}).join('')||'<div class="sub">No hay juegos activos todavía.</div>';
-    setTeacherSessionBusy(false);document.getElementById('workshopSessionClose').disabled=!s.classroomOpen;document.getElementById('workshopSessionRetire').disabled=!s.published;setTeacherSessionStatus(s.updatedAt?'Guardado · '+s.updatedAt:'Prepara la sesión y guárdala.');
+  function renderPlannerActive(){
+    var host=document.getElementById('workshopActiveHost');if(!host)return;
+    var s=workshopPlannerState&&workshopPlannerState.activeSession;
+    if(!s||!s.published){
+      host.innerHTML='<div class="workshopActiveCard isClosed"><div><div class="workshopActiveEyebrow">Sesión visible para los alumnos</div><div class="workshopActiveTitle">No hay ninguna sesión publicada</div><div class="sub">Puedes preparar todas las sesiones que quieras sin afectar a los alumnos. Cuando llegue la clase, abre una desde la lista.</div></div><span class="workshopSessionState closed">Sin sesión activa</span></div>';
+      return;
+    }
+    var meta=['<span>🎮 '+sessionEsc(plannerGameCountLabel(s.gameIds))+'</span>'];
+    if(Number(s.targetXp||0)>0)meta.push('<span>🎯 '+sessionEsc(s.targetXp)+' XP</span>');
+    if(s.homeEnabled)meta.push('<span>🏠 Horario de casa configurado</span>');
+    var openButton=s.classroomOpen?'':'<button type="button" id="workshopActiveOpen">▶ Abrir en clase</button>';
+    host.innerHTML='<div class="workshopActiveCard '+(s.active?'':'isClosed')+'"><div><div class="workshopActiveEyebrow">Sesión visible para los alumnos</div><div class="workshopActiveTitle">'+sessionEsc(s.title||'Sesión del taller')+'</div><div class="workshopActiveMeta">'+meta.join('')+'</div></div><div><div style="text-align:right;margin-bottom:8px"><span class="workshopSessionState '+plannerSessionModeClass(s)+'">'+sessionEsc(plannerSessionModeLabel(s))+'</span></div><div class="workshopActiveActions">'+openButton+(s.classroomOpen?'<button type="button" id="workshopActiveClose">⏸ Cerrar clase</button>':'')+'<button type="button" class="dangerAction" id="workshopActiveRetire">Retirar</button></div></div></div>';
+    var open=document.getElementById('workshopActiveOpen');if(open)open.onclick=openActivePlannerSession;
+    var close=document.getElementById('workshopActiveClose');if(close)close.onclick=closeActivePlannerSession;
+    var retire=document.getElementById('workshopActiveRetire');if(retire)retire.onclick=retireActivePlannerSession;
   }
 
-  async function loadTeacherSession(){var classCode=teacherCurrentClass();var editor=document.getElementById('workshopSessionEditor');if(!editor)return;if(!classCode){setTeacherSessionStatus('Elige una clase concreta arriba para preparar su sesión.');var state=document.getElementById('workshopSessionState');state.className='workshopSessionState closed';state.textContent='Selecciona una clase';return;}setTeacherSessionStatus('Cargando sesión...');try{renderTeacherSession(await sessionCall('getWorkshopSessionAdmin',[classCode]));}catch(error){setTeacherSessionStatus('No se pudo cargar la sesión: '+(error.message||error),true);}}
-  async function saveTeacherSession(mode){if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode){setTeacherSessionStatus('Elige una clase concreta.',true);return;}var payload=teacherSessionPayload();if(!payload.gameIds.length){setTeacherSessionStatus('Selecciona al menos un juego para la misión.',true);return;}setTeacherSessionBusy(true);setTeacherSessionStatus(mode==='open'?'Abriendo la sesión en clase...':'Guardando sesión...');try{var result=mode==='open'?await sessionCall('setWorkshopClassroomSessionOpen',[classCode,true,payload]):await sessionCall('saveWorkshopSession',[classCode,payload]);renderTeacherSession(result);}catch(error){setTeacherSessionBusy(false);setTeacherSessionStatus('No se pudo guardar: '+(error.message||error),true);}}
-  async function closeTeacherSession(){if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode)return;setTeacherSessionBusy(true);setTeacherSessionStatus('Cerrando la sesión en clase...');try{renderTeacherSession(await sessionCall('setWorkshopClassroomSessionOpen',[classCode,false,teacherSessionPayload()]));}catch(error){setTeacherSessionBusy(false);setTeacherSessionStatus('No se pudo cerrar: '+(error.message||error),true);}}
-  async function retireTeacherSession(){if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode)return;setTeacherSessionBusy(true);setTeacherSessionStatus('Retirando sesión...');try{renderTeacherSession(await sessionCall('retireWorkshopSession',[classCode]));}catch(error){setTeacherSessionBusy(false);setTeacherSessionStatus('No se pudo retirar: '+(error.message||error),true);}}
+  function renderPlannerList(){
+    var list=document.getElementById('workshopPlanList');if(!list)return;
+    var plans=workshopPlannerState&&workshopPlannerState.plans||[];
+    if(!plans.length){
+      list.innerHTML='<div class="workshopPlannerEmpty"><strong>Aún no hay sesiones preparadas</strong>Crea la primera y déjala lista para el próximo taller.</div>';
+      return;
+    }
+    list.innerHTML=plans.map(function(plan){
+      var classes='workshopPlanCard'+(plan.active?' isActive':'')+(String(plan.planId)===String(workshopEditingPlanId)?' isEditing':'');
+      var meta=['<span>🎮 '+sessionEsc(plannerGameCountLabel(plan.gameIds))+'</span>'];
+      if(Number(plan.targetXp||0)>0)meta.push('<span>🎯 '+sessionEsc(plan.targetXp)+' XP</span>');
+      if(plan.homeEnabled)meta.push('<span>🏠 Casa</span>');
+      if(plan.usedAt)meta.push('<span>✓ Ya utilizada</span>');
+      return '<article class="'+classes+'" data-plan-card="'+sessionEsc(plan.planId)+'"><div class="workshopPlanCardTop"><div><strong>'+sessionEsc(plan.title||'Sesión del taller')+'</strong><div class="workshopPlanDate">📅 '+sessionEsc(plannerDateText(plan.plannedAt))+'</div></div>'+(plan.active?'<span class="workshopSessionState '+plannerSessionModeClass(workshopPlannerState.activeSession)+'">Activa</span>':'')+'</div><div class="workshopPlanMeta">'+meta.join('')+'</div><div class="workshopPlanCardActions"><button type="button" class="ghostPlan" data-plan-edit="'+sessionEsc(plan.planId)+'">Editar</button><button type="button" data-plan-open="'+sessionEsc(plan.planId)+'">▶ Abrir ahora</button><button type="button" class="ghostPlan" data-plan-duplicate="'+sessionEsc(plan.planId)+'">Duplicar</button>'+(plan.active?'':'<button type="button" class="ghostPlan" data-plan-delete="'+sessionEsc(plan.planId)+'">Eliminar</button>')+'</div></article>';
+    }).join('');
+    [].slice.call(list.querySelectorAll('[data-plan-edit]')).forEach(function(button){button.onclick=function(event){event.stopPropagation();editPlannerPlan(button.dataset.planEdit);};});
+    [].slice.call(list.querySelectorAll('[data-plan-open]')).forEach(function(button){button.onclick=function(event){event.stopPropagation();activatePreparedPlan(button.dataset.planOpen,true);};});
+    [].slice.call(list.querySelectorAll('[data-plan-duplicate]')).forEach(function(button){button.onclick=function(event){event.stopPropagation();duplicatePlannerPlan(button.dataset.planDuplicate);};});
+    [].slice.call(list.querySelectorAll('[data-plan-delete]')).forEach(function(button){button.onclick=function(event){event.stopPropagation();deletePreparedPlan(button.dataset.planDelete);};});
+    [].slice.call(list.querySelectorAll('[data-plan-card]')).forEach(function(card){card.onclick=function(){editPlannerPlan(card.dataset.planCard);};});
+  }
+
+  function plannerEditorPlan(){
+    if(workshopEditingPlanId)return plannerPlan(workshopEditingPlanId);
+    return {planId:'',title:'',message:'',targetXp:0,plannedAt:'',homeEnabled:false,homeStart:'',homeEnd:'',gameIds:[]};
+  }
+  function renderPlannerEditor(plan){
+    var body=document.getElementById('workshopPlanEditorBody');if(!body)return;
+    plan=plan||plannerEditorPlan();
+    var selected={};(plan.gameIds||[]).forEach(function(id){selected[String(id)]=true;});
+    var catalog=workshopPlannerState&&workshopPlannerState.catalog||[];
+    body.innerHTML='<div class="workshopEditorIntro"><div><h3>'+(plan.planId?'Editar sesión':'Nueva sesión')+'</h3><div class="sub">'+(plan.planId?'Los cambios quedan guardados en esta preparación. No afectan a los alumnos hasta que la abras.':'Prepara ahora lo que quieres hacer en clase y guárdalo para más adelante.')+'</div></div>'+(plan.planId?'<span class="workshopSessionState closed">Preparada</span>':'')+'</div><input id="workshopPlanId" type="hidden" value="'+sessionEsc(plan.planId||'')+'"><div class="workshopEditorSteps">'+
+      '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">1</span><div><strong>Identifica la sesión</strong><span>Una fecha y un título te permitirán encontrarla rápidamente.</span></div></div><div class="workshopFormGrid"><div class="field"><label>Título de la sesión</label><input id="workshopSessionTitle" type="text" maxlength="80" placeholder="Ej.: Taller 3 · Cazadores de tildes" value="'+sessionEsc(plan.title||'')+'"></div><div class="field"><label>Fecha prevista</label><input id="workshopPlannedAt" type="datetime-local" value="'+sessionEsc(plan.plannedAt||'')+'"></div><div class="field wide"><label>Mensaje / instrucciones para los alumnos</label><textarea id="workshopSessionMessage" maxlength="400" placeholder="Ej.: Hoy trabajamos ortografía. Completa dos partidas y trata de superar el reto de XP.">'+sessionEsc(plan.message||'')+'</textarea></div><div class="field"><label>Objetivo de XP (opcional)</label><input id="workshopSessionXp" type="number" min="0" step="25" value="'+sessionEsc(Number(plan.targetXp||0))+'"></div></div></section>'+
+      '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">2</span><div><strong>Elige los juegos de esta sesión</strong><span>Al abrirla, solo estos juegos quedarán disponibles para la clase.</span></div></div><div id="workshopSessionGames" class="workshopGamePicker">'+catalog.map(function(game){var image=typeof bannerUrl==='function'?bannerUrl(game.gameId):'';return '<label class="workshopPick"><span class="workshopPickArt" style="--pick-img:url(\''+sessionEsc(image)+'\')">'+sessionEsc(game.icono||'🎮')+'</span><span><strong>'+sessionEsc(game.nombre)+'</strong><small>'+sessionEsc(game.categoria||game.subtitulo||'LenguArcade')+'</small></span><input type="checkbox" data-session-game value="'+sessionEsc(game.gameId)+'" '+(selected[String(game.gameId)]?'checked':'')+'></label>';}).join('')+'</div></section>'+
+      '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">3</span><div><strong>Acceso opcional desde casa</strong><span>Úsalo solo si quieres que esta misma sesión esté disponible durante un horario concreto fuera del colegio.</span></div></div><div class="workshopHomeBox"><div class="workshopHomeHead"><div><strong>🏠 Permitir acceso en casa</strong><div class="sub">El horario se activa y caduca automáticamente.</div></div><label><input id="workshopHomeEnabled" type="checkbox" '+(plan.homeEnabled?'checked':'')+'> Activar</label></div><div id="workshopHomeTimes" class="workshopHomeTimes '+(plan.homeEnabled?'':'isDisabled')+'"><div class="field"><label>Desde</label><input id="workshopHomeStart" type="datetime-local" value="'+sessionEsc(plan.homeStart||'')+'"></div><div class="field"><label>Hasta</label><input id="workshopHomeEnd" type="datetime-local" value="'+sessionEsc(plan.homeEnd||'')+'"></div></div></div></section>'+
+      '</div><div class="workshopEditorActions"><button type="button" id="workshopPlanSave">💾 Guardar preparación</button><button type="button" id="workshopPlanSaveOpen">▶ Guardar y abrir ahora</button><button type="button" class="homeAction" id="workshopPlanSaveHome">🏠 Guardar y publicar cerrada</button><button type="button" class="secondaryAction" id="workshopPlanCancel">Limpiar editor</button></div><div class="workshopPlannerStatus" id="workshopPlannerStatus"></div>';
+    document.getElementById('workshopHomeEnabled').onchange=function(){document.getElementById('workshopHomeTimes').classList.toggle('isDisabled',!this.checked);};
+    document.getElementById('workshopPlanSave').onclick=function(){savePreparedPlan('save');};
+    document.getElementById('workshopPlanSaveOpen').onclick=function(){savePreparedPlan('open');};
+    document.getElementById('workshopPlanSaveHome').onclick=function(){savePreparedPlan('publish');};
+    document.getElementById('workshopPlanCancel').onclick=newPlannerPlan;
+  }
+
+  function renderWorkshopPlanner(result){
+    workshopPlannerState=result||{plans:[],activeSession:null,catalog:[]};
+    renderPlannerActive();renderPlannerList();
+    if(workshopEditingPlanId&&!plannerPlan(workshopEditingPlanId))workshopEditingPlanId='';
+    renderPlannerEditor(plannerEditorPlan());
+    setTeacherSessionBusy(false);
+  }
+  function plannerPayload(){
+    var editor=document.getElementById('workshopPlanEditorBody');
+    return {
+      planId:(document.getElementById('workshopPlanId')||{}).value||'',
+      title:(document.getElementById('workshopSessionTitle')||{}).value||'',
+      message:(document.getElementById('workshopSessionMessage')||{}).value||'',
+      targetXp:Number((document.getElementById('workshopSessionXp')||{}).value||0),
+      plannedAt:(document.getElementById('workshopPlannedAt')||{}).value||'',
+      homeEnabled:!!((document.getElementById('workshopHomeEnabled')||{}).checked),
+      homeStart:(document.getElementById('workshopHomeStart')||{}).value||'',
+      homeEnd:(document.getElementById('workshopHomeEnd')||{}).value||'',
+      gameIds:editor?[].slice.call(editor.querySelectorAll('[data-session-game]:checked')).map(function(input){return input.value;}):[]
+    };
+  }
+
+  async function loadWorkshopPlanner(){
+    var classCode=teacherCurrentClass();var mount=document.getElementById('workshopPlannerMount');if(!mount)return;
+    if(!classCode){workshopPlannerState=null;workshopEditingPlanId='';mount.innerHTML='<div class="workshopPlannerEmpty"><strong>Elige una clase para empezar</strong>Después podrás crear y guardar todas las sesiones que necesites.</div>';return;}
+    mount.innerHTML='<div class="workshopPlannerEmpty"><strong>Cargando sesiones…</strong>Recuperando las preparaciones de esta clase.</div>';
+    try{
+      workshopEditingPlanId='';
+      var result=await sessionCall('getWorkshopPlannerAdmin',[classCode]);
+      mount.innerHTML='<div id="workshopActiveHost"></div><div class="workshopPlannerGrid"><section class="workshopPlanLibrary"><div class="workshopPanelTitle"><div><h3>Sesiones preparadas</h3><div class="sub">Tu banco de talleres para esta clase.</div></div><button type="button" id="workshopNewPlan">＋ Nueva</button></div><div id="workshopPlanList" class="workshopPlanList"></div></section><section class="workshopPlanEditor"><div class="workshopPanelTitle"><div><h3>Preparar la sesión</h3><div class="sub">Guardar no publica nada automáticamente.</div></div></div><div id="workshopPlanEditorBody" class="workshopPlanEditorBody"></div></section></div>';
+      document.getElementById('workshopNewPlan').onclick=newPlannerPlan;
+      renderWorkshopPlanner(result);
+    }catch(error){mount.innerHTML='<div class="workshopPlannerEmpty"><strong>No se pudieron cargar las sesiones</strong>'+sessionEsc(error.message||error)+'</div>';}
+  }
+  function newPlannerPlan(){workshopEditingPlanId='';renderPlannerList();renderPlannerEditor(plannerEditorPlan());}
+  function editPlannerPlan(planId){var plan=plannerPlan(planId);if(!plan)return;workshopEditingPlanId=String(planId);renderPlannerList();renderPlannerEditor(plan);}
+  function duplicatePlannerPlan(planId){var plan=plannerPlan(planId);if(!plan)return;workshopEditingPlanId='';var copy=Object.assign({},plan,{planId:'',title:(plan.title||'Sesión del taller')+' · copia',usedAt:'',active:false});renderPlannerList();renderPlannerEditor(copy);plannerStatus('Copia preparada. Guárdala para añadirla a la lista.');}
+
+  async function savePreparedPlan(mode){
+    if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode)return;
+    var payload=plannerPayload();if(!payload.gameIds.length){plannerStatus('Selecciona al menos un juego para esta sesión.',true);return;}
+    if(mode==='publish'&&!payload.homeEnabled){plannerStatus('Activa el acceso en casa antes de publicar la sesión cerrada.',true);return;}
+    setTeacherSessionBusy(true);plannerStatus(mode==='open'?'Guardando y abriendo la sesión…':mode==='publish'?'Guardando y publicando la sesión…':'Guardando la preparación…');
+    try{
+      var saved=await sessionCall('saveWorkshopPlan',[classCode,payload]);
+      var planId=String(saved.savedPlanId||payload.planId||'');
+      workshopEditingPlanId=planId;
+      if(mode==='open'||mode==='publish'){
+        saved=await sessionCall('activateWorkshopPlan',[classCode,planId,mode==='open']);
+      }
+      renderWorkshopPlanner(saved);
+      workshopEditingPlanId=planId;
+      renderPlannerList();renderPlannerEditor(plannerPlan(planId));
+      plannerStatus(mode==='open'?'Sesión guardada y abierta para la clase.':mode==='publish'?'Sesión publicada; permanecerá cerrada en clase y se abrirá en casa durante el horario indicado.':'Preparación guardada. Los alumnos todavía no ven ningún cambio.');
+      if(typeof loadTeacherWorkshopState==='function')loadTeacherWorkshopState(classCode,false);
+    }catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo guardar: '+(error.message||error),true);}
+  }
+  async function activatePreparedPlan(planId,openNow){
+    if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode)return;
+    setTeacherSessionBusy(true);plannerStatus(openNow?'Abriendo la sesión…':'Publicando la sesión…');
+    try{renderWorkshopPlanner(await sessionCall('activateWorkshopPlan',[classCode,planId,!!openNow]));workshopEditingPlanId=String(planId);renderPlannerList();renderPlannerEditor(plannerPlan(planId));plannerStatus(openNow?'Sesión abierta. Los alumnos ya pueden entrar en los juegos seleccionados.':'Sesión publicada.');if(typeof loadTeacherWorkshopState==='function')loadTeacherWorkshopState(classCode,false);}
+    catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo activar: '+(error.message||error),true);}
+  }
+  async function deletePreparedPlan(planId){
+    if(teacherSessionBusy)return;var plan=plannerPlan(planId);if(!plan||plan.active)return;
+    if(!window.confirm('¿Eliminar la sesión preparada «'+(plan.title||'Sesión')+'»?'))return;
+    setTeacherSessionBusy(true);
+    try{workshopEditingPlanId='';renderWorkshopPlanner(await sessionCall('deleteWorkshopPlan',[teacherCurrentClass(),planId]));plannerStatus('Sesión preparada eliminada.');}
+    catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo eliminar: '+(error.message||error),true);}
+  }
+  async function openActivePlannerSession(){
+    var s=workshopPlannerState&&workshopPlannerState.activeSession;if(!s)return;
+    if(s.planId)return activatePreparedPlan(s.planId,true);
+    setTeacherSessionBusy(true);try{
+      var payload={title:s.title,message:s.message,targetXp:s.targetXp,homeEnabled:s.homeEnabled,homeStart:s.homeStart,homeEnd:s.homeEnd,gameIds:s.gameIds,planId:s.planId||''};
+      await sessionCall('setWorkshopClassroomSessionOpen',[teacherCurrentClass(),true,payload]);await loadWorkshopPlanner();
+    }catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo abrir: '+(error.message||error),true);}
+  }
+  async function closeActivePlannerSession(){
+    if(teacherSessionBusy)return;setTeacherSessionBusy(true);
+    try{renderWorkshopPlanner(await sessionCall('closeWorkshopPlannerSession',[teacherCurrentClass()]));plannerStatus('La sesión queda cerrada en clase. El horario de casa, si existe, se mantiene.');}
+    catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo cerrar: '+(error.message||error),true);}
+  }
+  async function retireActivePlannerSession(){
+    if(teacherSessionBusy)return;if(!window.confirm('¿Retirar la sesión actual? Dejará de aparecer a los alumnos y los juegos de esta clase quedarán cerrados hasta la próxima sesión.'))return;
+    setTeacherSessionBusy(true);
+    try{renderWorkshopPlanner(await sessionCall('retireWorkshopPlannerSession',[teacherCurrentClass()]));plannerStatus('Sesión retirada. Puedes abrir otra preparación cuando quieras.');if(typeof loadTeacherWorkshopState==='function')loadTeacherWorkshopState(teacherCurrentClass(),false);}
+    catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo retirar: '+(error.message||error),true);}
+  }
 
   function mountTeacherSession(){
-    var taller=document.getElementById('taller');if(!taller||document.getElementById('workshopSessionEditor'))return false;var grid=taller.querySelector('.workshopGameGrid');var editor=document.createElement('div');editor.id='workshopSessionEditor';editor.className='workshopSessionEditor';
-    editor.innerHTML='<div class="workshopSessionTop"><div><h3>🎯 Sesión del taller</h3><div class="sub">En clase la abres y cierras tú. En casa solo funciona durante el horario que autorices.</div></div><span id="workshopSessionState" class="workshopSessionState closed">Selecciona una clase</span></div><div class="workshopSessionForm"><div class="field"><label>Título de la misión</label><input id="workshopSessionTitle" type="text" maxlength="80" placeholder="Ej.: Cazadores de tildes"></div><div class="field"><label>Objetivo XP</label><input id="workshopSessionXp" type="number" min="0" step="25" value="0"></div><div class="field wide"><label>Mensaje para los alumnos</label><textarea id="workshopSessionMessage" maxlength="400" placeholder="Qué tienen que hacer hoy, qué pueden elegir o qué reto deben superar."></textarea></div><div class="workshopSessionHome"><div class="workshopSessionHomeHead"><div><strong>🏠 Acceso supervisado en casa</strong><div class="sub">Para tardes, fines de semana o tareas concretas.</div></div><label><input id="workshopHomeEnabled" type="checkbox"> Permitir</label></div><div class="workshopSessionHomeTimes"><div class="field"><label>Desde</label><input id="workshopHomeStart" type="datetime-local"></div><div class="field"><label>Hasta</label><input id="workshopHomeEnd" type="datetime-local"></div></div></div><div class="wide"><label>Juegos de esta misión</label></div><div id="workshopSessionGames" class="workshopGamePicker"><div class="sub">Elige una clase para cargar el catálogo.</div></div><div class="workshopSessionActions"><button type="button" id="workshopSessionSave">💾 Guardar sesión</button><button type="button" id="workshopSessionOpen">▶ Abrir en clase</button><button type="button" id="workshopSessionClose">⏹ Cerrar en clase</button><button type="button" class="dangerAction" id="workshopSessionRetire">Retirar sesión</button></div><div class="workshopSessionHelp">La sesión añade una capa de supervisión al control manual de juegos de abajo. Si está publicada pero cerrada, sus juegos no se pueden abrir. El acceso en casa se activa y caduca automáticamente. Los juegos nuevos aparecerán aquí en cuanto se activen en el catálogo de LenguArcade.</div><div class="status workshopStatus" id="workshopSessionStatus"></div></div>';
-    if(grid)taller.insertBefore(editor,grid);else taller.appendChild(editor);document.getElementById('workshopSessionSave').onclick=function(){saveTeacherSession('save');};document.getElementById('workshopSessionOpen').onclick=function(){saveTeacherSession('open');};document.getElementById('workshopSessionClose').onclick=closeTeacherSession;document.getElementById('workshopSessionRetire').onclick=retireTeacherSession;var select=document.getElementById('workshopClassSelect');if(select)select.addEventListener('change',function(){setTimeout(loadTeacherSession,0);});setTimeout(loadTeacherSession,0);return true;
+    var mount=document.getElementById('workshopPlannerMount');if(!mount||mount.dataset.plannerMounted==='1')return false;mount.dataset.plannerMounted='1';
+    var select=document.getElementById('workshopClassSelect');if(select)select.addEventListener('change',function(){setTimeout(loadWorkshopPlanner,0);});
+    setTimeout(loadWorkshopPlanner,0);return true;
   }
-  function installTeacherSession(){var attempts=0;var timer=setInterval(function(){attempts++;if(mountTeacherSession()||attempts>30)clearInterval(timer);},150);return true;}
+  function installTeacherSession(){var attempts=0;var timer=setInterval(function(){attempts++;if(mountTeacherSession()||attempts>40)clearInterval(timer);},150);return true;}
 
   if(!installStudentSession())installTeacherSession();
 })();
