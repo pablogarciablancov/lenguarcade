@@ -8325,10 +8325,31 @@ async function remoteSaveNow() {
   // Limpieza de seguridad para el inventario
   window.player.items = window.player.items || [];
   
+  const globalGold = Number(window.BG?.getGlobalGold?.(window.player.gold) ?? window.player.gold ?? 0);
+  window.player.gold = globalGold;
+  window.player.__globalGold = globalGold;
   const datosStr = JSON.stringify(window.player);
   const fecha = new Date().toLocaleString("es-ES");
 
-  console.log("Guardando progreso e inventario de:", email);
+  console.log("Guardando progreso y oro general de:", email);
+
+  // PERFIL_GLOBAL contiene solo la economía común. El resto sigue separado por modo.
+  try{
+    const globalRecord = {
+      gold:globalGold,
+      updatedAt:Number(window.player.__globalGoldUpdatedAt || Date.now()),
+      version:1
+    };
+    google.script.run.guardarProgreso(
+      email,
+      "PERFIL_GLOBAL",
+      globalGold,
+      1,
+      0,
+      JSON.stringify(globalRecord),
+      fecha
+    );
+  }catch(e){}
 
   return new Promise((resolve) => {
     google.script.run
@@ -8336,7 +8357,7 @@ async function remoteSaveNow() {
         console.log("Servidor responde:", respuesta);
         resolve(respuesta);
       })
-      .guardarProgreso(email, slot, window.player.gold || 0, window.player.level || 1, window.player.xp || 0, datosStr, fecha);
+      .guardarProgreso(email, slot, globalGold, window.player.level || 1, window.player.xp || 0, datosStr, fecha);
   });
 }
 
@@ -8358,12 +8379,15 @@ async function remoteLoad() {
             
             if (globalJson) {
               const globalStats = JSON.parse(globalJson);
-              // ¡MAGIA! Sobrescribimos el oro y objetos del modo con los globales
-              playerObj.gold = globalStats.gold;
-              playerObj.items = globalStats.items;
-              playerObj.level = globalStats.level;
-              playerObj.xp = globalStats.xp;
-              console.log("Sincronización global completada: Oro y Objetos recuperados.");
+              // Solo el oro es global. Inventario, nivel y EXP pertenecen al modo.
+              const remoteGold = Number(globalStats?.gold);
+              if(Number.isFinite(remoteGold)){
+                playerObj.gold = Math.max(0,Math.floor(remoteGold));
+                playerObj.__globalGold = playerObj.gold;
+                playerObj.__globalGoldUpdatedAt = Number(globalStats?.updatedAt || 0);
+                try{ window.BG?.setGlobalGold?.(playerObj.gold,{updatedAt:playerObj.__globalGoldUpdatedAt || Date.now()}); }catch(e){}
+              }
+              console.log("Sincronización global completada: oro general recuperado.");
             }
             
             resolve(playerObj);
@@ -10598,6 +10622,184 @@ try{
   let player = null;
 function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.BG.player = p; }catch(e){} }
 
+  // ===== ORO GLOBAL =====
+  // El oro pertenece al aventurero, no a una partida concreta. Aventura,
+  // Supervivencia, Dominio y Estrategia conservan su progreso separado,
+  // pero comparten este monedero.
+  const GLOBAL_GOLD_PREFIX = "battlegrafia_v2_global_gold_v1_";
+  const GLOBAL_GOLD_MODES = ["adventure","survival","dominio","strategy"];
+
+  function isDemoGoldEconomy(){
+    try{ return !!(window.BG?.isDemo && window.BG.isDemo()); }catch(e){ return false; }
+  }
+
+  function globalGoldIdentity(){
+    let raw = "";
+    try{ raw = window.__LENGUARCADE_PROFILE_KEY || ""; }catch(e){}
+    try{ if(!raw) raw = window.__LENGUARCADE_PROFILE_EMAIL || ""; }catch(e){}
+    try{ if(!raw && window.BG?.getUserEmail) raw = window.BG.getUserEmail() || ""; }catch(e){}
+    try{ if(!raw) raw = localStorage.getItem("bg_user_email") || ""; }catch(e){}
+    raw = String(raw || "local-player").trim().toLowerCase();
+    return raw.replace(/[^a-z0-9@._-]+/g,"_").slice(0,96) || "local-player";
+  }
+
+  function globalGoldKey(){
+    return GLOBAL_GOLD_PREFIX + globalGoldIdentity();
+  }
+
+  function readGlobalGoldRecord(){
+    if(isDemoGoldEconomy()) return { gold:0, updatedAt:0, demo:true };
+    try{
+      const raw = localStorage.getItem(globalGoldKey());
+      if(!raw) return null;
+      const parsed = JSON.parse(raw);
+      if(typeof parsed === "number" && Number.isFinite(parsed)){
+        return { gold:Math.max(0,Math.floor(parsed)), updatedAt:0 };
+      }
+      const gold = Number(parsed?.gold);
+      if(!Number.isFinite(gold)) return null;
+      return {
+        gold:Math.max(0,Math.floor(gold)),
+        updatedAt:Number(parsed?.updatedAt || 0)
+      };
+    }catch(e){
+      return null;
+    }
+  }
+
+  function discoverLegacyGlobalGold(seedValue){
+    // Migración inicial: NO sumamos el oro de los modos (lo duplicaría).
+    // Conservamos el mayor saldo conocido para no perder monedas al pasar
+    // del sistema antiguo de partidas separadas al monedero común.
+    const values = [];
+    const add = value => {
+      const n = Number(value);
+      if(Number.isFinite(n) && n >= 0) values.push(Math.floor(n));
+    };
+
+    add(seedValue);
+    try{ add(player?.gold); }catch(e){}
+    try{ add(window.player?.gold); }catch(e){}
+
+    GLOBAL_GOLD_MODES.forEach(mode=>{
+      try{
+        const slotsRaw = localStorage.getItem("battlegrafia_v2_save_slots_v1_" + mode);
+        const slots = slotsRaw ? JSON.parse(slotsRaw) : [];
+        if(Array.isArray(slots)){
+          slots.forEach(slot=>add(slot?.data?.__globalGold ?? slot?.data?.gold));
+        }
+        const legacyRaw = localStorage.getItem("battlegrafia_v2_player_pixel_historia_v6_" + mode);
+        if(legacyRaw){
+          const legacy = JSON.parse(legacyRaw);
+          add(legacy?.__globalGold ?? legacy?.gold);
+        }
+      }catch(e){}
+    });
+
+    return values.length ? Math.max(...values) : 0;
+  }
+
+  function writeGlobalGoldRecord(value, updatedAt=Date.now()){
+    const gold = Math.max(0,Math.floor(Number(value) || 0));
+    if(isDemoGoldEconomy()) return { gold:0, updatedAt:0, demo:true };
+    const record = { gold, updatedAt:Number(updatedAt || Date.now()), version:1 };
+    try{ localStorage.setItem(globalGoldKey(), JSON.stringify(record)); }catch(e){}
+    return record;
+  }
+
+  function getGlobalGold(seedValue){
+    if(isDemoGoldEconomy()) return 0;
+    let record = readGlobalGoldRecord();
+    if(!record){
+      record = writeGlobalGoldRecord(discoverLegacyGlobalGold(seedValue));
+    }
+    return Number(record.gold || 0);
+  }
+
+  function setGlobalGold(value, options={}){
+    if(isDemoGoldEconomy()) return 0;
+    const record = writeGlobalGoldRecord(value, options.updatedAt || Date.now());
+    const gold = record.gold;
+
+    if(options.syncPlayer !== false){
+      try{
+        if(player){
+          player.gold = gold;
+          player.__globalGold = gold;
+          player.__globalGoldUpdatedAt = record.updatedAt;
+        }
+      }catch(e){}
+      try{
+        if(window.player && window.player !== player){
+          window.player.gold = gold;
+          window.player.__globalGold = gold;
+          window.player.__globalGoldUpdatedAt = record.updatedAt;
+        }
+      }catch(e){}
+    }
+
+    try{
+      window.dispatchEvent(new CustomEvent("bg2:global-gold-changed",{detail:{gold,updatedAt:record.updatedAt}}));
+    }catch(e){}
+    return gold;
+  }
+
+  function syncPlayerGoldFromGlobal(target){
+    if(!target || typeof target !== "object") return 0;
+    if(isDemoGoldEconomy()){
+      target.gold = 0;
+      return 0;
+    }
+
+    let record = readGlobalGoldRecord();
+    const incomingGold = Number(target.__globalGold ?? target.gold);
+    const incomingAt = Number(target.__globalGoldUpdatedAt || 0);
+
+    // Si recibimos de la nube un monedero explícitamente más reciente,
+    // lo aceptamos. Los guardados antiguos sin marca temporal solo sirven
+    // como semilla de migración.
+    if(record && Number.isFinite(incomingGold) && incomingAt > Number(record.updatedAt || 0)){
+      record = writeGlobalGoldRecord(incomingGold, incomingAt);
+    }
+    if(!record){
+      record = writeGlobalGoldRecord(discoverLegacyGlobalGold(Number.isFinite(incomingGold) ? incomingGold : 0));
+    }
+
+    target.gold = record.gold;
+    target.__globalGold = record.gold;
+    target.__globalGoldUpdatedAt = record.updatedAt;
+    return record.gold;
+  }
+
+  function commitPlayerGoldToGlobal(target){
+    if(!target || typeof target !== "object") return 0;
+    if(isDemoGoldEconomy()){
+      target.gold = 0;
+      return 0;
+    }
+
+    const desired = Math.max(0,Math.floor(Number(target.gold) || 0));
+    const current = readGlobalGoldRecord();
+    let record = current;
+
+    if(!current || current.gold !== desired){
+      record = writeGlobalGoldRecord(desired);
+    }else{
+      target.__globalGold = current.gold;
+      target.__globalGoldUpdatedAt = current.updatedAt;
+    }
+
+    target.gold = record.gold;
+    target.__globalGold = record.gold;
+    target.__globalGoldUpdatedAt = record.updatedAt;
+    return record.gold;
+  }
+
+  window.BG = window.BG || {};
+  window.BG.getGlobalGold = getGlobalGold;
+  window.BG.setGlobalGold = setGlobalGold;
+  window.BG.syncPlayerGoldFromGlobal = syncPlayerGoldFromGlobal;
+
 
   // ===== Estado del "modo de juego" (Aventura / Supervivencia / Práctica / Dominio / Estrategia) =====
   let runModeId = "adventure";
@@ -11184,6 +11386,7 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
         player.currentMonsterHp = currentMonsterHp;
         player.modeId = runModeId || getSelectedModeId();
         player.__runState = snapshotRunState();
+        commitPlayerGoldToGlobal(player);
         window.player = player;
         window.BG = window.BG || {};
         window.BG.getPlayer = function(){ return window.player || player || null; };
@@ -11309,7 +11512,7 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
   // ===== Reiniciar partida sin perder logros =====
   function resetRunKeepAchievements(){
     if(!player){ alert('No hay partida activa.'); return; }
-    const ok = confirm("¿Reiniciar la partida?\n\nSe conservarán los LOGROS, pero perderás TODO el oro, los objetos, cartas y el progreso de la aventura.");
+    const ok = confirm("¿Reiniciar la partida?\n\nSe conservarán los LOGROS y el ORO GENERAL. Perderás los objetos, cartas y el progreso de esta partida.");
     if(!ok) return;
 
     const keepAchievements = player.achievements ? _deepCopy(player.achievements) : undefined;
@@ -11325,7 +11528,7 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
       xpToNext: 100,
       hp: 100,
       maxHp: 100,
-      gold: 0,
+      gold: getGlobalGold(player?.gold),
       monstersDefeated: 0,
       abilityCharge: 0,
       items: [],
@@ -11351,7 +11554,7 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
     try{ renderShop(); }catch(e){}
     try{ updateHpBars(); }catch(e){}
 
-    try{ setLog('<span class="bad">Has reiniciado la aventura.</span> Conservas tus <strong>logros</strong>, pero empiezas de cero.'); }catch(e){}
+    try{ setLog('<span class="bad">Has reiniciado la aventura.</span> Conservas tus <strong>logros</strong> y tu <strong>oro general</strong>; el progreso de esta partida empieza de cero.'); }catch(e){}
     try{ switchTo('battle'); }catch(e){}
   }
 
@@ -11410,6 +11613,7 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
       if(!Array.isArray(parsed.diary)) parsed.diary = [];
       if(!Array.isArray(parsed.battleFeed)) parsed.battleFeed = [];
       if(typeof parsed.abilityCharge === "undefined") parsed.abilityCharge = 0;
+      syncPlayerGoldFromGlobal(parsed);
       return parsed;
     }catch(e){
       console.warn("Error al cargar partida:", e);
@@ -11431,7 +11635,10 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
   try {
     console.log("No hay partida local, consultando a la nube (esto tardará unos segundos)...");
     let remoteState = await remoteLoad();
-    if (remoteState) return remoteState;
+    if (remoteState){
+      syncPlayerGoldFromGlobal(remoteState);
+      return remoteState;
+    }
   } catch(e) {
     console.warn("No se encontró partida en la nube o hubo un error:", e);
   }
@@ -11482,7 +11689,7 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
 
   function addGold(amount){
     if(runRules && !runRules.allowRewards) return;
-    player.gold += amount;
+    player.gold = setGlobalGold((Number(player.gold) || 0) + (Number(amount) || 0));
     enforceDemoEconomy();
     updateHeroUi();
     savePlayer();
@@ -13251,7 +13458,7 @@ function buyShopItem(id){
     return;
   }
 
-  player.gold = goldNow - item.cost;
+  player.gold = setGlobalGold(goldNow - item.cost);
   addItem(item.name);
 
   showMsg(`<span class="good">Has comprado <strong>${item.name}</strong>.</span>`);
@@ -13291,7 +13498,7 @@ function sellShopItem(identifier){
   }
 
   player.items.splice(itemIndex, 1);
-  player.gold = (Number(player.gold) || 0) + saleDef.sellPrice;
+  player.gold = setGlobalGold((Number(player.gold) || 0) + saleDef.sellPrice);
 
   showMsg(`<span class="good">Has vendido <strong>${saleDef.name}</strong> por ${saleDef.sellPrice} de oro.</span>`);
 
@@ -13333,7 +13540,7 @@ campRestBtn.addEventListener("click", ()=>{
     campMessageEl.innerHTML = `<span class="bad">No tienes suficiente oro para descansar (necesitas ${restCost}).</span>`;
     return;
   }
-  player.gold -= restCost;
+  player.gold = setGlobalGold((Number(player.gold) || 0) - restCost);
   player.hp = player.maxHp;
   campMessageEl.innerHTML = `<span class="good">Descansas junto a la hoguera.</span> Recuperas toda tu vida.`;
   updateHeroUi();
@@ -14051,7 +14258,7 @@ function endRunWinAll(){
     // Penalización v1.0: si mueres, pierdes TODO el oro y TODOS los objetos.
     const oldGold = Number(player.gold) || 0;
     const goldLost = oldGold;
-    player.gold = 0;
+    player.gold = setGlobalGold(0);
 
     const itemsLost = Array.isArray(player.items) ? player.items.length : 0;
     player.items = [];
@@ -14941,7 +15148,7 @@ if(currentMonsterHp <= 0 || forceWinByStreak){
         xpToNext:100,
         hp:100,
         maxHp:100,
-        gold:0,
+        gold:getGlobalGold(player?.gold),
         monstersDefeated:0,
         abilityCharge:0,
         items:[],
@@ -17251,7 +17458,7 @@ function getUnlockedSet(){
 <!-- Battlegrafía 2.0: capas v2; el motor original permanece intacto. -->
 <script src="./enhance-v2.js?v=20260907-rpg14"></script>
 <script src="./save-slots-v2.js?v=20260909-rpg27"></script>
-<script src="./rpg-ui-v2.js?v=20260909-rpg27"></script>
+<script src="./rpg-ui-v2.js?v=20260909-rpg29"></script>
 <script src="./rpg-unified-v2.js?v=20260907-rpg14"></script>
 <script src="./battle-clean-v2.js?v=20260907-rpg19"></script>
 <script src="./battle-router-v2.js?v=20260907-rpg14"></script>
