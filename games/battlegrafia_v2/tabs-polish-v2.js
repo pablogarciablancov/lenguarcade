@@ -3,12 +3,20 @@
   const $=id=>document.getElementById(id);
 
   function loadCss(){
-    if($('bg2-tabs-polish-css')) return;
-    const link=document.createElement('link');
-    link.id='bg2-tabs-polish-css';
-    link.rel='stylesheet';
-    link.href='./tabs-polish-v2.css?v=20260907-rpg14';
-    document.head.appendChild(link);
+    if(!$('bg2-tabs-polish-css')){
+      const link=document.createElement('link');
+      link.id='bg2-tabs-polish-css';
+      link.rel='stylesheet';
+      link.href='./tabs-polish-v2.css?v=20260907-rpg14';
+      document.head.appendChild(link);
+    }
+    if(!$('bg2-inventory-compact-css')){
+      const compact=document.createElement('link');
+      compact.id='bg2-inventory-compact-css';
+      compact.rel='stylesheet';
+      compact.href='./inventory-compact-v2.css?v=20260907-rpg14';
+      document.head.appendChild(compact);
+    }
   }
 
   const tabs={
