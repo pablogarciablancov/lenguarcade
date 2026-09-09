@@ -416,3 +416,14 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 9. Publicar Apps Script y probar Scrabble, Battlegrafía, Narratoria, Rayuela y Entre Líneas desde el portal.
 10. Confirmar que Battlegrafía 2.0 sigue inactiva y no aparece en el catálogo del alumno.
 
+
+
+## Taller · selector de clases reales (2026-09-09)
+
+1. Abrir el panel del profesor y entrar en **Taller**.
+2. Comprobar que no aparecen `1º ESO A/B` … `4º ESO A/B` si esas clases no existen en Supabase.
+3. Sin clases activas, verificar que el selector contiene solo **Todas las clases · regla general**.
+4. Importar o restaurar una clase real y actualizar el panel.
+5. Confirmar que la clase real aparece en Taller sin recargar manualmente datos legacy.
+6. Archivar esa clase desde **Gestión**, actualizar el panel y confirmar que desaparece del selector de Taller.
+7. Ejecutar `npm.cmd run check`.

@@ -104,11 +104,7 @@ function buildWorkshopAccessState_(scope) {
 function getWorkshopAccessAdmin(classCode) {
   requireWorkshopTeacher_();
   ensureSheets_();
-  var state = buildWorkshopAccessState_(classCode);
-  state.classes = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.CLASES))
-    .filter(function(row){ return isTrue_(row.activa); })
-    .map(function(row){ return {classCode:String(row.classCode), nombreVisible:String(row.nombreVisible || row.classCode)}; });
-  return state;
+  return buildWorkshopAccessState_(classCode);
 }
 
 function setWorkshopGameAccess(classCode, gameId, enabled) {

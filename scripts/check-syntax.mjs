@@ -88,6 +88,17 @@ if (
 ) {
   errors.push("El panel público del profesor expone credenciales o mantenimiento.");
 }
+const workshopAdminSource = serverSource.match(
+  /function getWorkshopAccessAdmin\([^)]*\)\s*\{[\s\S]*?\n\}/,
+)?.[0] || "";
+if (
+  !professorHtml.includes("function teacherWorkshopClasses()") ||
+  !professorHtml.includes("currentTeacher.classes") ||
+  !professorHtml.includes("state.classes=classes") ||
+  workshopAdminSource.includes("SHEETS.CLASES")
+) {
+  errors.push("El selector de Taller debe usar las clases activas de Supabase y no la hoja legacy Clases.");
+}
 const legacyTeacherDetailIsProtected =
   /function getTeacherStudentDetail\(studentId,\s*token\)\s*\{[\s\S]*?requireSession_\(token,\s*'teacher'\)/.test(serverSource);
 const supabaseTeacherDetailIsProtected =

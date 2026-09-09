@@ -462,3 +462,12 @@ Cada cambio debe indicar:
 - Supabase añade `description`, `competencies`, `integration` y `official` a `public.games`.
 - Battlegrafía 2.0 queda dentro de la fuente canónica como laboratorio no oficial e inactivo.
 
+
+
+## 2026-09-09 · Taller: clases reales en el selector
+
+- Corregido el selector de clase del menú **Taller** del panel del profesor.
+- El selector deja de leer la hoja legacy `Clases`, que podía conservar las clases de demostración `1º ESO A/B` a `4º ESO A/B`.
+- La fuente de verdad pasa a ser `teacher-dashboard` / Supabase mediante `currentTeacher.classes`.
+- Si no hay clases activas importadas, Taller muestra únicamente la regla general; no crea ni muestra cursos ficticios.
+- El selector se vuelve a sincronizar cuando el panel recibe una lista actualizada de clases.

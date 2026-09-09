@@ -720,6 +720,25 @@ body.light .workshopGameRow{background:rgba(94,53,177,.04)}
     var select=document.getElementById('workshopClassSelect');
     return select?select.value:'*';
   }
+  function teacherWorkshopClasses(){
+    try{
+      if(typeof currentTeacher!=='undefined'&&currentTeacher&&Array.isArray(currentTeacher.classes)){
+        var seen={};
+        return currentTeacher.classes.map(function(row){
+          var classCode=String(row&&row.classCode||'').trim();
+          return {
+            classCode:classCode,
+            nombreVisible:String(row&&row.nombreVisible||classCode).trim()||classCode
+          };
+        }).filter(function(row){
+          if(!row.classCode||seen[row.classCode])return false;
+          seen[row.classCode]=true;
+          return true;
+        });
+      }
+    }catch(error){}
+    return [];
+  }
   function teacherGameLabel(game){
     if(game.accessSource==='class')return 'Regla propia de esta clase';
     if(game.accessSource==='general')return teacherScope()==='*'?'Regla general':'Hereda la regla general';
@@ -730,7 +749,9 @@ body.light .workshopGameRow{background:rgba(94,53,177,.04)}
     var select=document.getElementById('workshopClassSelect');
     if(!select)return;
     var selected=state.scope||'*';
-    var options='<option value="*">Todas las clases · regla general</option>'+(state.classes||[]).map(function(row){return '<option value="'+workshopEsc(row.classCode)+'">'+workshopEsc(row.nombreVisible)+'</option>';}).join('');
+    var classes=teacherWorkshopClasses();
+    state.classes=classes;
+    var options='<option value="*">Todas las clases · regla general</option>'+classes.map(function(row){return '<option value="'+workshopEsc(row.classCode)+'">'+workshopEsc(row.nombreVisible)+'</option>';}).join('');
     select.innerHTML=options;
     if([].slice.call(select.options).some(function(option){return option.value===selected;}))select.value=selected;else select.value='*';
     localStorage.setItem('LA_WORKSHOP_SCOPE',select.value);
@@ -813,7 +834,9 @@ body.light .workshopGameRow{background:rgba(94,53,177,.04)}
     renderTeacher=function(data){
       var result=baseRenderTeacher(data);
       mountTeacherWorkshop();
-      if(!workshopTeacherState){
+      if(workshopTeacherState){
+        renderTeacherWorkshopState(workshopTeacherState);
+      }else{
         var remembered=localStorage.getItem('LA_WORKSHOP_SCOPE')||'*';
         setTimeout(function(){loadTeacherWorkshopState(remembered,false);},0);
       }
