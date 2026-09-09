@@ -106,11 +106,11 @@
             collectionFilterButton('Todos','all')+
             collectionFilterButton('Derrotados','unlocked')+
             collectionFilterButton('Bloqueados','locked')+
-            collectionFilterButton('Mundo I','world-1')+
-            collectionFilterButton('Mundo II','world-2')+
-            collectionFilterButton('Mundo III','world-3')+
-            collectionFilterButton('Mundo IV','world-4')+
-            collectionFilterButton('Mundo V','world-5')+
+            collectionFilterButton('Montañas','world-montanas')+
+            collectionFilterButton('Castillo','world-castillo')+
+            collectionFilterButton('Ciénaga','world-cienaga')+
+            collectionFilterButton('Acantilados','world-acantilados')+
+            collectionFilterButton('Volcán','world-volcan')+
           '</div>'+
           '<label class="bg2-catalog-search-wrap"><span>⌕</span><input id="bg2-collection-search" type="search" placeholder="Buscar criatura o contenido…" autocomplete="off"></label>'+
         '</div>';
@@ -145,27 +145,44 @@
       const unlocked=!card.classList.contains('locked');
       if(unlocked) unlockedCount++;
 
-      const world=Math.floor(index/6)+1;
-      const boss=index%6===5;
+      const fallbackWorldIndex=Math.floor(index/6)+1;
+      const worldId=card.dataset.monsterWorld || ['montanas','castillo','cienaga','acantilados','volcan'][fallbackWorldIndex-1] || 'montanas';
+      const worldIndex=Number(card.dataset.monsterWorldIndex || fallbackWorldIndex);
+      const worldName=card.dataset.monsterWorldName || ('Mundo '+roman(worldIndex));
+      const shortWorld={
+        montanas:'MONTAÑAS',
+        castillo:'CASTILLO',
+        cienaga:'CIÉNAGA',
+        acantilados:'ACANTILADOS',
+        volcan:'VOLCÁN'
+      }[worldId] || ('MUNDO '+roman(worldIndex));
+      const boss=card.dataset.monsterBoss === '1';
       const name=safeText(card.querySelector('.mon-name'));
       const rule=safeText(card.querySelector('.mon-rule'));
       card.dataset.bg2Status=unlocked ? 'unlocked' : 'locked';
-      card.dataset.bg2World=String(world);
-      card.dataset.bg2Search=(name+' '+rule).toLowerCase();
+      card.dataset.bg2World=worldId;
+      card.dataset.bg2WorldIndex=String(worldIndex);
+      card.dataset.bg2Search=(name+' '+rule+' '+worldName+' '+shortWorld+(boss ? ' jefe' : '')).toLowerCase();
       card.classList.toggle('bg2-boss-card',boss);
 
       const art=card.querySelector('.mon-sprite-wrap');
-      if(art && !art.querySelector('.bg2-mon-world')){
-        const chip=document.createElement('span');
-        chip.className='bg2-mon-world';
-        chip.textContent='MUNDO '+roman(world);
-        art.appendChild(chip);
+      let worldChip=art?.querySelector('.bg2-mon-world');
+      if(art && !worldChip){
+        worldChip=document.createElement('span');
+        worldChip.className='bg2-mon-world';
+        art.appendChild(worldChip);
       }
-      if(art && boss && !art.querySelector('.bg2-mon-boss')){
-        const chip=document.createElement('span');
-        chip.className='bg2-mon-boss';
-        chip.textContent='JEFE';
-        art.appendChild(chip);
+      if(worldChip) worldChip.textContent=shortWorld;
+
+      let bossChip=art?.querySelector('.bg2-mon-boss');
+      if(art && boss && !bossChip){
+        bossChip=document.createElement('span');
+        bossChip.className='bg2-mon-boss';
+        art.appendChild(bossChip);
+      }
+      if(bossChip){
+        bossChip.textContent='JEFE';
+        bossChip.hidden=!boss;
       }
 
       let status=card.querySelector('.bg2-mon-status');
@@ -178,7 +195,7 @@
         ? '<span class="bg2-status-dot"></span> Derrotado <b>VER FICHA →</b>'
         : '<span class="bg2-status-lock">◆</span> Sin derrotar <b>VER FICHA →</b>';
 
-      card.setAttribute('aria-label',name+(unlocked ? ', derrotado' : ', no derrotado')+', Mundo '+roman(world));
+      card.setAttribute('aria-label',name+(boss ? ', jefe' : ', criatura')+', '+worldName+(unlocked ? ', derrotado' : ', no derrotado'));
     });
 
     const count=$('bg2-collection-count');
