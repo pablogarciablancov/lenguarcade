@@ -11075,6 +11075,7 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
     try{
       attackBtn && (attackBtn.disabled = true);
       answerEl && (answerEl.disabled = true);
+      battleItemSelect && (battleItemSelect.disabled = true);
       useItemBtn && (useItemBtn.disabled = true);
       abilityBtn && (abilityBtn.disabled = true);
     }catch(e){}
@@ -11087,9 +11088,11 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
       answerEl && (answerEl.disabled = false);
       // useItem/ability dependen de reglas y carga
       if(runRules && !runRules.allowItems){
+        battleItemSelect && (battleItemSelect.disabled = true);
         useItemBtn && (useItemBtn.disabled = true);
       }else{
-        useItemBtn && (useItemBtn.disabled = false);
+        // updateBattleItemSelect decide además si la mochila está vacía.
+        try{ updateBattleItemSelect(); }catch(e){}
       }
       if(runRules && !runRules.allowAbility){
         abilityBtn && (abilityBtn.disabled = true);
@@ -11567,84 +11570,82 @@ function normalizeImageName(name) {
 }
 
 function updateBattleItemSelect(){
-  // Ahora buscamos el ID exacto con guiones
-  const container = document.getElementById('battle-item-select');
-  if(!container || !player) return;
+  const select = document.getElementById('battle-item-select');
+  if(!select || !player) return;
+
+  const items = Array.isArray(player.items) ? player.items : [];
+  const previousValue = select.value || "";
+
+  // IMPORTANTE: este control es un <select>. Solo puede contener <option>/<optgroup>.
+  // La versión anterior insertaba <div> con tarjetas dentro del <select>, por eso
+  // el desplegable dejaba de abrirse correctamente en varios navegadores.
+  const makeOption = (value, label, disabled=false) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    option.disabled = !!disabled;
+    return option;
+  };
+
+  select.replaceChildren();
+  select.appendChild(makeOption("", "Usar objeto…"));
 
   if(runRules && !runRules.allowItems){
-    container.innerHTML = `<div style="color:#9ca3af; text-align:center; padding:10px; font-style:italic;">(Sin objetos en este modo)</div>`;
+    select.appendChild(makeOption("", "Objetos desactivados en este modo", true));
+    select.disabled = true;
+    if(useItemBtn) useItemBtn.disabled = true;
     return;
   }
 
   const counts = {};
-  const allowedSet = (runModeId === "strategy" && runState && Array.isArray(runState.allowedItems)) ? new Set(runState.allowedItems) : null;
-  
-  player.items.forEach(name => {
-    if(!BATTLE_USABLE.has(name)) return; 
+  const allowedSet = (runModeId === "strategy" && runState && Array.isArray(runState.allowedItems))
+    ? new Set(runState.allowedItems)
+    : null;
+
+  items.forEach(name => {
+    if(!BATTLE_USABLE.has(name)) return;
     if(allowedSet && !allowedSet.has(name)) return;
     counts[name] = (counts[name] || 0) + 1;
   });
 
   const names = Object.keys(counts).sort((a,b)=>a.localeCompare(b,'es'));
-  
+
   if(names.length === 0){
-    container.innerHTML = `<div style="color:#9ca3af; text-align:center; padding:10px; font-style:italic;">(Mochila de combate vacía)</div>`;
+    select.appendChild(makeOption("", "Mochila de combate vacía", true));
+    select.disabled = true;
+    if(useItemBtn) useItemBtn.disabled = true;
     return;
   }
 
-  // Diccionario de descripciones
   const descMap = {
-    "Poción de tinta": "Inflige daño directo al monstruo.",
-    "Escudo gramatical": "Reduce daño del próximo ataque.",
-    "Mancha de Tinta": "Reduce daño del próximo ataque.",
-    "Poción debilitante": "El monstruo golpea menos por 2 turnos.",
-    "Tinta corrosiva": "Ataques con daño extra por 3 turnos.",
-    "Expansor de tildes": "Ataque perfecto = Daño extra.",
-    "Eco Agudo": "+35 a la barra de habilidad.",
-    "Pluma Arcana": "+60 a la barra de habilidad.",
-    "Orbe de la Ortografía Perfecta": "El próximo ataque será indulgente.",
-    "Libro Viviente": "El próximo ataque será indulgente.",
-    "Corona del Corrector Supremo": "+60% de daño durante 3 turnos.",
-    "Polvo de Tilde": "Tus errores penalizan un 25% menos en el próximo turno.",
-    "Cristal Vocálico": "Anula el daño enemigo durante el próximo turno."
+    "Poción de tinta": "daño directo",
+    "Escudo gramatical": "reduce el próximo daño",
+    "Mancha de Tinta": "reduce el próximo daño",
+    "Poción debilitante": "debilita al enemigo",
+    "Tinta corrosiva": "aumenta tu daño",
+    "Expansor de tildes": "bonifica un ataque perfecto",
+    "Eco Agudo": "+35 habilidad",
+    "Pluma Arcana": "+60 habilidad",
+    "Orbe de la Ortografía Perfecta": "reduce penalizaciones",
+    "Libro Viviente": "pista + tolerancia",
+    "Corona del Corrector Supremo": "gran aumento de daño",
+    "Polvo de Tilde": "reduce penalizaciones",
+    "Cristal Vocálico": "anula el próximo daño"
   };
-  const hintItems = ["Pergamino de pista", "Coma Semilla", "Pergamino Roto", "Lupa del corrector", "H Perdida", "Colmillo Ortográfico", "Garra Confusora", "Acento Condensado", "Colmillo Comático", "Runas de Coherencia", "Gema de Conjugación", "Libro Viviente"];
-
-  let html = `<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; width: 100%; max-height: 250px; overflow-y: auto; padding-right: 5px;">`;
 
   names.forEach(name => {
     const count = counts[name];
-    let desc = descMap[name];
-    if (!desc && hintItems.includes(name)) desc = "Revela una pista potente.";
-    if (!desc) desc = "Objeto consumible.";
-
-    // Misma fuente visual que mochila/tienda: evita rutas inventadas por nombre.
-    const itemVisual = ITEM_DEFS[name] || SHOP_ITEMS.find(item=>item.name===name) || {};
-    const imgSrc = itemVisual.icon || DEFAULT_ITEM_ICON;
-
-    html += `
-      <div onclick="applyBattleItem('${name}')" 
-           style="background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; cursor: pointer; transition: all 0.15s ease;"
-           onmouseover="this.style.background='#1f2937'; this.style.borderColor='#8b5cf6'; this.style.transform='scale(1.02)';"
-           onmouseout="this.style.background='#111827'; this.style.borderColor='#374151'; this.style.transform='scale(1)';">
-        
-        <img src="${imgSrc}" 
-             alt="${name}" 
-             style="width: 36px; height: 36px; object-fit: contain; margin-right: 12px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));"> 
-        
-        <div style="flex: 1; text-align: left; display: flex; flex-direction: column; justify-content: center;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-            <span style="color: #f3f4f6; font-size: 0.95rem; font-weight: bold;">${name}</span>
-            <span style="background: #000; color: #a855f7; border: 1px solid #a855f7; border-radius: 12px; padding: 2px 8px; font-size: 0.8rem; font-weight: bold;">x${count}</span>
-          </div>
-          <span style="color: #9ca3af; font-size: 0.75rem; line-height: 1.2;">${desc}</span>
-        </div>
-      </div>
-    `;
+    const desc = descMap[name] || "objeto de combate";
+    select.appendChild(makeOption(name, `${name} · x${count} — ${desc}`));
   });
 
-  html += `</div>`;
-  container.innerHTML = html;
+  select.disabled = false;
+  if(useItemBtn && !battleState?.isTurnResolving && !battleState?.isDeathAnimating){
+    useItemBtn.disabled = false;
+  }
+
+  // Si el objeto seleccionado sigue existiendo tras refrescar inventario, lo conservamos.
+  if(previousValue && counts[previousValue]) select.value = previousValue;
 }
 
   function getHintText(){
