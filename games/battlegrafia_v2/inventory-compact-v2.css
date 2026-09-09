@@ -1,0 +1,107 @@
+/* Battlegrafía 2.0 · Mochila compacta v14
+   Las criaturas derrotadas ocupan solo el espacio real de su sprite. */
+
+body.bg2-tabs-polished #inventory-screen #monster-collection{
+  min-height:0!important;
+  height:auto!important;
+  display:grid!important;
+  grid-template-columns:repeat(auto-fill,82px)!important;
+  grid-auto-rows:82px!important;
+  align-items:start!important;
+  justify-content:start!important;
+  align-content:start!important;
+  gap:8px!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:visible!important;
+}
+
+/* Cada criatura se convierte en una ficha-sprite, no en una tarjeta alta. */
+body.bg2-tabs-polished #inventory-screen #monster-collection > *:has(img){
+  width:82px!important;
+  min-width:82px!important;
+  max-width:82px!important;
+  height:82px!important;
+  min-height:82px!important;
+  max-height:82px!important;
+  margin:0!important;
+  padding:5px!important;
+  display:grid!important;
+  place-items:center!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--tp-pixel);
+  background:#08111e!important;
+  box-sizing:border-box!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 4px #35465f!important;
+}
+
+body.bg2-tabs-polished #inventory-screen #monster-collection > *:has(img):hover{
+  transform:translateY(-2px)!important;
+  box-shadow:
+    inset 0 0 0 2px #020409,
+    inset 0 0 0 4px #8e7130,
+    0 5px 0 #020409!important;
+}
+
+body.bg2-tabs-polished #inventory-screen #monster-collection > *:has(img) img{
+  width:72px!important;
+  min-width:72px!important;
+  max-width:72px!important;
+  height:72px!important;
+  min-height:72px!important;
+  max-height:72px!important;
+  margin:0!important;
+  padding:0!important;
+  display:block!important;
+  object-fit:contain!important;
+  image-rendering:pixelated!important;
+  filter:drop-shadow(4px 6px 0 rgba(0,0,0,.28))!important;
+}
+
+/* El nombre/información ya existe en el propio registro; no necesita inflar la ficha. */
+body.bg2-tabs-polished #inventory-screen #monster-collection > *:has(img) > :not(img),
+body.bg2-tabs-polished #inventory-screen #monster-collection > *:has(img) :is(.monster-name,.monster-label,.monster-meta,.collection-name,.collection-meta){
+  display:none!important;
+}
+
+/* Si el sprite viene dentro de un wrapper, el wrapper también se ajusta a la imagen. */
+body.bg2-tabs-polished #inventory-screen #monster-collection > *:has(img) > :has(img){
+  width:72px!important;
+  height:72px!important;
+  min-width:72px!important;
+  min-height:72px!important;
+  margin:0!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  overflow:visible!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+@media(max-width:700px){
+  body.bg2-tabs-polished #inventory-screen #monster-collection{
+    grid-template-columns:repeat(auto-fill,76px)!important;
+    grid-auto-rows:76px!important;
+  }
+  body.bg2-tabs-polished #inventory-screen #monster-collection > *:has(img){
+    width:76px!important;
+    min-width:76px!important;
+    max-width:76px!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+  }
+  body.bg2-tabs-polished #inventory-screen #monster-collection > *:has(img) img,
+  body.bg2-tabs-polished #inventory-screen #monster-collection > *:has(img) > :has(img){
+    width:66px!important;
+    height:66px!important;
+    min-width:66px!important;
+    min-height:66px!important;
+  }
+}
