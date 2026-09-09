@@ -3,7 +3,16 @@
 
   const PREFIX = 'rpg_slot_';
   const SLOT_COUNT = 3;
+  const PERSISTENT_MODES = ['adventure','survival','dominio','strategy'];
+  const MODE_LABELS = {
+    adventure:'Aventura',
+    survival:'Supervivencia',
+    dominio:'Dominio',
+    strategy:'Estrategia',
+    practice:'Práctica'
+  };
   const BACKUP_KEY = 'battlegrafia_v2_save_slots_backup_v1_adventure';
+  const MODE_BACKUP_KEY = mode => 'battlegrafia_v2_save_slots_backup_v2_last_' + mode;
   const WORLDS = [
     'Montañas de Lexikon',
     'Castillo de Paper',
@@ -27,6 +36,7 @@
   const slotId = index => PREFIX + index;
   const isEmbedded = () => !!window.__LENGUARCADE_EMBEDDED;
   let pendingNewSlotId = null;
+  let pendingNewMode = null;
 
   function rawSlots(mode='adventure') {
     const slots = safeParse(localStorage.getItem(modeKey(mode)), []);
@@ -163,6 +173,74 @@
     writeRawSlots(mode, slots);
   }
 
+  function getModeSave(mode='adventure') {
+    const slots = rawSlots(mode)
+      .filter(slot => slot && slot.data)
+      .sort((a,b)=>(Number(b.updatedAt)||0)-(Number(a.updatedAt)||0));
+    if (!slots.length) return null;
+
+    const active = localStorage.getItem(activeKey(mode));
+    const selected = slots.find(slot => slot.id === active) || slots[0];
+    return selected || null;
+  }
+
+  function modeSummary(mode='adventure') {
+    const slot = getModeSave(mode);
+    const base = progressMeta(slot, 1);
+    return {
+      ...base,
+      mode,
+      modeLabel:MODE_LABELS[mode] || mode,
+      saved:!!(slot && slot.data),
+      slotId:slot?.id || null
+    };
+  }
+
+  function activateMode(mode='adventure') {
+    const slot = getModeSave(mode);
+    localStorage.setItem('bg_modeId', mode);
+    if (!slot) {
+      localStorage.removeItem(activeKey(mode));
+      return null;
+    }
+    localStorage.setItem(activeKey(mode), slot.id);
+    return slot;
+  }
+
+  function backupMode(mode='adventure') {
+    try {
+      const slots = rawSlots(mode);
+      const legacy = localStorage.getItem(legacyKey(mode));
+      if (!slots.length && !legacy) return;
+      localStorage.setItem(MODE_BACKUP_KEY(mode), JSON.stringify({
+        savedAt:Date.now(),
+        slots,
+        active:localStorage.getItem(activeKey(mode)) || null,
+        legacy:legacy ? safeParse(legacy, null) : null
+      }));
+    } catch (error) {}
+  }
+
+  function clearMode(mode='adventure') {
+    if (!PERSISTENT_MODES.includes(mode)) return;
+    backupMode(mode);
+    localStorage.removeItem(modeKey(mode));
+    localStorage.removeItem(activeKey(mode));
+    localStorage.removeItem(legacyKey(mode));
+    window.dispatchEvent(new CustomEvent('bg2:slots-changed', { detail:{ mode } }));
+  }
+
+  function prepareModeNew(mode='adventure') {
+    if (!PERSISTENT_MODES.includes(mode)) return null;
+    clearMode(mode);
+    localStorage.setItem('bg_modeId', mode);
+    const id = slotId(1);
+    localStorage.setItem(activeKey(mode), id);
+    pendingNewSlotId = id;
+    pendingNewMode = mode;
+    return id;
+  }
+
   function formatDate(value) {
     if (!value) return '—';
     try {
@@ -179,9 +257,11 @@
   try {
     const originalMakeSlotId = typeof window.makeSlotId === 'function' ? window.makeSlotId : null;
     window.makeSlotId = function(){
-      if (pendingNewSlotId) {
+      const selectedMode = localStorage.getItem('bg_modeId') || 'adventure';
+      if (pendingNewSlotId && (!pendingNewMode || pendingNewMode === selectedMode)) {
         const id = pendingNewSlotId;
         pendingNewSlotId = null;
+        pendingNewMode = null;
         return id;
       }
       return originalMakeSlotId ? originalMakeSlotId.apply(this, arguments) : ('slot_' + Date.now());
@@ -189,7 +269,9 @@
   } catch (error) {}
 
   window.BG2Slots = {
-    SLOT_COUNT, PREFIX, all, meta, getSlot, setActive, erase, prepareNew,
-    touchName, formatDate, normalizeAdventureSlots, isEmbedded
+    SLOT_COUNT, PREFIX, PERSISTENT_MODES, MODE_LABELS,
+    all, meta, getSlot, setActive, erase, prepareNew,
+    touchName, formatDate, normalizeAdventureSlots, isEmbedded,
+    getModeSave, modeSummary, activateMode, backupMode, clearMode, prepareModeNew
   };
 })();
