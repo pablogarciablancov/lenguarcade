@@ -14954,10 +14954,17 @@ if(currentMonsterHp <= 0 || forceWinByStreak){
 
       // limpiar persistencia y guardar nueva
       try{ localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(ACTIVE_SLOT_KEY); }catch(e){}
-      // No borramos ranuras: creamos una nueva para esta partida
+      // Los modos persistentes tienen su ranura propia. Práctica no deja
+      // ni siquiera una ranura activa vacía: es entrenamiento puro.
       try{
-        const newSlotId = makeSlotId();
-        setActiveSlotId(newSlotId);
+        if(runModeId !== "practice"){
+          const newSlotId = makeSlotId();
+          setActiveSlotId(newSlotId);
+        }else{
+          localStorage.removeItem(storageKeyForMode(STORAGE_SLOTS_KEY));
+          localStorage.removeItem(storageKeyForMode(ACTIVE_SLOT_KEY));
+          localStorage.removeItem(storageKeyForMode(STORAGE_KEY));
+        }
       }catch(e){}
       currentMonsterIndex = 0;
       currentMonsterHp = 0;
