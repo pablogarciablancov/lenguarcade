@@ -49,7 +49,7 @@
       level:Number(p.level || 1),
       xp:Number(p.xp || 0),
       xpToNext:Number(p.xpToNext || 100),
-      gold:Number(p.gold || 0),
+      gold:Number(window.BG?.getGlobalGold?.(p.gold) ?? p.gold ?? 0),
       avatarId:p.avatarId || 'mago',
       world:worlds[worldIndex] || worlds[0],
       defeated
@@ -139,6 +139,13 @@
 
     updateHub();
   }
+
+  window.addEventListener('bg2:global-gold-changed', ()=>{
+    updateHub();
+    try{
+      if($('bg2-mode-archive')?.classList.contains('open')) renderModeArchive();
+    }catch(e){}
+  });
 
   function updateHub() {
     if (!$('bg2-rpg-hub')) return;
