@@ -8385,7 +8385,8 @@ async function remoteLoad() {
                 playerObj.gold = Math.max(0,Math.floor(remoteGold));
                 playerObj.__globalGold = playerObj.gold;
                 playerObj.__globalGoldUpdatedAt = Number(globalStats?.updatedAt || 0);
-                try{ window.BG?.setGlobalGold?.(playerObj.gold,{updatedAt:playerObj.__globalGoldUpdatedAt || Date.now()}); }catch(e){}
+                // No pisar un saldo local más reciente con una copia antigua de nube.
+                try{ window.BG?.syncPlayerGoldFromGlobal?.(playerObj); }catch(e){}
               }
               console.log("Sincronización global completada: oro general recuperado.");
             }
