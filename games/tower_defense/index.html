@@ -2285,6 +2285,78 @@ body{
   .start-menu-btn{padding:6px 8px!important}
   .start-menu-btn small,.start-meta{display:none!important}
 }
+
+/* ===== v31.1 · menú de inicio estable dentro del viewport =====
+   Evita que CSS Grid estire verticalmente los cuatro botones del menú. */
+#startHomePanel.start-hub{
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:minmax(0,1fr) auto auto!important;
+  grid-auto-rows:max-content!important;
+  align-content:stretch!important;
+  overflow:hidden!important;
+}
+#startHomePanel .start-hero-art{
+  min-width:0!important;
+  min-height:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+}
+#startHomePanel .start-menu-bar{
+  display:grid!important;
+  width:100%!important;
+  height:clamp(56px,8dvh,72px)!important;
+  min-height:56px!important;
+  max-height:72px!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  grid-auto-rows:minmax(0,1fr)!important;
+  align-self:end!important;
+  align-content:stretch!important;
+  overflow:hidden!important;
+}
+#startHomePanel .start-menu-btn{
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-height:72px!important;
+  align-self:stretch!important;
+  align-content:center!important;
+  overflow:hidden!important;
+}
+#startHomePanel .start-meta{
+  flex:0 0 auto!important;
+  min-height:0!important;
+}
+
+/* En pantallas estrechas el menú pasa a 2×2, pero sigue teniendo altura controlada. */
+@media(max-width:980px){
+  #startHomePanel .start-menu-bar{
+    height:clamp(112px,16dvh,144px)!important;
+    min-height:112px!important;
+    max-height:144px!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:repeat(2,minmax(0,1fr))!important;
+  }
+  #startHomePanel .start-menu-btn{max-height:72px!important}
+}
+
+/* Móvil: cuatro filas compactas sin permitir scroll de documento. */
+@media(max-width:640px){
+  html,body,#app{overflow:hidden!important}
+  #startHomePanel .start-menu-bar{
+    height:clamp(208px,32dvh,272px)!important;
+    min-height:208px!important;
+    max-height:272px!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:repeat(4,minmax(0,1fr))!important;
+  }
+  #startHomePanel .start-menu-btn{max-height:68px!important}
+}
+/* ===== /v31.1 ===== */
+
 </style>
 <script id="v31-fluid-viewport-script">
 (function(){
