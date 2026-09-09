@@ -59,7 +59,7 @@ for(const required of [
 }
 
 for(const required of [
-  "const GAME_ID = 'battlegrafia_v2'",
+  "const GAME_ID = 'battlegrafia'",
   "battlegrafia_v2_player_pixel_historia_v6",
   "battlegrafia_v2_save_slots_v1",
   "battlegrafia_v2_active_slot_v1",
@@ -460,17 +460,44 @@ for(const required of [
   if(!unifiedUi.includes(required)) errors.push("Falta cierre de arranque anti-flash: "+required);
 }
 
-const catalogEntry=catalog.games.find(game=>game.id==="battlegrafia_v2");
+const catalogEntry=catalog.games.find(game=>game.id==="battlegrafia");
 if(!catalogEntry){
-  errors.push("El catálogo canónico no registra Battlegrafía 2.0.");
+  errors.push("El catálogo canónico no registra Battlegrafía.");
 }else{
-  if(catalogEntry.official!==false) errors.push("Battlegrafía 2.0 debe seguir fuera del catálogo oficial.");
-  if(catalogEntry.active!==false) errors.push("Battlegrafía 2.0 debe seguir inactiva en producción.");
-  if(catalogEntry.integration!=="embedded") errors.push("Battlegrafía 2.0 debe conservar su integración embebida de laboratorio.");
-  if(catalogEntry.entry!=="games/battlegrafia_v2/") errors.push("Battlegrafía 2.0 debe apuntar a su directorio aislado.");
+  if(catalogEntry.official!==true) errors.push("Battlegrafía debe ser juego oficial.");
+  if(catalogEntry.active!==true) errors.push("Battlegrafía debe estar activa en producción.");
+  if(catalogEntry.status!=="listo") errors.push("Battlegrafía debe estar marcada como lista.");
+  if(catalogEntry.integration!=="embedded") errors.push("Battlegrafía debe conservar integración embebida.");
+  if(catalogEntry.entry!=="games/battlegrafia_v2/") errors.push("Battlegrafía oficial debe apuntar al RPG Fantasy Arcade.");
+}
+if(catalog.games.some(game=>game.id==="battlegrafia_v2")){
+  errors.push("El catálogo no debe mantener una segunda Battlegrafía 2.0.");
 }
 if(!migration.includes("'battlegrafia_v2'") || !migration.includes("on conflict (id) do update")){
-  errors.push("Falta la migración idempotente de Battlegrafía 2.0.");
+  errors.push("La migración histórica de la v2 debe seguir siendo idempotente.");
+}
+
+for(const forbidden of [
+  "<title>Battlegrafía 2.0",
+  "BATTLEGRAFÍA 2.0",
+  "MODO PRUEBA",
+  "Modo prueba · Fantasy Arcade v2",
+  "Fantasy Arcade · v2",
+]){
+  if(index.includes(forbidden) || rpgUi.includes(forbidden) || enhance.includes(forbidden)){
+    errors.push("Queda branding de laboratorio visible en Battlegrafía: "+forbidden);
+  }
+}
+for(const required of [
+  "<title>Battlegrafía · LenguArcade</title>",
+  'const GAME_ID = \'battlegrafia\'',
+  "<h1>BATTLEGRAFÍA</h1>",
+  ">FANTASY ARCADE<",
+  "pill.textContent = 'Fantasy Arcade'",
+]){
+  if(!(index.includes(required) || rpgUi.includes(required) || enhance.includes(required))){
+    errors.push("Falta branding de producción de Battlegrafía: "+required);
+  }
 }
 
 for(const required of [
@@ -595,4 +622,4 @@ for(const required of [
 }
 
 if(errors.length) throw new Error("Comprobaciones de Battlegrafía 2.0 fallidas:\n- "+errors.join("\n- "));
-console.log("Battlegrafía 2.0 correcta: batalla limpia, partidas independientes con oro global persistente, 5 mundos, 30 sprites, objetos auditados y modo de prueba directa.");
+console.log("Battlegrafía correcta: RPG Fantasy Arcade en producción, partidas independientes con oro global, 5 mundos, 30 criaturas y objetos auditados.");
