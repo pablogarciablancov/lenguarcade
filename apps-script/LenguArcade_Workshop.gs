@@ -20,11 +20,6 @@ function normalizeWorkshopScope_(classCode) {
   if (!scope || scope.toLowerCase() === 'all' || scope.toLowerCase() === 'todas') {
     return LA_WORKSHOP_ACCESS_CONFIG_.GLOBAL_SCOPE;
   }
-  if (scope === LA_WORKSHOP_ACCESS_CONFIG_.GLOBAL_SCOPE) return scope;
-  var exists = rowsToObjects_(getSheet_(LA_CONFIG.SHEETS.CLASES)).some(function(row) {
-    return isTrue_(row.activa) && String(row.classCode) === scope;
-  });
-  if (!exists) throw new Error('Clase no reconocida: ' + scope);
   return scope;
 }
 
@@ -165,7 +160,7 @@ var LA_WORKSHOP_SESSION_CONFIG_ = {
   SHEET: 'TallerSesiones',
   HEADERS: [
     'classCode','title','message','targetXp','published','classroomOpen',
-    'homeEnabled','homeStart','homeEnd','gameIds','updatedAt','updatedBy'
+    'homeEnabled','homeStart','homeEnd','gameIds','planId','updatedAt','updatedBy'
   ]
 };
 
@@ -252,6 +247,7 @@ function workshopSessionPublic_(row) {
     homeEnd:homeEnd,
     homeActive:homeActive,
     gameIds:ids,
+    planId:String(row.planId || ''),
     mode:mode,
     active:classroomOpen || homeActive,
     nowLocal:nowLocal,
@@ -276,6 +272,7 @@ function getWorkshopSessionAdmin(classCode) {
     homeEnd:'',
     homeActive:false,
     gameIds:[],
+    planId:'',
     mode:'closed',
     active:false,
     nowLocal:workshopSessionLocalNow_(),
@@ -325,6 +322,7 @@ function saveWorkshopSession(classCode, payload) {
     homeStart:homeStart,
     homeEnd:homeEnd,
     gameIds:JSON.stringify(ids),
+    planId:String(payload.planId || ''),
     updatedAt:nowIso_(),
     updatedBy:teacherEmail
   });
@@ -357,11 +355,265 @@ function retireWorkshopSession(classCode) {
     homeStart:String(existing.homeStart || ''),
     homeEnd:String(existing.homeEnd || ''),
     gameIds:String(existing.gameIds || '[]'),
+    planId:String(existing.planId || ''),
     updatedAt:nowIso_(),
     updatedBy:teacherEmail
   });
   SpreadsheetApp.flush();
   return getWorkshopSessionAdmin(cleanClass);
+}
+
+
+var LA_WORKSHOP_PLAN_CONFIG_ = {
+  SHEET: 'TallerPlanes',
+  HEADERS: [
+    'planId','classCode','title','message','targetXp','plannedAt',
+    'homeEnabled','homeStart','homeEnd','gameIds','usedAt',
+    'createdAt','updatedAt','updatedBy'
+  ]
+};
+
+function ensureWorkshopPlanSheet_() {
+  var ss = getDb_();
+  ensureSheetHeaders_(ss, LA_WORKSHOP_PLAN_CONFIG_.SHEET, LA_WORKSHOP_PLAN_CONFIG_.HEADERS);
+  return ss.getSheetByName(LA_WORKSHOP_PLAN_CONFIG_.SHEET);
+}
+
+function workshopPlanRows_() {
+  return rowsToObjects_(ensureWorkshopPlanSheet_());
+}
+
+function workshopPlanCleanId_(value) {
+  return String(value || '').trim().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 120);
+}
+
+function workshopPlanPublic_(row, activeSession) {
+  if (!row) return null;
+  var planId = workshopPlanCleanId_(row.planId);
+  var active = !!(activeSession && activeSession.published && String(activeSession.planId || '') === planId);
+  return {
+    planId:planId,
+    classCode:String(row.classCode || ''),
+    title:String(row.title || 'Sesión del taller'),
+    message:String(row.message || ''),
+    targetXp:Math.max(0, Number(row.targetXp || 0)),
+    plannedAt:workshopSessionNormalizeLocalDateTime_(row.plannedAt || ''),
+    homeEnabled:workshopSessionBool_(row.homeEnabled),
+    homeStart:workshopSessionNormalizeLocalDateTime_(row.homeStart || ''),
+    homeEnd:workshopSessionNormalizeLocalDateTime_(row.homeEnd || ''),
+    gameIds:workshopSessionGameIds_(row.gameIds),
+    usedAt:String(row.usedAt || ''),
+    createdAt:String(row.createdAt || ''),
+    updatedAt:String(row.updatedAt || ''),
+    active:active
+  };
+}
+
+function workshopPlannerCatalogIds_() {
+  var result = {};
+  getWorkshopCatalog_().forEach(function(game){ result[String(game.gameId)] = true; });
+  return result;
+}
+
+function workshopPlanValidatePayload_(payload) {
+  payload = payload || {};
+  var catalogIds = workshopPlannerCatalogIds_();
+  var gameIds = workshopSessionGameIds_(payload.gameIds).filter(function(id){ return catalogIds[id]; });
+  if (!gameIds.length) throw new Error('Selecciona al menos un juego para esta sesión.');
+
+  var plannedAt = workshopSessionNormalizeLocalDateTime_(payload.plannedAt || '');
+  var homeEnabled = !!payload.homeEnabled;
+  var homeStart = workshopSessionNormalizeLocalDateTime_(payload.homeStart || '');
+  var homeEnd = workshopSessionNormalizeLocalDateTime_(payload.homeEnd || '');
+  if (homeEnabled && (!homeStart || !homeEnd)) {
+    throw new Error('Para permitir el acceso en casa, indica una fecha y hora de inicio y de fin.');
+  }
+  if (homeEnabled && homeEnd <= homeStart) {
+    throw new Error('La hora de fin del acceso en casa debe ser posterior a la de inicio.');
+  }
+
+  return {
+    title:String(payload.title || '').trim() || 'Sesión del taller',
+    message:String(payload.message || '').trim(),
+    targetXp:Math.max(0, Math.round(Number(payload.targetXp || 0))),
+    plannedAt:plannedAt,
+    homeEnabled:homeEnabled,
+    homeStart:homeStart,
+    homeEnd:homeEnd,
+    gameIds:gameIds
+  };
+}
+
+function workshopPlanFind_(classCode, planId) {
+  var cleanClass = workshopSessionCleanClass_(classCode);
+  var cleanId = workshopPlanCleanId_(planId);
+  return workshopPlanRows_().find(function(row) {
+    return String(row.classCode || '') === cleanClass &&
+      workshopPlanCleanId_(row.planId) === cleanId;
+  }) || null;
+}
+
+function getWorkshopPlannerAdmin(classCode) {
+  requireWorkshopTeacher_();
+  ensureSheets_();
+  var cleanClass = workshopSessionCleanClass_(classCode);
+  var activeSession = workshopSessionPublic_(workshopSessionFind_(cleanClass));
+  var plans = workshopPlanRows_()
+    .filter(function(row){ return String(row.classCode || '') === cleanClass; })
+    .map(function(row){ return workshopPlanPublic_(row, activeSession); })
+    .sort(function(a,b) {
+      if (a.active !== b.active) return a.active ? -1 : 1;
+      if (!!a.plannedAt !== !!b.plannedAt) return a.plannedAt ? -1 : 1;
+      if (a.plannedAt && b.plannedAt && a.plannedAt !== b.plannedAt) return a.plannedAt < b.plannedAt ? -1 : 1;
+      return String(b.updatedAt || '').localeCompare(String(a.updatedAt || ''));
+    });
+  return {
+    ok:true,
+    classCode:cleanClass,
+    plans:plans,
+    activeSession:activeSession,
+    catalog:getWorkshopCatalog_()
+  };
+}
+
+function saveWorkshopPlan(classCode, payload) {
+  var teacherEmail = requireWorkshopTeacher_();
+  ensureSheets_();
+  var cleanClass = workshopSessionCleanClass_(classCode);
+  var clean = workshopPlanValidatePayload_(payload);
+  var planId = workshopPlanCleanId_(payload && payload.planId) || ('plan_' + Utilities.getUuid().replace(/-/g, '').slice(0, 20));
+  var existing = workshopPlanFind_(cleanClass, planId);
+  var now = nowIso_();
+
+  upsertByKeys_(ensureWorkshopPlanSheet_(), ['planId'], {
+    planId:planId,
+    classCode:cleanClass,
+    title:clean.title,
+    message:clean.message,
+    targetXp:clean.targetXp,
+    plannedAt:clean.plannedAt,
+    homeEnabled:clean.homeEnabled,
+    homeStart:clean.homeStart,
+    homeEnd:clean.homeEnd,
+    gameIds:JSON.stringify(clean.gameIds),
+    usedAt:existing ? String(existing.usedAt || '') : '',
+    createdAt:existing ? String(existing.createdAt || now) : now,
+    updatedAt:now,
+    updatedBy:teacherEmail
+  });
+  SpreadsheetApp.flush();
+  var result = getWorkshopPlannerAdmin(cleanClass);
+  result.savedPlanId = planId;
+  return result;
+}
+
+function deleteWorkshopPlan(classCode, planId) {
+  requireWorkshopTeacher_();
+  ensureSheets_();
+  var cleanClass = workshopSessionCleanClass_(classCode);
+  var cleanId = workshopPlanCleanId_(planId);
+  if (!cleanId) throw new Error('Sesión preparada no reconocida.');
+  var sheet = ensureWorkshopPlanSheet_();
+  var rows = rowsToObjects_(sheet);
+  var index = rows.findIndex(function(row) {
+    return String(row.classCode || '') === cleanClass &&
+      workshopPlanCleanId_(row.planId) === cleanId;
+  });
+  if (index < 0) throw new Error('La sesión preparada ya no existe.');
+  sheet.deleteRow(index + 2);
+  SpreadsheetApp.flush();
+  return getWorkshopPlannerAdmin(cleanClass);
+}
+
+function applyWorkshopPlanAccess_(classCode, gameIds, teacherEmail) {
+  var cleanClass = workshopSessionCleanClass_(classCode);
+  var selected = {};
+  workshopSessionGameIds_(gameIds).forEach(function(id){ selected[String(id)] = true; });
+  var sheet = ensureWorkshopAccessSheet_();
+  var now = nowIso_();
+  getWorkshopCatalog_().forEach(function(game) {
+    upsertByKeys_(sheet, ['classCode','gameId'], {
+      classCode:cleanClass,
+      gameId:String(game.gameId),
+      enabled:!!selected[String(game.gameId)],
+      updatedAt:now,
+      updatedBy:teacherEmail
+    });
+  });
+}
+
+function activateWorkshopPlan(classCode, planId, openNow) {
+  var teacherEmail = requireWorkshopTeacher_();
+  ensureSheets_();
+  var cleanClass = workshopSessionCleanClass_(classCode);
+  var row = workshopPlanFind_(cleanClass, planId);
+  if (!row) throw new Error('La sesión preparada ya no existe.');
+  var plan = workshopPlanPublic_(row, null);
+  applyWorkshopPlanAccess_(cleanClass, plan.gameIds, teacherEmail);
+
+  var activeResult = saveWorkshopSession(cleanClass, {
+    title:plan.title,
+    message:plan.message,
+    targetXp:plan.targetXp,
+    homeEnabled:plan.homeEnabled,
+    homeStart:plan.homeStart,
+    homeEnd:plan.homeEnd,
+    gameIds:plan.gameIds,
+    planId:plan.planId,
+    published:true,
+    classroomOpen:!!openNow
+  });
+
+  upsertByKeys_(ensureWorkshopPlanSheet_(), ['planId'], {
+    planId:plan.planId,
+    classCode:cleanClass,
+    title:plan.title,
+    message:plan.message,
+    targetXp:plan.targetXp,
+    plannedAt:plan.plannedAt,
+    homeEnabled:plan.homeEnabled,
+    homeStart:plan.homeStart,
+    homeEnd:plan.homeEnd,
+    gameIds:JSON.stringify(plan.gameIds),
+    usedAt:nowIso_(),
+    createdAt:String(row.createdAt || nowIso_()),
+    updatedAt:String(row.updatedAt || nowIso_()),
+    updatedBy:teacherEmail
+  });
+  SpreadsheetApp.flush();
+
+  var result = getWorkshopPlannerAdmin(cleanClass);
+  result.activeSession = activeResult.session;
+  return result;
+}
+
+function closeWorkshopPlannerSession(classCode) {
+  requireWorkshopTeacher_();
+  ensureSheets_();
+  var cleanClass = workshopSessionCleanClass_(classCode);
+  var existing = workshopSessionFind_(cleanClass);
+  if (!existing) return getWorkshopPlannerAdmin(cleanClass);
+  setWorkshopClassroomSessionOpen(cleanClass, false, {
+    title:String(existing.title || ''),
+    message:String(existing.message || ''),
+    targetXp:Number(existing.targetXp || 0),
+    homeEnabled:workshopSessionBool_(existing.homeEnabled),
+    homeStart:String(existing.homeStart || ''),
+    homeEnd:String(existing.homeEnd || ''),
+    gameIds:workshopSessionGameIds_(existing.gameIds),
+    planId:String(existing.planId || '')
+  });
+  return getWorkshopPlannerAdmin(cleanClass);
+}
+
+function retireWorkshopPlannerSession(classCode) {
+  var teacherEmail = requireWorkshopTeacher_();
+  ensureSheets_();
+  var cleanClass = workshopSessionCleanClass_(classCode);
+  retireWorkshopSession(cleanClass);
+  applyWorkshopPlanAccess_(cleanClass, [], teacherEmail);
+  SpreadsheetApp.flush();
+  return getWorkshopPlannerAdmin(cleanClass);
 }
 
 function getWorkshopSessionForCurrentUser() {
