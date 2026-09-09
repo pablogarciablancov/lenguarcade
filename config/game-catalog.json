@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 2,
+  "version": 3,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -14,35 +14,14 @@
         "verbos",
         "semántica"
       ],
-      "status": "en pruebas",
-      "sortOrder": 1,
-      "color": "#f59e0b",
-      "icon": "🐉",
-      "entry": "games/battlegrafia/",
-      "description": "RPG de Lengua con combates, mundos, criaturas y progresión.",
-      "banner": "dragon",
-      "active": true,
-      "integration": "embedded"
-    },
-    {
-      "id": "battlegrafia_v2",
-      "official": false,
-      "name": "Battlegrafía 2.0",
-      "subtitle": "Fantasy Arcade · versión alternativa",
-      "category": "RPG",
-      "competencies": [
-        "ortografía",
-        "verbos",
-        "semántica"
-      ],
-      "status": "en pruebas",
+      "status": "listo",
       "sortOrder": 1,
       "color": "#68d9ff",
       "icon": "⚔️",
       "entry": "games/battlegrafia_v2/",
-      "description": "Versión alternativa de Battlegrafía en laboratorio, separada de la clásica.",
+      "description": "RPG de Lengua con combates, cinco mundos, criaturas, modos de juego y progresión.",
       "banner": "dragon",
-      "active": false,
+      "active": true,
       "integration": "embedded"
     },
     {
