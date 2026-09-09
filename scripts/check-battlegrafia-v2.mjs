@@ -487,7 +487,7 @@ for(const required of [
   "const persistentModes = ['adventure','survival','dominio','strategy'];",
   "persistentModes.includes(mode)",
   "./save-slots-v2.js?v=20260909-rpg27",
-  "./rpg-ui-v2.js?v=20260909-rpg27",
+  "./rpg-ui-v2.js?v=20260909-rpg29",
 ]){
   if(!index.includes(required)) errors.push("Falta aislamiento/continuación de partidas por modo v2: "+required);
 }
@@ -556,6 +556,29 @@ for(const required of [
   "const boss=card.dataset.monsterBoss === '1'"
 ]){ if(!catalogPolish.includes(required)) errors.push("La capa visual del bestiario no usa metadata real: "+required); }
 
+// Economía global: el saldo sobrevive a partidas nuevas y es común entre modos.
+for(const required of [
+  'const GLOBAL_GOLD_PREFIX = "battlegrafia_v2_global_gold_v1_"',
+  "function getGlobalGold(seedValue)",
+  "function setGlobalGold(value, options={})",
+  "function syncPlayerGoldFromGlobal(target)",
+  "function commitPlayerGoldToGlobal(target)",
+  "window.BG.getGlobalGold = getGlobalGold",
+  "window.BG.setGlobalGold = setGlobalGold",
+  "gold:getGlobalGold(player?.gold)",
+  "gold: getGlobalGold(player?.gold)",
+  "commitPlayerGoldToGlobal(player)",
+  "player.gold = setGlobalGold(goldNow - item.cost)",
+  "player.gold = setGlobalGold((Number(player.gold) || 0) + saleDef.sellPrice)",
+  "player.gold = setGlobalGold((Number(player.gold) || 0) - restCost)",
+  "player.gold = setGlobalGold(0)",
+  'email,\n      "PERFIL_GLOBAL"',
+  "./rpg-ui-v2.js?v=20260909-rpg29"
+]){ if(!index.includes(required)) errors.push("Falta monedero global de oro v2: "+required); }
+if(index.includes("Se conservarán los LOGROS, pero perderás TODO el oro")) errors.push("Reiniciar partida no debe borrar el oro general.");
+if(!rpgUi.includes("window.BG?.getGlobalGold?.(p.gold)")) errors.push("El HUD principal no muestra el oro general.");
+if(!saveSlots.includes("window.BG?.getGlobalGold?.(summary.gold)")) errors.push("El archivo de partidas no muestra el oro general.");
+
 for(const required of [
   "function getInventorySaleDef(itemName)",
   "function renderInventorySaleHtml()",
@@ -572,4 +595,4 @@ for(const required of [
 }
 
 if(errors.length) throw new Error("Comprobaciones de Battlegrafía 2.0 fallidas:\n- "+errors.join("\n- "));
-console.log("Battlegrafía 2.0 correcta: batalla limpia, RPG pixel UI unificada, partidas independientes por modo, 5 mundos, 30 sprites, objetos auditados y modo de prueba directa.");
+console.log("Battlegrafía 2.0 correcta: batalla limpia, partidas independientes con oro global persistente, 5 mundos, 30 sprites, objetos auditados y modo de prueba directa.");
