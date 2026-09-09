@@ -16528,39 +16528,44 @@ localStorage.setItem = function(key, value) {
     }
 
 
+    function startModeDirect(mode, intent='new'){
+      const persistentModes = ['adventure','survival','dominio','strategy'];
+      if(!GAME_MODES || !GAME_MODES[mode]) return false;
+
+      if(intent === 'continue'){
+        if(!persistentModes.includes(mode)){
+          try{ window.showToast('Práctica es entrenamiento y no crea una partida guardada.'); }catch(e){}
+          return false;
+        }
+        if(window.BG && typeof window.BG.hasSaveForMode === 'function' && !window.BG.hasSaveForMode(mode)){
+          try{ window.showToast('No hay partida guardada en este modo.'); }catch(e){}
+          return false;
+        }
+      }
+
+      try{ localStorage.setItem('bg_modeId', mode); }catch(e){}
+      startIntent = intent === 'continue' ? 'continue' : 'new';
+      newModeChosen = startIntent === 'new';
+
+      if(gameShell) gameShell.style.display = 'block';
+      appScreens.forEach(s => s.classList.remove('is-active'));
+
+      if(startIntent === 'new'){
+        showStartScreen();
+      }else if(window.BG && typeof window.BG._triggerContinue === 'function'){
+        window.BG._triggerContinue();
+      }
+      return true;
+    }
+
+    window.BG = window.BG || {};
+    window.BG.startMode = startModeDirect;
+
     // Selector de modo
     document.querySelectorAll('[data-mode]').forEach(btn => {
       btn.addEventListener('click', () => {
         const mode = btn.getAttribute('data-mode');
-        try{ localStorage.setItem('bg_modeId', mode); }catch(e){}
-
-        // Continuar solo aplica a modos con guardado
-        if(startIntent === 'continue'){
-          const canContinue = ['adventure','survival','dominio','strategy'].includes(mode);
-          if(!canContinue){
-            try{
-              window.showToast('Práctica es entrenamiento y no crea una partida guardada.');
-            }catch(e){}
-            return;
-          }
-        }
-
-        if(window.BG){
-          if(gameShell) gameShell.style.display = 'block';
-          appScreens.forEach(s => s.classList.remove('is-active'));
-
-          if(startIntent === "new"){
-            newModeChosen = true;
-            // Mode chosen -> now choose hero
-            showStartScreen();
-          }else{
-            // Continue: load saved game for this mode
-            if(typeof window.BG._triggerContinue === "function") window.BG._triggerContinue();
-            else console.warn("No existe BG._triggerContinue");
-          }
-        }else{
-          console.warn('No existe BG._startNewGame');
-        }
+        startModeDirect(mode, startIntent);
       });
     });
 
