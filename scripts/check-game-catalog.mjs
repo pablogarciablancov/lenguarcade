@@ -62,13 +62,21 @@ for(const column of ["description","competencies","integration","official"]){
   }
   if(!snapshot.includes(column)) throw new Error("Snapshot SQL: falta "+column);
 }
-if(catalog.games.find(game=>game.id==="battlegrafia_v2")?.active!==false ||
-   catalog.games.find(game=>game.id==="battlegrafia_v2")?.official!==false){
-  throw new Error("Battlegrafía 2.0 debe seguir aislada e inactiva.");
+const battlegrafia=catalog.games.find(game=>game.id==="battlegrafia");
+if(!battlegrafia ||
+   battlegrafia.active!==true ||
+   battlegrafia.official!==true ||
+   battlegrafia.status!=="listo" ||
+   battlegrafia.entry!=="games/battlegrafia_v2/" ||
+   battlegrafia.integration!=="embedded"){
+  throw new Error("Battlegrafía oficial debe usar la versión Fantasy Arcade de producción.");
+}
+if(catalog.games.some(game=>game.id==="battlegrafia_v2")){
+  throw new Error("El catálogo canónico no debe exponer una segunda entrada Battlegrafía 2.0.");
 }
 if(catalog.games.some(game=>/rim[oó]polis/i.test(game.id+" "+game.name)) ||
    code.includes("Rimópolis") || dashboard.includes("Rimópolis") || student.includes("Rimópolis")){
   throw new Error("Rimópolis no debe volver al catálogo activo.");
 }
 
-console.log("Catálogo canónico LenguArcade: 10 oficiales, una sola fuente y capas derivadas sincronizadas.");
+console.log("Catálogo canónico LenguArcade: 10 oficiales; Battlegrafía Fantasy Arcade ya es la versión de producción.");
