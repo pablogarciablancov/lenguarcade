@@ -18,7 +18,7 @@
     const link=document.createElement('link');
     link.id='bg2-stable-tabs-css';
     link.rel='stylesheet';
-    link.href='./stable-tabs-v2.css?v=20260907-rpg13';
+    link.href='./stable-tabs-v2.css?v=20260910-rpg31';
     document.head.appendChild(link);
   }
 
