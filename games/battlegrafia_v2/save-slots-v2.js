@@ -187,13 +187,40 @@
   function modeSummary(mode='adventure') {
     const slot = getModeSave(mode);
     const base = progressMeta(slot, 1);
-    return {
+    const data = slot?.data || {};
+    const defeated = Array.isArray(data.defeatedMonsters) ? data.defeatedMonsters.length : Number(data.monstersDefeated || 0);
+    const state = data.__runState || {};
+
+    const summary = {
       ...base,
       mode,
       modeLabel:MODE_LABELS[mode] || mode,
       saved:!!(slot && slot.data),
       slotId:slot?.id || null
     };
+
+    if(!summary.saved) return summary;
+
+    if(mode === 'survival'){
+      summary.world = 'Supervivencia · ' + defeated + ' criaturas superadas';
+      summary.stage = 'Ronda ' + Math.max(1, defeated + 1);
+    }else if(mode === 'dominio'){
+      const streak = Math.max(0, Number(state.perfectStreak || 0));
+      summary.world = 'Racha perfecta ' + streak + ' / 5';
+      summary.stage = 'Dominio';
+      summary.progress = Math.min(100, Math.round((streak / 5) * 100));
+    }else if(mode === 'strategy'){
+      const ids = Array.isArray(state.strategyMonsterIds)
+        ? state.strategyMonsterIds
+        : (Array.isArray(state.strategyConfig?.monsterIds) ? state.strategyConfig.monsterIds : []);
+      const total = ids.length;
+      const completed = total ? Math.min(total, defeated) : 0;
+      summary.world = total ? ('Reto de ' + total + ' criaturas') : 'Reto sin configurar';
+      summary.stage = Number(state.endsAt || 0) > Date.now() ? 'En curso' : 'Preparado';
+      summary.progress = total ? Math.round((completed / total) * 100) : 0;
+    }
+
+    return summary;
   }
 
   function activateMode(mode='adventure') {
