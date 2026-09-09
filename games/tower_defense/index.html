@@ -2094,22 +2094,36 @@ if(new URLSearchParams(location.search).has('selftest'))runPixelSelfTest(game);
 </style>
 
 
-<style id="v30-fluid-viewport">
-/* ===== v30 · viewport fluido sin scroll de página ===== */
+<style id="v31-fluid-viewport">
+/* ===== v31 · encaje real al viewport, sin scroll de página =====
+   La escena se dimensiona desde el espacio REAL que deja el HUD.
+   Este bloque es deliberadamente el último para neutralizar media queries antiguas. */
 html,body{
+  margin:0!important;
   width:100%!important;
   height:100%!important;
+  min-width:0!important;
   min-height:0!important;
-  max-height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
   overflow:hidden!important;
   overscroll-behavior:none!important;
 }
-body{min-height:0!important}
+body{
+  position:fixed!important;
+  inset:0!important;
+  touch-action:manipulation;
+}
 #app{
-  width:100%!important;
-  height:100dvh!important;
+  position:absolute!important;
+  inset:0!important;
+  width:auto!important;
+  height:auto!important;
+  min-width:0!important;
   min-height:0!important;
-  max-height:100dvh!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
   overflow:hidden!important;
   display:flex!important;
   flex-direction:column!important;
@@ -2117,16 +2131,21 @@ body{min-height:0!important}
 .topbar{
   flex:0 0 auto!important;
   width:100%!important;
+  min-width:0!important;
   min-height:0!important;
-  max-width:100vw!important;
+  max-width:none!important;
   overflow:hidden!important;
   flex-wrap:nowrap!important;
 }
+.brand,.hud{min-width:0!important}
 .stage-wrap{
-  flex:1 1 auto!important;
+  flex:1 1 0!important;
+  width:100%!important;
+  height:auto!important;
   min-width:0!important;
   min-height:0!important;
-  height:auto!important;
+  max-width:none!important;
+  max-height:none!important;
   overflow:hidden!important;
   display:flex!important;
   justify-content:center!important;
@@ -2134,13 +2153,16 @@ body{min-height:0!important}
   padding:6px!important;
 }
 .map-shell{
+  position:relative!important;
   flex:0 0 auto!important;
+  width:min(920px,calc(100vw - 12px))!important;
+  height:auto!important;
   min-width:0!important;
   min-height:0!important;
-  max-width:100%!important;
-  max-height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
   aspect-ratio:14/9!important;
-  margin:auto!important;
+  margin:0!important;
   overflow:hidden!important;
 }
 #gameCanvas{
@@ -2159,72 +2181,60 @@ body{min-height:0!important}
   right:8px!important;
   bottom:8px!important;
   margin:0!important;
+  max-width:none!important;
 }
 .question-card{
   max-height:calc(100% - 18px)!important;
   overflow:hidden!important;
 }
 
-/* Inicio: ocupa el viewport, nunca hace crecer la página. */
+/* Las pantallas superpuestas tampoco pueden hacer crecer el documento. */
+.start-screen,.modal-wrap{
+  position:fixed!important;
+  inset:0!important;
+  max-width:100vw!important;
+  max-height:100%!important;
+}
 .start-screen{
-  width:100vw!important;
-  height:100dvh!important;
+  width:100%!important;
+  height:100%!important;
   min-height:0!important;
-  max-height:100dvh!important;
   overflow:hidden!important;
   padding:6px!important;
 }
 .start-hub{
-  width:min(1180px,calc(100vw - 12px))!important;
-  height:calc(100dvh - 12px)!important;
-  max-height:calc(100dvh - 12px)!important;
+  width:min(1180px,calc(100% - 12px))!important;
+  height:calc(100% - 12px)!important;
+  max-height:calc(100% - 12px)!important;
   min-height:0!important;
-  display:grid!important;
-  grid-template-rows:minmax(0,1fr) auto auto!important;
   gap:6px!important;
 }
 .start-hero-art{
-  width:100%!important;
-  height:100%!important;
   min-height:0!important;
+  height:100%!important;
   aspect-ratio:auto!important;
-  background-size:cover!important;
-  background-position:center!important;
 }
 .start-map-panel{
-  width:min(1120px,calc(100vw - 12px))!important;
-  max-height:calc(100dvh - 12px)!important;
+  width:min(1120px,calc(100% - 12px))!important;
+  max-height:calc(100% - 12px)!important;
   overflow:hidden!important;
-  padding:10px!important;
 }
-.start-map-panel .start-map-grid{
-  min-height:0!important;
-  grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  gap:7px!important;
-}
-.start-map-card{min-height:0!important}
 
-/* Los dos catálogos siguen completos y sin scroll. */
+/* Catálogos: se mantienen contenidos en el viewport. */
 #monsterModal,#towerGuideModal{overflow:hidden!important}
 #monsterModal .guide-modal,#towerGuideModal .guide-modal{
   width:min(1320px,calc(100vw - 12px))!important;
-  height:calc(100dvh - 12px)!important;
-  max-height:calc(100dvh - 12px)!important;
+  height:calc(100% - 12px)!important;
+  max-height:calc(100% - 12px)!important;
   overflow:hidden!important;
 }
-.v29-guide-content{min-height:0!important;overflow:hidden!important}
-.v29-gallery{height:100%!important;min-height:0!important;overflow:hidden!important}
-.v29-monsters{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
-.v29-towers{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
-.v29-gallery-card{min-height:0!important;overflow:hidden!important}
-.v29-gallery-card img{width:100%!important;height:100%!important;object-fit:contain!important}
 
-/* Compactación progresiva: conserva toda la información importante. */
+/* Compactación del HUD para que tampoco provoque anchura extra. */
 @media(max-width:1200px){
   .logo-plaque{display:none!important}
   .brand p{display:none!important}
   .topbar{padding:5px 8px!important;gap:7px!important}
-  .hud{gap:4px!important;flex-wrap:nowrap!important;min-width:0!important}
+  .hud{gap:4px!important;flex-wrap:nowrap!important}
   .hud-chip{min-width:72px!important;padding:5px 7px!important}
   .profile-chip{padding:5px 7px!important}
 }
@@ -2248,21 +2258,19 @@ body{min-height:0!important}
   .strip-card .label{font-size:9px!important}
   .strip-card .sub{font-size:8px!important}
   .dock-actions-host button{padding:4px 6px!important;font-size:9px!important}
-  #monsterModal .guide-modal,#towerGuideModal .guide-modal{overflow:hidden!important}
-  .v29-guide-content{overflow:hidden!important}
-  .v29-gallery{height:100%!important}
-  .v29-gallery-card img{height:100%!important}
 }
 @media(max-width:620px){
   .brand h1{display:none!important}
-  .hud-chip{min-width:45px!important}
-  .hud-chip .icon{font-size:15px!important}
+  .brand{gap:4px!important}
+  .hud{flex:1 1 auto!important;justify-content:flex-end!important}
+  .hud-chip{min-width:42px!important;padding:3px 4px!important}
+  .hud-chip .icon{font-size:14px!important}
   .hud-chip b,.profile-chip b{font-size:10px!important}
+  .profile-chip{padding:3px 4px!important}
+  .profile-chip>span:first-child{font-size:14px!important}
   .overlay-buttons{gap:4px!important}
   .overlay-buttons button{padding:5px 6px!important;font-size:9px!important}
   .enemy-select-hint{display:none!important}
-  .v29-monsters{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(3,minmax(0,1fr))!important}
-  .v29-towers{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
 }
 @media(max-height:720px){
   .topbar{padding-top:3px!important;padding-bottom:3px!important}
@@ -2273,56 +2281,92 @@ body{min-height:0!important}
   .question-body{padding:9px!important}
   .answer-btn{min-height:40px!important;padding:6px!important}
   .start-menu-btn{padding:6px 8px!important}
-  .start-menu-btn small{display:none!important}
-  .start-meta{display:none!important}
+  .start-menu-btn small,.start-meta{display:none!important}
 }
 </style>
-<script id="v30-fluid-viewport-script">
+<script id="v31-fluid-viewport-script">
 (function(){
   const RATIO=14/9;
   let raf=0;
+  let ro=null;
+
+  function px(value){
+    const n=parseFloat(value);
+    return Number.isFinite(n)?n:0;
+  }
+
   function fitGuardianViewport(){
-    const topbar=document.querySelector('.topbar');
+    const app=document.getElementById('app');
     const stage=document.querySelector('.stage-wrap');
     const shell=document.getElementById('mapShell');
-    if(!topbar||!stage||!shell)return;
-    const viewport=window.visualViewport;
-    const vw=Math.max(280,Math.floor(viewport?.width||document.documentElement.clientWidth||window.innerWidth||1366));
-    const vh=Math.max(220,Math.floor(viewport?.height||window.innerHeight||768));
-    const topH=Math.ceil(topbar.getBoundingClientRect().height);
-    const pad=6;
-    const availableW=Math.max(240,vw-pad*2);
-    const availableH=Math.max(154,vh-topH-pad*2);
-    let width=Math.min(availableW,availableH*RATIO);
+    if(!app||!stage||!shell)return;
+
+    /* visualViewport evita los saltos típicos de barras móviles y zoom del navegador. */
+    const vv=window.visualViewport;
+    const viewportH=Math.max(1,Math.floor(vv?.height||window.innerHeight||document.documentElement.clientHeight||1));
+    const viewportW=Math.max(1,Math.floor(vv?.width||window.innerWidth||document.documentElement.clientWidth||1));
+
+    app.style.setProperty('height',viewportH+'px','important');
+    app.style.setProperty('width',viewportW+'px','important');
+
+    /* Forzamos el reflow del flex y medimos el hueco que REALMENTE queda para el mapa. */
+    const cs=getComputedStyle(stage);
+    const innerW=Math.max(1,stage.clientWidth-px(cs.paddingLeft)-px(cs.paddingRight));
+    const innerH=Math.max(1,stage.clientHeight-px(cs.paddingTop)-px(cs.paddingBottom));
+
+    let width=Math.min(innerW,innerH*RATIO);
     let height=width/RATIO;
-    width=Math.max(240,Math.floor(width));
-    height=Math.max(154,Math.floor(height));
-    if(height>availableH){
-      height=availableH;
-      width=Math.floor(height*RATIO);
-    }
+
+    /* Redondeo hacia abajo: nunca añadimos ni un píxel que pueda generar desbordamiento. */
+    width=Math.max(1,Math.floor(width));
+    height=Math.max(1,Math.floor(height));
+
     shell.style.setProperty('width',width+'px','important');
     shell.style.setProperty('height',height+'px','important');
-    stage.style.setProperty('height',Math.max(0,vh-topH)+'px','important');
+    shell.style.setProperty('aspect-ratio','auto','important');
+
     document.documentElement.style.setProperty('--guardian-map-w',width+'px');
     document.documentElement.style.setProperty('--guardian-map-h',height+'px');
   }
+
   function requestGuardianFit(){
     cancelAnimationFrame(raf);
     raf=requestAnimationFrame(()=>requestAnimationFrame(fitGuardianViewport));
   }
-  window.addEventListener('resize',requestGuardianFit,{passive:true});
-  window.addEventListener('orientationchange',requestGuardianFit,{passive:true});
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize',requestGuardianFit,{passive:true});
+
+  function startGuardianFit(){
+    requestGuardianFit();
+
+    window.addEventListener('resize',requestGuardianFit,{passive:true});
+    window.addEventListener('orientationchange',requestGuardianFit,{passive:true});
+
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize',requestGuardianFit,{passive:true});
+      window.visualViewport.addEventListener('scroll',requestGuardianFit,{passive:true});
+    }
+
+    if('ResizeObserver' in window){
+      ro=new ResizeObserver(requestGuardianFit);
+      const app=document.getElementById('app');
+      const stage=document.querySelector('.stage-wrap');
+      const topbar=document.querySelector('.topbar');
+      if(app)ro.observe(app);
+      if(stage)ro.observe(stage);
+      if(topbar)ro.observe(topbar);
+    }
+
+    if(document.fonts&&document.fonts.ready){
+      document.fonts.ready.then(requestGuardianFit).catch(()=>{});
+    }
+
+    window.addEventListener('load',requestGuardianFit,{once:true});
   }
-  if('ResizeObserver' in window){
-    const ro=new ResizeObserver(requestGuardianFit);
-    const topbar=document.querySelector('.topbar');
-    if(topbar)ro.observe(topbar);
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',startGuardianFit,{once:true});
+  }else{
+    startGuardianFit();
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',requestGuardianFit,{once:true});
-  else requestGuardianFit();
 })();
 </script>
 
