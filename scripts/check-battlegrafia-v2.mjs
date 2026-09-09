@@ -514,7 +514,8 @@ for(const required of [
   "const persistentModes = ['adventure','survival','dominio','strategy'];",
   "persistentModes.includes(mode)",
   "./save-slots-v2.js?v=20260909-rpg27",
-  "./rpg-ui-v2.js?v=20260909-rpg29",
+  "./enhance-v2.js?v=20260910-rpg30",
+  "./rpg-ui-v2.js?v=20260910-rpg30",
 ]){
   if(!index.includes(required)) errors.push("Falta aislamiento/continuación de partidas por modo v2: "+required);
 }
@@ -600,7 +601,7 @@ for(const required of [
   "player.gold = setGlobalGold((Number(player.gold) || 0) - restCost)",
   "player.gold = setGlobalGold(0)",
   'email,\n      "PERFIL_GLOBAL"',
-  "./rpg-ui-v2.js?v=20260909-rpg29"
+  "./rpg-ui-v2.js?v=20260910-rpg30"
 ]){ if(!index.includes(required)) errors.push("Falta monedero global de oro v2: "+required); }
 if(index.includes("Se conservarán los LOGROS, pero perderás TODO el oro")) errors.push("Reiniciar partida no debe borrar el oro general.");
 if(!rpgUi.includes("window.BG?.getGlobalGold?.(p.gold)")) errors.push("El HUD principal no muestra el oro general.");
