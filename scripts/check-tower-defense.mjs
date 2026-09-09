@@ -3,6 +3,13 @@ const html=fs.readFileSync("games/tower_defense/index.html","utf8");
 const catalog=JSON.parse(fs.readFileSync("config/game-catalog.json","utf8"));
 const game=catalog.games.find(item=>item.id==="tower_defense");
 const errors=[];
+const assetsDir="games/tower_defense/assets";
+const assetRefs=[...html.matchAll(/(?:\.\/)?assets\/([a-f0-9]{12}\.webp)/g)].map(match=>match[1]);
+const uniqueAssetRefs=[...new Set(assetRefs)];
+const assetFiles=fs.existsSync(assetsDir)?fs.readdirSync(assetsDir).filter(name=>name.endsWith(".webp")):[];
+if(uniqueAssetRefs.length!==16)errors.push("se esperaban 16 imágenes locales referenciadas y hay "+uniqueAssetRefs.length);
+for(const name of uniqueAssetRefs)if(!assetFiles.includes(name))errors.push("falta asset local: "+name);
+if(/oaidalleapiprodscus|files\.oaiusercontent|\/mnt\/data\//i.test(html))errors.push("quedan referencias de imagen temporales/externas");
 if(!game)errors.push("falta tower_defense en el catálogo");
 else{
   if(game.name!=="Guardianes de la Biblioteca")errors.push("nombre canónico incorrecto");
