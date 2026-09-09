@@ -323,7 +323,7 @@
     if(footer && !footer.querySelector('.bg2-card-action-label')){
       const label=document.createElement('span');
       label.className='bg2-card-action-label';
-      label.textContent='LISTO PARA EQUIPAR';
+      label.textContent=footer.querySelector('.shop-sell-btn') ? 'VALOR DE REVENTA' : 'LISTO PARA EQUIPAR';
       footer.insertBefore(label,footer.firstChild);
     }
   }
@@ -449,6 +449,10 @@
         afterPaint(()=>decorateShop($('hub-shop-list')));
       }else if(target.matches('#nav-camp')){
         afterPaint(()=>decorateShop($('shop-list')));
+      }else if(target.matches('.shop-tab-btn')){
+        const mount=target.closest('#hub-shop-list,#shop-list');
+        if(mount) state[shopFilterKey(mount)]='all';
+        afterPaint(()=>decorateShop(mount));
       }else if(target.closest('#hub-shop-list')){
         afterPaint(()=>decorateShop($('hub-shop-list')));
       }else if(target.closest('#shop-list')){
