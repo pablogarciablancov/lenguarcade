@@ -10,6 +10,9 @@ const assetFiles=fs.existsSync(assetsDir)?fs.readdirSync(assetsDir).filter(name=
 if(uniqueAssetRefs.length!==16)errors.push("se esperaban 16 imágenes locales referenciadas y hay "+uniqueAssetRefs.length);
 for(const name of uniqueAssetRefs)if(!assetFiles.includes(name))errors.push("falta asset local: "+name);
 if(/oaidalleapiprodscus|files\.oaiusercontent|\/mnt\/data\//i.test(html))errors.push("quedan referencias de imagen temporales/externas");
+if(!html.includes('id="v30-fluid-viewport"'))errors.push("falta viewport fluido v30");
+if(!html.includes('overflow:hidden!important'))errors.push("falta bloqueo de scroll de página");
+if(!html.includes("fitGuardianViewport"))errors.push("falta ajuste dinámico al tamaño del viewport");
 if(!game)errors.push("falta tower_defense en el catálogo");
 else{
   if(game.name!=="Guardianes de la Biblioteca")errors.push("nombre canónico incorrecto");
