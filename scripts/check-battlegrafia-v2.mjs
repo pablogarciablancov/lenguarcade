@@ -500,7 +500,12 @@ for(const required of [
 ]){
   if(!index.includes(required)) errors.push("Falta reparación del selector de objetos en combate v2: "+required);
 }
-if(index.includes("container.innerHTML = `<div") && index.includes("battle-item-select")){
+const battleSelectStart = index.indexOf("function updateBattleItemSelect(){");
+const battleSelectEnd = index.indexOf("function getHintText(){", battleSelectStart);
+const battleSelectFn = battleSelectStart >= 0 && battleSelectEnd > battleSelectStart
+  ? index.slice(battleSelectStart, battleSelectEnd)
+  : "";
+if(!battleSelectFn || battleSelectFn.includes("innerHTML = `<div") || battleSelectFn.includes("html += `<div")){
   errors.push("El selector de objetos no puede insertar <div> dentro de un <select>.");
 }
 
