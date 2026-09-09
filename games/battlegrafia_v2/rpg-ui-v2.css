@@ -153,15 +153,7 @@ body.bg2-rpg #main-menu>.menu-panel>#hub-backpack{
     linear-gradient(180deg,rgba(24,34,56,.96),rgba(8,13,24,.97));
   box-shadow:inset 0 0 0 3px #07090f,inset 0 0 0 5px #33415c,var(--rpg-shadow);
 }
-.bg2-hero-card::before{
-  content:"PLAYER DATA";
-  position:absolute;
-  top:10px;
-  right:14px;
-  color:#72829a;
-  font:900 8px "Courier New",monospace;
-  letter-spacing:.18em;
-}
+.bg2-hero-card::before{content:none!important;display:none!important;}
 .bg2-portrait-frame{
   height:170px;
   margin-bottom:14px;
@@ -284,7 +276,7 @@ body.bg2-rpg #main-menu>.menu-panel>#hub-backpack{
 }
 .bg2-menu-mini{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(3,1fr);
   gap:7px;
 }
 .bg2-menu-mini button{
@@ -983,4 +975,130 @@ body.bg2-rpg img{user-select:none}
   .bg2-menu-mini{grid-template-columns:1fr 1fr}
   body.bg2-rpg .layout{grid-template-columns:1fr!important;height:auto!important}
   body.bg2-rpg .panel-right{border-left:0;border-top:3px solid #020409}
+}
+
+
+/* ===== rpg26 · ARCHIVO DE PARTIDAS POR MODO ===== */
+.bg2-mode-archive-card{
+  width:min(1120px,96vw)!important;
+}
+#bg2-mode-archive-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.bg2-mode-save{
+  min-width:0;
+  min-height:270px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  clip-path:var(--rpg-pixel);
+  background:linear-gradient(180deg,#121e31,#0a1220);
+  box-shadow:inset 0 0 0 3px #03050a,inset 0 0 0 5px #2f405a,0 6px 0 #020409;
+}
+.bg2-mode-save.occupied{
+  box-shadow:inset 0 0 0 3px #03050a,inset 0 0 0 5px #806729,0 6px 0 #020409;
+}
+.bg2-mode-save-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+  color:#7f92aa;
+  font:900 8px "Courier New",Consolas,monospace;
+  letter-spacing:.12em;
+}
+.bg2-mode-save-state{color:#69809b}
+.bg2-mode-save.occupied .bg2-mode-save-state{color:#d7b85d}
+.bg2-mode-save-main{
+  display:grid;
+  grid-template-columns:82px minmax(0,1fr);
+  align-items:center;
+  gap:11px;
+}
+.bg2-mode-save-portrait{
+  width:82px;
+  height:90px;
+  display:grid;
+  place-items:center;
+  clip-path:var(--rpg-pixel);
+  background:#07101c;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #32435e;
+}
+.bg2-mode-save-portrait img{
+  width:76px;
+  height:76px;
+  object-fit:contain;
+  image-rendering:pixelated;
+}
+.bg2-mode-save-roman{
+  color:#d8b85c;
+  font:900 28px "Courier New",Consolas,monospace;
+}
+.bg2-mode-save-copy{min-width:0}
+.bg2-mode-save-copy strong{
+  display:block;
+  color:#fff1c8;
+  font:900 15px "Courier New",Consolas,monospace;
+  letter-spacing:.03em;
+}
+.bg2-mode-save-copy span{
+  display:block;
+  margin-top:6px;
+  color:#9cafc6;
+  font:600 10px/1.35 Arial,sans-serif;
+}
+.bg2-mode-save-copy small{
+  display:block;
+  margin-top:7px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#7388a3;
+  font:800 9px "Courier New",Consolas,monospace;
+}
+.bg2-mode-save-meta{
+  display:grid;
+  grid-template-columns:1.35fr .65fr;
+  gap:5px 9px;
+  margin-bottom:12px;
+  color:#8194ac;
+  font:800 9px "Courier New",Consolas,monospace;
+}
+.bg2-mode-save-meta span:last-child{grid-column:1/-1}
+.bg2-mode-save-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:auto;
+}
+.bg2-mode-save-actions button{
+  min-height:40px!important;
+  padding:8px 9px!important;
+  border:0!important;
+  border-radius:0!important;
+  clip-path:var(--rpg-pixel);
+  background:#26364d!important;
+  color:#edf4ff!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #52647d,0 4px 0 #020409!important;
+  font:900 9px "Courier New",Consolas,monospace!important;
+}
+.bg2-mode-save-actions button.new{
+  background:#4b3917!important;
+  color:#fff0b5!important;
+  box-shadow:inset 0 0 0 2px #020409,inset 0 0 0 4px #92722c,0 4px 0 #020409!important;
+}
+.bg2-mode-save-actions button:disabled{
+  opacity:.32!important;
+  filter:grayscale(1)!important;
+  cursor:not-allowed!important;
+}
+.bg2-mode-save-actions button:not(:disabled):hover{
+  filter:brightness(1.15)!important;
+  transform:translateY(-1px)!important;
+}
+@media(max-width:760px){
+  #bg2-mode-archive-grid{grid-template-columns:1fr}
+  .bg2-mode-save{min-height:250px}
 }
