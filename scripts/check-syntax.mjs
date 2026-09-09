@@ -94,10 +94,10 @@ const workshopAdminSource = serverSource.match(
 if (
   !professorHtml.includes("function teacherWorkshopClasses()") ||
   !professorHtml.includes("currentTeacher.classes") ||
-  !professorHtml.includes("state.classes=classes") ||
+  professorHtml.includes('Todas las clases · regla general') ||
   workshopAdminSource.includes("SHEETS.CLASES")
 ) {
-  errors.push("El selector de Taller debe usar las clases activas de Supabase y no la hoja legacy Clases.");
+  errors.push("El selector de Taller debe usar exclusivamente las clases activas de Supabase y no la hoja legacy Clases.");
 }
 const legacyTeacherDetailIsProtected =
   /function getTeacherStudentDetail\(studentId,\s*token\)\s*\{[\s\S]*?requireSession_\(token,\s*'teacher'\)/.test(serverSource);

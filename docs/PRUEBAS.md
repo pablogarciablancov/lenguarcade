@@ -422,8 +422,49 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 
 1. Abrir el panel del profesor y entrar en **Taller**.
 2. Comprobar que no aparecen `1º ESO A/B` … `4º ESO A/B` si esas clases no existen en Supabase.
-3. Sin clases activas, verificar que el selector contiene solo **Todas las clases · regla general**.
+3. Sin clases activas, verificar que Taller muestra un estado vacío y no ofrece cursos ficticios.
 4. Importar o restaurar una clase real y actualizar el panel.
 5. Confirmar que la clase real aparece en Taller sin recargar manualmente datos legacy.
 6. Archivar esa clase desde **Gestión**, actualizar el panel y confirmar que desaparece del selector de Taller.
 7. Ejecutar `npm.cmd run check`.
+
+
+## Taller · planificador de sesiones (2026-09-09)
+
+1. Entrar en el panel del profesor y abrir **Taller**.
+2. Comprobar que la cabecera explica que Taller sirve para **preparar sesiones** y no para gestionar permisos técnicos.
+3. Elegir una clase activa real.
+4. Verificar que aparecen tres zonas claras:
+   - estado de la sesión visible para los alumnos;
+   - biblioteca de **Sesiones preparadas**;
+   - editor **Preparar la sesión**.
+5. Pulsar **Nueva** y crear una sesión con título, fecha prevista, instrucciones, objetivo de XP y al menos dos juegos.
+6. Pulsar **Guardar preparación**.
+7. Confirmar que la sesión aparece en la biblioteca y que **no** cambia el acceso del alumno ni publica ninguna misión.
+8. Crear otras dos preparaciones para la misma clase; las tres deben conservarse simultáneamente.
+9. Cambiar de clase y confirmar que la biblioteca es independiente.
+10. Volver a la clase anterior y comprobar que las tres preparaciones siguen disponibles.
+11. Editar una preparación y guardar: debe actualizarse sin crear un duplicado.
+12. Pulsar **Duplicar**, modificar el título y guardar: debe aparecer como una preparación nueva.
+13. Eliminar una preparación no activa y confirmar que desaparece.
+14. Abrir una preparación con **Abrir ahora**:
+    - debe aparecer como sesión activa;
+    - los alumnos deben ver el título, instrucciones y objetivo;
+    - únicamente los juegos elegidos deben estar accesibles.
+15. Desde la sesión activa, pulsar **Cerrar clase**:
+    - la sesión sigue publicada;
+    - los juegos dejan de estar accesibles en clase;
+    - un horario de casa configurado debe conservarse.
+16. Crear una preparación con **Acceso en casa**, fechas válidas y pulsar **Guardar y activar horario de casa**:
+    - debe publicarse sin abrirse inmediatamente en clase;
+    - antes de la hora indicada debe permanecer cerrada;
+    - dentro de la ventana debe permitir solo sus juegos;
+    - al terminar la ventana debe volver a cerrarse automáticamente.
+17. Pulsar **Retirar**:
+    - la sesión deja de aparecer como publicada;
+    - los juegos de esa clase quedan cerrados;
+    - las preparaciones guardadas siguen existiendo.
+18. Abrir **Ajustes avanzados de disponibilidad** y comprobar que está claramente presentado como un control excepcional, no como el flujo principal.
+19. Verificar que abrir una sesión reconfigura esos permisos con los juegos de la sesión.
+20. Ejecutar `npm.cmd run check` y confirmar el mensaje:
+    `Planificador de Taller correcto: sesiones preparadas, activación explícita y permisos automáticos.`

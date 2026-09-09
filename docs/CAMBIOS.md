@@ -469,5 +469,37 @@ Cada cambio debe indicar:
 - Corregido el selector de clase del menú **Taller** del panel del profesor.
 - El selector deja de leer la hoja legacy `Clases`, que podía conservar las clases de demostración `1º ESO A/B` a `4º ESO A/B`.
 - La fuente de verdad pasa a ser `teacher-dashboard` / Supabase mediante `currentTeacher.classes`.
-- Si no hay clases activas importadas, Taller muestra únicamente la regla general; no crea ni muestra cursos ficticios.
+- Si no hay clases activas importadas, Taller muestra un estado vacío y no crea ni muestra cursos ficticios.
 - El selector se vuelve a sincronizar cuando el panel recibe una lista actualizada de clases.
+
+
+## 2026-09-09 · Taller: planificador de sesiones
+
+- Se rediseña por completo la sección **Taller** del panel del profesor para que su finalidad principal sea preparar sesiones con antelación.
+- Desaparece del flujo principal el antiguo concepto ambiguo de «control del taller» y la regla general de todas las clases.
+- Cada clase dispone de una **biblioteca independiente de sesiones preparadas** almacenada en `TallerPlanes`.
+- Una preparación puede incluir:
+  - título;
+  - fecha prevista de uso;
+  - instrucciones para los alumnos;
+  - objetivo opcional de XP;
+  - selección de juegos;
+  - horario opcional de acceso en casa.
+- **Guardar preparación no publica ni abre nada**. Las sesiones pueden dejarse listas durante semanas sin modificar el acceso del alumnado.
+- Desde la biblioteca se puede:
+  - editar una preparación;
+  - duplicarla;
+  - eliminarla;
+  - abrirla directamente en clase.
+- Al abrir una sesión, LenguArcade:
+  - la convierte en la sesión publicada de la clase;
+  - deja disponibles únicamente los juegos seleccionados;
+  - bloquea los demás;
+  - muestra al profesor un resumen claro de la sesión visible para el alumno.
+- Una preparación con horario de casa puede publicarse cerrada en clase; el acceso doméstico se activa y caduca automáticamente durante la ventana indicada.
+- La sesión activa puede cerrarse solo en clase, conservando su posible horario doméstico, o retirarse por completo.
+- Al retirar la sesión se cierran los juegos de esa clase hasta que se abra otra sesión o el profesor use los controles avanzados.
+- El antiguo control manual de disponibilidad se conserva dentro de **Ajustes avanzados**, fuera del flujo normal de preparación.
+- El selector de clases continúa usando exclusivamente las clases activas devueltas por Supabase.
+- Se elimina de `normalizeWorkshopScope_` la validación contra la hoja legacy `Clases`.
+- Se añade `scripts/check-workshop-planner.mjs` a `npm run check`.
