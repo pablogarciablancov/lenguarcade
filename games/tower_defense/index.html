@@ -2093,5 +2093,238 @@ if(new URLSearchParams(location.search).has('selftest'))runPixelSelfTest(game);
 }
 </style>
 
+
+<style id="v30-fluid-viewport">
+/* ===== v30 · viewport fluido sin scroll de página ===== */
+html,body{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:100%!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
+body{min-height:0!important}
+#app{
+  width:100%!important;
+  height:100dvh!important;
+  min-height:0!important;
+  max-height:100dvh!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+.topbar{
+  flex:0 0 auto!important;
+  width:100%!important;
+  min-height:0!important;
+  max-width:100vw!important;
+  overflow:hidden!important;
+  flex-wrap:nowrap!important;
+}
+.stage-wrap{
+  flex:1 1 auto!important;
+  min-width:0!important;
+  min-height:0!important;
+  height:auto!important;
+  overflow:hidden!important;
+  display:flex!important;
+  justify-content:center!important;
+  align-items:center!important;
+  padding:6px!important;
+}
+.map-shell{
+  flex:0 0 auto!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  aspect-ratio:14/9!important;
+  margin:auto!important;
+  overflow:hidden!important;
+}
+#gameCanvas{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  aspect-ratio:auto!important;
+}
+.game-bottom-dock{
+  position:absolute!important;
+  left:8px!important;
+  right:8px!important;
+  bottom:8px!important;
+  margin:0!important;
+}
+.question-card{
+  max-height:calc(100% - 18px)!important;
+  overflow:hidden!important;
+}
+
+/* Inicio: ocupa el viewport, nunca hace crecer la página. */
+.start-screen{
+  width:100vw!important;
+  height:100dvh!important;
+  min-height:0!important;
+  max-height:100dvh!important;
+  overflow:hidden!important;
+  padding:6px!important;
+}
+.start-hub{
+  width:min(1180px,calc(100vw - 12px))!important;
+  height:calc(100dvh - 12px)!important;
+  max-height:calc(100dvh - 12px)!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-rows:minmax(0,1fr) auto auto!important;
+  gap:6px!important;
+}
+.start-hero-art{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  aspect-ratio:auto!important;
+  background-size:cover!important;
+  background-position:center!important;
+}
+.start-map-panel{
+  width:min(1120px,calc(100vw - 12px))!important;
+  max-height:calc(100dvh - 12px)!important;
+  overflow:hidden!important;
+  padding:10px!important;
+}
+.start-map-panel .start-map-grid{
+  min-height:0!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:7px!important;
+}
+.start-map-card{min-height:0!important}
+
+/* Los dos catálogos siguen completos y sin scroll. */
+#monsterModal,#towerGuideModal{overflow:hidden!important}
+#monsterModal .guide-modal,#towerGuideModal .guide-modal{
+  width:min(1320px,calc(100vw - 12px))!important;
+  height:calc(100dvh - 12px)!important;
+  max-height:calc(100dvh - 12px)!important;
+  overflow:hidden!important;
+}
+.v29-guide-content{min-height:0!important;overflow:hidden!important}
+.v29-gallery{height:100%!important;min-height:0!important;overflow:hidden!important}
+.v29-monsters{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
+.v29-towers{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
+.v29-gallery-card{min-height:0!important;overflow:hidden!important}
+.v29-gallery-card img{width:100%!important;height:100%!important;object-fit:contain!important}
+
+/* Compactación progresiva: conserva toda la información importante. */
+@media(max-width:1200px){
+  .logo-plaque{display:none!important}
+  .brand p{display:none!important}
+  .topbar{padding:5px 8px!important;gap:7px!important}
+  .hud{gap:4px!important;flex-wrap:nowrap!important;min-width:0!important}
+  .hud-chip{min-width:72px!important;padding:5px 7px!important}
+  .profile-chip{padding:5px 7px!important}
+}
+@media(max-width:900px){
+  .brand-badge{width:34px!important;height:34px!important;font-size:18px!important}
+  .brand h1{font-size:13px!important;white-space:nowrap!important}
+  .hud-chip small,.profile-chip small{display:none!important}
+  .hud-chip{min-width:52px!important;padding:4px 5px!important;gap:4px!important}
+  .hud-chip .icon{font-size:17px!important}
+  .hud-chip b,.profile-chip b{font-size:12px!important}
+  .profile-chip>span:first-child{font-size:17px!important}
+  .game-bottom-dock{
+    grid-template-columns:minmax(0,1fr) 132px!important;
+    gap:5px!important;
+    padding:5px!important;
+  }
+  .dock-info-host{display:none!important}
+  #towerStrip{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .strip-card{min-height:46px!important;padding:4px!important}
+  .strip-card .big{font-size:19px!important}
+  .strip-card .label{font-size:9px!important}
+  .strip-card .sub{font-size:8px!important}
+  .dock-actions-host button{padding:4px 6px!important;font-size:9px!important}
+  #monsterModal .guide-modal,#towerGuideModal .guide-modal{overflow:hidden!important}
+  .v29-guide-content{overflow:hidden!important}
+  .v29-gallery{height:100%!important}
+  .v29-gallery-card img{height:100%!important}
+}
+@media(max-width:620px){
+  .brand h1{display:none!important}
+  .hud-chip{min-width:45px!important}
+  .hud-chip .icon{font-size:15px!important}
+  .hud-chip b,.profile-chip b{font-size:10px!important}
+  .overlay-buttons{gap:4px!important}
+  .overlay-buttons button{padding:5px 6px!important;font-size:9px!important}
+  .enemy-select-hint{display:none!important}
+  .v29-monsters{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(3,minmax(0,1fr))!important}
+  .v29-towers{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-height:720px){
+  .topbar{padding-top:3px!important;padding-bottom:3px!important}
+  .brand-badge{width:32px!important;height:32px!important}
+  .hud-chip,.profile-chip{padding-top:3px!important;padding-bottom:3px!important}
+  .game-bottom-dock{bottom:5px!important;left:5px!important;right:5px!important;padding:4px!important}
+  .strip-card{min-height:42px!important}
+  .question-body{padding:9px!important}
+  .answer-btn{min-height:40px!important;padding:6px!important}
+  .start-menu-btn{padding:6px 8px!important}
+  .start-menu-btn small{display:none!important}
+  .start-meta{display:none!important}
+}
+</style>
+<script id="v30-fluid-viewport-script">
+(function(){
+  const RATIO=14/9;
+  let raf=0;
+  function fitGuardianViewport(){
+    const topbar=document.querySelector('.topbar');
+    const stage=document.querySelector('.stage-wrap');
+    const shell=document.getElementById('mapShell');
+    if(!topbar||!stage||!shell)return;
+    const viewport=window.visualViewport;
+    const vw=Math.max(280,Math.floor(viewport?.width||document.documentElement.clientWidth||window.innerWidth||1366));
+    const vh=Math.max(220,Math.floor(viewport?.height||window.innerHeight||768));
+    const topH=Math.ceil(topbar.getBoundingClientRect().height);
+    const pad=6;
+    const availableW=Math.max(240,vw-pad*2);
+    const availableH=Math.max(154,vh-topH-pad*2);
+    let width=Math.min(availableW,availableH*RATIO);
+    let height=width/RATIO;
+    width=Math.max(240,Math.floor(width));
+    height=Math.max(154,Math.floor(height));
+    if(height>availableH){
+      height=availableH;
+      width=Math.floor(height*RATIO);
+    }
+    shell.style.setProperty('width',width+'px','important');
+    shell.style.setProperty('height',height+'px','important');
+    stage.style.setProperty('height',Math.max(0,vh-topH)+'px','important');
+    document.documentElement.style.setProperty('--guardian-map-w',width+'px');
+    document.documentElement.style.setProperty('--guardian-map-h',height+'px');
+  }
+  function requestGuardianFit(){
+    cancelAnimationFrame(raf);
+    raf=requestAnimationFrame(()=>requestAnimationFrame(fitGuardianViewport));
+  }
+  window.addEventListener('resize',requestGuardianFit,{passive:true});
+  window.addEventListener('orientationchange',requestGuardianFit,{passive:true});
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',requestGuardianFit,{passive:true});
+  }
+  if('ResizeObserver' in window){
+    const ro=new ResizeObserver(requestGuardianFit);
+    const topbar=document.querySelector('.topbar');
+    if(topbar)ro.observe(topbar);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',requestGuardianFit,{once:true});
+  else requestGuardianFit();
+})();
+</script>
+
 </body>
 </html>
