@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 1,
+  "version": 2,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -225,7 +225,7 @@
     {
       "id": "tower_defense",
       "official": true,
-      "name": "Tower Defense",
+      "name": "Guardianes de la Biblioteca",
       "subtitle": "Defiende la lengua",
       "category": "Estrategia lingüística",
       "competencies": [
@@ -234,15 +234,15 @@
         "semántica",
         "estrategia"
       ],
-      "status": "en revisión",
+      "status": "en pruebas",
       "sortOrder": 10,
       "color": "#14b8a6",
       "icon": "🛡️",
-      "entry": "",
-      "description": "Detén oleadas de monstruos resolviendo retos lingüísticos antes de que alcancen la base.",
+      "entry": "games/tower_defense/",
+      "description": "Tower defense lingüístico: rompe escudos resolviendo retos de Ortografía, Verbos y Semántica y deja que tus torres derroten a los monstruos.",
       "banner": "tower_defense",
       "active": true,
-      "integration": "none"
+      "integration": "embedded"
     }
   ]
 }
