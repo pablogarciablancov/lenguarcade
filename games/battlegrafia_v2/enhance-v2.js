@@ -148,8 +148,8 @@
   }
 
   function relabelInterface() {
-    document.title = 'Battlegrafía 2.0 · LenguArcade';
-    setText('#main-menu .menu-title', 'BATTLEGRAFÍA 2.0');
+    document.title = 'Battlegrafía · LenguArcade';
+    setText('#main-menu .menu-title', 'BATTLEGRAFÍA');
     setText('#main-menu .menu-sub', 'Campamento del Escriba');
     decorateMenuButton('menu-start', 'Jugar', 'Entra en los cinco mundos y continúa tu aventura.');
     decorateMenuButton('menu-account', 'Perfil', 'Tu héroe, nivel y datos de jugador.');
@@ -188,7 +188,7 @@
       pill.id = 'bg2-version-pill';
       nav.appendChild(pill);
     }
-    pill.textContent = TEST_MODE ? 'Modo prueba · Fantasy Arcade v2' : 'Fantasy Arcade · v2';
+    pill.textContent = 'Fantasy Arcade';
     pill.dataset.testMode = TEST_MODE ? '1' : '0';
   }
 
