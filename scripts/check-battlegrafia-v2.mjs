@@ -491,6 +491,20 @@ for(const required of [
 }
 
 for(const required of [
+  "function updateBattleItemSelect()",
+  "const select = document.getElementById(\'battle-item-select\')",
+  "select.replaceChildren()",
+  "select.appendChild(makeOption(\"\", \"Usar objeto…\"))",
+  "select.appendChild(makeOption(name,",
+  "battleItemSelect && (battleItemSelect.disabled = true)",
+]){
+  if(!index.includes(required)) errors.push("Falta reparación del selector de objetos en combate v2: "+required);
+}
+if(index.includes("container.innerHTML = `<div") && index.includes("battle-item-select")){
+  errors.push("El selector de objetos no puede insertar <div> dentro de un <select>.");
+}
+
+for(const required of [
   "function getInventorySaleDef(itemName)",
   "function renderInventorySaleHtml()",
   "sellShopItem(root.dataset.itemName || root.dataset.id)",
