@@ -198,6 +198,9 @@
       saved:!!(slot && slot.data),
       slotId:slot?.id || null
     };
+    try{
+      summary.gold = Number(window.BG?.getGlobalGold?.(summary.gold) ?? summary.gold ?? 0);
+    }catch(e){}
 
     if(!summary.saved) return summary;
 
