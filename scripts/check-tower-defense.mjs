@@ -19,7 +19,11 @@ for(const token of [
   "post('RESULT'",
   "LA_TD_BRIDGE.sessionStarted"
 ]) if(!html.includes(token))errors.push("falta bridge: "+token);
-if(!html.includes("hpBefore"))errors.push("falta la protección que evita daño al romper escudo");
+const v29Start=html.indexOf("Enemy.prototype.correct=function(question,fast)");
+const v29End=v29Start>=0?html.indexOf("// 2) Reparto de enemigos",v29Start):-1;
+const v29Correct=v29Start>=0&&v29End>v29Start?html.slice(v29Start,v29End):"";
+if(!v29Correct)errors.push("falta override v29 de ruptura de escudo");
+if(v29Correct.includes("this.hp-=")||v29Correct.includes("this.hp =")||v29Correct.includes("this.hp="))errors.push("romper el escudo sigue modificando la vida");
 if(!html.includes("v29InterleaveGroups"))errors.push("falta intercalado de oleadas v29");
 if(errors.length)throw new Error("Comprobaciones de Guardianes fallidas:\n- "+errors.join("\n- "));
 console.log("Guardianes de la Biblioteca correcto: catálogo, bridge, escudos y oleadas.");
