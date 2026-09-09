@@ -33,12 +33,24 @@
   };
 
   function loadCss(){
-    if($('bg2-catalog-polish-css')) return;
-    const link=document.createElement('link');
-    link.id='bg2-catalog-polish-css';
-    link.rel='stylesheet';
-    link.href='./catalog-polish-v2.css?v=20260907-rpg23';
-    document.head.appendChild(link);
+    let link=$('bg2-catalog-polish-css');
+    if(!link){
+      link=document.createElement('link');
+      link.id='bg2-catalog-polish-css';
+      link.rel='stylesheet';
+      document.head.appendChild(link);
+    }
+    link.href='./catalog-polish-v2.css?v=20260909-rpg24';
+    return link;
+  }
+
+  // Las demás capas RPG insertan sus CSS en DOMContentLoaded. Recolocamos
+  // esta hoja al final para que el catálogo sea realmente la última capa visual.
+  function keepCssLast(){
+    const link=loadCss();
+    if(link && document.head && link.parentNode===document.head){
+      document.head.appendChild(link);
+    }
   }
 
   function roman(n){
@@ -454,13 +466,19 @@
     loadCss();
     document.body.classList.add('bg2-catalog-polish');
     if(document.readyState==='loading'){
-      document.addEventListener('DOMContentLoaded',bind,{once:true});
+      document.addEventListener('DOMContentLoaded',()=>{
+        keepCssLast();
+        bind();
+        setTimeout(keepCssLast,0);
+      },{once:true});
     }else{
+      keepCssLast();
       bind();
     }
 
     /* Segundo intento únicamente por si BG_UI se registra un instante después. */
     setTimeout(()=>{
+      keepCssLast();
       wrapBgUi('renderCollection',decorateCollection);
       wrapBgUi('renderHubShop',()=>decorateShop($('hub-shop-list')));
       wrapGlobal('renderShop',()=>decorateShop($('shop-list')));
