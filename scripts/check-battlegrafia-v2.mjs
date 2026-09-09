@@ -204,6 +204,31 @@ for(const required of [
 }
 
 for(const required of [
+  "html.lenguarcade-embedded{width:100%!important;height:100%!important;min-height:0!important;overflow:hidden!important",
+  "html.lenguarcade-embedded body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important",
+  "html.lenguarcade-embedded .game-shell{max-width:none!important;width:100%!important;height:100%!important",
+  "height:min(650px,calc(100% - 66px))!important",
+  "body.bg2-tabs-polished.bg2-battle-router[data-bg2-view] .game-shell>.layout",
+  "body.bg2-battle-router[data-bg2-view]:not([data-bg2-view=\"battle\"]) .game-shell>.layout",
+  "./battle-clean-v2.js?v=20260910-rpg31",
+  "./stable-tabs-v2.js?v=20260910-rpg31",
+]){
+  if(!index.includes(required)) errors.push("Falta ajuste sin scroll en iframe LenguArcade: "+required);
+}
+if(!battleUi.includes("./battle-clean-v2.css?v=20260910-rpg31")){
+  errors.push("battle-clean-v2.js no fuerza el CSS rpg31.");
+}
+if(!stableTabs.includes("./stable-tabs-v2.css?v=20260910-rpg31")){
+  errors.push("stable-tabs-v2.js no fuerza el CSS rpg31.");
+}
+if(battleCss.includes('content:"BATTLEGRAFÍA 2.0')){
+  errors.push("La barra de combate conserva branding 2.0.");
+}
+if(stableTabsCss.includes('content:"BATTLEGRAFÍA 2.0')){
+  errors.push("La barra de pestañas conserva branding 2.0.");
+}
+
+for(const required of [
   "bg2-battle-clean",
   "bg2-in-battle",
   "function updateBattleState",
