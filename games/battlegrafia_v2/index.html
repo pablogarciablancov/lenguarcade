@@ -8532,12 +8532,17 @@ function actualizarMochilaHub() {
 
 // VIGILANTE ACTUALIZADO: Repinta mochila Y refresca la tienda al pulsar botones
 document.addEventListener('click', (e) => {
-  if(e.target.closest('button') || e.target.closest('.btn')) {
-    setTimeout(() => {
-       actualizarMochilaHub();
-       refrescarPantallasSecundarias(); // <-- Esto avisa a la tienda de que ya tienes oro
-    }, 50);
-  }
+  const button = e.target.closest('button,.btn');
+  if(!button) return;
+
+  // Los filtros y pestañas de catálogo se repintan solos. Si pasaran por este
+  // refresco global, se volverían a renderizar Bestiario/Logros/Tienda a la vez.
+  if(button.closest('.ach-filter,.ach-tab,[data-bg2-collection-filter],[data-bg2-shop-filter]')) return;
+
+  setTimeout(() => {
+     actualizarMochilaHub();
+     refrescarPantallasSecundarias(); // avisa a tienda/logros/colección tras cambios reales
+  }, 50);
 });
 
 // Función para restaurar la intercepción de guardado
@@ -16743,12 +16748,15 @@ function safeJSON(key){
 }
 
 function getActiveSlotId(){
-  return localStorage.getItem("battlegrafia_v2_active_slot_v1") || "";
+  return localStorage.getItem("battlegrafia_v2_active_slot_v1_adventure")
+    || localStorage.getItem("battlegrafia_v2_active_slot_v1")
+    || "";
 }
 
 function getActiveSlotData(){
   const slotId = getActiveSlotId();
-  const slots = safeJSON("battlegrafia_v2_save_slots_v1");
+  const slots = safeJSON("battlegrafia_v2_save_slots_v1_adventure")
+    || safeJSON("battlegrafia_v2_save_slots_v1");
 
   if(!slotId || !slots) return null;
 
@@ -16903,19 +16911,28 @@ function getUnlockedSet(){
 
   function bindFilters(){
     const group = document.getElementById("hub-ach-filter-group");
+    if(group && !group.dataset.bg2FiltersBound){
+      group.dataset.bg2FiltersBound = "1";
+      group.addEventListener("click", (event)=>{
+        const btn = event.target.closest(".ach-filter");
+        if(!btn || !group.contains(btn)) return;
+        STATE.filter = btn.getAttribute("data-filter") || "all";
+        renderAchievementsHub();
+      });
+    }
+
     if(group){
       group.querySelectorAll(".ach-filter").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          group.querySelectorAll(".ach-filter").forEach(b=>b.classList.remove("is-active"));
-          btn.classList.add("is-active");
-          STATE.filter = btn.getAttribute("data-filter") || "all";
-          renderAchievementsHub();
-        });
+        btn.classList.toggle(
+          "is-active",
+          (btn.getAttribute("data-filter") || "all") === STATE.filter
+        );
       });
     }
 
     const search = document.getElementById("hub-ach-search");
-    if(search){
+    if(search && !search.dataset.bg2FiltersBound){
+      search.dataset.bg2FiltersBound = "1";
       search.addEventListener("input", ()=>{
         STATE.search = (search.value || "").trim().toLowerCase();
         renderAchievementsHub();
@@ -16927,8 +16944,8 @@ function getUnlockedSet(){
   if(STATE.filter === "unlocked") return unlocked;
   if(STATE.filter === "locked") return !unlocked;
 
-  // "hidden" debe significar: secretos YA desbloqueados (no “ver secretos bloqueados”)
-  if(STATE.filter === "hidden") return !!a.hidden && unlocked;
+  // "Secretos" muestra también los bloqueados; su descripción sigue siendo ???.
+  if(STATE.filter === "hidden") return !!a.hidden;
 
   return true;
 }
@@ -17026,6 +17043,6 @@ function getUnlockedSet(){
 <script src="./battle-router-v2.js?v=20260907-rpg14"></script>
 <script src="./tabs-polish-v2.js?v=20260907-rpg14"></script>
 <script src="./stable-tabs-v2.js?v=20260907-rpg14"></script>
-<script src="./catalog-polish-v2.js?v=20260907-rpg23"></script>
+<script src="./catalog-polish-v2.js?v=20260909-rpg24"></script>
 </body>
 </html>
