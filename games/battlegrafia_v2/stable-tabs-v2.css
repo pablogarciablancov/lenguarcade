@@ -23,7 +23,7 @@ body.bg2-battle-router[data-bg2-view] .top-nav.bg2-stable-tabs{
 
 /* Marca fija: nunca empuja ni encoge las pestañas. */
 body.bg2-battle-router[data-bg2-view] .top-nav.bg2-stable-tabs::before{
-  content:"BATTLEGRAFÍA 2.0";
+  content:"BATTLEGRAFÍA";
   flex:0 0 112px!important;
   width:112px!important;
   margin:0 5px 0 0!important;
