@@ -133,6 +133,7 @@ for(const required of [
   "function launchContinueMode",
   "function launchNewMode",
   "prepareModeNew",
+  "window.BG.startMode",
 ]){
   if(!rpgUi.includes(required)) errors.push("Falta archivo RPG de partidas por modo: "+required);
 }
@@ -478,10 +479,12 @@ for(const required of [
   "player.__runState = snapshotRunState();",
   "runState.strategyMonsterIds = ids.slice();",
   "async function continueSelectedMode()",
+  "function startModeDirect(mode, intent='new')",
+  "window.BG.startMode = startModeDirect",
   "const hasLiveRun = selected.length > 0 && Number(runState.endsAt || 0) > Date.now();",
   "['adventure','survival','dominio','strategy'].includes(mode)",
-  "./save-slots-v2.js?v=20260909-rpg26",
-  "./rpg-ui-v2.js?v=20260909-rpg26",
+  "./save-slots-v2.js?v=20260909-rpg27",
+  "./rpg-ui-v2.js?v=20260909-rpg27",
 ]){
   if(!index.includes(required)) errors.push("Falta aislamiento/continuación de partidas por modo v2: "+required);
 }
