@@ -58,7 +58,7 @@ body.bg2-battle-clean.bg2-in-battle .top-nav{
   box-shadow:inset 0 -1px 0 #26354b!important;
 }
 body.bg2-battle-clean.bg2-in-battle .top-nav::before{
-  content:"BATTLEGRAFÍA 2.0  /  COMBATE";
+  content:"BATTLEGRAFÍA  /  COMBATE";
   margin-right:10px;
   color:#71839b;
   font:900 8px "Courier New",Consolas,monospace;
