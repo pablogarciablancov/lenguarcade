@@ -10518,28 +10518,28 @@ const monsters = [
 const DEFAULT_ITEM_ICON = window.BG.getAssetUrl("items/item_pista_simple.webp");
 
 const ITEM_DEFS = {
-  "Fragmento de Diccionario": { icon: window.BG.getAssetUrl("items/item_fragmento_diccionario.webp"), rarity:"common", desc:"Un trozo de sabiduría olvidada. Al usarlo, obtienes un pequeño extra de experiencia." },
-  "Polvo de Tilde": { icon: window.BG.getAssetUrl("items/item_polvo_tilde.webp"), rarity:"common", desc:"Un leve brillo recorre tus palabras. Aumenta ligeramente tu precisión en el próximo turno." },
-  "Píxel Roto": { icon: window.BG.getAssetUrl("items/item_pixel_roto.webp"), rarity:"common", desc:"Restos de un mundo antiguo. No sirve en combate, pero puede venderse por unas monedas." },
-  "Mancha de Tinta": { icon: window.BG.getAssetUrl("items/item_mancha_tinta.webp"), rarity:"common", desc:"La tinta te cubre como una armadura improvisada. Reduce el daño del próximo ataque enemigo." },
-  "Coma Semilla": { icon: window.BG.getAssetUrl("items/item_coma_semilla.webp"), rarity:"common", desc:"Planta una coma en el texto y observa cómo crece el sentido. Te da una pista sencilla sobre la frase." },
-  "Eco Agudo": { icon: window.BG.getAssetUrl("items/item_eco_agudo.webp"), rarity:"common", desc:"Un sonido punzante resuena en tu mente. Recarga ligeramente la barra de habilidad del héroe." },
-  "Pergamino Roto": { icon: window.BG.getAssetUrl("items/item_pergamino_roto.webp"), rarity:"common", desc:"Solo se lee un fragmento… pero basta. Revela una pista sencilla." },
+  "Fragmento de Diccionario": { icon: window.BG.getAssetUrl("items/item_fragmento_diccionario.webp"), rarity:"common", sellValue:8, desc:"Un trozo de sabiduría olvidada. Al usarlo, obtienes 15 EXP." },
+  "Polvo de Tilde": { icon: window.BG.getAssetUrl("items/item_polvo_tilde.webp"), rarity:"common", sellValue:8, desc:"Reduce un 25% la penalización de tus errores en el próximo turno." },
+  "Píxel Roto": { icon: window.BG.getAssetUrl("items/item_pixel_roto.webp"), rarity:"common", sellValue:6, desc:"Restos de un mundo antiguo. No sirve en combate; puedes venderlo por 6 de oro." },
+  "Mancha de Tinta": { icon: window.BG.getAssetUrl("items/item_mancha_tinta.webp"), rarity:"common", sellValue:8, desc:"Reduce a la mitad el daño del próximo ataque enemigo." },
+  "Coma Semilla": { icon: window.BG.getAssetUrl("items/item_coma_semilla.webp"), rarity:"common", sellValue:8, desc:"Revela una pista sencilla sobre la frase actual." },
+  "Eco Agudo": { icon: window.BG.getAssetUrl("items/item_eco_agudo.webp"), rarity:"common", sellValue:8, desc:"Recarga 35 puntos de la barra de habilidad." },
+  "Pergamino Roto": { icon: window.BG.getAssetUrl("items/item_pergamino_roto.webp"), rarity:"common", sellValue:8, desc:"Revela una pista sencilla sobre la frase actual." },
 
-  "H Perdida": { icon: window.BG.getAssetUrl("items/item_h_perdida.webp"), rarity:"unique", desc:"Corrige automáticamente un error de h en el siguiente combate (pista potente)." },
-  "Colmillo Ortográfico": { icon: window.BG.getAssetUrl("items/item_colmillo_bv.webp"), rarity:"unique", desc:"Te da una pista clara sobre B/V en tu próximo ataque." },
-  "Garra Confusora": { icon: window.BG.getAssetUrl("items/item_garra_gj.webp"), rarity:"unique", desc:"Te da una pista clara sobre G/J." },
-  "Acento Condensado": { icon: window.BG.getAssetUrl("items/item_acento_condensado.webp"), rarity:"unique", desc:"Te ayuda con tildes (pista potente) en el siguiente ataque." },
-  "Colmillo Comático": { icon: window.BG.getAssetUrl("items/item_colmillo_comas.webp"), rarity:"unique", desc:"Te indica dónde deberían ir comas (pista potente)." },
+  "H Perdida": { icon: window.BG.getAssetUrl("items/item_h_perdida.webp"), rarity:"unique", sellValue:18, desc:"Revela una pista potente y hace más tolerante tu próximo ataque." },
+  "Colmillo Ortográfico": { icon: window.BG.getAssetUrl("items/item_colmillo_bv.webp"), rarity:"unique", sellValue:18, desc:"Revela una pista potente sobre la frase y hace más tolerante tu próximo ataque." },
+  "Garra Confusora": { icon: window.BG.getAssetUrl("items/item_garra_gj.webp"), rarity:"unique", sellValue:18, desc:"Revela una pista potente y hace más tolerante tu próximo ataque." },
+  "Acento Condensado": { icon: window.BG.getAssetUrl("items/item_acento_condensado.webp"), rarity:"unique", sellValue:18, desc:"Revela una pista potente y hace más tolerante tu próximo ataque." },
+  "Colmillo Comático": { icon: window.BG.getAssetUrl("items/item_colmillo_comas.webp"), rarity:"unique", sellValue:18, desc:"Revela una pista potente y hace más tolerante tu próximo ataque." },
 
-  "Pluma Arcana": { icon: window.BG.getAssetUrl("items/item_pluma_arcana.webp"), rarity:"rare", desc:"Rellena parte de la barra de habilidad." },
-  "Gema de Conjugación": { icon: window.BG.getAssetUrl("items/item_gema_conjugacion.webp"), rarity:"rare", desc:"Permite una ayuda extra en el próximo ataque." },
-  "Cristal Vocálico": { icon: window.BG.getAssetUrl("items/item_cristal_vocalico.webp"), rarity:"rare", desc:"Evita penalizaciones durante un turno." },
-  "Runas de Coherencia": { icon: window.BG.getAssetUrl("items/item_runas_coherencia.webp"), rarity:"rare", desc:"Reduce errores generales en tu próximo ataque." },
+  "Pluma Arcana": { icon: window.BG.getAssetUrl("items/item_pluma_arcana.webp"), rarity:"rare", sellValue:15, desc:"Recarga 60 puntos de la barra de habilidad." },
+  "Gema de Conjugación": { icon: window.BG.getAssetUrl("items/item_gema_conjugacion.webp"), rarity:"rare", sellValue:15, desc:"Revela una pista potente y hace más tolerante tu próximo ataque." },
+  "Cristal Vocálico": { icon: window.BG.getAssetUrl("items/item_cristal_vocalico.webp"), rarity:"rare", sellValue:15, desc:"Anula el daño del monstruo durante tu próximo turno." },
+  "Runas de Coherencia": { icon: window.BG.getAssetUrl("items/item_runas_coherencia.webp"), rarity:"rare", sellValue:15, desc:"Reduce a la mitad la penalización de tus errores en el próximo ataque." },
 
-  "Orbe de la Ortografía Perfecta": { icon: window.BG.getAssetUrl("items/item_orbe_ortografia.webp"), rarity:"legendary", desc:"Te vuelve muy indulgente el siguiente ataque." },
-  "Corona del Corrector Supremo": { icon: window.BG.getAssetUrl("items/item_corona_corrector.webp"), rarity:"legendary", desc:"Potencia el daño durante un combate." },
-  "Libro Viviente": { icon: window.BG.getAssetUrl("items/item_libro_viviente.webp"), rarity:"legendary", desc:"Te da una pista muy potente." }
+  "Orbe de la Ortografía Perfecta": { icon: window.BG.getAssetUrl("items/item_orbe_ortografia.webp"), rarity:"legendary", sellValue:30, desc:"Reduce a la mitad la penalización de tus errores en el próximo ataque." },
+  "Corona del Corrector Supremo": { icon: window.BG.getAssetUrl("items/item_corona_corrector.webp"), rarity:"legendary", sellValue:30, desc:"Aumenta un 60% tu daño durante los próximos 3 turnos." },
+  "Libro Viviente": { icon: window.BG.getAssetUrl("items/item_libro_viviente.webp"), rarity:"legendary", sellValue:30, desc:"Revela una pista potente y hace más tolerante tu próximo ataque." }
 };
 
 const COMMON_ITEMS = ["Fragmento de Diccionario","Polvo de Tilde","Píxel Roto","Mancha de Tinta","Coma Semilla","Eco Agudo","Pergamino Roto"];
@@ -10553,6 +10553,26 @@ const MONSTER_UNIQUE_ITEMS = {
   "espectro_agudo": "Acento Condensado",
   "serpiente_comata": "Colmillo Comático"
 };
+
+// Completa las definiciones de los objetos de tienda para que la mochila use
+// exactamente el mismo icono, descripción y valor de reventa.
+const SHOP_ITEM_RARITY = {
+  venda_rapida:"common", cuaderno_descanso:"rare", pista_simple:"common",
+  lupa_corrector:"rare", escudo_gramatical:"common", pocion_debilitante:"rare",
+  pocion_tinta:"common", tinta_corrosiva:"rare", expansor_tildes:"rare",
+  pluma_maestra:"legendary", botas_corregidor:"unique"
+};
+SHOP_ITEMS.forEach(item=>{
+  ITEM_DEFS[item.name] = {
+    ...(ITEM_DEFS[item.name] || {}),
+    icon:item.icon || DEFAULT_ITEM_ICON,
+    rarity:SHOP_ITEM_RARITY[item.id] || "common",
+    desc:item.description || "",
+    shopId:item.id,
+    buyCost:item.cost,
+    sellValue:Math.floor(item.cost / 2)
+  };
+});
 
 // ===== Reliquias (jefes) =====
 const BOSS_RELICS = ["Sello del Castillo Roto","Amuleto de la Coma Antigua","Medalla del Corrector"];
@@ -10818,6 +10838,8 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
     poweredAttackTurns:0,
     dodgeTurns:0,
     autoCorrectBoost:false,
+    precisionBoost:0,
+    noPenaltyTurns:0,
     weakenTurns:0,
     poisonTurns:0,
     perfectTildeBonus:false,
@@ -10833,6 +10855,8 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
       poweredAttackTurns:0,
       dodgeTurns:0,
       autoCorrectBoost:false,
+      precisionBoost:0,
+      noPenaltyTurns:0,
       weakenTurns:0,
       poisonTurns:0,
       perfectTildeBonus:false,
@@ -11439,8 +11463,8 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
   }
 
   // ===== Usabilidad de objetos =====
-  const SHOP_NON_BATTLE_USABLE = new Set(["Pluma maestra", "Cuaderno de descanso", "Venda rápida"]);
-  const SHOP_NOT_USABLE = new Set(["Botas del Corregidor"]);
+  const SHOP_NON_BATTLE_USABLE = new Set(["Pluma maestra", "Cuaderno de descanso", "Venda rápida", "Fragmento de Diccionario"]);
+  const SHOP_NOT_USABLE = new Set(["Botas del Corregidor", "Píxel Roto", ...BOSS_RELICS]);
 
   const BATTLE_USABLE = new Set([
     "Pergamino de pista","Lupa del corrector","Poción de tinta","Escudo gramatical","Poción debilitante","Tinta corrosiva","Expansor de tildes",
@@ -11520,9 +11544,11 @@ function updateBattleItemSelect(){
     "Pluma Arcana": "+60 a la barra de habilidad.",
     "Orbe de la Ortografía Perfecta": "El próximo ataque será indulgente.",
     "Libro Viviente": "El próximo ataque será indulgente.",
-    "Corona del Corrector Supremo": "Mucho daño extra por 3 turnos."
+    "Corona del Corrector Supremo": "+60% de daño durante 3 turnos.",
+    "Polvo de Tilde": "Tus errores penalizan un 25% menos en el próximo turno.",
+    "Cristal Vocálico": "Anula el daño enemigo durante el próximo turno."
   };
-  const hintItems = ["Pergamino de pista", "Coma Semilla", "Pergamino Roto", "Lupa del corrector", "H Perdida", "Colmillo Ortográfico", "Garra Confusora", "Acento Condensado", "Colmillo Comático", "Cristal Vocálico", "Runas de Coherencia", "Gema de Conjugación"];
+  const hintItems = ["Pergamino de pista", "Coma Semilla", "Pergamino Roto", "Lupa del corrector", "H Perdida", "Colmillo Ortográfico", "Garra Confusora", "Acento Condensado", "Colmillo Comático", "Runas de Coherencia", "Gema de Conjugación", "Libro Viviente"];
 
   let html = `<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; width: 100%; max-height: 250px; overflow-y: auto; padding-right: 5px;">`;
 
@@ -11532,8 +11558,9 @@ function updateBattleItemSelect(){
     if (!desc && hintItems.includes(name)) desc = "Revela una pista potente.";
     if (!desc) desc = "Objeto consumible.";
 
-    // La imagen exacta usando la misma codificación de la tienda
-    const imgSrc = `img/items/${encodeURIComponent(name)}.webp`;
+    // Misma fuente visual que mochila/tienda: evita rutas inventadas por nombre.
+    const itemVisual = ITEM_DEFS[name] || SHOP_ITEMS.find(item=>item.name===name) || {};
+    const imgSrc = itemVisual.icon || DEFAULT_ITEM_ICON;
 
     html += `
       <div onclick="applyBattleItem('${name}')" 
@@ -11641,6 +11668,14 @@ function updateBattleItemSelect(){
       return;
     }
 
+    if(itemName === "Polvo de Tilde"){
+      battleState.precisionBoost = Math.max(battleState.precisionBoost || 0, 0.25);
+      setLog(`<span class="good">Polvo de Tilde activado.</span> <span class="hint">En el próximo turno, tus errores penalizan un 25% menos.</span>`);
+      if(consume) removeOneItem(itemName);
+      savePlayer(); updateBattleItemSelect(); updateHeroUi();
+      return;
+    }
+
     if(itemName === "Eco Agudo" || itemName === "Pluma Arcana"){
       const add = (itemName === "Pluma Arcana") ? 60 : 35;
       player.abilityCharge = Math.min(100, (player.abilityCharge || 0) + add);
@@ -11651,9 +11686,17 @@ function updateBattleItemSelect(){
       return;
     }
 
-    if(itemName === "Orbe de la Ortografía Perfecta" || itemName === "Libro Viviente"){
+    if(itemName === "Orbe de la Ortografía Perfecta"){
       battleState.autoCorrectBoost = true;
-      setLog(`<span class="good">${itemName} activado.</span> <span class="hint">El próximo ataque será mucho más indulgente con errores.</span><br>${getHintText()}`);
+      setLog(`<span class="good">Orbe de la Ortografía Perfecta activado.</span> <span class="hint">La penalización de tus errores se reduce a la mitad en el próximo ataque.</span>`);
+      if(consume) removeOneItem(itemName);
+      savePlayer(); updateBattleItemSelect(); updateHeroUi();
+      return;
+    }
+
+    if(itemName === "Libro Viviente"){
+      battleState.autoCorrectBoost = true;
+      setLog(`<span class="good">Libro Viviente activado.</span><br><span class="hint">${getStrongHintText()}</span><br><span class="hint">Además, el próximo ataque será más tolerante con errores.</span>`);
       if(consume) removeOneItem(itemName);
       savePlayer(); updateBattleItemSelect(); updateHeroUi();
       return;
@@ -11667,9 +11710,17 @@ function updateBattleItemSelect(){
       return;
     }
 
-    if(["H Perdida","Colmillo Ortográfico","Garra Confusora","Acento Condensado","Colmillo Comático","Cristal Vocálico","Runas de Coherencia","Gema de Conjugación"].includes(itemName)){
+    if(itemName === "Cristal Vocálico"){
+      battleState.noPenaltyTurns = Math.max(battleState.noPenaltyTurns || 0, 1);
+      setLog(`<span class="good">Cristal Vocálico activado.</span> <span class="hint">El monstruo no podrá dañarte durante tu próximo turno.</span>`);
+      if(consume) removeOneItem(itemName);
+      savePlayer(); updateBattleItemSelect(); updateHeroUi();
+      return;
+    }
+
+    if(["H Perdida","Colmillo Ortográfico","Garra Confusora","Acento Condensado","Colmillo Comático","Runas de Coherencia","Gema de Conjugación"].includes(itemName)){
       battleState.autoCorrectBoost = true;
-      setLog(`<span class="good">${itemName} usado.</span><br><span class="hint">${getHintText()}</span>`);
+      setLog(`<span class="good">${itemName} usado.</span><br><span class="hint">${getStrongHintText()}</span><br><span class="hint">El próximo ataque será más tolerante con errores.</span>`);
       if(consume) removeOneItem(itemName);
       savePlayer(); updateBattleItemSelect(); updateHeroUi();
       return;
@@ -11728,6 +11779,16 @@ function removeOneItem(itemName) {
         try{ if(typeof renderInventory === 'function') renderInventory(); }catch(e){}
 
         setLog(`<span class="good">Usas ${itemName}.</span> Recuperas toda tu vida.`);
+        return;
+      }
+
+      if(itemName === "Fragmento de Diccionario"){
+        removeOneItem(itemName);
+        const levels = addXp(15);
+        updateHeroUi(); savePlayer();
+        try{ if(window.BG_UI?.renderHubBackpack) window.BG_UI.renderHubBackpack(); }catch(e){}
+        try{ if(typeof renderInventory === 'function') renderInventory(); }catch(e){}
+        setLog(`<span class="good">Usas ${itemName}.</span> Obtienes <strong>15 EXP</strong>${levels > 0 ? " y subes de nivel" : ""}.`);
         return;
       }
 
@@ -11802,7 +11863,8 @@ function removeOneItem(itemName) {
           const def = ITEM_DEFS[name];
           const rarityClass = def?.rarity || "common";
           const desc = def?.desc || "Sin descripción.";
-          const disabled = SHOP_NOT_USABLE.has(name); // coleccionable puro
+          const disabled = SHOP_NOT_USABLE.has(name);
+          const disabledLabel = BOSS_RELICS.includes(name) ? "Reliquia" : (name === "Píxel Roto" ? "Solo venta" : "Colección");
           const iconSrc = (def && def.icon) ? def.icon : DEFAULT_ITEM_ICON;
           const iconHtml = `<img src="${iconSrc}" alt="${name}" class="inv-card-icon" onerror="this.onerror=null;this.src='${DEFAULT_ITEM_ICON}';">`;
           return `
@@ -11815,7 +11877,7 @@ function removeOneItem(itemName) {
                   </div>
                   <div class="inv-card-desc">${desc}</div>
                   <div class="inv-card-actions">
-                    <button class="inv-use-btn" data-item="${name}" ${disabled ? "disabled" : ""}>Usar</button>
+                    <button class="inv-use-btn" data-item="${name}" ${disabled ? "disabled" : ""}>${disabled ? disabledLabel : "Usar"}</button>
                   </div>
                 </div>
               </div>
@@ -12747,6 +12809,91 @@ function applyBattleWorldBackground(worldId){
   // Variable global para controlar en qué pestaña estamos
 let currentShopMode = 'buy'; // Puede ser 'buy' o 'sell'
 
+const FALLBACK_SELL_PRICE_BY_RARITY = {
+  common:6,
+  rare:15,
+  unique:18,
+  legendary:30
+};
+
+function getInventorySaleDef(itemName){
+  const name = String(itemName || "");
+  if(!name) return null;
+
+  const lootDef = ITEM_DEFS[name] || {};
+  const isRelic = BOSS_RELICS.includes(name) || lootDef.rarity === "relic";
+  if(isRelic){
+    return {
+      id:"relic-" + normalizeImageName(name),
+      name,
+      icon:lootDef.icon || DEFAULT_ITEM_ICON,
+      description:lootDef.desc || "Reliquia de jefe.",
+      rarity:"relic",
+      sellable:false,
+      sellPrice:0
+    };
+  }
+
+  const shopDef = SHOP_ITEMS.find(item=>item.name===name) || null;
+  const rarity = lootDef.rarity || (shopDef ? (SHOP_ITEM_RARITY[shopDef.id] || "common") : "common");
+  const explicit = Number(lootDef.sellValue);
+  const sellPrice = Number.isFinite(explicit) && explicit >= 0
+    ? explicit
+    : (shopDef ? Math.floor(shopDef.cost / 2) : (FALLBACK_SELL_PRICE_BY_RARITY[rarity] || 5));
+
+  return {
+    id:shopDef?.id || ("loot-" + normalizeImageName(name)),
+    name,
+    icon:lootDef.icon || shopDef?.icon || DEFAULT_ITEM_ICON,
+    description:lootDef.desc || shopDef?.description || "Objeto de la mochila.",
+    rarity,
+    sellable:true,
+    sellPrice
+  };
+}
+
+function getInventorySaleEntries(){
+  if(!player || !Array.isArray(player.items)) return [];
+  const counts = {};
+  player.items.forEach(name=>{ counts[name] = (counts[name] || 0) + 1; });
+  return Object.entries(counts)
+    .map(([name,count])=>({ ...getInventorySaleDef(name), count }))
+    .filter(entry=>entry && entry.name)
+    .sort((a,b)=>{
+      if(a.sellable !== b.sellable) return a.sellable ? -1 : 1;
+      return a.name.localeCompare(b.name,'es');
+    });
+}
+
+function renderInventorySaleHtml(){
+  const entries = getInventorySaleEntries();
+  if(!entries.length){
+    return `<div class="shop-empty" style="text-align:center;color:#9ca3af;padding:20px;width:100%;">No tienes objetos en tu inventario para vender.</div>`;
+  }
+
+  return entries.map(entry=>{
+    const safeName = entry.name.replace(/"/g,"&quot;");
+    const status = entry.sellable
+      ? `<div class="shop-price" style="color:#4ade80;">+${entry.sellPrice} oro</div><button class="shop-sell-btn">Vender</button>`
+      : `<div class="shop-price" style="color:#9ca3af;">Reliquia · no vendible</div>`;
+
+    return `
+      <div class="shop-item" data-id="${entry.id}" data-item-name="${safeName}" data-bg2-rarity="${entry.rarity}">
+        <div class="shop-item-main">
+          <img src="${entry.icon}" class="shop-item-icon" alt="" onerror="this.onerror=null;this.src='${DEFAULT_ITEM_ICON}'">
+          <div class="shop-item-text">
+            <div class="shop-item-name">${entry.name} (x${entry.count})</div>
+            <div class="shop-item-desc">${entry.sellable ? "Puedes vender una unidad por " + entry.sellPrice + " de oro." : entry.description}</div>
+          </div>
+        </div>
+        <div class="shop-item-footer">
+          ${status}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
 // ===== Tienda (Campamento) =====
 function renderShop(){
   if(!shopListEl || !player) return;
@@ -12793,37 +12940,8 @@ function renderShop(){
       `;
     }).join("");
   } else {
-    // MODO VENDER
-    const uniqueItems = [...new Set(player.items)];
-    if(uniqueItems.length === 0){
-      listHtml = `<div class="shop-empty" style="text-align: center; color: #9ca3af; padding: 20px;">No tienes objetos en tu inventario para vender.</div>`;
-    } else {
-      listHtml = uniqueItems.map(itemName => {
-        const itemDef = SHOP_ITEMS.find(x => x.name === itemName);
-        if(!itemDef) return "";
-        const count = player.items.filter(i => i === itemName).length;
-        const sellPrice = Math.floor(itemDef.cost / 2); // Se vende a mitad de precio
-        
-        // RESTAURADO A TU CÓDIGO ORIGINAL
-        const icon = itemDef.icon || "";
-
-        return `
-          <div class="shop-item" data-id="${itemDef.id}">
-            <div class="shop-item-main">
-              ${icon ? `<img src="${icon}" class="shop-item-icon" alt="">` : ""}
-              <div class="shop-item-text">
-                <div class="shop-item-name">${itemDef.name} (x${count})</div>
-                <div class="shop-item-desc">Puedes venderlo por ${sellPrice} de oro.</div>
-              </div>
-            </div>
-            <div class="shop-item-footer">
-              <div class="shop-price" style="color: #4ade80;">+${sellPrice} oro</div>
-              <button class="shop-sell-btn" style="background: #ef4444;">Vender</button>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
+    // MODO VENDER: muestra todos los objetos de la mochila.
+    listHtml = renderInventorySaleHtml();
   }
 
   shopListEl.innerHTML = menuHtml + listHtml;
@@ -12908,35 +13026,8 @@ function renderHubShop(){
       `;
     }).join('');
   } else {
-    // MODO VENDER HUB
-    const uniqueItems = [...new Set(player.items)];
-    if(uniqueItems.length === 0){
-      listHtml = `<div class="shop-empty" style="text-align: center; color: #9ca3af; padding: 20px; width: 100%;">No tienes objetos en tu inventario para vender.</div>`;
-    } else {
-      listHtml = uniqueItems.map(itemName => {
-        const itemDef = SHOP_ITEMS.find(x => x.name === itemName);
-        if(!itemDef) return "";
-        const count = player.items.filter(i => i === itemName).length;
-        const sellPrice = Math.floor(itemDef.cost / 2);
-        const icon = itemDef.icon || ""; // RESTAURADO
-
-        return `
-          <div class="shop-item" data-id="${itemDef.id}">
-            <div class="shop-item-main">
-              ${icon ? `<img src="${icon}" class="shop-item-icon" alt="">` : ""}
-              <div class="shop-item-text">
-                <div class="shop-item-name">${itemDef.name} (x${count})</div>
-                <div class="shop-item-desc">Precio de venta: ${sellPrice} oro</div>
-              </div>
-            </div>
-            <div class="shop-item-footer">
-              <div class="shop-price" style="color: #4ade80;">+${sellPrice} oro</div>
-              <button class="shop-sell-btn" style="background: #ef4444;">Vender</button>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
+    // MODO VENDER HUB: misma fuente de verdad que el campamento.
+    listHtml = renderInventorySaleHtml();
   }
 
   mount.innerHTML = menuHtml + listHtml;
@@ -12964,7 +13055,7 @@ function renderHubShop(){
     btn.addEventListener('click', () => {
       const root = btn.closest('.shop-item');
       if(!root) return;
-      sellShopItem(root.dataset.id);
+      sellShopItem(root.dataset.itemName || root.dataset.id);
       try{ renderHubShop(); }catch(e){}
     });
   });
@@ -13109,7 +13200,7 @@ function buyShopItem(id){
   try{ renderShop?.(); }catch(e){}
 }
 
-function sellShopItem(id){
+function sellShopItem(identifier){
   const showMsg = (html) => {
     try{ const hubMsg = document.getElementById('hub-shop-msg'); if(hubMsg){ hubMsg.innerHTML = html; return; } }catch(e){}
     try{ if(typeof campMessageEl !== 'undefined' && campMessageEl) { campMessageEl.innerHTML = html; return; } }catch(e){}
@@ -13117,22 +13208,29 @@ function sellShopItem(id){
 
   if(runRules && !runRules.allowShop){ showMsg(`<span class="hint">En este modo no puedes vender.</span>`); return; }
   if(!isOnlineNow()){ showMsg(`<span class="hint">Sin conexión.</span>`); return; }
+  if(!player || !Array.isArray(player.items)) return;
 
-  const itemDef = SHOP_ITEMS.find(x => x.id === id);
-  if(!itemDef) return;
+  const shopDef = SHOP_ITEMS.find(item=>item.id===identifier) || null;
+  const itemName = shopDef?.name || String(identifier || "");
+  const saleDef = getInventorySaleDef(itemName);
+  if(!saleDef) return;
 
-  const itemIndex = player.items.indexOf(itemDef.name);
+  if(!saleDef.sellable){
+    showMsg(`<span class="hint"><strong>${saleDef.name}</strong> es una reliquia y no se puede vender.</span>`);
+    return;
+  }
+
+  const itemIndex = player.items.indexOf(itemName);
   if(itemIndex === -1){
     showMsg(`<span class="bad">No tienes este objeto.</span>`);
     return;
   }
 
-  const sellPrice = Math.floor(itemDef.cost / 2);
   player.items.splice(itemIndex, 1);
-  player.gold = (Number(player.gold) || 0) + sellPrice;
+  player.gold = (Number(player.gold) || 0) + saleDef.sellPrice;
 
-  showMsg(`<span class="good">Has vendido <strong>${itemDef.name}</strong> por ${sellPrice} de oro.</span>`);
-  
+  showMsg(`<span class="good">Has vendido <strong>${saleDef.name}</strong> por ${saleDef.sellPrice} de oro.</span>`);
+
   updateHpBars();
   updateHeroUi();
   savePlayer();
@@ -13152,7 +13250,7 @@ if(shopListEl){
       if(root) (window.buyShopItem || buyShopItem)(root.dataset.id);
     } else if(sellBtn) {
       const root = sellBtn.closest(".shop-item");
-      if(root) sellShopItem(root.dataset.id);
+      if(root) sellShopItem(root.dataset.itemName || root.dataset.id);
     }
   });
 }
@@ -14089,6 +14187,10 @@ function disintegrateImg(imgEl, onDone, opts = {}) {
       ratio *= 0.5;
       battleState.autoCorrectBoost = false;
     }
+    if((battleState.precisionBoost || 0) > 0){
+      ratio *= Math.max(0, 1 - battleState.precisionBoost);
+      battleState.precisionBoost = 0;
+    }
 
     let playerDamage = 0;
     let monsterDamage = 0;
@@ -14185,6 +14287,16 @@ function disintegrateImg(imgEl, onDone, opts = {}) {
     if(monster.special && ratio > 0.3 && monster.special.type === "extraOnBigError"){
       monsterDamage += monster.special.extra;
       feedback += `<br><span class="bad">Su poder especial <strong>${monster.special.name}</strong> aumenta el daño.</span>`;
+    }
+
+    if(battleState.noPenaltyTurns > 0){
+      if(monsterDamage > 0){
+        monsterDamage = 0;
+        feedback += `<br><span class="good">El Cristal Vocálico anula por completo el contraataque.</span>`;
+      }else{
+        feedback += `<br><span class="hint">El Cristal Vocálico te protegía este turno, aunque no has necesitado su defensa.</span>`;
+      }
+      battleState.noPenaltyTurns--;
     }
 
     if(battleState.weakenTurns > 0 && monsterDamage > 0){
