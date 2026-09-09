@@ -45,7 +45,7 @@
     const worldIndex = Math.min(4, Math.floor(Math.max(0, defeated) / 6));
     const worlds = ['Montañas de Lexikon','Castillo de Paper','Ciénaga de Torvax','Acantilados de Sintaxion','Volcán de Don Pablo'];
     return {
-      name:p.name || (TEST_MODE ? 'Aventurero de prueba' : 'Nuevo aventurero'),
+      name:p.name || 'Nuevo aventurero',
       level:Number(p.level || 1),
       xp:Number(p.xp || 0),
       xpToNext:Number(p.xpToNext || 100),
@@ -81,10 +81,10 @@
       <header class="bg2-hub-header">
         <div class="bg2-brand-lockup">
           <div class="bg2-kicker">FANTASY LANGUAGE RPG</div>
-          <h1>BATTLEGRAFÍA <b>2.0</b></h1>
+          <h1>BATTLEGRAFÍA</h1>
           <div class="bg2-brand-sub">La aventura de las palabras</div>
         </div>
-        <div class="bg2-build-badge">${TEST_MODE ? 'MODO PRUEBA' : 'FANTASY ARCADE'}</div>
+        <div class="bg2-build-badge">FANTASY ARCADE</div>
       </header>
 
       <div class="bg2-hub-body">
