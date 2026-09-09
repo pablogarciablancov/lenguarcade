@@ -15,7 +15,7 @@
     const link = document.createElement('link');
     link.id = 'bg2-rpg-css';
     link.rel = 'stylesheet';
-    link.href = './rpg-ui-v2.css?v=20260907-rpg10';
+    link.href = './rpg-ui-v2.css?v=20260909-rpg26';
     document.head.appendChild(link);
   }
 
@@ -61,6 +61,13 @@
     return ASSET + 'heros/sprite_hero_' + safe + '.webp';
   }
 
+  const MODE_ARCHIVE = [
+    { id:'adventure', roman:'I', label:'AVENTURA', desc:'Campaña de cinco mundos y treinta criaturas.', save:true },
+    { id:'survival', roman:'II', label:'SUPERVIVENCIA', desc:'Resiste sin campamento ni tienda. Cada error importa.', save:true },
+    { id:'dominio', roman:'III', label:'DOMINIO', desc:'Encadena respuestas perfectas y conserva tu progreso.', save:true },
+    { id:'strategy', roman:'IV', label:'ESTRATEGIA', desc:'Retos configurables con tiempo, rivales y loadout.', save:true }
+  ];
+
   function mountHub() {
     const panel = document.querySelector('#main-menu .menu-panel');
     if (!panel || $('bg2-rpg-hub')) return;
@@ -97,20 +104,16 @@
         </section>
 
         <nav class="bg2-rpg-menu" aria-label="Menú principal RPG">
-          <button class="bg2-rpg-action primary" data-action="continue">
-            <span class="bg2-cursor">▶</span><span><b>CONTINUAR AVENTURA</b><small>Regresa a tu última expedición</small></span>
+          <button class="bg2-rpg-action primary" data-action="games">
+            <span class="bg2-cursor">▶</span><span><b>PARTIDAS</b><small>Cada modo conserva su propia partida y nunca pisa las demás</small></span>
           </button>
-          <button class="bg2-rpg-action new" data-action="new">
-            <span class="bg2-cursor">✦</span><span><b>NUEVA AVENTURA</b><small>Elige una ranura y forja otro héroe</small></span>
-          </button>
-          <button class="bg2-rpg-action" data-action="modes">
-            <span class="bg2-cursor">◆</span><span><b>MODOS DE JUEGO</b><small>Supervivencia · Práctica · Dominio · Estrategia</small></span>
+          <button class="bg2-rpg-action new" data-action="practice">
+            <span class="bg2-cursor">✦</span><span><b>ENTRENAMIENTO</b><small>Práctica libre con criaturas desbloqueadas · no guarda una partida aparte</small></span>
           </button>
           <div class="bg2-menu-mini">
             <button data-action="bestiary"><b>BESTIARIO</b><small>30 criaturas</small></button>
             <button data-action="shop"><b>MERCADER</b><small>Objetos y reliquias</small></button>
             <button data-action="achievements"><b>LOGROS</b><small>Tu leyenda</small></button>
-            <button data-action="profile"><b>PERFIL</b><small>Ficha del héroe</small></button>
           </div>
         </nav>
       </div>
@@ -126,13 +129,11 @@
       const button = event.target.closest('[data-action]');
       if (!button) return;
       const action = button.dataset.action;
-      if (action === 'continue') return openSlots('continue');
-      if (action === 'new') return openSlots('new');
-      if (action === 'modes') return openModes();
+      if (action === 'games') return openModeArchive();
+      if (action === 'practice') return launchPractice();
       if (action === 'bestiary') return click('menu-collection');
       if (action === 'shop') return click('menu-shop');
       if (action === 'achievements') return click('menu-achievements');
-      if (action === 'profile') return click('menu-account');
       if (action === 'credits') return click('menu-credits');
     });
 
@@ -163,88 +164,95 @@
     if (xp && xp.style.width !== nextWidth) xp.style.width = nextWidth;
   }
 
-  function ensureSlotsModal() {
-    if ($('bg2-slots-modal')) return;
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  function ensureModeArchive() {
+    if ($('bg2-mode-archive')) return;
     const modal = document.createElement('div');
-    modal.id = 'bg2-slots-modal';
+    modal.id = 'bg2-mode-archive';
     modal.className = 'bg2-overlay';
     modal.innerHTML = `
-      <div class="bg2-overlay-card bg2-slots-card" role="dialog" aria-modal="true" aria-labelledby="bg2-slots-title">
+      <div class="bg2-overlay-card bg2-mode-archive-card" role="dialog" aria-modal="true" aria-labelledby="bg2-mode-archive-title">
         <div class="bg2-overlay-top">
           <div>
             <span class="bg2-label">ARCHIVO DEL CRONISTA</span>
-            <h2 id="bg2-slots-title">Partidas guardadas</h2>
+            <h2 id="bg2-mode-archive-title">Partidas por modo</h2>
           </div>
           <button class="bg2-close" data-close aria-label="Cerrar">×</button>
         </div>
-        <p id="bg2-slots-sub">Elige una ranura.</p>
-        <div id="bg2-slots-grid"></div>
-        <div class="bg2-slots-note">Las ranuras de Battlegrafía 2.0 están aisladas de la versión clásica.</div>
+        <p>Cada modo tiene un guardado independiente. Empezar de nuevo solo sustituye la partida de ese modo.</p>
+        <div id="bg2-mode-archive-grid"></div>
+        <div class="bg2-slots-note">Aventura · Supervivencia · Dominio · Estrategia se guardan por separado. Práctica es una sesión de entrenamiento.</div>
       </div>
     `;
     document.body.appendChild(modal);
+
     modal.addEventListener('click', event => {
-      if (event.target === modal || event.target.closest('[data-close]')) closeSlots();
-      const action = event.target.closest('[data-slot-action]');
+      if (event.target === modal || event.target.closest('[data-close]')) closeModeArchive();
+      const action = event.target.closest('[data-mode-save-action]');
       if (!action) return;
-      const index = Number(action.dataset.slot);
-      if (action.dataset.slotAction === 'continue') continueSlot(index);
-      if (action.dataset.slotAction === 'new') newSlot(index);
+      const mode = action.dataset.mode;
+      if (!mode) return;
+      if (action.dataset.modeSaveAction === 'continue') launchContinueMode(mode);
+      if (action.dataset.modeSaveAction === 'new') launchNewMode(mode);
     });
   }
 
-  function renderSlots(intent) {
-    ensureSlotsModal();
-    const grid = $('bg2-slots-grid');
-    const metas = window.BG2Slots?.meta?.('adventure') || [];
-    $('bg2-slots-title').textContent = intent === 'continue' ? 'Continuar aventura' : 'Nueva aventura';
-    $('bg2-slots-sub').textContent = intent === 'continue'
-      ? 'Elige la expedición que quieres recuperar.'
-      : 'Elige dónde guardar la nueva aventura. Ninguna partida se sustituirá sin avisarte.';
+  function renderModeArchive() {
+    ensureModeArchive();
+    const grid = $('bg2-mode-archive-grid');
+    if (!grid) return;
 
-    grid.innerHTML = metas.map(meta => {
-      const updated = window.BG2Slots?.formatDate?.(meta.updatedAt) || '—';
+    grid.innerHTML = MODE_ARCHIVE.map(info => {
+      const meta = window.BG2Slots?.modeSummary?.(info.id) || { saved:false, empty:true, progress:0 };
+      const saved = !!meta.saved;
+      const updated = saved ? (window.BG2Slots?.formatDate?.(meta.updatedAt) || '—') : 'Sin partida';
+      const portrait = saved
+        ? `<img src="${meta.sprite}" alt="">`
+        : `<span class="bg2-mode-save-roman">${info.roman}</span>`;
       return `
-        <article class="bg2-slot ${meta.empty ? 'empty' : 'occupied'}">
-          <div class="bg2-slot-number">RANURA 0${meta.index}</div>
-          <div class="bg2-slot-main">
-            <div class="bg2-slot-portrait">${meta.empty ? '<span>＋</span>' : '<img src="'+meta.sprite+'" alt="">'}</div>
-            <div class="bg2-slot-copy">
-              <strong>${meta.empty ? 'Ranura vacía' : escapeHtml(meta.name)}</strong>
-              <span>${meta.empty ? 'Una historia todavía no escrita' : escapeHtml(meta.world)}</span>
-              <small>${meta.empty ? 'Lista para comenzar' : 'Nivel '+meta.level+' · '+meta.stage}</small>
+        <article class="bg2-mode-save ${saved ? 'occupied' : 'empty'}" data-mode-save="${info.id}">
+          <div class="bg2-mode-save-top">
+            <span class="bg2-mode-save-code">MODO ${info.roman}</span>
+            <span class="bg2-mode-save-state">${saved ? 'PARTIDA GUARDADA' : 'SIN COMENZAR'}</span>
+          </div>
+          <div class="bg2-mode-save-main">
+            <div class="bg2-mode-save-portrait">${portrait}</div>
+            <div class="bg2-mode-save-copy">
+              <strong>${info.label}</strong>
+              <span>${info.desc}</span>
+              <small>${saved ? escapeHtml(meta.name)+' · Nivel '+meta.level : 'Preparado para una nueva partida'}</small>
             </div>
           </div>
-          <div class="bg2-slot-progress"><span style="width:${meta.progress}%"></span></div>
-          <div class="bg2-slot-meta">
-            <span>${meta.empty ? '—' : meta.gold+' oro'}</span>
-            <span>${meta.empty ? '—' : meta.progress+'%'}</span>
-            <span>${meta.empty ? 'Sin guardar' : updated}</span>
+          <div class="bg2-slot-progress"><span style="width:${saved ? meta.progress : 0}%"></span></div>
+          <div class="bg2-mode-save-meta">
+            <span>${saved ? escapeHtml(meta.world) : '—'}</span>
+            <span>${saved ? meta.gold+' oro' : '—'}</span>
+            <span>${updated}</span>
           </div>
-          <button class="bg2-slot-button ${intent === 'new' ? 'new' : ''}" data-slot-action="${intent === 'new' ? 'new' : 'continue'}" data-slot="${meta.index}" ${intent === 'continue' && meta.empty ? 'disabled' : ''}>
-            ${intent === 'continue' ? (meta.empty ? 'VACÍA' : 'CONTINUAR') : (meta.empty ? 'CREAR AVENTURA' : 'SUSTITUIR…')}
-          </button>
+          <div class="bg2-mode-save-actions">
+            <button data-mode-save-action="continue" data-mode="${info.id}" ${saved ? '' : 'disabled'}>CONTINUAR</button>
+            <button class="new" data-mode-save-action="new" data-mode="${info.id}">${saved ? 'NUEVA PARTIDA…' : 'EMPEZAR'}</button>
+          </div>
         </article>
       `;
     }).join('');
   }
 
-  function escapeHtml(value) {
-    return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function openModeArchive() {
+    if (!window.BG2Slots) return toast('El archivo de partidas todavía no está disponible.', 'red');
+    renderModeArchive();
+    $('bg2-mode-archive').classList.add('open');
   }
 
-  let slotIntent = 'continue';
-  function openSlots(intent) {
-    if (!window.BG2Slots) return toast('Las ranuras todavía no están disponibles.', 'red');
-    slotIntent = intent;
-    renderSlots(intent);
-    $('bg2-slots-modal').classList.add('open');
-  }
-  function closeSlots() {
-    $('bg2-slots-modal')?.classList.remove('open');
+  function closeModeArchive() {
+    $('bg2-mode-archive')?.classList.remove('open');
   }
 
-  function confirmReplace(index) {
+  function confirmReplaceMode(mode) {
+    const label = window.BG2Slots?.MODE_LABELS?.[mode] || mode;
     return new Promise(resolve => {
       let modal = $('bg2-confirm-modal');
       if (!modal) {
@@ -256,11 +264,11 @@
       modal.innerHTML = `
         <div class="bg2-overlay-card bg2-confirm-card">
           <span class="bg2-label danger">ADVERTENCIA</span>
-          <h2>¿Sustituir la ranura?</h2>
-          <p>Esta ranura contiene una aventura. La copia actual dejará de ser la partida activa.</p>
+          <h2>¿Nueva partida de ${escapeHtml(label)}?</h2>
+          <p>Se sustituirá únicamente la partida guardada de <strong>${escapeHtml(label)}</strong>. Las partidas de los demás modos no se tocarán.</p>
           <div class="bg2-confirm-actions">
             <button data-answer="no">CANCELAR</button>
-            <button class="danger" data-answer="yes">SUSTITUIR</button>
+            <button class="danger" data-answer="yes">EMPEZAR DE NUEVO</button>
           </div>
         </div>`;
       modal.classList.add('open');
@@ -275,36 +283,43 @@
     });
   }
 
-  async function newSlot(index) {
-    const current = window.BG2Slots.getSlot(index,'adventure');
-    if (current && !(await confirmReplace(index))) return;
-    window.BG2Slots.prepareNew(index,'adventure');
-    closeSlots();
-    toast('Ranura 0'+index+' preparada', 'cyan');
+  function legacySelectMode(mode, intent) {
+    try { localStorage.setItem('bg_modeId', mode); } catch (e) {}
     click('menu-start');
-    setTimeout(()=>click('start-choice-new'), 30);
+    setTimeout(()=>click(intent === 'continue' ? 'start-choice-continue' : 'start-choice-new'), 25);
     setTimeout(()=>{
-      const adventure = document.querySelector('.mode-card[data-mode="adventure"]');
-      if (adventure) adventure.click();
-    }, 85);
-  }
-
-  function continueSlot(index) {
-    const slot = window.BG2Slots.getSlot(index,'adventure');
-    if (!slot?.data) return;
-    window.BG2Slots.setActive(index,'adventure');
-    closeSlots();
-    click('menu-start');
-    setTimeout(()=>click('start-choice-continue'), 25);
-    setTimeout(()=>{
-      const adventure = document.querySelector('.mode-card[data-mode="adventure"]');
-      if (adventure) adventure.click();
+      const card = document.querySelector('.mode-card[data-mode="'+mode+'"]');
+      if (card) card.click();
     }, 80);
   }
 
-  function openModes() {
-    click('menu-start');
-    setTimeout(()=>click('start-choice-new'), 25);
+  async function launchNewMode(mode) {
+    const current = window.BG2Slots?.modeSummary?.(mode);
+    if (current?.saved && !(await confirmReplaceMode(mode))) return;
+    window.BG2Slots?.prepareModeNew?.(mode);
+    closeModeArchive();
+    toast((window.BG2Slots?.MODE_LABELS?.[mode] || mode) + ' · nueva partida', 'cyan');
+    legacySelectMode(mode, 'new');
+  }
+
+  function launchContinueMode(mode) {
+    const slot = window.BG2Slots?.activateMode?.(mode);
+    if (!slot?.data) {
+      renderModeArchive();
+      return toast('No hay partida guardada en ese modo.', 'red');
+    }
+    closeModeArchive();
+    legacySelectMode(mode, 'continue');
+  }
+
+  function launchPractice() {
+    try {
+      localStorage.setItem('bg_modeId', 'practice');
+      localStorage.removeItem('battlegrafia_v2_save_slots_v1_practice');
+      localStorage.removeItem('battlegrafia_v2_active_slot_v1_practice');
+      localStorage.removeItem('battlegrafia_v2_player_pixel_historia_v6_practice');
+    } catch (e) {}
+    legacySelectMode('practice', 'new');
   }
 
   function decorateModes() {
