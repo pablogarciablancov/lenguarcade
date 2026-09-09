@@ -113,24 +113,31 @@ for(const required of [
 
 for(const required of [
   "rpg_slot_",
-  "SLOT_COUNT = 3",
-  "save_slots_backup_v1_adventure",
-  "pendingNewSlotId",
-  "function prepareNew",
+  "PERSISTENT_MODES = ['adventure','survival','dominio','strategy']",
+  "MODE_BACKUP_KEY",
+  "function modeSummary",
+  "function activateMode",
+  "function backupMode",
+  "function clearMode",
+  "function prepareModeNew",
 ]){
-  if(!saveSlots.includes(required)) errors.push("Falta sistema de tres ranuras v2: "+required);
+  if(!saveSlots.includes(required)) errors.push("Falta guardado independiente por modo v2: "+required);
 }
 
 for(const required of [
   "bg2-rpg-hub",
-  "CONTINUAR AVENTURA",
-  "NUEVA AVENTURA",
-  "MODOS DE JUEGO",
-  "bg2-slots-modal",
-  "function continueSlot",
-  "function newSlot",
+  ">PARTIDAS<",
+  ">ENTRENAMIENTO<",
+  "bg2-mode-archive",
+  "Partidas por modo",
+  "function launchContinueMode",
+  "function launchNewMode",
+  "prepareModeNew",
 ]){
-  if(!rpgUi.includes(required)) errors.push("Falta shell RPG v2: "+required);
+  if(!rpgUi.includes(required)) errors.push("Falta archivo RPG de partidas por modo: "+required);
+}
+if(rpgUi.includes('data-action="profile"')){
+  errors.push("El HUB RPG no debe recuperar el botón Perfil redundante.");
 }
 
 if(!rpgUi.includes("observer.observe(document.body,{subtree:true,childList:true});")){
@@ -143,12 +150,16 @@ if(rpgUi.includes("attributeFilter:['class','style']")){
 for(const required of [
   "#bg2-rpg-hub",
   ".bg2-rpg-action",
-  "#bg2-slots-grid",
+  "#bg2-mode-archive-grid",
+  ".bg2-mode-save",
   "#battle-screen",
   "#mode-screen",
   "#start-screen",
 ]){
   if(!rpgCss.includes(required)) errors.push("Falta dirección visual RPG v2: "+required);
+}
+if(rpgCss.includes('content:"PLAYER DATA"')){
+  errors.push("La ficha del héroe no debe mostrar la etiqueta PLAYER DATA.");
 }
 
 for(const required of [
@@ -460,6 +471,22 @@ if(!migration.includes("'battlegrafia_v2'") || !migration.includes("on conflict 
 }
 
 for(const required of [
+  'return ["adventure","survival","dominio","strategy"].filter',
+  'if(getSelectedModeId() === "practice") return;',
+  "function snapshotRunState()",
+  "function restoreRunStateFromPlayer(savedPlayer)",
+  "player.__runState = snapshotRunState();",
+  "runState.strategyMonsterIds = ids.slice();",
+  "async function continueSelectedMode()",
+  "const hasLiveRun = selected.length > 0 && Number(runState.endsAt || 0) > Date.now();",
+  "['adventure','survival','dominio','strategy'].includes(mode)",
+  "./save-slots-v2.js?v=20260909-rpg26",
+  "./rpg-ui-v2.js?v=20260909-rpg26",
+]){
+  if(!index.includes(required)) errors.push("Falta aislamiento/continuación de partidas por modo v2: "+required);
+}
+
+for(const required of [
   "function getInventorySaleDef(itemName)",
   "function renderInventorySaleHtml()",
   "sellShopItem(root.dataset.itemName || root.dataset.id)",
@@ -475,4 +502,4 @@ for(const required of [
 }
 
 if(errors.length) throw new Error("Comprobaciones de Battlegrafía 2.0 fallidas:\n- "+errors.join("\n- "));
-console.log("Battlegrafía 2.0 correcta: batalla limpia y enfocada, RPG pixel UI unificada, tres ranuras seguras, 5 mundos, 30 sprites, guardado aislado y modo de prueba directa.");
+console.log("Battlegrafía 2.0 correcta: batalla limpia, RPG pixel UI unificada, partidas independientes por modo, 5 mundos, 30 sprites, objetos auditados y modo de prueba directa.");
