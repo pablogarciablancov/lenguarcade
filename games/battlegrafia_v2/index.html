@@ -7920,15 +7920,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const style = document.createElement('style');
     style.id = 'lenguarcade-battlegrafia-bridge-css';
     style.textContent = [
-      'html.lenguarcade-embedded,html.lenguarcade-embedded body{width:100%;min-height:100%;overflow:auto!important;background:#050712!important}',
-      'html.lenguarcade-embedded body{padding:0!important;align-items:stretch!important}',
-      'html.lenguarcade-embedded #gameRoot{min-height:100vh!important;width:100%!important}',
-      'html.lenguarcade-embedded .app-screen{position:relative!important;min-height:100vh!important;overflow:auto!important;padding:18px!important}',
-      'html.lenguarcade-embedded .main-menu{align-items:flex-start!important}',
-      'html.lenguarcade-embedded .menu-panel{width:min(940px,100%)!important;margin:0 auto!important}',
-      'html.lenguarcade-embedded .game-shell{max-width:1180px!important;width:calc(100% - 16px)!important;margin:8px auto!important;min-height:calc(100vh - 16px)!important}',
-      'html.lenguarcade-embedded .layout{grid-template-columns:minmax(0,1.8fr) minmax(260px,.9fr)!important}',
-      '@media(max-width:1050px){html.lenguarcade-embedded .layout{grid-template-columns:1fr!important}html.lenguarcade-embedded .panel-right{display:flex!important}}',
+      /* El iframe de LenguArcade ya mide exactamente el espacio que queda bajo su encabezado.
+         Por eso aquí usamos 100% del iframe y prohibimos que Battlegrafía añada otro 100vh,
+         márgenes o min-heights que creen la pequeña barra de scroll. */
+      'html.lenguarcade-embedded{width:100%!important;height:100%!important;min-height:0!important;overflow:hidden!important;background:#050712!important}',
+      'html.lenguarcade-embedded body{width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;align-items:stretch!important}',
+      'html.lenguarcade-embedded body.layout-flex{height:100%!important;min-height:0!important}',
+      'html.lenguarcade-embedded #gameRoot{height:100%!important;min-height:0!important;width:100%!important;overflow:hidden!important}',
+      'html.lenguarcade-embedded .app-screen{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;overflow:hidden!important;padding:0!important}',
+      'html.lenguarcade-embedded #main-menu>.menu-panel{width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important}',
+      'html.lenguarcade-embedded .main-menu{align-items:stretch!important;justify-content:stretch!important}',
+      'html.lenguarcade-embedded .game-shell{max-width:none!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important}',
+      'html.lenguarcade-embedded .game-shell>.top-nav{flex:0 0 58px!important}',
+      'html.lenguarcade-embedded .game-shell>.layout{width:100%!important;height:calc(100% - 58px)!important;min-height:0!important;max-height:calc(100% - 58px)!important;margin:0!important;overflow:hidden!important;grid-template-columns:minmax(0,1.8fr) minmax(260px,.9fr)!important}',
+      'html.lenguarcade-embedded #start-screen{height:100%!important;min-height:0!important;max-height:100%!important;padding:12px!important;overflow:hidden!important}',
+      'html.lenguarcade-embedded #start-screen .start-panel{max-height:calc(100% - 24px)!important;min-height:0!important;overflow:auto!important}',
+      'html.lenguarcade-embedded #mode-screen{height:100%!important;min-height:0!important;padding:12px!important;overflow:hidden!important}',
+      'html.lenguarcade-embedded #mode-screen .mode-content{height:min(680px,calc(100% - 24px))!important;max-height:calc(100% - 24px)!important}',
+      'html.lenguarcade-embedded :is(#start-choice,#hub-account,#hub-achievements,#hub-shop,#hub-collection,#hub-credits){padding:12px!important;overflow:hidden!important}',
+      'html.lenguarcade-embedded :is(#start-choice,#hub-account,#hub-achievements,#hub-shop,#hub-collection,#hub-credits) .menu-panel{max-height:calc(100% - 24px)!important;margin:auto!important}',
+      '@media(max-width:1050px){html.lenguarcade-embedded .game-shell>.layout{grid-template-columns:1fr!important}html.lenguarcade-embedded .panel-right{display:flex!important}}',
       'html.lenguarcade-embedded #login-screen{display:none!important}',
       'html.lenguarcade-embedded #menu-account,html.lenguarcade-embedded #nav-account,html.lenguarcade-embedded #nav-teacher{display:none!important}',
       'html.lenguarcade-embedded #authOverlay,html.lenguarcade-embedded #teacherPanel{display:none!important}',
@@ -17461,10 +17472,10 @@ function getUnlockedSet(){
 <script src="./save-slots-v2.js?v=20260909-rpg27"></script>
 <script src="./rpg-ui-v2.js?v=20260910-rpg30"></script>
 <script src="./rpg-unified-v2.js?v=20260907-rpg14"></script>
-<script src="./battle-clean-v2.js?v=20260907-rpg19"></script>
+<script src="./battle-clean-v2.js?v=20260910-rpg31"></script>
 <script src="./battle-router-v2.js?v=20260907-rpg14"></script>
 <script src="./tabs-polish-v2.js?v=20260907-rpg14"></script>
-<script src="./stable-tabs-v2.js?v=20260907-rpg14"></script>
+<script src="./stable-tabs-v2.js?v=20260910-rpg31"></script>
 <script src="./catalog-polish-v2.js?v=20260909-rpg28"></script>
 </body>
 </html>
