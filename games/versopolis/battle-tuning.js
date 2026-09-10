@@ -1,227 +1,254 @@
 'use strict';
 
-/* Versópolis · ajuste de claridad y equilibrio de batalla (v1)
-   Se carga después de app.js para no tocar el motor común del juego. */
+/* Versópolis · batalla simple (v2)
+   La Plaza del Flow debe entenderse en segundos: leer reto, escribir, atacar. */
 (() => {
   const style = document.createElement('style');
   style.textContent = `
-    .battle-howto{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
-    .battle-howto .step{border:1px solid var(--line);border-radius:16px;padding:12px;background:rgba(255,255,255,.045)}
-    .battle-howto .step b{display:block;margin-bottom:4px;color:var(--gold)}
-    .battle-howto .step span{font-size:12px;color:var(--muted);line-height:1.35}
-    .turn-guide{border:1px solid rgba(84,225,255,.35);background:rgba(84,225,255,.08);border-radius:16px;padding:10px 12px;margin:9px 0 10px}
-    .turn-guide strong{display:block;color:#c9f7ff;font-size:13px;margin-bottom:4px}
-    .turn-guide span{font-size:12px;color:var(--muted);line-height:1.4}
-    .damage-legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:7px}
-    .damage-legend span{border:1px solid var(--line);border-radius:10px;padding:6px 7px;font-size:10px;text-align:center;background:rgba(255,255,255,.04)}
+    #battleRiskCards,.risk-help,#battleMultiplier{display:none!important}
+    #battlePlay .sidecard>div:first-child{display:none!important}
+    .turn-guide{border:2px solid rgba(84,225,255,.48);background:rgba(84,225,255,.09);border-radius:18px;padding:13px 15px;margin:8px 0 11px}
+    .turn-guide strong{display:block;color:#c9f7ff;font-size:12px;letter-spacing:.08em;margin-bottom:5px}
+    .turn-guide .main-task{font-size:18px;line-height:1.35;font-weight:900;color:#fff}
+    .turn-guide .sub-task{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.35}
+    .battle-simple-help{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px}
+    .battle-simple-help .step{border:1px solid var(--line);border-radius:15px;padding:11px 12px;background:rgba(255,255,255,.045)}
+    .battle-simple-help b{display:block;color:var(--gold);margin-bottom:3px}
+    .battle-simple-help span{font-size:12px;color:var(--muted);line-height:1.35}
+    .simple-damage{border:1px solid rgba(255,209,102,.32);background:rgba(255,209,102,.07);border-radius:14px;padding:10px 12px;margin-top:10px}
+    .simple-damage b{color:var(--gold)}
+    .simple-damage .formula{font-size:15px;font-weight:900;color:#fff;margin:3px 0}
     .damage-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
     .damage-card{border-radius:14px;padding:10px 12px;border:1px solid var(--line);background:rgba(255,255,255,.05)}
     .damage-card small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em}
-    .damage-card b{display:block;font-size:24px;margin-top:2px}
+    .damage-card b{display:block;font-size:25px;margin-top:2px}
     .damage-card.player b{color:#79f2ff}.damage-card.rival b{color:#ff86df}
-    .turn-result-title{font-weight:900;margin-top:10px;font-size:14px}
+    .simple-feedback{border:1px solid var(--line);background:rgba(255,255,255,.045);border-radius:14px;padding:10px 12px;margin-top:9px;font-size:12px;line-height:1.5}
+    .simple-feedback.good{border-color:rgba(88,227,139,.45)}
+    .simple-feedback.bad{border-color:rgba(255,107,122,.5)}
     .next-round-wrap{display:flex;justify-content:flex-end;margin-top:10px}
-    .risk-help{font-size:11px;color:var(--muted);margin:0 0 7px}
-    .risk.selected{outline:2px solid rgba(84,225,255,.72);box-shadow:0 0 0 3px rgba(84,225,255,.08)}
-    @media(max-width:760px){.battle-howto{grid-template-columns:1fr}.damage-legend{grid-template-columns:1fr 1fr 1fr}}
+    @media(max-width:760px){.battle-simple-help{grid-template-columns:1fr}.turn-guide .main-task{font-size:16px}}
   `;
   document.head.appendChild(style);
 
   const originalRenderBattle = renderBattle;
   const originalRenderBattleSetup = renderBattleSetup;
-  const originalPrepareBattleTurn = prepareBattleTurn;
+  const originalStartBattle = startBattle;
 
-  function damageBand(score){
-    if(score < 25) return {label:'Sin golpe', cls:'bad'};
-    if(score < 40) return {label:'Roce', cls:''};
-    if(score < 55) return {label:'Golpe', cls:''};
-    if(score < 70) return {label:'Golpe fuerte', cls:'good'};
-    if(score < 85) return {label:'Gran golpe', cls:'good'};
-    return {label:'CRÍTICO', cls:'good'};
+  function resetChallenge(ch){
+    ch.rhyme='free'; ch.rhymeA=null; ch.rhymeB=null; ch.scheme=ch.lines===4?'ABAB':'AA';
+    ch.requiredWords=[]; ch.forbiddenWords=[]; ch.meter=null; ch.figure=null; ch.customPrompt='';
+    return ch;
   }
 
-  function playerDamage(score, multiplier, combo){
-    if(score < 25) return 0;
-    let base = 5 + (score - 25) * 0.43;
-    if(score >= 70) base += 2;
-    if(score >= 85) base += 4;
-    base += Math.min(4, Math.max(0, combo - 1));
-    return clamp(Math.round(base * multiplier), 0, 52);
+  function makeSimpleChallenge(){
+    const d=Number(battle.difficulty||1);
+    const lines=(d===3 && battle.round>=4)?4:2;
+    const ch=resetChallenge(generateBaseChallenge({difficulty:1,topic:battle.topic,category:'none',lines}));
+
+    if(d===1){
+      if(battle.round%2===1){
+        ch.requiredWords=[pick(REQUIRED_WORDS)];
+      }else{
+        ch.rhyme='assonant';
+        ch.rhymeA=pick(RHYMES);
+      }
+    }else{
+      ch.rhyme='consonant';
+      ch.rhymeA=pick(RHYMES);
+      if(lines===4){
+        do{ ch.rhymeB=pick(RHYMES); }while(ch.rhymeB===ch.rhymeA);
+      }
+      if(d>=2 && battle.round>=3) ch.requiredWords=[pick(REQUIRED_WORDS)];
+      if(d===3 && battle.round>=5) ch.figure=pick(['simile','metaphor','personification','hyperbole']);
+    }
+    return ch;
   }
 
-  function cpuDamage(score, rival, shield){
-    const raw = 8 + rival.power * 7 + Math.random() * 4;
-    const defence = score * 0.085 + (score >= 85 ? 2 : 0);
-    let damage = clamp(Math.round(raw - defence), 4, 17);
-    if(shield) damage = Math.max(2, Math.round(damage * .45));
+  function taskSentence(ch){
+    const bits=[];
+    bits.push(`Escribe ${ch.lines} verso${ch.lines===1?'':'s'} sobre ${String(TOPIC_LABELS[ch.topic]||ch.topic).toLowerCase()}.`);
+    if(ch.rhyme&&ch.rhyme!=='free'){
+      if(ch.lines===4 && ch.rhymeB){
+        bits.push(`Rima ${ch.scheme}: A ${ch.rhymeA.label} y B ${ch.rhymeB.label}.`);
+      }else{
+        bits.push(`Haz que terminen con rima ${ch.rhyme==='consonant'?'consonante':'asonante'} ${ch.rhymeA.label}.`);
+      }
+    }
+    if(ch.requiredWords?.length) bits.push(`Incluye «${ch.requiredWords.join('» y «')}».`);
+    if(ch.figure) bits.push(`Usa una ${FIGURES[ch.figure]}.`);
+    return bits.join(' ');
+  }
+
+  function battleScore(result){
+    /* En batalla mandan las reglas visibles. Tema y expresión solo afinan la nota. */
+    const topic=Math.max(50,result.coherence||0);
+    const expression=Math.max(50,result.expression||0);
+    return clamp(Math.round((result.conditions||0)*.80 + topic*.10 + expression*.10),0,100);
+  }
+
+  function playerDamage(score){
+    if(score<30) return 0;
+    return clamp(Math.round(score/3),0,34);
+  }
+
+  function cpuDamage(score,rival,shield){
+    let damage=Math.round(12 - score/12 + rival.power*2);
+    damage=clamp(damage,3,12);
+    if(shield) damage=Math.max(2,Math.round(damage*.45));
     return damage;
   }
 
-  function ensureSetupHelp(){
-    const setup = document.querySelector('#battleSetup .card.panel');
-    if(!setup || setup.querySelector('.battle-howto')) return;
-    const help = document.createElement('div');
-    help.className = 'battle-howto';
-    help.innerHTML = `
-      <div class="step"><b>1 · Mira el encargo</b><span>Escribe el número de versos indicado. Las condiciones activas aparecen justo encima del cuadro de escritura.</span></div>
-      <div class="step"><b>2 · Elige el riesgo</b><span>Las cartas son opcionales: cuantas más actives, más reglas tendrás que cumplir, pero más daño podrás hacer.</span></div>
-      <div class="step"><b>3 · Haz daño</b><span>Desde 25 puntos ya golpeas. Con 55+ haces un golpe fuerte; 70+ es un gran golpe y 85+ puede ser crítico.</span></div>`;
-    setup.appendChild(help);
+  function ensureSimpleSetup(){
+    const format=document.getElementById('battleScenario');
+    if(format){ format.value='free'; const field=format.closest('.field'); if(field) field.style.display='none'; }
+    const diff=document.getElementById('battleDifficulty');
+    if(diff){
+      const labels={1:'Fácil',2:'Normal',3:'Difícil'};
+      Array.from(diff.options).forEach(o=>{ if(labels[o.value]) o.textContent=labels[o.value]; });
+    }
+    const setup=document.querySelector('#battleSetup .card.panel');
+    if(!setup) return;
+    const old=setup.querySelector('.battle-howto'); if(old) old.remove();
+    if(!setup.querySelector('.battle-simple-help')){
+      const help=document.createElement('div');
+      help.className='battle-simple-help';
+      help.innerHTML=`<div class="step"><b>1 · Lee y escribe</b><span>Cada turno te pedirá una cosa concreta: por ejemplo, dos versos que rimen o que incluyan una palabra.</span></div><div class="step"><b>2 · Ataca</b><span>El juego puntúa de 0 a 100. Tu daño es aproximadamente esa nota dividida entre 3. Un buen verso también reduce el golpe del rival.</span></div>`;
+      setup.appendChild(help);
+    }
+    const technical=Array.from(setup.querySelectorAll('p.tiny')).find(p=>p.textContent.includes('endpoint'));
+    if(technical) technical.style.display='none';
   }
 
-  function ensureBattleGuides(){
+  function ensureSimpleBattle(){
     if(!battle) return;
-    const card = document.querySelector('#battlePlay .challengecard');
+    const card=document.querySelector('#battlePlay .challengecard');
     if(card && !card.querySelector('.turn-guide')){
-      const guide = document.createElement('div');
-      guide.className = 'turn-guide';
-      guide.innerHTML = '<strong>🎯 QUÉ TIENES QUE HACER</strong><span id="turnGuideText"></span>';
-      const risks = card.querySelector('#battleRiskCards');
-      card.insertBefore(guide, risks);
-      const riskHelp = document.createElement('div');
-      riskHelp.className = 'risk-help';
-      riskHelp.textContent = 'Pulsa las cartas para activarlas o desactivarlas. Una carta activa añade una condición y aumenta la recompensa.';
-      card.insertBefore(riskHelp, risks);
+      const guide=document.createElement('div');
+      guide.className='turn-guide';
+      guide.innerHTML='<strong>🎯 TU RETO</strong><div class="main-task" id="turnGuideText"></div><div class="sub-task">Eso es todo. Escribe tus versos y pulsa ATACAR.</div>';
+      const risks=card.querySelector('#battleRiskCards');
+      card.insertBefore(guide,risks);
     }
-    const side = document.querySelector('#battlePlay .sidecard');
-    if(side && !side.querySelector('.damage-help')){
-      const box = document.createElement('div');
-      box.className = 'damage-help';
-      box.innerHTML = `<div class="eyebrow">Cómo funciona el daño</div>
-        <div class="damage-legend"><span>0–24<br>0 daño</span><span>25–39<br>roce</span><span>40–54<br>golpe</span><span>55–69<br>fuerte</span><span>70–84<br>gran golpe</span><span>85–100<br>crítico</span></div>
-        <div class="tiny" style="margin-top:6px">Tu puntuación depende sobre todo de cumplir las condiciones visibles. Un buen turno también reduce el daño del rival.</div>`;
-      side.insertBefore(box, side.lastElementChild);
+    const side=document.querySelector('#battlePlay .sidecard');
+    if(side && !side.querySelector('.simple-damage')){
+      const box=document.createElement('div');
+      box.className='simple-damage';
+      box.innerHTML='<div class="eyebrow">Daño</div><div class="formula">NOTA ÷ 3 ≈ DAÑO</div><div class="tiny">90 puntos ≈ 30 de daño. Si cumples bien el reto, el rival también te hará menos daño.</div>';
+      side.appendChild(box);
     }
   }
 
-  function updateTurnGuide(){
+  function updateSimpleGuide(){
     if(!battle) return;
-    const guide = document.getElementById('turnGuideText');
-    if(!guide) return;
-    const ch = battleChallenge();
-    const conditions = conditionText(ch);
-    const optional = battle.selectedRisks.length;
-    guide.innerHTML = `<b style="color:white">${escapeHTML(conditions.join(' · '))}</b><br>
-      Cumple esas reglas y escribe con sentido sobre <b>${escapeHTML(TOPIC_LABELS[battle.topic] || battle.topic)}</b>. Has activado ${optional} carta${optional===1?'':'s'} de riesgo.`;
-    const title = document.getElementById('battleChallengeTitle');
-    if(title) title.textContent = `Escribe ${ch.lines} verso${ch.lines===1?'':'s'} y ataca`;
-    const submit = document.getElementById('battleSubmit');
-    if(submit && !submit.disabled) submit.textContent = 'Atacar con estos versos ⚡';
+    const ch=battleChallenge();
+    const guide=document.getElementById('turnGuideText');
+    if(guide) guide.textContent=taskSentence(ch);
+    const title=document.getElementById('battleChallengeTitle');
+    if(title) title.textContent='Escribe y ataca';
+    const submit=document.getElementById('battleSubmit');
+    if(submit && !submit.disabled) submit.textContent='ATACAR ⚡';
   }
 
-  renderBattleSetup = function(){
-    originalRenderBattleSetup();
-    ensureSetupHelp();
-    if(battle){ ensureBattleGuides(); updateTurnGuide(); }
-  };
+  battleMultiplier=function(){ return 1; };
+  battleChallenge=function(){ return cloneChallenge(battle.baseChallenge); };
 
-  renderBattle = function(){
+  prepareBattleTurn=function(){
+    if(!battle) return;
+    battle.baseChallenge=makeSimpleChallenge();
+    battle.riskOptions=[];
+    battle.selectedRisks=[];
+    battle.double=false;
+    const input=document.getElementById('battleInput');
+    if(input){ input.value=''; input.readOnly=false; }
+    const fb=document.getElementById('battleFeedback'); if(fb) fb.innerHTML='';
+    const submit=document.getElementById('battleSubmit');
+    if(submit){ submit.disabled=false; submit.textContent='ATACAR ⚡'; }
     originalRenderBattle();
-    ensureBattleGuides();
-    updateTurnGuide();
+    ensureSimpleBattle();
+    updateSimpleGuide();
   };
 
-  function setBattleControlsLocked(locked){
-    const input = document.getElementById('battleInput');
-    const risks = document.getElementById('battleRiskCards');
-    if(input) input.readOnly = locked;
-    if(risks) risks.style.pointerEvents = locked ? 'none' : '';
-    ['tacticShield','tacticDouble','tacticReroll'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el && locked) el.disabled=true;
-    });
+  startBattle=function(){
+    const scenario=document.getElementById('battleScenario'); if(scenario) scenario.value='free';
+    originalStartBattle();
+    if(battle){ battle.maxRounds=5; battle.tactics={shield:0,double:0,reroll:0}; }
+    renderBattleSetup();
+  };
+
+  renderBattleSetup=function(){
+    originalRenderBattleSetup();
+    ensureSimpleSetup();
+    if(battle){ ensureSimpleBattle(); updateSimpleGuide(); }
+  };
+
+  renderBattleScores=function(r){
+    const score=battleScore(r);
+    document.getElementById('battleScores').innerHTML=`<div class="scorechip"><small>Reglas</small><b>${r.conditions}</b></div><div class="scorechip"><small>Tema</small><b>${r.coherence}</b></div><div class="scorechip"><small>Expresión</small><b>${r.expression}</b></div><div class="scorechip"><small>Nota</small><b>${score}</b></div>`;
+  };
+
+  renderBattle=function(){
+    originalRenderBattle();
+    ensureSimpleBattle();
+    updateSimpleGuide();
+  };
+
+  function lockTurn(locked){
+    const input=document.getElementById('battleInput'); if(input) input.readOnly=locked;
   }
 
-  prepareBattleTurn = function(){
-    originalPrepareBattleTurn();
-    const submit = document.getElementById('battleSubmit');
-    if(submit){ submit.disabled=false; submit.textContent='Atacar con estos versos ⚡'; }
-    setBattleControlsLocked(false);
-    renderBattle();
-  };
-
-  async function balancedSubmitBattle(){
+  async function simpleSubmitBattle(){
     if(!battle) return;
-    const input = document.getElementById('battleInput');
-    const text = input.value.trim();
-    if(!text){ toast('Escribe tu respuesta.'); return; }
+    const input=document.getElementById('battleInput');
+    const text=input.value.trim();
+    if(!text){ toast('Escribe tus versos antes de atacar.'); return; }
+    const submit=document.getElementById('battleSubmit');
+    submit.disabled=true; submit.textContent='Analizando…'; lockTurn(true);
 
-    const submit = document.getElementById('battleSubmit');
-    submit.disabled = true;
-    submit.textContent = 'Analizando…';
-    setBattleControlsLocked(true);
+    const ch=battleChallenge();
+    const raw=validateChallenge(text,ch);
+    const score=battleScore(raw);
+    const damage=playerDamage(score);
+    battle.score+=score;
+    battle.lastResult={...raw,overall:score};
+    if(score>=70) battle.combo++; else battle.combo=0;
+    state.stats.bestCombo=Math.max(state.stats.bestCombo,battle.combo);
+    if(battle.combo>=3) unlockAchievement('combo3');
+    afterTurn(score);
+    battle.rivalFlow=clamp(battle.rivalFlow-damage,0,100);
 
-    const ch = battleChallenge();
-    const result = validateChallenge(text, ch);
-    const multiplier = battleMultiplier();
-    const band = damageBand(result.overall);
-    const damage = playerDamage(result.overall, multiplier, battle.combo);
-    const scoreGain = Math.round(result.overall * multiplier);
+    renderBattleScores(raw);
+    const feedback=document.getElementById('battleFeedback');
+    const good=score>=60;
+    feedback.innerHTML=`<div class="simple-feedback ${good?'good':'bad'}"><b>Nota: ${score}/100</b><br>${raw.details.map(escapeHTML).join(' · ')}<br><span class="tiny">Lo que más pesa es cumplir exactamente el reto que ves arriba.</span></div><div class="damage-summary"><div class="damage-card player"><small>Tu daño</small><b>−${damage}</b></div><div class="damage-card rival"><small>Daño rival</small><b id="cpuDamagePreview">…</b></div></div>`;
 
-    battle.score += scoreGain;
-    battle.lastResult = result;
-    if(result.overall >= 55) battle.combo++;
-    else battle.combo = 0;
-    state.stats.bestCombo = Math.max(state.stats.bestCombo, battle.combo);
-    if(battle.combo >= 3) unlockAchievement('combo3');
-    afterTurn(result.overall);
-
-    battle.rivalFlow = clamp(battle.rivalFlow - damage, 0, 100);
-    if(result.overall >= 92){
-      state.anthology.unshift({id:uid('verse'),title:`Golpe memorable contra ${battle.rival.name}`,text,date:new Date().toISOString(),mode:'battle'});
-      state.anthology = state.anthology.slice(0,30);
+    let rivalDamage=0;
+    if(battle.rivalFlow>0){
+      document.getElementById('battleSpeech').textContent=`${state.profile.name||'Tú'}:\n${text}\n\n${battle.rival.name} responde…`;
+      const reply=await rivalReply(text,ch,battle.rival,battle.topic);
+      rivalDamage=cpuDamage(score,battle.rival,false);
+      battle.playerFlow=clamp(battle.playerFlow-rivalDamage,0,100);
+      battle.log.push({player:text,cpu:reply.text,score,playerDamage:damage,cpuDamage:rivalDamage});
+      document.getElementById('battleSpeech').textContent=`${state.profile.name||'Tú'}:\n${text}\n\n${battle.rival.name}:\n${reply.text}`;
     }
-
-    renderBattleScores(result);
-    const feedback = document.getElementById('battleFeedback');
-    feedback.innerHTML = feedbackHTML(result, ch) + `
-      <div class="turn-result-title ${band.cls}">${band.label}: has hecho <b>${damage} de daño</b>.</div>
-      <div class="damage-summary"><div class="damage-card player"><small>Tu ataque</small><b>−${damage}</b></div><div class="damage-card rival"><small>Respuesta rival</small><b id="cpuDamagePreview">…</b></div></div>`;
-
-    document.getElementById('battleSpeech').textContent = `${state.profile.name||'Tú'}:\n${text}\n\n${damage ? `⚡ ${damage} de daño a ${battle.rival.name}.` : 'El verso no ha conectado: necesitas al menos 25 puntos.'}`;
-    document.getElementById('battleSpeechMeta').innerHTML = `<span class="chip">Nota ${result.overall}/100</span><span class="chip">Ataque −${damage}</span><span class="chip">+${scoreGain} pts</span>`;
-    renderBattle();
-
-    let rivalDamage = 0;
-    let reply = null;
-    if(battle.rivalFlow > 0){
-      document.getElementById('battleSpeech').textContent += `\n\n${battle.rival.name} está preparando su respuesta…`;
-      reply = await rivalReply(text, ch, battle.rival, battle.topic);
-      rivalDamage = cpuDamage(result.overall, battle.rival, battle.shield);
-      battle.playerFlow = clamp(battle.playerFlow - rivalDamage, 0, 100);
-      battle.shield = false;
-      battle.log.push({player:text,cpu:reply.text,score:result.overall,playerDamage:damage,cpuDamage:rivalDamage});
-      document.getElementById('battleSpeech').textContent = `${state.profile.name||'Tú'}:\n${text}\n\n${battle.rival.name}:\n${reply.text}`;
-      document.getElementById('battleSpeechMeta').innerHTML = `<span class="chip">Tu nota ${result.overall}/100</span><span class="chip">Tú haces −${damage}</span><span class="chip">Rival hace −${rivalDamage}</span>`;
-    } else {
-      document.getElementById('battleSpeechMeta').innerHTML = `<span class="chip">Tu nota ${result.overall}/100</span><span class="chip">KO · −${damage}</span>`;
-    }
-
-    battle.double = false;
-    const preview = document.getElementById('cpuDamagePreview');
-    if(preview) preview.textContent = rivalDamage ? `−${rivalDamage}` : 'KO';
+    document.getElementById('battleSpeechMeta').innerHTML=`<span class="chip">Nota ${score}/100</span><span class="chip">Tú −${damage}</span><span class="chip">Rival −${rivalDamage}</span>`;
+    const preview=document.getElementById('cpuDamagePreview'); if(preview) preview.textContent=rivalDamage?`−${rivalDamage}`:'KO';
     saveState('battle_turn');
-    renderBattle();
+    originalRenderBattle(); ensureSimpleBattle(); updateSimpleGuide();
 
-    /* Mantener el análisis visible: la ronda solo cambia cuando el jugador lo decide. */
-    const next = document.createElement('div');
-    next.className = 'next-round-wrap';
-    const finished = battle.rivalFlow <= 0 || battle.playerFlow <= 0 || battle.round >= battle.maxRounds;
-    next.innerHTML = `<button class="btn gold" id="battleNextRound">${finished?'Ver resultado':'Siguiente ronda →'}</button>`;
+    const next=document.createElement('div');
+    next.className='next-round-wrap';
+    const finished=battle.rivalFlow<=0||battle.playerFlow<=0||battle.round>=battle.maxRounds;
+    next.innerHTML=`<button class="btn gold" id="battleNextRound">${finished?'Ver resultado':'SIGUIENTE RONDA →'}</button>`;
     feedback.appendChild(next);
-    document.getElementById('battleNextRound').onclick = () => {
-      if(!battle) return;
+    document.getElementById('battleNextRound').onclick=()=>{
       if(finished){ finishBattle(); return; }
-      battle.round++;
-      prepareBattleTurn();
+      battle.round++; prepareBattleTurn();
     };
-
-    submit.textContent = 'Turno resuelto';
+    submit.textContent='Turno resuelto';
   }
 
-  /* El rival ya no pega una cantidad casi fija. La calidad del turno actúa también como defensa. */
-  document.getElementById('battleSubmit').onclick = balancedSubmitBattle;
-
-  ensureSetupHelp();
-  if(battle){ ensureBattleGuides(); updateTurnGuide(); }
+  document.getElementById('startBattleBtn').onclick=()=>startBattle();
+  document.getElementById('battleSubmit').onclick=simpleSubmitBattle;
+  ensureSimpleSetup();
 })();
