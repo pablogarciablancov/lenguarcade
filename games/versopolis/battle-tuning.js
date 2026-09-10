@@ -1,15 +1,17 @@
 'use strict';
 
-/* Versópolis · batalla simple (v2)
-   La Plaza del Flow debe entenderse en segundos: leer reto, escribir, atacar. */
+/* Versópolis · batalla simple + estabilidad visual (v3)
+   La Plaza del Flow debe entenderse en segundos y ningún panel debe invadir a otro. */
 (() => {
   const style = document.createElement('style');
   style.textContent = `
     #battleRiskCards,.risk-help,#battleMultiplier{display:none!important}
     #battlePlay .sidecard>div:first-child{display:none!important}
-    .turn-guide{border:2px solid rgba(84,225,255,.48);background:rgba(84,225,255,.09);border-radius:18px;padding:13px 15px;margin:8px 0 11px}
+
+    /* --- Batalla simple --- */
+    .turn-guide{border:2px solid rgba(84,225,255,.48);background:rgba(84,225,255,.09);border-radius:18px;padding:13px 15px;margin:8px 0 11px;position:relative;z-index:1}
     .turn-guide strong{display:block;color:#c9f7ff;font-size:12px;letter-spacing:.08em;margin-bottom:5px}
-    .turn-guide .main-task{font-size:18px;line-height:1.35;font-weight:900;color:#fff}
+    .turn-guide .main-task{font-size:18px;line-height:1.35;font-weight:900;color:#fff;overflow-wrap:anywhere}
     .turn-guide .sub-task{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.35}
     .battle-simple-help{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px}
     .battle-simple-help .step{border:1px solid var(--line);border-radius:15px;padding:11px 12px;background:rgba(255,255,255,.045)}
@@ -18,16 +20,69 @@
     .simple-damage{border:1px solid rgba(255,209,102,.32);background:rgba(255,209,102,.07);border-radius:14px;padding:10px 12px;margin-top:10px}
     .simple-damage b{color:var(--gold)}
     .simple-damage .formula{font-size:15px;font-weight:900;color:#fff;margin:3px 0}
-    .damage-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-    .damage-card{border-radius:14px;padding:10px 12px;border:1px solid var(--line);background:rgba(255,255,255,.05)}
+    .damage-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;position:relative;z-index:1}
+    .damage-card{border-radius:14px;padding:10px 12px;border:1px solid var(--line);background:rgba(255,255,255,.05);min-width:0}
     .damage-card small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em}
     .damage-card b{display:block;font-size:25px;margin-top:2px}
     .damage-card.player b{color:#79f2ff}.damage-card.rival b{color:#ff86df}
-    .simple-feedback{border:1px solid var(--line);background:rgba(255,255,255,.045);border-radius:14px;padding:10px 12px;margin-top:9px;font-size:12px;line-height:1.5}
+    .simple-feedback{border:1px solid var(--line);background:rgba(255,255,255,.045);border-radius:14px;padding:10px 12px;margin-top:9px;font-size:12px;line-height:1.5;overflow-wrap:anywhere;position:relative;z-index:1}
     .simple-feedback.good{border-color:rgba(88,227,139,.45)}
     .simple-feedback.bad{border-color:rgba(255,107,122,.5)}
-    .next-round-wrap{display:flex;justify-content:flex-end;margin-top:10px}
-    @media(max-width:760px){.battle-simple-help{grid-template-columns:1fr}.turn-guide .main-task{font-size:16px}}
+    .next-round-wrap{display:flex;justify-content:flex-end;margin-top:10px;position:relative;z-index:2}
+
+    /* --- FIX GENERAL DE SOLAPES --- */
+    html,body{overflow:hidden!important}
+    .app,.content,.screen,.section,#battlePlay,.battlelayout,.arenaStage,.challengeDock,.challengecard,.sidecard,.speech,.fighterbox,.modewrap,.modecard,.sidepanel{min-width:0;min-height:0}
+
+    /* La pantalla puede desplazarse internamente: nunca forzamos a la batalla a caber aplastando paneles. */
+    #screen-battle{overflow:auto!important;overscroll-behavior:contain}
+    #battlePlay{height:auto!important;min-height:100%!important;overflow:visible!important;padding-bottom:18px}
+    .battlelayout{height:auto!important;min-height:100%!important;grid-template-rows:auto auto auto!important;align-content:start;overflow:visible!important}
+    .arenaStage{overflow:visible!important;align-items:stretch}
+    .challengeDock{align-items:start;overflow:visible!important}
+    .challengecard,.sidecard,.speech,.fighterbox,.combatant{position:relative;z-index:1;isolation:isolate}
+    .challengecard,.sidecard{overflow:hidden}
+    #battleFeedback,.challenge-feedback{position:relative!important;z-index:2!important;display:block;clear:both;overflow:visible!important;contain:layout paint}
+    #battleFeedback:empty,.challenge-feedback:empty{display:none}
+    .speechbox,.poem,.challenge-input,textarea{overflow-wrap:anywhere;word-break:break-word}
+    .speechbox{max-height:220px;overflow:auto;padding-right:4px;overscroll-behavior:contain}
+    .sidecard{max-height:none!important}
+    .results{position:relative;z-index:1}
+
+    /* Los paneles de otros modos tampoco se pisan al crecer el feedback. */
+    .modewrap{align-items:start}
+    .modecard,.sidepanel{overflow:hidden}
+    .modecard .challenge-feedback{margin-top:8px}
+
+    /* --- MODALES: SIEMPRE UNO SOLO Y POR ENCIMA DEL JUEGO --- */
+    .modal{position:fixed!important;inset:0!important;z-index:3000!important;padding:18px!important;overflow:auto!important;align-items:center!important;justify-content:center!important;background:rgba(3,2,10,.82)!important;backdrop-filter:blur(8px)}
+    .modal.open{display:flex!important}
+    .modal .dialog{position:relative!important;z-index:3001!important;width:min(620px,calc(100vw - 28px))!important;max-height:min(760px,calc(100dvh - 36px))!important;overflow:auto!important;margin:auto!important;overscroll-behavior:contain}
+    body.modal-open .content{pointer-events:none}
+    body.modal-open .modal.open{pointer-events:auto}
+    .toast{z-index:3100!important;max-width:min(420px,calc(100vw - 24px));overflow-wrap:anywhere}
+
+    /* En pantallas medianas la zona inferior pasa a una columna antes de que empiece a comprimirse. */
+    @media(max-width:1080px), (max-height:760px){
+      .challengeDock{grid-template-columns:1fr!important}
+      .sidecard{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px!important}
+      .sidecard>.tiny{grid-column:1/-1}
+      .arenaStage{grid-template-columns:120px minmax(0,1fr) 120px!important}
+      .combatant .bigavatar{font-size:54px!important}
+    }
+    @media(max-width:760px){
+      .battle-simple-help{grid-template-columns:1fr}
+      .turn-guide .main-task{font-size:16px}
+      .arenaStage{grid-template-columns:1fr!important}
+      .combatant{display:none!important}
+      .sidecard{grid-template-columns:1fr!important}
+      .damage-summary{grid-template-columns:1fr 1fr}
+      .fighterrow{grid-template-columns:1fr!important}
+      .inputrow{grid-template-columns:1fr!important}
+      .submitbtn{width:100%}
+      .modal{padding:8px!important;align-items:flex-start!important}
+      .modal .dialog{width:100%!important;max-height:calc(100dvh - 16px)!important}
+    }
   `;
   document.head.appendChild(style);
 
@@ -81,7 +136,6 @@
   }
 
   function battleScore(result){
-    /* En batalla mandan las reglas visibles. Tema y expresión solo afinan la nota. */
     const topic=Math.max(50,result.coherence||0);
     const expression=Math.max(50,result.expression||0);
     return clamp(Math.round((result.conditions||0)*.80 + topic*.10 + expression*.10),0,100);
@@ -162,6 +216,8 @@
     const input=document.getElementById('battleInput');
     if(input){ input.value=''; input.readOnly=false; }
     const fb=document.getElementById('battleFeedback'); if(fb) fb.innerHTML='';
+    const staleNext=document.getElementById('battleNextRound'); if(staleNext) staleNext.remove();
+    const meta=document.getElementById('battleSpeechMeta'); if(meta) meta.innerHTML='';
     const submit=document.getElementById('battleSubmit');
     if(submit){ submit.disabled=false; submit.textContent='ATACAR ⚡'; }
     originalRenderBattle();
@@ -219,6 +275,7 @@
 
     renderBattleScores(raw);
     const feedback=document.getElementById('battleFeedback');
+    const oldNext=document.getElementById('battleNextRound'); if(oldNext) oldNext.remove();
     const good=score>=60;
     feedback.innerHTML=`<div class="simple-feedback ${good?'good':'bad'}"><b>Nota: ${score}/100</b><br>${raw.details.map(escapeHTML).join(' · ')}<br><span class="tiny">Lo que más pesa es cumplir exactamente el reto que ves arriba.</span></div><div class="damage-summary"><div class="damage-card player"><small>Tu daño</small><b>−${damage}</b></div><div class="damage-card rival"><small>Daño rival</small><b id="cpuDamagePreview">…</b></div></div>`;
 
@@ -248,7 +305,33 @@
     submit.textContent='Turno resuelto';
   }
 
+  /* Garantiza que no puedan coexistir dos ventanas emergentes. */
+  function syncModalState(){
+    const opened=Array.from(document.querySelectorAll('.modal.open'));
+    if(opened.length>1){
+      const keep=opened[opened.length-1];
+      opened.forEach(modal=>{ if(modal!==keep) modal.classList.remove('open'); });
+    }
+    document.body.classList.toggle('modal-open',document.querySelector('.modal.open')!==null);
+  }
+
+  const modalObserver=new MutationObserver(mutations=>{
+    let changed=false;
+    mutations.forEach(m=>{ if(m.type==='attributes'&&m.attributeName==='class'&&m.target.classList.contains('modal')) changed=true; });
+    if(changed) requestAnimationFrame(syncModalState);
+  });
+  document.querySelectorAll('.modal').forEach(modal=>{
+    modalObserver.observe(modal,{attributes:true,attributeFilter:['class']});
+    modal.addEventListener('click',event=>{
+      if(event.target===modal){ modal.classList.remove('open'); syncModalState(); }
+    });
+  });
+  document.querySelectorAll('[data-close-modal]').forEach(btn=>{
+    btn.addEventListener('click',()=>requestAnimationFrame(syncModalState));
+  });
+
   document.getElementById('startBattleBtn').onclick=()=>startBattle();
   document.getElementById('battleSubmit').onclick=simpleSubmitBattle;
   ensureSimpleSetup();
+  syncModalState();
 })();
