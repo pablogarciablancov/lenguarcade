@@ -1,0 +1,31 @@
+{
+  "gameId": "versopolis",
+  "name": "Versópolis",
+  "status": "en pruebas",
+  "integration": "embedded",
+  "entry": "games/versopolis/",
+  "banner": "city",
+  "requires": {
+    "studentRunner": true,
+    "saveProgress": true,
+    "supabaseCatalog": true
+  },
+  "catalog": {
+    "subtitle": "La ciudad donde combaten las palabras",
+    "category": "Poesía y creación verbal",
+    "competencies": [
+      "poesía",
+      "rima",
+      "métrica",
+      "recursos literarios",
+      "creatividad",
+      "expresión escrita"
+    ],
+    "description": "Arena de creación poética con batallas, retos, supervivencia, captura de palabras, poemas compartidos y retos personalizados."
+  },
+  "optional": {
+    "aiEndpointContextKey": "versopolisAiEndpoint",
+    "teacherChallengePresets": "La Forja funciona localmente; una biblioteca de retos publicada desde el panel del profesor requeriría una integración central posterior."
+  },
+  "notes": "El juego es plenamente funcional sin servicios externos mediante su motor local. Si el host entrega un endpoint seguro en context.versopolisAiEndpoint, los rivales pueden usar respuesta generativa remota con fallback automático al motor local. El catálogo central debe cambiar versopolis de integration:none/entry vacío a embedded/games/versopolis/."
+}
