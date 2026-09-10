@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Versópolis · La ciudad donde combaten las palabras</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brandmark">✒️</div>
+      <div><h1>VERSÓPOLIS</h1><small>La ciudad donde combaten las palabras</small></div>
+    </div>
+    <nav class="topnav" id="topnav">
+      <button class="navbtn active" data-nav="city">Ciudad</button>
+      <button class="navbtn" data-nav="battle">Arena</button>
+      <button class="navbtn" data-nav="challenges">Retos</button>
+      <button class="navbtn" data-nav="anthology">Obras</button>
+    </nav>
+    <div class="topstats">
+      <div class="statpill">Nv. <b id="hudLevel">1</b></div>
+      <div class="statpill">XP <b id="hudXp">0</b></div>
+      <button class="iconbtn" id="profileBtn" title="Perfil y logros">🏆</button>
+    </div>
+  </header>
+  <main class="content">
+    <section class="screen active" id="screen-city">
+      <div class="section">
+        <article class="cityhero card">
+          <div>
+            <div class="eyebrow">Bienvenido a Versópolis</div>
+            <h2 class="title">Aquí no eliges la respuesta.<br>La <span style="color:var(--gold)">escribes</span>.</h2>
+            <p class="lead">Rima, improvisa, construye poemas y reta a rivales automáticos. Cada distrito usa el mismo motor poético con reglas distintas.</p>
+            <div class="cityprogress">
+              <div class="mini"><b id="cityBattles">0</b><small>duelos</small></div>
+              <div class="mini"><b id="cityBest">0</b><small>mejor combo</small></div>
+              <div class="mini"><b id="cityPoems">0</b><small>poemas guardados</small></div>
+            </div>
+          </div>
+          <div class="heroquote">«Una buena rima abre una puerta. Una buena idea <em>derriba la pared.</em>»</div>
+        </article>
+        <div class="districts grid">
+          <article class="district card"><div class="accent"></div><div class="icon">⚔️</div><h3>Plaza del Flow</h3><p>Batalla por turnos contra rivales que responden a tus palabras. Elige riesgo, tema y condiciones.</p><button class="btn primary" data-open="battle">Entrar en la arena</button></article>
+          <article class="district card"><div class="accent"></div><div class="icon">🎯</div><h3>Torre de los Poetas</h3><p>Retos progresivos de rima, métrica, figuras literarias y combinaciones mixtas.</p><button class="btn" data-open="challenges">Subir a la torre</button></article>
+          <article class="district card"><div class="accent"></div><div class="icon">🔥</div><h3>Callejón de la Rima</h3><p>Supervivencia contrarreloj. Cada ronda añade presión y las condiciones se vuelven más exigentes.</p><button class="btn" data-open="survival">Sobrevivir</button></article>
+          <article class="district card"><div class="accent"></div><div class="icon">🧲</div><h3>Mercado de Palabras</h3><p>Captura palabras incorporándolas a tus versos antes de que el rival automático se las lleve.</p><button class="btn" data-open="words">Robar palabras</button></article>
+          <article class="district card"><div class="accent"></div><div class="icon">🤝</div><h3>Jardín de las Musas</h3><p>Construye un poema alternando versos con el sistema. Cada turno llega con una nueva condición.</p><button class="btn" data-open="coauthor">Escribir juntos</button></article>
+          <article class="district card"><div class="accent"></div><div class="icon">🛠️</div><h3>Forja de Retos</h3><p>Crea tus propias condiciones poéticas y guárdalas para reutilizarlas en clase o lanzarlas al momento.</p><button class="btn" data-open="forge">Crear reto</button></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-battle">
+      <div class="section" id="battleSetup">
+        <div class="eyebrow">Plaza del Flow</div><h2 class="title">Elige rival</h2><p class="lead">Cada rival tiene un estilo propio. Los más fuertes se desbloquean jugando y ganando XP.</p>
+        <div class="rivalgrid grid" id="rivalGrid"></div>
+        <article class="card panel" style="margin-top:14px">
+          <div class="setupbar">
+            <div class="field"><label>Dificultad</label><select id="battleDifficulty"><option value="1">Calentamiento</option><option value="2" selected>Escenario</option><option value="3">Pro</option></select></div>
+            <div class="field grow"><label>Tema</label><select id="battleTopic"></select></div>
+            <div class="field grow"><label>Formato</label><select id="battleScenario"></select></div>
+            <button class="btn gold" id="startBattleBtn">🎙️ Comenzar batalla</button>
+          </div>
+          <p class="tiny" style="margin-bottom:0">El rival funciona sin servicios externos. Si LenguArcade incorpora después un endpoint de IA, Versópolis puede usarlo automáticamente y mantiene este motor local como respaldo.</p>
+        </article>
+      </div>
+      <div class="section hidden" id="battlePlay" style="height:100%">
+        <div class="battlelayout">
+          <div>
+            <div class="battlehead"><div><span class="eyebrow" id="battleRoundLabel">Ronda 1</span><h2 style="margin:2px 0 0;font-size:22px" id="battleTopicLabel">Tema</h2></div><div class="row"><span class="chip">Combo <b id="battleCombo">0</b></span><span class="chip">Puntos <b id="battleScore">0</b></span><button class="btn sm" id="leaveBattleBtn">Salir</button></div></div>
+            <div class="fighterrow" style="margin-top:8px"><article class="fighterbox card"><div class="fightertitle"><b id="battlePlayerName">Tú</b><span id="playerFlowText">100</span></div><div class="bar"><div class="fill" id="playerFlowBar"></div></div></article><article class="fighterbox card"><div class="fightertitle"><b id="battleRivalName">Rival</b><span id="rivalFlowText">100</span></div><div class="bar"><div class="fill rival" id="rivalFlowBar"></div></div></article></div>
+          </div>
+          <div class="arenaStage">
+            <article class="combatant card"><div class="bigavatar">🎤</div><strong id="battlePlayerMini">Poeta</strong><span class="tiny">Tu verso</span></article>
+            <article class="speech card"><div class="eyebrow">Último intercambio</div><div class="speechbox" id="battleSpeech">El rival espera. El primer golpe es tuyo.</div><div class="speechmeta" id="battleSpeechMeta"></div></article>
+            <article class="combatant card"><div class="bigavatar" id="battleRivalAvatar">🎧</div><strong id="battleRivalMini">Rival</strong><span class="tiny" id="battleRivalStyle">Estilo</span></article>
+          </div>
+          <div class="challengeDock">
+            <article class="challengecard card">
+              <div class="challengeTop"><div><span class="eyebrow">Tu turno</span><h3 id="battleChallengeTitle">Construye tu respuesta</h3></div><span class="chip">x<span id="battleMultiplier">1.0</span> recompensa</span></div>
+              <div class="riskcards" id="battleRiskCards"></div>
+              <div class="conditions" id="battleConditions"></div>
+              <div class="inputrow"><textarea class="challenge-input" id="battleInput" placeholder="Escribe aquí tus versos..."></textarea><button class="btn primary submitbtn" id="battleSubmit">Lanzar verso ⚡</button></div>
+              <div id="battleFeedback"></div>
+            </article>
+            <aside class="sidecard card">
+              <div><div class="eyebrow">Cartas tácticas</div><div class="row" style="margin-top:6px"><button class="btn sm" id="tacticShield">🛡️ Escudo</button><button class="btn sm" id="tacticDouble">✨ Doble</button><button class="btn sm" id="tacticReroll">🎲 Cambiar</button></div></div>
+              <div><div class="eyebrow">Análisis del turno</div><div class="scorechips" id="battleScores"><div class="scorechip"><small>Rima</small><b>—</b></div><div class="scorechip"><small>Métrica</small><b>—</b></div><div class="scorechip"><small>Recursos</small><b>—</b></div><div class="scorechip"><small>Expresión</small><b>—</b></div></div></div>
+              <div class="tiny">La métrica y las figuras se detectan de forma aproximada: sirven como feedback inmediato, no como corrección académica definitiva.</div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-challenges">
+      <div class="section"><div class="eyebrow">Torre de los Poetas</div><h2 class="title">Desafíos poéticos</h2><p class="lead">Escoge un foco. La torre genera nuevos encargos y premia las rachas de respuestas completas.</p>
+        <div class="setupbar"><div class="field"><label>Tipo</label><select id="challengeCategory"><option value="rhyme">Rima</option><option value="meter">Métrica</option><option value="figure">Figuras</option><option value="mixed" selected>Mixto</option></select></div><div class="field"><label>Dificultad</label><select id="challengeDifficulty"><option value="1">Básica</option><option value="2" selected>Media</option><option value="3">Alta</option></select></div><button class="btn primary" id="newChallengeBtn">Nuevo reto</button></div>
+        <div class="modewrap"><article class="modecard card"><div id="challengeBox"></div></article><aside class="sidepanel card"><h3>Racha</h3><div class="cityprogress"><div class="mini"><b id="challengeStreak">0</b><small>seguidos</small></div><div class="mini"><b id="challengeSolved">0</b><small>superados</small></div><div class="mini"><b id="challengeScore">0</b><small>puntos</small></div></div><div class="sep"></div><div class="timeline" id="challengeTimeline"></div></aside></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-survival">
+      <div class="section"><div class="eyebrow">Callejón de la Rima</div><h2 class="title">Supervivencia</h2><p class="lead">Tres vidas. Un reloj. Cada ronda añade una dificultad nueva. Necesitas al menos 55 puntos para sobrevivir.</p>
+        <div class="modewrap"><article class="modecard card"><div class="row"><span class="chip">Ronda <b id="survivalRound">0</b></span><span class="chip">Vidas <b id="survivalLives">❤❤❤</b></span><span class="chip">Tiempo <b class="timer" id="survivalTime">—</b></span><span class="chip">Puntos <b id="survivalScore">0</b></span><button class="btn gold right" id="survivalStart">Empezar</button></div><div id="survivalBox" style="margin-top:12px"></div></article><aside class="sidepanel card"><h3>Récord</h3><p class="muted">Mejor ronda: <b id="survivalBest">0</b></p><p class="muted">Las condiciones pasan de simples a combinadas: rima → palabra → métrica → recurso literario.</p></aside></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-words">
+      <div class="section"><div class="eyebrow">Mercado de Palabras</div><h2 class="title">Roba la palabra</h2><p class="lead">Incorpora palabras del mercado a tus versos. Si cumples el reto, las capturas. Después el rival se queda con una de las que dejes libres.</p>
+        <div class="modewrap"><article class="modecard card"><div class="row"><span class="chip">Tu botín <b id="wordPlayerScore">0</b></span><span class="chip">Rival <b id="wordCpuScore">0</b></span><span class="chip">Ronda <b id="wordRound">0/4</b></span><button class="btn gold right" id="wordStart">Nuevo mercado</button></div><div class="wordboard" id="wordBoard"></div><div id="wordChallenge"></div></article><aside class="sidepanel card"><h3>Regla</h3><p class="muted">Puedes capturar varias palabras de una vez si aparecen exactamente en tus versos. Las palabras difíciles valen más.</p><div class="timeline" id="wordLog"></div></aside></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-coauthor">
+      <div class="section"><div class="eyebrow">Jardín de las Musas</div><h2 class="title">Poema compartido</h2><p class="lead">La máquina propone, tú continúas y vuelve a responder. Al terminar, el poema se guarda en tu colección.</p>
+        <div class="modewrap"><article class="modecard card"><div class="row"><div class="field grow"><label>Tema</label><select id="coauthorTopic"></select></div><button class="btn gold" id="coauthorStart">Nuevo poema</button></div><div class="poem" id="coauthorPoem" style="margin-top:12px">Elige un tema para comenzar.</div><div id="coauthorChallenge" style="margin-top:12px"></div></article><aside class="sidepanel card"><h3>Sesión</h3><p class="muted">Turno <b id="coauthorTurn">0</b>/4</p><p class="muted">Cada turno cambia una condición para que el poema tenga variedad.</p></aside></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-forge">
+      <div class="section"><div class="eyebrow">Forja de Retos</div><h2 class="title">Construye tus propias reglas</h2><p class="lead">Define un encargo poético y guárdalo. La misma plantilla puede lanzarse tantas veces como quieras.</p>
+        <div class="modewrap"><article class="modecard card"><div class="customgrid">
+          <div class="field"><label>Nombre</label><input id="forgeName" value="Reto de clase"></div><div class="field"><label>Tema</label><select id="forgeTopic"></select></div>
+          <div class="field"><label>N.º de versos</label><select id="forgeLines"><option>1</option><option selected>2</option><option>4</option></select></div><div class="field"><label>Rima</label><select id="forgeRhyme"><option value="free">Libre</option><option value="assonant">Asonante</option><option value="consonant">Consonante</option></select></div>
+          <div class="field"><label>Métrica objetivo</label><select id="forgeMeter"><option value="">Libre</option><option value="8">8 sílabas</option><option value="11">11 sílabas</option></select></div><div class="field"><label>Figura</label><select id="forgeFigure"><option value="">Ninguna</option><option value="metaphor">Metáfora</option><option value="simile">Comparación</option><option value="personification">Personificación</option><option value="hyperbole">Hipérbole</option><option value="alliteration">Aliteración</option></select></div>
+          <div class="field"><label>Palabra obligatoria</label><input id="forgeRequired" placeholder="Ej. tormenta"></div><div class="field"><label>Palabra prohibida</label><input id="forgeForbidden" placeholder="Opcional"></div>
+          <div class="field full"><label>Consigna personalizada</label><input id="forgePrompt" placeholder="Ej. Responde como si fueras un caballero medieval"></div>
+          <div class="row full"><button class="btn primary" id="forgeSave">Guardar reto</button><button class="btn gold" id="forgeLaunch">Probar ahora</button></div>
+        </div><div id="forgePlay" style="margin-top:12px"></div></article><aside class="sidepanel card"><h3>Mis retos</h3><div class="library" id="forgeLibrary"></div></aside></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-anthology">
+      <div class="section"><div class="eyebrow">Archivo de Versópolis</div><h2 class="title">Tus obras</h2><p class="lead">Poemas compartidos y mejores respuestas guardadas durante las sesiones.</p><div class="library" id="anthologyList" style="margin-top:14px"></div></div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="profileModal"><article class="dialog card"><div class="row"><div><div class="eyebrow">Perfil de Versópolis</div><h2 id="profileName" style="margin-top:4px">Poeta</h2></div><button class="btn sm right" data-close-modal="profileModal">Cerrar</button></div><div class="cityprogress"><div class="mini"><b id="profileXp">0</b><small>XP</small></div><div class="mini"><b id="profileTurns">0</b><small>versos lanzados</small></div><div class="mini"><b id="profileAccuracy">0%</b><small>retos completos</small></div></div><h3>Logros</h3><div class="achgrid" id="achievementGrid"></div></article></div>
+<div class="modal" id="resultModal"><article class="dialog card"><div class="eyebrow" id="resultEyebrow">Resultado</div><h2 id="resultTitle">Fin</h2><p id="resultText"></p><div class="row"><button class="btn primary" id="resultPrimary">Continuar</button><button class="btn" id="resultSecondary">Volver a la ciudad</button></div></article></div>
+<div class="toast" id="toast"></div>
+
+<script src="./app.js"></script>
+</body>
+</html>
