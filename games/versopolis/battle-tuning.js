@@ -29,6 +29,7 @@
 
   const originalRenderBattle = renderBattle;
   const originalRenderBattleSetup = renderBattleSetup;
+  const originalPrepareBattleTurn = prepareBattleTurn;
 
   function damageBand(score){
     if(score < 25) return {label:'Sin golpe', cls:'bad'};
@@ -120,6 +121,25 @@
     updateTurnGuide();
   };
 
+  function setBattleControlsLocked(locked){
+    const input = document.getElementById('battleInput');
+    const risks = document.getElementById('battleRiskCards');
+    if(input) input.readOnly = locked;
+    if(risks) risks.style.pointerEvents = locked ? 'none' : '';
+    ['tacticShield','tacticDouble','tacticReroll'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el && locked) el.disabled=true;
+    });
+  }
+
+  prepareBattleTurn = function(){
+    originalPrepareBattleTurn();
+    const submit = document.getElementById('battleSubmit');
+    if(submit){ submit.disabled=false; submit.textContent='Atacar con estos versos ⚡'; }
+    setBattleControlsLocked(false);
+    renderBattle();
+  };
+
   async function balancedSubmitBattle(){
     if(!battle) return;
     const input = document.getElementById('battleInput');
@@ -129,6 +149,7 @@
     const submit = document.getElementById('battleSubmit');
     submit.disabled = true;
     submit.textContent = 'Analizando…';
+    setBattleControlsLocked(true);
 
     const ch = battleChallenge();
     const result = validateChallenge(text, ch);
