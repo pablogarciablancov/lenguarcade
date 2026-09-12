@@ -91,16 +91,16 @@ for (const required of [
   if (!bridgeHtml.includes(required)) errors.push(`Falta el puente de BattleGrafia: ${required}`);
 }
 
-const githubUrl = "https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia/";
+const githubUrl = "https://pablogarciablancov.github.io/lenguarcade/games/battlegrafia_v2/";
 const staticIndex = fs.readFileSync(path.resolve("games", "battlegrafia", "index.html"), "utf8");
 if (staticIndex.includes("<?!=") || staticIndex.includes("include('")) {
   errors.push("La version GitHub Pages de BattleGrafia debe estar aplanada sin includes de Apps Script.");
 }
 if (!generatedCatalog.includes('gameId:"battlegrafia"') ||
-    !generatedCatalog.includes('estado:"en pruebas"') ||
+    !generatedCatalog.includes('estado:"listo"') ||
     !generatedCatalog.includes('integration:"embedded"') ||
     !generatedCatalog.includes(githubUrl)) {
-  errors.push("El catálogo generado debe mantener BattleGrafia como juego embebido y estado «en pruebas».");
+  errors.push("El catálogo generado debe mantener Battlegrafía Fantasy Arcade como juego embebido y estado «listo».");
 }
 
 if (!centralStudent.includes("gameRecord?.gameId==='battlegrafia'") ||

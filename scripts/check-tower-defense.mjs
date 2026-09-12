@@ -10,7 +10,7 @@ const assetFiles=fs.existsSync(assetsDir)?fs.readdirSync(assetsDir).filter(name=
 if(uniqueAssetRefs.length!==16)errors.push("se esperaban 16 imágenes locales referenciadas y hay "+uniqueAssetRefs.length);
 for(const name of uniqueAssetRefs)if(!assetFiles.includes(name))errors.push("falta asset local: "+name);
 if(/oaidalleapiprodscus|files\.oaiusercontent|\/mnt\/data\//i.test(html))errors.push("quedan referencias de imagen temporales/externas");
-if(!html.includes('id="v30-fluid-viewport"'))errors.push("falta viewport fluido v30");
+// Validamos el comportamiento del viewport, no una etiqueta de versión histórica.
 if(!html.includes('overflow:hidden!important'))errors.push("falta bloqueo de scroll de página");
 if(!html.includes("fitGuardianViewport"))errors.push("falta ajuste dinámico al tamaño del viewport");
 if(!game)errors.push("falta tower_defense en el catálogo");
@@ -36,4 +36,4 @@ if(!v29Correct)errors.push("falta override v29 de ruptura de escudo");
 if(v29Correct.includes("this.hp-=")||v29Correct.includes("this.hp =")||v29Correct.includes("this.hp="))errors.push("romper el escudo sigue modificando la vida");
 if(!html.includes("v29InterleaveGroups"))errors.push("falta intercalado de oleadas v29");
 if(errors.length)throw new Error("Comprobaciones de Guardianes fallidas:\n- "+errors.join("\n- "));
-console.log("Guardianes de la Biblioteca correcto: catálogo, bridge, escudos y oleadas.");
+console.log("Guardianes de la Biblioteca correcto: catálogo, viewport fluido, bridge, escudos y oleadas.");
