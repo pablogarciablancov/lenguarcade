@@ -17,6 +17,13 @@
   ];
   const VOWELS = new Set(['A','E','I','O','U']);
   const BLOCKED = new Set(['puta','puto','putas','putos','mierda','gilipollas','coño','joder','follar','follando','polla','pollas','cabrón','cabron','cabrones']);
+  const STRICT_ACCENTS = new Map(Object.entries({
+    cancion:'canción', canciones:'canciones', camion:'camión', camiones:'camiones', avion:'avión', aviones:'aviones', accion:'acción', acciones:'acciones',
+    corazon:'corazón', rincon:'rincón', jardin:'jardín', lapiz:'lápiz', arbol:'árbol', musica:'música', rapido:'rápido', rapida:'rápida', rapidos:'rápidos', rapidas:'rápidas',
+    dificil:'difícil', faciles:'fáciles', facil:'fácil', filosofia:'filosofía', religion:'religión', gramatica:'gramática', ortografia:'ortografía', tecnologia:'tecnología',
+    linguistica:'lingüística', linguistico:'lingüístico', pinguino:'pingüino', pinguinos:'pingüinos', verguenza:'vergüenza', bilingue:'bilingüe', ciguena:'cigüeña',
+    murcielago:'murciélago', dia:'día', dias:'días', despues:'después', aqui:'aquí', alli:'allí', tambien:'también'
+  }));
   const FALLBACK_WORDS = `
     casa cosa paso peso piso puso mesa misa masa mapa mano mono mina luna lana lino loma lupa palo pelo pila polo pera puro para pero poro toro tiro tela tila tono tuna taza zona
     amor amigo amiga amigos amigas aula clase libro libros leer leo lees lee poema poemas verso versos rima rimas lengua palabra palabras letra letras frase frases texto textos juego juegos
@@ -148,7 +155,7 @@
     return 'A';
   }
   function newTile(letter = weightedLetter()) {
-    return { id: crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random()}`, letter, kind:'normal', bonus:0, uses:0 };
+    return { id: globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `${Date.now()}_${Math.random()}`, letter, kind:'normal', bonus:0, uses:0 };
   }
   function createBoard() {
     const board = Array.from({length:16},()=>newTile());
@@ -206,6 +213,8 @@
     const w = normalizeWord(word);
     if (w.length < 3) return {ok:false,kind:'length',message:'Necesitas al menos 3 letras.'};
     if (BLOCKED.has(w)) return {ok:false,kind:'blocked',message:'Esa palabra no está disponible en el modo escolar.'};
+    const strictAccent = STRICT_ACCENTS.get(w);
+    if (strictAccent) return {ok:false,kind:'accent',suggestion:strictAccent,message:`Casi: prueba con «${strictAccent}».`};
     if (dictionary.has(w)) return {ok:true,word:w};
     const alternatives = accentMap.get(stripAccents(w)) || [];
     const accented = alternatives.find(x => /[áéíóúü]/.test(x));
@@ -229,7 +238,7 @@
     if (tile.kind === 'echo') base *= 2;
     return Math.round(base * (state?.bonuses?.letterMult || 1));
   }
-  function calculateScore(word, tiles, includeModifiers=true) {
+  function calculateScore(word, tiles, includeModifiers=true, preview=false) {
     let letters = tiles.reduce((sum,t)=>sum+tileBaseScore(t),0);
     let bonus = lengthBonus(word.length);
     let subtotal = letters + bonus;
@@ -237,7 +246,7 @@
     const effects = [];
     if (bonus) effects.push(`Longitud +${bonus}`);
     if (includeModifiers) {
-      const ctx = {word, tiles, prevLength:state.previousLength, validStreak:state.validStreak + 1};
+      const ctx = {word, tiles, prevLength:state.previousLength, validStreak:state.validStreak + (preview ? 1 : 0)};
       for (const id of state.modifiers) {
         const mod = modifiers.find(m=>m.id===id);
         if (!mod?.score) continue;
@@ -334,7 +343,16 @@
     }
   }
   function replaceUsedTiles(ids) {
-    state.board = state.board.map(tile => ids.includes(tile.id) ? newTile() : tile);
+    state.board = state.board.map(tile => {
+      if (!ids.includes(tile.id)) return tile;
+      const replacement = newTile();
+      if (tile.kind !== 'normal') {
+        replacement.kind = tile.kind;
+        replacement.bonus = tile.bonus || 0;
+        replacement.uses = tile.uses || 0;
+      }
+      return replacement;
+    });
     ensurePlayableBoard();
   }
   function ensurePlayableBoard() {
@@ -347,9 +365,9 @@
   }
   function shuffleBoard() {
     if (!state || state.shufflesLeft <= 0) return;
-    const preservedUpgrades = state.board.filter(t=>t.kind!=='normal').map(t=>({kind:t.kind,bonus:t.bonus}));
+    const preservedUpgrades = state.board.filter(t=>t.kind!=='normal').map(t=>({kind:t.kind,bonus:t.bonus,uses:t.uses||0}));
     state.board = createBoard();
-    preservedUpgrades.forEach((up,i)=>{ if(state.board[i]) {state.board[i].kind=up.kind;state.board[i].bonus=up.bonus;} });
+    preservedUpgrades.forEach((up,i)=>{ if(state.board[i]) {state.board[i].kind=up.kind;state.board[i].bonus=up.bonus;state.board[i].uses=up.uses;} });
     state.selected = [];
     state.shufflesLeft -= 1;
     showFeedback('Fichas renovadas.', 'good');
@@ -370,7 +388,14 @@
     state.challenge = chooseRoundChallenge(state.round);
     state.selected = [];
     state.validStreak = 0;
+    const persistentUpgrades = state.board.filter(t=>t.kind!=='normal').map(t=>({kind:t.kind,bonus:t.bonus||0,uses:t.uses||0}));
     state.board = createBoard();
+    persistentUpgrades.forEach((up,i)=>{
+      if (!state.board[i]) return;
+      state.board[i].kind = up.kind;
+      state.board[i].bonus = up.bonus;
+      state.board[i].uses = up.uses;
+    });
     saveRun();
     closeModals();
     render();
@@ -486,7 +511,7 @@
     });
     const word=currentWord();
     const tiles=state.selected.map(s=>state.board.find(t=>t.id===s.id)).filter(Boolean);
-    const preview=word ? calculateScore(word,tiles,true).total : 0;
+    const preview=word ? calculateScore(word,tiles,true,true).total : 0;
     ui.previewScore.textContent=`${formatNumber(preview)} pts`;
     ui.wordHint.textContent=word ? word.toUpperCase() : 'Selecciona fichas para formar una palabra';
     ui.submitBtn.disabled=state.selected.length<3 || state.playsLeft<=0;
