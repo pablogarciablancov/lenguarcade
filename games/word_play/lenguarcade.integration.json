@@ -1,0 +1,15 @@
+{
+  "$schema": "lenguarcade-integration-v1",
+  "gameId": "word_play",
+  "name": "Word Play",
+  "status": "laboratorio",
+  "integration": "embedded",
+  "entry": "games/word_play/index.html",
+  "banner": "",
+  "requires": {
+    "studentRunner": true,
+    "saveProgress": true,
+    "supabaseCatalog": true
+  },
+  "notes": "Primera versión jugable del roguelike de palabras. Antes de pasar a producción conviene sustituir la carga remota del léxico de 50k por un recurso local y conectar estadísticas/XP/logros mediante el adaptador común de LenguArcade. No requiere cambios del núcleo para probarse de forma aislada."
+}

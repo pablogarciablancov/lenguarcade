@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>Word Play · LenguArcade</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main id="app" class="app-shell" aria-live="polite">
+    <section id="menuScreen" class="screen menu-screen">
+      <div class="brand-block">
+        <span class="eyebrow">LENGUARCADE · LABORATORIO</span>
+        <h1>WORD <span>PLAY</span></h1>
+        <p class="tagline">Construye palabras. Encadena efectos. Rompe la puntuación.</p>
+      </div>
+
+      <div class="menu-grid">
+        <section class="panel hero-panel">
+          <div>
+            <h2>Roguelike de palabras</h2>
+            <p>Supera doce rondas formando palabras con tus fichas. Cada victoria te permite elegir una mejora permanente que puede cambiar por completo tu estrategia.</p>
+          </div>
+          <div class="mini-rule-grid">
+            <article><strong>16</strong><span>fichas</span></article>
+            <article><strong>5</strong><span>jugadas por ronda</span></article>
+            <article><strong>3</strong><span>mejoras a elegir</span></article>
+            <article><strong>12</strong><span>rondas</span></article>
+          </div>
+        </section>
+
+        <section class="panel menu-actions">
+          <button id="continueBtn" class="primary-btn hidden" type="button">Continuar partida</button>
+          <button id="newGameBtn" class="primary-btn" type="button">Nueva partida</button>
+          <button id="quickGameBtn" class="secondary-btn" type="button">Partida rápida</button>
+          <button id="howToBtn" class="ghost-btn" type="button">Cómo se juega</button>
+        </section>
+
+        <section class="panel stats-panel">
+          <div class="panel-title-row"><h2>Tu historial</h2><span id="dictionaryStatus" class="status-pill">Preparando diccionario…</span></div>
+          <div class="career-stats">
+            <div><span>Mejor puntuación</span><strong id="bestScore">0</strong></div>
+            <div><span>Palabra más larga</span><strong id="bestWord">—</strong></div>
+            <div><span>Partidas</span><strong id="gamesPlayed">0</strong></div>
+            <div><span>Palabras distintas</span><strong id="uniqueWords">0</strong></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen hidden">
+      <header class="game-topbar">
+        <div class="round-block">
+          <span id="modeLabel" class="eyebrow">MODO NORMAL</span>
+          <div><strong id="roundLabel">RONDA 1</strong><span id="challengeLabel">Sin condición especial</span></div>
+        </div>
+        <div class="score-block">
+          <span>Ronda</span>
+          <strong><span id="roundScore">0</span> <small>/ <span id="targetScore">90</span></small></strong>
+          <div class="progress-track" aria-hidden="true"><i id="roundProgress"></i></div>
+        </div>
+        <div class="top-actions">
+          <button id="helpBtn" class="icon-btn" type="button" aria-label="Ayuda">?</button>
+          <button id="pauseBtn" class="icon-btn" type="button" aria-label="Menú">☰</button>
+        </div>
+      </header>
+
+      <div class="game-layout">
+        <aside class="side-panel left-panel">
+          <div class="resource-row">
+            <article><span>Jugadas</span><strong id="playsLeft">5</strong></article>
+            <article><span>Barajados</span><strong id="shufflesLeft">2</strong></article>
+          </div>
+          <section class="modifier-section">
+            <div class="section-heading"><h2>Tu estrategia</h2><span id="modifierCount">0</span></div>
+            <div id="modifierList" class="modifier-list empty-list"><p>Aún no tienes mejoras.</p></div>
+          </section>
+        </aside>
+
+        <section class="play-panel">
+          <div class="word-zone">
+            <div class="word-meta">
+              <span id="wordHint">Selecciona fichas para formar una palabra</span>
+              <strong id="previewScore">0 pts</strong>
+            </div>
+            <div id="wordBuilder" class="word-builder" aria-label="Palabra actual"></div>
+            <div class="word-controls">
+              <button id="undoBtn" class="small-btn" type="button">↶ Quitar</button>
+              <button id="clearBtn" class="small-btn" type="button">Limpiar</button>
+              <button id="submitBtn" class="submit-btn" type="button">JUGAR PALABRA</button>
+            </div>
+          </div>
+
+          <div id="board" class="board" role="group" aria-label="Fichas disponibles"></div>
+
+          <div class="board-footer">
+            <button id="shuffleBtn" class="secondary-btn compact" type="button">⟳ Barajar fichas</button>
+            <div id="feedback" class="feedback" role="status">Elige al menos 3 letras.</div>
+          </div>
+        </section>
+
+        <aside class="side-panel right-panel">
+          <section class="run-stats">
+            <div class="section-heading"><h2>Partida</h2></div>
+            <dl>
+              <div><dt>Total</dt><dd id="totalScore">0</dd></div>
+              <div><dt>Palabras</dt><dd id="wordsPlayed">0</dd></div>
+              <div><dt>Mejor palabra</dt><dd id="runBestWord">—</dd></div>
+              <div><dt>Mejor combo</dt><dd id="bestCombo">×1</dd></div>
+            </dl>
+          </section>
+          <section class="last-play">
+            <div class="section-heading"><h2>Última jugada</h2></div>
+            <div id="lastPlayCard" class="last-play-card empty-list"><p>Tu primera palabra aparecerá aquí.</p></div>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <div id="modalBackdrop" class="modal-backdrop hidden" aria-hidden="true">
+      <section id="rewardModal" class="modal reward-modal hidden" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
+        <span class="eyebrow">RONDA SUPERADA</span>
+        <h2 id="rewardTitle">Elige una mejora</h2>
+        <p>Solo puedes quedarte con una. Busca sinergias con las que ya tienes.</p>
+        <div id="rewardChoices" class="reward-grid"></div>
+      </section>
+
+      <section id="infoModal" class="modal info-modal hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+        <h2 id="infoTitle">Cómo se juega</h2>
+        <div id="infoBody" class="info-body"></div>
+        <button id="closeInfoBtn" class="primary-btn" type="button">Entendido</button>
+      </section>
+
+      <section id="pauseModal" class="modal pause-modal hidden" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+        <h2 id="pauseTitle">Partida en pausa</h2>
+        <div class="toggle-row">
+          <label><span>Reducir animaciones</span><input id="reduceMotionToggle" type="checkbox" /></label>
+          <label><span>Efectos de sonido</span><input id="soundToggle" type="checkbox" checked /></label>
+        </div>
+        <button id="resumeBtn" class="primary-btn" type="button">Seguir jugando</button>
+        <button id="saveExitBtn" class="secondary-btn" type="button">Guardar y salir</button>
+        <button id="abandonBtn" class="danger-btn" type="button">Abandonar partida</button>
+      </section>
+
+      <section id="endModal" class="modal end-modal hidden" role="dialog" aria-modal="true" aria-labelledby="endTitle">
+        <span id="endEyebrow" class="eyebrow">FIN DE PARTIDA</span>
+        <h2 id="endTitle">Tu partida</h2>
+        <div id="endStats" class="end-stats"></div>
+        <div class="end-actions">
+          <button id="playAgainBtn" class="primary-btn" type="button">Jugar otra vez</button>
+          <button id="endMenuBtn" class="secondary-btn" type="button">Volver al menú</button>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>
