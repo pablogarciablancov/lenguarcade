@@ -1,0 +1,12 @@
+(() => {
+'use strict';
+let ctx=null,lastFeedback='';
+function enabled(){return window.WordPlayEngine?.settings?.sound!==false;}
+function context(){if(!enabled())return null;try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();return ctx;}catch{return null;}}
+function tone(freq=440,duration=.055,volume=.035,type='sine',delay=0){const c=context();if(!c)return;const start=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,start);g.gain.setValueAtTime(0,start);g.gain.linearRampToValueAtTime(volume,start+.008);g.gain.exponentialRampToValueAtTime(.0001,start+duration);o.connect(g);g.connect(c.destination);o.start(start);o.stop(start+duration+.02);}
+function play(kind){if(!enabled())return;switch(kind){case'tile':tone(340,.045,.025,'triangle');break;case'undo':tone(250,.045,.02,'triangle');break;case'good':tone(523,.07,.04,'sine');tone(659,.08,.03,'sine',.055);break;case'bad':tone(180,.1,.035,'sawtooth');break;case'reward':tone(440,.06,.035,'triangle');tone(554,.07,.035,'triangle',.05);tone(659,.09,.035,'triangle',.1);break;case'win':tone(523,.08,.035);tone(659,.09,.035,'sine',.07);tone(784,.14,.04,'sine',.14);break;default:tone(300,.04,.018,'sine');}}
+document.addEventListener('pointerdown',event=>{const el=event.target.closest('button');if(!el||!enabled())return;if(el.classList.contains('tile')||el.classList.contains('word-chip'))play('tile');else if(el.id==='undoBtn'||el.id==='clearBtn')play('undo');else if(el.classList.contains('reward-card'))play('reward');else play('click');},{passive:true});
+function watch(){const feedback=document.getElementById('feedback');if(feedback){new MutationObserver(()=>{const text=feedback.textContent||'';if(!text||text===lastFeedback)return;lastFeedback=text;if(feedback.classList.contains('good'))play('good');else if(feedback.classList.contains('bad')||feedback.classList.contains('warn'))play('bad');}).observe(feedback,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});}const end=document.getElementById('endModal');if(end){new MutationObserver(()=>{if(!end.classList.contains('hidden')&&document.getElementById('endEye')?.textContent?.includes('COMPLETADA'))play('win');}).observe(end,{attributes:true,attributeFilter:['class']});}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watch,{once:true});else watch();
+window.WordPlaySound={play};
+})();

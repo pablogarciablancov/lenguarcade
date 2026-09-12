@@ -1,0 +1,104 @@
+/* Word Play · responsive containment layer
+   Keeps the 4×4 board inside the playable viewport without page scroll. */
+html,body,#app,.app-shell,.screen,.game-screen,.game-layout,.play-panel{min-height:0!important}
+html,body{width:100%;height:100%;overflow:hidden!important}
+.app-shell{height:100dvh!important;min-height:0!important;max-height:100dvh!important;overflow:hidden!important}
+.game-screen{height:100%!important;max-height:100%!important;overflow:hidden!important;padding:7px!important;gap:7px!important;grid-template-rows:auto minmax(0,1fr)!important}
+.game-topbar{min-height:58px!important;padding:7px 11px!important}
+.game-layout{height:100%!important;min-height:0!important;overflow:hidden!important;grid-template-columns:minmax(150px,.48fr) minmax(360px,1.75fr) minmax(155px,.5fr)!important;gap:7px!important}
+.side-panel{min-width:0!important;min-height:0!important;padding:9px!important;overflow:hidden!important}
+.play-panel{height:100%!important;min-height:0!important;overflow:hidden!important;padding:8px!important;gap:6px!important;grid-template-rows:auto auto minmax(0,1fr) auto!important}
+.challenge-banner{min-height:0!important;padding:6px 9px!important}
+.word-zone{min-height:0!important;padding:6px 8px!important;overflow:hidden!important}
+.word-builder{min-height:38px!important;margin:3px 0!important}
+.combo-preview{min-height:14px!important;max-height:30px!important}
+.word-controls{gap:5px!important}
+.word-controls button{min-height:38px!important}
+.board{
+  --tile-size:82px;
+  --board-gap:7px;
+  width:calc(var(--tile-size) * 4 + var(--board-gap) * 3)!important;
+  height:calc(var(--tile-size) * 4 + var(--board-gap) * 3)!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  aspect-ratio:auto!important;
+  place-self:center!important;
+  align-self:center!important;
+  justify-self:center!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,var(--tile-size))!important;
+  grid-template-rows:repeat(4,var(--tile-size))!important;
+  gap:var(--board-gap)!important;
+  overflow:visible!important;
+  contain:layout size;
+}
+.tile{
+  width:var(--tile-size)!important;
+  height:var(--tile-size)!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:var(--tile-size)!important;
+  max-height:var(--tile-size)!important;
+  padding:0!important;
+  border-radius:clamp(7px,calc(var(--tile-size) * .11),13px)!important;
+  font-size:clamp(1rem,calc(var(--tile-size) * .32),2.25rem)!important;
+  line-height:1!important;
+}
+.tile::after{font-size:clamp(.42rem,calc(var(--tile-size) * .115),.68rem)!important;right:7%!important;bottom:6%!important}
+.tile.ink::before{font-size:clamp(.4rem,calc(var(--tile-size) * .1),.58rem)!important}
+.board-footer{min-height:38px!important;gap:6px!important}
+.board-footer .compact{min-height:36px!important}
+.feedback{min-height:36px!important;padding:7px 9px!important}
+
+/* Short laptop / Chromebook heights */
+@media (max-height:850px){
+  .game-screen{padding:5px!important;gap:5px!important}
+  .game-topbar{min-height:52px!important;padding:5px 9px!important}
+  .round-block strong{font-size:1rem!important}.round-block span:last-child{font-size:.7rem!important}
+  .score-block>strong{font-size:1.25rem!important}
+  .game-layout{gap:5px!important}
+  .side-panel{padding:7px!important}
+  .resource-row article{padding:6px 5px!important}.resource-row strong{font-size:1.05rem!important}
+  .play-panel{padding:6px!important;gap:5px!important}
+  .challenge-banner{padding:5px 7px!important}.challenge-banner strong{font-size:.78rem!important}.challenge-banner p{font-size:.62rem!important}
+  .word-zone{padding:5px 7px!important}.word-builder{min-height:32px!important;margin:2px 0!important}
+  .word-chip{width:clamp(27px,3vw,36px)!important}.combo-preview{min-height:12px!important;max-height:22px!important}
+  .word-controls button{min-height:34px!important}.submit-btn{min-width:140px!important}
+  .board-footer,.board-footer .compact,.feedback{min-height:34px!important}
+  .modifier-card{padding:6px!important}.modifier-card span{font-size:.59rem!important}
+  .run-stats dl div{padding:4px 0!important}.goal-item{padding:4px 6px!important}
+}
+
+/* Narrow desktop/tablet: preserve the whole game, shrink side rails first. */
+@media (max-width:1180px){
+  .game-layout{grid-template-columns:minmax(130px,.38fr) minmax(340px,1.8fr) minmax(135px,.4fr)!important}
+  .side-panel{padding:7px!important}.resource-row{gap:4px!important}.resource-row article{padding:6px 4px!important}
+  .resource-row span{font-size:.54rem!important}.resource-row strong{font-size:1rem!important}
+  .modifier-card strong{font-size:.66rem!important}.modifier-card span{font-size:.58rem!important}
+  .run-stats dt{font-size:.6rem!important}.run-stats dd{font-size:.72rem!important}
+}
+
+/* Tablet/portrait fallback: keep essential resource strip, hide secondary rails. */
+@media (max-width:820px){
+  .game-layout{grid-template-columns:1fr!important;grid-template-rows:auto minmax(0,1fr)!important}
+  .left-panel{display:block!important;padding:5px 7px!important}
+  .left-panel .modifier-section{display:none!important}
+  .left-panel .resource-row{grid-template-columns:repeat(3,1fr)!important}
+  .left-panel .resource-row article{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:7px!important;padding:4px 8px!important}
+  .right-panel{display:none!important}
+  .play-panel{grid-column:1!important;grid-row:2!important}
+}
+
+@media (max-width:620px){
+  .game-topbar{grid-template-columns:1fr auto!important}.score-block{grid-column:1/-1!important;grid-row:2!important}
+  .game-screen{grid-template-rows:auto minmax(0,1fr)!important}
+  .challenge-banner p{max-width:48%!important}
+  .word-controls{grid-template-columns:1fr 1fr!important}.submit-btn{grid-column:1/-1!important;min-width:0!important}
+  .feedback{font-size:.65rem!important}
+}
+
+/* Layout.js toggles this only when the available tile size is genuinely tight. */
+.compact-board .tile{box-shadow:inset 0 -3px 0 rgba(83,58,19,.16),0 3px 8px rgba(0,0,0,.2)!important}
+.compact-board .tile::after{right:5%!important;bottom:4%!important}
