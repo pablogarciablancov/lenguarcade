@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 3,
+  "version": 4,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -9,11 +9,7 @@
       "name": "Battlegrafía",
       "subtitle": "La aventura de las palabras",
       "category": "RPG",
-      "competencies": [
-        "ortografía",
-        "verbos",
-        "semántica"
-      ],
+      "competencies": ["ortografía", "verbos", "semántica"],
       "status": "listo",
       "sortOrder": 1,
       "color": "#68d9ff",
@@ -30,11 +26,7 @@
       "name": "Maniacgrafía",
       "subtitle": "Atrapa las palabras",
       "category": "Ortografía",
-      "competencies": [
-        "ortografía",
-        "acentuación",
-        "atención"
-      ],
+      "competencies": ["ortografía", "acentuación", "atención"],
       "status": "listo",
       "sortOrder": 2,
       "color": "#d946ef",
@@ -51,11 +43,7 @@
       "name": "Narratoria",
       "subtitle": "Escribe. Crea. Cuenta.",
       "category": "Escritura",
-      "competencies": [
-        "narración",
-        "creatividad",
-        "redacción"
-      ],
+      "competencies": ["narración", "creatividad", "redacción"],
       "status": "listo",
       "sortOrder": 3,
       "color": "#f59e0b",
@@ -72,12 +60,7 @@
       "name": "Versópolis",
       "subtitle": "La ciudad de la poesía",
       "category": "Poesía",
-      "competencies": [
-        "poesía",
-        "rima",
-        "métrica",
-        "creatividad"
-      ],
+      "competencies": ["poesía", "rima", "métrica", "creatividad"],
       "status": "en revisión",
       "sortOrder": 4,
       "color": "#8b5cf6",
@@ -94,11 +77,7 @@
       "name": "Scrabble",
       "subtitle": "Palabras en juego",
       "category": "Léxico",
-      "competencies": [
-        "léxico",
-        "vocabulario",
-        "estrategia"
-      ],
+      "competencies": ["léxico", "vocabulario", "estrategia"],
       "status": "listo",
       "sortOrder": 5,
       "color": "#34d399",
@@ -115,12 +94,7 @@
       "name": "Conjuga y apuesta",
       "subtitle": "Conjuga. Arriesga. Remonta.",
       "category": "Verbos",
-      "competencies": [
-        "verbos",
-        "morfología",
-        "conjugación",
-        "estrategia"
-      ],
+      "competencies": ["verbos", "morfología", "conjugación", "estrategia"],
       "status": "en pruebas",
       "sortOrder": 6,
       "color": "#fb7185",
@@ -137,13 +111,7 @@
       "name": "Batalla verbal",
       "subtitle": "Arena táctica de los verbos",
       "category": "Verbos",
-      "competencies": [
-        "verbos",
-        "morfología",
-        "conjugación",
-        "estrategia",
-        "equipos"
-      ],
+      "competencies": ["verbos", "morfología", "conjugación", "estrategia", "equipos"],
       "status": "en pruebas",
       "sortOrder": 7,
       "color": "#60a5fa",
@@ -160,13 +128,7 @@
       "name": "Rayuela",
       "subtitle": "Tu historia. Tus decisiones.",
       "category": "Escritura",
-      "competencies": [
-        "narración",
-        "creatividad",
-        "redacción",
-        "coherencia",
-        "planificación"
-      ],
+      "competencies": ["narración", "creatividad", "redacción", "coherencia", "planificación"],
       "status": "en pruebas",
       "sortOrder": 8,
       "color": "#22d3ee",
@@ -183,14 +145,7 @@
       "name": "Entre Líneas",
       "subtitle": "Agencia de Investigación Lectora",
       "category": "Comprensión lectora",
-      "competencies": [
-        "comprensión",
-        "inferencia",
-        "síntesis",
-        "análisis",
-        "coherencia",
-        "vocabulario"
-      ],
+      "competencies": ["comprensión", "inferencia", "síntesis", "análisis", "coherencia", "vocabulario"],
       "status": "en pruebas",
       "sortOrder": 9,
       "color": "#d7a942",
@@ -207,12 +162,7 @@
       "name": "Guardianes de la Biblioteca",
       "subtitle": "Defiende la lengua",
       "category": "Estrategia lingüística",
-      "competencies": [
-        "ortografía",
-        "verbos",
-        "semántica",
-        "estrategia"
-      ],
+      "competencies": ["ortografía", "verbos", "semántica", "estrategia"],
       "status": "en pruebas",
       "sortOrder": 10,
       "color": "#14b8a6",
@@ -220,6 +170,23 @@
       "entry": "games/tower_defense/",
       "description": "Tower defense lingüístico: rompe escudos resolviendo retos de Ortografía, Verbos y Semántica y deja que tus torres derroten a los monstruos.",
       "banner": "tower_defense",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "word_play",
+      "official": false,
+      "name": "Word Play",
+      "subtitle": "Construye. Combina. Rompe el marcador.",
+      "category": "Léxico",
+      "competencies": ["léxico", "vocabulario", "ortografía", "acentuación", "estrategia"],
+      "status": "en pruebas",
+      "sortOrder": 11,
+      "color": "#22d3ee",
+      "icon": "🔠",
+      "entry": "games/word_play/",
+      "description": "Roguelike de palabras con cartas, mejoras, retos lingüísticos, combos y progresión léxica.",
+      "banner": "board",
       "active": true,
       "integration": "embedded"
     }
