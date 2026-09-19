@@ -34,6 +34,22 @@ function scoreWord(data={}){
   const lifetime=1550+Math.min(8,(data.tilePoints||[]).length)*70;
   setTimeout(()=>seq.remove(),lifetime);
 }
+function activations(data={}){
+  if(reduce())return;
+  const items=[];
+  for(const m of data.modifiers||[])items.push({cls:'modifier',label:m.name,text:m.text||'ACTIVA'});
+  for(const e of data.specialEvents||[])items.push({cls:'special '+(e.kind||''),label:e.label||'ESPECIAL',text:e.text||''});
+  if(data.mission)items.push({cls:'mission',label:'MISIÓN COMPLETADA',text:'+'+Number(data.mission.reward||0)+' Monedas'});
+  if(!items.length)return;
+  const stack=document.createElement('div');stack.className='wp-activation-stack';
+  items.slice(0,6).forEach((item,i)=>{
+    const el=document.createElement('div');el.className='wp-activation '+item.cls;el.style.setProperty('--i',i);
+    const strong=document.createElement('strong');strong.textContent=item.label;
+    const span=document.createElement('span');span.textContent=item.text;
+    el.append(strong,span);stack.appendChild(el);
+  });
+  layer.appendChild(stack);setTimeout(()=>stack.remove(),1800+items.length*90);
+}
 function hit(){
   const g=game();if(!g||reduce())return;
   g.classList.remove('wp-hit');void g.offsetWidth;g.classList.add('wp-hit');setTimeout(()=>g.classList.remove('wp-hit'),330);
@@ -79,5 +95,5 @@ function install(){
   toggle?.addEventListener('change',()=>setTimeout(syncMotionClass,0));
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
-window.WordPlayGameFeel={syncMotionClass,scoreWord};
+window.WordPlayGameFeel={syncMotionClass,scoreWord,activations};
 })();
