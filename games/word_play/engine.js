@@ -623,8 +623,8 @@ function boardPlayability(b=state?.board||[],run=state){
     stats.total++;stats.longest=Math.max(stats.longest,entry.length);
     if(entry.length>=4)stats.len4++;if(entry.length>=5)stats.len5++;if(entry.length>=6)stats.len6++;
   }
-  const restrictive=!!run?.specialRound||challenge(run?.challenge).kind==='constraint';
-  stats.threshold=restrictive?1:4;
+  const constrained=challenge(run?.challenge).kind==='constraint';
+  stats.threshold=run?.specialRound?2:constrained?3:8;
   stats.safe=stats.total>=stats.threshold;
   return stats;
 }
@@ -677,7 +677,6 @@ function rescueBoard(reason='atasco',force=false){
   if(!best)return{rescued:false,before,after:before};
   state.board=best;state.selected=[];
   remapSpecialIds(oldBoard,best,state);
-  rebalanceBoard();
   const after=boardPlayability(state.board,state);
   state.rescues=Number(state.rescues||0)+1;
   state.lastRescue={reason,at:Date.now(),before:before.total,after:after.total};
