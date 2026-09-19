@@ -7,6 +7,7 @@ const generatedApps=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Ga
 const code=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Code.gs"),"utf8");
 const auth=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Auth.gs"),"utf8");
 const student=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Alumno.html"),"utf8");
+const teacher=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Profesor.html"),"utf8");
 const dashboard=fs.readFileSync(path.join(root,"supabase","functions","student-dashboard","index.ts"),"utf8");
 const snapshot=fs.readFileSync(path.join(root,"supabase","catalog","game-catalog.sql"),"utf8");
 const canonicalMigration=fs.readFileSync(path.join(root,"supabase","migrations","202609060002_canonical_game_catalog.sql"),"utf8");
@@ -82,6 +83,11 @@ if(!wordPlay ||
    wordPlay.entry!=="games/word_play/" ||
    wordPlay.integration!=="embedded"){
   throw new Error("Word Play debe estar integrado como juego oficial de producción.");
+}
+for(const [label,html] of [["alumno",student],["profesor",teacher]]){
+  if(!html.includes("word_play:'word-play-banner.webp'")){
+    throw new Error("Word Play debe usar su portada propia en el panel de "+label+".");
+  }
 }
 if(catalog.games.some(game=>/rim[oó]polis/i.test(game.id+" "+game.name)) ||
    code.includes("Rimópolis") || dashboard.includes("Rimópolis") || student.includes("Rimópolis")){
