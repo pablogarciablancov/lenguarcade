@@ -323,8 +323,10 @@ function renderBoards(){
 }
 function unitCard(u,isSel,area,index){
   const c=creatureOf(u); if(!c)return '';
+  const meta=abilityMeta(c),trainPct=Math.round((u.training||0)*TRAINING_STEP*100);
   return '<button draggable="true" class="unit-card '+(u.chromatic?'chromatic ':'')+(isSel?'selected':'')+'" data-unit="'+esc(u.uid)+'" data-area="'+esc(area||'')+'" data-index="'+String(index??'')+'" data-rarity="'+esc(c.rarity)+'">'+
-    '<i class="rarity-line"></i><span class="unit-level">Nv.'+u.level+'</span><span class="unit-power">+'+(u.training||0)+'</span>'+
+    '<i class="rarity-line"></i><span class="unit-level">'+levelStars(u.level)+'</span><span class="unit-power">🎓 +'+trainPct+'%</span>'+
+    '<span class="unit-role">'+esc(meta.icon)+' '+esc(meta.role)+'</span>'+
     '<span class="unit-emoji">'+esc(c.emoji)+'</span><span class="unit-name">'+esc(c.name)+'</span>'+
   '</button>';
 }
@@ -804,13 +806,13 @@ function renderOpponents(){
 }
 function studentOpponentStats(u,index,team,snapshot){
   const c=creatureOf(u);if(!c)return{hp:1,damage:1,cooldown:3};
-  const levelMult=[0,1,1.65,2.65,4.1][clamp(u.level,1,4)];
-  const trainMult=1+(u.training||0)*.045;
+  const levelMult=LEVEL_MULT[clamp(u.level,1,4)]||1;
+  const trainMult=1+(u.training||0)*TRAINING_STEP;
   let hp=c.hp*levelMult*trainMult,damage=c.damage*levelMult*trainMult,cooldown=c.cooldown;
   const counts={};team.filter(Boolean).forEach(x=>creatureOf(x)?.types.forEach(t=>counts[t]=(counts[t]||0)+1));
   let syn=0;c.types.forEach(t=>{const n=counts[t]||0;syn=Math.max(syn,n>=6?.20:n>=4?.12:n>=2?.05:0);});
   hp*=1+syn;damage*=1+syn;
-  if(index<3)hp*=1.10;else cooldown*=.92;
+  if(index<3){hp*=1.25;cooldown*=1.10;}else{hp*=.90;cooldown*=.85;}
   const tr=D.trainer(snapshot?.trainerId);
   if(tr?.effect==='ortho'&&c.types.includes('ortografia')){hp*=1.18;damage*=1.18;}
   if(tr?.effect==='verbs'&&c.types.includes('verbos'))cooldown*=.85;
@@ -853,9 +855,11 @@ function buildSide(team,kind,opponentSnapshot){
   return{kind,units,maxHp:hp,hp,shield:0,burn:0,poison:0,shock:0,guard:0,haste:0,silence:0,teamRamp:0,castCount:0,fatalGuardUsed:false,lastSupport:0};
 }
 function enemyStats(u,index,team){
-  const c=creatureOf(u),levelMult=[0,1,1.6,2.5,3.8][u.level]||1;
+  const c=creatureOf(u),levelMult=LEVEL_MULT[clamp(u.level,1,4)]||1;
   const scale=1+Math.max(0,run.day-1)*.035;
-  return{hp:Math.round(c.hp*levelMult*scale),damage:Math.round(c.damage*levelMult*scale),cooldown:Math.max(.85,c.cooldown*(1-Math.min(.16,run.day*.008)))};
+  let hp=c.hp*levelMult*scale,damage=c.damage*levelMult*scale,cooldown=c.cooldown*(1-Math.min(.16,run.day*.008));
+  if(index<3){hp*=1.25;cooldown*=1.10;}else{hp*=.90;cooldown*=.85;}
+  return{hp:Math.round(hp),damage:Math.round(damage),cooldown:Math.max(.85,cooldown)};
 }
 function createBattleState(playerTeam,enemyTeam,enemyTrainer,opponentSnapshot){
   const seedBase=battleContext==='student'?(career.duelSquad?.publishedAt||Date.now())+'_'+(opponentSnapshot?.id||'rival'):(run.id+'_battle_'+run.day);
@@ -875,10 +879,13 @@ function renderBattleStatic(enemyTrainer){
 }
 function renderBattleBoard(id,side){
   $(id).innerHTML=side.units.map((b,i)=>{
-    if(!b)return '<div class="battle-unit empty"></div>';
-    const c=creatureOf(b.unit);
-    return '<div class="battle-unit '+(b.unit.chromatic?'chromatic':'')+'" data-battle-side="'+side.kind+'" data-battle-index="'+i+'">'+
-      '<span class="unit-level">Nv.'+b.unit.level+'</span><span class="unit-emoji">'+esc(c.emoji)+'</span><span class="unit-name">'+esc(c.name)+'</span><div class="cooldown-ring"><i></i></div>'+
+    if(!b)return '<div class="battle-unit empty '+(i<3?'front':'back')+'"></div>';
+    const c=creatureOf(b.unit),meta=abilityMeta(c);
+    return '<div class="battle-unit '+(i<3?'front ':'back ')+(b.unit.chromatic?'chromatic ':'')+'" data-battle-side="'+side.kind+'" data-battle-index="'+i+'">'+
+      '<div class="battle-unit-top"><span class="battle-stars">'+levelStars(b.unit.level)+'</span><span class="battle-role">'+esc(meta.icon)+' '+esc(meta.role)+'</span></div>'+
+      '<span class="unit-emoji">'+esc(c.emoji)+'</span><span class="unit-name">'+esc(c.name)+'</span>'+
+      '<span class="battle-ability-name">'+esc(c.ability.name)+'</span>'+
+      '<div class="cooldown-label"><span>HABILIDAD</span><b>0%</b></div><div class="cooldown-ring"><i></i></div>'+
     '</div>';
   }).join('');
 }
@@ -918,12 +925,47 @@ function applyBattleStart(){
   logBattle('<b>Comienza el encuentro.</b> Las habilidades se lanzan automáticamente.');
 }
 function abilityPower(b,base){
-  let amount=(base||b.stats.damage)*(b.unit.level===4?1.15:1);
-  amount*=1+(b.unit.training||0)*.012;
-  if(battle.time>=20&&b.unit&&b.stats&&b===b)amount*=1+(b.unit&&battle.player.units.includes(b)?countRelicEffect('lateDamage'):0);
+  const c=creatureOf(b.unit);
+  const scale=c?.damage?b.stats.damage/c.damage:1;
+  let amount=(base||c?.damage||b.stats.damage)*scale;
+  if(battle.time>=20&&battle.player.units.includes(b))amount*=1+countRelicEffect('lateDamage');
   if(battle.player.units.includes(b))amount*=1+battle.player.teamRamp/100;
   else amount*=1+battle.enemy.teamRamp/100;
   return amount;
+}
+function battleActionFx(side,target,b,c,a,dealt,healed,shielded){
+  const source=document.querySelector('[data-battle-side="'+side.kind+'"][data-battle-index="'+b.index+'"]');
+  const targetBoard=$(target.kind==='player'?'playerBattleBoard':'enemyBattleBoard');
+  const ownBoard=$(side.kind==='player'?'playerBattleBoard':'enemyBattleBoard');
+  const layer=$('battleFxLayer'),callout=$('abilityCallout');
+  if(source){source.classList.remove('casting');void source.offsetWidth;source.classList.add('casting');}
+  if(dealt>0&&targetBoard){
+    targetBoard.classList.remove('team-hit');void targetBoard.offsetWidth;targetBoard.classList.add('team-hit');
+    setTimeout(()=>targetBoard.classList.remove('team-hit'),260);
+  }
+  if(layer&&source&&targetBoard&&dealt>0){
+    const lr=layer.getBoundingClientRect(),sr=source.getBoundingClientRect(),tr=targetBoard.getBoundingClientRect();
+    const x1=sr.left+sr.width/2-lr.left,y1=sr.top+sr.height/2-lr.top;
+    const x2=tr.left+tr.width/2-lr.left,y2=tr.top+tr.height/2-lr.top;
+    const bolt=document.createElement('i');
+    bolt.className='battle-projectile '+side.kind;
+    bolt.style.left=x1+'px';bolt.style.top=y1+'px';bolt.style.setProperty('--dx',(x2-x1)+'px');bolt.style.setProperty('--dy',(y2-y1)+'px');
+    layer.appendChild(bolt);setTimeout(()=>bolt.remove(),420);
+  }
+  const floatHost=dealt>0?targetBoard:ownBoard;
+  if(layer&&floatHost&&(dealt>0||healed>0||shielded>0)){
+    const lr=layer.getBoundingClientRect(),hr=floatHost.getBoundingClientRect();
+    const n=document.createElement('b');
+    n.className='battle-float '+(dealt>0?'damage':healed>0?'heal':'shield');
+    n.textContent=dealt>0?'−'+format(dealt):healed>0?'+'+format(healed)+' CURA':'+'+format(shielded)+' ESCUDO';
+    n.style.left=(hr.left+hr.width/2-lr.left)+'px';n.style.top=(hr.top+hr.height*.34-lr.top)+'px';
+    layer.appendChild(n);setTimeout(()=>n.remove(),760);
+  }
+  if(callout){
+    callout.className='ability-callout '+side.kind;
+    callout.innerHTML='<span>'+esc(c.name)+'</span><b>'+esc(a.name)+'</b><small>'+(dealt>0?format(dealt)+' daño':healed>0?format(healed)+' de cura':shielded>0?format(shielded)+' de escudo':'efecto de equipo')+'</small>';
+    setTimeout(()=>{if(callout)callout.className='ability-callout hidden';},900);
+  }
 }
 function castAbility(side,target,b,free){
   if(!b||battle.ended)return;
@@ -936,13 +978,12 @@ function castAbility(side,target,b,free){
   for(let repeat=0;repeat<mult;repeat++){
     executeAbility(a,side,target,b,c);
   }
-  const unitEl=document.querySelector('[data-battle-side="'+side.kind+'"][data-battle-index="'+b.index+'"]');
-  if(unitEl){unitEl.classList.remove('casting');void unitEl.offsetWidth;unitEl.classList.add('casting');}
   if(side.kind==='player'&&hasRelic('abaco')&&side.castCount%5===0)heal(side,side.maxHp*.04);
   b.cooldown=b.stats.cooldown/Math.max(.45,1+(side.haste/100));
 }
 function executeAbility(a,side,target,b,c){
-  const p=abilityPower(b,a.power||b.stats.damage);
+  const p=abilityPower(b,a.power||c.damage);
+  const beforeHp=side.hp,beforeShield=side.shield;
   let dealt=0;
   switch(a.kind){
     case'damageBurn':dealt=directHit(target,p,side);target.burn+=a.status||2;break;
@@ -976,7 +1017,11 @@ function executeAbility(a,side,target,b,c){
     case'diversityBlast':{const types=Object.keys(teamTypeCounts(side.units.filter(Boolean).map(x=>x.unit))).length;dealt=directHit(target,p*(1+types*.16),side);break;}
     default:dealt=directHit(target,p,side);
   }
-  if(dealt>0)logBattle('<b>'+esc(c.name)+'</b> usa '+esc(a.name)+' ('+format(dealt)+' daño).');
+  const healed=Math.max(0,side.hp-beforeHp),shielded=Math.max(0,side.shield-beforeShield);
+  battleActionFx(side,target,b,c,a,dealt,healed,shielded);
+  if(dealt>0)logBattle('<b>'+esc(c.name)+'</b> usa '+esc(a.name)+' → <strong>'+format(dealt)+' daño</strong>.');
+  else if(healed>0||shielded>0)logBattle('<b>'+esc(c.name)+'</b> usa '+esc(a.name)+' → '+(healed>0?format(healed)+' cura ':'')+(shielded>0?format(shielded)+' escudo':'')+'.');
+  else logBattle('<b>'+esc(c.name)+'</b> usa '+esc(a.name)+'.');
 }
 function statusTick(side,target){
   if(side.burn>0){directHit(side,side.burn*2,null);side.burn=Math.max(0,side.burn-1);}
@@ -1010,8 +1055,12 @@ function renderBattle(){
   $('battleStatus').textContent=battle.time>=30?'MUERTE SÚBITA · '+battle.sudden+' pulsos':'Quemadura '+p.burn+' · Veneno '+p.poison+' · Descarga '+p.shock;
   ['player','enemy'].forEach(k=>battle[k].units.forEach(b=>{
     if(!b)return;
-    const el=document.querySelector('[data-battle-side="'+k+'"][data-battle-index="'+b.index+'"] .cooldown-ring i');
-    if(el)el.style.width=(100*(1-clamp(b.cooldown/b.stats.cooldown,0,1)))+'%';
+    const unitEl=document.querySelector('[data-battle-side="'+k+'"][data-battle-index="'+b.index+'"]');
+    const el=unitEl?.querySelector('.cooldown-ring i');
+    const pct=Math.round(100*(1-clamp(b.cooldown/b.stats.cooldown,0,1)));
+    if(el)el.style.width=pct+'%';
+    const label=unitEl?.querySelector('.cooldown-label b');if(label)label.textContent=pct+'%';
+    if(unitEl)unitEl.classList.toggle('ready',pct>=92);
   }));
 }
 function finishBattle(){
