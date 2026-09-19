@@ -588,7 +588,7 @@ function generateShopStock(run=state,r=null){
     const i=Math.floor(rng()*pool.length);chosen.push(pool.splice(i,1)[0]);
   }
   const sale=chosen.length?Math.floor(rng()*chosen.length):-1;
-  return chosen.map((item,i)=>({id:item.id,price:i===sale?Math.max(1,Math.ceil(item.cost*.75)):item.cost,discount:i===sale?25:0,sold:false}));
+  return chosen.map((item,i)=>({id:item.id,price:i===sale?Math.max(1,Math.floor(item.cost*.75)):item.cost,discount:i===sale?25:0,sold:false}));
 }
 function shopOffers(){
   if(!state)return[];
