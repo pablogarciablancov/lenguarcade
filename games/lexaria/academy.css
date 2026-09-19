@@ -334,10 +334,10 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
 .opponent-avatar-sprite{width:58px!important;height:70px!important;flex-basis:58px!important}
 
 /* Campos de batalla generados. Las propias imágenes ya contienen los 12 círculos de posición. */
-.battle-screen[data-battlefield="academy"]{background:url('./assets/generated/battle-academy.svg') center/cover no-repeat!important}
+.battle-screen[data-battlefield="academy"]{background:url('./assets/generated/battle-academy.webp') center/cover no-repeat!important}
 .battle-screen[data-battlefield="ice"]{background:url('./assets/generated/battle-ice.svg') center/cover no-repeat!important}
 .battle-screen[data-battlefield="crystal"]{background:url('./assets/generated/battle-crystal.svg') center/cover no-repeat!important}
-.battle-screen[data-battlefield="sunset"]{background:url('./assets/generated/battle-sunset.svg') center/cover no-repeat!important}
+.battle-screen[data-battlefield="sunset"]{background:url('./assets/generated/battle-sunset.webp') center/cover no-repeat!important}
 .battle-unit:after,.battle-unit.empty:before{display:none!important}
 .battle-board{padding:2px 5px 4px!important;gap:0 6px!important}
 .battle-unit{justify-content:flex-end!important;padding:4px 1px 10px!important}
@@ -373,3 +373,38 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
 .battle-screen[data-battlefield] .battle-unit{background:linear-gradient(180deg,#08182708,#07131f28)!important;border-color:#e7cf9166!important;box-shadow:none!important}
 .battle-screen[data-battlefield] .battle-unit:hover{background:linear-gradient(180deg,#fff2bd10,#0a1b2b38)!important;border-color:#ffe19caa!important}
 .battle-screen[data-battlefield] .battle-unit .unit-name{background:#07172bd6;padding:1px 4px;border-radius:5px}
+
+/* ===== LEXARIA REAL ART · v8 =====
+   Authoritative layer. Old atlas rules explicitly disabled background-image;
+   these rules restore the real generated image sheets and real raster arenas. */
+.lex-sprite{
+  background-image:var(--lex-image)!important;
+  background-size:1000% 100%!important;
+  background-repeat:no-repeat!important;
+  background-position:var(--lex-pos,0%) 50%!important;
+  background-color:transparent!important;
+}
+.trainer-sprite{
+  background-image:var(--trainer-image)!important;
+  background-size:400% 100%!important;
+  background-repeat:no-repeat!important;
+  background-position:var(--trainer-pos,0%) center!important;
+  background-color:transparent!important;
+}
+.battle-screen[data-battlefield="academy"]{
+  background:url('./assets/generated/battle-academy.webp') center/cover no-repeat!important;
+}
+.battle-screen[data-battlefield="sunset"]{
+  background:url('./assets/generated/battle-sunset.webp') center/cover no-repeat!important;
+}
+.battle-screen[data-battlefield] .battle-arena{
+  background:linear-gradient(180deg,#07182705,#07182700 58%,#00121c18)!important;
+}
+.battle-screen[data-battlefield] .battle-board{
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.battle-screen[data-battlefield] .battle-unit{
+  background:linear-gradient(180deg,#08182702,#07131f12)!important;
+  border-color:#e7cf9148!important;
+}

@@ -13,10 +13,8 @@ const TRAINING_STEP=.05;
 const LEVEL_MULT={1:1,2:1.7,3:3,4:4.5};
 
 const BATTLEFIELDS=[
-  {id:'academy',name:'Patio Celeste',image:'battle-academy.svg'},
-  {id:'ice',name:'Valle Helado',image:'battle-ice.svg'},
-  {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal.svg'},
-  {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset.svg'}
+  {id:'academy',name:'Patio Celeste',image:'battle-academy.webp'},
+  {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset.webp'}
 ];
 
 const TRAINER_ART={
@@ -139,7 +137,7 @@ function spriteMarkup(c,extra){
   const i=D.creatures.findIndex(x=>x.id===c.id);
   if(i<0)return '<span class="lex-sprite missing" aria-hidden="true"></span>';
   const row=Math.floor(i/10)+1,col=i%10,pos=(col/9)*100;
-  return '<span class="lex-sprite '+esc(extra||'')+'" aria-hidden="true" style="--lex-pos:'+pos.toFixed(4)+'%;background-image:url(\'./assets/generated/lexarios-row-'+row+'.svg\')"></span>';
+  return '<span class="lex-sprite '+esc(extra||'')+'" aria-hidden="true" style="--lex-pos:'+pos.toFixed(4)+'%;--lex-image:url(\'./assets/generated/lexarios-row-'+row+'.webp\')"></span>';
 }
 const TRAINER_SPRITE_INDEX={
   filologa:0,corrector:1,verbologa:2,lexicografo:3,
@@ -148,7 +146,7 @@ const TRAINER_SPRITE_INDEX={
 function trainerSpriteMarkup(t,extra){
   if(!t)return '';
   const i=TRAINER_SPRITE_INDEX[t.id]??0,row=Math.floor(i/4)+1,col=i%4,pos=(col/3)*100;
-  return '<span class="trainer-sprite '+esc(extra||'')+'" role="img" aria-label="'+esc(t.name)+'" style="--trainer-pos:'+pos.toFixed(4)+'%;background-image:url(\'./assets/generated/trainers-row-'+row+'.svg\')"></span>';
+  return '<span class="trainer-sprite '+esc(extra||'')+'" role="img" aria-label="'+esc(t.name)+'" style="--trainer-pos:'+pos.toFixed(4)+'%;--trainer-image:url(\'./assets/generated/trainers-row-'+row+'.webp\')"></span>';
 }
 function battlefieldFor(seedBase){
   const rng=D.seeded(String(seedBase||'lexaria')+'_battlefield');
