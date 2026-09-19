@@ -265,13 +265,13 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
     const SUPABASE_KEY='sb_publishable_zScSYh0tbpXLcY_5iyzsqQ_wepkdqKe';
     const SESSION_KEY='LA_TEACHER_SUPABASE_SESSION';
     const ASSET_BASE='https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/games/';
-    const BANNERS={battlegrafia:'battlegrafia-banner.jpg',maniacgrafia:'maniacgrafia-banner.jpg',narratoria:'narratoria-banner.jpg',versopolis:'versopolis-banner.jpg',scrabble:'scrabble-banner.jpg',conjuga_apuesta:'conjuga-apuesta-banner.jpg',verb_battle:'verb-battle-banner.jpg',rayuela:'rayuela-banner.webp',entre_lineas:'entre-lineas-banner.webp',word_play:'word-play-banner.webp'};
+    const BANNERS={battlegrafia:'battlegrafia-banner.jpg',maniacgrafia:'maniacgrafia-banner.jpg',narratoria:'narratoria-banner.jpg',versopolis:'versopolis-banner.jpg',scrabble:'scrabble-banner.jpg',conjuga_apuesta:'conjuga-apuesta-banner.jpg',verb_battle:'verb-battle-banner.jpg',rayuela:'rayuela-banner.webp',entre_lineas:'entre-lineas-banner.webp',word_play:'word-play-banner-v2.webp'};
     const $=id=>document.getElementById(id);
     let session=null,currentTeacher=null,busy=false;
     let rosterState={classes:[],students:[],summary:{}};
 
     function esc(value){return String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));}
-    function bannerUrl(id){return ASSET_BASE+(BANNERS[id]||'maniacgrafia-banner.jpg');}
+    function bannerUrl(id,banner){const direct=String(banner||'');return ASSET_BASE+((/\.(?:png|jpe?g|webp|svg)$/i.test(direct)?direct:'')||BANNERS[id]||'maniacgrafia-banner.jpg');}
     function showLoader(text){$('loaderText').textContent=text||'Cargando...';$('loader').classList.add('open');}
     function hideLoader(){$('loader').classList.remove('open');}
     function setStatus(text){$('status').textContent=text;$('loginStatus').textContent=text;}

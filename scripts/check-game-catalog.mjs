@@ -81,11 +81,12 @@ if(!wordPlay ||
    wordPlay.official!==true ||
    wordPlay.status!=="listo" ||
    wordPlay.entry!=="games/word_play/" ||
-   wordPlay.integration!=="embedded"){
-  throw new Error("Word Play debe estar integrado como juego oficial de producción.");
+   wordPlay.integration!=="embedded" ||
+   wordPlay.banner!=="word-play-banner-v2.webp"){
+  throw new Error("Word Play debe estar integrado como juego oficial de producción con su portada versionada.");
 }
 for(const [label,html] of [["alumno",student],["profesor",teacher]]){
-  if(!html.includes("word_play:'word-play-banner.webp'")){
+  if(!html.includes("word_play:'word-play-banner-v2.webp'")){
     throw new Error("Word Play debe usar su portada propia en el panel de "+label+".");
   }
 }
