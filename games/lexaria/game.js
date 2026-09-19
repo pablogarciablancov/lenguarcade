@@ -430,7 +430,7 @@ function renderMarket(){
     if(o.kind==='creature'){
       const c=D.creature(o.creatureId),meta=abilityMeta(c),fit=strategicFit(c),fusion=fusionInfo(c.id,1,true);
       const rowLabel=meta.row==='front'?'🛡️ DELANTE':'⚡ DETRÁS';
-      return '<article class="offer-card game-offer '+(o.bought?'bought ':'')+(o.chromatic?'chromatic ':'')+(affordable?'':'unaffordable')+'" data-role="'+esc(meta.role)+'">'+
+      return '<article class="offer-card game-offer '+(o.bought?'bought ':'')+(o.chromatic?'chromatic ':'')+(affordable?'':'unaffordable')+'" data-role="'+esc(meta.role)+'" data-rarity="'+esc(c.rarity)+'">'+
         '<div class="offer-topline"><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span><span class="rarity-name">'+esc(D.RARITIES[c.rarity].name)+'</span></div>'+
         '<div class="offer-body"><div class="offer-portrait">'+spriteMarkup(c,'market-sprite')+'<div><h4>'+esc(c.name)+(o.chromatic?' ✦':'')+'</h4><small>'+rowLabel+'</small></div></div>'+
         '<div class="offer-type-row">'+c.types.map(t=>'<span class="offer-type">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+
