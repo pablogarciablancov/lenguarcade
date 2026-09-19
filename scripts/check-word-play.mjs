@@ -30,7 +30,7 @@ for (const required of [
   './content.js','./lexicon.js','./vendor/typo.js','./engine.js','./bridge.js','./app.js','./layout.js','./sound.js','./game-feel.js','./styles.css','./responsive.css','./arcade.css'
 ]) if (!index.includes(required)) throw new Error(`Falta ${required} en index.html`);
 
-if(!index.includes('20260919-shop-score-v1'))throw new Error('Los assets de Word Play no llevan la versión de tienda y feedback de puntuación');
+if(!index.includes('20260919-tooltips-v1'))throw new Error('Los assets de Word Play no llevan la versión de microayudas contextuales');
 if(!app.includes('dictionaryReady')||!app.includes('launchButtons'))throw new Error('La partida puede arrancar antes de cargar el diccionario');
 if(app.includes("visibilitychange"))throw new Error('Cambiar de pestaña no debe activar Tinta Viva automáticamente');
 if(!/function applyUpgrade[\s\S]*const upgradeId=activeUpgrade[\s\S]*activeUpgrade=null[\s\S]*render\(\)/.test(app))throw new Error('Aplicar una Mejora debe desarmar el modo de selección tras una sola ficha');
@@ -39,11 +39,12 @@ if(!app.includes('sanitizeSelection'))throw new Error('La UI no sanea seleccione
 for (const required of ['100dvh','overflow:hidden','.board','.reward-card','.collection-body','.boss-badge']) {
   if (!css.replaceAll(' ', '').includes(required.replaceAll(' ', ''))) throw new Error(`Falta ${required} en styles.css`);
 }
+if(!arcade.replaceAll(' ','').includes('.tile::after{content:none!important}'))throw new Error('El valor de la ficha sigue usando la burbuja/pseudo-elemento antiguo');
 for (const required of ['--tile-size','--board-gap','grid-template-columns:repeat(4,var(--tile-size))','max-height:100dvh','max-height:850px','max-width:820px']) {
   if (!responsive.replaceAll(' ', '').includes(required.replaceAll(' ', ''))) throw new Error(`Falta ${required} en responsive.css`);
 }
 
-for (const required of ['.wp-fx-layer','.wp-score-pop','.word-slot','.score-breakdown','.difficulty-grid','.upgrade-card','.tile.emerald','.tile.dot','.tile.mirror','.tile.bang','.tile.plus','.tile.normal.value-1','.tile.normal.value-4','.tile.normal.value-9','.word-slot.normal.value-3','.economy-hud','.coin-wallet','.shop-btn','.shop-grid','.shop-card','.letter-grid','.tile-points','.wp-word-score-sequence','.wp-score-letter','.ink-power','.ink-wallet','.tinta-viva-btn','.reward-art','.reward-art-image','.reward-card-body','.rarity-gem','.card-corner','.classroom-toggle','user-select:none','.reward-card.rarity-legendary','.board::before','.tile.gold']) {
+for (const required of ['.wp-fx-layer','.wp-score-pop','.word-slot','.score-breakdown','.difficulty-grid','.upgrade-card','.tile.emerald','.tile.dot','.tile.mirror','.tile.bang','.tile.plus','.tile.normal.value-1','.tile.normal.value-4','.tile.normal.value-9','.word-slot.normal.value-3','.economy-hud','.coin-wallet','.shop-btn','.shop-grid','.shop-card','.letter-grid','.tile-points','.hover-tooltip','.hover-tooltip.visible','.wp-word-score-sequence','.wp-score-letter','.ink-power','.ink-wallet','.tinta-viva-btn','.reward-art','.reward-art-image','.reward-card-body','.rarity-gem','.card-corner','.classroom-toggle','user-select:none','.reward-card.rarity-legendary','.board::before','.tile.gold']) {
   if (!arcade.includes(required)) throw new Error(`Falta ${required} en arcade.css`);
 }
 for (const required of ['WordPlayLexicon','additions','strict','blocked','rejectPatterns','es-ES']) {
@@ -74,7 +75,7 @@ for (const required of ['computeTileSize','ResizeObserver','MutationObserver','v
 for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','BOARD_RULES','pickBalancedLetter','rebalanceBoard','boardQuality','wordIndex','candidateBoards','repairLoadedBoard','improvePlayability','HUNSPELL_AFF','HUNSPELL_DIC','loadHunspell','morphologyReady','modeConfig','totalRounds','specialRound','specialEffect','slotBonusAt','useUpgrade','sellModifier','skipReward','refreshBoard','anchorWordCandidates','anchoredBoard','boardPlayability','rescueBoard','stabilizeBoard','classroomScramble','buyTintaViva','useTintaViva','shopItem','shopStatus','buyShopItem','coinRewardForPlay','tilePoints']) {
   if (!engine.includes(required)) throw new Error(`Falta ${required} en engine.js`);
 }
-for (const required of ['renderCareer','renderBoard','renderUpgrades','valueClass','wordScorePreview','difficultyModal','openReward','skipReward','collection','wordLog','classroomMode','tintaBtn','buyTintaViva','useTintaViva','rewardArt','rewardArtSvg','rewardAccent','reward-art.svg','rarity-gem','openShop','renderShop','buyFromShop','buyShopLetter','tile-points','scoreWord','copy']) {
+for (const required of ['renderCareer','renderBoard','renderUpgrades','valueClass','wordScorePreview','difficultyModal','openReward','skipReward','collection','wordLog','classroomMode','tintaBtn','buyTintaViva','useTintaViva','rewardArt','rewardArtSvg','rewardAccent','reward-art.svg','rarity-gem','openShop','renderShop','buyFromShop','buyShopLetter','tile-points','scoreWord','copy','initTooltips','installStaticTips','specialHelp','tileTip','data-tip','Rerolls de recompensa']) {
   if (!app.includes(required)) throw new Error(`Falta ${required} en app.js`);
 }
 for (const required of ["const GAME_ID='word_play'","post('READY'","post('INITIALIZED'","post('CHECKPOINT'","post('RESULT'",'SESSION_STARTED']) {
@@ -96,6 +97,15 @@ if (C.modifiers.length < 60) throw new Error(`Solo hay ${C.modifiers.length} mod
 if (C.gifts.length < 25) throw new Error(`Solo hay ${C.gifts.length} obsequios/recursos`);
 if (C.upgrades.length < 15) throw new Error(`Solo hay ${C.upgrades.length} mejoras activas`);
 if (!Array.isArray(C.shopItems)||C.shopItems.length < 9) throw new Error('La tienda tiene pocos artículos');
+const upEmerald=C.upgrades.find(x=>x.id==='up_emerald');
+const upDot=C.upgrades.find(x=>x.id==='up_dot');
+const upGold=C.upgrades.find(x=>x.id==='up_gold');
+const upDiamond=C.upgrades.find(x=>x.id==='up_diamond');
+if(!upEmerald||!/25%/.test(upEmerald.desc)||!/×5/.test(upEmerald.desc))throw new Error('La carta Esmeralda no explica su efecto');
+if(!upDot||!/duplica el Word Score/i.test(upDot.desc))throw new Error('La carta Punto no explica su efecto');
+if(!upGold||!/Word Score/i.test(upGold.desc)||!/2 o más Doradas/i.test(upGold.desc))throw new Error('La carta Dorada no explica su efecto');
+if(!upDiamond||!/\+5/.test(upDiamond.desc))throw new Error('La carta Diamante no explica su efecto');
+
 if (C.specialRounds.length < 9) throw new Error(`Solo hay ${C.specialRounds.length} rondas especiales`);
 if (Object.keys(C.modes||{}).length < 6) throw new Error('Faltan dificultades/modos');
 if (C.achievements.length < 20) throw new Error(`Solo hay ${C.achievements.length} logros`);
@@ -483,4 +493,4 @@ for(const [w,h] of [[700,430],[520,360],[390,250],[900,500]]){
   const s=layoutSize(w,h);if(s*4+21>w+1||s*4+21>h+1)throw new Error(`El tablero puede desbordar ${w}×${h}`);
 }
 
-console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/color/core-loop/slots/upgrades/special-rounds/special-tiles/deadlock-rescue/tinta-economy/reward-art/anchor-6plus/upgrade-state-regression/shop-economy/score-animation/classroom-copy-guard/morphology-esES/bridge/audio/daily OK`);
+console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/color/core-loop/slots/upgrades/special-rounds/special-tiles/deadlock-rescue/tinta-economy/reward-art/anchor-6plus/upgrade-state-regression/shop-economy/score-animation/tooltips-special-help/classroom-copy-guard/morphology-esES/bridge/audio/daily OK`);
