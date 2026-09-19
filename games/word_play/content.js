@@ -69,8 +69,8 @@ window.WordPlayContent = (() => {
     {id:'length_up',name:'Amante de lo largo',rarity:'rare',desc:'+25% a todas las bonificaciones de longitud.',type:'gift',effect:'lengthMult',value:.25},
     {id:'letters_up',name:'Tipografía premium',rarity:'rare',desc:'+20% al valor base de todas las letras.',type:'gift',effect:'letterMult',value:.2},
     {id:'start_bonus',name:'Salida lanzada',rarity:'uncommon',desc:'+30 puntos al empezar cada ronda.',type:'gift',effect:'roundSeed',value:30},
-    {id:'gold_tile',name:'Ficha dorada',rarity:'uncommon',desc:'Convierte una ficha aleatoria en dorada (×2).',type:'tile',effect:'gold'},
-    {id:'diamond_tile',name:'Ficha diamante',rarity:'rare',desc:'Convierte una ficha aleatoria en diamante (×3).',type:'tile',effect:'diamond'},
+    {id:'gold_tile',name:'Ficha dorada',rarity:'uncommon',desc:'Convierte una ficha aleatoria en Dorada. Si juegas 2 o más Doradas juntas, multiplican el Word Score por su número.',type:'tile',effect:'gold'},
+    {id:'diamond_tile',name:'Ficha diamante',rarity:'rare',desc:'Convierte una ficha aleatoria en Diamante. Gana +5 de valor cada vez que permanece sin jugar tras una palabra.',type:'tile',effect:'diamond'},
     {id:'echo_tile',name:'Ficha eco',rarity:'rare',desc:'Una ficha suma dos veces su valor.',type:'tile',effect:'echo'},
     {id:'ink_tile',name:'Ficha tinta',rarity:'uncommon',desc:'Gana +1 de valor cada vez que se usa.',type:'tile',effect:'ink'},
     {id:'crown_tile',name:'Ficha corona',rarity:'epic',desc:'Esta ficha añade +25 al jugarla.',type:'tile',effect:'crown'},
@@ -82,15 +82,15 @@ window.WordPlayContent = (() => {
     {id:'boss_play',name:'Salvoconducto',rarity:'rare',desc:'+1 jugada extra en cada ronda jefe.',type:'gift',effect:'bossPlay',value:1},
     {id:'rare_luck',name:'Ojo del coleccionista',rarity:'epic',desc:'Mejora las probabilidades de recompensas raras.',type:'gift',effect:'rareLuck',value:1},
     {id:'refresh_pack',name:'Bolsa de renovación',rarity:'common',desc:'+4 Renovaciones inmediatamente.',type:'gift',effect:'instantShuffle',value:4},
-    {id:'gift_diamond',name:'Dos diamantes',rarity:'uncommon',desc:'Añade 2 fichas Diamante a la reserva especial.',type:'bagTile',effect:'diamond',count:2},
-    {id:'gift_dot',name:'Dos puntos',rarity:'uncommon',desc:'Añade 2 fichas Punto a la reserva especial.',type:'bagTile',effect:'dot',count:2},
-    {id:'gift_emerald',name:'Dos esmeraldas',rarity:'uncommon',desc:'Añade 2 fichas Esmeralda a la reserva especial.',type:'bagTile',effect:'emerald',count:2},
-    {id:'gift_wild',name:'Dos comodines',rarity:'uncommon',desc:'Añade 2 comodines a la reserva especial.',type:'bagTile',effect:'wild',count:2},
-    {id:'gift_potion',name:'Poción de jugadas',rarity:'rare',desc:'Añade una ficha Poción a la reserva especial.',type:'bagTile',effect:'potion',count:1},
-    {id:'gift_glass',name:'Cristales',rarity:'rare',desc:'Añade 2 fichas de Cristal a la reserva especial.',type:'bagTile',effect:'glass',count:2},
-    {id:'gift_mirror',name:'Espejos',rarity:'rare',desc:'Añade 2 fichas Espejo a la reserva especial.',type:'bagTile',effect:'mirror',count:2},
-    {id:'gift_bang',name:'Exclamación',rarity:'rare',desc:'Añade una ficha Exclamación a la reserva especial.',type:'bagTile',effect:'bang',count:1},
-    {id:'gift_plus',name:'Conector',rarity:'legendary',desc:'Añade una ficha Conector para jugar dos palabras a la vez.',type:'bagTile',effect:'plus',count:1}
+    {id:'gift_diamond',name:'Dos diamantes',rarity:'uncommon',desc:'Añade 2 Diamantes a la reserva. Cada Diamante gana +5 de valor cuando no lo usas en una palabra.',type:'bagTile',effect:'diamond',count:2},
+    {id:'gift_dot',name:'Dos puntos',rarity:'uncommon',desc:'Añade 2 fichas Punto a la reserva. Si una ficha Punto cierra la palabra, duplica el Word Score.',type:'bagTile',effect:'dot',count:2},
+    {id:'gift_emerald',name:'Dos esmeraldas',rarity:'uncommon',desc:'Añade 2 Esmeraldas a la reserva. Cada Esmeralda tiene un 25% de probabilidad de puntuar ×5.',type:'bagTile',effect:'emerald',count:2},
+    {id:'gift_wild',name:'Dos comodines',rarity:'uncommon',desc:'Añade 2 Comodines a la reserva. Pueden representar cualquier letra, pero su valor propio es 0.',type:'bagTile',effect:'wild',count:2},
+    {id:'gift_potion',name:'Poción de jugadas',rarity:'rare',desc:'Añade una Poción a la reserva. Al jugarla, su valor se convierte en Jugadas extra y después se rompe.',type:'bagTile',effect:'potion',count:1},
+    {id:'gift_glass',name:'Cristales',rarity:'rare',desc:'Añade 2 Cristales a la reserva. Son copias temporales y se rompen al jugarlas.',type:'bagTile',effect:'glass',count:2},
+    {id:'gift_mirror',name:'Espejos',rarity:'rare',desc:'Añade 2 Espejos a la reserva. Copian la letra y el valor de la ficha colocada a su izquierda.',type:'bagTile',effect:'mirror',count:2},
+    {id:'gift_bang',name:'Exclamación',rarity:'rare',desc:'Añade una Exclamación a la reserva. Debe cerrar la jugada y vale la suma de las fichas que dejas en el tablero.',type:'bagTile',effect:'bang',count:1},
+    {id:'gift_plus',name:'Conector',rarity:'legendary',desc:'Añade un Conector a la reserva. Permite unir y puntuar dos palabras válidas en una sola jugada.',type:'bagTile',effect:'plus',count:1}
   ];
 
 
@@ -98,16 +98,16 @@ window.WordPlayContent = (() => {
     {id:'up_hold',name:'Reserva una ficha',rarity:'common',desc:'Elige una ficha: se mantiene y renueva el resto del tablero.',type:'upgrade',effect:'holdRefresh',uses:3},
     {id:'up_vowel',name:'Cambio vocálico',rarity:'common',desc:'Cambia una ficha por una vocal nueva.',type:'upgrade',effect:'swapVowel',uses:4},
     {id:'up_consonant',name:'Cambio consonántico',rarity:'common',desc:'Cambia una ficha por una consonante común.',type:'upgrade',effect:'swapConsonant',uses:4},
-    {id:'up_gold',name:'Baño de oro',rarity:'common',desc:'Convierte una ficha en Dorada.',type:'upgrade',effect:'makeGold',uses:2},
-    {id:'up_emerald',name:'Esmeralda',rarity:'common',desc:'Convierte una ficha en Esmeralda.',type:'upgrade',effect:'makeEmerald',uses:2},
-    {id:'up_dot',name:'Punto rojo',rarity:'common',desc:'Convierte una ficha en Punto.',type:'upgrade',effect:'makeDot',uses:3},
+    {id:'up_gold',name:'Baño de oro',rarity:'common',desc:'Convierte una ficha en Dorada. Con 2 o más Doradas en la misma palabra, el Word Score se multiplica por su número.',type:'upgrade',effect:'makeGold',uses:2},
+    {id:'up_emerald',name:'Esmeralda',rarity:'common',desc:'Convierte una ficha en Esmeralda. Cada vez que la juegas tiene un 25% de probabilidad de puntuar ×5.',type:'upgrade',effect:'makeEmerald',uses:2},
+    {id:'up_dot',name:'Punto rojo',rarity:'common',desc:'Convierte una ficha en Punto. Si esa ficha es la última de la palabra, duplica el Word Score.',type:'upgrade',effect:'makeDot',uses:3},
     {id:'up_duplicate',name:'Duplicador',rarity:'uncommon',desc:'Duplica una ficha y añade una copia a la reserva especial.',type:'upgrade',effect:'duplicate',uses:2},
     {id:'up_glass',name:'Copia de cristal',rarity:'uncommon',desc:'Crea una copia de cristal de la ficha. Se rompe al jugarla.',type:'upgrade',effect:'glass',uses:3},
     {id:'up_destroy_play',name:'Sacrificio',rarity:'uncommon',desc:'Destruye una ficha y gana 1 jugada.',type:'upgrade',effect:'destroyPlay',uses:2},
-    {id:'up_diamond',name:'Diamante',rarity:'uncommon',desc:'Convierte una ficha en Diamante; gana +5 mientras la reservas.',type:'upgrade',effect:'makeDiamond',uses:2},
+    {id:'up_diamond',name:'Diamante',rarity:'uncommon',desc:'Convierte una ficha en Diamante. Gana +5 de valor cada vez que termina una palabra sin haberlo jugado.',type:'upgrade',effect:'makeDiamond',uses:2},
     {id:'up_plus5',name:'Imprenta +5',rarity:'rare',desc:'Añade +5 permanentemente al valor de una ficha.',type:'upgrade',effect:'addScore',value:5,uses:2},
     {id:'up_random',name:'Tinta imprevisible',rarity:'rare',desc:'Añade entre +1 y +10 permanentemente a una ficha.',type:'upgrade',effect:'randomScore',uses:2},
-    {id:'up_wild',name:'Comodín',rarity:'rare',desc:'Convierte una ficha en comodín; podrás elegir su letra.',type:'upgrade',effect:'makeWild',uses:1},
+    {id:'up_wild',name:'Comodín',rarity:'rare',desc:'Convierte una ficha en Comodín. Puede representar cualquier letra, aunque su valor propio es 0.',type:'upgrade',effect:'makeWild',uses:1},
     {id:'up_random_special',name:'Transmutación',rarity:'rare',desc:'Convierte una ficha en un tipo especial al azar.',type:'upgrade',effect:'randomSpecial',uses:2},
     {id:'up_plus10',name:'Imprenta +10',rarity:'legendary',desc:'Añade +10 permanentemente al valor de una ficha.',type:'upgrade',effect:'addScore',value:10,uses:2}
   ];
@@ -118,9 +118,9 @@ window.WordPlayContent = (() => {
     {id:'shop_reroll',name:'Reroll',desc:'+1 cambio de opciones de recompensa.',cost:5,effect:'reroll',amount:1,artKey:'art-refresh'},
     {id:'shop_tinta',name:'Carga de Tinta Viva',desc:'+1 uso de Tinta Viva.',cost:6,effect:'tinta',amount:1,artKey:'art-transmute'},
     {id:'shop_letter',name:'Letra a la carta',desc:'Elige una letra y añádela a la reserva.',cost:5,effect:'letter',amount:1,artKey:'art-vowels'},
-    {id:'shop_wild',name:'Comodín',desc:'Añade un Comodín a la reserva especial.',cost:7,effect:'reserveTile',tileKind:'wild',amount:1,artKey:'art-wild'},
-    {id:'shop_gold',name:'Ficha Dorada',desc:'Añade una Dorada a la reserva especial.',cost:8,effect:'reserveTile',tileKind:'gold',amount:1,artKey:'art-gold'},
-    {id:'shop_diamond',name:'Ficha Diamante',desc:'Añade un Diamante a la reserva especial.',cost:10,effect:'reserveTile',tileKind:'diamond',amount:1,artKey:'art-diamond'},
+    {id:'shop_wild',name:'Comodín',desc:'Añade un Comodín a la reserva. Puede representar cualquier letra, pero vale 0 puntos.',cost:7,effect:'reserveTile',tileKind:'wild',amount:1,artKey:'art-wild'},
+    {id:'shop_gold',name:'Ficha Dorada',desc:'Añade una Dorada a la reserva. Con 2 o más Doradas juntas, multiplican el Word Score.',cost:8,effect:'reserveTile',tileKind:'gold',amount:1,artKey:'art-gold'},
+    {id:'shop_diamond',name:'Ficha Diamante',desc:'Añade un Diamante a la reserva. Gana +5 de valor cuando sobrevive a una palabra sin jugarse.',cost:10,effect:'reserveTile',tileKind:'diamond',amount:1,artKey:'art-diamond'},
     {id:'shop_upgrade',name:'Mejora misteriosa',desc:'Compra una Mejora aleatoria si tienes hueco.',cost:9,effect:'upgrade',amount:1,artKey:'art-transmute'}
   ];
 
