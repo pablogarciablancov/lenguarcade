@@ -396,3 +396,14 @@ html.reduce-motion *,html.reduce-motion *::before,html.reduce-motion *::after{an
   .score-breakdown{font-size:.5rem;gap:3px}
   .difficulty-grid{grid-template-columns:1fr 1fr}
 }
+
+
+/* Fichas avanzadas */
+.tile.mirror,.word-slot.mirror{background:linear-gradient(145deg,#f2fbff,#8fd5e8)!important;color:#173143!important}
+.tile.mirror::before{content:"◀";position:absolute;left:7%;top:4%;font-size:.72rem;color:#28637a}
+.tile.bang,.word-slot.bang{background:linear-gradient(145deg,#fff0b8,#ff9b31)!important;color:#3c1c08!important}
+.tile.bang::before{content:"!";position:absolute;left:8%;top:2%;font-size:.8rem;color:#b63716;font-weight:950}
+.tile.plus,.word-slot.plus{background:linear-gradient(145deg,#d6ffe8,#45e19b)!important;color:#0c3b2a!important}
+.tile.plus::before{content:"+";position:absolute;left:6%;top:2%;font-size:.78rem;color:#087b55;font-weight:950}
+.modifier-section{flex:.62!important}
+.upgrade-section{flex:.38!important}
