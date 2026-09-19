@@ -48,9 +48,38 @@ function renderUpgrades(){
   ui.upgrades.innerHTML=s.upgrades.map(o=>{const u=C.upgrades.find(x=>x.id===o.id);return u?'<button type="button" class="upgrade-card rarity-'+u.rarity+' '+(activeUpgrade===o.id?'active':'')+'" data-upgrade="'+o.id+'"><strong>'+u.name+'<em>×'+o.uses+'</em></strong><span>'+u.desc+'</span></button>':'';}).join('');
   ui.upgrades.querySelectorAll('[data-upgrade]').forEach(b=>b.addEventListener('click',()=>{activeUpgrade=activeUpgrade===b.dataset.upgrade?null:b.dataset.upgrade;showFeedback(activeUpgrade?'Selecciona una ficha para aplicar la mejora.':'Mejora deseleccionada.','');renderUpgrades();renderBoard();}));
 }
-function renderBoard(){const s=state();ui.board.innerHTML='';for(const t of s.board){const b=document.createElement('button');b.type='button';b.className=`tile ${t.kind} ${s.selected.some(x=>x.id===t.id)?'selected':''}`;b.dataset.value=E.tileScore(t);b.dataset.bonus=t.bonus||0;b.textContent=t.letter;b.addEventListener('click',()=>selectTile(t.id));ui.board.appendChild(b);}}
-function selectTile(id){const s=state(),t=s.board.find(x=>x.id===id);if(!t||s.selected.some(x=>x.id===id))return;s.selected.push({id:t.id,char:t.letter});renderBoard();renderWord();}
-function renderWord(){const s=state(),w=currentWord();ui.builder.innerHTML='';s.selected.forEach((x,i)=>{const t=s.board.find(q=>q.id===x.id),b=document.createElement('button');b.type='button';b.className=`word-chip ${E.VOWELS.has(E.strip(x.char).toUpperCase())?'vowel':''}`;b.innerHTML=`${x.char}<small>${E.tileScore(t)}</small>`;b.addEventListener('click',()=>{const base=E.strip(x.char).toUpperCase(),cycle=E.ACCENTABLE[base];if(cycle){const j=cycle.indexOf(x.char.toUpperCase());x.char=cycle[(j+1)%cycle.length];renderWord();}else{s.selected.splice(i,1);renderBoard();renderWord();}});ui.builder.appendChild(b);});if(!w){ui.hint.textContent='Selecciona fichas para formar una palabra';ui.preview.textContent='0 pts';ui.combo.innerHTML='';return;}ui.hint.textContent='Pulsa una vocal seleccionada para cambiar su tilde';const tiles=s.selected.map(x=>s.board.find(t=>t.id===x.id)).filter(Boolean),sc=E.score(w,tiles,true);ui.preview.textContent=`${fmt(sc.total)} pts`;ui.combo.innerHTML=sc.effects.slice(0,5).map(e=>`<span class="combo-chip">${e}</span>`).join('');}
+function tileLocked(t){const s=state(),effect=E.specialEffect();return effect==='topLocked'&&s.roundWords<4&&(s.specialData.lockedIds||[]).includes(t.id);}
+function renderBoard(){
+  const s=state();ui.board.innerHTML='';const highlighted=s.specialData?.highlightedId;
+  for(const t of s.board){
+    const b=document.createElement('button');b.type='button';const locked=tileLocked(t);
+    b.className='tile '+t.kind+' '+(s.selected.some(x=>x.id===t.id)?'selected ':'')+(locked?'locked ':'')+(highlighted===t.id?'highlighted ':'')+(activeUpgrade?'upgrade-target':'');
+    b.dataset.value=E.tileScore(t);b.dataset.bonus=t.bonus||0;b.dataset.kind=t.kind;b.textContent=t.kind==='wild'?'★':t.letter;if(locked)b.disabled=true;
+    b.addEventListener('click',()=>activeUpgrade?applyUpgrade(t.id):selectTile(t.id));ui.board.appendChild(b);
+  }
+}
+function applyUpgrade(tileId){
+  if(!activeUpgrade)return;state().selected=[];const res=E.useUpgrade(activeUpgrade,tileId);
+  if(res.ok){showFeedback(res.message,'good');if(!state().upgrades.some(x=>x.id===activeUpgrade))activeUpgrade=null;}else showFeedback(res.message,'warn');render();
+}
+function selectTile(id,forcedChar=null){const s=state(),t=s.board.find(x=>x.id===id);if(!t||tileLocked(t)||s.selected.some(x=>x.id===id))return;s.selected.push({id:t.id,char:forcedChar||(t.kind==='wild'?'A':t.letter)});renderBoard();renderWord();}
+function cycleWild(current){const alpha='ABCDEFGHIJKLMNÑOPQRSTUVWXYZ';const i=alpha.indexOf(String(current||'A').toUpperCase());return alpha[(i+1)%alpha.length];}
+function renderWord(){
+  const s=state(),w=currentWord(),maxSlots=C.wordLengthSlots.length;ui.builder.innerHTML='';
+  for(let i=0;i<maxSlots;i++){
+    const selected=s.selected[i],bonus=E.slotBonusAt(i),el=document.createElement(selected?'button':'div');
+    if(selected){
+      const t=s.board.find(q=>q.id===selected.id);el.type='button';el.className='word-slot filled '+(t?.kind||'normal');
+      el.innerHTML='<span class="slot-bonus">'+(bonus?'+'+bonus:'')+'</span><strong>'+selected.char+'</strong><small>'+E.tileScore(t)+'</small>';
+      el.addEventListener('click',()=>{if(t?.kind==='wild'){selected.char=cycleWild(selected.char);renderWord();return;}const base=E.strip(selected.char).toUpperCase(),cycle=E.ACCENTABLE[base];if(cycle){const j=cycle.indexOf(selected.char.toUpperCase());selected.char=cycle[(j+1)%cycle.length];renderWord();}else{s.selected.splice(i,1);renderBoard();renderWord();}});
+    }else{el.className='word-slot empty '+(bonus?'bonus':'');el.innerHTML='<span class="slot-bonus">'+(bonus?'+'+bonus:'')+'</span><strong>'+(i+1)+'</strong>';}
+    ui.builder.appendChild(el);
+  }
+  if(!w){ui.hint.textContent='Selecciona fichas para formar una palabra';ui.preview.textContent='0 pts';ui.wordScore.textContent='0';ui.bonusScore.textContent='0';ui.finalScore.textContent='0';ui.combo.innerHTML='';return;}
+  ui.hint.textContent='4 letras mínimo · pulsa vocal para tilde · ★ para cambiar comodín';
+  const tiles=s.selected.map(x=>s.board.find(t=>t.id===x.id)).filter(Boolean),sc=E.score(w,tiles,true);ui.preview.textContent=fmt(sc.total)+' pts';ui.wordScore.textContent=fmt(sc.wordScore);ui.bonusScore.textContent=fmt(sc.bonusPoints);ui.finalScore.textContent=fmt(sc.total);
+  ui.combo.innerHTML=sc.effects.slice(0,6).map(e=>'<span class="combo-chip">'+e+'</span>').join('');
+}
 function play(){const s=state(),tiles=s.selected.map(x=>s.board.find(t=>t.id===x.id)).filter(Boolean),result=E.play(currentWord(),tiles);if(!result.ok){showFeedback(result.message,result.accent?'warn':'bad');render();return;}s.selected=[];showFeedback(`${result.word.toUpperCase()} · +${fmt(result.score.total)} puntos`,'good');ui.last.className='last-play-card';ui.last.innerHTML=`<div class="played-word">${result.word.toUpperCase()}</div><div class="played-score">+${fmt(result.score.total)} pts</div><div class="effect-list">${result.score.effects.length?result.score.effects.map(e=>`<span>• ${e}</span>`).join(''):'<span>Sin modificadores activos</span>'}</div>`;E.achievements();render();if(s.mode==='quick'&&s.playsLeft<=0)return setTimeout(()=>finish(true),220);if(s.mode!=='quick'&&s.roundScore>=s.target)return setTimeout(openReward,220);if(s.mode!=='quick'&&s.playsLeft<=0)setTimeout(()=>finish(false),220);}
 function openReward(){const ch=E.challenge(state().challenge);rewardOptions=E.rewards();renderRewards();$('rewardTitle').textContent=ch.kind==='boss'?'Botín de jefe':'Elige una mejora';ui.reward.classList.toggle('boss-loot',ch.kind==='boss');ui.rewardRound.textContent=`Ronda ${state().round} · ${fmt(state().roundScore)} pts${ch.kind==='boss'?' · recompensa mejorada':''}`;ui.rerollBtn.disabled=state().rerollsLeft<=0;showModal(ui.reward);}
 function renderRewards(){ui.rewardChoices.innerHTML=rewardOptions.map(r=>`<button class="reward-card rarity-${r.rarity}" data-id="${r.id}" type="button"><span class="reward-type">${r.type==='modifier'?'MODIFICADOR':r.type==='tile'?'FICHA':'RECURSO'} · ${r.rarity}</span><h3>${r.name}</h3><p>${r.desc}</p><div class="reward-footer"><span>${r.type==='modifier'?'Efecto permanente':'Mejora de partida'}</span><strong>Elegir →</strong></div></button>`).join('');ui.rewardChoices.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>choose(rewardOptions.find(r=>r.id===b.dataset.id))));}
