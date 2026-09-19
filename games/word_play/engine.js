@@ -434,6 +434,7 @@ function score(word,tiles,preview=false){
       value=(state?.board||[]).filter(q=>!selectedIds.has(q.id)).reduce((sum,q)=>sum+tileScore(q),0);
       effects.push(`Exclamación +${value}`);specialEvents.push({kind:'bang',label:'EXCLAMACIÓN',text:'+'+value});
     }
+    if(!specialsOff&&t?.kind==='echo'){value*=2;effects.push('Eco · valor de ficha ×2');specialEvents.push({kind:'echo',label:'ECO',text:'ficha ×2'});}
     if(sr==='vowelsZero'&&vowel(word[i]||''))value=0;
     if(!specialsOff&&t?.kind==='emerald'){
       const hit=preview?false:scoreRng()<.25;
@@ -602,7 +603,7 @@ function shopStatus(id){
   const offer=state.shopStock.find(x=>x.id===id);
   if(!offer)return{ok:false,message:'Ese artículo no está en la tienda de esta ronda.',item};
   if(offer.sold)return{ok:false,message:'Ese artículo ya se ha comprado esta ronda.',item,offer,price:offer.price};
-  const price=Number(offer.price??item.cost||0);
+  const price=Number(offer.price??item.cost??0);
   if(Number(state.coins||0)<price)return{ok:false,message:`Necesitas ${price} Monedas.`,item,offer,price};
   if(item.effect==='upgrade'&&state.upgrades.length>=3)return{ok:false,message:'Ya llevas 3 Mejoras. Usa una antes de comprar otra.',item,offer,price};
   return{ok:true,item,offer,price};
