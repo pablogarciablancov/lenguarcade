@@ -49,7 +49,17 @@ window.WordPlayContent = (() => {
     ['decena','Decatlón','epic','10 letras o más','min10','mult',1.9],
     ['perfecta','Palabra perfecta','legendary','8+ letras y sin repetir letras','perfectWord','mult',2.2],
     ['acentuada_larga','Orfebrería','epic','7+ letras con tilde','accentLong','mult',1.85],
-    ['rare_combo','Colección exótica','legendary','Dos letras raras o más','twoRare','mult',2.1]
+    ['rare_combo','Colección exótica','legendary','Dos letras raras o más','twoRare','mult',2.1],
+    ['alquimista','Alquimista','rare','Cada ficha especial suma +16','specialTile','specialFlat',16],
+    ['joyero','Joyero','epic','Dos fichas especiales o más','twoSpecialTiles','mult',1.65],
+    ['cazajefes','Cazajefes','rare','Durante una ronda jefe','bossRound','mult',1.35],
+    ['ortografo','Ortógrafo','epic','Tilde y letra rara en la misma palabra','accentAndRare','mult',1.75],
+    ['cuatro_vocales','Coro vocálico','rare','Cuatro vocales o más','fourVowels','mult',1.45],
+    ['sello_real','Sello real','legendary','Usa una ficha corona','crownTile','mult',1.8],
+    ['nueve','Todo o nada','epic','Palabras de 9 letras o más','min9','mult',1.75],
+    ['triple_rara','Trinidad exótica','legendary','Tres letras raras o más','threeRare','mult',2.4],
+    ['doble_especial','Doble carga','uncommon','Dos fichas especiales o más','twoSpecialTiles','flat',50],
+    ['sin_vocal_repetida','Vocales limpias','rare','No repite ninguna vocal','uniqueVowels','mult',1.4]
   ].map(([id,name,rarity,desc,condition,effect,value])=>({id,name,rarity,desc,condition,effect,value,type:'modifier'}));
 
   const gifts = [
@@ -68,29 +78,32 @@ window.WordPlayContent = (() => {
     {id:'heal_shuffle',name:'Reorganización',rarity:'common',desc:'Recupera 2 barajados inmediatamente.',type:'gift',effect:'instantShuffle',value:2},
     {id:'heal_play',name:'Prórroga',rarity:'rare',desc:'Gana 1 jugada extra ahora y en esta ronda.',type:'gift',effect:'instantPlay',value:1},
     {id:'score_seed',name:'Fondo de puntos',rarity:'uncommon',desc:'+60 puntos inmediatos en la siguiente ronda.',type:'gift',effect:'nextRoundSeed',value:60},
-    {id:'lexical_xp',name:'Biblioteca privada',rarity:'rare',desc:'+40 XP léxico al terminar la partida.',type:'gift',effect:'careerXp',value:40}
+    {id:'lexical_xp',name:'Biblioteca privada',rarity:'rare',desc:'+40 XP léxico al terminar la partida.',type:'gift',effect:'careerXp',value:40},
+    {id:'boss_play',name:'Salvoconducto',rarity:'rare',desc:'+1 jugada extra en cada ronda jefe.',type:'gift',effect:'bossPlay',value:1},
+    {id:'rare_luck',name:'Ojo del coleccionista',rarity:'epic',desc:'Mejora las probabilidades de recompensas raras.',type:'gift',effect:'rareLuck',value:1}
   ];
 
   const challenges = [
-    {id:'none',title:'Ronda abierta',desc:'Cualquier palabra válida puntúa.',kind:'normal'},
-    {id:'min5',title:'Palabra larga',desc:'Solo cuentan palabras de 5 letras o más.',kind:'constraint'},
-    {id:'min6',title:'Sin atajos',desc:'Solo cuentan palabras de 6 letras o más.',kind:'boss'},
-    {id:'vowel',title:'Puerta vocálica',desc:'La palabra debe empezar por vocal.',kind:'constraint'},
-    {id:'consonant',title:'Golpe consonante',desc:'La palabra debe empezar por consonante.',kind:'constraint'},
-    {id:'noA',title:'La A prohibida',desc:'No puedes usar la letra A.',kind:'constraint'},
-    {id:'noE',title:'Sin la reina',desc:'No puedes usar la letra E.',kind:'boss'},
-    {id:'accent',title:'Acentuación',desc:'La palabra debe contener una tilde o diéresis.',kind:'boss'},
-    {id:'ntilde',title:'Territorio Ñ',desc:'La palabra debe contener Ñ.',kind:'boss'},
-    {id:'unique',title:'Sin repetir',desc:'No puedes repetir ninguna letra.',kind:'constraint'},
-    {id:'exact5',title:'Cinco exactas',desc:'Solo palabras de exactamente 5 letras.',kind:'constraint'},
-    {id:'exact6',title:'Media docena',desc:'Solo palabras de exactamente 6 letras.',kind:'boss'},
-    {id:'rare',title:'Letras raras',desc:'Debe contener J, Ñ, Q, X o Z.',kind:'boss'},
-    {id:'endsS',title:'Final en S',desc:'La palabra debe terminar en S.',kind:'constraint'},
-    {id:'twoVowels',title:'Vocal doble',desc:'Debe contener al menos dos vocales.',kind:'constraint'},
-    {id:'threeVowels',title:'Festival vocálico',desc:'Debe contener al menos tres vocales.',kind:'boss'},
-    {id:'longAccent',title:'Maestría ortográfica',desc:'6+ letras y al menos una tilde.',kind:'boss'},
-    {id:'noCommon',title:'Sin A ni E',desc:'No puedes utilizar A ni E.',kind:'boss'}
-  ];
+    {id:'none',title:'Ronda abierta',desc:'Cualquier palabra válida puntúa.',kind:'normal',targetMult:1},
+    {id:'min5',title:'Palabra larga',desc:'Solo cuentan palabras de 5 letras o más.',kind:'constraint',targetMult:.96},
+    {id:'vowel',title:'Puerta vocálica',desc:'La palabra debe empezar por vocal.',kind:'constraint',targetMult:.96},
+    {id:'consonant',title:'Golpe consonante',desc:'La palabra debe empezar por consonante.',kind:'constraint',targetMult:.96},
+    {id:'noA',title:'La A prohibida',desc:'No puedes usar la letra A.',kind:'constraint',targetMult:.94},
+    {id:'unique',title:'Sin repetir',desc:'No puedes repetir ninguna letra.',kind:'constraint',targetMult:.94},
+    {id:'exact5',title:'Cinco exactas',desc:'Solo palabras de exactamente 5 letras.',kind:'constraint',targetMult:.92},
+    {id:'endsS',title:'Final en S',desc:'La palabra debe terminar en S.',kind:'constraint',targetMult:.93},
+    {id:'twoVowels',title:'Vocal doble',desc:'Debe contener al menos dos vocales.',kind:'constraint',targetMult:.96},
+
+    {id:'min6',title:'El Devorasílabas',desc:'JEFE · Solo acepta palabras de 6 letras o más.',kind:'boss',targetMult:.84,rewardTier:'rare'},
+    {id:'noE',title:'La Reina Ausente',desc:'JEFE · No puedes utilizar la letra E.',kind:'boss',targetMult:.88,rewardTier:'rare'},
+    {id:'accent',title:'El Inquisidor de Tildes',desc:'JEFE · Toda palabra debe contener tilde o diéresis.',kind:'boss',targetMult:.78,rewardTier:'rare'},
+    {id:'ntilde',title:'El Guardián de la Ñ',desc:'JEFE · Toda palabra debe contener Ñ. El tablero te concederá una.',kind:'boss',targetMult:.76,rewardTier:'epic',setup:'ntilde'},
+    {id:'exact6',title:'El Hexámetro',desc:'JEFE · Solo acepta palabras de exactamente 6 letras.',kind:'boss',targetMult:.80,rewardTier:'rare'},
+    {id:'rare',title:'El Coleccionista Imposible',desc:'JEFE · Debes usar J, Ñ, Q, X o Z.',kind:'boss',targetMult:.80,rewardTier:'epic',setup:'rare'},
+    {id:'threeVowels',title:'La Hidra Vocálica',desc:'JEFE · Cada palabra necesita al menos tres vocales.',kind:'boss',targetMult:.84,rewardTier:'rare',setup:'vowels'},
+    {id:'longAccent',title:'El Maestro Ortográfico',desc:'JEFE · 6+ letras y al menos una tilde.',kind:'boss',targetMult:.72,rewardTier:'epic',setup:'vowels'},
+    {id:'noCommon',title:'El Vacío',desc:'JEFE · No puedes utilizar A ni E.',kind:'boss',targetMult:.76,rewardTier:'epic',setup:'noCommon'}
+  ]
 
   const achievements = [
     ['first','Primera palabra','Juega tu primera palabra.','careerWords',1],
