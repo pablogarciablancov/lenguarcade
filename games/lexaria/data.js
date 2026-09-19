@@ -53,7 +53,27 @@ const creatures = [
   {id:'versalia',name:'Versalia',emoji:'♫',types:['literatura'],rarity:'uncommon',hp:105,damage:19,cooldown:2.8,ability:{name:'Ritmo métrico',text:'Acelera a sus vecinos en el tablero.',kind:'adjacentHaste',power:0,status:16}},
   {id:'narragon',name:'Narragón',emoji:'♜',types:['literatura'],rarity:'rare',hp:168,damage:20,cooldown:4.6,ability:{name:'Giro narrativo',text:'Cuando el equipo baja de la mitad, cura una gran cantidad.',kind:'clutchHeal',power:58}},
   {id:'retorix',name:'Retórix',emoji:'✹',types:['literatura','lexico'],rarity:'epic',hp:128,damage:27,cooldown:4.2,ability:{name:'Figura retórica',text:'Aplica al azar Quemadura, Veneno o Descarga.',kind:'randomStatus',power:23,status:4}},
-  {id:'caligrifo',name:'Caligrifo',emoji:'✒',types:['literatura','ortografia'],rarity:'legendary',hp:162,damage:31,cooldown:4.7,ability:{name:'Manuscrito total',text:'Cada tipo diferente del equipo potencia esta habilidad.',kind:'diversityBlast',power:28}}
+  {id:'caligrifo',name:'Caligrifo',emoji:'✒',types:['literatura','ortografia'],rarity:'legendary',hp:162,damage:31,cooldown:4.7,ability:{name:'Manuscrito total',text:'Cada tipo diferente del equipo potencia esta habilidad.',kind:'diversityBlast',power:28}},
+  {id:'acenturio',name:'Acenturio',emoji:'´',types:['ortografia','sintaxis'],rarity:'common',hp:118,damage:21,cooldown:3.3,ability:{name:'Acento de choque',text:'Golpea y deja una quemadura de tinta.',kind:'damageBurn',power:20,status:2}},
+  {id:'cronoverbo',name:'Cronoverbo',emoji:'⏱',types:['verbos'],rarity:'uncommon',hp:105,damage:22,cooldown:2.7,ability:{name:'Tiempo veloz',text:'Ataca y adelanta su siguiente habilidad.',kind:'selfHasteHit',power:19,status:14}},
+  {id:'glosaria',name:'Glosaria',emoji:'✧',types:['lexico','literatura'],rarity:'rare',hp:116,damage:25,cooldown:4.0,ability:{name:'Glosa cambiante',text:'Alterna entre daño, escudo y curación.',kind:'cycleEffect',power:32}},
+  {id:'morfogolem',name:'Morfogólem',emoji:'⬢',types:['morfologia'],rarity:'uncommon',hp:154,damage:17,cooldown:4.2,ability:{name:'Bloque morfológico',text:'Genera escudo y transforma parte en daño.',kind:'shieldStrike',power:22,status:30}},
+  {id:'clausor',name:'Clausor',emoji:'⌁',types:['sintaxis'],rarity:'rare',hp:138,damage:24,cooldown:4.4,ability:{name:'Cláusula cerrada',text:'Gran golpe que silencia una habilidad rival.',kind:'heavySilence',power:36,status:1}},
+  {id:'liridraco',name:'Lirídraco',emoji:'♫',types:['literatura'],rarity:'epic',hp:126,damage:31,cooldown:4.6,ability:{name:'Verso ígneo',text:'Ataque de alto impacto con posibilidad crítica.',kind:'crit',power:35,status:45}},
+  {id:'lexarca',name:'Lexarca',emoji:'L',types:['lexico'],rarity:'uncommon',hp:112,damage:20,cooldown:3.5,ability:{name:'Eco de significado',text:'Replica parte del último apoyo recibido.',kind:'echoSupport',power:27}},
+  {id:'grafion',name:'Grafión',emoji:'G',types:['ortografia'],rarity:'rare',hp:98,damage:30,cooldown:3.8,ability:{name:'Trazo creciente',text:'Cada lanzamiento golpea con más fuerza.',kind:'rampingDamage',power:29}},
+  {id:'modulante',name:'Modulante',emoji:'M',types:['verbos','morfologia'],rarity:'uncommon',hp:124,damage:18,cooldown:3.0,ability:{name:'Flexión coral',text:'Cada uso aumenta el daño de todo el equipo.',kind:'teamRamp',power:7}},
+  {id:'paradoxil',name:'Paradoxil',emoji:'∞',types:['sintaxis','literatura'],rarity:'epic',hp:140,damage:28,cooldown:5.0,ability:{name:'Paradoja final',text:'Castiga especialmente a rivales afectados por estados.',kind:'statusPunish',power:43}},
+  {id:'etimor',name:'Etimor',emoji:'E',types:['lexico','morfologia'],rarity:'rare',hp:146,damage:20,cooldown:4.3,ability:{name:'Raíz común',text:'Cura más cuanto mejor encaja con los tipos del equipo.',kind:'typeHeal',power:29}},
+  {id:'prosodian',name:'Prosodian',emoji:'♪',types:['ortografia','literatura'],rarity:'uncommon',hp:100,damage:23,cooldown:2.9,ability:{name:'Cadencia',text:'Acelera a sus aliados cercanos.',kind:'adjacentHaste',power:0,status:17}},
+  {id:'copulon',name:'Copulón',emoji:'=',types:['sintaxis','verbos'],rarity:'rare',hp:132,damage:23,cooldown:3.9,ability:{name:'Nexo eléctrico',text:'Conecta el ataque con una descarga acumulable.',kind:'shock',power:22,status:3}},
+  {id:'derivax',name:'Derivax',emoji:'↦',types:['morfologia'],rarity:'common',hp:110,damage:20,cooldown:3.2,ability:{name:'Derivación inmediata',text:'Empieza el combate lanzando una habilidad gratis.',kind:'startCast',power:18}},
+  {id:'semantor',name:'Semantor',emoji:'S',types:['lexico','sintaxis'],rarity:'epic',hp:155,damage:24,cooldown:4.7,ability:{name:'Campo semántico',text:'Protege al equipo y reduce el daño recibido.',kind:'teamGuard',power:38,status:5}},
+  {id:'epiteto',name:'Epíteto',emoji:'✦',types:['literatura','morfologia'],rarity:'rare',hp:120,damage:26,cooldown:3.7,ability:{name:'Adorno imprevisible',text:'Aplica al azar quemadura, veneno o descarga.',kind:'randomStatus',power:24,status:4}},
+  {id:'imperion',name:'Imperion',emoji:'!',types:['verbos'],rarity:'epic',hp:136,damage:34,cooldown:5.0,ability:{name:'Orden final',text:'Hace más daño cuanto menos vida conserva el equipo.',kind:'missingHpDamage',power:31}},
+  {id:'fonemix',name:'Fonemix',emoji:'F',types:['ortografia','lexico'],rarity:'uncommon',hp:102,damage:25,cooldown:3.1,ability:{name:'Eco fonémico',text:'Golpea dos veces y remata con una descarga.',kind:'doubleShock',power:17,status:2}},
+  {id:'hiperbaton',name:'Hiperbatón',emoji:'↯',types:['literatura','sintaxis'],rarity:'legendary',hp:170,damage:32,cooldown:5.2,ability:{name:'Orden imposible',text:'Combina daño, escudo y curación en un mismo lanzamiento.',kind:'trinity',power:41,status:25}},
+  {id:'gramarion',name:'Gramarion',emoji:'✺',types:['sintaxis','morfologia'],rarity:'legendary',hp:194,damage:29,cooldown:5.5,ability:{name:'Gramática total',text:'Se potencia con la diversidad de tipos de todo el equipo.',kind:'diversityBlast',power:30}}
 ];
 
 const trainers = [
@@ -110,7 +130,7 @@ const achievements = [
   {id:'flawless',name:'Sin tachones',icon:'✒',desc:'Gana una liga sin perder vidas.',metric:'flawless',value:1},
   {id:'chromatic',name:'Tinta iridiscente',icon:'🌈',desc:'Encuentra una variante cromática.',metric:'chromatics',value:1},
   {id:'collector10',name:'Coleccionista',icon:'▦',desc:'Descubre 10 Lexarios distintos.',metric:'discovered',value:10},
-  {id:'collector30',name:'Lexipedia completa',icon:'📚',desc:'Descubre los 30 Lexarios.',metric:'discovered',value:30},
+  {id:'collector30',name:'Lexipedia completa',icon:'📚',desc:'Descubre los 50 Lexarios.',metric:'discovered',value:50},
   {id:'all_types',name:'Equipo interdisciplinar',icon:'✺',desc:'Combate con los 6 tipos a la vez.',metric:'typesInTeam',value:6},
   {id:'relics5',name:'Mesa de estudio',icon:'🔰',desc:'Reúne 5 reliquias en una liga.',metric:'relics',value:5},
   {id:'training20',name:'Horas de biblioteca',icon:'📖',desc:'Acumula 20 entrenamientos correctos.',metric:'trainingCorrect',value:20},

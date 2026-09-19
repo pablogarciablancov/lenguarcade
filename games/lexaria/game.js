@@ -13,11 +13,10 @@ const TRAINING_STEP=.05;
 const LEVEL_MULT={1:1,2:1.7,3:3,4:4.5};
 
 const BATTLEFIELDS=[
-  {id:'academy',name:'Patio de la Academia'},
-  {id:'emerald-grove',name:'Arboleda Esmeralda'},
-  {id:'sunken-library',name:'Biblioteca Hundida'},
-  {id:'storm-cliffs',name:'Acantilados de Tormenta'},
-  {id:'lunar-arena',name:'Arena Lunar'}
+  {id:'academy',name:'Patio Celeste',image:'battle-academy.svg'},
+  {id:'ice',name:'Valle Helado',image:'battle-ice.svg'},
+  {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal.svg'},
+  {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset.svg'}
 ];
 
 const TRAINER_ART={
@@ -137,40 +136,19 @@ function adjacencyCount(index,team){return adjacentIndexes(index).filter(i=>team
 function abilityMeta(c){return ABILITY_META[c?.ability?.kind]||{role:'VERSÁTIL',icon:'✦',row:'back',tags:['HABILIDAD']};}
 function spriteMarkup(c,extra){
   if(!c)return '<span class="lex-sprite missing" aria-hidden="true"></span>';
-  const i=Math.max(0,D.creatures.findIndex(x=>x.id===c.id)),x=i%6,y=Math.floor(i/6);
-  const special={
-    gerundra:{l:8,t:8,r:24,b:8},
-    lexifin:{l:16,t:8,r:10,b:8}
-  };
-  const crop=special[c.id]||{l:12,t:8,r:12,b:8};
-  const w=100-crop.l-crop.r,h=100-crop.t-crop.b;
-  return '<span class="lex-sprite '+esc(extra||'')+'" aria-hidden="true"><svg viewBox="'+crop.l+' '+crop.t+' '+w+' '+h+'" preserveAspectRatio="xMidYMid meet" focusable="false"><image href="./assets/lexarios-fantasy.webp" x="'+(-x*100)+'" y="'+(-y*100)+'" width="600" height="500" preserveAspectRatio="none"/></svg></span>';
+  const i=D.creatures.findIndex(x=>x.id===c.id);
+  if(i<0)return '<span class="lex-sprite missing" aria-hidden="true"></span>';
+  const row=Math.floor(i/10)+1,col=i%10,pos=(col/9)*100;
+  return '<span class="lex-sprite '+esc(extra||'')+'" aria-hidden="true" style="--lex-pos:'+pos.toFixed(4)+'%;background-image:url(\'./assets/generated/lexarios-row-'+row+'.svg\')"></span>';
 }
+const TRAINER_SPRITE_INDEX={
+  filologa:0,corrector:1,verbologa:2,lexicografo:3,
+  estratega:4,mercader:5,maestra:6,archivero:7
+};
 function trainerSpriteMarkup(t,extra){
   if(!t)return '';
-  const a=TRAINER_ART[t.id]||TRAINER_ART.filologa;
-  const beard=a.beard?'<path d="M33 55 Q48 69 63 55 L59 70 Q48 78 37 70Z" fill="'+a.beard+'" opacity=".95"/>':'';
-  const glasses=a.glasses?'<g fill="none" stroke="#293442" stroke-width="2.2"><rect x="30" y="43" width="15" height="10" rx="4"/><rect x="51" y="43" width="15" height="10" rx="4"/><path d="M45 48h6"/></g>':'';
-  const hair=t.id==='estratega'
-    ?'<path d="M25 39 Q27 18 45 18 L51 10 57 19 Q71 21 72 40 L64 34 58 27 48 31 37 26 31 39Z" fill="'+a.hair+'"/>'
-    :t.id==='verbologa'
-      ?'<path d="M25 40 Q24 19 48 18 Q70 20 71 40 L62 31 55 34 48 26 40 34 31 31Z" fill="'+a.hair+'"/>'
-      :'<path d="M25 40 Q25 19 47 18 Q69 19 71 40 L63 33 56 29 47 34 38 28 30 36Z" fill="'+a.hair+'"/>';
-  return '<svg class="trainer-sprite '+esc(extra||'')+'" viewBox="0 0 96 112" role="img" aria-label="'+esc(t.name)+'">'+
-    '<ellipse cx="48" cy="104" rx="35" ry="7" fill="#051728" opacity=".32"/>'+
-    '<path d="M18 109 Q19 76 35 70 L61 70 Q77 76 78 109Z" fill="'+a.coat+'" stroke="#16283b" stroke-width="2"/>'+
-    '<path d="M39 70h18l-2 16H41Z" fill="'+a.accent+'" opacity=".95"/>'+
-    '<circle cx="23" cy="92" r="6" fill="'+a.accent+'"/><circle cx="73" cy="92" r="6" fill="'+a.accent+'"/>'+
-    '<rect x="42" y="62" width="12" height="13" rx="4" fill="'+a.skin+'"/>'+
-    '<path d="M27 39 Q27 21 48 21 Q69 21 69 42 V54 Q65 67 48 70 Q31 67 27 54Z" fill="'+a.skin+'" stroke="#7a553c" stroke-width="1.4"/>'+
-    hair+
-    '<ellipse cx="38" cy="47" rx="3" ry="2.4" fill="#1d2b38"/><ellipse cx="58" cy="47" rx="3" ry="2.4" fill="#1d2b38"/>'+
-    '<path d="M47 49 44 57 50 57" fill="none" stroke="#8b6046" stroke-width="1.4" stroke-linecap="round"/>'+
-    '<path d="M40 61 Q48 65 56 61" fill="none" stroke="#6e4439" stroke-width="1.5" stroke-linecap="round"/>'+
-    beard+glasses+
-    '<circle cx="67" cy="82" r="10" fill="#0c2137" stroke="'+a.accent+'" stroke-width="2"/>'+
-    '<text x="67" y="86" text-anchor="middle" font-size="11" font-family="Arial,sans-serif" font-weight="900" fill="'+a.accent+'">'+a.badge+'</text>'+
-    '</svg>';
+  const i=TRAINER_SPRITE_INDEX[t.id]??0,row=Math.floor(i/4)+1,col=i%4,pos=(col/3)*100;
+  return '<span class="trainer-sprite '+esc(extra||'')+'" role="img" aria-label="'+esc(t.name)+'" style="--trainer-pos:'+pos.toFixed(4)+'%;background-image:url(\'./assets/generated/trainers-row-'+row+'.svg\')"></span>';
 }
 function battlefieldFor(seedBase){
   const rng=D.seeded(String(seedBase||'lexaria')+'_battlefield');
