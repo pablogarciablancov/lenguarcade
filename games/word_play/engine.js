@@ -177,7 +177,7 @@ function repairLoadedBoard(run){
   const upgrades=run.board.filter(t=>t&&t.kind&&t.kind!=='normal').map(t=>({kind:t.kind,bonus:t.bonus||0,uses:t.uses||0}));
   run.board=board(run.mode==='daily'?runRandom:Math.random,setup,run.challenge);
   upgrades.slice(0,run.board.length).forEach((u,i)=>Object.assign(run.board[i],u));
-  ensureBoard();
+  stabilizeBoard('carga guardada');
   run.selected=[];
   state=previous;
   localStorage.setItem(SAVE_KEY,JSON.stringify(run));
