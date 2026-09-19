@@ -80,8 +80,71 @@ window.WordPlayContent = (() => {
     {id:'score_seed',name:'Fondo de puntos',rarity:'uncommon',desc:'+60 puntos inmediatos en la siguiente ronda.',type:'gift',effect:'nextRoundSeed',value:60},
     {id:'lexical_xp',name:'Biblioteca privada',rarity:'rare',desc:'+40 XP léxico al terminar la partida.',type:'gift',effect:'careerXp',value:40},
     {id:'boss_play',name:'Salvoconducto',rarity:'rare',desc:'+1 jugada extra en cada ronda jefe.',type:'gift',effect:'bossPlay',value:1},
-    {id:'rare_luck',name:'Ojo del coleccionista',rarity:'epic',desc:'Mejora las probabilidades de recompensas raras.',type:'gift',effect:'rareLuck',value:1}
+    {id:'rare_luck',name:'Ojo del coleccionista',rarity:'epic',desc:'Mejora las probabilidades de recompensas raras.',type:'gift',effect:'rareLuck',value:1},
+    {id:'refresh_pack',name:'Bolsa de renovación',rarity:'common',desc:'+4 Renovaciones inmediatamente.',type:'gift',effect:'instantShuffle',value:4},
+    {id:'gift_diamond',name:'Dos diamantes',rarity:'uncommon',desc:'Añade 2 fichas Diamante a la reserva especial.',type:'bagTile',effect:'diamond',count:2},
+    {id:'gift_dot',name:'Dos puntos',rarity:'uncommon',desc:'Añade 2 fichas Punto a la reserva especial.',type:'bagTile',effect:'dot',count:2},
+    {id:'gift_emerald',name:'Dos esmeraldas',rarity:'uncommon',desc:'Añade 2 fichas Esmeralda a la reserva especial.',type:'bagTile',effect:'emerald',count:2},
+    {id:'gift_wild',name:'Dos comodines',rarity:'uncommon',desc:'Añade 2 comodines a la reserva especial.',type:'bagTile',effect:'wild',count:2},
+    {id:'gift_potion',name:'Poción de jugadas',rarity:'rare',desc:'Añade una ficha Poción a la reserva especial.',type:'bagTile',effect:'potion',count:1},
+    {id:'gift_glass',name:'Cristales',rarity:'rare',desc:'Añade 2 fichas de Cristal a la reserva especial.',type:'bagTile',effect:'glass',count:2}
   ];
+
+
+  const upgrades = [
+    {id:'up_hold',name:'Reserva una ficha',rarity:'common',desc:'Elige una ficha: se mantiene y renueva el resto del tablero.',type:'upgrade',effect:'holdRefresh',uses:3},
+    {id:'up_vowel',name:'Cambio vocálico',rarity:'common',desc:'Cambia una ficha por una vocal nueva.',type:'upgrade',effect:'swapVowel',uses:4},
+    {id:'up_consonant',name:'Cambio consonántico',rarity:'common',desc:'Cambia una ficha por una consonante común.',type:'upgrade',effect:'swapConsonant',uses:4},
+    {id:'up_gold',name:'Baño de oro',rarity:'common',desc:'Convierte una ficha en Dorada.',type:'upgrade',effect:'makeGold',uses:2},
+    {id:'up_emerald',name:'Esmeralda',rarity:'common',desc:'Convierte una ficha en Esmeralda.',type:'upgrade',effect:'makeEmerald',uses:2},
+    {id:'up_dot',name:'Punto rojo',rarity:'common',desc:'Convierte una ficha en Punto.',type:'upgrade',effect:'makeDot',uses:3},
+    {id:'up_duplicate',name:'Duplicador',rarity:'uncommon',desc:'Duplica una ficha y añade una copia a la reserva especial.',type:'upgrade',effect:'duplicate',uses:2},
+    {id:'up_glass',name:'Copia de cristal',rarity:'uncommon',desc:'Crea una copia de cristal de la ficha. Se rompe al jugarla.',type:'upgrade',effect:'glass',uses:3},
+    {id:'up_destroy_play',name:'Sacrificio',rarity:'uncommon',desc:'Destruye una ficha y gana 1 jugada.',type:'upgrade',effect:'destroyPlay',uses:2},
+    {id:'up_diamond',name:'Diamante',rarity:'uncommon',desc:'Convierte una ficha en Diamante; gana +5 mientras la reservas.',type:'upgrade',effect:'makeDiamond',uses:2},
+    {id:'up_plus5',name:'Imprenta +5',rarity:'rare',desc:'Añade +5 permanentemente al valor de una ficha.',type:'upgrade',effect:'addScore',value:5,uses:2},
+    {id:'up_random',name:'Tinta imprevisible',rarity:'rare',desc:'Añade entre +1 y +10 permanentemente a una ficha.',type:'upgrade',effect:'randomScore',uses:2},
+    {id:'up_wild',name:'Comodín',rarity:'rare',desc:'Convierte una ficha en comodín; podrás elegir su letra.',type:'upgrade',effect:'makeWild',uses:1},
+    {id:'up_random_special',name:'Transmutación',rarity:'rare',desc:'Convierte una ficha en un tipo especial al azar.',type:'upgrade',effect:'randomSpecial',uses:2},
+    {id:'up_plus10',name:'Imprenta +10',rarity:'legendary',desc:'Añade +10 permanentemente al valor de una ficha.',type:'upgrade',effect:'addScore',value:10,uses:2}
+  ];
+
+  const specialRounds = [
+    {id:'limit_tiles',title:'Palabra encogida',desc:'Empiezas pudiendo usar 4 fichas; el límite aumenta tras cada palabra.',effect:'maxTiles'},
+    {id:'first_locked',title:'Primera letra sellada',desc:'Todas las palabras deben empezar por la letra indicada.',effect:'firstLocked'},
+    {id:'specials_off',title:'Magia anulada',desc:'Las fichas especiales no activan sus poderes durante esta ronda.',effect:'specialsOff'},
+    {id:'top_locked',title:'Fila congelada',desc:'Las cuatro fichas superiores quedan bloqueadas durante 4 palabras.',effect:'topLocked'},
+    {id:'auto_refresh',title:'Tablero inestable',desc:'Tras cada palabra se renueva el tablero; renovar manualmente cuesta 1 jugada.',effect:'autoRefresh'},
+    {id:'vowels_zero',title:'Silencio vocálico',desc:'Las vocales puntúan 0 en Word Score.',effect:'vowelsZero'},
+    {id:'highlighted',title:'Ficha obligatoria',desc:'Debes usar la ficha destacada o perderás 2 jugadas extra.',effect:'highlighted'},
+    {id:'double_play',title:'Palabras agotadoras',desc:'Cada palabra consume 2 jugadas.',effect:'doublePlay'},
+    {id:'min_six_zero',title:'Solo palabras largas',desc:'Las palabras de menos de 6 fichas obtienen 0 puntos.',effect:'minSixZero'}
+  ];
+
+  const modes = {
+    easy:{id:'easy',name:'Fácil',rounds:10,startPlays:10,startRefreshes:5,roundGain:4,specialRounds:[5,10],targets:[35,45,50,55,60,75,90,110,140,180]},
+    normal:{id:'normal',name:'Normal',rounds:12,startPlays:10,startRefreshes:4,roundGain:4,specialRounds:[5,8,12],targets:[45,55,60,70,75,90,110,135,170,220,290,385]},
+    hard:{id:'hard',name:'Difícil',rounds:12,startPlays:10,startRefreshes:3,roundGain:4,specialRounds:[5,8,12],targets:[50,65,70,80,95,120,155,205,280,395,570,830]},
+    legendary:{id:'legendary',name:'Legendario',rounds:14,startPlays:8,startRefreshes:3,roundGain:3,specialRounds:[5,8,10,14],targets:[60,80,85,95,110,130,155,195,245,320,425,570,775,1060]},
+    marathon:{id:'marathon',name:'Maratón',rounds:20,startPlays:12,startRefreshes:6,roundGain:4,specialRounds:[5,10,15,18,20],targets:[40,75,80,90,95,110,120,140,160,180,210,245,285,335,395,465,550,650,775,920]},
+    quick:{id:'quick',name:'Rápida',rounds:1,startPlays:30,startRefreshes:6,roundGain:0,specialRounds:[],targets:[999999]}
+  };
+
+  const wordLengthSlots = [0,0,0,0,5,5,5,10,10,15,15,20];
+
+  const specialTileTypes = {
+    normal:{name:'Normal'},
+    gold:{name:'Dorada',desc:'Con 2+ doradas, multiplica Word Score por su número.'},
+    diamond:{name:'Diamante',desc:'Gana +5 si permanece sin jugar tras una palabra.'},
+    emerald:{name:'Esmeralda',desc:'25% de probabilidad de puntuar ×5.'},
+    dot:{name:'Punto',desc:'Si cierra la palabra, Word Score ×2.'},
+    potion:{name:'Poción',desc:'Al jugarla, suma su valor a tus Jugadas y se rompe.'},
+    glass:{name:'Cristal',desc:'Se rompe al jugarla.'},
+    wild:{name:'Comodín',desc:'Puede representar cualquier letra y vale 0.'},
+    ink:{name:'Tinta',desc:'Gana +1 de valor cada vez que se usa.'},
+    crown:{name:'Corona',desc:'Añade +25 a su valor.'},
+    volatile:{name:'Explosiva',desc:'Multiplica el Final Score ×1,35.'}
+  };
 
   const challenges = [
     {id:'none',title:'Ronda abierta',desc:'Cualquier palabra válida puntúa.',kind:'normal',targetMult:1},
@@ -132,5 +195,5 @@ window.WordPlayContent = (() => {
     ['allround','Doce estaciones','Llega a la ronda 12.','round',12]
   ].map(([id,name,desc,metric,value])=>({id,name,desc,metric,value}));
 
-  return {modifiers,gifts,challenges,achievements};
+  return {modifiers,gifts,upgrades,specialRounds,modes,wordLengthSlots,specialTileTypes,challenges,achievements};
 })();
