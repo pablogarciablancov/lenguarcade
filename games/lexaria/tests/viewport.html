@@ -1,1 +1,46 @@
-<!doctype html><html lang="es"><meta charset="utf-8"><title>Lexaria · prueba de iframe</title><style>body{margin:0;background:#162334;color:white;font:14px system-ui}header{height:45px;display:flex;align-items:center;gap:10px;padding:0 12px}button{padding:5px}iframe{display:block;border:0;transform-origin:top left}#stage{height:calc(100vh - 45px);overflow:auto}</style><header>Prueba aislada de altura de iframe <button data-w="1280" data-h="650">1280 × 650</button><button data-w="1024" data-h="600">1024 × 600</button><button data-w="1366" data-h="768">1366 × 768</button><button data-w="390" data-h="700">390 × 700</button><output id="result"></output></header><div id="stage"><iframe id="game" title="Lexaria en iframe" src="../index.html" width="1280" height="650"></iframe></div><script>document.querySelectorAll('button').forEach(b=>b.onclick=()=>{game.width=b.dataset.w;game.height=b.dataset.h;result.textContent='';});setInterval(()=>{try{const d=game.contentDocument,s=d.querySelector('.screen:not(.hidden)');result.textContent=s?`${s.id}: ${s.clientWidth}×${s.clientHeight} · contenido ${s.scrollWidth}×${s.scrollHeight}`:'';}catch{}},1000);</script></html>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lexaria · prueba de iframe</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#162334;color:white;font:14px system-ui}
+header{height:45px;display:flex;align-items:center;gap:8px;padding:0 12px;background:#0c1725;border-bottom:1px solid #30435a}
+button{padding:5px 8px;background:#203a57;color:white;border:1px solid #5f7690;border-radius:5px}
+output{margin-left:auto;font-weight:800}#stage{height:calc(100vh - 45px);overflow:auto;padding:8px}
+iframe{display:block;border:1px solid #54677d;background:#08131f;transform-origin:top left}
+.pass{color:#83f0ad}.fail{color:#ff8e98}
+</style>
+</head>
+<body>
+<header>
+  <strong>Lexaria · QA viewport</strong>
+  <button data-w="1366" data-h="700">1366×700 · plataforma</button>
+  <button data-w="1440" data-h="832">1440×832 · plataforma</button>
+  <button data-w="1920" data-h="1012">1920×1012 · plataforma</button>
+  <button data-w="1280" data-h="650">1280×650 · compacto</button>
+  <output id="result">Cargando…</output>
+</header>
+<div id="stage"><iframe id="game" title="Lexaria en iframe" src="../index.html" width="1366" height="700"></iframe></div>
+<script>
+const game=document.getElementById('game'), result=document.getElementById('result');
+document.querySelectorAll('button[data-w]').forEach(b=>b.addEventListener('click',()=>{
+  game.width=b.dataset.w;game.height=b.dataset.h;result.className='';result.textContent='Comprobando…';
+}));
+setInterval(()=>{
+  try{
+    const d=game.contentDocument;
+    const s=d.querySelector('.screen:not(.hidden)');
+    if(!s)return;
+    const root=d.documentElement, body=d.body;
+    const screenOk=s.scrollWidth<=s.clientWidth+1&&s.scrollHeight<=s.clientHeight+1;
+    const docOk=root.scrollWidth<=root.clientWidth+1&&root.scrollHeight<=root.clientHeight+1&&body.scrollWidth<=body.clientWidth+1&&body.scrollHeight<=body.clientHeight+1;
+    const ok=screenOk&&docOk;
+    result.className=ok?'pass':'fail';
+    result.textContent=(ok?'SIN SCROLL':'HAY SCROLL')+' · '+s.id+' '+s.clientWidth+'×'+s.clientHeight+' · contenido '+s.scrollWidth+'×'+s.scrollHeight;
+  }catch(e){result.className='fail';result.textContent='No se pudo leer el iframe';}
+},700);
+</script>
+</body>
+</html>
