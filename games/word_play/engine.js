@@ -333,7 +333,7 @@ function lengthBonus(n){
 }
 function tileScore(t){
   if(!t)return 0;
-  if(t.kind==='wild')return 0;
+  if(['wild','mirror','bang','plus'].includes(t.kind))return 0;
   let v=(LETTER_VALUES[t.letter]||1)+(t.bonus||0)+(t.kind==='diamond'?(t.charge||0):0);
   if(t.kind==='crown')v+=25;
   return Math.round(v*(state?.bonuses.letterMult||1));
@@ -345,8 +345,14 @@ function score(word,tiles,preview=false){
   let goldCount=0;
   let emeraldHits=0;
   const effects=[];
+  const selectedIds=new Set(tiles.map(t=>t.id));
   tiles.forEach((t,i)=>{
     let value=tileScore(t);
+    if(!specialsOff&&t?.kind==='mirror'&&i>0){value=tileScore(tiles[i-1]);effects.push('Espejo · copia la ficha izquierda');}
+    if(!specialsOff&&t?.kind==='bang'){
+      value=(state?.board||[]).filter(q=>!selectedIds.has(q.id)).reduce((sum,q)=>sum+tileScore(q),0);
+      effects.push(`Exclamación +${value}`);
+    }
     if(sr==='vowelsZero'&&vowel(word[i]||''))value=0;
     if(!specialsOff&&t?.kind==='emerald'){
       const hit=preview?false:boardRng()<.25;
@@ -480,7 +486,7 @@ function useUpgrade(id,tileId){
     case'destroyPlay':{const idx=state.board.findIndex(x=>x.id===t.id);state.board[idx]=freshReplacement(t);state.playsLeft++;break;}
     case'addScore':t.bonus=(t.bonus||0)+(def.value||0);break;
     case'randomScore':t.bonus=(t.bonus||0)+1+Math.floor(rng()*10);break;
-    case'randomSpecial':t.kind=pick(['gold','diamond','emerald','dot','ink','volatile'],rng);if(t.kind==='diamond')t.charge=0;break;
+    case'randomSpecial':t.kind=pick(['gold','diamond','emerald','dot','mirror','ink','volatile'],rng);if(t.kind==='diamond')t.charge=0;break;
     default:return{ok:false,message:'Esta mejora todavía no puede aplicarse.'};
   }
   owned.uses--;
@@ -642,6 +648,14 @@ function replace(ids){
 }
 function specialValidation(word,tiles){
   const effect=specialEffect();
+  const bangIndex=tiles.findIndex(t=>t.kind==='bang');
+  if(bangIndex>=0&&bangIndex!==tiles.length-1)return{ok:false,message:'La ficha Exclamación debe ser la última de la jugada.'};
+  const plusCount=tiles.filter(t=>t.kind==='plus').length;
+  if(plusCount>1)return{ok:false,message:'Solo puedes usar un Conector por jugada.'};
+  if(plusCount===1){
+    const i=tiles.findIndex(t=>t.kind==='plus');
+    if(i<4||tiles.length-i-1<4)return{ok:false,message:'El Conector necesita una palabra de 4+ letras a cada lado.'};
+  }
   if(effect==='maxTiles'){
     const max=4+state.roundWords;
     if(tiles.length>max)return{ok:false,message:`Ronda especial: máximo ${max} fichas ahora mismo.`};
@@ -657,34 +671,29 @@ function specialValidation(word,tiles){
   return{ok:true};
 }
 function play(word,tiles){
-  const val=validate(word);if(!val.ok){state.invalidAttempts++;state.validStreak=0;saveRun();return val;}
-  if(state.usedWords.includes(val.word))return{ok:false,message:'Ya has utilizado esa palabra.'};
-  if(!challengeOK(state.challenge,val.word))return{ok:false,message:`No cumple el reto: ${challenge(state.challenge).desc}`};
-  const sv=specialValidation(val.word,tiles);if(!sv.ok)return sv;
+  const raw=String(word||'').toLowerCase();
+  const lexical=raw.replace(/!/g,'');
+  const parts=lexical.split('+');
+  if(parts.some(p=>!p))return{ok:false,message:'El Conector debe unir dos palabras completas.'};
+  const validated=[];
+  for(const part of parts){const val=validate(part);if(!val.ok){state.invalidAttempts++;state.validStreak=0;saveRun();return val;}if(state.usedWords.includes(val.word))return{ok:false,message:'Ya has utilizado «'+val.word.toUpperCase()+'».'};validated.push(val.word);}
+  if(validated.some(w=>!challengeOK(state.challenge,w)))return{ok:false,message:'Alguna palabra no cumple el reto: '+challenge(state.challenge).desc};
+  const displayWord=validated.join('+')+(raw.endsWith('!')?'!':'');
+  const sv=specialValidation(displayWord,tiles);if(!sv.ok)return sv;
   state.validStreak++;state.maxStreak=Math.max(state.maxStreak,state.validStreak);
-  const sc=score(val.word,tiles,false);
-  const effect=specialEffect();
-  const selectedIds=new Set(tiles.map(t=>t.id));
+  const sc=score(displayWord,tiles,false);const effect=specialEffect();const selectedIds=new Set(tiles.map(t=>t.id));
   for(const t of tiles){t.uses++;if(t.kind==='ink')t.bonus=(t.bonus||0)+1;}
-  if(effect!=='specialsOff'){
-    for(const t of state.board)if(t.kind==='diamond'&&!selectedIds.has(t.id))t.charge=(t.charge||0)+5;
-  }
-  let playCost=effect==='doublePlay'?2:1;
-  let penalty=0;
+  if(effect!=='specialsOff'){for(const t of state.board)if(t.kind==='diamond'&&!selectedIds.has(t.id))t.charge=(t.charge||0)+5;}
+  let playCost=effect==='doublePlay'?2:1,penalty=0;
   if(effect==='highlighted'&&state.specialData.highlightedId&&!selectedIds.has(state.specialData.highlightedId))penalty=2;
   state.playsLeft-=playCost+penalty;
   for(const t of tiles)if(effect!=='specialsOff'&&t.kind==='potion')state.playsLeft+=Math.max(1,tileScore(t));
-  state.roundScore+=sc.total;state.totalScore+=sc.total;
-  state.previousLength=[...val.word].length;state.words.push(val.word);state.usedWords.push(val.word);state.roundWords++;
-  state.wordLog.push({word:val.word,score:sc.total,wordScore:sc.wordScore,bonusPoints:sc.bonusPoints,effects:sc.effects});
-  if(val.word.length>state.longestWord.length)state.longestWord=val.word;
-  if(!state.bestPlay||sc.total>state.bestPlay.score)state.bestPlay={word:val.word,score:sc.total};
-  state.bestCombo=Math.max(state.bestCombo,sc.multiplier);
-  if([...val.word].length>=7)state.goals[0].done=true;if(/[áéíóúü]/.test(val.word))state.goals[1].done=true;if(tiles.some(t=>RARE.has(t.letter)))state.goals[2].done=true;
-  career.words[val.word]=(career.words[val.word]||0)+1;if(val.word.length>(career.bestWord||'').length)career.bestWord=val.word;
-  replace(tiles.map(t=>t.id));
-  if(effect==='autoRefresh')refreshBoard(false,true);
-  saveCareer();saveRun();return{ok:true,word:val.word,score:sc,playCost,penalty};
+  state.roundScore+=sc.total;state.totalScore+=sc.total;state.previousLength=tiles.length;
+  for(const valid of validated){state.words.push(valid);state.usedWords.push(valid);career.words[valid]=(career.words[valid]||0)+1;if(valid.length>(state.longestWord||'').length)state.longestWord=valid;if(valid.length>(career.bestWord||'').length)career.bestWord=valid;}
+  state.roundWords++;state.wordLog.push({word:displayWord,score:sc.total,wordScore:sc.wordScore,bonusPoints:sc.bonusPoints,effects:sc.effects});
+  if(!state.bestPlay||sc.total>state.bestPlay.score)state.bestPlay={word:displayWord,score:sc.total};state.bestCombo=Math.max(state.bestCombo,sc.multiplier);
+  if(validated.some(w=>w.length>=7))state.goals[0].done=true;if(validated.some(w=>/[áéíóúü]/.test(w)))state.goals[1].done=true;if(tiles.some(t=>RARE.has(t.letter)))state.goals[2].done=true;
+  replace(tiles.map(t=>t.id));if(effect==='autoRefresh')refreshBoard(false,true);saveCareer();saveRun();return{ok:true,word:displayWord,words:validated,score:sc,playCost,penalty};
 }
 function refreshBoard(manual=true,free=false){
   const effect=specialEffect();
