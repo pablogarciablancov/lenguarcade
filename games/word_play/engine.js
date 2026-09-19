@@ -2,6 +2,7 @@
 'use strict';
 const C=window.WordPlayContent,LX=window.WordPlayLexicon||{additions:[],strict:{},blocked:[],rejectPatterns:[]};
 const DICTIONARY_URLS=['./dictionary-es-50k.txt','https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/es/es_50k.txt'];
+const HUNSPELL_AFF='./hunspell/es_ES.aff',HUNSPELL_DIC='./hunspell/es_ES.dic';
 const SAVE_KEY='lenguarcade.wordplay.run.v3',CAREER_KEY='lenguarcade.wordplay.career.v3',SETTINGS_KEY='lenguarcade.wordplay.settings.v1';
 const LETTER_POOL=[['A',13],['E',13],['O',10],['S',8],['R',8],['N',7],['I',7],['L',6],['D',5],['T',5],['U',5],['C',4],['M',3],['P',3],['B',2],['G',2],['V',2],['H',2],['F',1.5],['Y',1.5],['Q',1],['J',1],['Ñ',.8],['X',.5],['Z',.5],['K',.12],['W',.12]];
 const LETTER_VALUES={A:1,E:1,I:1,O:1,N:1,R:1,S:1,L:1,U:1,D:2,T:2,B:3,C:3,G:3,M:3,P:3,F:4,H:4,V:4,Y:4,Q:5,Ñ:5,J:7,X:7,Z:9,K:10,W:10};
@@ -27,7 +28,7 @@ for(const [wrong,right] of Object.entries(LX.strict||{}))STRICT.set(wrong,right)
 const FALLBACK=`casa cosa paso peso piso mesa misa masa mapa mano mono mina luna lana lino loma lupa palo pelo pila polo pera puro para pero toro tiro tela tila tono tuna taza zona amor amigo amiga aula clase libro libros leer poema poemas verso versos rima rimas lengua palabra palabras letra letras frase frases texto textos juego juegos gato gata perro perra pez peces ave aves oso rana lobo vaca toro gallo gallina caballo yegua burro agua aire fuego tierra mar río lago sol luna nube nubes cielo campo bosque árbol hoja hojas flor flores roca arena isla costa playa monte valle camino caminos uno una dos tres cuatro cinco seis siete ocho nueve diez cien mil ser soy eres es somos sois son fui fue fueron era eran estar estoy estás está estamos están tener tengo tienes tiene tenemos tienen hacer hago haces hace hacemos hacen decir digo dices dice decimos dicen ir voy vas va vamos vais van venir vengo vienes viene vienen ver veo ves ve vemos ven dar doy das da damos dan saber sé sabes sabe sabemos saben querer quiero quieres quiere queremos quieren poder puedo puedes puede podemos pueden deber debo debes debe deben poner pongo pones pone ponen salir salgo sales sale salen canción camión avión acción corazón rincón jardín lápiz árbol música rápido rápida difícil fácil filosofía religión gramática ortografía tecnología lingüística pingüino vergüenza bilingüe cigüeña murciélago día días después aquí allí también español niño niña mañana señor señora año años sueño enseñar extraño otoño pequeño pequeña cariño caña piña montaña`;
 const EXTRA_WORDS=(LX.additions||[]).join(' ');
 const TARGETS=[85,160,270,420,610,840,1110,1470,1930,2510,3260,4200];
-let dictionary=new Set(),accentMap=new Map(),wordIndex=[],state=null,career=loadCareer(),settings=loadSettings();
+let dictionary=new Set(),accentMap=new Map(),wordIndex=[],hunspell=null,state=null,career=loadCareer(),settings=loadSettings();
 const normalize=s=>String(s||'').trim().toLowerCase().normalize('NFC');
 const strip=s=>normalize(s).replace(/ñ/g,'__enie__').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/__enie__/g,'ñ');
 const vowel=c=>/[aeiouáéíóúü]/i.test(c);
@@ -178,10 +179,29 @@ function repairLoadedBoard(run){
 }
 function loadRun(){try{const r=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(!r||r.version!==3||r.completed)return null;if(r.mode==='daily'){if(!Number.isFinite(r.dailySeed))r.dailySeed=daySeed();if(!Number.isFinite(r.rngCounter))r.rngCounter=0;}if(typeof r.won!=='boolean')r.won=false;r.bonuses=Object.assign({extraPlays:0,extraShuffles:0,roundSeed:0,nextRoundSeed:0,lengthMult:1,letterMult:1,careerXp:0,bossPlay:0,rareLuck:0},r.bonuses||{});r.target=r.mode==='quick'?999999:roundTarget(r.round,r.challenge);return repairLoadedBoard(r);}catch{return null;}}
 function clearRun(){localStorage.removeItem(SAVE_KEY);}
+async function loadHunspell(){
+  try{
+    const TypoCtor=globalThis.Typo||window.Typo;
+    if(typeof TypoCtor!=='function')throw new Error('typo-unavailable');
+    const [affRes,dicRes]=await Promise.all([
+      fetch(HUNSPELL_AFF,{cache:'force-cache'}),
+      fetch(HUNSPELL_DIC,{cache:'force-cache'})
+    ]);
+    if(!affRes.ok||!dicRes.ok)throw new Error('hunspell-http');
+    const [affData,dicData]=await Promise.all([affRes.text(),dicRes.text()]);
+    hunspell=new TypoCtor('es_ES',affData,dicData,{});
+    return !!hunspell?.loaded;
+  }catch{
+    hunspell=null;
+    return false;
+  }
+}
 async function loadDictionary(onStatus){
   dictionary=new Set((FALLBACK+' '+EXTRA_WORDS).split(/\s+/).map(normalize).filter(Boolean));
   rebuild();
   onStatus?.(`Diccionario esencial · ${dictionary.size.toLocaleString('es-ES')} palabras`);
+
+  let sourceLabel='esencial';
   for(const url of DICTIONARY_URLS){
     try{
       const res=await fetch(url,{cache:'force-cache'});
@@ -193,9 +213,16 @@ async function loadDictionary(onStatus){
       }
       for(const w of (LX.additions||[]))dictionary.add(normalize(w));
       rebuild();
-      onStatus?.(`${url.startsWith('./')?'Diccionario local':'Diccionario ampliado'} · ${dictionary.size.toLocaleString('es-ES')} palabras`);
-      return;
+      sourceLabel=url.startsWith('./')?'local':'ampliado';
+      break;
     }catch{}
+  }
+
+  const morphReady=await loadHunspell();
+  if(morphReady){
+    onStatus?.(`Español completo · ${dictionary.size.toLocaleString('es-ES')} formas frecuentes + flexión y derivación`);
+  }else{
+    onStatus?.(`Diccionario ${sourceLabel} · ${dictionary.size.toLocaleString('es-ES')} palabras`);
   }
 }
 function rebuild(){
@@ -212,7 +239,27 @@ function rebuild(){
     wordIndex.push({word:w,length:letters.length,signature:[...counts.entries()]});
   }
 }
-function validate(raw){const w=normalize(raw);if(w.length<3)return{ok:false,message:'Necesitas al menos 3 letras.'};if(BLOCKED.has(w)||(LX.rejectPatterns||[]).some(re=>re&&typeof re.test==='function'&&re.test(w)))return{ok:false,message:'Esa forma no está disponible en el modo escolar.'};const strict=STRICT.get(w);if(strict)return{ok:false,accent:true,message:`Casi: prueba con «${strict}».`};if(dictionary.has(w))return{ok:true,word:w};const alt=(accentMap.get(strip(w))||[]).find(x=>/[áéíóúü]/.test(x));return alt?{ok:false,accent:true,message:`Casi: prueba con «${alt}».`}:{ok:false,message:`No encuentro «${w.toUpperCase()}» en el diccionario.`};}
+function validate(raw){
+  const w=normalize(raw);
+  if(w.length<3)return{ok:false,message:'Necesitas al menos 3 letras.'};
+  if(BLOCKED.has(w)||(LX.rejectPatterns||[]).some(re=>re&&typeof re.test==='function'&&re.test(w)))return{ok:false,message:'Esa forma no está disponible en el modo escolar.'};
+  const strict=STRICT.get(w);
+  if(strict)return{ok:false,accent:true,message:`Casi: prueba con «${strict}».`};
+  if(dictionary.has(w))return{ok:true,word:w,source:'frequency'};
+  if(hunspell?.check?.(w))return{ok:true,word:w,source:'morphology'};
+
+  const alt=(accentMap.get(strip(w))||[]).find(x=>/[áéíóúü]/.test(x));
+  if(alt)return{ok:false,accent:true,message:`Casi: prueba con «${alt}».`};
+
+  if(hunspell?.suggest){
+    const suggestion=hunspell.suggest(w).find(x=>{
+      const n=normalize(x);
+      return strip(n)===strip(w)&&/[áéíóúü]/.test(n);
+    });
+    if(suggestion)return{ok:false,accent:true,message:`Casi: prueba con «${normalize(suggestion)}».`};
+  }
+  return{ok:false,message:`No encuentro «${w.toUpperCase()}» en el diccionario.`};
+}
 function challenge(id){return C.challenges.find(x=>x.id===id)||C.challenges[0];}
 function challengeOK(id,w){const a=[...w],p=strip(w);switch(id){case'none':return true;case'min5':return a.length>=5;case'min6':return a.length>=6;case'vowel':return vowel(a[0]);case'consonant':return!vowel(a[0]);case'noA':return!p.includes('a');case'noE':return!p.includes('e');case'accent':return/[áéíóúü]/.test(w);case'ntilde':return w.includes('ñ');case'unique':return new Set(a).size===a.length;case'exact5':return a.length===5;case'exact6':return a.length===6;case'rare':return/[jñqxz]/i.test(w);case'endsS':return w.endsWith('s');case'twoVowels':return a.filter(vowel).length>=2;case'threeVowels':return a.filter(vowel).length>=3;case'longAccent':return a.length>=6&&/[áéíóúü]/.test(w);case'noCommon':return!/[aeáé]/.test(w);default:return true;}}
 function chooseChallenge(round,mode){
@@ -393,5 +440,5 @@ function shuffle(){if(state.shufflesLeft<=0)return false;const upgrades=state.bo
 function metric(a){switch(a.metric){case'careerWords':return Object.values(career.words).reduce((s,n)=>s+n,0);case'bestPlay':return Math.max(career.bestPlay,state?.bestPlay?.score||0);case'runScore':return state?.totalScore||0;case'longest':return Math.max((career.bestWord||'').length,(state?.longestWord||'').length);case'ntilde':return state?.words.some(w=>w.includes('ñ'))?1:0;case'accent':return state?.words.some(w=>/[áéíóúü]/.test(w))?1:0;case'streak':return state?.maxStreak||0;case'rare':return state?.words.some(w=>/[jñqxzkw]/i.test(w))?1:0;case'wins':return career.wins;case'uniqueWords':return Object.keys(career.words).length;case'cards':return Object.keys(career.cards).length;case'combo':return Math.max(career.bestCombo,state?.bestCombo||1);case'quick':return career.quickGames;case'daily':return career.dailyGames;case'perfect':return state?.completed&&state?.won&&state.invalidAttempts===0?1:0;case'round':return state?.round||0;default:return 0;}}
 function achievements(){const got=[];for(const a of C.achievements)if(!career.achievements[a.id]&&metric(a)>=a.value){career.achievements[a.id]=Date.now();career.xp+=25;got.push(a);}if(got.length)saveCareer();return got;}
 function finish(won){state.won=!!won;state.completed=true;clearRun();career.games++;if(won&&state.mode!=='quick')career.wins++;if(state.mode==='quick')career.quickGames++;if(state.mode==='daily')career.dailyGames++;career.bestScore=Math.max(career.bestScore,state.totalScore);career.bestPlay=Math.max(career.bestPlay,state.bestPlay?.score||0);career.bestCombo=Math.max(career.bestCombo,state.bestCombo);let xp=Math.round(state.words.length*4+state.round*10+(won?80:0)+state.bonuses.careerXp);if(state.mode==='quick')xp=Math.round(xp*.7);career.xp+=xp;const got=achievements();saveCareer();return{xp,got};}
-window.WordPlayEngine={C,LETTER_VALUES,VOWELS,ACCENTABLE,BOARD_RULES,boardQuality,isBalancedBoard,repairLoadedBoard,get state(){return state},set state(v){state=v},get career(){return career},settings,saveSettings,saveRun,loadRun,clearRun,newState,loadDictionary,validate,challenge,chooseChallenge,roundTarget,tileScore,score,rewards,chooseReward,nextRound,play,shuffle,achievements,finish,strip,vowel,pick,daySeed,runRandom};
+window.WordPlayEngine={C,LETTER_VALUES,VOWELS,ACCENTABLE,BOARD_RULES,boardQuality,isBalancedBoard,repairLoadedBoard,get morphologyReady(){return !!hunspell?.loaded},get state(){return state},set state(v){state=v},get career(){return career},settings,saveSettings,saveRun,loadRun,clearRun,newState,loadDictionary,validate,challenge,chooseChallenge,roundTarget,tileScore,score,rewards,chooseReward,nextRound,play,shuffle,achievements,finish,strip,vowel,pick,daySeed,runRandom};
 })();
