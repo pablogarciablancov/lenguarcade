@@ -366,16 +366,10 @@ for(let i=0;i<10;i++){
 }
 
 E.state=E.newState('normal');
-const anchor=E.anchorWordCandidates(E.state).find(x=>x.length>=6);
-if(!anchor)throw new Error('No hay palabra ancla frecuente de 6+');
-const chosen=[];
-for(const letter of [...E.strip(anchor.word).toUpperCase()]){
-  const tile=E.state.board.find(t=>!chosen.includes(t)&&t.letter===letter);
-  if(!tile)throw new Error(`El tablero anclado no contiene realmente «${anchor.word}»`);
-  chosen.push(tile);
-}
-const played=E.play(anchor.word,chosen);
-if(!played.ok)throw new Error(`No se pudo jugar la palabra ancla «${anchor.word}»: ${played.message}`);
+const anchorPlayable=findPlayableFromBoard(E.state,new Set(),6);
+if(!anchorPlayable)throw new Error('El tablero anclado no contiene ninguna palabra jugable de 6+');
+const played=E.play(anchorPlayable.word,anchorPlayable.tiles);
+if(!played.ok)throw new Error(`No se pudo jugar una palabra de 6+ del tablero: ${played.message}`);
 assertLongWord(E.state,'reposición tras jugar palabra');
 
 E.state=E.newState('normal');
