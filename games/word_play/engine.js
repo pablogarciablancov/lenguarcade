@@ -1,15 +1,18 @@
 (() => {
 'use strict';
-const C=window.WordPlayContent;
-const DICTIONARY_URL='https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/es/es_50k.txt';
+const C=window.WordPlayContent,LX=window.WordPlayLexicon||{additions:[],strict:{},blocked:[]};
+const DICTIONARY_URLS=['./dictionary-es-50k.txt','https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/es/es_50k.txt'];
 const SAVE_KEY='lenguarcade.wordplay.run.v3',CAREER_KEY='lenguarcade.wordplay.career.v3',SETTINGS_KEY='lenguarcade.wordplay.settings.v1';
 const LETTER_POOL=[['A',13],['E',13],['O',10],['S',8],['R',8],['N',7],['I',7],['L',6],['D',5],['T',5],['U',5],['C',4],['M',3],['P',3],['B',2],['G',2],['V',2],['H',2],['F',1.5],['Y',1.5],['Q',1],['J',1],['Ñ',.8],['X',.5],['Z',.5],['K',.12],['W',.12]];
 const LETTER_VALUES={A:1,E:1,I:1,O:1,N:1,R:1,S:1,L:1,U:1,D:2,T:2,B:3,C:3,G:3,M:3,P:3,F:4,H:4,V:4,Y:4,Q:5,Ñ:5,J:7,X:7,Z:9,K:10,W:10};
 const VOWELS=new Set(['A','E','I','O','U']),RARE=new Set(['J','Ñ','Q','X','Z','K','W']);
 const ACCENTABLE={A:['A','Á'],E:['E','É'],I:['I','Í'],O:['O','Ó'],U:['U','Ú','Ü']};
 const BLOCKED=new Set(['puta','puto','putas','putos','mierda','gilipollas','coño','joder','follar','follando','polla','pollas','cabrón','cabron','cabrones']);
+for(const word of (LX.blocked||[]))BLOCKED.add(word);
 const STRICT=new Map(Object.entries({cancion:'canción',camion:'camión',avion:'avión',accion:'acción',corazon:'corazón',rincon:'rincón',jardin:'jardín',lapiz:'lápiz',arbol:'árbol',musica:'música',rapido:'rápido',dificil:'difícil',facil:'fácil',filosofia:'filosofía',religion:'religión',gramatica:'gramática',ortografia:'ortografía',tecnologia:'tecnología',linguistica:'lingüística',pinguino:'pingüino',verguenza:'vergüenza',bilingue:'bilingüe',ciguena:'cigüeña',murcielago:'murciélago',dia:'día',despues:'después',aqui:'aquí',alli:'allí',tambien:'también'}));
+for(const [wrong,right] of Object.entries(LX.strict||{}))STRICT.set(wrong,right);
 const FALLBACK=`casa cosa paso peso piso mesa misa masa mapa mano mono mina luna lana lino loma lupa palo pelo pila polo pera puro para pero toro tiro tela tila tono tuna taza zona amor amigo amiga aula clase libro libros leer poema poemas verso versos rima rimas lengua palabra palabras letra letras frase frases texto textos juego juegos gato gata perro perra pez peces ave aves oso rana lobo vaca toro gallo gallina caballo yegua burro agua aire fuego tierra mar río lago sol luna nube nubes cielo campo bosque árbol hoja hojas flor flores roca arena isla costa playa monte valle camino caminos uno una dos tres cuatro cinco seis siete ocho nueve diez cien mil ser soy eres es somos sois son fui fue fueron era eran estar estoy estás está estamos están tener tengo tienes tiene tenemos tienen hacer hago haces hace hacemos hacen decir digo dices dice decimos dicen ir voy vas va vamos vais van venir vengo vienes viene vienen ver veo ves ve vemos ven dar doy das da damos dan saber sé sabes sabe sabemos saben querer quiero quieres quiere queremos quieren poder puedo puedes puede podemos pueden deber debo debes debe deben poner pongo pones pone ponen salir salgo sales sale salen canción camión avión acción corazón rincón jardín lápiz árbol música rápido rápida difícil fácil filosofía religión gramática ortografía tecnología lingüística pingüino vergüenza bilingüe cigüeña murciélago día días después aquí allí también español niño niña mañana señor señora año años sueño enseñar extraño otoño pequeño pequeña cariño caña piña montaña`;
+const EXTRA_WORDS=(LX.additions||[]).join(' ');
 const TARGETS=[90,170,280,430,620,850,1120,1480,1920,2480,3200,4100];
 let dictionary=new Set(),accentMap=new Map(),state=null,career=loadCareer(),settings=loadSettings();
 const normalize=s=>String(s||'').trim().toLowerCase().normalize('NFC');
@@ -30,7 +33,26 @@ function newState(mode='normal'){const daily=mode==='daily',quick=mode==='quick'
 function saveRun(){if(state&&!state.completed)localStorage.setItem(SAVE_KEY,JSON.stringify(state));}
 function loadRun(){try{const r=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(!r||r.version!==3||r.completed)return null;if(r.mode==='daily'){if(!Number.isFinite(r.dailySeed))r.dailySeed=daySeed();if(!Number.isFinite(r.rngCounter))r.rngCounter=0;}if(typeof r.won!=='boolean')r.won=false;return r;}catch{return null;}}
 function clearRun(){localStorage.removeItem(SAVE_KEY);}
-async function loadDictionary(onStatus){dictionary=new Set(FALLBACK.split(/\s+/).map(normalize).filter(Boolean));rebuild();onStatus?.(`Modo básico · ${dictionary.size.toLocaleString('es-ES')} palabras`);try{const res=await fetch(DICTIONARY_URL,{cache:'force-cache'});if(!res.ok)throw new Error();const text=await res.text();for(const line of text.split(/\r?\n/)){const w=normalize(line.split(/\s+/)[0]);if(w&&/^[a-záéíóúüñ]+$/i.test(w)&&w.length>=2)dictionary.add(w);}rebuild();onStatus?.(`Diccionario ampliado · ${dictionary.size.toLocaleString('es-ES')} palabras`);}catch{}}
+async function loadDictionary(onStatus){
+  dictionary=new Set((FALLBACK+' '+EXTRA_WORDS).split(/\s+/).map(normalize).filter(Boolean));
+  rebuild();
+  onStatus?.(`Diccionario esencial · ${dictionary.size.toLocaleString('es-ES')} palabras`);
+  for(const url of DICTIONARY_URLS){
+    try{
+      const res=await fetch(url,{cache:'force-cache'});
+      if(!res.ok)throw new Error('dictionary-http-'+res.status);
+      const text=await res.text();
+      for(const line of text.split(/\r?\n/)){
+        const w=normalize(line.split(/\s+/)[0]);
+        if(w&&/^[a-záéíóúüñ]+$/i.test(w)&&w.length>=2)dictionary.add(w);
+      }
+      for(const w of (LX.additions||[]))dictionary.add(normalize(w));
+      rebuild();
+      onStatus?.(`${url.startsWith('./')?'Diccionario local':'Diccionario ampliado'} · ${dictionary.size.toLocaleString('es-ES')} palabras`);
+      return;
+    }catch{}
+  }
+}
 function rebuild(){accentMap=new Map();for(const w of dictionary){const k=strip(w);if(!accentMap.has(k))accentMap.set(k,[]);accentMap.get(k).push(w);}}
 function validate(raw){const w=normalize(raw);if(w.length<3)return{ok:false,message:'Necesitas al menos 3 letras.'};if(BLOCKED.has(w))return{ok:false,message:'Esa palabra no está disponible en el modo escolar.'};const strict=STRICT.get(w);if(strict)return{ok:false,accent:true,message:`Casi: prueba con «${strict}».`};if(dictionary.has(w))return{ok:true,word:w};const alt=(accentMap.get(strip(w))||[]).find(x=>/[áéíóúü]/.test(x));return alt?{ok:false,accent:true,message:`Casi: prueba con «${alt}».`}:{ok:false,message:`No encuentro «${w.toUpperCase()}» en el diccionario.`};}
 function challenge(id){return C.challenges.find(x=>x.id===id)||C.challenges[0];}

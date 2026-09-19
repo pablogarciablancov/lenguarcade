@@ -1,0 +1,155 @@
+/* Word Play · capa visual arcade
+   Se carga después de responsive.css para aportar identidad de videojuego sin alterar el containment. */
+:root{
+  --wp-cyan:#55e7ff;
+  --wp-violet:#9b7cff;
+  --wp-pink:#ff71b8;
+  --wp-gold:#ffd166;
+  --wp-green:#62f2b0;
+  --wp-ink:#070b14;
+  --wp-deep:#0c1220;
+  --wp-panel:#111a2b;
+  --wp-panel2:#18243a;
+}
+
+.app-shell{position:relative;isolation:isolate;background:
+  radial-gradient(circle at 50% -10%,rgba(85,231,255,.11),transparent 34rem),
+  radial-gradient(circle at 0 100%,rgba(155,124,255,.13),transparent 30rem),
+  linear-gradient(155deg,#060911 0%,#0a1020 46%,#080b15 100%)!important}
+.app-shell::before{content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;opacity:.24;background-image:
+  linear-gradient(rgba(255,255,255,.026) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px);
+  background-size:34px 34px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.65),transparent 86%)}
+.app-shell::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(circle at 50% 46%,transparent 0 28%,rgba(2,6,16,.14) 55%,rgba(2,6,16,.6) 100%)}
+
+.panel,.side-panel,.play-panel,.game-topbar{border-color:rgba(139,191,255,.18)!important;background:
+  linear-gradient(180deg,rgba(21,31,50,.965),rgba(10,16,29,.965))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),inset 0 -1px 0 rgba(0,0,0,.38),0 12px 34px rgba(0,0,0,.28)!important}
+
+.game-topbar{position:relative;overflow:hidden;border-radius:14px!important}
+.game-topbar::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(var(--wp-cyan),var(--wp-violet))}
+.game-topbar::after{content:"WORD PLAY // RUN";position:absolute;right:112px;top:7px;font:800 .52rem/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.17em;color:rgba(148,211,255,.32);pointer-events:none}
+.round-block strong,.score-block>strong{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.02em}
+.score-block{position:relative;padding:2px 12px 4px;border-left:1px solid rgba(255,255,255,.06);border-right:1px solid rgba(255,255,255,.06)}
+.score-block>strong{color:white;text-shadow:0 0 20px rgba(85,231,255,.22)}
+.progress-track{height:8px!important;border:1px solid rgba(255,255,255,.07);background:#070b14!important}
+.progress-track i{box-shadow:0 0 14px rgba(85,231,255,.5);background:linear-gradient(90deg,#2dd4bf,#55e7ff 48%,#a78bfa)!important}
+
+.resource-row article{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025))!important;border-color:rgba(255,255,255,.08)!important}
+.resource-row article::after{position:absolute;right:7px;top:4px;font-size:.72rem;opacity:.28;font-weight:900}
+.resource-row article:nth-child(1)::after{content:"▶"}
+.resource-row article:nth-child(2)::after{content:"⟳"}
+.resource-row article:nth-child(3)::after{content:"✦"}
+.resource-row strong{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#fff;text-shadow:0 0 12px rgba(85,231,255,.18)}
+
+.section-heading h2{letter-spacing:.02em;text-transform:uppercase;font-size:.78rem!important;color:#dce8ff}
+.section-heading>span{box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 0 18px rgba(155,124,255,.12)}
+
+.play-panel{position:relative}
+.play-panel::before{content:"";position:absolute;inset:7px;border:1px solid rgba(85,231,255,.05);border-radius:14px;pointer-events:none}
+
+.challenge-banner{position:relative;overflow:hidden;background:linear-gradient(90deg,rgba(85,231,255,.08),rgba(155,124,255,.045))!important;border-color:rgba(85,231,255,.15)!important}
+.challenge-banner::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--wp-cyan)}
+.challenge-banner strong{font-size:.92rem!important;letter-spacing:.02em}
+.game-screen[data-challenge-kind="boss"] .challenge-banner{background:linear-gradient(90deg,rgba(255,82,112,.13),rgba(154,76,255,.08))!important;border-color:rgba(255,113,184,.3)!important;box-shadow:inset 0 0 20px rgba(255,73,126,.04),0 0 20px rgba(255,73,126,.04)}
+.game-screen[data-challenge-kind="boss"] .challenge-banner::before{background:linear-gradient(#ff718f,#ff71b8)}
+.game-screen[data-challenge-kind="boss"] .boss-badge{animation:bossPulse 1.8s ease-in-out infinite}
+
+.word-zone{position:relative;background:
+  radial-gradient(circle at 50% 0,rgba(85,231,255,.055),transparent 55%),
+  rgba(5,10,20,.74)!important;border-color:rgba(107,180,255,.17)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.018),inset 0 -18px 38px rgba(0,0,0,.18)}
+.word-zone::after{content:"COMPOSE";position:absolute;right:9px;bottom:5px;font:800 .46rem/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.18em;color:rgba(116,196,255,.16);pointer-events:none}
+.word-builder{filter:drop-shadow(0 5px 9px rgba(0,0,0,.24))}
+.word-chip{border:1px solid rgba(255,255,255,.62)!important;box-shadow:inset 0 -5px 0 rgba(88,60,20,.17),inset 0 1px 0 #fff,0 5px 12px rgba(0,0,0,.3)!important}
+
+.board{position:relative;z-index:1}
+.board::before{content:"";position:absolute;inset:-11px;z-index:-2;border-radius:18px;pointer-events:none;background:
+  linear-gradient(145deg,rgba(85,231,255,.08),rgba(155,124,255,.05)),
+  #080e1b;border:1px solid rgba(107,191,255,.16);box-shadow:
+  inset 0 0 0 1px rgba(255,255,255,.02),inset 0 0 36px rgba(85,231,255,.025),0 16px 36px rgba(0,0,0,.32)}
+.board::after{content:"";position:absolute;inset:-4px;z-index:-1;pointer-events:none;border-radius:14px;background:
+  linear-gradient(90deg,transparent,rgba(85,231,255,.10),transparent) top/100% 1px no-repeat,
+  linear-gradient(90deg,transparent,rgba(155,124,255,.08),transparent) bottom/100% 1px no-repeat}
+
+.tile{border-color:rgba(255,255,255,.62)!important;background:
+  radial-gradient(circle at 32% 20%,rgba(255,255,255,.64),transparent 38%),
+  linear-gradient(145deg,#fff5d8,#e5c98d)!important;
+  box-shadow:inset 0 -7px 0 rgba(87,59,18,.17),inset 0 1px 0 #fff,0 7px 18px rgba(0,0,0,.32)!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.55);transition:transform .11s ease,box-shadow .11s ease,filter .11s ease!important}
+@media(hover:hover){.tile:not(.selected):hover{transform:translateY(-4px) scale(1.025)!important;filter:brightness(1.04);box-shadow:inset 0 -7px 0 rgba(87,59,18,.17),inset 0 1px 0 #fff,0 12px 24px rgba(0,0,0,.38),0 0 0 2px rgba(85,231,255,.12)!important}}
+.tile.selected{transform:scale(.88)!important;filter:saturate(.6) brightness(.7)!important;opacity:.24!important}
+.tile.gold{background:radial-gradient(circle at 30% 18%,#fffbd1,transparent 38%),linear-gradient(145deg,#ffe979,#d99c20)!important;box-shadow:inset 0 -7px 0 rgba(93,55,0,.2),0 0 18px rgba(255,209,102,.3),0 8px 18px rgba(0,0,0,.3)!important}
+.tile.diamond{background:radial-gradient(circle at 30% 18%,#fff,transparent 33%),linear-gradient(145deg,#c9fbff,#5ed0ff)!important;box-shadow:inset 0 -7px 0 rgba(0,94,140,.16),0 0 19px rgba(85,231,255,.3),0 8px 18px rgba(0,0,0,.3)!important}
+.tile.echo{outline:2px solid rgba(168,139,250,.72)!important;box-shadow:inset 0 -7px 0 rgba(87,59,18,.17),0 0 18px rgba(155,124,255,.34),0 8px 18px rgba(0,0,0,.3)!important}
+.tile.ink{background:radial-gradient(circle at 30% 18%,#f8ecff,transparent 38%),linear-gradient(145deg,#d9c5ff,#a893df)!important}
+.tile.crown{outline:2px solid #ffd166!important;box-shadow:inset 0 -7px 0 rgba(87,59,18,.17),0 0 22px rgba(255,209,102,.35),0 8px 18px rgba(0,0,0,.3)!important}
+.tile.volatile{animation:volatileGlow 1.6s ease-in-out infinite}
+
+.submit-btn{position:relative;overflow:hidden;letter-spacing:.055em;text-transform:uppercase;color:#06131c!important;background:linear-gradient(180deg,#8ff1ff,#57d9ee 52%,#8d7ef4)!important;border:1px solid rgba(255,255,255,.55)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -4px 0 rgba(23,50,111,.24),0 8px 17px rgba(0,0,0,.27)!important}
+.submit-btn::after{content:"";position:absolute;top:-80%;left:-30%;width:28%;height:260%;transform:rotate(20deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);animation:buttonSheen 4.2s ease-in-out infinite}
+.secondary-btn,.small-btn,.ghost-btn,.icon-btn,.icon-text-btn{box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.feedback{border:1px solid rgba(255,255,255,.055)}
+.feedback.good{box-shadow:inset 3px 0 0 var(--wp-green),0 0 16px rgba(98,242,176,.05)}
+.feedback.warn{box-shadow:inset 3px 0 0 var(--wp-gold)}
+.feedback.bad{box-shadow:inset 3px 0 0 var(--wp-pink)}
+
+.modifier-card{position:relative;overflow:hidden;border-left-width:3px!important;background:linear-gradient(90deg,rgba(255,255,255,.047),rgba(255,255,255,.018))!important;transition:transform .12s ease,background .12s ease}
+.modifier-card:hover{transform:translateX(2px);background:linear-gradient(90deg,rgba(85,231,255,.065),rgba(255,255,255,.018))!important}
+.modifier-card.rarity-uncommon{border-left-color:#62f2b0!important}
+.modifier-card.rarity-rare{border-left-color:#64a5ff!important}
+.modifier-card.rarity-epic{border-left-color:#b58cff!important}
+.modifier-card.rarity-legendary{border-left-color:#ffd166!important}
+
+.run-stats{padding:8px 9px;border:1px solid rgba(255,255,255,.055);border-radius:12px;background:rgba(4,9,18,.26)}
+.run-stats dd{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#e6f7ff}
+.last-play-card{position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(85,231,255,.055),rgba(155,124,255,.035))!important}
+.played-score{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+
+.goal-item.done{border-color:rgba(98,242,176,.23)!important;background:rgba(98,242,176,.055)!important}
+
+.mode-card{position:relative;overflow:hidden;min-height:126px;background:
+  radial-gradient(circle at 100% 0,rgba(85,231,255,.08),transparent 42%),
+  linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 10px 24px rgba(0,0,0,.2)!important}
+.mode-card::after{position:absolute;right:14px;top:7px;font:900 3rem/1 ui-monospace,SFMono-Regular,Consolas,monospace;color:rgba(255,255,255,.055)}
+.mode-card:nth-child(1)::after{content:"12"}
+.mode-card:nth-child(2)::after{content:"↻"}
+.mode-card:nth-child(3)::after{content:"10"}
+.mode-card:nth-child(4)::after{content:"☼"}
+.mode-card.featured{border-color:rgba(85,231,255,.25)!important;background:
+  radial-gradient(circle at 86% 10%,rgba(85,231,255,.12),transparent 36%),
+  linear-gradient(145deg,rgba(34,211,238,.10),rgba(139,92,246,.08))!important}
+@media(hover:hover){.mode-card:hover{transform:translateY(-3px)!important;border-color:rgba(85,231,255,.28)!important}}
+
+.reward-card{position:relative;overflow:hidden;border-width:1px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 18px 32px rgba(0,0,0,.28)!important;transform-style:preserve-3d}
+.reward-card::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,transparent 18%,rgba(255,255,255,.075) 39%,transparent 54%);transform:translateX(-120%);transition:transform .5s ease}
+@media(hover:hover){.reward-card:hover{transform:translateY(-7px) rotateX(2deg)!important}.reward-card:hover::before{transform:translateX(120%)}}
+.reward-card.rarity-common{background:linear-gradient(155deg,#172236,#101726)!important}
+.reward-card.rarity-uncommon{background:linear-gradient(155deg,#103128,#101d21)!important}
+.reward-card.rarity-rare{background:linear-gradient(155deg,#102947,#111b31)!important}
+.reward-card.rarity-epic{background:linear-gradient(155deg,#291b47,#17142d)!important}
+.reward-card.rarity-legendary{background:linear-gradient(155deg,#473415,#231b11)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 0 28px rgba(255,209,102,.12),0 18px 32px rgba(0,0,0,.3)!important}
+
+.modal{border-color:rgba(103,191,255,.2)!important;background:linear-gradient(180deg,#121c2e,#0b111f)!important;box-shadow:0 32px 80px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.05)!important}
+.modal-backdrop{backdrop-filter:blur(8px)}
+
+.wp-fx-layer{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.wp-score-pop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:950 clamp(1.6rem,4vw,3.3rem)/1 ui-monospace,SFMono-Regular,Consolas,monospace;color:#c8fff4;text-shadow:0 0 12px rgba(98,242,176,.75),0 5px 20px rgba(0,0,0,.85);animation:scorePop .95s cubic-bezier(.2,.8,.2,1) forwards}
+.wp-combo-callout{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);padding:7px 13px;border:1px solid rgba(155,124,255,.4);border-radius:999px;background:rgba(12,8,28,.86);font-weight:950;color:#e5d9ff;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 0 26px rgba(155,124,255,.22);animation:comboPop 1.15s ease forwards}
+.wp-round-flash{position:absolute;inset:0;background:radial-gradient(circle at center,rgba(85,231,255,.16),transparent 52%);animation:roundFlash .65s ease forwards}
+.game-screen.wp-hit .play-panel{animation:panelHit .28s ease}
+.game-screen.wp-boss-enter .challenge-banner{animation:bossEnter .55s cubic-bezier(.2,.8,.2,1)}
+
+@keyframes scorePop{0%{opacity:0;transform:translate(-50%,-35%) scale(.7)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.13)}100%{opacity:0;transform:translate(-50%,-105%) scale(.92)}}
+@keyframes comboPop{0%{opacity:0;transform:translate(-50%,-30%) scale(.8)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-75%) scale(.96)}}
+@keyframes roundFlash{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+@keyframes panelHit{0%,100%{transform:none}45%{transform:scale(1.006)}}
+@keyframes bossPulse{50%{box-shadow:0 0 18px rgba(255,113,184,.32)}}
+@keyframes bossEnter{0%{transform:scale(.97);filter:brightness(1.7)}100%{transform:none;filter:none}}
+@keyframes volatileGlow{50%{filter:brightness(1.1);box-shadow:inset 0 -7px 0 rgba(87,59,18,.17),0 0 24px rgba(255,113,143,.42),0 8px 18px rgba(0,0,0,.3)}}
+@keyframes buttonSheen{0%,62%{transform:translateX(-200%) rotate(20deg)}76%,100%{transform:translateX(650%) rotate(20deg)}}
+
+html.reduce-motion *,html.reduce-motion *::before,html.reduce-motion *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}

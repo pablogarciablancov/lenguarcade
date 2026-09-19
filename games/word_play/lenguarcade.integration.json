@@ -11,5 +11,5 @@
     "saveProgress": true,
     "supabaseCatalog": true
   },
-  "notes": "Versión ampliada del roguelike de palabras: 50 modificadores, 16 recompensas, 18 desafíos, 24 logros, colección, XP léxico local, modo rápido y reto diario. Solicita integración posterior con catálogo, perfil, XP, logros y misiones mediante el adaptador común. El léxico ampliado de laboratorio sigue cargándose desde FrequencyWords con fallback local; antes de declarar el juego estable conviene fijar un recurso léxico local definitivo de español de España."
+  "notes": "Roguelike de palabras con 50 modificadores, 16 recompensas, 18 desafíos, 24 logros, colección, XP léxico, modo rápido y reto diario determinista. El juego incluye un léxico local de unas 49.500 formas, capa ortográfica para español de España, bridge de progreso, sonido procedural y tema visual arcade. Mantener en pruebas hasta completar la validación docente del léxico y el equilibrio."
 }

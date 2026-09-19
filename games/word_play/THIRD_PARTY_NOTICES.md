@@ -1,10 +1,15 @@
-# Fuentes lingüísticas de Word Play
+# Word Play · avisos de terceros
 
-La versión de laboratorio intenta cargar en tiempo de ejecución la lista española de las 50.000 formas más frecuentes del proyecto **FrequencyWords** de Hermit Dave:
+## Léxico de frecuencia en español
 
-- Proyecto: https://github.com/hermitdave/FrequencyWords
-- Archivo usado: `content/2016/es/es_50k.txt`
-- Contenido derivado de OpenSubtitles.
-- Licencia declarada para el contenido del repositorio: **CC BY-SA 4.0**.
+El archivo `dictionary-es-50k.txt` se genera a partir de:
 
-El juego no redistribuye todavía esa lista dentro de este repositorio: la consulta de laboratorio se realiza desde el archivo público original. Si el juego pasa a producción, se recomienda fijar una copia local versionada con su atribución completa o sustituirla por el léxico definitivo elegido para LenguArcade.
+- Proyecto: **FrequencyWords**, de hermitdave.
+- Fuente concreta: `content/2018/es/es_50k.txt`.
+- Corpus de origen: OpenSubtitles 2018.
+- Licencia del contenido: **CC BY-SA 4.0**.
+- Repositorio: https://github.com/hermitdave/FrequencyWords
+
+Para Word Play se conserva únicamente la primera columna (la forma léxica) y se eliminan las frecuencias. El archivo se usa como léxico local del juego y se complementa con una capa ortográfica propia para español de España en `lexicon.js`.
+
+La presencia de una forma en el corpus de frecuencia no implica por sí sola que sea una recomendación normativa. Word Play aplica filtros escolares y correcciones ortográficas adicionales antes de aceptar determinadas formas.
