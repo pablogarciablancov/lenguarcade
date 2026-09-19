@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07141d">
+  <title>Lexaria · LenguArcade</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main id="app" class="app-shell">
+  <section id="titleScreen" class="screen title-screen">
+    <div class="title-noise"></div>
+    <header class="title-topbar">
+      <span class="micro-label">LENGUARCADE · LABORATORIO</span>
+      <div class="top-actions">
+        <button class="icon-btn" data-open="howtoModal" aria-label="Cómo se juega">?</button>
+        <button class="icon-btn" data-open="settingsModal" aria-label="Ajustes">⚙</button>
+      </div>
+    </header>
+    <div class="title-stage">
+      <div class="title-copy">
+        <div class="brand-ribbon">UNIVERSO DE CRIATURAS LINGÜÍSTICAS</div>
+        <h1>LEX<span>ARIA</span></h1>
+        <p class="title-subtitle">Colecciona Lexarios. Entrénalos con Lengua. Construye una combinación imposible.</p>
+        <div class="title-actions">
+          <button id="newRunBtn" class="primary big">NUEVA LIGA</button>
+          <button id="continueRunBtn" class="secondary big hidden">CONTINUAR</button>
+          <button id="practiceBtn" class="secondary">ENTRENAMIENTO LIBRE</button>
+        </div>
+      </div>
+      <div class="hero-creatures" aria-hidden="true">
+        <div class="hero-card h1"><span>Á</span><b>Brontilde</b></div>
+        <div class="hero-card h2"><span>⚡</span><b>Flexión</b></div>
+        <div class="hero-card h3"><span>✦</span><b>Lexifin</b></div>
+      </div>
+    </div>
+    <footer class="title-footer">
+      <button id="codexBtn" class="footer-btn"><b>▦</b><span>Lexipedia</span><small id="codexCount">0/30</small></button>
+      <button id="achievementsBtn" class="footer-btn"><b>★</b><span>Logros</span><small id="achievementCount">0/20</small></button>
+      <button id="historyBtn" class="footer-btn"><b>≡</b><span>Historial</span><small id="historyCount">0 ligas</small></button>
+    </footer>
+  </section>
+
+  <section id="trainerScreen" class="screen trainer-screen hidden">
+    <header class="section-header">
+      <button class="back-btn" data-action="back-title">←</button>
+      <div><span class="micro-label">ANTES DE EMPEZAR</span><h2>Elige a tu entrenador</h2><p>Su habilidad cambia las reglas de toda la liga.</p></div>
+    </header>
+    <div id="trainerChoices" class="trainer-grid"></div>
+  </section>
+
+  <section id="shopScreen" class="screen shop-screen hidden">
+    <header class="run-topbar">
+      <div class="trainer-chip" id="trainerChip"></div>
+      <div class="run-counters">
+        <div><span>VIDAS</span><strong id="livesValue">10</strong></div>
+        <div><span>DÍA</span><strong id="dayValue">1</strong></div>
+        <div><span>VICTORIAS</span><strong id="winsValue">0/10</strong></div>
+        <div><span>TINTA</span><strong id="goldValue">12</strong></div>
+        <div><span>RANGO</span><strong id="rankValue">1</strong></div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" data-open="codexModal">▦</button>
+        <button class="icon-btn" data-open="settingsModal">⚙</button>
+      </div>
+    </header>
+
+    <div class="shop-layout">
+      <aside class="run-sidebar">
+        <section class="side-card">
+          <div class="side-card-title"><span>RELIQUIAS</span><b id="relicCount">0</b></div>
+          <div id="relicBag" class="relic-bag empty"><p>Fusiona Lexarios para obtener reliquias.</p></div>
+        </section>
+        <section class="side-card training-card">
+          <div class="side-card-title"><span>ENTRENAMIENTO</span><b id="trainingValue">3</b></div>
+          <p>Responde correctamente para potenciar permanentemente a un Lexario.</p>
+          <button id="trainBtn" class="secondary full">ENTRENAR</button>
+        </section>
+        <section class="side-card">
+          <div class="side-card-title"><span>SINERGIAS</span></div>
+          <div id="synergyList" class="synergy-list"></div>
+        </section>
+      </aside>
+
+      <section class="board-panel">
+        <div class="panel-heading">
+          <div><span class="micro-label">TU EQUIPO</span><h2>Formación</h2></div>
+          <p>Arrastra o pulsa para mover. La adyacencia importa.</p>
+        </div>
+        <div id="teamBoard" class="team-board"></div>
+        <div class="bench-wrap">
+          <div class="bench-label">RESERVA <small>4 huecos</small></div>
+          <div id="benchBoard" class="bench-board"></div>
+        </div>
+      </section>
+
+      <aside class="inspect-panel">
+        <div id="inspectCard" class="inspect-card empty">
+          <div class="inspect-placeholder">Selecciona un Lexario para ver estadísticas, habilidad y entrenamiento.</div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="market-panel">
+      <div class="market-head">
+        <div><span class="micro-label">MERCADO DEL DÍA</span><h2>Recluta y combina</h2></div>
+        <div class="market-actions">
+          <button id="lockBtn" class="secondary">🔒 FIJAR</button>
+          <button id="rerollBtn" class="secondary">↻ CAMBIAR <small>3</small></button>
+          <button id="battleBtn" class="battle-btn">COMBATIR ➜</button>
+        </div>
+      </div>
+      <div id="marketRow" class="market-row"></div>
+    </section>
+  </section>
+
+  <section id="battleScreen" class="screen battle-screen hidden">
+    <header class="battle-header">
+      <div class="battle-trainer left" id="battlePlayerTrainer"></div>
+      <div class="battle-title"><span id="battleDayLabel">DÍA 1</span><strong id="battleVsLabel">ENCUENTRO</strong></div>
+      <div class="battle-trainer right" id="battleEnemyTrainer"></div>
+    </header>
+    <div class="battle-arena">
+      <div class="hp-cluster">
+        <div class="hp-label"><span>TU EQUIPO</span><strong id="playerHpText">700/700</strong></div>
+        <div class="hp-track"><i id="playerHpBar"></i><em id="playerShieldBar"></em></div>
+      </div>
+      <div class="battle-boards">
+        <div id="playerBattleBoard" class="battle-board player"></div>
+        <div class="versus-mark">VS</div>
+        <div id="enemyBattleBoard" class="battle-board enemy"></div>
+      </div>
+      <div class="hp-cluster enemy">
+        <div class="hp-label"><span>RIVAL</span><strong id="enemyHpText">700/700</strong></div>
+        <div class="hp-track"><i id="enemyHpBar"></i><em id="enemyShieldBar"></em></div>
+      </div>
+      <div class="battle-controls">
+        <button id="speedBtn" class="secondary">×1 VELOCIDAD</button>
+        <div class="battle-timer"><span>TIEMPO</span><strong id="battleTime">0.0</strong></div>
+        <div id="battleStatus" class="battle-status">Preparando habilidades…</div>
+      </div>
+      <div id="battleLog" class="battle-log"></div>
+    </div>
+  </section>
+
+  <section id="practiceScreen" class="screen practice-screen hidden">
+    <header class="section-header compact">
+      <button class="back-btn" data-action="back-title">←</button>
+      <div><span class="micro-label">SIN PARTIDA</span><h2>Entrenamiento libre</h2><p>Practica Lengua y gana XP de perfil sin afectar a una liga.</p></div>
+    </header>
+    <div class="practice-layout">
+      <aside class="practice-categories" id="practiceCategories"></aside>
+      <section class="practice-main">
+        <div id="practiceQuestion" class="question-card"></div>
+        <div id="practiceStats" class="practice-stats"></div>
+      </section>
+    </div>
+  </section>
+
+  <div id="modalLayer" class="modal-layer hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+
+    <section id="howtoModal" class="modal hidden">
+      <div class="modal-head"><div><span class="micro-label">GUÍA RÁPIDA</span><h2>Cómo se juega</h2></div><button class="icon-btn" data-close-modal>×</button></div>
+      <div class="howto-grid">
+        <article><b>1</b><h3>Compra</h3><p>Cada día aparecen cuatro Lexarios y un recurso. El mercado no tiene temporizador.</p></article>
+        <article><b>2</b><h3>Combina</h3><p>3 copias de nivel 1 → nivel 2. 2 copias de nivel 2 → nivel 3. Cada fusión da una reliquia.</p></article>
+        <article><b>3</b><h3>Entrena</h3><p>Gasta sesiones respondiendo preguntas de Lengua. Los aciertos mejoran permanentemente la criatura.</p></article>
+        <article><b>4</b><h3>Coloca</h3><p>Seis huecos en 3×2. Algunas habilidades afectan a aliados adyacentes o del mismo tipo.</p></article>
+        <article><b>5</b><h3>Combate</h3><p>La batalla es automática. Gana 10 encuentros antes de quedarte sin vidas.</p></article>
+        <article><b>6</b><h3>Rompe el juego</h3><p>Entrenadores, reliquias, niveles, variantes cromáticas y sinergias pueden disparar las estadísticas.</p></article>
+      </div>
+    </section>
+
+    <section id="trainingModal" class="modal training-modal hidden">
+      <div class="modal-head"><div><span class="micro-label">SESIÓN LINGÜÍSTICA</span><h2 id="trainingTitle">Entrenamiento</h2></div><button class="icon-btn" data-close-modal>×</button></div>
+      <div id="trainingBody"></div>
+    </section>
+
+    <section id="relicModal" class="modal reward-modal hidden">
+      <div class="modal-head"><div><span class="micro-label">FUSIÓN COMPLETADA</span><h2>Elige una reliquia</h2></div></div>
+      <p>Una sola elección. Sus efectos se mantienen durante toda la liga.</p>
+      <div id="relicChoices" class="reward-grid"></div>
+    </section>
+
+    <section id="eventModal" class="modal reward-modal hidden">
+      <div class="modal-head"><div><span class="micro-label">ENCUENTRO ESPECIAL</span><h2 id="eventTitle">Una oportunidad</h2></div></div>
+      <p id="eventText"></p>
+      <div id="eventChoices" class="reward-grid"></div>
+    </section>
+
+    <section id="resultModal" class="modal result-modal hidden">
+      <div class="result-banner" id="resultBanner">VICTORIA</div>
+      <h2 id="resultTitle">Encuentro superado</h2>
+      <p id="resultText"></p>
+      <div id="resultStats" class="result-stats"></div>
+      <button id="resultContinueBtn" class="primary big">CONTINUAR</button>
+    </section>
+
+    <section id="endModal" class="modal end-modal hidden">
+      <span class="micro-label">FIN DE LA LIGA</span>
+      <h2 id="endTitle">Campeón de Lexaria</h2>
+      <p id="endText"></p>
+      <div id="endStats" class="end-stats"></div>
+      <div class="end-actions"><button id="endAgainBtn" class="primary">NUEVA LIGA</button><button id="endHomeBtn" class="secondary">MENÚ</button></div>
+    </section>
+
+    <section id="codexModal" class="modal codex-modal hidden">
+      <div class="modal-head"><div><span class="micro-label">COLECCIÓN</span><h2>Lexipedia</h2></div><button class="icon-btn" data-close-modal>×</button></div>
+      <div class="codex-toolbar">
+        <input id="codexSearch" type="search" placeholder="Buscar Lexario…">
+        <select id="codexType"><option value="">Todos los tipos</option></select>
+        <select id="codexRarity"><option value="">Todas las rarezas</option></select>
+      </div>
+      <div id="codexGrid" class="codex-grid"></div>
+    </section>
+
+    <section id="achievementsModal" class="modal codex-modal hidden">
+      <div class="modal-head"><div><span class="micro-label">PERFIL</span><h2>Logros</h2></div><button class="icon-btn" data-close-modal>×</button></div>
+      <div id="achievementGrid" class="achievement-grid"></div>
+    </section>
+
+    <section id="historyModal" class="modal history-modal hidden">
+      <div class="modal-head"><div><span class="micro-label">ARCHIVO</span><h2>Historial de ligas</h2></div><button class="icon-btn" data-close-modal>×</button></div>
+      <div id="historyList" class="history-list"></div>
+    </section>
+
+    <section id="settingsModal" class="modal settings-modal hidden">
+      <div class="modal-head"><div><span class="micro-label">OPCIONES</span><h2>Ajustes</h2></div><button class="icon-btn" data-close-modal>×</button></div>
+      <label class="setting-row"><span>Reducir animaciones</span><input id="motionToggle" type="checkbox"></label>
+      <label class="setting-row"><span>Sonido</span><input id="soundToggle" type="checkbox" checked></label>
+      <button id="abandonRunBtn" class="danger hidden">ABANDONAR LIGA ACTUAL</button>
+    </section>
+  </div>
+
+  <div id="toastHost" class="toast-host"></div>
+</main>
+<script src="./data.js"></script>
+<script src="./game.js"></script>
+<script src="./bridge.js"></script>
+</body>
+</html>
