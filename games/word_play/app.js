@@ -125,7 +125,7 @@ function play(){
   if(s.mode!=='quick'&&s.playsLeft<=0)setTimeout(()=>finish(false),220);
 }
 function shopCard(item){
-  const status=E.shopStatus(item.id),disabled=!status.ok&&Number(state().coins||0)<Number(item.cost||0);
+  const status=E.shopStatus(item.id),disabled=!status.ok;
   return '<button class="shop-card '+(disabled?'disabled':'')+'" data-shop="'+item.id+'" type="button" '+(disabled?'disabled':'')+'>'+
     '<div class="shop-card-art">'+rewardArtSvg(item)+'</div>'+
     '<div class="shop-card-copy"><span class="shop-kind">'+(item.effect==='letter'?'LETRA':item.effect==='upgrade'?'MEJORA':'RECURSO')+'</span><strong>'+item.name+'</strong><p>'+item.desc+'</p></div>'+
