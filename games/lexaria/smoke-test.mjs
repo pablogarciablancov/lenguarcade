@@ -3,6 +3,10 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 
 const source=fs.readFileSync(new URL('./data.js',import.meta.url),'utf8');
+const game=fs.readFileSync(new URL('./game.js',import.meta.url),'utf8');
+const bridge=fs.readFileSync(new URL('./bridge.js',import.meta.url),'utf8');
+const index=fs.readFileSync(new URL('./index.html',import.meta.url),'utf8');
+const styles=fs.readFileSync(new URL('./styles.css',import.meta.url),'utf8');
 const sandbox={window:{}};
 vm.createContext(sandbox);
 vm.runInContext(source,sandbox);
@@ -35,4 +39,21 @@ for(const c of D.creatures){
   assert.ok(D.RARITIES[c.rarity]);
   assert.ok(c.ability?.kind);
 }
-console.log('Lexaria smoke test: OK · 30 criaturas · 3000 preguntas generadas verificadas');
+for(const required of [
+  'id="studentBattleBtn"','id="formationHp"','id="formationDamage"','id="dayFlow"',
+  'id="marketWallet"','id="studentBattleScreen"','id="publishSquadBtn"','id="opponentList"'
+]) assert.ok(index.includes(required),'Falta UI: '+required);
+
+for(const required of [
+  'function moveUnit','dragstart','function formationTotals','Vanguardia · +10% vida',
+  'function showStudentBattle','function publishCurrentSquad','function startStudentBattle',
+  "battleContext==='student'","COMPRAR · "
+]) assert.ok(game.includes(required),'Falta lógica UX: '+required);
+
+for(const required of ['REQUEST_OPPONENTS','PUBLISH_SQUAD','OPPONENTS']) assert.ok(bridge.includes(required),'Falta bridge PvP: '+required);
+for(const required of ['overflow:hidden!important','.position-guide','.offer-stats','.student-battle-layout','.currency-counter']) assert.ok(styles.includes(required),'Falta estilo UX: '+required);
+
+new vm.Script(game,{filename:'game.js'});
+new vm.Script(bridge,{filename:'bridge.js'});
+
+console.log('Lexaria smoke test: OK · 30 criaturas · 3000 preguntas · drag/drop · UX económica · arena asíncrona');
