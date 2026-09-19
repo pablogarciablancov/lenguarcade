@@ -353,16 +353,28 @@ function clearSelection(){selected=null;renderBoards();renderInspect();}
 function renderInspect(){
   const host=$('inspectCard'); if(!host)return;
   const u=unitAt(selected);
-  if(!u){host.className='inspect-card empty';host.innerHTML='<div class="inspect-placeholder">Selecciona un Lexario para ver estadísticas, habilidad y entrenamiento.</div>';return;}
-  const c=creatureOf(u),stats=unitStats(u,selected?.index,run.team);
+  if(!u){host.className='inspect-card empty';host.innerHTML='<div class="inspect-placeholder"><b>Selecciona un Lexario</b><span>Verás su rol, habilidad, progreso de fusión, entrenamiento y la razón para colocarlo delante o detrás.</span></div>';return;}
+  const c=creatureOf(u),stats=unitStats(u,selected?.index,run.team),meta=abilityMeta(c);
+  const fusion=fusionInfo(c.id,u.level,false);
+  const trainPct=Math.round((u.training||0)*TRAINING_STEP*100);
+  const neighbors=selected?.area==='team'?adjacencyCount(selected.index,run.team):0;
+  const posText=selected?.area==='team'
+    ?(selected.index<3
+      ?'<b>🛡️ VANGUARDIA</b><span>+25% vida · habilidades 10% más lentas. '+neighbors+' vecino'+(neighbors===1?'':'s')+' activo'+(neighbors===1?'':'s')+'.</span>'
+      :'<b>⚡ RETAGUARDIA</b><span>−10% vida · habilidades 15% más rápidas. '+neighbors+' vecino'+(neighbors===1?'':'s')+' activo'+(neighbors===1?'':'s')+'.</span>')
+    :'<b>📦 RESERVA</b><span>No combate. Sí cuenta para conseguir copias y fusionar.</span>';
   host.className='inspect-card';
   host.innerHTML=
-    '<div class="inspect-hero"><span class="big-emoji">'+esc(c.emoji)+'</span><h3>'+esc(c.name)+(u.chromatic?' ✦':'')+'</h3><div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div></div>'+
-    '<div class="stat-grid"><div><span>Vida</span><b>'+format(stats.hp)+'</b></div><div><span>Daño</span><b>'+format(stats.damage)+'</b></div><div><span>Ritmo</span><b>'+stats.cooldown.toFixed(1)+'s</b></div><div><span>Nivel</span><b>'+u.level+'</b></div></div>'+
-    '<div class="ability-box"><b>'+esc(c.ability.name)+'</b>'+esc(c.ability.text)+'</div>'+
-    (selected?.area==='team'?'<div class="training-box"><b>'+(selected.index<3?'Vanguardia · +10% vida':'Retaguardia · habilidad 8% más rápida')+'</b>'+(selected.index<3?'Ideal para criaturas resistentes o que quieras proteger menos.':'Ideal para criaturas cuyo valor depende de lanzar su habilidad.')+'</div>':'<div class="training-box"><b>Reserva · no combate</b>Este Lexario no aporta estadísticas al combate, pero cuenta para fusionar copias.</div>')+
-    '<div class="training-box"><b>Entrenamiento +'+(u.training||0)+'</b>Cada mejora aumenta vida y daño. Los aciertos se conservan durante toda la liga.</div>'+
-    '<div class="inspect-actions"><button class="primary" data-action="train-selected">ENTRENAR</button><button class="secondary" data-action="sell-selected">VENDER +'+sellValue(u)+'</button></div>'+
+    '<div class="inspect-hero game-card-header"><span class="big-emoji">'+esc(c.emoji)+'</span><div class="inspect-name"><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span><h3>'+esc(c.name)+(u.chromatic?' ✦':'')+'</h3><div class="level-stars">'+levelStars(u.level)+' <small>Nv.'+u.level+'</small></div></div></div>'+
+    '<div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+
+    '<div class="stat-grid game-stats"><div><span>❤️ Vida efectiva</span><b>'+format(stats.hp)+'</b></div><div><span>⚔️ Potencia</span><b>'+format(stats.damage)+'</b></div><div><span>⏱ Habilidad</span><b>'+stats.cooldown.toFixed(1)+'s</b></div><div><span>🎓 Entreno</span><b>+'+trainPct+'%</b></div></div>'+
+    '<div class="ability-box featured"><div class="ability-title"><b>'+esc(c.ability.name)+'</b><span>'+esc(meta.tags.join(' · '))+'</span></div><p>'+esc(c.ability.text)+'</p><small>Cada '+stats.cooldown.toFixed(1)+' s, cuando se llena su barra, lanza esta habilidad automáticamente.</small></div>'+
+    '<div class="progress-box"><div><b>SUBIDA DE NIVEL</b><span>'+levelStars(u.level)+'</span></div>'+
+      (fusion.max?'<p>Nivel máximo alcanzado.</p>':'<p>Fusiona copias iguales: <strong>'+fusion.text+'</strong> '+(u.level===1?'copias Nv.1 → Nv.2 (×1,7 estadísticas)':'copias Nv.2 → Nv.3 (×3 estadísticas)')+'.</p>')+
+      '<div class="fusion-pips">'+(fusion.max?'<i class="on"></i><i class="on"></i><i class="on"></i>':Array.from({length:fusion.needed},(_,i)=>'<i class="'+(i<fusion.current?'on':'')+'"></i>').join(''))+'</div></div>'+
+    '<div class="progress-box training-progress"><div><b>ENTRENAMIENTO</b><span>+'+trainPct+'%</span></div><p>Cada acierto = <strong>+1 punto = +5% vida y +5% potencia</strong>. Al fusionar, los puntos de las copias se suman (máx. +20).</p></div>'+
+    '<div class="position-card '+(selected?.area==='team'?(selected.index<3?'front':'back'):'reserve')+'">'+posText+'<small>Recomendación de rol: '+(meta.row==='front'?'Vanguardia':'Retaguardia')+'.</small></div>'+
+    '<div class="inspect-actions"><button class="primary" data-action="train-selected">ENTRENAR (+5%)</button><button class="secondary" data-action="sell-selected">VENDER +'+sellValue(u)+'</button></div>'+
     '<button class="secondary full" style="margin-top:7px" data-action="clear-selection">CERRAR FICHA</button>';
 }
 function sellValue(u){return Math.max(1,Math.floor(D.rarityPrice(creatureOf(u)?.rarity||'common')*.6)*u.level);}
@@ -409,17 +421,22 @@ function renderMarket(){
   host.innerHTML=run.shop.map((o,i)=>{
     const affordable=run.gold>=o.price;
     if(o.kind==='creature'){
-      const c=D.creature(o.creatureId);
-      return '<article class="offer-card '+(o.bought?'bought ':'')+(o.chromatic?'chromatic ':'')+(affordable?'':'unaffordable')+'">'+
-        '<div class="offer-body"><span class="unit-emoji">'+esc(c.emoji)+'</span><h4>'+esc(c.name)+(o.chromatic?' ✦':'')+'</h4>'+
-        '<div class="offer-type-row">'+c.types.map(t=>'<span class="offer-type">'+esc(D.TYPES[t].name)+'</span>').join('')+'<span class="offer-type">'+esc(D.RARITIES[c.rarity].name)+'</span></div>'+
+      const c=D.creature(o.creatureId),meta=abilityMeta(c),fit=strategicFit(c),fusion=fusionInfo(c.id,1,true);
+      const rowLabel=meta.row==='front'?'🛡️ DELANTE':'⚡ DETRÁS';
+      return '<article class="offer-card game-offer '+(o.bought?'bought ':'')+(o.chromatic?'chromatic ':'')+(affordable?'':'unaffordable')+'" data-role="'+esc(meta.role)+'">'+
+        '<div class="offer-topline"><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span><span class="rarity-name">'+esc(D.RARITIES[c.rarity].name)+'</span></div>'+
+        '<div class="offer-body"><div class="offer-portrait"><span class="unit-emoji">'+esc(c.emoji)+'</span><div><h4>'+esc(c.name)+(o.chromatic?' ✦':'')+'</h4><small>'+rowLabel+'</small></div></div>'+
+        '<div class="offer-type-row">'+c.types.map(t=>'<span class="offer-type">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+
         '<div class="offer-stats"><span>❤️ '+format(c.hp)+'</span><span>⚔️ '+format(c.damage)+'</span><span>⏱ '+c.cooldown.toFixed(1)+'s</span></div>'+
-        '<p class="offer-ability"><b>'+esc(c.ability.name)+':</b> '+esc(c.ability.text)+'</p></div>'+
-        '<div class="offer-footer"><span class="price">🖋️ '+o.price+'</span><button class="primary '+(affordable?'':'cant-afford')+'" data-buy="'+i+'" '+(!affordable?'disabled':'')+'>'+(affordable?'COMPRAR · '+o.price:'FALTAN '+(o.price-run.gold))+'</button></div>'+
+        '<div class="market-ability"><b>'+esc(c.ability.name)+'</b><p>'+esc(c.ability.text)+'</p><div>'+meta.tags.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div>'+
+        (fit.length?'<div class="fit-notes">'+fit.map(x=>'<span>✦ '+esc(x)+'</span>').join('')+'</div>':'')+
+        '<div class="fusion-preview"><b>FUSIÓN</b><span>'+(fusion.current>=fusion.needed?'¡SUBE A Nv.2!':fusion.text+' hacia Nv.2')+'</span></div>'+
+        '</div>'+
+        '<div class="offer-footer"><span class="price">🖋️ '+o.price+'</span><button class="primary '+(affordable?'':'cant-afford')+'" data-buy="'+i+'" '+(!affordable?'disabled':'')+'>'+(affordable?'RECLUTAR':'FALTAN '+(o.price-run.gold))+'</button></div>'+
       '</article>';
     }
     const r=D.resource(o.resourceId);
-    return '<article class="offer-card resource '+(o.bought?'bought ':'')+(affordable?'':'unaffordable')+'"><div class="offer-body"><span class="unit-emoji">'+esc(r.icon)+'</span><h4>'+esc(r.name)+'</h4><div class="offer-type-row"><span class="offer-type">RECURSO</span><span class="offer-type">1 uso/día</span></div><p class="offer-ability">'+esc(r.text)+'</p></div><div class="offer-footer"><span class="price">🖋️ '+o.price+'</span><button class="primary '+(affordable?'':'cant-afford')+'" data-buy="'+i+'" '+(!affordable?'disabled':'')+'>'+(affordable?'USAR · '+o.price:'FALTAN '+(o.price-run.gold))+'</button></div></article>';
+    return '<article class="offer-card resource game-offer '+(o.bought?'bought ':'')+(affordable?'':'unaffordable')+'"><div class="offer-topline"><span class="role-badge">◆ RECURSO</span><span class="rarity-name">1 uso/jornada</span></div><div class="offer-body"><span class="unit-emoji">'+esc(r.icon)+'</span><h4>'+esc(r.name)+'</h4><div class="market-ability resource-copy"><b>EFECTO INMEDIATO</b><p>'+esc(r.text)+'</p></div></div><div class="offer-footer"><span class="price">🖋️ '+o.price+'</span><button class="primary '+(affordable?'':'cant-afford')+'" data-buy="'+i+'" '+(!affordable?'disabled':'')+'>'+(affordable?'USAR':'FALTAN '+(o.price-run.gold))+'</button></div></article>';
   }).join('');
 }
 function freeRef(){
@@ -445,15 +462,18 @@ function removeUnitByUid(id){
 }
 function addCreature(creatureId,chromatic){
   let incoming=createUnit(creatureId,chromatic,1,0);
-  while(incoming.level<4){
+  while(incoming.level<3){
     const need=incoming.level===1?2:1;
     const matches=allUnitRefs().filter(x=>x.unit.creatureId===incoming.creatureId&&x.unit.level===incoming.level);
     if(matches.length<need)break;
     const consumed=matches.slice(0,need);
     let chrom=incoming.chromatic,training=incoming.training;
-    consumed.forEach(x=>{chrom=chrom||x.unit.chromatic;training=Math.max(training,x.unit.training||0);removeUnitByUid(x.unit.uid);});
+    consumed.forEach(x=>{chrom=chrom||x.unit.chromatic;training+=x.unit.training||0;removeUnitByUid(x.unit.uid);});
+    training=Math.min(20,training);
     incoming=createUnit(creatureId,chrom,incoming.level+1,training);
     run.stats.merges++;pendingRelicRewards++;
+    const cc=D.creature(creatureId);
+    toast('¡FUSIÓN! '+(cc?.name||'Lexario')+' sube a '+levelStars(incoming.level)+' · Nv.'+incoming.level,'good');
   }
   if(!placeUnit(incoming)){
     toast('No hay hueco para ese Lexario.','bad');return false;
@@ -523,8 +543,8 @@ function chooseRelic(id){
 
 function unitStats(u,index,teamUnits){
   const c=creatureOf(u);if(!c)return{hp:1,damage:1,cooldown:3};
-  const levelMult=[0,1,1.65,2.65,4.1][clamp(u.level,1,4)];
-  const trainMult=1+(u.training||0)*.045;
+  const levelMult=LEVEL_MULT[clamp(u.level,1,4)]||1;
+  const trainMult=1+(u.training||0)*TRAINING_STEP;
   const team=teamUnits||rulesRun()?.team||[];
   const synergy=synergyBonusFor(u,team.filter(Boolean));
   let hp=c.hp*levelMult*trainMult*(1+synergy),damage=c.damage*levelMult*trainMult*(1+synergy),cooldown=c.cooldown;
@@ -532,8 +552,8 @@ function unitStats(u,index,teamUnits){
   if(t?.effect==='ortho'&&c.types.includes('ortografia')){hp*=1.18;damage*=1.18;}
   if(t?.effect==='verbs'&&c.types.includes('verbos'))cooldown*=.85;
   if(typeof index==='number'&&index>=0&&index<6){
-    if(index<3)hp*=1.10;
-    else cooldown*=.92;
+    if(index<3){hp*=1.25;cooldown*=1.10;}
+    else{hp*=.90;cooldown*=.85;}
   }
   if(t?.effect==='adjacency'&&typeof index==='number'&&index>=0){
     const neighbors=adjacencyCount(index,team);damage*=1+neighbors*.07;
@@ -561,7 +581,7 @@ function renderTrainingQuestion(){
   if(!currentQuestion)return;
   const q=currentQuestion.data,u=currentQuestion.mode==='run'?unitAt(currentQuestion.ref):null,c=u?creatureOf(u):null;
   $('trainingTitle').textContent=currentQuestion.mode==='run'?'Entrenar '+c.name:'Entrenamiento libre';
-  const target=currentQuestion.mode==='run'?'<div class="training-target"><span class="unit-emoji">'+esc(c.emoji)+'</span><div><b>'+esc(c.name)+'</b><small> · '+esc(D.TYPES[q.category].name)+' · mejora actual +'+u.training+'</small></div></div>':'';
+  const target=currentQuestion.mode==='run'?'<div class="training-target"><span class="unit-emoji">'+esc(c.emoji)+'</span><div><b>'+esc(c.name)+'</b><small> · '+esc(D.TYPES[q.category].name)+' · entrenamiento '+u.training+' = +'+Math.round((u.training||0)*TRAINING_STEP*100)+'% vida/potencia</small></div><strong>ACIERTO = +5%</strong></div>':'';
   $('trainingBody').innerHTML=target+
     '<div class="question-meta"><span>'+esc(D.TYPES[q.category].name)+'</span><span>Elige una respuesta</span></div>'+
     '<div class="question-card" style="margin-top:10px"><h3>'+esc(q.prompt)+'</h3><div class="answers">'+q.answers.map((a,i)=>'<button class="answer-btn" data-answer="'+i+'">'+esc(a)+'</button>').join('')+'</div><div id="trainingFeedback" style="margin-top:12px;color:var(--muted)"></div></div>';
@@ -575,7 +595,7 @@ function answerTraining(index){
   buttons[index]?.classList.add(correct?'correct':'wrong');
   if(!correct)buttons[q.correct]?.classList.add('correct');
   const feedback=$('trainingFeedback');
-  if(feedback)feedback.innerHTML='<b style="color:'+(correct?'var(--green)':'var(--red)')+'">'+(correct?'Correcto.':'No exactamente.')+'</b> '+esc(q.explanation);
+  if(feedback)feedback.innerHTML='<b style="color:'+(correct?'var(--green)':'var(--red)')+'">'+(correct?'Correcto · entrenamiento mejorado.':'No exactamente.')+'</b> '+(correct?'<strong style="color:var(--gold)">+5% vida y potencia por cada punto obtenido. </strong>':'')+esc(q.explanation);
   if(currentQuestion.mode==='run'){
     run.trainingLeft=Math.max(0,run.trainingLeft-1);
     run.stats.trainingAttempts++;career.metrics.trainingAttempts++;
@@ -584,7 +604,7 @@ function answerTraining(index){
       let gain=1+(run.trainingBonus||0);run.trainingBonus=0;
       if(trainer()?.effect==='teacher')gain*=2;
       if(u?.chromatic&&hasRelic('folio_dorado'))gain*=2;
-      if(u)u.training+=gain;
+      if(u)u.training=Math.min(20,(u.training||0)+gain);
       run.stats.trainingCorrect++;run.stats.trainingStreak++;run.stats.maxTrainingStreak=Math.max(run.stats.maxTrainingStreak,run.stats.trainingStreak);
       career.metrics.trainingCorrect++;career.metrics.trainingStreak++;career.metrics.maxTrainingStreak=Math.max(career.metrics.maxTrainingStreak,career.metrics.trainingStreak);
       career.xp+=12;
