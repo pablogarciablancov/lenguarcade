@@ -92,7 +92,7 @@ function saveState(reason){
   emitProgress(reason||"autosave");
 }
 
-function emitProgress(reason){
+function serializeRun(){\n  if(!game)return null;\n  return {\n    heroId:game.hero.id,regionId:game.region.id,difficultyId:game.diff.id,\n    equippedWeaponId:state.equippedWeaponId,secondaryWeaponId:state.secondaryWeaponId,\n    hp:Math.max(1,game.player.hp),x:game.player.x,y:game.player.y,\n    carried:Object.assign({},game.carried),kills:game.kills,runKills:game.runKills,\n    giantStarted:game.giantStarted,bossSpawned:game.bossSpawned,\n    bossHp:game.boss&&!game.boss.dead?game.boss.hp:null,bossShieldIndex:game.bossShieldIndex,\n    savedAt:Date.now()\n  };\n}\n\nfunction emitProgress(reason){
   try{
     if(window.parent&&window.parent!==window){
       window.parent.postMessage({
@@ -489,19 +489,7 @@ function finishChallenge(){
   if(typeof cb==="function")cb(result);
 }
 
-function startExpedition(){
-  closeGeneric();
-  var hero=findHero(state.heroId),region=findRegion(state.regionId),diff=findDifficulty(state.difficultyId);
-  game=createGameState(hero,region,diff);
-  showScreen("game");
-  resizeGameCanvas();
-  spawnInitialEnemies();
-  updateGameHud();
-  notice(region.name,1400);
-  lastTime=performance.now();
-  if(loopId)cancelAnimationFrame(loopId);
-  loopId=requestAnimationFrame(loop);
-}
+function startExpedition(snapshot){\n  closeGeneric();\n  var snap=snapshot||null;\n  if(snap){\n    state.heroId=snap.heroId||state.heroId;state.regionId=snap.regionId||state.regionId;state.difficultyId=snap.difficultyId||state.difficultyId;\n    state.equippedWeaponId=snap.equippedWeaponId||state.equippedWeaponId;state.secondaryWeaponId=snap.secondaryWeaponId||state.secondaryWeaponId;\n  }\n  var hero=findHero(state.heroId),region=findRegion(state.regionId),diff=findDifficulty(state.difficultyId);\n  game=createGameState(hero,region,diff);\n  showScreen("game");\n  resizeGameCanvas();\n  if(snap){\n    game.player.hp=clamp(Number(snap.hp)||hero.hp,1,hero.hp);\n    game.player.x=clamp(Number(snap.x)||game.player.x,25,els.gameCanvas.clientWidth-25);\n    game.player.y=clamp(Number(snap.y)||game.player.y,65,els.gameCanvas.clientHeight-30);\n    game.carried=Object.assign({wood:0,ore:0,fragments:0},snap.carried||{});\n    game.kills=Math.max(0,Number(snap.kills)||0);game.runKills=Math.max(0,Number(snap.runKills)||game.kills);\n    game.giantStarted=!!snap.giantStarted;game.bossShieldIndex=Math.max(0,Number(snap.bossShieldIndex)||0);\n    if(snap.bossSpawned){spawnBoss();if(game.boss&&snap.bossHp!=null)game.boss.hp=clamp(Number(snap.bossHp)||game.boss.maxHp,1,game.boss.maxHp);}\n    else{for(var i=0;i<(game.giantStarted?6:5);i++)spawnEnemy(game.giantStarted);}\n  }else{\n    state.activeRun=null;spawnInitialEnemies();\n  }\n  updateGameHud();\n  notice(snap?"EXPEDICIÓN RECUPERADA":region.name,1400);\n  lastTime=performance.now();\n  if(loopId)cancelAnimationFrame(loopId);\n  loopId=requestAnimationFrame(loop);\n}
 
 function createGameState(hero,region,diff){
   var w=window.innerWidth,h=window.innerHeight;
@@ -872,12 +860,12 @@ function transferCarried(factor){
 
 function voluntaryReturn(){
   if(!game||game.ended)return;
-  game.ended=true;transferCarried(1);state.gold+=Math.round(game.runKills*1.2);saveState("voluntary_return");
+  game.ended=true;transferCarried(1);state.gold+=Math.round(game.runKills*1.2);state.activeRun=null;saveState("voluntary_return");
   stopGame();showScreen("camp");toast("Expedición cerrada · botín asegurado");
 }
 
 function defeat(){
-  if(game.ended)return;game.ended=true;game.paused=true;transferCarried(.65);saveState("defeat");
+  if(game.ended)return;game.ended=true;game.paused=true;transferCarried(.65);state.activeRun=null;saveState("defeat");
   var lost=35;
   openGeneric('<span class="eyebrow">EXPEDICIÓN FALLIDA</span><h2>La tinta se repliega</h2><p style="color:#a9bab4;font-size:11px;line-height:1.5">Conservas tu experiencia, dominio y equipo. Se ha perdido aproximadamente un '+lost+' % de los recursos transportados.</p><button id="defeatCampBtn" class="primary-btn" type="button">VOLVER AL CAMPAMENTO</button>');
   $("defeatCampBtn").addEventListener("click",function(){closeGeneric();stopGame();showScreen("camp");});
@@ -886,7 +874,7 @@ function defeat(){
 function winExpedition(){
   if(game.ended)return;game.ended=true;game.paused=true;
   transferCarried(1);state.victories++;state.bossesDefeated++;updateOrder("boss",1);state.gold+=55+game.region.level*8;state.ink+=5;state.seals+=1;
-  state.regionMastery[game.region.id]=clamp((state.regionMastery[game.region.id]||0)+12,0,100);gainXp(35+game.region.level*5);saveState("boss_defeated");
+  state.regionMastery[game.region.id]=clamp((state.regionMastery[game.region.id]||0)+12,0,100);gainXp(35+game.region.level*5);state.activeRun=null;saveState("boss_defeated");
   openGeneric('<span class="eyebrow">JEFE DERROTADO</span><h2>'+game.region.boss+'</h2><p style="color:#a9bab4;font-size:11px;line-height:1.5">La región reconoce tu dominio. Todo el botín queda asegurado.</p><div class="stat-pills"><span>+'+(55+game.region.level*8)+' oro</span><span>+5 tinta</span><span>+1 sello</span><span>+12 % dominio regional</span></div><button id="victoryCampBtn" class="primary-btn" style="margin-top:14px" type="button">REGRESAR COMO VENCEDOR</button>');
   $("victoryCampBtn").addEventListener("click",function(){closeGeneric();stopGame();showScreen("camp");});
 }
@@ -1065,7 +1053,7 @@ els.gameCanvas.addEventListener("contextmenu",function(ev){ev.preventDefault();}
   $("touchAbility").addEventListener("click",ability);$("touchDodge").addEventListener("click",dodge);
 })();
 
-document.addEventListener("visibilitychange",function(){if(document.hidden&&game&&currentScreen==="game"&&!game.paused)pauseGame();});
+window.addEventListener("beforeunload",function(){if(game&&currentScreen==="game"&&!game.ended)saveState("beforeunload");});\ndocument.addEventListener("visibilitychange",function(){if(document.hidden&&game&&currentScreen==="game"&&!game.paused){saveState("visibility_autosave");pauseGame();}});
 window.addEventListener("blur",function(){if(game&&currentScreen==="game"&&!game.paused)pauseGame();});
 window.addEventListener("resize",function(){resizeGameCanvas();if(currentScreen==="camp")renderCamp();});
 
