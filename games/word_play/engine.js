@@ -9,7 +9,14 @@ const BOARD_RULES={
   minDistinct:9,
   minVowels:5,
   maxVowels:7,
-  maxCopies:{A:3,E:3,I:3,O:3,U:2,S:2,R:2,N:2,L:2,D:2,T:2,C:2,M:2,P:2,B:2,G:2,V:2,H:2,F:2,Y:2,Q:1,J:1,Ñ:1,X:1,Z:1,K:1,W:1}
+  maxCopies:{A:3,E:3,I:3,O:3,U:2,S:2,R:2,N:2,L:2,D:2,T:2,C:2,M:2,P:2,B:2,G:2,V:2,H:2,F:2,Y:2,Q:1,J:1,Ñ:1,X:1,Z:1,K:1,W:1},
+  quality:{
+    normal:{total:30,len4:16,len5:7,len6:2},
+    constraint:{total:14,len4:8,len5:3,len6:1},
+    boss:{total:7,len4:4,len5:2,len6:1}
+  },
+  candidateBoards:8,
+  replacementAttempts:5
 };
 const VOWELS=new Set(['A','E','I','O','U']),RARE=new Set(['J','Ñ','Q','X','Z','K','W']);
 const ACCENTABLE={A:['A','Á'],E:['E','É'],I:['I','Í'],O:['O','Ó'],U:['U','Ú','Ü']};
@@ -20,7 +27,7 @@ for(const [wrong,right] of Object.entries(LX.strict||{}))STRICT.set(wrong,right)
 const FALLBACK=`casa cosa paso peso piso mesa misa masa mapa mano mono mina luna lana lino loma lupa palo pelo pila polo pera puro para pero toro tiro tela tila tono tuna taza zona amor amigo amiga aula clase libro libros leer poema poemas verso versos rima rimas lengua palabra palabras letra letras frase frases texto textos juego juegos gato gata perro perra pez peces ave aves oso rana lobo vaca toro gallo gallina caballo yegua burro agua aire fuego tierra mar río lago sol luna nube nubes cielo campo bosque árbol hoja hojas flor flores roca arena isla costa playa monte valle camino caminos uno una dos tres cuatro cinco seis siete ocho nueve diez cien mil ser soy eres es somos sois son fui fue fueron era eran estar estoy estás está estamos están tener tengo tienes tiene tenemos tienen hacer hago haces hace hacemos hacen decir digo dices dice decimos dicen ir voy vas va vamos vais van venir vengo vienes viene vienen ver veo ves ve vemos ven dar doy das da damos dan saber sé sabes sabe sabemos saben querer quiero quieres quiere queremos quieren poder puedo puedes puede podemos pueden deber debo debes debe deben poner pongo pones pone ponen salir salgo sales sale salen canción camión avión acción corazón rincón jardín lápiz árbol música rápido rápida difícil fácil filosofía religión gramática ortografía tecnología lingüística pingüino vergüenza bilingüe cigüeña murciélago día días después aquí allí también español niño niña mañana señor señora año años sueño enseñar extraño otoño pequeño pequeña cariño caña piña montaña`;
 const EXTRA_WORDS=(LX.additions||[]).join(' ');
 const TARGETS=[85,160,270,420,610,840,1110,1470,1930,2510,3260,4200];
-let dictionary=new Set(),accentMap=new Map(),state=null,career=loadCareer(),settings=loadSettings();
+let dictionary=new Set(),accentMap=new Map(),wordIndex=[],state=null,career=loadCareer(),settings=loadSettings();
 const normalize=s=>String(s||'').trim().toLowerCase().normalize('NFC');
 const strip=s=>normalize(s).replace(/ñ/g,'__enie__').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/__enie__/g,'ñ');
 const vowel=c=>/[aeiouáéíóúü]/i.test(c);
@@ -79,10 +86,47 @@ function pickBalancedLetter(existing,r=Math.random,setup='',forceType=''){
   const damped=entries.map(([l,w])=>[l,w/Math.pow(1+(counts.get(l)||0)*2.75,2)]);
   return weightedFrom(damped,r);
 }
-function board(r=Math.random,setup=''){
+function rawBoard(r=Math.random,setup=''){
   const b=[];
   for(let i=0;i<16;i++)b.push(tile(pickBalancedLetter(b,r,setup),r));
   return b;
+}
+function wordFitsCounts(signature,counts){
+  for(const [letter,needed] of signature)if((counts.get(letter)||0)<needed)return false;
+  return true;
+}
+function qualityTarget(challengeId='none'){
+  const kind=challenge(challengeId).kind||'normal';
+  return BOARD_RULES.quality[kind]||BOARD_RULES.quality.normal;
+}
+function boardQuality(b,challengeId='none'){
+  const counts=letterCounts(b.map(t=>t.letter));
+  const target=qualityTarget(challengeId);
+  const stats={total:0,len4:0,len5:0,len6:0,len7:0,score:0,meets:false};
+  if(!wordIndex.length)return Object.assign(stats,{score:1,meets:true});
+  for(const entry of wordIndex){
+    if(challengeId!=='none'&&!challengeOK(challengeId,entry.word))continue;
+    if(!wordFitsCounts(entry.signature,counts))continue;
+    stats.total++;
+    if(entry.length>=4)stats.len4++;
+    if(entry.length>=5)stats.len5++;
+    if(entry.length>=6)stats.len6++;
+    if(entry.length>=7)stats.len7++;
+  }
+  stats.score=stats.total+stats.len4*1.5+stats.len5*3+stats.len6*6+stats.len7*10;
+  stats.meets=stats.total>=target.total&&stats.len4>=target.len4&&stats.len5>=target.len5&&stats.len6>=target.len6;
+  return stats;
+}
+function board(r=Math.random,setup='',challengeId='none'){
+  if(wordIndex.length<500)return rawBoard(r,setup);
+  let best=null,bestQ=null;
+  for(let i=0;i<BOARD_RULES.candidateBoards;i++){
+    const candidate=rawBoard(r,setup);
+    const q=boardQuality(candidate,challengeId);
+    if(!best||q.score>bestQ.score){best=candidate;bestQ=q;}
+    if(q.meets)return candidate;
+  }
+  return best||rawBoard(r,setup);
 }
 function newState(mode='normal'){
   const daily=mode==='daily',quick=mode==='quick',dailySeedValue=daily?daySeed():null;
@@ -93,7 +137,7 @@ function newState(mode='normal'){
     version:3,mode,round:1,roundScore:0,totalScore:0,
     target:quick?999999:roundTarget(1,challengeId),
     playsLeft:quick?10:5,shufflesLeft:quick?3:2,rerollsLeft:1,
-    board:board(r),selected:[],modifiers:[],
+    board:board(r,'',challengeId),selected:[],modifiers:[],
     bonuses:{extraPlays:0,extraShuffles:0,roundSeed:0,nextRoundSeed:0,lengthMult:1,letterMult:1,careerXp:0,bossPlay:0,rareLuck:0},
     challenge:challengeId,words:[],wordLog:[],usedWords:[],validStreak:0,maxStreak:0,invalidAttempts:0,
     longestWord:'',bestPlay:null,bestCombo:1,previousLength:0,roundWords:0,discoveredCards:[],
@@ -106,7 +150,33 @@ function newState(mode='normal'){
   };
 }
 function saveRun(){if(state&&!state.completed)localStorage.setItem(SAVE_KEY,JSON.stringify(state));}
-function loadRun(){try{const r=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(!r||r.version!==3||r.completed)return null;if(r.mode==='daily'){if(!Number.isFinite(r.dailySeed))r.dailySeed=daySeed();if(!Number.isFinite(r.rngCounter))r.rngCounter=0;}if(typeof r.won!=='boolean')r.won=false;r.bonuses=Object.assign({extraPlays:0,extraShuffles:0,roundSeed:0,nextRoundSeed:0,lengthMult:1,letterMult:1,careerXp:0,bossPlay:0,rareLuck:0},r.bonuses||{});r.target=r.mode==='quick'?999999:roundTarget(r.round,r.challenge);return r;}catch{return null;}}
+function isBalancedBoard(b,setup=''){
+  if(!Array.isArray(b)||b.length!==16)return false;
+  const counts=letterCounts(b.map(t=>t.letter));
+  const [minVowels,maxVowels]=vowelBounds(setup);
+  const vowels=b.filter(t=>VOWELS.has(t.letter)).length;
+  if(counts.size<BOARD_RULES.minDistinct||vowels<minVowels||vowels>maxVowels)return false;
+  for(const [letter,count] of counts)if(!setupAllows(letter,setup)||count>(BOARD_RULES.maxCopies[letter]||1))return false;
+  return true;
+}
+function repairLoadedBoard(run){
+  if(!run||!Array.isArray(run.board))return run;
+  const setup=challenge(run.challenge).setup||'';
+  const balanced=isBalancedBoard(run.board,setup);
+  const playable=wordIndex.length<500||boardQuality(run.board,run.challenge).meets;
+  if(balanced&&playable)return run;
+  const previous=state;
+  state=run;
+  const upgrades=run.board.filter(t=>t&&t.kind&&t.kind!=='normal').map(t=>({kind:t.kind,bonus:t.bonus||0,uses:t.uses||0}));
+  run.board=board(run.mode==='daily'?runRandom:Math.random,setup,run.challenge);
+  upgrades.slice(0,run.board.length).forEach((u,i)=>Object.assign(run.board[i],u));
+  ensureBoard();
+  run.selected=[];
+  state=previous;
+  localStorage.setItem(SAVE_KEY,JSON.stringify(run));
+  return run;
+}
+function loadRun(){try{const r=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(!r||r.version!==3||r.completed)return null;if(r.mode==='daily'){if(!Number.isFinite(r.dailySeed))r.dailySeed=daySeed();if(!Number.isFinite(r.rngCounter))r.rngCounter=0;}if(typeof r.won!=='boolean')r.won=false;r.bonuses=Object.assign({extraPlays:0,extraShuffles:0,roundSeed:0,nextRoundSeed:0,lengthMult:1,letterMult:1,careerXp:0,bossPlay:0,rareLuck:0},r.bonuses||{});r.target=r.mode==='quick'?999999:roundTarget(r.round,r.challenge);return repairLoadedBoard(r);}catch{return null;}}
 function clearRun(){localStorage.removeItem(SAVE_KEY);}
 async function loadDictionary(onStatus){
   dictionary=new Set((FALLBACK+' '+EXTRA_WORDS).split(/\s+/).map(normalize).filter(Boolean));
@@ -128,7 +198,20 @@ async function loadDictionary(onStatus){
     }catch{}
   }
 }
-function rebuild(){accentMap=new Map();for(const w of dictionary){const k=strip(w);if(!accentMap.has(k))accentMap.set(k,[]);accentMap.get(k).push(w);}}
+function rebuild(){
+  accentMap=new Map();
+  wordIndex=[];
+  for(const w of dictionary){
+    const k=strip(w);
+    if(!accentMap.has(k))accentMap.set(k,[]);
+    accentMap.get(k).push(w);
+    if(w.length<3||w.length>10||STRICT.has(w)||BLOCKED.has(w)||(LX.rejectPatterns||[]).some(re=>re&&typeof re.test==='function'&&re.test(w)))continue;
+    const letters=[...k.toUpperCase()];
+    if(!letters.every(ch=>/^[A-ZÑ]$/.test(ch)))continue;
+    const counts=letterCounts(letters);
+    wordIndex.push({word:w,length:letters.length,signature:[...counts.entries()]});
+  }
+}
 function validate(raw){const w=normalize(raw);if(w.length<3)return{ok:false,message:'Necesitas al menos 3 letras.'};if(BLOCKED.has(w)||(LX.rejectPatterns||[]).some(re=>re&&typeof re.test==='function'&&re.test(w)))return{ok:false,message:'Esa forma no está disponible en el modo escolar.'};const strict=STRICT.get(w);if(strict)return{ok:false,accent:true,message:`Casi: prueba con «${strict}».`};if(dictionary.has(w))return{ok:true,word:w};const alt=(accentMap.get(strip(w))||[]).find(x=>/[áéíóúü]/.test(x));return alt?{ok:false,accent:true,message:`Casi: prueba con «${alt}».`}:{ok:false,message:`No encuentro «${w.toUpperCase()}» en el diccionario.`};}
 function challenge(id){return C.challenges.find(x=>x.id===id)||C.challenges[0];}
 function challengeOK(id,w){const a=[...w],p=strip(w);switch(id){case'none':return true;case'min5':return a.length>=5;case'min6':return a.length>=6;case'vowel':return vowel(a[0]);case'consonant':return!vowel(a[0]);case'noA':return!p.includes('a');case'noE':return!p.includes('e');case'accent':return/[áéíóúü]/.test(w);case'ntilde':return w.includes('ñ');case'unique':return new Set(a).size===a.length;case'exact5':return a.length===5;case'exact6':return a.length===6;case'rare':return/[jñqxz]/i.test(w);case'endsS':return w.endsWith('s');case'twoVowels':return a.filter(vowel).length>=2;case'threeVowels':return a.filter(vowel).length>=3;case'longAccent':return a.length>=6&&/[áéíóúü]/.test(w);case'noCommon':return!/[aeáé]/.test(w);default:return true;}}
@@ -255,6 +338,30 @@ function rebalanceBoard(){
     break;
   }
 }
+function improvePlayability(indices=[]){
+  if(wordIndex.length<500||!state?.board?.length)return;
+  const initial=boardQuality(state.board,state.challenge);
+  if(initial.meets)return;
+  const mutable=[...new Set(indices)].filter(i=>i>=0&&i<state.board.length);
+  while(mutable.length<3){
+    const extra=state.board.findIndex((t,i)=>!mutable.includes(i)&&t.kind==='normal');
+    if(extra<0)break;
+    mutable.push(extra);
+  }
+  if(!mutable.length)return;
+  let best=state.board.map(t=>({...t})),bestQ=initial;
+  for(let attempt=0;attempt<BOARD_RULES.replacementAttempts;attempt++){
+    for(const idx of mutable){
+      const old=state.board[idx];
+      state.board[idx]=retile(old);
+    }
+    rebalanceBoard();
+    const q=boardQuality(state.board,state.challenge);
+    if(q.score>bestQ.score){best=state.board.map(t=>({...t}));bestQ=q;}
+    if(q.meets)break;
+  }
+  state.board=best;
+}
 function ensureBoard(){
   const ch=challenge(state.challenge),setup=ch.setup||'';
   rebalanceBoard();
@@ -270,17 +377,21 @@ function ensureBoard(){
   rebalanceBoard();
 }
 function replace(ids){
+  const changed=[];
   for(const id of ids){
     const idx=state.board.findIndex(t=>t.id===id);
     if(idx<0)continue;
+    changed.push(idx);
     state.board[idx]=retile(state.board[idx]);
   }
   ensureBoard();
+  improvePlayability(changed);
+  ensureBoard();
 }
 function play(word,tiles){const val=validate(word);if(!val.ok){state.invalidAttempts++;state.validStreak=0;saveRun();return val;}if(state.usedWords.includes(val.word))return{ok:false,message:'Ya has utilizado esa palabra.'};if(!challengeOK(state.challenge,val.word))return{ok:false,message:`No cumple el reto: ${challenge(state.challenge).desc}`};state.validStreak++;state.maxStreak=Math.max(state.maxStreak,state.validStreak);const sc=score(val.word,tiles,false);for(const t of tiles){t.uses++;if(t.kind==='ink')t.bonus++;}state.roundScore+=sc.total;state.totalScore+=sc.total;state.playsLeft--;state.previousLength=[...val.word].length;state.words.push(val.word);state.usedWords.push(val.word);state.roundWords++;state.wordLog.push({word:val.word,score:sc.total,effects:sc.effects});if(val.word.length>state.longestWord.length)state.longestWord=val.word;if(!state.bestPlay||sc.total>state.bestPlay.score)state.bestPlay={word:val.word,score:sc.total};state.bestCombo=Math.max(state.bestCombo,sc.multiplier);if([...val.word].length>=7)state.goals[0].done=true;if(/[áéíóúü]/.test(val.word))state.goals[1].done=true;if(tiles.some(t=>RARE.has(t.letter)))state.goals[2].done=true;career.words[val.word]=(career.words[val.word]||0)+1;if(val.word.length>(career.bestWord||'').length)career.bestWord=val.word;replace(tiles.map(t=>t.id));saveCareer();saveRun();return{ok:true,word:val.word,score:sc};}
-function shuffle(){if(state.shufflesLeft<=0)return false;const upgrades=state.board.filter(t=>t.kind!=='normal').map(t=>({kind:t.kind,bonus:t.bonus,uses:t.uses}));state.board=board(state.mode==='daily'?runRandom:Math.random,currentSetup());upgrades.forEach((u,i)=>Object.assign(state.board[i],u));ensureBoard();state.shufflesLeft--;state.selected=[];saveRun();return true;}
+function shuffle(){if(state.shufflesLeft<=0)return false;const upgrades=state.board.filter(t=>t.kind!=='normal').map(t=>({kind:t.kind,bonus:t.bonus,uses:t.uses}));state.board=board(state.mode==='daily'?runRandom:Math.random,currentSetup(),state.challenge);upgrades.forEach((u,i)=>Object.assign(state.board[i],u));ensureBoard();state.shufflesLeft--;state.selected=[];saveRun();return true;}
 function metric(a){switch(a.metric){case'careerWords':return Object.values(career.words).reduce((s,n)=>s+n,0);case'bestPlay':return Math.max(career.bestPlay,state?.bestPlay?.score||0);case'runScore':return state?.totalScore||0;case'longest':return Math.max((career.bestWord||'').length,(state?.longestWord||'').length);case'ntilde':return state?.words.some(w=>w.includes('ñ'))?1:0;case'accent':return state?.words.some(w=>/[áéíóúü]/.test(w))?1:0;case'streak':return state?.maxStreak||0;case'rare':return state?.words.some(w=>/[jñqxzkw]/i.test(w))?1:0;case'wins':return career.wins;case'uniqueWords':return Object.keys(career.words).length;case'cards':return Object.keys(career.cards).length;case'combo':return Math.max(career.bestCombo,state?.bestCombo||1);case'quick':return career.quickGames;case'daily':return career.dailyGames;case'perfect':return state?.completed&&state?.won&&state.invalidAttempts===0?1:0;case'round':return state?.round||0;default:return 0;}}
 function achievements(){const got=[];for(const a of C.achievements)if(!career.achievements[a.id]&&metric(a)>=a.value){career.achievements[a.id]=Date.now();career.xp+=25;got.push(a);}if(got.length)saveCareer();return got;}
 function finish(won){state.won=!!won;state.completed=true;clearRun();career.games++;if(won&&state.mode!=='quick')career.wins++;if(state.mode==='quick')career.quickGames++;if(state.mode==='daily')career.dailyGames++;career.bestScore=Math.max(career.bestScore,state.totalScore);career.bestPlay=Math.max(career.bestPlay,state.bestPlay?.score||0);career.bestCombo=Math.max(career.bestCombo,state.bestCombo);let xp=Math.round(state.words.length*4+state.round*10+(won?80:0)+state.bonuses.careerXp);if(state.mode==='quick')xp=Math.round(xp*.7);career.xp+=xp;const got=achievements();saveCareer();return{xp,got};}
-window.WordPlayEngine={C,LETTER_VALUES,VOWELS,ACCENTABLE,BOARD_RULES,get state(){return state},set state(v){state=v},get career(){return career},settings,saveSettings,saveRun,loadRun,clearRun,newState,loadDictionary,validate,challenge,chooseChallenge,roundTarget,tileScore,score,rewards,chooseReward,nextRound,play,shuffle,achievements,finish,strip,vowel,pick,daySeed,runRandom};
+window.WordPlayEngine={C,LETTER_VALUES,VOWELS,ACCENTABLE,BOARD_RULES,boardQuality,isBalancedBoard,repairLoadedBoard,get state(){return state},set state(v){state=v},get career(){return career},settings,saveSettings,saveRun,loadRun,clearRun,newState,loadDictionary,validate,challenge,chooseChallenge,roundTarget,tileScore,score,rewards,chooseReward,nextRound,play,shuffle,achievements,finish,strip,vowel,pick,daySeed,runRandom};
 })();
