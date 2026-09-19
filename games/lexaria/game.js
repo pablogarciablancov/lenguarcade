@@ -83,12 +83,12 @@ function adjacencyCount(index,team){return adjacentIndexes(index).filter(i=>team
 function loadCareer(){
   const base={
     version:1,xp:0,level:1,championships:0,careerWins:0,games:0,
-    discovered:{},chromatics:{},badges:{},achievements:{},history:[],duelSquad:null,
+    discovered:{},chromatics:{},badges:{},achievements:{},history:[],duelSquad:null,duels:{wins:0,losses:0},
     metrics:{buys:0,trainingCorrect:0,trainingAttempts:0,trainingStreak:0,maxTrainingStreak:0,maxLevel:1,chromatics:0,biggestHit:0,maxShield:0,maxDay:1,maxRank:1}
   };
   const saved=safeParse(localStorage.getItem(CAREER_KEY),null);
   if(!saved)return base;
-  return Object.assign(base,saved,{metrics:Object.assign(base.metrics,saved.metrics||{}),history:Array.isArray(saved.history)?saved.history:[]});
+  return Object.assign(base,saved,{metrics:Object.assign(base.metrics,saved.metrics||{}),history:Array.isArray(saved.history)?saved.history:[],duels:Object.assign(base.duels,saved.duels||{})});
 }
 function loadSettings(){return Object.assign({reduceMotion:false,sound:true},safeParse(localStorage.getItem(SETTINGS_KEY),{}));}
 function saveCareer(){
@@ -156,7 +156,7 @@ function renderTitleMeta(){
   if($('historyCount'))$('historyCount').textContent=(career.history?.length||0)+' ligas';
 }
 function backHome(){
-  selected=null;
+  selected=null;battleContext='adventure';duelRunContext=null;
   showScreen('titleScreen');
   renderTitleMeta();
 }
@@ -176,6 +176,7 @@ function chooseTrainerScreen(){
   ).join('');
 }
 function newRun(trainerId){
+  battleContext='adventure';duelRunContext=null;
   const t=D.trainer(trainerId); if(!t)return;
   run={
     version:1,id:uid('league'),mode:'adventure',startedAt:nowIso(),completed:false,trainerId:t.id,
@@ -464,7 +465,7 @@ function unitStats(u,index,teamUnits){
   const c=creatureOf(u);if(!c)return{hp:1,damage:1,cooldown:3};
   const levelMult=[0,1,1.65,2.65,4.1][clamp(u.level,1,4)];
   const trainMult=1+(u.training||0)*.045;
-  const team=teamUnits||run?.team||[];
+  const team=teamUnits||rulesRun()?.team||[];
   const synergy=synergyBonusFor(u,team.filter(Boolean));
   let hp=c.hp*levelMult*trainMult*(1+synergy),damage=c.damage*levelMult*trainMult*(1+synergy),cooldown=c.cooldown;
   const t=trainer();
@@ -632,6 +633,9 @@ function makeDuelSquad(){
 }
 function showStudentBattle(){
   if(!run)run=loadRun();
+  battleContext='student';
+  const snap=career.duelSquad||makeDuelSquad();
+  duelRunContext=snap?{trainerId:snap.trainerId,relics:snap.relics||[],team:snap.team,day:1,stats:{damage:0,biggestHit:0,maxShield:0,casts:0}}:null;
   showScreen('studentBattleScreen');
   renderStudentBattle();
   window.LexariaBridge?.requestOpponents?.();
@@ -923,6 +927,16 @@ function finishBattle(){
   battle.ended=true;clearInterval(battleTimer);
   let won=battle.enemy.hp<=0&&battle.player.hp>0;
   if(battle.time>=45&&battle.enemy.hp>0&&battle.player.hp>0)won=(battle.player.hp/battle.player.maxHp)>=(battle.enemy.hp/battle.enemy.maxHp);
+
+  if(battleContext==='student'){
+    career.duels=career.duels||{wins:0,losses:0};
+    if(won)career.duels.wins++;else career.duels.losses++;
+    career.xp+=won?12:4;
+    saveCareer();
+    showBattleResult(won);
+    return;
+  }
+
   if(won){run.wins++;career.careerWins++;run.gold+=4+Math.floor(run.day/3);}
   else{
     run.losses++;const penalty=run.day<=2?1:run.day<=4?2:3;run.lives-=penalty;
@@ -937,13 +951,24 @@ function finishBattle(){
 }
 function showBattleResult(won){
   $('resultBanner').textContent=won?'VICTORIA':'DERROTA';$('resultBanner').classList.toggle('loss',!won);
-  $('resultTitle').textContent=won?'Encuentro superado':'El rival se lleva el encuentro';
-  $('resultText').textContent=won?'Tu combinación funcionó. Puedes mejorar el equipo antes del siguiente combate.':'Reordena, entrena y busca mejores sinergias. La liga continúa mientras te queden vidas.';
-  $('resultStats').innerHTML='<article><span>Vida restante</span><strong>'+format(battle.player.hp)+'</strong></article><article><span>Tiempo</span><strong>'+battle.time.toFixed(1)+'s</strong></article><article><span>Victorias</span><strong>'+run.wins+'/'+WIN_TARGET+'</strong></article>';
+  if(battleContext==='student'){
+    $('resultTitle').textContent=won?'Duelo ganado':'Duelo perdido';
+    $('resultText').textContent='Este combate de clase no modifica tu Aventura: no pierdes vidas, Tinta ni progreso.';
+    $('resultStats').innerHTML='<article><span>Vida restante</span><strong>'+format(battle.player.hp)+'</strong></article><article><span>Tiempo</span><strong>'+battle.time.toFixed(1)+'s</strong></article><article><span>Duelo</span><strong>'+career.duels.wins+'-'+career.duels.losses+'</strong></article>';
+    $('resultContinueBtn').textContent='VOLVER A LA ARENA';
+  }else{
+    $('resultTitle').textContent=won?'Encuentro superado':'El rival se lleva el encuentro';
+    $('resultText').textContent=won?'Tu combinación funcionó. Puedes mejorar el equipo antes del siguiente combate.':'Reordena, entrena y busca mejores sinergias. La aventura continúa mientras te queden vidas.';
+    $('resultStats').innerHTML='<article><span>Vida restante</span><strong>'+format(battle.player.hp)+'</strong></article><article><span>Tiempo</span><strong>'+battle.time.toFixed(1)+'s</strong></article><article><span>Victorias</span><strong>'+run.wins+'/'+WIN_TARGET+'</strong></article>';
+    $('resultContinueBtn').textContent='SIGUIENTE JORNADA';
+  }
   openModal('resultModal');
 }
 function continueAfterBattle(){
   closeModal();
+  if(battleContext==='student'){
+    battle=null;showStudentBattle();return;
+  }
   if(run.wins>=WIN_TARGET)return endLeague(true);
   if(run.lives<=0)return endLeague(false);
   run.day++;
@@ -1166,7 +1191,7 @@ return {
     const pack=payload?.save||payload;
     if(pack?.career){
       const base=loadCareer();
-      career=Object.assign(base,pack.career,{metrics:Object.assign(base.metrics,pack.career.metrics||{}),history:Array.isArray(pack.career.history)?pack.career.history:base.history});
+      career=Object.assign(base,pack.career,{metrics:Object.assign(base.metrics,pack.career.metrics||{}),history:Array.isArray(pack.career.history)?pack.career.history:base.history,duels:Object.assign(base.duels,pack.career.duels||{})});
       localStorage.setItem(CAREER_KEY,JSON.stringify(career));
     }
     const incoming=pack?.run||((pack?.version===1&&pack?.trainerId)?pack:null);
@@ -1185,6 +1210,8 @@ return {
     };
   },
   achievements(){return Object.keys(career.achievements||{}).map(id=>{const a=D.achievements.find(x=>x.id===id)||{};return{id,title:a.name||id,description:a.desc||'',xpReward:25};});},
+  setStudentOpponents(list){setStudentOpponents(list);},
+  getDuelSquad(){return career.duelSquad||null;},
   save(){saveRun('manual');saveCareer();}
 };
 })();
