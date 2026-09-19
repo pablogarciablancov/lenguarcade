@@ -238,6 +238,7 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
 
 
 /* ===== LEXARIA SCENARIOS + TRAINERS + SAFE SPRITES · v5 ===== */
+.battle-screen{position:relative!important}
 .lex-sprite{background:none!important;background-image:none!important;overflow:hidden!important}
 .lex-sprite>img{display:none!important}
 .lex-sprite>svg{display:block;width:100%;height:100%;overflow:hidden}
