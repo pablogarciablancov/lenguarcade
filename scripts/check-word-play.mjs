@@ -23,13 +23,14 @@ const app = read('app.js');
 const layout = read('layout.js');
 const bridge = read('bridge.js');
 const sound = read('sound.js');
+const rewardArt = read('assets/reward-art.svg');
 
 for (const required of [
   'id="board"','id="wordBuilder"','id="scoreBreakdown"','id="upgradeList"','id="difficultyModal"','id="skipRewardBtn"','id="classroomModeToggle"','id="inkWallet"','id="inkValue"','id="tintaVivaBtn"','id="tintaCharges"','id="rewardChoices"','id="collectionModal"','id="dailyGameBtn"',
   './content.js','./lexicon.js','./vendor/typo.js','./engine.js','./bridge.js','./app.js','./layout.js','./sound.js','./game-feel.js','./styles.css','./responsive.css','./arcade.css'
 ]) if (!index.includes(required)) throw new Error(`Falta ${required} en index.html`);
 
-if(!index.includes('20260919-tinta-cards-v2'))throw new Error('Los assets de Word Play no llevan la versión de Tinta y cartas actual');
+if(!index.includes('20260919-art-anchor6-v1'))throw new Error('Los assets de Word Play no llevan la versión de arte y ancla 6+ actual');
 if(!app.includes('dictionaryReady')||!app.includes('launchButtons'))throw new Error('La partida puede arrancar antes de cargar el diccionario');
 if(app.includes("visibilitychange"))throw new Error('Cambiar de pestaña no debe activar Tinta Viva automáticamente');
 
@@ -40,7 +41,7 @@ for (const required of ['--tile-size','--board-gap','grid-template-columns:repea
   if (!responsive.replaceAll(' ', '').includes(required.replaceAll(' ', ''))) throw new Error(`Falta ${required} en responsive.css`);
 }
 
-for (const required of ['.wp-fx-layer','.wp-score-pop','.word-slot','.score-breakdown','.difficulty-grid','.upgrade-card','.tile.emerald','.tile.dot','.tile.mirror','.tile.bang','.tile.plus','.tile.normal.value-1','.tile.normal.value-4','.tile.normal.value-9','.word-slot.normal.value-3','.ink-power','.ink-wallet','.tinta-viva-btn','.reward-art','.reward-art-rune','.reward-card-body','.rarity-gem','.card-corner','.classroom-toggle','user-select:none','.reward-card.rarity-legendary','.board::before','.tile.gold']) {
+for (const required of ['.wp-fx-layer','.wp-score-pop','.word-slot','.score-breakdown','.difficulty-grid','.upgrade-card','.tile.emerald','.tile.dot','.tile.mirror','.tile.bang','.tile.plus','.tile.normal.value-1','.tile.normal.value-4','.tile.normal.value-9','.word-slot.normal.value-3','.ink-power','.ink-wallet','.tinta-viva-btn','.reward-art','.reward-art-image','.reward-card-body','.rarity-gem','.card-corner','.classroom-toggle','user-select:none','.reward-card.rarity-legendary','.board::before','.tile.gold']) {
   if (!arcade.includes(required)) throw new Error(`Falta ${required} en arcade.css`);
 }
 for (const required of ['WordPlayLexicon','additions','strict','blocked','rejectPatterns','es-ES']) {
@@ -49,6 +50,11 @@ for (const required of ['WordPlayLexicon','additions','strict','blocked','reject
 for (const required of ['WordPlayGameFeel','MutationObserver','wp-score-pop','wp-combo-callout']) {
   if (!gameFeel.includes(required)) throw new Error(`Falta ${required} en game-feel.js`);
 }
+
+for (const required of ['art-generic','art-long','art-vowels','art-accent','art-enye','art-rare','art-gold','art-emerald','art-diamond','art-dot','art-duplicate','art-destroy','art-refresh','art-play','art-wild','art-mirror','art-potion','art-glass','art-plus','art-bang','art-score','art-xp','art-transmute']) {
+  if (!rewardArt.includes(`id="${required}"`)) throw new Error(`Falta ilustración SVG ${required}`);
+}
+if ((rewardArt.match(/<symbol /g)||[]).length < 20) throw new Error('El atlas de recompensas tiene muy pocas ilustraciones');
 const localWords=dictionary.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
 if(localWords.length<45000)throw new Error(`Diccionario local demasiado pequeño: ${localWords.length}`);
 if(!localWords.includes('palabra')||!localWords.includes('español'))throw new Error('El diccionario local no contiene vocabulario básico esperado');
@@ -63,10 +69,10 @@ if(!typo.includes('Typo = function')||!typo.includes('_parseAFF'))throw new Erro
 for (const required of ['computeTileSize','ResizeObserver','MutationObserver','visualViewport','--tile-size','--board-gap']) {
   if (!layout.includes(required)) throw new Error(`Falta ${required} en layout.js`);
 }
-for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','BOARD_RULES','pickBalancedLetter','rebalanceBoard','boardQuality','wordIndex','candidateBoards','repairLoadedBoard','improvePlayability','HUNSPELL_AFF','HUNSPELL_DIC','loadHunspell','morphologyReady','modeConfig','totalRounds','specialRound','specialEffect','slotBonusAt','useUpgrade','sellModifier','skipReward','refreshBoard','boardPlayability','rescueBoard','stabilizeBoard','classroomScramble','buyTintaViva','useTintaViva']) {
+for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','BOARD_RULES','pickBalancedLetter','rebalanceBoard','boardQuality','wordIndex','candidateBoards','repairLoadedBoard','improvePlayability','HUNSPELL_AFF','HUNSPELL_DIC','loadHunspell','morphologyReady','modeConfig','totalRounds','specialRound','specialEffect','slotBonusAt','useUpgrade','sellModifier','skipReward','refreshBoard','anchorWordCandidates','anchoredBoard','boardPlayability','rescueBoard','stabilizeBoard','classroomScramble','buyTintaViva','useTintaViva']) {
   if (!engine.includes(required)) throw new Error(`Falta ${required} en engine.js`);
 }
-for (const required of ['renderCareer','renderBoard','renderUpgrades','valueClass','wordScorePreview','difficultyModal','openReward','skipReward','collection','wordLog','classroomMode','tintaBtn','buyTintaViva','useTintaViva','rewardArt','rewardAccent','rarity-gem','copy']) {
+for (const required of ['renderCareer','renderBoard','renderUpgrades','valueClass','wordScorePreview','difficultyModal','openReward','skipReward','collection','wordLog','classroomMode','tintaBtn','buyTintaViva','useTintaViva','rewardArt','rewardArtSvg','rewardAccent','reward-art.svg','rarity-gem','copy']) {
   if (!app.includes(required)) throw new Error(`Falta ${required} en app.js`);
 }
 for (const required of ["const GAME_ID='word_play'","post('READY'","post('INITIALIZED'","post('CHECKPOINT'","post('RESULT'",'SESSION_STARTED']) {
@@ -95,6 +101,11 @@ for (const list of [C.modifiers,C.gifts,C.upgrades,C.specialRounds,C.challenges,
   if (new Set(ids).size !== ids.length) throw new Error('Hay IDs duplicados en content.js');
 }
 if(JSON.stringify(C.wordLengthSlots)!==JSON.stringify([0,0,0,0,5,5,5,10,10,15,15,20]))throw new Error('La escalera de bonus por longitud no coincide con el diseño');
+if(C.challenges.some(x=>x.id==='exact5'&&x.kind==='constraint'))throw new Error('No puede existir una ronda activa que impida palabras de 6+ letras');
+if(!C.challenges.some(x=>x.id==='exact6c'))throw new Error('Falta el reto de seis letras exactas');
+const shrink=C.specialRounds.find(x=>x.id==='limit_tiles');
+if(!shrink||!/6 fichas/.test(shrink.desc))throw new Error('Palabra encogida debe empezar permitiendo 6 fichas');
+
 for(const kind of ['gold','diamond','emerald','dot','potion','glass','mirror','bang','plus','wild']){
   if(!C.specialTileTypes[kind])throw new Error(`Falta ficha especial ${kind}`);
 }
@@ -272,6 +283,70 @@ assertBalancedBoard(repaired.board,'partida antigua reparada');
 const repairedQuality=E.boardQuality(repaired.board,repaired.challenge);
 if(!repairedQuality.meets)throw new Error('La reparación de una partida antigua no mejora su jugabilidad');
 
+function assertLongWord(run,label,min=1){
+  const q=E.boardPlayability(run.board,run);
+  if(q.len6<min||!q.safe)throw new Error(`${label}: no garantiza ${min} palabra(s) de 6+ letras · ${JSON.stringify(q)}`);
+}
+for(let i=0;i<60;i++){
+  const run=E.newState('normal');
+  assertLongWord(run,`inicio normal ${i}`);
+}
+
+E.state=E.newState('normal');
+E.state.shufflesLeft=12;
+for(let i=0;i<10;i++){
+  if(!E.shuffle())throw new Error('No se pudo renovar para probar ancla larga');
+  assertLongWord(E.state,`renovación ${i}`);
+}
+
+E.state=E.newState('normal');
+const anchor=E.anchorWordCandidates(E.state).find(x=>x.length>=6);
+if(!anchor)throw new Error('No hay palabra ancla frecuente de 6+');
+const chosen=[];
+for(const letter of [...anchor.word.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ñ/g,'Ñ').toUpperCase()]){
+  const tile=E.state.board.find(t=>!chosen.includes(t)&&t.letter===letter);
+  if(!tile)throw new Error(`El tablero anclado no contiene realmente «${anchor.word}»`);
+  chosen.push(tile);
+}
+const played=E.play(anchor.word,chosen);
+if(!played.ok)throw new Error(`No se pudo jugar la palabra ancla «${anchor.word}»: ${played.message}`);
+assertLongWord(E.state,'reposición tras jugar palabra');
+
+E.state=E.newState('normal');
+const tinta=E.useTintaViva(6);
+if(!tinta.ok)throw new Error('No se pudo usar Tinta Viva en prueba 6+');
+assertLongWord(E.state,'Tinta Viva');
+
+E.state=E.newState('normal');
+E.state.challenge='exact6c';
+E.state.specialRound=null;
+E.stabilizeBoard('prueba exacta 6');
+assertLongWord(E.state,'reto seis exactas');
+
+E.state=E.newState('normal');
+E.state.specialRound='min_six_zero';
+E.state.specialData={};
+E.stabilizeBoard('prueba ronda larga');
+assertLongWord(E.state,'ronda Solo palabras largas',2);
+
+E.state=E.newState('normal');
+E.state.specialRound='top_locked';
+E.state.specialData={lockedIds:E.state.board.slice(0,4).map(t=>t.id)};
+E.stabilizeBoard('prueba fila congelada');
+assertLongWord(E.state,'fila congelada');
+
+E.state=E.newState('normal');
+E.state.specialRound='first_locked';
+E.state.specialData={lockedLetter:'R'};
+E.stabilizeBoard('prueba primera letra');
+assertLongWord(E.state,'primera letra sellada');
+
+E.state=E.newState('normal');
+E.state.specialRound='limit_tiles';
+E.state.specialData={};
+E.stabilizeBoard('prueba límite');
+assertLongWord(E.state,'palabra encogida');
+
 const daily1=E.newState('daily');
 const letters1=daily1.board.map(t=>t.letter).join('');
 E.state=daily1;
@@ -296,4 +371,4 @@ for(const [w,h] of [[700,430],[520,360],[390,250],[900,500]]){
   const s=layoutSize(w,h);if(s*4+21>w+1||s*4+21>h+1)throw new Error(`El tablero puede desbordar ${w}×${h}`);
 }
 
-console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/color/core-loop/slots/upgrades/special-rounds/special-tiles/deadlock-rescue/tinta-economy/classroom-copy-guard/morphology-esES/bridge/audio/daily OK`);
+console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/color/core-loop/slots/upgrades/special-rounds/special-tiles/deadlock-rescue/tinta-economy/reward-art/anchor-6plus/classroom-copy-guard/morphology-esES/bridge/audio/daily OK`);
