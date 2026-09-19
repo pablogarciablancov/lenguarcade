@@ -12,6 +12,11 @@ const lexicon = read('lexicon.js');
 const gameFeel = read('game-feel.js');
 const dictionary = read('dictionary-es-50k.txt');
 const notices = read('THIRD_PARTY_NOTICES.md');
+const typo = read('vendor/typo.js');
+const hunspellAff = read('hunspell/es_ES.aff');
+const hunspellDic = read('hunspell/es_ES.dic');
+const typoLicense = read('vendor/TYPO_LICENSE.txt');
+const rlaLicense = read('hunspell/RLA_ES_LICENSE.md');
 const content = read('content.js');
 const engine = read('engine.js');
 const app = read('app.js');
@@ -21,10 +26,10 @@ const sound = read('sound.js');
 
 for (const required of [
   'id="board"','id="wordBuilder"','id="rewardChoices"','id="collectionModal"','id="dailyGameBtn"',
-  './content.js','./lexicon.js','./engine.js','./bridge.js','./app.js','./layout.js','./sound.js','./game-feel.js','./styles.css','./responsive.css','./arcade.css'
+  './content.js','./lexicon.js','./vendor/typo.js','./engine.js','./bridge.js','./app.js','./layout.js','./sound.js','./game-feel.js','./styles.css','./responsive.css','./arcade.css'
 ]) if (!index.includes(required)) throw new Error(`Falta ${required} en index.html`);
 
-if(!index.includes('20260919-playable-v2'))throw new Error('Los assets de Word Play no llevan versión de caché actual');
+if(!index.includes('20260919-morphology-v1'))throw new Error('Los assets de Word Play no llevan la versión morfológica actual');
 if(!app.includes('dictionaryReady')||!app.includes('launchButtons'))throw new Error('La partida puede arrancar antes de cargar el diccionario');
 
 for (const required of ['100dvh','overflow:hidden','.board','.reward-card','.collection-body','.boss-badge']) {
@@ -47,10 +52,17 @@ const localWords=dictionary.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
 if(localWords.length<45000)throw new Error(`Diccionario local demasiado pequeño: ${localWords.length}`);
 if(!localWords.includes('palabra')||!localWords.includes('español'))throw new Error('El diccionario local no contiene vocabulario básico esperado');
 if(!/CC BY-SA 4\.0/i.test(notices)||!/FrequencyWords/i.test(notices))throw new Error('Falta atribución del léxico local');
+if(!/RLA-ES/i.test(notices)||!/Typo\.js/i.test(notices))throw new Error('Faltan avisos de terceros de la capa morfológica');
+if(!/Copyright \(c\) 2011, Christopher Finke/i.test(typoLicense))throw new Error('Falta licencia de Typo.js');
+if(!/GPL versión 3/i.test(rlaLicense)||!/MPL versión 1\.1/i.test(rlaLicense))throw new Error('Falta licencia RLA-ES');
+if(!hunspellAff.includes('SET UTF-8')||!hunspellAff.includes('PFX ')||!hunspellAff.includes('SFX '))throw new Error('es_ES.aff no parece un diccionario Hunspell válido');
+if(!hunspellDic.startsWith('58221'))throw new Error('es_ES.dic no parece el diccionario esperado');
+if(!typo.includes('Typo = function')||!typo.includes('_parseAFF'))throw new Error('Typo.js no está completo');
+
 for (const required of ['computeTileSize','ResizeObserver','MutationObserver','visualViewport','--tile-size','--board-gap']) {
   if (!layout.includes(required)) throw new Error(`Falta ${required} en layout.js`);
 }
-for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','rewardTier','bossPlay','rareLuck','specialFlat','BOARD_RULES','pickBalancedLetter','rebalanceBoard','boardQuality','wordIndex','candidateBoards','repairLoadedBoard','improvePlayability']) {
+for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','rewardTier','bossPlay','rareLuck','specialFlat','BOARD_RULES','pickBalancedLetter','rebalanceBoard','boardQuality','wordIndex','candidateBoards','repairLoadedBoard','improvePlayability','HUNSPELL_AFF','HUNSPELL_DIC','loadHunspell','morphologyReady']) {
   if (!engine.includes(required)) throw new Error(`Falta ${required} en engine.js`);
 }
 for (const required of ['renderCareer','renderBoard','openReward','collection','wordLog']) {
@@ -86,7 +98,7 @@ if(bosses.some(x=>!(x.targetMult>0&&x.targetMult<1)||!x.rewardTier))throw new Er
 if(!C.modifiers.some(x=>x.id==='cazajefes')||!C.gifts.some(x=>x.id==='boss_play'))throw new Error('Faltan sinergias específicas de jefe');
 
 // Sintaxis de todos los módulos.
-for (const [name, code] of [['lexicon.js',lexicon],['engine.js',engine],['app.js',app],['layout.js',layout],['bridge.js',bridge],['sound.js',sound],['game-feel.js',gameFeel]]) {
+for (const [name, code] of [['lexicon.js',lexicon],['vendor/typo.js',typo],['engine.js',engine],['app.js',app],['layout.js',layout],['bridge.js',bridge],['sound.js',sound],['game-feel.js',gameFeel]]) {
   new vm.Script(code, { filename:name });
 }
 
@@ -101,16 +113,31 @@ const runtime = {
     removeItem:key=>store.delete(key)
   },
   crypto:{randomUUID:()=>`test-${++uuid}`},
-  fetch:async url=>({ok:true,status:200,text:async()=>url.includes('dictionary-es-50k')?dictionary:'palabra 1\nespañol 1\n'}),
+  fetch:async url=>({
+    ok:true,status:200,
+    text:async()=>url.includes('dictionary-es-50k')?dictionary:
+      url.includes('es_ES.aff')?hunspellAff:
+      url.includes('es_ES.dic')?hunspellDic:
+      'palabra 1\nespañol 1\n'
+  }),
   Intl,Date,Math,Set,Map,JSON,Object,Array,String,Number,RegExp,console,
   setTimeout,clearTimeout
 };
 runtime.globalThis=runtime;
 vm.createContext(runtime);
+new vm.Script(typo,{filename:'vendor/typo.js'}).runInContext(runtime);
 new vm.Script(engine,{filename:'engine.js'}).runInContext(runtime);
 const E=runtime.window.WordPlayEngine;
 if(!E)throw new Error('engine.js no expone WordPlayEngine');
 await E.loadDictionary();
+if(!E.morphologyReady)throw new Error('La capa Hunspell no queda cargada');
+for(const word of ['cantábamos','condujeron','hubiésemos','deshacer','ilegalmente','pequeñísima']){
+  const result=E.validate(word);
+  if(!result.ok)throw new Error(`La morfología española rechaza «${word}»: ${result.message}`);
+}
+const malformed=E.validate('cantabamos');
+if(malformed.ok)throw new Error('La morfología acepta «cantabamos» sin tilde');
+
 const accentCheck=E.validate('ortografia');
 if(accentCheck.ok||!accentCheck.accent||!String(accentCheck.message).includes('ortografía'))throw new Error('La capa ortográfica no corrige ortografia → ortografía');
 
@@ -201,4 +228,4 @@ for(const [w,h] of [[700,430],[520,360],[390,250],[900,500]]){
   const s=layoutSize(w,h);if(s*4+21>w+1||s*4+21>h+1)throw new Error(`El tablero puede desbordar ${w}×${h}`);
 }
 
-console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/arcade/lexicon/bosses/synergies/balanced-board/playability/cache-migration/bridge/audio/daily OK`);
+console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/arcade/lexicon/bosses/synergies/balanced-board/playability/cache-migration/morphology-esES/bridge/audio/daily OK`);
