@@ -168,6 +168,7 @@ window.WordPlayContent = (() => {
     normal:{name:'Normal'},
     gold:{name:'Dorada',desc:'Con 2+ doradas, multiplica Word Score por su número.'},
     diamond:{name:'Diamante',desc:'Gana +5 si permanece sin jugar tras una palabra.'},
+    echo:{name:'Eco',desc:'Duplica el valor individual de esta ficha cuando la juegas.'},
     emerald:{name:'Esmeralda',desc:'25% de probabilidad de puntuar ×5.'},
     dot:{name:'Punto',desc:'Si cierra la palabra, Word Score ×2.'},
     potion:{name:'Poción',desc:'Al jugarla, suma su valor a tus Jugadas y se rompe.'},
