@@ -407,3 +407,124 @@ html.reduce-motion *,html.reduce-motion *::before,html.reduce-motion *::after{an
 .tile.plus::before{content:"+";position:absolute;left:6%;top:2%;font-size:.78rem;color:#087b55;font-weight:950}
 .modifier-section{flex:.62!important}
 .upgrade-section{flex:.38!important}
+
+
+/* Tinta viva + color pass 3 */
+.game-screen{
+  background:
+    radial-gradient(circle at 16% 18%,rgba(255,61,145,.22),transparent 28rem),
+    radial-gradient(circle at 84% 20%,rgba(76,139,255,.17),transparent 30rem),
+    linear-gradient(135deg,#4d0d5e 0%,#7f0f57 38%,#39216f 70%,#123f73 100%)!important;
+}
+.play-panel{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.025) 25%,transparent 25% 75%,rgba(255,255,255,.025) 75%) 0 0/34px 34px,
+    linear-gradient(45deg,rgba(255,255,255,.016) 25%,transparent 25% 75%,rgba(255,255,255,.016) 75%) 0 0/34px 34px,
+    radial-gradient(circle at 50% 30%,rgba(255,73,155,.2),transparent 42%),
+    linear-gradient(180deg,#94114f 0%,#6f104e 47%,#4b174c 100%)!important;
+  border-color:rgba(255,118,183,.38)!important;
+}
+.game-screen[data-round-tone="2"] .play-panel{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.025) 25%,transparent 25% 75%,rgba(255,255,255,.025) 75%) 0 0/34px 34px,
+    radial-gradient(circle at 50% 28%,rgba(72,187,255,.16),transparent 44%),
+    linear-gradient(180deg,#5e187f 0%,#4f246f 52%,#293a77 100%)!important;
+}
+.game-screen[data-round-tone="3"] .play-panel{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.025) 25%,transparent 25% 75%,rgba(255,255,255,.025) 75%) 0 0/34px 34px,
+    radial-gradient(circle at 50% 28%,rgba(255,176,62,.13),transparent 44%),
+    linear-gradient(180deg,#8e2b3a 0%,#72214f 50%,#48245f 100%)!important;
+}
+.game-screen[data-round-tone="4"] .play-panel{
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.025) 25%,transparent 25% 75%,rgba(255,255,255,.025) 75%) 0 0/34px 34px,
+    radial-gradient(circle at 50% 28%,rgba(66,236,190,.12),transparent 44%),
+    linear-gradient(180deg,#145c68 0%,#24426f 50%,#39245f 100%)!important;
+}
+
+.left-panel{
+  background:
+    radial-gradient(circle at 10% 0,rgba(54,140,255,.18),transparent 55%),
+    linear-gradient(180deg,#112e64 0%,#1a2757 48%,#281a4d 100%)!important;
+  border-color:rgba(76,154,255,.38)!important;
+}
+.right-panel{
+  background:
+    radial-gradient(circle at 90% 0,rgba(255,85,157,.13),transparent 55%),
+    linear-gradient(180deg,#24205a 0%,#2f184d 55%,#22143f 100%)!important;
+  border-color:rgba(180,102,255,.32)!important;
+}
+.challenge-banner{
+  background:linear-gradient(90deg,#c21767,#8b1d94 52%,#4931a4)!important;
+  color:#fff!important;border-color:rgba(255,150,206,.42)!important;
+}
+.challenge-banner p{color:#f4d7e9!important}
+.challenge-banner .eyebrow{color:#ffd95d!important}
+.word-zone{
+  background:
+    radial-gradient(circle at 50% 0,rgba(255,189,86,.08),transparent 45%),
+    linear-gradient(180deg,rgba(77,13,73,.91),rgba(36,14,60,.94))!important;
+  border-color:rgba(255,112,178,.34)!important;
+}
+.board::before{
+  background:
+    linear-gradient(180deg,rgba(89,18,66,.78),rgba(29,22,65,.92)),
+    #1a123d!important;
+  border-color:rgba(255,113,174,.33)!important;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.018),0 16px 36px rgba(0,0,0,.34)!important;
+}
+.submit-btn{
+  background:linear-gradient(180deg,#5bf0ba,#26d694 54%,#1ab77d)!important;
+  color:#08261b!important;
+  border-color:rgba(211,255,238,.7)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72),inset 0 -5px 0 rgba(2,92,62,.22),0 8px 18px rgba(0,0,0,.3),0 0 20px rgba(38,214,148,.15)!important;
+}
+#shuffleBtn{
+  color:#fff!important;
+  background:linear-gradient(180deg,#8057e9,#6740c9)!important;
+  border-color:rgba(207,190,255,.32)!important;
+}
+#wordLogBtn{
+  color:#ffe5f5!important;
+  border-color:rgba(255,112,178,.25)!important;
+  background:rgba(122,23,82,.32)!important;
+}
+.modifier-card{
+  border-left-width:5px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 5px 12px rgba(0,0,0,.13)!important;
+}
+.modifier-card.rarity-common{background:linear-gradient(100deg,#174a91,#23346f)!important}
+.modifier-card.rarity-uncommon{background:linear-gradient(100deg,#12755e,#1e4f72)!important}
+.modifier-card.rarity-rare{background:linear-gradient(100deg,#225fc6,#493a9d)!important}
+.modifier-card.rarity-epic{background:linear-gradient(100deg,#7930ad,#5f276f)!important}
+.modifier-card.rarity-legendary{background:linear-gradient(100deg,#bd6528,#9b2f60)!important}
+.modifier-card span,.modifier-card strong{color:#fff!important}
+.modifier-card>span{color:rgba(255,255,255,.75)!important}
+.upgrade-card{background:linear-gradient(120deg,#5c2eb2,#275e9d)!important;border-color:rgba(201,168,255,.4)!important}
+.upgrade-card.active{background:linear-gradient(120deg,#c96b28,#9c2e8b)!important}
+.resource-row article{border-color:rgba(255,255,255,.13)!important}
+.resource-row article:nth-child(1){background:linear-gradient(150deg,#178e6f,#165d76)!important}
+.resource-row article:nth-child(2){background:linear-gradient(150deg,#7145d6,#4b32a3)!important}
+.resource-row article:nth-child(3){background:linear-gradient(150deg,#dc7427,#a9464d)!important}
+.resource-row span,.resource-row strong{color:#fff!important}
+
+.classroom-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:30px;padding:0 9px;border-radius:999px;
+  color:#183b2c;background:linear-gradient(180deg,#a7ffd9,#54e7a9);
+  border:1px solid rgba(255,255,255,.65);
+  font-size:.57rem;font-weight:950;letter-spacing:.08em;
+  box-shadow:0 0 18px rgba(84,231,169,.22),inset 0 1px 0 rgba(255,255,255,.7);
+}
+.classroom-toggle span{display:flex;flex-direction:column;gap:2px}
+.classroom-toggle small{color:var(--muted);font-size:.62rem;font-weight:500;line-height:1.25}
+.board,.word-builder,.tile,.word-slot{-webkit-user-select:none;user-select:none}
+.tile{-webkit-touch-callout:none}
+
+.feedback.warn{background:linear-gradient(90deg,rgba(191,92,15,.22),rgba(126,38,91,.2))!important;color:#ffe3a4!important}
+.feedback.good{background:linear-gradient(90deg,rgba(19,139,98,.21),rgba(25,95,130,.18))!important;color:#bfffe3!important}
+
+@media(max-width:760px){
+  .classroom-badge{display:none!important}
+}
