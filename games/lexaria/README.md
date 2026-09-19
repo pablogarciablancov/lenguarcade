@@ -48,3 +48,29 @@ Laboratorio. El multijugador asíncrono real no está implementado todavía: los
 ## Propiedad intelectual
 
 El proyecto reproduce ideas de diseño y un bucle de género, pero no incluye código, imágenes, audio, nombres de criaturas, textos, interfaz exacta ni recursos artísticos de Batomon Showdown. La identidad visual y el contenido de Lexaria son originales para LenguArcade.
+
+
+## Revisión UX 2
+
+La pantalla de preparación se ha rediseñado para que las reglas sean visibles sin depender del tutorial:
+
+- La Tinta aparece destacada y cada oferta indica su coste, si es asequible y cuánto falta.
+- Las cartas del mercado enseñan tipo, rareza, vida, daño, cooldown y habilidad antes de comprar.
+- Vanguardia: +10% de vida. Retaguardia: -8% al cooldown. La adyacencia sigue activando habilidades específicas.
+- La reserva tiene 4 huecos, no combate y sí participa en fusiones.
+- Los Lexarios se mueven por drag & drop. Un clic abre su ficha y repetir clic la cierra.
+- La formación muestra vida total y daño base total.
+- Cada jornada explica su flujo: compra → coloca → entrena → combate → nueva jornada con ingresos y sesiones renovadas.
+- Se eliminan los scrolls internos de las dos barras laterales en el layout de escritorio.
+
+## Modos
+
+### Aventura
+
+Es la run estratégica principal. Mantiene Tinta, vidas, jornadas, entrenador, mercado, fusiones, Reliquias, Recursos, entrenamiento y el objetivo de 10 victorias.
+
+### Arena de clase
+
+Combate asíncrono: el alumno publica una instantánea de su formación y otros compañeros pueden enfrentarse a ella aunque no esté conectado. Los duelos no consumen vidas ni Tinta ni alteran la Aventura.
+
+En laboratorio, si no existe host de LenguArcade conectado, se muestran rivales deterministas de prueba. El bridge ya implementa los mensajes `PUBLISH_SQUAD`, `REQUEST_OPPONENTS` y `OPPONENTS`; la persistencia real de rivales debe añadirse posteriormente desde una rama `integration/*` en Supabase.
