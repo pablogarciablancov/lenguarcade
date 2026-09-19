@@ -910,3 +910,23 @@ html.reduce-motion *,html.reduce-motion *::before,html.reduce-motion *::after{an
   .reward-art{height:auto;min-height:150px;border-bottom:0;border-right:1px solid color-mix(in srgb,var(--card-accent) 45%,transparent)}
   .reward-art-rune{min-width:58px;height:58px;font-size:1.85rem}
 }
+
+
+/* Ilustraciones reales de cartas */
+.reward-art-image{
+  position:relative;
+  z-index:3;
+  width:88%;
+  height:88%;
+  max-width:185px;
+  max-height:128px;
+  display:block;
+  overflow:visible;
+  filter:drop-shadow(0 10px 16px rgba(0,0,0,.28));
+  transition:transform .18s ease,filter .18s ease;
+}
+.reward-card:hover .reward-art-image{
+  transform:scale(1.045) translateY(-2px);
+  filter:drop-shadow(0 12px 20px rgba(0,0,0,.34));
+}
+.reward-art-rune{display:none!important}
