@@ -80,11 +80,35 @@ function renderWord(){
   const tiles=s.selected.map(x=>s.board.find(t=>t.id===x.id)).filter(Boolean),sc=E.score(w,tiles,true);ui.preview.textContent=fmt(sc.total)+' pts';ui.wordScore.textContent=fmt(sc.wordScore);ui.bonusScore.textContent=fmt(sc.bonusPoints);ui.finalScore.textContent=fmt(sc.total);
   ui.combo.innerHTML=sc.effects.slice(0,6).map(e=>'<span class="combo-chip">'+e+'</span>').join('');
 }
-function play(){const s=state(),tiles=s.selected.map(x=>s.board.find(t=>t.id===x.id)).filter(Boolean),result=E.play(currentWord(),tiles);if(!result.ok){showFeedback(result.message,result.accent?'warn':'bad');render();return;}s.selected=[];showFeedback(`${result.word.toUpperCase()} · +${fmt(result.score.total)} puntos`,'good');ui.last.className='last-play-card';ui.last.innerHTML=`<div class="played-word">${result.word.toUpperCase()}</div><div class="played-score">+${fmt(result.score.total)} pts</div><div class="effect-list">${result.score.effects.length?result.score.effects.map(e=>`<span>• ${e}</span>`).join(''):'<span>Sin modificadores activos</span>'}</div>`;E.achievements();render();if(s.mode==='quick'&&s.playsLeft<=0)return setTimeout(()=>finish(true),220);if(s.mode!=='quick'&&s.roundScore>=s.target)return setTimeout(openReward,220);if(s.mode!=='quick'&&s.playsLeft<=0)setTimeout(()=>finish(false),220);}
-function openReward(){const ch=E.challenge(state().challenge);rewardOptions=E.rewards();renderRewards();$('rewardTitle').textContent=ch.kind==='boss'?'Botín de jefe':'Elige una mejora';ui.reward.classList.toggle('boss-loot',ch.kind==='boss');ui.rewardRound.textContent=`Ronda ${state().round} · ${fmt(state().roundScore)} pts${ch.kind==='boss'?' · recompensa mejorada':''}`;ui.rerollBtn.disabled=state().rerollsLeft<=0;showModal(ui.reward);}
-function renderRewards(){ui.rewardChoices.innerHTML=rewardOptions.map(r=>`<button class="reward-card rarity-${r.rarity}" data-id="${r.id}" type="button"><span class="reward-type">${r.type==='modifier'?'MODIFICADOR':r.type==='tile'?'FICHA':'RECURSO'} · ${r.rarity}</span><h3>${r.name}</h3><p>${r.desc}</p><div class="reward-footer"><span>${r.type==='modifier'?'Efecto permanente':'Mejora de partida'}</span><strong>Elegir →</strong></div></button>`).join('');ui.rewardChoices.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>choose(rewardOptions.find(r=>r.id===b.dataset.id))));}
-function choose(r){E.chooseReward(r);hideModal();if(!E.nextRound())return finish(true);render();const ch=E.challenge(state().challenge);showFeedback(ch.kind==='boss'?`¡Ronda jefe! ${ch.title}`:ch.kind==='constraint'?`Regla activa: ${ch.title}`:'Nueva ronda. Busca una combinación potente.','good');}
+function play(){
+  const s=state(),tiles=s.selected.map(x=>s.board.find(t=>t.id===x.id)).filter(Boolean),result=E.play(currentWord(),tiles);
+  if(!result.ok){showFeedback(result.message,result.accent?'warn':'bad');render();return;}
+  s.selected=[];activeUpgrade=null;
+  const costText=result.penalty?' · -'+(result.playCost+result.penalty)+' jugadas':result.playCost>1?' · -'+result.playCost+' jugadas':'';
+  showFeedback(result.word.toUpperCase()+' · +'+fmt(result.score.total)+' puntos'+costText,'good');
+  ui.last.className='last-play-card';
+  ui.last.innerHTML='<div class="played-word">'+result.word.toUpperCase()+'</div><div class="score-mini"><span>WORD <b>'+fmt(result.score.wordScore)+'</b></span><span>BONUS <b>+'+fmt(result.score.bonusPoints)+'</b></span><span>FINAL <b>'+fmt(result.score.total)+'</b></span></div><div class="effect-list">'+(result.score.effects.length?result.score.effects.map(e=>'<span>• '+e+'</span>').join(''):'<span>Sin efectos adicionales</span>')+'</div>';
+  E.achievements();render();
+  if(s.mode==='quick'&&s.playsLeft<=0)return setTimeout(()=>finish(true),220);
+  if(s.mode!=='quick'&&s.roundScore>=s.target)return setTimeout(openReward,220);
+  if(s.mode!=='quick'&&s.playsLeft<=0)setTimeout(()=>finish(false),220);
+}
+function openReward(){
+  rewardOptions=E.rewards();renderRewards();$('rewardTitle').textContent=state().specialRound?'Recompensa especial':'Elige una recompensa';
+  ui.reward.classList.toggle('boss-loot',!!state().specialRound);ui.rewardRound.textContent='Ronda '+state().round+' · '+fmt(state().roundScore)+' pts';ui.rerollBtn.disabled=state().rerollsLeft<=0;showModal(ui.reward);
+}
+function rewardType(r){return r.type==='modifier'?'MODIFICADOR':r.type==='upgrade'?'MEJORA':r.type==='bagTile'?'OBSEQUIO':r.type==='tile'?'FICHA':'RECURSO';}
+function renderRewards(){
+  ui.rewardChoices.innerHTML=rewardOptions.map(r=>'<button class="reward-card rarity-'+r.rarity+'" data-id="'+r.id+'" type="button"><span class="reward-type">'+rewardType(r)+' · '+r.rarity+'</span><h3>'+r.name+'</h3><p>'+r.desc+'</p><div class="reward-footer"><span>'+(r.type==='upgrade'?r.uses+' usos':r.type==='modifier'?state().modifiers.length+'/6 modificadores':r.type==='bagTile'?'Va a la reserva especial':'Mejora de partida')+'</span><strong>Elegir →</strong></div></button>').join('');
+  ui.rewardChoices.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>choose(rewardOptions.find(r=>r.id===b.dataset.id))));
+}
+function afterReward(){
+  hideModal();if(!E.nextRound())return finish(true);render();const sr=E.specialRound(state().specialRound),ch=E.challenge(state().challenge);
+  showFeedback(sr?'¡Ronda especial! '+sr.title:ch.kind==='constraint'?'Regla activa: '+ch.title:'Nueva ronda. Construye una palabra potente.','good');
+}
+function choose(r){if(!E.chooseReward(r)){showFeedback('No puedes llevar más de ese tipo.','warn');return;}afterReward();}
 function reroll(){if(state().rerollsLeft<=0)return;state().rerollsLeft--;rewardOptions=E.rewards();renderRewards();ui.rerollBtn.disabled=state().rerollsLeft<=0;E.saveRun();render();}
+function skipReward(){const n=E.skipReward();showFeedback('Pasas la recompensa · +'+n+' renovaciones','good');afterReward();}
 function start(mode){if(!dictionaryReady){showFeedback('Espera un instante: estoy preparando el diccionario.','warn');return;}E.state=E.newState(mode);ui.menu.classList.add('hidden');ui.game.classList.remove('hidden');render();E.saveRun();if(E.career.games===0)howTo(true);}
 function resumeRun(){if(!dictionaryReady)return;const r=E.loadRun();if(!r)return;E.state=r;ui.menu.classList.add('hidden');ui.game.classList.remove('hidden');render();}
 function finish(won){const out=E.finish(won),s=state();ui.endEye.textContent=won?'PARTIDA COMPLETADA':'FIN DE PARTIDA';ui.endTitle.textContent=won?'¡Estrategia completada!':'Tu partida';const stats=[['Puntuación',fmt(s.totalScore)],['Ronda',s.mode==='quick'?'Rápida':`${s.round}/12`],['Palabras',s.words.length],['Más larga',s.longestWord||'—'],['Mejor jugada',s.bestPlay?`${s.bestPlay.word} · ${fmt(s.bestPlay.score)}`:'—'],['XP léxico',`+${out.xp}`]];ui.endStats.innerHTML=stats.map(([a,b])=>`<article><span>${a}</span><strong>${b}</strong></article>`).join('');ui.newAchievements.classList.toggle('hidden',!out.got.length);if(out.got.length)ui.newAchievements.innerHTML=`<strong>🏆 Nuevos logros</strong><div>${out.got.map(a=>a.name).join(' · ')}</div>`;showModal(ui.end);renderCareer();}
