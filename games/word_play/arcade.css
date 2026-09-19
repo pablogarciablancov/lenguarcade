@@ -528,3 +528,79 @@ html.reduce-motion *,html.reduce-motion *::before,html.reduce-motion *::after{an
 @media(max-width:760px){
   .classroom-badge{display:none!important}
 }
+
+
+/* Color por valor · las fichas especiales mantienen su skin propio */
+.tile.normal.value-1,.word-slot.normal.value-1{
+  background:
+    radial-gradient(circle at 28% 16%,rgba(255,255,255,.8),transparent 38%),
+    linear-gradient(145deg,#fff8df,#efd290)!important;
+  border-color:rgba(255,247,217,.92)!important;
+}
+.tile.normal.value-2,.word-slot.normal.value-2{
+  background:
+    radial-gradient(circle at 28% 16%,rgba(255,255,255,.76),transparent 38%),
+    linear-gradient(145deg,#dff6ff,#86c8f2)!important;
+  border-color:rgba(190,235,255,.92)!important;
+}
+.tile.normal.value-3,.word-slot.normal.value-3{
+  background:
+    radial-gradient(circle at 28% 16%,rgba(255,255,255,.7),transparent 38%),
+    linear-gradient(145deg,#a9d7ff,#5a98e5)!important;
+  border-color:rgba(144,202,255,.95)!important;
+}
+.tile.normal.value-4,.word-slot.normal.value-4{
+  background:
+    radial-gradient(circle at 28% 16%,rgba(255,255,255,.7),transparent 38%),
+    linear-gradient(145deg,#baf7c5,#54ca7a)!important;
+  border-color:rgba(150,241,175,.95)!important;
+}
+.tile.normal.value-5,.word-slot.normal.value-5{
+  background:
+    radial-gradient(circle at 28% 16%,rgba(255,255,255,.76),transparent 38%),
+    linear-gradient(145deg,#fff0a0,#efc140)!important;
+  border-color:rgba(255,224,100,.95)!important;
+}
+.tile.normal.value-6,.word-slot.normal.value-6{
+  background:
+    radial-gradient(circle at 28% 16%,rgba(255,255,255,.7),transparent 38%),
+    linear-gradient(145deg,#ffd09a,#f1843d)!important;
+  border-color:rgba(255,174,104,.96)!important;
+}
+.tile.normal.value-9,.word-slot.normal.value-9{
+  background:
+    radial-gradient(circle at 28% 16%,rgba(255,255,255,.68),transparent 38%),
+    linear-gradient(145deg,#ff9dbb,#e7437d)!important;
+  border-color:rgba(255,122,169,.98)!important;
+  box-shadow:
+    inset 0 -7px 0 rgba(91,13,45,.18),
+    inset 0 1px 0 rgba(255,255,255,.72),
+    0 8px 18px rgba(0,0,0,.32),
+    0 0 18px rgba(231,67,125,.16)!important;
+}
+
+/* Borde lateral de rareza/value para reforzar lectura sin depender solo del fondo */
+.tile.normal[class*="value-"]::after{
+  content:"";
+  position:absolute;
+  left:0;
+  top:16%;
+  bottom:16%;
+  width:4px;
+  border-radius:0 4px 4px 0;
+  background:rgba(255,255,255,.34);
+  box-shadow:0 0 10px rgba(255,255,255,.12);
+  pointer-events:none;
+}
+.tile.normal.value-1::after{background:#d8bb76}
+.tile.normal.value-2::after{background:#4da8dd}
+.tile.normal.value-3::after{background:#3177ca}
+.tile.normal.value-4::after{background:#22a95a}
+.tile.normal.value-5::after{background:#d99e18}
+.tile.normal.value-6::after{background:#df651f}
+.tile.normal.value-9::after{background:#b51c5d}
+
+.word-slot.normal[class*="value-"]{
+  color:#141b2b!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.45);
+}
