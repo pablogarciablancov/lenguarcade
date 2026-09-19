@@ -472,7 +472,7 @@ function useUpgrade(id,tileId){
   const owned=state.upgrades.find(x=>x.id===id&&x.uses>0);if(!owned)return{ok:false,message:'Mejora agotada.'};
   const def=C.upgrades.find(x=>x.id===id);const t=state.board.find(x=>x.id===tileId);
   if(!def||!t)return{ok:false,message:'Selecciona una ficha válida.'};
-  const rng=boardRng;
+  const rng=boardRng();
   switch(def.effect){
     case'holdRefresh':{
       const held={...t};
@@ -655,7 +655,7 @@ function rescueBoard(reason='atasco',force=false){
   if(!force&&before.safe)return{rescued:false,before,after:before};
   const oldBoard=state.board.map(t=>({...t}));
   let best=null,bestStats=null;
-  const rng=boardRng;
+  const rng=boardRng();
   for(let attempt=0;attempt<18;attempt++){
     const candidate=board(rng,currentSetup(),state.challenge);
     candidate.forEach((t,i)=>cloneTraits(oldBoard[i],t));
@@ -816,7 +816,7 @@ function shuffle(){return refreshBoard(true,false);}
 
 function classroomScramble(count=6){
   if(!state?.board?.length||state.mode==='daily')return{changed:0,rescue:null};
-  const rng=boardRng;
+  const rng=boardRng();
   const locked=new Set(specialEffect()==='topLocked'&&state.roundWords<4?(state.specialData.lockedIds||[]):[]);
   let pool=state.board.map((t,i)=>({t,i})).filter(x=>!locked.has(x.t.id)&&x.t.kind==='normal');
   if(pool.length<count)pool=state.board.map((t,i)=>({t,i})).filter(x=>!locked.has(x.t.id));
