@@ -9,6 +9,40 @@ const TEAM_SIZE=6;
 const BENCH_SIZE=4;
 const WIN_TARGET=10;
 const CHROMATIC_RATE=200;
+const TRAINING_STEP=.05;
+const LEVEL_MULT={1:1,2:1.7,3:3,4:4.5};
+
+const ABILITY_META={
+  damageBurn:{role:'ATACANTE',icon:'🔥',row:'back',tags:['DAÑO','QUEMADURA']},
+  doubleIfShield:{role:'ATACANTE',icon:'⚔',row:'back',tags:['DAÑO','COMBO ESCUDO']},
+  teamShieldHaste:{role:'APOYO',icon:'✦',row:'back',tags:['ESCUDO','VELOCIDAD']},
+  rampingDamage:{role:'ATACANTE',icon:'↗',row:'back',tags:['DAÑO','ESCALA']},
+  healShield:{role:'APOYO',icon:'✚',row:'back',tags:['CURA','ESCUDO']},
+  selfHasteHit:{role:'ATACANTE',icon:'⚡',row:'back',tags:['DAÑO','RÁPIDO']},
+  doubleShock:{role:'CONTROL',icon:'⚡',row:'back',tags:['2 GOLPES','DESCARGA']},
+  teamHaste:{role:'APOYO',icon:'⏩',row:'back',tags:['VELOCIDAD','EQUIPO']},
+  statusPunish:{role:'REMATADOR',icon:'☠',row:'back',tags:['DAÑO','CASTIGA ESTADOS']},
+  poison:{role:'CONTROL',icon:'☣',row:'back',tags:['VENENO','ACUMULA']},
+  crit:{role:'ATACANTE',icon:'✹',row:'back',tags:['CRÍTICO','DAÑO']},
+  echoSupport:{role:'APOYO',icon:'≈',row:'back',tags:['COPIA','CURA/ESCUDO']},
+  missingHpDamage:{role:'REMATADOR',icon:'◆',row:'back',tags:['DAÑO','DESESPERACIÓN']},
+  cycleEffect:{role:'VERSÁTIL',icon:'◇',row:'back',tags:['DAÑO','CURA','ESCUDO']},
+  maxHpHeal:{role:'DEFENSOR',icon:'♥',row:'front',tags:['CURA','RESISTENCIA']},
+  shieldStrike:{role:'DEFENSOR',icon:'🛡',row:'front',tags:['ESCUDO','DAÑO']},
+  startCast:{role:'ATACANTE',icon:'➤',row:'back',tags:['INICIO','DAÑO']},
+  teamRamp:{role:'APOYO',icon:'↗',row:'back',tags:['BUFF','DAÑO EQUIPO']},
+  teamGuard:{role:'DEFENSOR',icon:'🛡',row:'front',tags:['ESCUDO','REDUCCIÓN']},
+  copyAlly:{role:'VERSÁTIL',icon:'◎',row:'back',tags:['COPIA','COMBO']},
+  adjacentShield:{role:'DEFENSOR',icon:'⬡',row:'front',tags:['ADYACENCIA','ESCUDO']},
+  shock:{role:'CONTROL',icon:'⚡',row:'back',tags:['DESCARGA','DAÑO']},
+  typeHeal:{role:'APOYO',icon:'✚',row:'back',tags:['CURA','SINERGIA']},
+  heavySilence:{role:'CONTROL',icon:'⌁',row:'back',tags:['GRAN DAÑO','SILENCIO']},
+  trinity:{role:'LEGENDARIO',icon:'✦',row:'front',tags:['DAÑO','CURA','ESCUDO']},
+  adjacentHaste:{role:'APOYO',icon:'♫',row:'back',tags:['ADYACENCIA','VELOCIDAD']},
+  clutchHeal:{role:'DEFENSOR',icon:'♥',row:'front',tags:['CURA CRÍTICA','RESISTENCIA']},
+  randomStatus:{role:'CONTROL',icon:'✹',row:'back',tags:['ESTADOS','DAÑO']},
+  diversityBlast:{role:'ATACANTE',icon:'✒',row:'back',tags:['DIVERSIDAD','DAÑO']}
+};
 
 let run=null;
 let career=loadCareer();
@@ -79,6 +113,32 @@ function adjacentIndexes(index){
   return out;
 }
 function adjacencyCount(index,team){return adjacentIndexes(index).filter(i=>team[i]).length;}
+function abilityMeta(c){return ABILITY_META[c?.ability?.kind]||{role:'VERSÁTIL',icon:'✦',row:'back',tags:['HABILIDAD']};}
+function levelStars(level){const l=clamp(Number(level)||1,1,3);return '★'.repeat(l)+'☆'.repeat(3-l);}
+function fusionInfo(creatureId,level,includeIncoming){
+  const l=clamp(Number(level)||1,1,3);
+  if(l>=3)return{current:1,needed:1,text:'NIVEL MÁXIMO',max:true};
+  const needed=l===1?3:2;
+  const current=allUnits().filter(u=>u.creatureId===creatureId&&u.level===l).length+(includeIncoming?1:0);
+  return{current:Math.min(current,needed),needed,text:Math.min(current,needed)+'/'+needed,max:false};
+}
+function strategicFit(c){
+  if(!run||!c)return[];
+  const notes=[];
+  const active=run.team.filter(Boolean);
+  const counts=teamTypeCounts(active);
+  c.types.forEach(t=>{
+    const before=counts[t]||0,after=before+1;
+    const threshold=after>=6?6:after>=4?4:after>=2?2:0;
+    if(threshold&&before<threshold)notes.push('ACTIVA '+D.TYPES[t].name.toUpperCase()+' '+threshold);
+    else if(before>0)notes.push('REFUERZA '+D.TYPES[t].name.toUpperCase());
+  });
+  const kinds=active.map(u=>creatureOf(u)?.ability.kind);
+  if(c.ability.kind==='statusPunish'&&kinds.some(k=>['damageBurn','doubleShock','poison','shock','randomStatus'].includes(k)))notes.push('COMBO CON ESTADOS');
+  if(['damageBurn','doubleShock','poison','shock','randomStatus'].includes(c.ability.kind)&&kinds.includes('statusPunish'))notes.push('PREPARA REMATADOR');
+  if(c.ability.kind==='doubleIfShield'&&kinds.some(k=>['teamShieldHaste','healShield','teamGuard','adjacentShield','trinity'].includes(k)))notes.push('COMBO CON ESCUDOS');
+  return notes.slice(0,2);
+}
 
 function loadCareer(){
   const base={
