@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#09131c">
+  <title>Tierras de tinta · LenguArcade</title>
+  <link rel="stylesheet" href="./styles.css?v=20260919-v21">
+</head>
+<body>
+  <main id="app" class="app-shell">
+    <section id="titleScreen" class="screen title-screen">
+      <div class="title-vignette"></div>
+      <div class="title-emblem" aria-hidden="true"><span></span><i></i><b></b></div>
+      <div class="title-copy">
+        <span class="eyebrow">UNA AVENTURA DE LENGUA · FRONTERAS DEL ABISMO</span>
+        <h1>TIERRAS <small>DE</small> TINTA</h1>
+        <p>Cada palabra es un arma. Cada regla, un poder.</p>
+        <div class="title-actions">
+          <button id="continueBtn" class="primary-btn hidden" type="button">CONTINUAR AVENTURA</button>
+          <button id="newGameBtn" class="primary-btn" type="button">COMENZAR AVENTURA</button>
+        </div>
+        <div id="titleSaveSummary" class="save-summary hidden"></div>
+      </div>
+      <footer class="title-footer">
+        <span>WASD · moverse</span><span>Clic · atacar</span><span>Espacio · esquivar</span><span>Q · poder</span>
+      </footer>
+    </section>
+
+    <section id="campScreen" class="screen camp-screen hidden">
+      <header class="camp-topbar">
+        <div class="brand-mini">
+          <span class="brand-rune">T</span>
+          <div><span class="eyebrow">TIERRAS DE TINTA</span><strong>Campamento de los Guardianes</strong></div>
+        </div>
+        <div class="hud-currencies">
+          <article><span>Oro</span><strong id="goldValue">0</strong></article>
+          <article><span>Tinta esencial</span><strong id="inkValue">0</strong></article>
+          <article><span>Sellos</span><strong id="sealValue">0</strong></article>
+          <article class="level-chip"><span>Nivel</span><strong id="levelValue">1</strong></article>
+        </div>
+        <button id="campMenuBtn" class="icon-btn" type="button" aria-label="Opciones">☰</button>
+      </header>
+
+      <div class="camp-layout">
+        <section class="guardian-room game-panel">
+          <div class="panel-heading">
+            <div><span class="eyebrow">CENTRO DE OPERACIONES</span><h2>Sala del Guardián</h2></div>
+            <button id="changeHeroBtn" class="small-btn" type="button">Cambiar héroe</button>
+          </div>
+
+          <div class="guardian-hero">
+            <div id="heroPortrait" class="hero-portrait"></div>
+            <div class="hero-info">
+              <span id="heroClass" class="hero-class">Guardián</span>
+              <h3 id="heroName">Aldren</h3>
+              <p id="heroTrait">Resiste el frente y convierte el bloqueo en contraataque.</p>
+              <div class="hero-bars">
+                <label><span>Vida</span><i><b id="heroHpBar"></b></i><em id="heroHpText">120</em></label>
+                <label><span>Experiencia</span><i><b id="heroXpBar"></b></i><em id="heroXpText">0 / 100</em></label>
+              </div>
+            </div>
+            <div class="loadout-summary">
+              <span class="eyebrow">EQUIPO</span>
+              <strong id="equippedWeaponName">Espada de grafito</strong>
+              <small id="equippedWeaponDesc">Equilibrada · corte frontal</small>
+              <button id="changeWeaponBtn" class="ghost-btn" type="button">Arsenal</button>
+            </div>
+          </div>
+
+          <div class="facility-grid">
+            <button class="facility-card" data-facility="forge" type="button">
+              <span class="facility-icon forge-icon"></span>
+              <div><strong>Forja</strong><small>Mejora armas y desbloquea efectos.</small></div>
+            </button>
+            <button class="facility-card" data-facility="archive" type="button">
+              <span class="facility-icon archive-icon"></span>
+              <div><strong>Archivo</strong><small>Dominio, errores y reglas aprendidas.</small></div>
+            </button>
+            <button class="facility-card" data-facility="storage" type="button">
+              <span class="facility-icon storage-icon"></span>
+              <div><strong>Almacén</strong><small>Materiales y botín asegurado.</small></div>
+            </button>
+            <button class="facility-card" data-facility="portal" type="button">
+              <span class="facility-icon portal-icon"></span>
+              <div><strong>Portal</strong><small>Prepara y comienza la expedición.</small></div>
+            </button>
+          </div>
+
+          <div class="camp-orders">
+            <div><span class="eyebrow">ENCARGO ACTIVO</span><strong id="orderTitle">La tinta no miente</strong></div>
+            <p id="orderText">Resuelve 3 desafíos sin usar pista.</p>
+            <span id="orderProgress" class="order-progress">0 / 3</span>
+          </div>
+        </section>
+
+        <aside class="cartographer game-panel">
+          <div class="panel-heading">
+            <div><span class="eyebrow">EXPEDICIONES</span><h2>Mesa del Cartógrafo</h2></div>
+            <span id="regionCountBadge" class="status-badge">7 regiones</span>
+          </div>
+
+          <div id="regionPreview" class="region-preview">
+            <div class="region-art"><canvas id="regionMiniCanvas" width="420" height="180"></canvas></div>
+            <div class="region-copy">
+              <span id="regionArea" class="region-area">ORTOGRAFÍA · VOCABULARIO</span>
+              <h3 id="regionName">Bosque de los Ecos</h3>
+              <p id="regionDescription">Senderos de tinta, raíces antiguas y criaturas que se alimentan de errores.</p>
+              <div class="boss-line"><span>JEFE</span><strong id="regionBoss">Guardián de Corteza</strong></div>
+            </div>
+          </div>
+
+          <div id="regionTabs" class="region-tabs" aria-label="Regiones"></div>
+
+          <div class="expedition-config">
+            <div class="config-block">
+              <span class="eyebrow">DIFICULTAD</span>
+              <div id="difficultyTabs" class="difficulty-tabs"></div>
+            </div>
+            <div class="config-block compact">
+              <span class="eyebrow">RECOMPENSA</span>
+              <strong id="rewardMultiplier">×1.00</strong>
+            </div>
+          </div>
+
+          <div class="mission-readout">
+            <div><span>Dominio regional</span><strong id="regionMastery">0 %</strong></div>
+            <div class="mastery-track"><i id="regionMasteryBar"></i></div>
+            <small id="regionObjective">Derrota 20 criaturas y supera al Guardián de Corteza.</small>
+          </div>
+
+          <button id="startExpeditionBtn" class="expedition-btn" type="button">
+            <span>ABRIR PORTAL</span><strong>COMENZAR EXPEDICIÓN</strong>
+          </button>
+        </aside>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen hidden">
+      <canvas id="gameCanvas"></canvas>
+      <div class="game-vignette" aria-hidden="true"></div>
+
+      <div class="game-hud hud-left">
+        <div class="player-chip">
+          <div id="hudHeroPortrait" class="mini-portrait"></div>
+          <div>
+            <strong id="hudHeroName">Aldren</strong>
+            <div class="hp-track"><i id="hudHpBar"></i></div>
+            <small><span id="hudHpText">120</span> PV</small>
+          </div>
+        </div>
+        <div class="carried-resources">
+          <span>Madera <b id="carryWood">0</b></span>
+          <span>Mineral <b id="carryOre">0</b></span>
+          <span>Fragmentos <b id="carryFragments">0</b></span>
+        </div>
+      </div>
+
+      <div class="game-hud hud-center">
+        <span id="hudRegionName" class="eyebrow">BOSQUE DE LOS ECOS</span>
+        <strong id="objectiveLabel">Elimina criaturas: 0 / 20</strong>
+        <div id="bossHud" class="boss-hud hidden">
+          <div><span>JEFE</span><strong id="bossHudName">Guardián de Corteza</strong></div>
+          <div class="boss-track"><i id="bossHpBar"></i></div>
+        </div>
+      </div>
+
+      <div class="game-hud hud-right">
+        <div class="mini-map"><canvas id="miniMapCanvas" width="150" height="100"></canvas></div>
+        <button id="returnCampBtn" class="return-btn" type="button">↩ Regresar al campamento</button>
+      </div>
+
+      <div class="ability-bar">
+        <article><span class="key">Q</span><div><strong id="abilityName">Onda de tinta</strong><small id="abilityCooldown">Lista</small></div></article>
+        <article><span class="key">ESP</span><div><strong>Esquiva</strong><small id="dodgeCooldown">Lista</small></div></article>
+        <article><span class="key">R</span><div><strong id="hudWeaponName">Espada de grafito</strong><small>Cambiar equipo</small></div></article>
+      </div>
+
+      <div id="waveNotice" class="wave-notice hidden"></div>
+
+      <div class="touch-controls" aria-hidden="true">
+        <div id="touchStick" class="touch-stick"><i></i></div>
+        <button id="touchAttack" class="touch-action attack" type="button">ATAQUE</button>
+        <button id="touchAbility" class="touch-action ability" type="button">Q</button>
+        <button id="touchDodge" class="touch-action dodge" type="button">↯</button>
+      </div>
+    </section>
+
+    <div id="modalBackdrop" class="modal-backdrop hidden">
+      <section id="genericModal" class="modal generic-modal hidden" role="dialog" aria-modal="true">
+        <button id="closeGenericModal" class="modal-close" type="button" aria-label="Cerrar">×</button>
+        <div id="genericModalBody"></div>
+      </section>
+
+      <section id="challengeModal" class="modal challenge-modal hidden" role="dialog" aria-modal="true">
+        <div class="challenge-header">
+          <div><span id="challengeArea" class="eyebrow">ORTOGRAFÍA</span><h2 id="challengeTitle">Descifra el sello</h2></div>
+          <span id="challengeReward" class="challenge-reward">BOTÍN COMPLETO</span>
+        </div>
+        <p id="challengePrompt" class="challenge-prompt"></p>
+        <div id="challengeOptions" class="challenge-options"></div>
+        <div id="challengeFeedback" class="challenge-feedback hidden"></div>
+        <div class="challenge-actions">
+          <button id="challengeHintBtn" class="ghost-btn" type="button">Usar pista</button>
+          <button id="challengeContinueBtn" class="primary-btn hidden" type="button">Volver a la acción</button>
+        </div>
+      </section>
+
+      <section id="pauseModal" class="modal pause-modal hidden" role="dialog" aria-modal="true">
+        <span class="eyebrow">PARTIDA EN PAUSA</span><h2>Crónica del guardián</h2>
+        <div class="pause-grid">
+          <button id="resumeGameBtn" class="primary-btn" type="button">Seguir jugando</button>
+          <button id="pauseSaveBtn" class="secondary-btn" type="button">Guardar partida</button>
+          <button id="pauseCampBtn" class="secondary-btn" type="button">Regresar al campamento</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="toast" class="toast hidden" role="status"></div>
+  </main>
+
+  <script src="./content.js?v=20260919-v21"></script>
+  <script src="./game.js?v=20260919-v21"></script>
+</body>
+</html>
