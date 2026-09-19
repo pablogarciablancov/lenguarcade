@@ -116,8 +116,39 @@ function openReward(){
   ui.reward.classList.toggle('boss-loot',!!state().specialRound);ui.rewardRound.textContent='Ronda '+state().round+' · '+fmt(state().roundScore)+' pts';ui.rerollBtn.disabled=state().rerollsLeft<=0;showModal(ui.reward);
 }
 function rewardType(r){return r.type==='modifier'?'MODIFICADOR':r.type==='upgrade'?'MEJORA':r.type==='bagTile'?'OBSEQUIO':r.type==='tile'?'FICHA':'RECURSO';}
+function rewardArt(r){
+  const byEffect={
+    extraPlay:'▶',extraShuffle:'↻',reroll:'⟳',lengthMult:'⌁',letterMult:'✦',roundSeed:'◆',instantShuffle:'↻',instantPlay:'▶',nextRoundSeed:'◇',careerXp:'★',bossPlay:'♜',rareLuck:'◉',
+    gold:'⬡',diamond:'◆',emerald:'✦',dot:'●',wild:'★',potion:'⚗',glass:'◈',mirror:'◀',bang:'!',plus:'+',
+    holdRefresh:'⛨',swapVowel:'A',swapConsonant:'R',makeGold:'⬡',makeEmerald:'✦',makeDot:'●',duplicate:'Ⅱ',destroyPlay:'✖',makeDiamond:'◆',addScore:'+5',randomScore:'?',makeWild:'★',randomSpecial:'✹'
+  };
+  if(byEffect[r.effect])return byEffect[r.effect];
+  if(r.type==='modifier')return '✦';
+  if(r.type==='upgrade')return '⬢';
+  if(r.type==='bagTile')return '▣';
+  if(r.type==='gift')return '◆';
+  return '◈';
+}
+function rewardAccent(r){
+  return r.rarity==='legendary'?'legendary':r.rarity==='epic'?'epic':r.rarity==='rare'?'rare':r.rarity==='uncommon'?'uncommon':'common';
+}
+
 function renderRewards(){
-  ui.rewardChoices.innerHTML=rewardOptions.map(r=>'<button class="reward-card rarity-'+r.rarity+'" data-id="'+r.id+'" type="button"><span class="reward-type">'+rewardType(r)+' · '+r.rarity+'</span><h3>'+r.name+'</h3><p>'+r.desc+'</p><div class="reward-footer"><span>'+(r.type==='upgrade'?r.uses+' usos':r.type==='modifier'?state().modifiers.length+'/6 modificadores':r.type==='bagTile'?'Va a la reserva especial':'Mejora de partida')+'</span><strong>Elegir →</strong></div></button>').join('');
+  ui.rewardChoices.innerHTML=rewardOptions.map(r=>{
+    const type=rewardType(r),accent=rewardAccent(r),art=rewardArt(r);
+    const meta=r.type==='upgrade'?r.uses+' USOS':r.type==='modifier'?state().modifiers.length+'/6 ACTIVOS':r.type==='bagTile'?'A LA RESERVA':'EFECTO DE RUN';
+    return '<button class="reward-card rarity-'+r.rarity+' card-'+accent+'" data-id="'+r.id+'" type="button">'+
+      '<span class="card-corner top-left"></span><span class="card-corner top-right"></span>'+
+      '<div class="reward-art"><span class="reward-art-rune">'+art+'</span><i></i></div>'+
+      '<div class="reward-card-body">'+
+        '<div class="reward-card-topline"><span class="reward-type">'+type+'</span><span class="rarity-gem">'+r.rarity.toUpperCase()+'</span></div>'+
+        '<h3>'+r.name+'</h3>'+
+        '<p>'+r.desc+'</p>'+
+        '<div class="reward-effect"><span>'+meta+'</span><strong>Elegir</strong></div>'+
+      '</div>'+
+      '<span class="card-corner bottom-left"></span><span class="card-corner bottom-right"></span>'+
+    '</button>';
+  }).join('');
   ui.rewardChoices.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>choose(rewardOptions.find(r=>r.id===b.dataset.id))));
 }
 function afterReward(){
