@@ -9,7 +9,7 @@ window.WordPlayContent = (() => {
     ['siete','Siete magnífico','uncommon','Palabras de 7 letras','len7','flat',42],
     ['ocho','Octava mayor','rare','Palabras de 8 letras','len8','flat',58],
     ['larga','Largo recorrido','common','7 letras o más','min7','mult',1.3],
-    ['mini','Precisión','common','Exactamente 3 letras','len3','flat',14],
+    ['mini','Precisión','common','Exactamente 4 letras','len4','flat',16],
     ['tilde','Acento agudo','uncommon','Contiene tilde o diéresis','accent','mult',1.55],
     ['ene','La letra española','rare','Contiene Ñ','ntilde','flat',45],
     ['sin_a','Sin A','uncommon','No contiene A','noA','mult',1.45],
@@ -52,7 +52,7 @@ window.WordPlayContent = (() => {
     ['rare_combo','Colección exótica','legendary','Dos letras raras o más','twoRare','mult',2.1],
     ['alquimista','Alquimista','rare','Cada ficha especial suma +16','specialTile','specialFlat',16],
     ['joyero','Joyero','epic','Dos fichas especiales o más','twoSpecialTiles','mult',1.65],
-    ['cazajefes','Cazajefes','rare','Durante una ronda jefe','bossRound','mult',1.35],
+    ['cazajefes','Especialista','rare','Durante una ronda especial','specialRound','mult',1.35],
     ['ortografo','Ortógrafo','epic','Tilde y letra rara en la misma palabra','accentAndRare','mult',1.75],
     ['cuatro_vocales','Coro vocálico','rare','Cuatro vocales o más','fourVowels','mult',1.45],
     ['sello_real','Sello real','legendary','Usa una ficha corona','crownTile','mult',1.8],
@@ -79,7 +79,7 @@ window.WordPlayContent = (() => {
     {id:'heal_play',name:'Prórroga',rarity:'rare',desc:'Gana 1 jugada extra ahora y en esta ronda.',type:'gift',effect:'instantPlay',value:1},
     {id:'score_seed',name:'Fondo de puntos',rarity:'uncommon',desc:'+60 puntos inmediatos en la siguiente ronda.',type:'gift',effect:'nextRoundSeed',value:60},
     {id:'lexical_xp',name:'Biblioteca privada',rarity:'rare',desc:'+40 XP léxico al terminar la partida.',type:'gift',effect:'careerXp',value:40},
-    {id:'boss_play',name:'Salvoconducto',rarity:'rare',desc:'+1 jugada extra en cada ronda jefe.',type:'gift',effect:'bossPlay',value:1},
+    {id:'boss_play',name:'Salvoconducto',rarity:'rare',desc:'+1 jugada extra al empezar cada ronda especial.',type:'gift',effect:'bossPlay',value:1},
     {id:'rare_luck',name:'Ojo del coleccionista',rarity:'epic',desc:'Mejora las probabilidades de recompensas raras.',type:'gift',effect:'rareLuck',value:1},
     {id:'refresh_pack',name:'Bolsa de renovación',rarity:'common',desc:'+4 Renovaciones inmediatamente.',type:'gift',effect:'instantShuffle',value:4},
     {id:'gift_diamond',name:'Dos diamantes',rarity:'uncommon',desc:'Añade 2 Diamantes a la reserva. Cada Diamante gana +5 de valor cuando no lo usas en una palabra.',type:'bagTile',effect:'diamond',count:2},
@@ -134,6 +134,23 @@ window.WordPlayContent = (() => {
     {id:'highlighted',title:'Ficha obligatoria',desc:'Debes usar la ficha destacada o perderás 2 jugadas extra.',effect:'highlighted'},
     {id:'double_play',title:'Palabras agotadoras',desc:'Cada palabra consume 2 jugadas.',effect:'doublePlay'},
     {id:'min_six_zero',title:'Solo palabras largas',desc:'Las palabras de menos de 6 fichas obtienen 0 puntos.',effect:'minSixZero'}
+  ];
+
+  const linguisticMissions = [
+    {id:'mission_accent',name:'Acento preciso',desc:'Juega una palabra con tilde o diéresis.',condition:'accent',reward:2},
+    {id:'mission_enye',name:'Marca española',desc:'Juega una palabra que contenga Ñ.',condition:'ntilde',reward:2},
+    {id:'mission_des',name:'Prefijo en acción',desc:'Juega una palabra que empiece por des-.',condition:'prefixDes',reward:2},
+    {id:'mission_mente',name:'Sufijo adverbial',desc:'Juega una palabra terminada en -mente.',condition:'suffixMente',reward:3},
+    {id:'mission_unique7',name:'Variedad léxica',desc:'Juega una palabra de 7+ letras sin repetir ninguna.',condition:'longUnique',reward:3}
+  ];
+
+  const synergies = [
+    {id:'syn_long',name:'Motor de palabras largas',desc:'Tu build premia especialmente la longitud.',members:['cinco','seis','siete','ocho','larga','nueve','decena','perfecta'],min:3},
+    {id:'syn_accent',name:'Orfebrería ortográfica',desc:'Has combinado varias cartas de tildes y ortografía.',members:['tilde','acentuada_larga','ortografo'],min:2},
+    {id:'syn_rare',name:'Colección exótica',desc:'Tu build gira alrededor de letras raras.',members:['raras','jota','zeta','equis','cu','rare_combo','triple_rara'],min:2},
+    {id:'syn_vowels',name:'Coro vocálico',desc:'Varias cartas recompensan el juego con vocales.',members:['vocalista','vocales3','cuatro_vocales','sin_vocal_repetida','doble_vocal'],min:2},
+    {id:'syn_streak',name:'Cadena de precisión',desc:'Escalera, rachas y cambios de longitud trabajan juntas.',members:['escalera','descenso','racha3','racha5'],min:2},
+    {id:'syn_specials',name:'Alquimia de fichas',desc:'Tu build saca partido de fichas especiales.',members:['alquimista','joyero','doble_especial','sello_real'],min:2}
   ];
 
   const modes = {
@@ -213,5 +230,5 @@ window.WordPlayContent = (() => {
     ['allround','Doce estaciones','Llega a la ronda 12.','round',12]
   ].map(([id,name,desc,metric,value])=>({id,name,desc,metric,value}));
 
-  return {modifiers,gifts,upgrades,shopItems,specialRounds,modes,wordLengthSlots,specialTileTypes,challenges,achievements};
+  return {modifiers,gifts,upgrades,shopItems,specialRounds,linguisticMissions,synergies,modes,wordLengthSlots,specialTileTypes,challenges,achievements};
 })();
