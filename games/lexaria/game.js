@@ -21,6 +21,9 @@ let battle=null;
 let battleTimer=null;
 let battleSpeed=1;
 let pendingRelicRewards=0;
+let dragSource=null;
+let studentOpponents=[];
+let battleContext='adventure';
 
 const $=id=>document.getElementById(id);
 const qsa=s=>Array.from(document.querySelectorAll(s));
@@ -78,7 +81,7 @@ function adjacencyCount(index,team){return adjacentIndexes(index).filter(i=>team
 function loadCareer(){
   const base={
     version:1,xp:0,level:1,championships:0,careerWins:0,games:0,
-    discovered:{},chromatics:{},badges:{},achievements:{},history:[],
+    discovered:{},chromatics:{},badges:{},achievements:{},history:[],duelSquad:null,
     metrics:{buys:0,trainingCorrect:0,trainingAttempts:0,trainingStreak:0,maxTrainingStreak:0,maxLevel:1,chromatics:0,biggestHit:0,maxShield:0,maxDay:1,maxRank:1}
   };
   const saved=safeParse(localStorage.getItem(CAREER_KEY),null);
@@ -173,7 +176,7 @@ function chooseTrainerScreen(){
 function newRun(trainerId){
   const t=D.trainer(trainerId); if(!t)return;
   run={
-    version:1,id:uid('league'),startedAt:nowIso(),completed:false,trainerId:t.id,
+    version:1,id:uid('league'),mode:'adventure',startedAt:nowIso(),completed:false,trainerId:t.id,
     day:1,wins:0,lives:10,gold:12,rank:1,freeRerolls:t.effect==='balanced'?1:0,
     trainingLeft:t.effect==='teacher'?5:3,team:Array(TEAM_SIZE).fill(null),bench:Array(BENCH_SIZE).fill(null),
     relics:[],shop:[],locked:false,itemUse:1,discount:0,rarityBoost:0,trainingBonus:0,
@@ -208,7 +211,10 @@ function renderRun(){
   $('rankValue').textContent=run.rank;
   $('trainingValue').textContent=run.trainingLeft;
   $('relicCount').textContent=run.relics.length;
-  renderRelics();renderSynergies();renderBoards();renderMarket();renderInspect();
+  if($('marketWallet'))$('marketWallet').textContent='Tienes '+run.gold+' 🖋️';
+  if($('dayFlowTitle'))$('dayFlowTitle').textContent='JORNADA '+run.day+' · PREPARACIÓN';
+  if($('dayFlowIncome'))$('dayFlowIncome').textContent='Combate cuando estés listo. Después: nueva jornada, +'+(10+countRelicEffect('dailyGold'))+' Tinta y nuevas sesiones de entrenamiento.';
+  renderRelics();renderSynergies();renderBoards();renderFormationTotals();renderMarket();renderInspect();
   $('lockBtn').textContent=(run.locked?'🔓 LIBERAR':'🔒 FIJAR');
   $('rerollBtn').innerHTML='↻ CAMBIAR <small>'+(run.freeRerolls>0?'GRATIS':rerollCost())+'</small>';
   $('battleBtn').disabled=!run.team.some(Boolean);
@@ -228,36 +234,57 @@ function renderSynergies(){
     return '<div class="synergy '+(active?'active':'')+'"><span>'+esc(t.icon)+' '+esc(t.name)+'</span><b>'+n+(active?' · +'+step:'')+'</b></div>';
   }).join('');
 }
+function formationTotals(team){
+  const active=(team||run?.team||[]).filter(Boolean);
+  let hp=0,damage=0;
+  (team||run?.team||[]).forEach((u,i)=>{
+    if(!u)return;
+    const st=unitStats(u,i,team||run.team);
+    hp+=st.hp;damage+=st.damage;
+  });
+  return {hp:Math.round(hp),damage:Math.round(damage),count:active.length};
+}
+function renderFormationTotals(){
+  const totals=formationTotals(run.team);
+  if($('formationHp'))$('formationHp').textContent=format(totals.hp);
+  if($('formationDamage'))$('formationDamage').textContent=format(totals.damage);
+}
 function renderBoards(){
   const makeSlot=(area,i,u)=>{
     const isSel=selected&&selected.area===area&&selected.index===i;
-    return '<div class="'+(area==='team'?'board-slot':'bench-slot')+' '+(u?'occupied ':'')+(isSel?'target':'')+'" data-slot="'+area+'" data-index="'+i+'">'+(u?unitCard(u,isSel):'<span class="slot-plus">+</span>')+'</div>';
+    const rowClass=area==='team'?(i<3?'front-row':'back-row'):'reserve-row';
+    return '<div class="'+(area==='team'?'board-slot':'bench-slot')+' '+rowClass+' '+(u?'occupied ':'')+(isSel?'target':'')+'" data-slot="'+area+'" data-index="'+i+'">'+(u?unitCard(u,isSel,area,i):'<span class="slot-plus">+</span>')+'</div>';
   };
   $('teamBoard').innerHTML=run.team.map((u,i)=>makeSlot('team',i,u)).join('');
   $('benchBoard').innerHTML=run.bench.map((u,i)=>makeSlot('bench',i,u)).join('');
 }
-function unitCard(u,isSel){
+function unitCard(u,isSel,area,index){
   const c=creatureOf(u); if(!c)return '';
-  return '<button class="unit-card '+(u.chromatic?'chromatic ':'')+(isSel?'selected':'')+'" data-unit="'+esc(u.uid)+'" data-rarity="'+esc(c.rarity)+'">'+
+  return '<button draggable="true" class="unit-card '+(u.chromatic?'chromatic ':'')+(isSel?'selected':'')+'" data-unit="'+esc(u.uid)+'" data-area="'+esc(area||'')+'" data-index="'+String(index??'')+'" data-rarity="'+esc(c.rarity)+'">'+
     '<i class="rarity-line"></i><span class="unit-level">Nv.'+u.level+'</span><span class="unit-power">+'+(u.training||0)+'</span>'+
     '<span class="unit-emoji">'+esc(c.emoji)+'</span><span class="unit-name">'+esc(c.name)+'</span>'+
   '</button>';
 }
 function slotClick(area,index){
-  const target={area,index};
   const arr=area==='team'?run.team:run.bench;
   const unit=arr[index];
-  if(!selected){
-    if(unit){selected=target;renderBoards();renderInspect();}
-    return;
-  }
-  const fromArr=selected.area==='team'?run.team:run.bench;
-  const temp=fromArr[selected.index];
-  fromArr[selected.index]=unit;
-  arr[index]=temp;
-  selected=unit?target:{area,index};
-  if(!unit)selected=target;
-  saveRun('move_unit');renderRun();
+  if(!unit){selected=null;renderBoards();renderInspect();return;}
+  if(selected&&selected.area===area&&selected.index===index)selected=null;
+  else selected={area,index};
+  renderBoards();renderInspect();
+}
+function moveUnit(from,to){
+  if(!run||!from||!to)return;
+  if(from.area===to.area&&from.index===to.index)return;
+  const fromArr=from.area==='team'?run.team:run.bench;
+  const toArr=to.area==='team'?run.team:run.bench;
+  const moving=fromArr[from.index];
+  if(!moving)return;
+  const displaced=toArr[to.index];
+  fromArr[from.index]=displaced||null;
+  toArr[to.index]=moving;
+  if(selected&&selected.area===from.area&&selected.index===from.index)selected={area:to.area,index:to.index};
+  saveRun('drag_unit');renderRun();
 }
 function clearSelection(){selected=null;renderBoards();renderInspect();}
 function renderInspect(){
@@ -270,6 +297,7 @@ function renderInspect(){
     '<div class="inspect-hero"><span class="big-emoji">'+esc(c.emoji)+'</span><h3>'+esc(c.name)+(u.chromatic?' ✦':'')+'</h3><div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div></div>'+
     '<div class="stat-grid"><div><span>Vida</span><b>'+format(stats.hp)+'</b></div><div><span>Daño</span><b>'+format(stats.damage)+'</b></div><div><span>Ritmo</span><b>'+stats.cooldown.toFixed(1)+'s</b></div><div><span>Nivel</span><b>'+u.level+'</b></div></div>'+
     '<div class="ability-box"><b>'+esc(c.ability.name)+'</b>'+esc(c.ability.text)+'</div>'+
+    (selected?.area==='team'?'<div class="training-box"><b>'+(selected.index<3?'Vanguardia · +10% vida':'Retaguardia · habilidad 8% más rápida')+'</b>'+(selected.index<3?'Ideal para criaturas resistentes o que quieras proteger menos.':'Ideal para criaturas cuyo valor depende de lanzar su habilidad.')+'</div>':'<div class="training-box"><b>Reserva · no combate</b>Este Lexario no aporta estadísticas al combate, pero cuenta para fusionar copias.</div>')+
     '<div class="training-box"><b>Entrenamiento +'+(u.training||0)+'</b>Cada mejora aumenta vida y daño. Los aciertos se conservan durante toda la liga.</div>'+
     '<div class="inspect-actions"><button class="primary" data-action="train-selected">ENTRENAR</button><button class="secondary" data-action="sell-selected">VENDER +'+sellValue(u)+'</button></div>'+
     '<button class="secondary full" style="margin-top:7px" data-action="clear-selection">CERRAR FICHA</button>';
@@ -436,6 +464,10 @@ function unitStats(u,index,teamUnits){
   const t=trainer();
   if(t?.effect==='ortho'&&c.types.includes('ortografia')){hp*=1.18;damage*=1.18;}
   if(t?.effect==='verbs'&&c.types.includes('verbos'))cooldown*=.85;
+  if(typeof index==='number'&&index>=0&&index<6){
+    if(index<3)hp*=1.10;
+    else cooldown*=.92;
+  }
   if(t?.effect==='adjacency'&&typeof index==='number'&&index>=0){
     const neighbors=adjacencyCount(index,team);damage*=1+neighbors*.07;
   }
