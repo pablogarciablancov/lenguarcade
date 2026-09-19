@@ -482,10 +482,7 @@ function useHint(){
 
 function finishChallenge(){
   var cc=challengeContext;if(!cc||!cc.done)return;
-  var result={correct:cc.item.a===Array.prototype.find.call($("challengeOptions").children,function(b){return b.classList.contains("correct")&&!b.disabled;})?.textContent||cc.attempts<=2,clean:cc.attempts===1&&!cc.usedHint,rewardFactor:cc.attempts===1?(cc.usedHint?.75:1):(cc.done?.5:0)};
-  /* correct is derived explicitly below to avoid depending on button state after a failed second attempt */
-  var correctButton=Array.prototype.some.call($("challengeOptions").children,function(b){return b.classList.contains("correct")&&!b.disabled;});
-  result.correct=correctButton;
+  var correctButton=Array.prototype.some.call($("challengeOptions").children,function(b){return b.classList.contains("correct")&&!b.disabled;});\n  var result={\n    correct:correctButton,\n    clean:cc.attempts===1&&!cc.usedHint,\n    rewardFactor:correctButton?(cc.attempts===1?(cc.usedHint?0.75:1):0.5):0\n  };
   els.challengeModal.classList.add("hidden");els.modalBackdrop.classList.add("hidden");
   var cb=cc.onResolve;challengeContext=null;
   if(game&&currentScreen==="game")game.paused=false;
