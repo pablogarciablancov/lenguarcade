@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const C=window.WordPlayContent,LX=window.WordPlayLexicon||{additions:[],strict:{},blocked:[]};
+const C=window.WordPlayContent,LX=window.WordPlayLexicon||{additions:[],strict:{},blocked:[],rejectPatterns:[]};
 const DICTIONARY_URLS=['./dictionary-es-50k.txt','https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/es/es_50k.txt'];
 const SAVE_KEY='lenguarcade.wordplay.run.v3',CAREER_KEY='lenguarcade.wordplay.career.v3',SETTINGS_KEY='lenguarcade.wordplay.settings.v1';
 const LETTER_POOL=[['A',13],['E',13],['O',10],['S',8],['R',8],['N',7],['I',7],['L',6],['D',5],['T',5],['U',5],['C',4],['M',3],['P',3],['B',2],['G',2],['V',2],['H',2],['F',1.5],['Y',1.5],['Q',1],['J',1],['Ñ',.8],['X',.5],['Z',.5],['K',.12],['W',.12]];
@@ -74,7 +74,7 @@ async function loadDictionary(onStatus){
   }
 }
 function rebuild(){accentMap=new Map();for(const w of dictionary){const k=strip(w);if(!accentMap.has(k))accentMap.set(k,[]);accentMap.get(k).push(w);}}
-function validate(raw){const w=normalize(raw);if(w.length<3)return{ok:false,message:'Necesitas al menos 3 letras.'};if(BLOCKED.has(w))return{ok:false,message:'Esa palabra no está disponible en el modo escolar.'};const strict=STRICT.get(w);if(strict)return{ok:false,accent:true,message:`Casi: prueba con «${strict}».`};if(dictionary.has(w))return{ok:true,word:w};const alt=(accentMap.get(strip(w))||[]).find(x=>/[áéíóúü]/.test(x));return alt?{ok:false,accent:true,message:`Casi: prueba con «${alt}».`}:{ok:false,message:`No encuentro «${w.toUpperCase()}» en el diccionario.`};}
+function validate(raw){const w=normalize(raw);if(w.length<3)return{ok:false,message:'Necesitas al menos 3 letras.'};if(BLOCKED.has(w)||(LX.rejectPatterns||[]).some(re=>re&&typeof re.test==='function'&&re.test(w)))return{ok:false,message:'Esa forma no está disponible en el modo escolar.'};const strict=STRICT.get(w);if(strict)return{ok:false,accent:true,message:`Casi: prueba con «${strict}».`};if(dictionary.has(w))return{ok:true,word:w};const alt=(accentMap.get(strip(w))||[]).find(x=>/[áéíóúü]/.test(x));return alt?{ok:false,accent:true,message:`Casi: prueba con «${alt}».`}:{ok:false,message:`No encuentro «${w.toUpperCase()}» en el diccionario.`};}
 function challenge(id){return C.challenges.find(x=>x.id===id)||C.challenges[0];}
 function challengeOK(id,w){const a=[...w],p=strip(w);switch(id){case'none':return true;case'min5':return a.length>=5;case'min6':return a.length>=6;case'vowel':return vowel(a[0]);case'consonant':return!vowel(a[0]);case'noA':return!p.includes('a');case'noE':return!p.includes('e');case'accent':return/[áéíóúü]/.test(w);case'ntilde':return w.includes('ñ');case'unique':return new Set(a).size===a.length;case'exact5':return a.length===5;case'exact6':return a.length===6;case'rare':return/[jñqxz]/i.test(w);case'endsS':return w.endsWith('s');case'twoVowels':return a.filter(vowel).length>=2;case'threeVowels':return a.filter(vowel).length>=3;case'longAccent':return a.length>=6&&/[áéíóúü]/.test(w);case'noCommon':return!/[aeáé]/.test(w);default:return true;}}
 function chooseChallenge(round,mode){
