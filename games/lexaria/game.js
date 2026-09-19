@@ -12,6 +12,25 @@ const CHROMATIC_RATE=200;
 const TRAINING_STEP=.05;
 const LEVEL_MULT={1:1,2:1.7,3:3,4:4.5};
 
+const BATTLEFIELDS=[
+  {id:'academy',name:'Patio de la Academia'},
+  {id:'emerald-grove',name:'Arboleda Esmeralda'},
+  {id:'sunken-library',name:'Biblioteca Hundida'},
+  {id:'storm-cliffs',name:'Acantilados de Tormenta'},
+  {id:'lunar-arena',name:'Arena Lunar'}
+];
+
+const TRAINER_ART={
+  filologa:{skin:'#e8bb91',hair:'#604127',coat:'#284f76',accent:'#e5bb54',beard:'#604127',glasses:false,badge:'A'},
+  corrector:{skin:'#d69a70',hair:'#262225',coat:'#8a3341',accent:'#f2dfc2',beard:'#262225',glasses:true,badge:'O'},
+  verbologa:{skin:'#edc19b',hair:'#b28447',coat:'#263b62',accent:'#65d8e6',beard:'#8b6535',glasses:false,badge:'V'},
+  lexicografo:{skin:'#d9aa82',hair:'#3b2a24',coat:'#405d42',accent:'#d8b45f',beard:'#3b2a24',glasses:true,badge:'L'},
+  estratega:{skin:'#b87854',hair:'#171923',coat:'#40365f',accent:'#c7a3ff',beard:'#171923',glasses:false,badge:'E'},
+  mercader:{skin:'#dfaa7b',hair:'#5a321b',coat:'#72502d',accent:'#f0c65d',beard:'#5a321b',glasses:false,badge:'M'},
+  maestra:{skin:'#edbd94',hair:'#6d4c31',coat:'#365d87',accent:'#f0eadc',beard:'#6d4c31',glasses:false,badge:'T'},
+  archivero:{skin:'#d4a884',hair:'#807265',coat:'#354c50',accent:'#8bcfc7',beard:'#66594d',glasses:true,badge:'R'}
+};
+
 const ABILITY_META={
   damageBurn:{role:'ATACANTE',icon:'🔥',row:'back',tags:['DAÑO','QUEMADURA']},
   doubleIfShield:{role:'ATACANTE',icon:'⚔',row:'back',tags:['DAÑO','COMBO ESCUDO']},
@@ -119,8 +138,43 @@ function abilityMeta(c){return ABILITY_META[c?.ability?.kind]||{role:'VERSÁTIL'
 function spriteMarkup(c,extra){
   if(!c)return '<span class="lex-sprite missing" aria-hidden="true"></span>';
   const i=Math.max(0,D.creatures.findIndex(x=>x.id===c.id)),x=i%6,y=Math.floor(i/6);
-  const ox=-(x*100),oy=-(y*100);
-  return '<span class="lex-sprite '+esc(extra||'')+'" style="--sx:'+x+';--sy:'+y+';--ox:'+ox+'%;--oy:'+oy+'%" aria-hidden="true"><img src="./assets/lexarios-fantasy.webp" alt="" draggable="false"></span>';
+  const special={
+    gerundra:{l:8,t:8,r:24,b:8},
+    lexifin:{l:16,t:8,r:10,b:8}
+  };
+  const crop=special[c.id]||{l:12,t:8,r:12,b:8};
+  const w=100-crop.l-crop.r,h=100-crop.t-crop.b;
+  return '<span class="lex-sprite '+esc(extra||'')+'" aria-hidden="true"><svg viewBox="'+crop.l+' '+crop.t+' '+w+' '+h+'" preserveAspectRatio="xMidYMid meet" focusable="false"><image href="./assets/lexarios-fantasy.webp" x="'+(-x*100)+'" y="'+(-y*100)+'" width="600" height="500" preserveAspectRatio="none"/></svg></span>';
+}
+function trainerSpriteMarkup(t,extra){
+  if(!t)return '';
+  const a=TRAINER_ART[t.id]||TRAINER_ART.filologa;
+  const beard=a.beard?'<path d="M33 55 Q48 69 63 55 L59 70 Q48 78 37 70Z" fill="'+a.beard+'" opacity=".95"/>':'';
+  const glasses=a.glasses?'<g fill="none" stroke="#293442" stroke-width="2.2"><rect x="30" y="43" width="15" height="10" rx="4"/><rect x="51" y="43" width="15" height="10" rx="4"/><path d="M45 48h6"/></g>':'';
+  const hair=t.id==='estratega'
+    ?'<path d="M25 39 Q27 18 45 18 L51 10 57 19 Q71 21 72 40 L64 34 58 27 48 31 37 26 31 39Z" fill="'+a.hair+'"/>'
+    :t.id==='verbologa'
+      ?'<path d="M25 40 Q24 19 48 18 Q70 20 71 40 L62 31 55 34 48 26 40 34 31 31Z" fill="'+a.hair+'"/>'
+      :'<path d="M25 40 Q25 19 47 18 Q69 19 71 40 L63 33 56 29 47 34 38 28 30 36Z" fill="'+a.hair+'"/>';
+  return '<svg class="trainer-sprite '+esc(extra||'')+'" viewBox="0 0 96 112" role="img" aria-label="'+esc(t.name)+'">'+
+    '<ellipse cx="48" cy="104" rx="35" ry="7" fill="#051728" opacity=".32"/>'+
+    '<path d="M18 109 Q19 76 35 70 L61 70 Q77 76 78 109Z" fill="'+a.coat+'" stroke="#16283b" stroke-width="2"/>'+
+    '<path d="M39 70h18l-2 16H41Z" fill="'+a.accent+'" opacity=".95"/>'+
+    '<circle cx="23" cy="92" r="6" fill="'+a.accent+'"/><circle cx="73" cy="92" r="6" fill="'+a.accent+'"/>'+
+    '<rect x="42" y="62" width="12" height="13" rx="4" fill="'+a.skin+'"/>'+
+    '<path d="M27 39 Q27 21 48 21 Q69 21 69 42 V54 Q65 67 48 70 Q31 67 27 54Z" fill="'+a.skin+'" stroke="#7a553c" stroke-width="1.4"/>'+
+    hair+
+    '<ellipse cx="38" cy="47" rx="3" ry="2.4" fill="#1d2b38"/><ellipse cx="58" cy="47" rx="3" ry="2.4" fill="#1d2b38"/>'+
+    '<path d="M47 49 44 57 50 57" fill="none" stroke="#8b6046" stroke-width="1.4" stroke-linecap="round"/>'+
+    '<path d="M40 61 Q48 65 56 61" fill="none" stroke="#6e4439" stroke-width="1.5" stroke-linecap="round"/>'+
+    beard+glasses+
+    '<circle cx="67" cy="82" r="10" fill="#0c2137" stroke="'+a.accent+'" stroke-width="2"/>'+
+    '<text x="67" y="86" text-anchor="middle" font-size="11" font-family="Arial,sans-serif" font-weight="900" fill="'+a.accent+'">'+a.badge+'</text>'+
+    '</svg>';
+}
+function battlefieldFor(seedBase){
+  const rng=D.seeded(String(seedBase||'lexaria')+'_battlefield');
+  return BATTLEFIELDS[Math.floor(rng()*BATTLEFIELDS.length)]||BATTLEFIELDS[0];
 }
 function levelStars(level){const l=clamp(Number(level)||1,1,3);return '★'.repeat(l)+'☆'.repeat(3-l);}
 function fusionInfo(creatureId,level,includeIncoming){
@@ -223,6 +277,17 @@ function renderTitleMeta(){
   if($('achievementCount'))$('achievementCount').textContent=ach+'/'+D.achievements.length;
   if($('historyCount'))$('historyCount').textContent=(career.history?.length||0)+' ligas';
 }
+function saveAndExit(){
+  if(run)saveRun('save_exit');
+  saveCareer();
+  clearInterval(battleTimer);
+  battle=null;battleInspectRef=null;setBattlePaused(false,true);
+  selected=null;currentQuestion=null;battleContext='adventure';duelRunContext=null;
+  closeModal();
+  showScreen('titleScreen');
+  renderTitleMeta();
+  toast(run?'Partida guardada. Puedes continuarla cuando quieras.':'Progreso guardado.','good');
+}
 function backHome(){
   setBattlePaused(false,true);battleInspectRef=null;
   selected=null;battleContext='adventure';duelRunContext=null;
@@ -235,7 +300,7 @@ function chooseTrainerScreen(){
   const host=$('trainerChoices'); if(!host)return;
   host.innerHTML=D.trainers.map(t=>
     '<article class="trainer-card">'+
-      '<div class="trainer-portrait">'+esc(t.emoji)+'</div>'+
+      '<div class="trainer-portrait">'+trainerSpriteMarkup(t,'trainer-select-sprite')+'</div>'+
       '<span class="class">'+esc(t.class)+'</span>'+
       '<h3>'+esc(t.name)+'</h3>'+
       '<p>'+esc(t.power)+'</p>'+
@@ -275,7 +340,7 @@ function showShop(){
 function renderRun(){
   if(!run)return;
   const t=trainer();
-  $('trainerChip').innerHTML='<span class="avatar">'+esc(t?.emoji||'🎓')+'</span><span>'+esc(t?.name||'Entrenador')+'</span>';
+  $('trainerChip').innerHTML=trainerSpriteMarkup(t,'trainer-avatar-mini')+'<span>'+esc(t?.name||'Entrenador')+'</span>';
   $('livesValue').textContent=run.lives;
   $('dayValue').textContent=run.day;
   $('winsValue').textContent=run.wins+'/'+WIN_TARGET;
@@ -817,7 +882,7 @@ function renderOpponents(){
   }
   host.innerHTML=list.slice(0,8).map((op,i)=>{
     const t=D.trainer(op.trainerId),tot=opponentTotals(op);
-    return '<article class="opponent-card"><span class="opponent-avatar">'+esc(t?.emoji||'🎓')+'</span><div><h3>'+esc(op.name||('Alumno '+(i+1)))+(op.practice?' · PRUEBA':'')+'</h3><p>'+esc(t?.name||'Entrenador')+'</p><div class="opponent-power"><span>❤️ '+format(tot.hp)+'</span><span>⚔️ '+format(tot.damage)+'</span></div></div><button class="primary" data-duel-opponent="'+i+'" data-duel-source="'+(real.length?'real':'mock')+'">DESAFIAR</button></article>';
+    return '<article class="opponent-card">'+trainerSpriteMarkup(t,'opponent-avatar-sprite')+'<div><h3>'+esc(op.name||('Alumno '+(i+1)))+(op.practice?' · PRUEBA':'')+'</h3><p>'+esc(t?.name||'Entrenador')+'</p><div class="opponent-power"><span>❤️ '+format(tot.hp)+'</span><span>⚔️ '+format(tot.damage)+'</span></div></div><button class="primary" data-duel-opponent="'+i+'" data-duel-source="'+(real.length?'real':'mock')+'">DESAFIAR</button></article>';
   }).join('');
 }
 function studentOpponentStats(u,index,team,snapshot){
@@ -881,14 +946,17 @@ function enemyStats(u,index,team){
 }
 function createBattleState(playerTeam,enemyTeam,enemyTrainer,opponentSnapshot){
   const seedBase=battleContext==='student'?(career.duelSquad?.publishedAt||Date.now())+'_'+(opponentSnapshot?.id||'rival'):(run.id+'_battle_'+run.day);
-  return{player:buildSide(playerTeam,'player'),enemy:buildSide(enemyTeam,'enemy',opponentSnapshot),enemyTrainer,time:0,sudden:0,ended:false,log:[],rng:D.seeded(seedBase),firstAbilityDone:{player:false,enemy:false},speed:1,opponentSnapshot};
+  return{player:buildSide(playerTeam,'player'),enemy:buildSide(enemyTeam,'enemy',opponentSnapshot),enemyTrainer,time:0,sudden:0,ended:false,log:[],rng:D.seeded(seedBase),firstAbilityDone:{player:false,enemy:false},speed:1,opponentSnapshot,battlefield:battlefieldFor(seedBase)};
 }
 function renderBattleStatic(enemyTrainer){
   const t=trainer();
   const pTotal={hp:battle.player.units.filter(Boolean).reduce((a,b)=>a+b.stats.hp,0),damage:battle.player.units.filter(Boolean).reduce((a,b)=>a+b.stats.damage,0)};
   const eTotal={hp:battle.enemy.units.filter(Boolean).reduce((a,b)=>a+b.stats.hp,0),damage:battle.enemy.units.filter(Boolean).reduce((a,b)=>a+b.stats.damage,0)};
-  $('battlePlayerTrainer').innerHTML='<span class="avatar">'+esc(t?.emoji||'🎓')+'</span><span>'+esc(t?.name||'Tú')+'<small class="battle-formation-summary">❤️ <b>'+format(pTotal.hp)+'</b> · ⚔️ <b>'+format(pTotal.damage)+'</b></small></span>';
-  $('battleEnemyTrainer').innerHTML='<span>'+esc(enemyTrainer?.name||'Rival')+'<small class="battle-formation-summary">❤️ <b>'+format(eTotal.hp)+'</b> · ⚔️ <b>'+format(eTotal.damage)+'</b></small></span><span class="avatar">'+esc(enemyTrainer?.emoji||'🎭')+'</span>';
+  const battleScreen=$('battleScreen');
+  if(battleScreen)battleScreen.dataset.battlefield=battle.battlefield?.id||'academy';
+  if($('battleFieldName'))$('battleFieldName').textContent=battle.battlefield?.name||'Patio de la Academia';
+  $('battlePlayerTrainer').innerHTML=trainerSpriteMarkup(t,'battle-trainer-sprite')+'<span>'+esc(t?.name||'Tú')+'<small class="battle-formation-summary">❤️ <b>'+format(pTotal.hp)+'</b> · ⚔️ <b>'+format(pTotal.damage)+'</b></small></span>';
+  $('battleEnemyTrainer').innerHTML='<span>'+esc(enemyTrainer?.name||'Rival')+'<small class="battle-formation-summary">❤️ <b>'+format(eTotal.hp)+'</b> · ⚔️ <b>'+format(eTotal.damage)+'</b></small></span>'+trainerSpriteMarkup(enemyTrainer,'battle-trainer-sprite');
   $('battleDayLabel').textContent=battleContext==='student'?'ARENA DE CLASE':'JORNADA '+run.day;
   $('battleVsLabel').textContent=battleContext==='student'?(battle.opponentName||'DUELO'):'ENCUENTRO '+(run.wins+1);
   $('battleLog').innerHTML='';
@@ -1310,6 +1378,9 @@ function bind(){
   $('rerollBtn')?.addEventListener('click',rerollShop);
   $('lockBtn')?.addEventListener('click',lockShop);
   $('battleBtn')?.addEventListener('click',startBattle);
+  $('saveExitBtn')?.addEventListener('click',saveAndExit);
+  $('battleSaveExitBtn')?.addEventListener('click',saveAndExit);
+  $('battleSaveExitModalBtn')?.addEventListener('click',saveAndExit);
   $('trainBtn')?.addEventListener('click',trainSelected);
   $('publishSquadBtn')?.addEventListener('click',publishCurrentSquad);
   $('refreshOpponentsBtn')?.addEventListener('click',refreshStudentOpponents);
