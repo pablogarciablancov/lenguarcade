@@ -86,3 +86,71 @@ button{touch-action:manipulation}
 .offer-stats span{background:#e6cd98;border:1px solid #c0a377;color:#172c48}
 @media(min-width:901px){.offer-portrait .market-sprite{height:clamp(70px,15vh,160px)}.game-offer .offer-portrait{justify-content:center}.offer-portrait>div{margin-top:0}.day-flow-title{gap:12px}}
 @media(max-height:720px) and (min-width:901px){.offer-portrait .market-sprite{height:clamp(47px,10vh,72px)}}
+
+
+/* ===== Final academy QA pass ===== */
+html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
+@supports(height:100dvh){html,body,.app-shell{height:100dvh}}
+.app-shell,.screen{width:100%;max-width:100%;min-width:0;min-height:0}
+.shop-screen>*{min-width:0;min-height:0}
+.market-row>*{min-width:0;min-height:0}
+
+/* Rareza visual real: la carta ya no depende de la posición que ocupa en el mercado. */
+.game-offer[data-rarity="common"]{border-color:#91a5b4}
+.game-offer[data-rarity="uncommon"]{border-color:#75c18b}
+.game-offer[data-rarity="rare"]{border-color:#66baf0}
+.game-offer[data-rarity="epic"]{border-color:#b88ce7}
+.game-offer[data-rarity="legendary"]{border-color:#f0b85e;box-shadow:inset 0 0 0 1px #fff1ae,0 0 12px #d99a3f45,0 2px 5px #0008}
+.game-offer.resource{border-color:#d9ad62}
+.game-offer.chromatic{box-shadow:inset 0 0 0 1px #fff6c7,0 0 16px #7cefff55,0 2px 6px #0008}
+
+/* La recomendación de fila es información estratégica, no decoración. */
+.offer-portrait small{display:inline-flex;align-items:center;justify-content:center;margin:1px auto 2px;padding:1px 5px;border-radius:999px;background:#0d2948;color:#dcecff;border:1px solid #527ca0;font-size:8px;font-weight:900;line-height:1.15}
+@media(min-height:761px) and (min-width:1101px){
+  .market-ability>div{display:flex;justify-content:center;gap:2px;flex-wrap:wrap;margin-top:2px}
+  .market-ability>div span{font-size:7px;padding:1px 4px;border-radius:999px;background:#172e49;color:#deebf5}
+}
+
+/* Los rivales miran hacia el centro de la arena. */
+.battle-board.enemy .battle-sprite{transform:scaleX(-1)}
+
+/* Modo Chromebook/iframe bajo: prioriza juego y controles sin crear scroll general. */
+@media(max-height:680px) and (min-width:901px){
+  .shop-screen{grid-template-rows:46px 23px minmax(175px,1.08fr) minmax(142px,.92fr) 36px;gap:4px;padding:5px 8px;overflow:hidden!important}
+  .run-topbar{padding:0 7px;gap:7px}
+  .academy-brand strong{font-size:25px}.academy-brand small{display:none}
+  .run-counters{height:36px}.run-counters>div{padding:2px 5px}
+  .run-counters span{font-size:8px}.run-counters strong{font-size:18px}.currency-counter strong{font-size:21px}
+  .day-flow{padding:2px 8px}.day-flow-title span{display:none}.day-flow-title b{font-size:9px}
+  .run-sidebar{gap:4px}.side-card{padding:5px}.side-card p{display:none}
+  .academy-trainer{min-height:58px}.academy-crest{font-size:26px}.trainer-chip{font-size:10px}
+  .synergy-list{gap:2px;margin-top:3px}.synergy{min-height:19px;padding:3px 4px;font-size:9px}
+  .relic-token{font-size:16px}
+  .market-panel{grid-template-rows:22px minmax(0,1fr);gap:3px;padding:4px}
+  .market-head h2{font-size:14px}.market-head h2 small{font-size:8px}.market-actions button{padding:3px 5px;font-size:8px}
+  .market-row{gap:3px}.game-offer{grid-template-rows:16px minmax(0,1fr) 24px;padding:3px}
+  .offer-portrait .market-sprite{height:clamp(42px,8vh,56px)}
+  .offer-portrait h4{font-size:10px!important}.offer-portrait small{font-size:6.8px;padding:1px 4px}
+  .offer-type{font-size:7px!important}.offer-stats span{font-size:8px;padding:1px 2px}
+  .market-ability{min-height:24px}.market-ability>b{font-size:8px}.market-ability p{font-size:8px!important;line-height:1.05!important;-webkit-line-clamp:2}
+  .offer-footer .price{font-size:10px}.offer-footer button{padding:3px 4px;font-size:7px}
+  .board-panel{grid-template-columns:68px minmax(0,1fr) 82px;grid-template-rows:23px minmax(0,1fr);padding:4px;gap:3px}
+  .formation-heading .micro-label{font-size:10px}.formation-heading h2{display:none}.formation-totals{gap:7px}.formation-totals span{font-size:7px}.formation-totals strong{font-size:14px}
+  .position-guide{gap:3px}.position-guide .front-rule,.position-guide .back-rule{padding:3px}.position-guide b{font-size:8px}.position-guide .front-rule span,.position-guide .back-rule span{display:none}
+  .team-board{gap:4px}.unit-card .unit-sprite{height:calc(100% - 17px);margin-bottom:10px}.unit-card .unit-name{font-size:8px}
+  .bench-wrap{grid-template-rows:23px minmax(0,1fr);padding:3px}.bench-label{font-size:9px}.bench-label small{display:none}
+  .inspect-card{padding:5px;gap:3px}.game-card-header{min-height:48px;max-height:63px}.inspect-sprite{max-width:60px}
+  .inspect-name h3{font-size:15px}.inspect-name .role-badge{font-size:7px}.level-stars{font-size:11px}
+  .type-pill{font-size:8px;padding:1px 4px}.game-stats{gap:2px}.game-stats div{font-size:8px;padding:2px 3px}
+  .ability-box.featured{padding:3px}.ability-title b{font-size:9px}.ability-title span{display:none}.ability-box.featured p{font-size:8px;line-height:1.15;margin:1px 0}.ability-box.featured small{display:none}
+  .progress-box{padding:3px 4px}.progress-box p{font-size:7px;line-height:1.15;margin:1px 0}.training-progress p{display:none}
+  .position-card{padding:3px 4px;font-size:8px}.position-card span,.position-card small{display:none}
+  .inspect-actions button,.inspect-card>.secondary{padding:4px 3px;font-size:8px}
+  .academy-footer{gap:5px;padding:1px 0}.academy-footer>span,.academy-footer>.secondary{display:none}.academy-footer .battle-btn{min-width:280px;font-size:20px;padding:2px 18px}
+  .battle-screen{grid-template-rows:48px minmax(0,1fr)}
+  .battle-arena{grid-template-rows:22px 32px minmax(0,1fr) 32px 31px 29px;gap:4px;padding:5px 2vw}
+  .battle-explainer{padding:3px 7px}.battle-explainer span{font-size:8px}.hp-track{height:15px}
+  .battle-board{gap:4px;padding:5px}.battle-unit .battle-sprite{height:calc(100% - 17px);margin-top:13px}
+  .battle-unit .unit-name{font-size:8px}.battle-unit-top{font-size:7px}.battle-ability-name{font-size:6px}
+  .battle-controls{padding:2px 6px}.battle-controls button{padding:4px;font-size:9px}.battle-status{font-size:9px}.battle-log{font-size:8px;padding:3px 6px}
+}
