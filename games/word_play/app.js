@@ -117,17 +117,36 @@ function openReward(){
 }
 function rewardType(r){return r.type==='modifier'?'MODIFICADOR':r.type==='upgrade'?'MEJORA':r.type==='bagTile'?'OBSEQUIO':r.type==='tile'?'FICHA':'RECURSO';}
 function rewardArt(r){
-  const byEffect={
-    extraPlay:'▶',extraShuffle:'↻',reroll:'⟳',lengthMult:'⌁',letterMult:'✦',roundSeed:'◆',instantShuffle:'↻',instantPlay:'▶',nextRoundSeed:'◇',careerXp:'★',bossPlay:'♜',rareLuck:'◉',
-    gold:'⬡',diamond:'◆',emerald:'✦',dot:'●',wild:'★',potion:'⚗',glass:'◈',mirror:'◀',bang:'!',plus:'+',
-    holdRefresh:'⛨',swapVowel:'A',swapConsonant:'R',makeGold:'⬡',makeEmerald:'✦',makeDot:'●',duplicate:'Ⅱ',destroyPlay:'✖',makeDiamond:'◆',addScore:'+5',randomScore:'?',makeWild:'★',randomSpecial:'✹'
+  const effectMap={
+    extraPlay:'art-play',instantPlay:'art-play',bossPlay:'art-play',
+    extraShuffle:'art-refresh',instantShuffle:'art-refresh',reroll:'art-refresh',
+    lengthMult:'art-long',letterMult:'art-score',roundSeed:'art-score',nextRoundSeed:'art-score',
+    careerXp:'art-xp',rareLuck:'art-rare',
+    gold:'art-gold',makeGold:'art-gold',
+    diamond:'art-diamond',makeDiamond:'art-diamond',
+    emerald:'art-emerald',makeEmerald:'art-emerald',
+    dot:'art-dot',makeDot:'art-dot',
+    wild:'art-wild',makeWild:'art-wild',
+    potion:'art-potion',glass:'art-glass',mirror:'art-mirror',bang:'art-bang',plus:'art-plus',
+    holdRefresh:'art-refresh',swapVowel:'art-vowels',swapConsonant:'art-consonants',
+    duplicate:'art-duplicate',destroyPlay:'art-destroy',
+    addScore:'art-score',randomScore:'art-score',randomSpecial:'art-transmute'
   };
-  if(byEffect[r.effect])return byEffect[r.effect];
-  if(r.type==='modifier')return '✦';
-  if(r.type==='upgrade')return '⬢';
-  if(r.type==='bagTile')return '▣';
-  if(r.type==='gift')return '◆';
-  return '◈';
+  if(effectMap[r.effect])return effectMap[r.effect];
+  const c=String(r.condition||'');
+  if(/accent/i.test(c))return'art-accent';
+  if(/ntilde/i.test(c))return'art-enye';
+  if(/rare|containsJ|containsZ|containsX|containsQ/i.test(c))return'art-rare';
+  if(/vowel|twoA|twoE/i.test(c))return'art-vowels';
+  if(/consonant/i.test(c))return'art-consonants';
+  if(/starts|ends|Edges/i.test(c))return'art-startend';
+  if(/len|min[0-9]|long|perfectWord|sixUnique/i.test(c))return'art-long';
+  if(/streak|palindrome|longerThanPrev|shorterThanPrev/i.test(c))return'art-combo';
+  if(/special|crown/i.test(c))return'art-transmute';
+  return'art-generic';
+}
+function rewardArtSvg(r){
+  return '<svg class="reward-art-image" viewBox="0 0 160 110" aria-hidden="true" focusable="false"><use href="./assets/reward-art.svg#'+rewardArt(r)+'"></use></svg>';
 }
 function rewardAccent(r){
   return r.rarity==='legendary'?'legendary':r.rarity==='epic'?'epic':r.rarity==='rare'?'rare':r.rarity==='uncommon'?'uncommon':'common';
@@ -135,11 +154,11 @@ function rewardAccent(r){
 
 function renderRewards(){
   ui.rewardChoices.innerHTML=rewardOptions.map(r=>{
-    const type=rewardType(r),accent=rewardAccent(r),art=rewardArt(r);
+    const type=rewardType(r),accent=rewardAccent(r),art=rewardArtSvg(r);
     const meta=r.type==='upgrade'?r.uses+' USOS':r.type==='modifier'?state().modifiers.length+'/6 ACTIVOS':r.type==='bagTile'?'A LA RESERVA':'EFECTO DE RUN';
     return '<button class="reward-card rarity-'+r.rarity+' card-'+accent+'" data-id="'+r.id+'" type="button">'+
       '<span class="card-corner top-left"></span><span class="card-corner top-right"></span>'+
-      '<div class="reward-art"><span class="reward-art-rune">'+art+'</span><i></i></div>'+
+      '<div class="reward-art">'+art+'<i></i></div>'+
       '<div class="reward-card-body">'+
         '<div class="reward-card-topline"><span class="reward-type">'+type+'</span><span class="rarity-gem">'+r.rarity.toUpperCase()+'</span></div>'+
         '<h3>'+r.name+'</h3>'+
