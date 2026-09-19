@@ -381,45 +381,127 @@ function score(word,tiles,preview=false){
   if(sr==='minSixZero'&&tiles.length<6){total=0;effects.push('Ronda especial · menos de 6 fichas = 0');}
   return{subtotal:wordScore+bonusPoints,multiplier:finalMultiplier,total,wordScore,bonusPoints,wordMultiplier,finalMultiplier,effects,emeraldHits,lengthBonus:lengthBonus(tiles.length)};
 }
-function applyGift(r){switch(r.effect){case'extraPlay':state.bonuses.extraPlays+=r.value;break;case'extraShuffle':state.bonuses.extraShuffles+=r.value;break;case'reroll':state.rerollsLeft+=r.value;break;case'lengthMult':state.bonuses.lengthMult+=r.value;break;case'letterMult':state.bonuses.letterMult+=r.value;break;case'roundSeed':state.bonuses.roundSeed+=r.value;break;case'instantShuffle':state.shufflesLeft+=r.value;break;case'instantPlay':state.playsLeft+=r.value;break;case'nextRoundSeed':state.bonuses.nextRoundSeed+=r.value;break;case'careerXp':state.bonuses.careerXp+=r.value;break;case'bossPlay':state.bonuses.bossPlay+=r.value;break;case'rareLuck':state.bonuses.rareLuck+=r.value;break;}}
+function reserveTemplateFromTile(t){
+  return{kind:t.kind||'normal',letter:t.letter||null,bonus:t.bonus||0,charge:t.charge||0};
+}
+function addReserveTile(kind,count=1,letter=null,bonus=0){
+  for(let i=0;i<count;i++)state.reserveTiles.push({kind,letter,bonus,charge:0});
+}
+function applyGift(r){
+  switch(r.effect){
+    case'extraPlay':state.bonuses.extraPlays+=r.value;break;
+    case'extraShuffle':state.bonuses.extraShuffles+=r.value;break;
+    case'reroll':state.rerollsLeft+=r.value;break;
+    case'lengthMult':state.bonuses.lengthMult+=r.value;break;
+    case'letterMult':state.bonuses.letterMult+=r.value;break;
+    case'roundSeed':state.bonuses.roundSeed+=r.value;break;
+    case'instantShuffle':state.shufflesLeft+=r.value;break;
+    case'instantPlay':state.playsLeft+=r.value;break;
+    case'nextRoundSeed':state.bonuses.nextRoundSeed+=r.value;break;
+    case'careerXp':state.bonuses.careerXp+=r.value;break;
+    case'bossPlay':state.bonuses.bossPlay+=r.value;break;
+    case'rareLuck':state.bonuses.rareLuck+=r.value;break;
+  }
+}
+function rewardWeight(rarity,luck=0){
+  const normal={common:45,uncommon:35,rare:15,epic:4,legendary:1};
+  const lucky={common:25,uncommon:25,rare:35,epic:12,legendary:3};
+  const a=normal[rarity]||1,b=lucky[rarity]||1,t=Math.min(1,luck*.5);
+  return a+(b-a)*t;
+}
 function rewards(){
   const luck=Math.max(0,Number(state.bonuses.rareLuck||0));
-  const weight={
-    common:Math.max(3,8-luck*2),
-    uncommon:5+luck,
-    rare:3+luck*1.4,
-    epic:1.5+luck*.9,
-    legendary:.5+luck*.35
-  };
-  const all=[...C.modifiers,...C.gifts].filter(x=>!(x.type==='modifier'&&state.modifiers.includes(x.id)));
+  const canMod=state.modifiers.length<6;
+  const canUpgrade=state.upgrades.length<3;
+  const all=[
+    ...(canMod?C.modifiers.filter(x=>!state.modifiers.includes(x.id)):[]),
+    ...(canUpgrade?C.upgrades:[]),
+    ...C.gifts
+  ];
   const bag=[];
-  for(const x of all)for(let i=0;i<Math.max(1,Math.round(weight[x.rarity]||1));i++)bag.push(x);
-  const out=[];
-  const ch=challenge(state.challenge);
-  if(ch.kind==='boss'){
-    const rank={common:0,uncommon:1,rare:2,epic:3,legendary:4};
-    const min=rank[ch.rewardTier||'rare']??2;
-    const premium=all.filter(x=>(rank[x.rarity]??0)>=min);
-    if(premium.length)out.push(pick(premium,state.mode==='daily'?runRandom:Math.random));
+  for(const x of all){
+    const weight=Math.max(1,Math.round(rewardWeight(x.rarity,luck)));
+    for(let i=0;i<weight;i++)bag.push(x);
   }
+  const out=[];
   while(out.length<3&&bag.length){
     const x=pick(bag,state.mode==='daily'?runRandom:Math.random);
-    if(!out.some(y=>y.id===x.id))out.push(x);
+    if(x&&!out.some(y=>y.id===x.id))out.push(x);
   }
   return out;
 }
-function chooseReward(r){state.discoveredCards.push(r.id);career.cards[r.id]=(career.cards[r.id]||0)+1;if(r.type==='modifier')state.modifiers.push(r.id);else if(r.type==='tile'){const pool=state.board.filter(x=>x.kind==='normal').length?state.board.filter(x=>x.kind==='normal'):state.board;const t=pick(pool,state.mode==='daily'?runRandom:Math.random);t.kind=r.effect;}else applyGift(r);saveCareer();saveRun();}
+function chooseReward(r){
+  if(!r)return false;
+  state.discoveredCards.push(r.id);
+  career.cards[r.id]=(career.cards[r.id]||0)+1;
+  if(r.type==='modifier'){
+    if(state.modifiers.length>=6)return false;
+    state.modifiers.push(r.id);
+  }else if(r.type==='upgrade'){
+    if(state.upgrades.length>=3)return false;
+    state.upgrades.push({id:r.id,uses:r.uses});
+  }else if(r.type==='bagTile'){
+    addReserveTile(r.effect,r.count||1,null,0);
+  }else if(r.type==='tile'){
+    const pool=state.board.filter(x=>x.kind==='normal').length?state.board.filter(x=>x.kind==='normal'):state.board;
+    const t=pick(pool,state.mode==='daily'?runRandom:Math.random);
+    if(t)t.kind=r.effect;
+  }else applyGift(r);
+  saveCareer();saveRun();return true;
+}
+function sellModifier(id){
+  const i=state.modifiers.indexOf(id);if(i<0)return false;
+  const m=C.modifiers.find(x=>x.id===id);if(!m)return false;
+  const value={common:1,uncommon:2,rare:3,epic:3,legendary:4}[m.rarity]||1;
+  state.modifiers.splice(i,1);state.shufflesLeft+=value;saveRun();return value;
+}
+function skipReward(){state.shufflesLeft+=2;saveRun();return 2;}
+function useUpgrade(id,tileId){
+  const owned=state.upgrades.find(x=>x.id===id&&x.uses>0);if(!owned)return{ok:false,message:'Mejora agotada.'};
+  const def=C.upgrades.find(x=>x.id===id);const t=state.board.find(x=>x.id===tileId);
+  if(!def||!t)return{ok:false,message:'Selecciona una ficha válida.'};
+  const rng=boardRng;
+  switch(def.effect){
+    case'holdRefresh':{
+      const held={...t};
+      for(const q of state.board)if(q.id!==t.id)returnTileToReserve(q);
+      state.board=board(rng,currentSetup(),state.challenge);
+      state.board[0]=held;ensureBoard();break;
+    }
+    case'swapVowel':Object.assign(t,retile(t,pick(['A','E','I','O','U'],rng)));break;
+    case'swapConsonant':Object.assign(t,retile(t,pick(['D','L','N','R','S','T'],rng)));break;
+    case'makeGold':t.kind='gold';break;
+    case'makeEmerald':t.kind='emerald';break;
+    case'makeDot':t.kind='dot';break;
+    case'makeDiamond':t.kind='diamond';t.charge=0;break;
+    case'makeWild':t.kind='wild';break;
+    case'duplicate':state.reserveTiles.push(reserveTemplateFromTile(t));break;
+    case'glass':state.reserveTiles.push({...reserveTemplateFromTile(t),kind:'glass'});break;
+    case'destroyPlay':{const idx=state.board.findIndex(x=>x.id===t.id);state.board[idx]=freshReplacement(t);state.playsLeft++;break;}
+    case'addScore':t.bonus=(t.bonus||0)+(def.value||0);break;
+    case'randomScore':t.bonus=(t.bonus||0)+1+Math.floor(rng()*10);break;
+    case'randomSpecial':t.kind=pick(['gold','diamond','emerald','dot','ink','volatile'],rng);if(t.kind==='diamond')t.charge=0;break;
+    default:return{ok:false,message:'Esta mejora todavía no puede aplicarse.'};
+  }
+  owned.uses--;
+  if(owned.uses<=0)state.upgrades=state.upgrades.filter(x=>x!==owned);
+  ensureBoard();saveRun();return{ok:true,message:`${def.name} aplicada.`};
+}
 function nextRound(){
   state.round++;
-  if(state.round>12)return false;
+  if(state.round>totalRounds(state.mode))return false;
+  const cfg=modeConfig(state.mode);
   state.challenge=chooseChallenge(state.round,state.mode);
-  const ch=challenge(state.challenge);
-  state.roundScore=state.bonuses.roundSeed+state.bonuses.nextRoundSeed;
-  state.totalScore+=state.roundScore;
+  state.specialRound=chooseSpecialRound(state.round,state.mode,state.mode==='daily'?runRandom:Math.random);
+  if(state.specialRound)state.specialHistory.push(state.specialRound);
+  state.specialData=makeSpecialData(state,state.mode==='daily'?runRandom:Math.random);
+  const seed=state.bonuses.roundSeed+state.bonuses.nextRoundSeed;
+  state.roundScore=seed;
+  state.totalScore+=seed;
   state.bonuses.nextRoundSeed=0;
-  state.target=roundTarget(state.round,state.challenge);
-  state.playsLeft=5+state.bonuses.extraPlays+(ch.kind==='boss'?Number(state.bonuses.bossPlay||0):0);
-  state.shufflesLeft=2+state.bonuses.extraShuffles;
+  state.target=roundTarget(state.round,state.challenge,state.mode);
+  state.playsLeft+=cfg.roundGain+state.bonuses.extraPlays;
+  state.shufflesLeft+=state.bonuses.extraShuffles;
   state.roundWords=0;
   state.selected=[];
   ensureBoard();
@@ -519,22 +601,110 @@ function ensureBoard(){
   }
   rebalanceBoard();
 }
+function returnTileToReserve(t){
+  if(!t)return;
+  if(['glass','potion'].includes(t.kind))return;
+  if(t.kind!=='normal'||(t.bonus||0)>0||(t.charge||0)>0)state.reserveTiles.push(reserveTemplateFromTile(t));
+}
+function freshReplacement(old=null){
+  const chance=Math.min(.58,(state.reserveTiles.length||0)/Math.max(6,(state.reserveTiles.length||0)+4));
+  if(state.reserveTiles.length&&boardRng()<chance){
+    const i=Math.floor(boardRng()*state.reserveTiles.length);
+    const tpl=state.reserveTiles.splice(i,1)[0];
+    const letter=tpl.letter&&/^[A-ZÑ]$/.test(tpl.letter)?tpl.letter:pickBalancedLetter(state.board,boardRng,currentSetup());
+    const n=tile(letter,boardRng);Object.assign(n,tpl,{letter});return n;
+  }
+  const source=old||{id:'none',kind:'normal',bonus:0,uses:0};
+  const chosen=pickBalancedLetter(state.board.filter(t=>t.id!==source.id),boardRng,currentSetup());
+  return tile(chosen,boardRng);
+}
+function injectReserveTiles(max=2){
+  let inserted=0;
+  while(state.reserveTiles.length&&inserted<max){
+    if(inserted>0&&boardRng()>.55)break;
+    const idxs=state.board.map((t,i)=>({t,i})).filter(x=>x.t.kind==='normal');
+    if(!idxs.length)break;
+    const slot=pick(idxs,boardRng);const tpl=state.reserveTiles.splice(Math.floor(boardRng()*state.reserveTiles.length),1)[0];
+    const letter=tpl.letter&&/^[A-ZÑ]$/.test(tpl.letter)?tpl.letter:slot.t.letter;
+    const n=tile(letter,boardRng);Object.assign(n,tpl,{letter});state.board[slot.i]=n;inserted++;
+  }
+}
 function replace(ids){
   const changed=[];
   for(const id of ids){
-    const idx=state.board.findIndex(t=>t.id===id);
-    if(idx<0)continue;
+    const idx=state.board.findIndex(t=>t.id===id);if(idx<0)continue;
     changed.push(idx);
-    state.board[idx]=retile(state.board[idx]);
+    const old=state.board[idx];
+    returnTileToReserve(old);
+    state.board[idx]=freshReplacement(old);
   }
-  ensureBoard();
-  improvePlayability(changed);
-  ensureBoard();
+  ensureBoard();injectReserveTiles(Math.min(2,changed.length));improvePlayability(changed);ensureBoard();
 }
-function play(word,tiles){const val=validate(word);if(!val.ok){state.invalidAttempts++;state.validStreak=0;saveRun();return val;}if(state.usedWords.includes(val.word))return{ok:false,message:'Ya has utilizado esa palabra.'};if(!challengeOK(state.challenge,val.word))return{ok:false,message:`No cumple el reto: ${challenge(state.challenge).desc}`};state.validStreak++;state.maxStreak=Math.max(state.maxStreak,state.validStreak);const sc=score(val.word,tiles,false);for(const t of tiles){t.uses++;if(t.kind==='ink')t.bonus++;}state.roundScore+=sc.total;state.totalScore+=sc.total;state.playsLeft--;state.previousLength=[...val.word].length;state.words.push(val.word);state.usedWords.push(val.word);state.roundWords++;state.wordLog.push({word:val.word,score:sc.total,effects:sc.effects});if(val.word.length>state.longestWord.length)state.longestWord=val.word;if(!state.bestPlay||sc.total>state.bestPlay.score)state.bestPlay={word:val.word,score:sc.total};state.bestCombo=Math.max(state.bestCombo,sc.multiplier);if([...val.word].length>=7)state.goals[0].done=true;if(/[áéíóúü]/.test(val.word))state.goals[1].done=true;if(tiles.some(t=>RARE.has(t.letter)))state.goals[2].done=true;career.words[val.word]=(career.words[val.word]||0)+1;if(val.word.length>(career.bestWord||'').length)career.bestWord=val.word;replace(tiles.map(t=>t.id));saveCareer();saveRun();return{ok:true,word:val.word,score:sc};}
-function shuffle(){if(state.shufflesLeft<=0)return false;const upgrades=state.board.filter(t=>t.kind!=='normal').map(t=>({kind:t.kind,bonus:t.bonus,uses:t.uses}));state.board=board(state.mode==='daily'?runRandom:Math.random,currentSetup(),state.challenge);upgrades.forEach((u,i)=>Object.assign(state.board[i],u));ensureBoard();state.shufflesLeft--;state.selected=[];saveRun();return true;}
+function specialValidation(word,tiles){
+  const effect=specialEffect();
+  if(effect==='maxTiles'){
+    const max=4+state.roundWords;
+    if(tiles.length>max)return{ok:false,message:`Ronda especial: máximo ${max} fichas ahora mismo.`};
+  }
+  if(effect==='firstLocked'){
+    const letter=(state.specialData.lockedLetter||'').toLowerCase();
+    if(letter&&!word.startsWith(letter))return{ok:false,message:`Ronda especial: la palabra debe empezar por ${letter.toUpperCase()}.`};
+  }
+  if(effect==='topLocked'&&state.roundWords<4){
+    const locked=new Set(state.specialData.lockedIds||[]);
+    if(tiles.some(t=>locked.has(t.id)))return{ok:false,message:'Ronda especial: la fila superior sigue bloqueada.'};
+  }
+  return{ok:true};
+}
+function play(word,tiles){
+  const val=validate(word);if(!val.ok){state.invalidAttempts++;state.validStreak=0;saveRun();return val;}
+  if(state.usedWords.includes(val.word))return{ok:false,message:'Ya has utilizado esa palabra.'};
+  if(!challengeOK(state.challenge,val.word))return{ok:false,message:`No cumple el reto: ${challenge(state.challenge).desc}`};
+  const sv=specialValidation(val.word,tiles);if(!sv.ok)return sv;
+  state.validStreak++;state.maxStreak=Math.max(state.maxStreak,state.validStreak);
+  const sc=score(val.word,tiles,false);
+  const effect=specialEffect();
+  const selectedIds=new Set(tiles.map(t=>t.id));
+  for(const t of tiles){t.uses++;if(t.kind==='ink')t.bonus=(t.bonus||0)+1;}
+  if(effect!=='specialsOff'){
+    for(const t of state.board)if(t.kind==='diamond'&&!selectedIds.has(t.id))t.charge=(t.charge||0)+5;
+  }
+  let playCost=effect==='doublePlay'?2:1;
+  let penalty=0;
+  if(effect==='highlighted'&&state.specialData.highlightedId&&!selectedIds.has(state.specialData.highlightedId))penalty=2;
+  state.playsLeft-=playCost+penalty;
+  for(const t of tiles)if(effect!=='specialsOff'&&t.kind==='potion')state.playsLeft+=Math.max(1,tileScore(t));
+  state.roundScore+=sc.total;state.totalScore+=sc.total;
+  state.previousLength=[...val.word].length;state.words.push(val.word);state.usedWords.push(val.word);state.roundWords++;
+  state.wordLog.push({word:val.word,score:sc.total,wordScore:sc.wordScore,bonusPoints:sc.bonusPoints,effects:sc.effects});
+  if(val.word.length>state.longestWord.length)state.longestWord=val.word;
+  if(!state.bestPlay||sc.total>state.bestPlay.score)state.bestPlay={word:val.word,score:sc.total};
+  state.bestCombo=Math.max(state.bestCombo,sc.multiplier);
+  if([...val.word].length>=7)state.goals[0].done=true;if(/[áéíóúü]/.test(val.word))state.goals[1].done=true;if(tiles.some(t=>RARE.has(t.letter)))state.goals[2].done=true;
+  career.words[val.word]=(career.words[val.word]||0)+1;if(val.word.length>(career.bestWord||'').length)career.bestWord=val.word;
+  replace(tiles.map(t=>t.id));
+  if(effect==='autoRefresh')refreshBoard(false,true);
+  saveCareer();saveRun();return{ok:true,word:val.word,score:sc,playCost,penalty};
+}
+function refreshBoard(manual=true,free=false){
+  const effect=specialEffect();
+  if(manual&&!free){
+    if(effect==='autoRefresh'){
+      if(state.playsLeft<=0)return false;
+      state.playsLeft--;
+    }else{
+      if(state.shufflesLeft<=0)return false;
+      state.shufflesLeft--;
+    }
+  }
+  for(const t of state.board)returnTileToReserve(t);
+  state.board=board(state.mode==='daily'?runRandom:Math.random,currentSetup(),state.challenge);
+  injectReserveTiles(3);ensureBoard();state.selected=[];saveRun();return true;
+}
+function shuffle(){return refreshBoard(true,false);}
+
 function metric(a){switch(a.metric){case'careerWords':return Object.values(career.words).reduce((s,n)=>s+n,0);case'bestPlay':return Math.max(career.bestPlay,state?.bestPlay?.score||0);case'runScore':return state?.totalScore||0;case'longest':return Math.max((career.bestWord||'').length,(state?.longestWord||'').length);case'ntilde':return state?.words.some(w=>w.includes('ñ'))?1:0;case'accent':return state?.words.some(w=>/[áéíóúü]/.test(w))?1:0;case'streak':return state?.maxStreak||0;case'rare':return state?.words.some(w=>/[jñqxzkw]/i.test(w))?1:0;case'wins':return career.wins;case'uniqueWords':return Object.keys(career.words).length;case'cards':return Object.keys(career.cards).length;case'combo':return Math.max(career.bestCombo,state?.bestCombo||1);case'quick':return career.quickGames;case'daily':return career.dailyGames;case'perfect':return state?.completed&&state?.won&&state.invalidAttempts===0?1:0;case'round':return state?.round||0;default:return 0;}}
 function achievements(){const got=[];for(const a of C.achievements)if(!career.achievements[a.id]&&metric(a)>=a.value){career.achievements[a.id]=Date.now();career.xp+=25;got.push(a);}if(got.length)saveCareer();return got;}
 function finish(won){state.won=!!won;state.completed=true;clearRun();career.games++;if(won&&state.mode!=='quick')career.wins++;if(state.mode==='quick')career.quickGames++;if(state.mode==='daily')career.dailyGames++;career.bestScore=Math.max(career.bestScore,state.totalScore);career.bestPlay=Math.max(career.bestPlay,state.bestPlay?.score||0);career.bestCombo=Math.max(career.bestCombo,state.bestCombo);let xp=Math.round(state.words.length*4+state.round*10+(won?80:0)+state.bonuses.careerXp);if(state.mode==='quick')xp=Math.round(xp*.7);career.xp+=xp;const got=achievements();saveCareer();return{xp,got};}
-window.WordPlayEngine={C,LETTER_VALUES,VOWELS,ACCENTABLE,BOARD_RULES,boardQuality,isBalancedBoard,repairLoadedBoard,get morphologyReady(){return !!hunspell?.loaded},get state(){return state},set state(v){state=v},get career(){return career},settings,saveSettings,saveRun,loadRun,clearRun,newState,loadDictionary,validate,challenge,chooseChallenge,roundTarget,tileScore,score,rewards,chooseReward,nextRound,play,shuffle,achievements,finish,strip,vowel,pick,daySeed,runRandom};
+window.WordPlayEngine={C,LETTER_VALUES,VOWELS,ACCENTABLE,BOARD_RULES,boardQuality,isBalancedBoard,repairLoadedBoard,get morphologyReady(){return !!hunspell?.loaded},get state(){return state},set state(v){state=v},get career(){return career},settings,saveSettings,saveRun,loadRun,clearRun,newState,loadDictionary,validate,challenge,chooseChallenge,modeConfig,totalRounds,isSpecialRound,specialRound,specialEffect,roundTarget,slotBonusAt,tileScore,score,rewards,chooseReward,sellModifier,skipReward,useUpgrade,nextRound,play,shuffle,achievements,finish,strip,vowel,pick,daySeed,runRandom};
 })();
