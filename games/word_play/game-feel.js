@@ -11,6 +11,29 @@ function spawn(className,text=''){
   const el=document.createElement('div');el.className=className;el.textContent=text;layer.appendChild(el);
   setTimeout(()=>el.remove(),1400);
 }
+function scoreWord(data={}){
+  if(reduce()||!data)return;
+  const seq=document.createElement('div');seq.className='wp-word-score-sequence';
+  const title=document.createElement('div');title.className='wp-score-word';title.textContent=String(data.word||'').toUpperCase();seq.appendChild(title);
+  const letters=document.createElement('div');letters.className='wp-score-letters';
+  (data.tilePoints||[]).forEach((p,i)=>{
+    const chip=document.createElement('span');chip.className='wp-score-letter';chip.style.setProperty('--i',i);
+    const l=document.createElement('b');l.textContent=p.letter||'•';
+    const v=document.createElement('em');v.textContent='+'+Number(p.value||0);
+    chip.append(l,v);letters.appendChild(chip);
+  });
+  seq.appendChild(letters);
+  const math=document.createElement('div');math.className='wp-score-math';
+  const add=(label,value,cls='')=>{const x=document.createElement('span');if(cls)x.className=cls;const small=document.createElement('small');small.textContent=label;const strong=document.createElement('strong');strong.textContent=value;x.append(small,strong);math.appendChild(x);};
+  add('WORD',String(Number(data.wordScore||0)));
+  if(Number(data.bonusPoints||0))add('BONUS','+'+Number(data.bonusPoints||0),'bonus');
+  if(Number(data.finalMultiplier||1)>1)add('MULT','×'+Number(data.finalMultiplier).toFixed(data.finalMultiplier%1?2:0),'mult');
+  add('TOTAL','+'+Number(data.total||0),'total');
+  if(Number(data.coins||0))add('MONEDAS','+'+Number(data.coins||0),'coins');
+  seq.appendChild(math);layer.appendChild(seq);
+  const lifetime=1550+Math.min(8,(data.tilePoints||[]).length)*70;
+  setTimeout(()=>seq.remove(),lifetime);
+}
 function hit(){
   const g=game();if(!g||reduce())return;
   g.classList.remove('wp-hit');void g.offsetWidth;g.classList.add('wp-hit');setTimeout(()=>g.classList.remove('wp-hit'),330);
@@ -56,5 +79,5 @@ function install(){
   toggle?.addEventListener('change',()=>setTimeout(syncMotionClass,0));
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
-window.WordPlayGameFeel={syncMotionClass};
+window.WordPlayGameFeel={syncMotionClass,scoreWord};
 })();

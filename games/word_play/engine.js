@@ -210,7 +210,7 @@ function newState(mode='normal'){
     playsLeft:cfg.startPlays,shufflesLeft:cfg.startRefreshes,rerollsLeft:1,
     board:board(r,'',challengeId),selected:[],modifiers:[],upgrades:[],reserveTiles:[],
     bonuses:{extraPlays:0,extraShuffles:0,roundSeed:0,nextRoundSeed:0,lengthMult:1,letterMult:1,careerXp:0,bossPlay:0,rareLuck:0},
-    challenge:challengeId,specialRound:null,specialData:{},specialHistory:[],rescues:0,focusMutations:0,lastRescue:null,ink:0,tintaCharges:1,tintaUses:0,lastInkGain:0,
+    challenge:challengeId,specialRound:null,specialData:{},specialHistory:[],rescues:0,focusMutations:0,lastRescue:null,ink:0,tintaCharges:1,tintaUses:0,lastInkGain:0,coins:4,coinsEarned:0,lastCoinGain:0,shopPurchases:0,
     words:[],wordLog:[],usedWords:[],validStreak:0,maxStreak:0,invalidAttempts:0,
     longestWord:'',bestPlay:null,bestCombo:1,previousLength:0,roundWords:0,discoveredCards:[],
     goals:[
@@ -267,7 +267,7 @@ function loadRun(){try{
   r.specialRound=r.specialRound||null;
   r.specialData=r.specialData||{};
   if(r.challenge==='exact5')r.challenge='exact6c';
-  r.rescues=Number(r.rescues||0);r.focusMutations=Number(r.focusMutations||0);r.lastRescue=r.lastRescue||null;r.ink=Number(r.ink||0);r.tintaCharges=Number.isFinite(r.tintaCharges)?Number(r.tintaCharges):1;r.tintaUses=Number(r.tintaUses||0);r.lastInkGain=Number(r.lastInkGain||0);
+  r.rescues=Number(r.rescues||0);r.focusMutations=Number(r.focusMutations||0);r.lastRescue=r.lastRescue||null;r.ink=Number(r.ink||0);r.tintaCharges=Number.isFinite(r.tintaCharges)?Number(r.tintaCharges):1;r.tintaUses=Number(r.tintaUses||0);r.lastInkGain=Number(r.lastInkGain||0);r.coins=Number.isFinite(r.coins)?Number(r.coins):4;r.coinsEarned=Number(r.coinsEarned||0);r.lastCoinGain=Number(r.lastCoinGain||0);r.shopPurchases=Number(r.shopPurchases||0);
   r.target=r.mode==='quick'?999999:roundTarget(r.round,r.challenge,r.mode);
   return repairLoadedBoard(r);
 }catch{return null;}}
@@ -420,6 +420,8 @@ function score(word,tiles,preview=false){
   let goldCount=0;
   let emeraldHits=0;
   const effects=[];
+  const tilePoints=[];
+  const scoreRng=boardRng();
   const selectedIds=new Set(tiles.map(t=>t.id));
   tiles.forEach((t,i)=>{
     let value=tileScore(t);
@@ -430,11 +432,12 @@ function score(word,tiles,preview=false){
     }
     if(sr==='vowelsZero'&&vowel(word[i]||''))value=0;
     if(!specialsOff&&t?.kind==='emerald'){
-      const hit=preview?false:boardRng()<.25;
+      const hit=preview?false:scoreRng()<.25;
       if(hit){value*=5;emeraldHits++;effects.push(`Esmeralda ×5`);}
       else if(preview)effects.push('Esmeralda · 25% ×5');
     }
     rawWordScore+=value;
+    tilePoints.push({id:t?.id||null,letter:(word[i]||t?.letter||'').toUpperCase(),kind:t?.kind||'normal',value});
     if(!specialsOff&&t?.kind==='gold')goldCount++;
   });
   let wordMultiplier=1;
@@ -460,7 +463,7 @@ function score(word,tiles,preview=false){
   if(!specialsOff&&tiles.some(t=>t.kind==='volatile')){finalMultiplier*=1.35;effects.push('Explosiva · Final ×1,35');}
   let total=Math.round((wordScore+bonusPoints)*finalMultiplier);
   if(sr==='minSixZero'&&tiles.length<6){total=0;effects.push('Ronda especial · menos de 6 fichas = 0');}
-  return{subtotal:wordScore+bonusPoints,multiplier:finalMultiplier,total,wordScore,bonusPoints,wordMultiplier,finalMultiplier,effects,emeraldHits,lengthBonus:lengthBonus(tiles.length)};
+  return{subtotal:wordScore+bonusPoints,multiplier:finalMultiplier,total,wordScore,bonusPoints,wordMultiplier,finalMultiplier,effects,emeraldHits,lengthBonus:lengthBonus(tiles.length),tilePoints};
 }
 function reserveTemplateFromTile(t){
   return{kind:t.kind||'normal',letter:t.letter||null,bonus:t.bonus||0,charge:t.charge||0};
@@ -537,6 +540,48 @@ function sellModifier(id){
   state.modifiers.splice(i,1);state.shufflesLeft+=value;saveRun();return value;
 }
 function skipReward(){state.shufflesLeft+=2;saveRun();return 2;}
+function shopItem(id){return C.shopItems?.find(x=>x.id===id)||null;}
+function shopStatus(id){
+  const item=shopItem(id);
+  if(!state||!item)return{ok:false,message:'Artículo no disponible.'};
+  if(Number(state.coins||0)<Number(item.cost||0))return{ok:false,message:`Necesitas ${item.cost} Monedas.`,item};
+  if(item.effect==='upgrade'&&state.upgrades.length>=3)return{ok:false,message:'Ya llevas 3 Mejoras. Usa una antes de comprar otra.',item};
+  return{ok:true,item};
+}
+function buyShopItem(id,options={}){
+  const status=shopStatus(id);if(!status.ok)return status;
+  const item=status.item,rng=boardRng();
+  let detail='';
+  switch(item.effect){
+    case'play':state.playsLeft+=Number(item.amount||1);detail='+1 Jugada';break;
+    case'refresh':state.shufflesLeft+=Number(item.amount||1);detail='+1 Renovación';break;
+    case'reroll':state.rerollsLeft+=Number(item.amount||1);detail='+1 reroll';break;
+    case'tinta':state.tintaCharges+=Number(item.amount||1);detail='+1 Tinta Viva';break;
+    case'reserveTile':addReserveTile(item.tileKind,Number(item.amount||1));detail=item.name+' a la reserva';break;
+    case'letter':{
+      const letter=String(options.letter||'').toUpperCase();
+      if(!/^[A-ZÑ]$/.test(letter))return{ok:false,message:'Elige una letra válida.',item};
+      addReserveTile('normal',1,letter,0);detail=letter+' añadida a la reserva';break;
+    }
+    case'upgrade':{
+      const owned=new Set(state.upgrades.map(x=>x.id));
+      const pool=C.upgrades.filter(x=>!owned.has(x.id));
+      const def=pick(pool,rng);if(!def)return{ok:false,message:'No hay Mejoras disponibles.',item};
+      state.upgrades.push({id:def.id,uses:def.uses});detail='Mejora: '+def.name;break;
+    }
+    default:return{ok:false,message:'Artículo todavía no implementado.',item};
+  }
+  state.coins-=Number(item.cost||0);state.shopPurchases=Number(state.shopPurchases||0)+1;saveRun();
+  return{ok:true,item,detail,coins:state.coins};
+}
+function coinRewardForPlay(words,tiles){
+  const longest=Math.max(0,...(words||[]).map(w=>[...w].length));
+  let gain=1;
+  if(longest>=6)gain++;
+  if(longest>=8)gain++;
+  if((tiles||[]).some(t=>t?.kind&&t.kind!=='normal'))gain++;
+  return Math.min(4,gain);
+}
 function useUpgrade(id,tileId){
   const owned=state.upgrades.find(x=>x.id===id&&x.uses>0);if(!owned)return{ok:false,message:'Mejora agotada.'};
   const def=C.upgrades.find(x=>x.id===id);const t=state.board.find(x=>x.id===tileId);
@@ -572,8 +617,12 @@ function useUpgrade(id,tileId){
 }
 function nextRound(){
   const inkGain=state.specialRound?2:1;
+  const coinGain=state.specialRound?4:2;
   state.ink=Number(state.ink||0)+inkGain;
   state.lastInkGain=inkGain;
+  state.coins=Number(state.coins||0)+coinGain;
+  state.coinsEarned=Number(state.coinsEarned||0)+coinGain;
+  state.lastCoinGain=coinGain;
   state.round++;
   if(state.round>totalRounds(state.mode)){saveRun();return false;}
   const cfg=modeConfig(state.mode);
@@ -869,13 +918,14 @@ function play(word,tiles){
   state.playsLeft-=playCost+penalty;
   for(const t of tiles)if(effect!=='specialsOff'&&t.kind==='potion')state.playsLeft+=Math.max(1,tileScore(t));
   state.roundScore+=sc.total;state.totalScore+=sc.total;state.previousLength=tiles.length;
+  const coinGain=coinRewardForPlay(validated,tiles);state.coins=Number(state.coins||0)+coinGain;state.coinsEarned=Number(state.coinsEarned||0)+coinGain;state.lastCoinGain=coinGain;
   for(const valid of validated){state.words.push(valid);state.usedWords.push(valid);career.words[valid]=(career.words[valid]||0)+1;if(valid.length>(state.longestWord||'').length)state.longestWord=valid;if(valid.length>(career.bestWord||'').length)career.bestWord=valid;}
-  state.roundWords++;state.wordLog.push({word:displayWord,score:sc.total,wordScore:sc.wordScore,bonusPoints:sc.bonusPoints,effects:sc.effects});
+  state.roundWords++;state.wordLog.push({word:displayWord,score:sc.total,wordScore:sc.wordScore,bonusPoints:sc.bonusPoints,effects:sc.effects,coins:coinGain});
   if(!state.bestPlay||sc.total>state.bestPlay.score)state.bestPlay={word:displayWord,score:sc.total};state.bestCombo=Math.max(state.bestCombo,sc.multiplier);
   if(validated.some(w=>w.length>=7))state.goals[0].done=true;if(validated.some(w=>/[áéíóúü]/.test(w)))state.goals[1].done=true;if(tiles.some(t=>RARE.has(t.letter)))state.goals[2].done=true;
   const rescue=replace(tiles.map(t=>t.id));if(effect==='autoRefresh')refreshBoard(false,true);
   state.selected=[];
-  saveCareer();saveRun();return{ok:true,word:displayWord,words:validated,score:sc,playCost,penalty,rescue};
+  saveCareer();saveRun();return{ok:true,word:displayWord,words:validated,score:sc,playCost,penalty,rescue,coinGain};
 }
 function refreshBoard(manual=true,free=false){
   const effect=specialEffect();
@@ -926,5 +976,5 @@ function useTintaViva(count=6){
 function metric(a){switch(a.metric){case'careerWords':return Object.values(career.words).reduce((s,n)=>s+n,0);case'bestPlay':return Math.max(career.bestPlay,state?.bestPlay?.score||0);case'runScore':return state?.totalScore||0;case'longest':return Math.max((career.bestWord||'').length,(state?.longestWord||'').length);case'ntilde':return state?.words.some(w=>w.includes('ñ'))?1:0;case'accent':return state?.words.some(w=>/[áéíóúü]/.test(w))?1:0;case'streak':return state?.maxStreak||0;case'rare':return state?.words.some(w=>/[jñqxzkw]/i.test(w))?1:0;case'wins':return career.wins;case'uniqueWords':return Object.keys(career.words).length;case'cards':return Object.keys(career.cards).length;case'combo':return Math.max(career.bestCombo,state?.bestCombo||1);case'quick':return career.quickGames;case'daily':return career.dailyGames;case'perfect':return state?.completed&&state?.won&&state.invalidAttempts===0?1:0;case'round':return state?.round||0;default:return 0;}}
 function achievements(){const got=[];for(const a of C.achievements)if(!career.achievements[a.id]&&metric(a)>=a.value){career.achievements[a.id]=Date.now();career.xp+=25;got.push(a);}if(got.length)saveCareer();return got;}
 function finish(won){state.won=!!won;state.completed=true;clearRun();career.games++;if(won&&state.mode!=='quick')career.wins++;if(state.mode==='quick')career.quickGames++;if(state.mode==='daily')career.dailyGames++;career.bestScore=Math.max(career.bestScore,state.totalScore);career.bestPlay=Math.max(career.bestPlay,state.bestPlay?.score||0);career.bestCombo=Math.max(career.bestCombo,state.bestCombo);let xp=Math.round(state.words.length*4+state.round*10+(won?80:0)+state.bonuses.careerXp);if(state.mode==='quick')xp=Math.round(xp*.7);career.xp+=xp;const got=achievements();saveCareer();return{xp,got};}
-window.WordPlayEngine={C,LETTER_VALUES,VOWELS,ACCENTABLE,BOARD_RULES,PLAYABILITY_COMMON_LIMIT,anchorWordCandidates,anchoredBoard,boardQuality,boardPlayability,rescueBoard,stabilizeBoard,isBalancedBoard,repairLoadedBoard,get morphologyReady(){return !!hunspell?.loaded},get state(){return state},set state(v){state=v},get career(){return career},settings,saveSettings,saveRun,loadRun,clearRun,newState,loadDictionary,validate,challenge,chooseChallenge,modeConfig,totalRounds,isSpecialRound,specialRound,specialEffect,roundTarget,slotBonusAt,tileScore,score,rewards,chooseReward,sellModifier,skipReward,useUpgrade,nextRound,play,shuffle,classroomScramble,buyTintaViva,useTintaViva,achievements,finish,strip,vowel,pick,daySeed,runRandom};
+window.WordPlayEngine={C,LETTER_VALUES,VOWELS,ACCENTABLE,BOARD_RULES,PLAYABILITY_COMMON_LIMIT,anchorWordCandidates,anchoredBoard,boardQuality,boardPlayability,rescueBoard,stabilizeBoard,isBalancedBoard,repairLoadedBoard,get morphologyReady(){return !!hunspell?.loaded},get state(){return state},set state(v){state=v},get career(){return career},settings,saveSettings,saveRun,loadRun,clearRun,newState,loadDictionary,validate,challenge,chooseChallenge,modeConfig,totalRounds,isSpecialRound,specialRound,specialEffect,roundTarget,slotBonusAt,tileScore,score,rewards,chooseReward,sellModifier,skipReward,shopItem,shopStatus,buyShopItem,useUpgrade,nextRound,play,shuffle,classroomScramble,buyTintaViva,useTintaViva,achievements,finish,strip,vowel,pick,daySeed,runRandom};
 })();
