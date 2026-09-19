@@ -34,7 +34,17 @@ const strict = {
   perifrasis:'perífrasis', lexico:'léxico', fonetica:'fonética', poetica:'poética', poesia:'poesía'
 };
 const blocked = [
-  'hostia','hostias','maricón','maricon','maricones','zorra','zorras','idiota','idiotas'
+  'hostia','hostias','maricón','maricon','maricones','zorra','zorras','idiota','idiotas',
+  'john','michael','mike','jack','james','peter','mary','sarah','tom','sam','charlie','george','henry','harry',
+  'steve','mark','paul','chris','robert','richard','frank','bill','billy','jim','jimmy','jenny','jessica','linda',
+  'nancy','kevin','brian','ryan','scott','tony','andy','nick','jason','eric','kate','katie','emily','emma','lucy',
+  'lisa','julia','anna','yeah','yep','nope','okay','wow','omg','lol','sir','mister','miss'
 ];
-window.WordPlayLexicon={additions,strict,blocked,locale:'es-ES',version:1};
+const rejectPatterns = [
+  /^(?:ja|je|ji|jo|ju){2,}$/i,
+  /^(.)\1{2,}$/i,
+  /^[bcdfghjklmnpqrstvwxyz]{6,}$/i,
+  /^[aeiou]{4,}$/i
+];
+window.WordPlayLexicon={additions,strict,blocked,rejectPatterns,locale:'es-ES',version:2};
 })();

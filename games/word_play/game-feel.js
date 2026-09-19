@@ -40,8 +40,18 @@ function watchRound(){
   new MutationObserver(check).observe(boss,{attributes:true,attributeFilter:['class']});
   check();
 }
+function watchBossLoot(){
+  const reward=document.getElementById('rewardModal');if(!reward)return;
+  let open=false;
+  const check=()=>{
+    const now=!reward.classList.contains('hidden')&&reward.classList.contains('boss-loot');
+    if(now&&!open)spawn('wp-boss-clear','JEFE SUPERADO');
+    open=now;
+  };
+  new MutationObserver(check).observe(reward,{attributes:true,attributeFilter:['class']});
+}
 function install(){
-  syncMotionClass();watchFeedback();watchRound();
+  syncMotionClass();watchFeedback();watchRound();watchBossLoot();
   const toggle=document.getElementById('reduceMotionToggle');
   toggle?.addEventListener('change',()=>setTimeout(syncMotionClass,0));
 }
