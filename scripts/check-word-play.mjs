@@ -26,15 +26,16 @@ const sound = read('sound.js');
 const rewardArt = read('assets/reward-art.svg');
 
 for (const required of [
-  'id="board"','id="wordBuilder"','id="scoreBreakdown"','id="upgradeList"','id="difficultyModal"','id="skipRewardBtn"','id="classroomModeToggle"','id="coinWallet"','id="coinValue"','id="shopBtn"','id="shopModal"','id="shopGrid"','id="letterGrid"','id="inkWallet"','id="inkValue"','id="tintaVivaBtn"','id="tintaCharges"','id="rewardChoices"','id="collectionModal"','id="dailyGameBtn"',
+  'id="board"','id="wordBuilder"','id="scoreBreakdown"','id="upgradeList"','id="difficultyModal"','id="skipRewardBtn"','id="classroomModeToggle"','id="coinWallet"','id="coinValue"','id="shopBtn"','id="shopModal"','id="shopGrid"','id="letterGrid"','id="missionChip"','id="buildSummary"','id="inkWallet"','id="inkValue"','id="tintaVivaBtn"','id="tintaCharges"','id="rewardChoices"','id="collectionModal"','id="dailyGameBtn"',
   './content.js','./lexicon.js','./vendor/typo.js','./engine.js','./bridge.js','./app.js','./layout.js','./sound.js','./game-feel.js','./styles.css','./responsive.css','./arcade.css'
 ]) if (!index.includes(required)) throw new Error(`Falta ${required} en index.html`);
 
-if(!index.includes('20260919-tooltips-v1'))throw new Error('Los assets de Word Play no llevan la versión de microayudas contextuales');
+if(!index.includes('20260920-roguelike-polish-v3'))throw new Error('Los assets de Word Play no llevan la versión de pulido roguelike v3');
 if(!app.includes('dictionaryReady')||!app.includes('launchButtons'))throw new Error('La partida puede arrancar antes de cargar el diccionario');
 if(app.includes("visibilitychange"))throw new Error('Cambiar de pestaña no debe activar Tinta Viva automáticamente');
 if(!/function applyUpgrade[\s\S]*const upgradeId=activeUpgrade[\s\S]*activeUpgrade=null[\s\S]*render\(\)/.test(app))throw new Error('Aplicar una Mejora debe desarmar el modo de selección tras una sola ficha');
 if(!app.includes('sanitizeSelection'))throw new Error('La UI no sanea selecciones cuyos IDs ya no existen en el tablero');
+if(app.includes("if(E.career.games===0)howTo(true)"))throw new Error('La primera partida sigue abriendo el tutorial modal en vez del tutorial contextual');
 
 for (const required of ['100dvh','overflow:hidden','.board','.reward-card','.collection-body','.boss-badge']) {
   if (!css.replaceAll(' ', '').includes(required.replaceAll(' ', ''))) throw new Error(`Falta ${required} en styles.css`);
@@ -44,13 +45,13 @@ for (const required of ['--tile-size','--board-gap','grid-template-columns:repea
   if (!responsive.replaceAll(' ', '').includes(required.replaceAll(' ', ''))) throw new Error(`Falta ${required} en responsive.css`);
 }
 
-for (const required of ['.wp-fx-layer','.wp-score-pop','.word-slot','.score-breakdown','.difficulty-grid','.upgrade-card','.tile.emerald','.tile.dot','.tile.mirror','.tile.bang','.tile.plus','.tile.normal.value-1','.tile.normal.value-4','.tile.normal.value-9','.word-slot.normal.value-3','.economy-hud','.coin-wallet','.shop-btn','.shop-grid','.shop-card','.letter-grid','.tile-points','.hover-tooltip','.hover-tooltip.visible','.wp-word-score-sequence','.wp-score-letter','.ink-power','.ink-wallet','.tinta-viva-btn','.reward-art','.reward-art-image','.reward-card-body','.rarity-gem','.card-corner','.classroom-toggle','user-select:none','.reward-card.rarity-legendary','.board::before','.tile.gold']) {
+for (const required of ['.wp-fx-layer','.wp-score-pop','.word-slot','.score-breakdown','.difficulty-grid','.upgrade-card','.tile.emerald','.tile.dot','.tile.mirror','.tile.bang','.tile.plus','.tile.normal.value-1','.tile.normal.value-4','.tile.normal.value-9','.word-slot.normal.value-3','.economy-hud','.coin-wallet','.shop-btn','.shop-grid','.shop-card','.letter-grid','.tile-points','.hover-tooltip','.hover-tooltip.visible','.mission-chip','.synergy-strip','.tile-state','.shop-card.on-sale','.sale-badge','.wp-activation-stack','.coach-mark','.build-summary','.wp-word-score-sequence','.wp-score-letter','.ink-power','.ink-wallet','.tinta-viva-btn','.reward-art','.reward-art-image','.reward-card-body','.rarity-gem','.card-corner','.classroom-toggle','user-select:none','.reward-card.rarity-legendary','.board::before','.tile.gold']) {
   if (!arcade.includes(required)) throw new Error(`Falta ${required} en arcade.css`);
 }
 for (const required of ['WordPlayLexicon','additions','strict','blocked','rejectPatterns','es-ES']) {
   if (!lexicon.includes(required)) throw new Error(`Falta ${required} en lexicon.js`);
 }
-for (const required of ['WordPlayGameFeel','MutationObserver','wp-score-pop','wp-combo-callout','scoreWord','wp-word-score-sequence','wp-score-letter']) {
+for (const required of ['WordPlayGameFeel','MutationObserver','wp-score-pop','wp-combo-callout','scoreWord','activations','wp-word-score-sequence','wp-score-letter','wp-activation-stack']) {
   if (!gameFeel.includes(required)) throw new Error(`Falta ${required} en game-feel.js`);
 }
 
@@ -72,10 +73,10 @@ if(!typo.includes('Typo = function')||!typo.includes('_parseAFF'))throw new Erro
 for (const required of ['computeTileSize','ResizeObserver','MutationObserver','visualViewport','--tile-size','--board-gap']) {
   if (!layout.includes(required)) throw new Error(`Falta ${required} en layout.js`);
 }
-for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','BOARD_RULES','pickBalancedLetter','rebalanceBoard','boardQuality','wordIndex','candidateBoards','repairLoadedBoard','improvePlayability','HUNSPELL_AFF','HUNSPELL_DIC','loadHunspell','morphologyReady','modeConfig','totalRounds','specialRound','specialEffect','slotBonusAt','useUpgrade','sellModifier','skipReward','refreshBoard','anchorWordCandidates','anchoredBoard','boardPlayability','rescueBoard','stabilizeBoard','classroomScramble','buyTintaViva','useTintaViva','shopItem','shopStatus','buyShopItem','coinRewardForPlay','tilePoints']) {
+for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','BOARD_RULES','pickBalancedLetter','rebalanceBoard','boardQuality','wordIndex','candidateBoards','repairLoadedBoard','improvePlayability','HUNSPELL_AFF','HUNSPELL_DIC','loadHunspell','morphologyReady','modeConfig','totalRounds','specialRound','specialEffect','slotBonusAt','useUpgrade','sellModifier','skipReward','refreshBoard','anchorWordCandidates','anchoredBoard','boardPlayability','rescueBoard','stabilizeBoard','classroomScramble','buyTintaViva','useTintaViva','shopItem','shopOffers','shopStatus','buyShopItem','generateShopStock','missionMatches','pickLinguisticMission','coinRewardForPlay','tilePoints','triggeredModifiers','specialEvents']) {
   if (!engine.includes(required)) throw new Error(`Falta ${required} en engine.js`);
 }
-for (const required of ['renderCareer','renderBoard','renderUpgrades','valueClass','wordScorePreview','difficultyModal','openReward','skipReward','collection','wordLog','classroomMode','tintaBtn','buyTintaViva','useTintaViva','rewardArt','rewardArtSvg','rewardAccent','reward-art.svg','rarity-gem','openShop','renderShop','buyFromShop','buyShopLetter','tile-points','scoreWord','copy','initTooltips','installStaticTips','specialHelp','tileTip','data-tip','Rerolls de recompensa']) {
+for (const required of ['renderCareer','renderBoard','renderUpgrades','valueClass','wordScorePreview','difficultyModal','openReward','skipReward','collection','wordLog','classroomMode','tintaBtn','buyTintaViva','useTintaViva','rewardArt','rewardArtSvg','rewardAccent','reward-art.svg','rarity-gem','openShop','renderShop','buyFromShop','buyShopLetter','tile-points','scoreWord','copy','initTooltips','installStaticTips','specialHelp','tileTip','data-tip','Rerolls de recompensa','activeSynergies','buildProfile','showCoach','missionChip','gold-ready','shopOffers','sale-badge']) {
   if (!app.includes(required)) throw new Error(`Falta ${required} en app.js`);
 }
 for (const required of ["const GAME_ID='word_play'","post('READY'","post('INITIALIZED'","post('CHECKPOINT'","post('RESULT'",'SESSION_STARTED']) {
@@ -97,6 +98,16 @@ if (C.modifiers.length < 60) throw new Error(`Solo hay ${C.modifiers.length} mod
 if (C.gifts.length < 25) throw new Error(`Solo hay ${C.gifts.length} obsequios/recursos`);
 if (C.upgrades.length < 15) throw new Error(`Solo hay ${C.upgrades.length} mejoras activas`);
 if (!Array.isArray(C.shopItems)||C.shopItems.length < 9) throw new Error('La tienda tiene pocos artículos');
+if(!Array.isArray(C.linguisticMissions)||C.linguisticMissions.length<5)throw new Error('Faltan misiones lingüísticas opcionales');
+if(!Array.isArray(C.synergies)||C.synergies.length<5)throw new Error('Faltan sinergias de build');
+const precision=C.modifiers.find(x=>x.id==='mini');
+if(!precision||precision.condition!=='len4'||!/4 letras/.test(precision.desc))throw new Error('Precisión sigue siendo una carta muerta de 3 letras');
+const specialist=C.modifiers.find(x=>x.id==='cazajefes');
+if(!specialist||specialist.condition!=='specialRound'||!/ronda especial/i.test(specialist.desc))throw new Error('Cazajefes no se ha migrado al loop de rondas especiales');
+const pass=C.gifts.find(x=>x.id==='boss_play');
+if(!pass||!/ronda especial/i.test(pass.desc))throw new Error('Salvoconducto sigue apuntando a rondas jefe antiguas');
+if(!C.specialTileTypes.echo||!/Duplica/i.test(C.specialTileTypes.echo.desc))throw new Error('Ficha Eco sigue sin definición funcional');
+
 const upEmerald=C.upgrades.find(x=>x.id==='up_emerald');
 const upDot=C.upgrades.find(x=>x.id==='up_dot');
 const upGold=C.upgrades.find(x=>x.id==='up_gold');
@@ -109,7 +120,7 @@ if(!upDiamond||!/\+5/.test(upDiamond.desc))throw new Error('La carta Diamante no
 if (C.specialRounds.length < 9) throw new Error(`Solo hay ${C.specialRounds.length} rondas especiales`);
 if (Object.keys(C.modes||{}).length < 6) throw new Error('Faltan dificultades/modos');
 if (C.achievements.length < 20) throw new Error(`Solo hay ${C.achievements.length} logros`);
-for (const list of [C.modifiers,C.gifts,C.upgrades,C.shopItems,C.specialRounds,C.challenges,C.achievements]) {
+for (const list of [C.modifiers,C.gifts,C.upgrades,C.shopItems,C.specialRounds,C.linguisticMissions,C.synergies,C.challenges,C.achievements]) {
   const ids = list.map(x => x.id);
   if (new Set(ids).size !== ids.length) throw new Error('Hay IDs duplicados en content.js');
 }
@@ -179,6 +190,10 @@ const normalStart=E.newState('normal');
 if(normalStart.playsLeft!==10||normalStart.shufflesLeft!==4)throw new Error('Recursos iniciales de Normal incorrectos');
 if(normalStart.ink!==0||normalStart.tintaCharges!==1)throw new Error('La run debe empezar con 0 Tinta y 1 carga de Tinta Viva');
 if(normalStart.coins!==4)throw new Error('La run debe empezar con 4 Monedas');
+if(!Array.isArray(normalStart.shopStock)||normalStart.shopStock.length!==5)throw new Error('La tienda inicial no tiene 5 artículos');
+if(new Set(normalStart.shopStock.map(x=>x.id)).size!==5)throw new Error('La tienda inicial repite artículos');
+if(normalStart.shopStock.filter(x=>x.discount===25).length!==1)throw new Error('La tienda inicial debe tener exactamente una oferta');
+if(normalStart.mission&&!C.linguisticMissions.some(x=>x.id===normalStart.mission.id))throw new Error('La misión inicial no pertenece al catálogo');
 const legendaryStart=E.newState('legendary');
 if(legendaryStart.playsLeft!==8||legendaryStart.shufflesLeft!==3||legendaryStart.target!==60)throw new Error('Recursos/objetivo inicial de Legendario incorrectos');
 
@@ -194,6 +209,13 @@ sc=E.score('casa',[mk('C','gold'),mk('A','gold'),mk('S'),mk('A')],true);
 if(sc.wordScore!==12)throw new Error('Dos doradas no multiplican Word Score ×2');
 sc=E.score('casa',[mk('C'),mk('A'),mk('S'),mk('A','dot')],true);
 if(sc.wordScore!==12)throw new Error('Punto final no duplica Word Score');
+sc=E.score('casa',[mk('C','echo'),mk('A'),mk('S'),mk('A')],true);
+if(sc.wordScore!==9||!sc.specialEvents.some(x=>x.kind==='echo'))throw new Error('Ficha Eco no duplica su valor o no informa activación');
+E.state.modifiers=['mini'];
+sc=E.score('casa',[mk('C'),mk('A'),mk('S'),mk('A')],true);
+if(!sc.triggeredModifiers.some(x=>x.id==='mini'))throw new Error('Las activaciones de Modificadores no se exponen al feedback visual');
+E.state.modifiers=[];
+
 
 E.state=E.newState('normal');
 const targetId=E.state.board[0].id;
@@ -227,23 +249,38 @@ function findPlayableFromBoard(run,exclude=new Set(),minLen=4){
 }
 
 
-// Economía de tienda y Monedas.
+// Economía de tienda, stock rotatorio y Monedas.
 E.state=E.newState('normal');
+let offers=E.shopOffers();
+if(offers.length!==5||offers.filter(x=>x.discount===25).length!==1)throw new Error('shopOffers no expone 5 artículos con una oferta');
+const sale=offers.find(x=>x.discount===25);
+if(!sale||sale.price>=sale.item.cost)throw new Error('La oferta no reduce realmente el precio');
+
 E.state.coins=20;
+E.state.shopStock=[
+  {id:'shop_play',price:4,discount:0,sold:false},
+  {id:'shop_refresh',price:2,discount:25,sold:false},
+  {id:'shop_reroll',price:5,discount:0,sold:false},
+  {id:'shop_letter',price:5,discount:0,sold:false},
+  {id:'shop_upgrade',price:9,discount:0,sold:false}
+];
 const playsShop=E.state.playsLeft;
 const buyPlay=E.buyShopItem('shop_play');
-if(!buyPlay.ok||E.state.playsLeft!==playsShop+1||E.state.coins!==16)throw new Error('Comprar Jugada extra no aplica coste/efecto correctamente');
+if(!buyPlay.ok||E.state.playsLeft!==playsShop+1||E.state.coins!==16||E.state.coinsSpent!==4)throw new Error('Comprar Jugada extra no aplica coste/efecto correctamente');
+if(E.buyShopItem('shop_play').ok)throw new Error('Se puede comprar dos veces el mismo artículo en una ronda');
 const refreshShop=E.state.shufflesLeft;
 const buyRefresh=E.buyShopItem('shop_refresh');
-if(!buyRefresh.ok||E.state.shufflesLeft!==refreshShop+1||E.state.coins!==13)throw new Error('Comprar Renovación no aplica coste/efecto correctamente');
+if(!buyRefresh.ok||E.state.shufflesLeft!==refreshShop+1||E.state.coins!==14||buyRefresh.price!==2)throw new Error('La oferta de Renovación no aplica precio rebajado');
 
 E.state.coins=0;
+E.state.shopStock=[{id:'shop_diamond',price:10,discount:0,sold:false}];
 const noMoneyBefore=E.state.coins;
 const noMoney=E.buyShopItem('shop_diamond');
 if(noMoney.ok||E.state.coins!==noMoneyBefore)throw new Error('La tienda permite comprar sin Monedas');
 
 E.state=E.newState('normal');
 E.state.coins=5;
+E.state.shopStock=[{id:'shop_letter',price:5,discount:0,sold:false}];
 const reserveBefore=E.state.reserveTiles.length;
 const buyLetter=E.buyShopItem('shop_letter',{letter:'Ñ'});
 if(!buyLetter.ok||E.state.coins!==0||E.state.reserveTiles.length!==reserveBefore+1)throw new Error('Letra a la carta no se compra correctamente');
@@ -252,16 +289,27 @@ if(boughtLetter.kind!=='normal'||boughtLetter.letter!=='Ñ')throw new Error('La 
 
 E.state=E.newState('normal');
 E.state.coins=30;
+E.state.shopStock=[{id:'shop_upgrade',price:9,discount:0,sold:false}];
 E.state.upgrades=C.upgrades.slice(0,3).map(u=>({id:u.id,uses:u.uses}));
 const fullUpgrade=E.buyShopItem('shop_upgrade');
 if(fullUpgrade.ok)throw new Error('La tienda permite una cuarta Mejora');
+
+E.state=E.newState('normal');
+const stockRound=E.state.shopStock.map(x=>x.id).join(',');
+E.state.round=4;
+const playsBeforeSpecial=E.state.playsLeft;
+E.state.bonuses.bossPlay=1;
+if(!E.nextRound()||E.state.round!==5||!E.state.specialRound)throw new Error('No se pudo entrar en una ronda especial para probar Salvoconducto');
+if(E.state.playsLeft!==playsBeforeSpecial+E.modeConfig('normal').roundGain+1)throw new Error('Salvoconducto no concede +1 Jugada en ronda especial');
+if(E.state.shopRound!==5||E.state.shopStock.length!==5)throw new Error('La tienda no renueva stock al cambiar de ronda');
+if(E.state.shopStock.some(x=>x.sold))throw new Error('El stock nuevo hereda artículos vendidos');
 
 E.state=E.newState('normal');
 const economyPlayable=findPlayableFromBoard(E.state,new Set(),4);
 if(!economyPlayable)throw new Error('No hay palabra para probar economía');
 const coinsBeforeWord=E.state.coins;
 const economyPlayed=E.play(economyPlayable.word,economyPlayable.tiles);
-if(!economyPlayed.ok||economyPlayed.coinGain<1||economyPlayed.coinGain>4)throw new Error('Una palabra válida no concede Monedas correctamente');
+if(!economyPlayed.ok||economyPlayed.coinGain<1||economyPlayed.coinGain>7)throw new Error('Una palabra válida no concede Monedas correctamente');
 if(E.state.coins!==coinsBeforeWord+economyPlayed.coinGain)throw new Error('Las Monedas de palabra no se contabilizan en la run');
 
 E.state=E.newState('normal');
@@ -274,6 +322,24 @@ E.state.specialRound='limit_tiles';
 const specialCoins=E.state.coins;
 E.nextRound();
 if(E.state.coins!==specialCoins+4||E.state.lastCoinGain!==4)throw new Error('Superar ronda especial no da +4 Monedas');
+
+// Misiones lingüísticas: la misión asignada siempre debe ser compatible con el tablero.
+let missionRun=null,missionPlayable=null;
+for(let i=0;i<20&&!missionPlayable;i++){
+  const run=E.newState('normal');
+  if(!run.mission)continue;
+  for(const w of localWords.slice(0,E.PLAYABILITY_COMMON_LIMIT)){
+    if(!E.missionMatches(run.mission,w))continue;
+    const tiles=wordTiles(run,w);
+    if(tiles&&E.validate(w).ok){missionRun=run;missionPlayable={word:w,tiles};break;}
+  }
+}
+if(!missionRun||!missionPlayable)throw new Error('No se genera ninguna misión lingüística compatible con su tablero');
+E.state=missionRun;
+const missionCoins=E.state.coins;
+const missionPlayed=E.play(missionPlayable.word,missionPlayable.tiles);
+if(!missionPlayed.ok||!missionPlayed.missionCompleted||missionPlayed.missionGain<=0)throw new Error('Completar una misión lingüística no concede recompensa');
+if(E.state.coins!==missionCoins+missionPlayed.coinGain||!E.state.missionDone||E.state.missionHistory.length!==1)throw new Error('La misión lingüística no actualiza estado/economía correctamente');
 
 // Regresión reportada: usar una carta sobre una letra no puede dejar el juego en estado de "aplicar mejora".
 E.state=E.newState('normal');
@@ -493,4 +559,4 @@ for(const [w,h] of [[700,430],[520,360],[390,250],[900,500]]){
   const s=layoutSize(w,h);if(s*4+21>w+1||s*4+21>h+1)throw new Error(`El tablero puede desbordar ${w}×${h}`);
 }
 
-console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/color/core-loop/slots/upgrades/special-rounds/special-tiles/deadlock-rescue/tinta-economy/reward-art/anchor-6plus/upgrade-state-regression/shop-economy/score-animation/tooltips-special-help/classroom-copy-guard/morphology-esES/bridge/audio/daily OK`);
+console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/color/core-loop/slots/upgrades/special-rounds/special-tiles/deadlock-rescue/tinta-economy/reward-art/anchor-6plus/upgrade-state-regression/shop-rotation/synergies/linguistic-missions/context-coach/special-activations/build-summary/score-animation/tooltips-special-help/classroom-copy-guard/morphology-esES/bridge/audio/daily OK`);

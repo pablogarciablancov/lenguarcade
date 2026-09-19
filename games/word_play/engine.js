@@ -210,7 +210,7 @@ function newState(mode='normal'){
     playsLeft:cfg.startPlays,shufflesLeft:cfg.startRefreshes,rerollsLeft:1,
     board:board(r,'',challengeId),selected:[],modifiers:[],upgrades:[],reserveTiles:[],
     bonuses:{extraPlays:0,extraShuffles:0,roundSeed:0,nextRoundSeed:0,lengthMult:1,letterMult:1,careerXp:0,bossPlay:0,rareLuck:0},
-    challenge:challengeId,specialRound:null,specialData:{},specialHistory:[],rescues:0,focusMutations:0,lastRescue:null,ink:0,tintaCharges:1,tintaUses:0,lastInkGain:0,coins:4,coinsEarned:0,lastCoinGain:0,shopPurchases:0,
+    challenge:challengeId,specialRound:null,specialData:{},specialHistory:[],rescues:0,focusMutations:0,lastRescue:null,ink:0,tintaCharges:1,tintaUses:0,lastInkGain:0,coins:4,coinsEarned:0,lastCoinGain:0,shopPurchases:0,coinsSpent:0,shopStock:[],shopRound:1,specialTilesUsed:0,specialKindUsage:{},mission:null,missionDone:false,missionRewarded:0,missionHistory:[],
     words:[],wordLog:[],usedWords:[],validStreak:0,maxStreak:0,invalidAttempts:0,
     longestWord:'',bestPlay:null,bestCombo:1,previousLength:0,roundWords:0,discoveredCards:[],
     goals:[
@@ -225,6 +225,8 @@ function newState(mode='normal'){
   run.specialData=makeSpecialData(run,r);
   run.board=anchoredBoard(run,r);
   if(specialRound(run.specialRound)?.effect==='topLocked')run.specialData.lockedIds=run.board.slice(0,4).map(t=>t.id);
+  run.shopStock=generateShopStock(run,r);run.shopRound=1;
+  run.mission=pickLinguisticMission(run,r);run.missionDone=false;
   return run;
 }
 function saveRun(){if(state&&!state.completed)localStorage.setItem(SAVE_KEY,JSON.stringify(state));}
@@ -267,7 +269,7 @@ function loadRun(){try{
   r.specialRound=r.specialRound||null;
   r.specialData=r.specialData||{};
   if(r.challenge==='exact5')r.challenge='exact6c';
-  r.rescues=Number(r.rescues||0);r.focusMutations=Number(r.focusMutations||0);r.lastRescue=r.lastRescue||null;r.ink=Number(r.ink||0);r.tintaCharges=Number.isFinite(r.tintaCharges)?Number(r.tintaCharges):1;r.tintaUses=Number(r.tintaUses||0);r.lastInkGain=Number(r.lastInkGain||0);r.coins=Number.isFinite(r.coins)?Number(r.coins):4;r.coinsEarned=Number(r.coinsEarned||0);r.lastCoinGain=Number(r.lastCoinGain||0);r.shopPurchases=Number(r.shopPurchases||0);
+  r.rescues=Number(r.rescues||0);r.focusMutations=Number(r.focusMutations||0);r.lastRescue=r.lastRescue||null;r.ink=Number(r.ink||0);r.tintaCharges=Number.isFinite(r.tintaCharges)?Number(r.tintaCharges):1;r.tintaUses=Number(r.tintaUses||0);r.lastInkGain=Number(r.lastInkGain||0);r.coins=Number.isFinite(r.coins)?Number(r.coins):4;r.coinsEarned=Number(r.coinsEarned||0);r.lastCoinGain=Number(r.lastCoinGain||0);r.shopPurchases=Number(r.shopPurchases||0);r.coinsSpent=Number(r.coinsSpent||0);r.specialTilesUsed=Number(r.specialTilesUsed||0);r.specialKindUsage=r.specialKindUsage&&typeof r.specialKindUsage==='object'?r.specialKindUsage:{};r.missionDone=!!r.missionDone;r.missionRewarded=Number(r.missionRewarded||0);r.missionHistory=Array.isArray(r.missionHistory)?r.missionHistory:[];if(!Array.isArray(r.shopStock)||!r.shopStock.length){r.shopStock=generateShopStock(r);r.shopRound=r.round;}if(!r.mission)r.mission=pickLinguisticMission(r);
   r.target=r.mode==='quick'?999999:roundTarget(r.round,r.challenge,r.mode);
   return repairLoadedBoard(r);
 }catch{return null;}}
@@ -399,7 +401,7 @@ function roundTarget(round,challengeId,mode=state?.mode||'normal'){
   const mult=Number(challenge(challengeId).targetMult||1);
   return Math.max(20,Math.round(base*mult/5)*5);
 }
-function cond(id,ctx){const a=[...ctx.word],p=strip(ctx.word),v=a.filter(vowel).length,c=a.length-v,u=new Set(a).size,r=a.filter(x=>RARE.has(strip(x).toUpperCase())).length,special=(ctx.tiles||[]).filter(t=>t&&t.kind&&t.kind!=='normal'),vowels=a.filter(vowel).map(x=>strip(x));switch(id){case'always':return true;case'startsVowel':return vowel(a[0]);case'startsConsonant':return!vowel(a[0]);case'endsVowel':return vowel(a.at(-1));case'endsConsonant':return!vowel(a.at(-1));case'len3':return a.length===3;case'len5':return a.length===5;case'len6':return a.length===6;case'len7':return a.length===7;case'len8':return a.length===8;case'min7':return a.length>=7;case'accent':return/[áéíóúü]/.test(ctx.word);case'ntilde':return ctx.word.includes('ñ');case'noA':return!p.includes('a');case'noE':return!p.includes('e');case'noO':return!p.includes('o');case'rareLetter':return r>0;case'containsJ':return p.includes('j');case'containsZ':return p.includes('z');case'containsX':return p.includes('x');case'containsQ':return p.includes('q');case'doubleVowel':return/[aeiouáéíóúü]{2}/i.test(ctx.word);case'tripleConsonant':return/[^aeiouáéíóúü]{3}/i.test(ctx.word);case'longerThanPrev':return ctx.prev>0&&a.length>ctx.prev;case'shorterThanPrev':return ctx.prev>0&&a.length<ctx.prev;case'streak3':return ctx.streak>=3;case'streak5':return ctx.streak>=5;case'firstPlay':return ctx.roundWords===0;case'lastPlay':return ctx.playsLeft===1;case'evenLength':return a.length%2===0;case'oddLength':return a.length%2===1;case'twoA':return(p.match(/a/g)||[]).length>=2;case'twoE':return(p.match(/e/g)||[]).length>=2;case'threeVowels':return v>=3;case'fiveConsonants':return c>=5;case'allUnique':return u===a.length;case'palindrome':return a.length>=3&&ctx.word===[...ctx.word].reverse().join('');case'startsM':return p.startsWith('m');case'startsP':return p.startsWith('p');case'endsS':return p.endsWith('s');case'endsN':return p.endsWith('n');case'vowelEdges':return vowel(a[0])&&vowel(a.at(-1));case'sameEdges':return a.length>2&&a[0]===a.at(-1);case'sixUnique':return u>=6;case'max4':return a.length<=4;case'min10':return a.length>=10;case'perfectWord':return a.length>=8&&u===a.length;case'accentLong':return a.length>=7&&/[áéíóúü]/.test(ctx.word);case'twoRare':return r>=2;case'specialTile':return special.length>=1;case'twoSpecialTiles':return special.length>=2;case'bossRound':return ctx.challengeKind==='boss';case'accentAndRare':return/[áéíóúü]/.test(ctx.word)&&r>=1;case'fourVowels':return v>=4;case'crownTile':return special.some(t=>t.kind==='crown');case'min9':return a.length>=9;case'threeRare':return r>=3;case'uniqueVowels':return vowels.length>0&&new Set(vowels).size===vowels.length;default:return false;}}
+function cond(id,ctx){const a=[...ctx.word],p=strip(ctx.word),v=a.filter(vowel).length,c=a.length-v,u=new Set(a).size,r=a.filter(x=>RARE.has(strip(x).toUpperCase())).length,special=(ctx.tiles||[]).filter(t=>t&&t.kind&&t.kind!=='normal'),vowels=a.filter(vowel).map(x=>strip(x));switch(id){case'always':return true;case'startsVowel':return vowel(a[0]);case'startsConsonant':return!vowel(a[0]);case'endsVowel':return vowel(a.at(-1));case'endsConsonant':return!vowel(a.at(-1));case'len3':return a.length===3;case'len4':return a.length===4;case'len5':return a.length===5;case'len6':return a.length===6;case'len7':return a.length===7;case'len8':return a.length===8;case'min7':return a.length>=7;case'accent':return/[áéíóúü]/.test(ctx.word);case'ntilde':return ctx.word.includes('ñ');case'noA':return!p.includes('a');case'noE':return!p.includes('e');case'noO':return!p.includes('o');case'rareLetter':return r>0;case'containsJ':return p.includes('j');case'containsZ':return p.includes('z');case'containsX':return p.includes('x');case'containsQ':return p.includes('q');case'doubleVowel':return/[aeiouáéíóúü]{2}/i.test(ctx.word);case'tripleConsonant':return/[^aeiouáéíóúü]{3}/i.test(ctx.word);case'longerThanPrev':return ctx.prev>0&&a.length>ctx.prev;case'shorterThanPrev':return ctx.prev>0&&a.length<ctx.prev;case'streak3':return ctx.streak>=3;case'streak5':return ctx.streak>=5;case'firstPlay':return ctx.roundWords===0;case'lastPlay':return ctx.playsLeft===1;case'evenLength':return a.length%2===0;case'oddLength':return a.length%2===1;case'twoA':return(p.match(/a/g)||[]).length>=2;case'twoE':return(p.match(/e/g)||[]).length>=2;case'threeVowels':return v>=3;case'fiveConsonants':return c>=5;case'allUnique':return u===a.length;case'palindrome':return a.length>=3&&ctx.word===[...ctx.word].reverse().join('');case'startsM':return p.startsWith('m');case'startsP':return p.startsWith('p');case'endsS':return p.endsWith('s');case'endsN':return p.endsWith('n');case'vowelEdges':return vowel(a[0])&&vowel(a.at(-1));case'sameEdges':return a.length>2&&a[0]===a.at(-1);case'sixUnique':return u>=6;case'max4':return a.length<=4;case'min10':return a.length>=10;case'perfectWord':return a.length>=8&&u===a.length;case'accentLong':return a.length>=7&&/[áéíóúü]/.test(ctx.word);case'twoRare':return r>=2;case'specialTile':return special.length>=1;case'twoSpecialTiles':return special.length>=2;case'bossRound':return ctx.challengeKind==='boss';case'specialRound':return !!ctx.specialRound;case'accentAndRare':return/[áéíóúü]/.test(ctx.word)&&r>=1;case'fourVowels':return v>=4;case'crownTile':return special.some(t=>t.kind==='crown');case'min9':return a.length>=9;case'threeRare':return r>=3;case'uniqueVowels':return vowels.length>0&&new Set(vowels).size===vowels.length;case'prefixDes':return p.startsWith('des')&&a.length>=6;case'suffixMente':return p.endsWith('mente')&&a.length>=7;case'longUnique':return a.length>=7&&u===a.length;default:return false;}}
 function slotBonusAt(index){return Number(C.wordLengthSlots[index]||0);}
 function lengthBonus(n){
   let total=0;
@@ -421,19 +423,22 @@ function score(word,tiles,preview=false){
   let emeraldHits=0;
   const effects=[];
   const tilePoints=[];
+  const triggeredModifiers=[];
+  const specialEvents=[];
   const scoreRng=boardRng();
   const selectedIds=new Set(tiles.map(t=>t.id));
   tiles.forEach((t,i)=>{
     let value=tileScore(t);
-    if(!specialsOff&&t?.kind==='mirror'&&i>0){value=tileScore(tiles[i-1]);effects.push('Espejo · copia la ficha izquierda');}
+    if(!specialsOff&&t?.kind==='mirror'&&i>0){value=tileScore(tiles[i-1]);effects.push('Espejo · copia la ficha izquierda');specialEvents.push({kind:'mirror',label:'ESPEJO',text:'copia la ficha izquierda'});}
     if(!specialsOff&&t?.kind==='bang'){
       value=(state?.board||[]).filter(q=>!selectedIds.has(q.id)).reduce((sum,q)=>sum+tileScore(q),0);
-      effects.push(`Exclamación +${value}`);
+      effects.push(`Exclamación +${value}`);specialEvents.push({kind:'bang',label:'EXCLAMACIÓN',text:'+'+value});
     }
+    if(!specialsOff&&t?.kind==='echo'){value*=2;effects.push('Eco · valor de ficha ×2');specialEvents.push({kind:'echo',label:'ECO',text:'ficha ×2'});}
     if(sr==='vowelsZero'&&vowel(word[i]||''))value=0;
     if(!specialsOff&&t?.kind==='emerald'){
       const hit=preview?false:scoreRng()<.25;
-      if(hit){value*=5;emeraldHits++;effects.push(`Esmeralda ×5`);}
+      if(hit){value*=5;emeraldHits++;effects.push(`Esmeralda ×5`);specialEvents.push({kind:'emerald',label:'ESMERALDA',text:'×5'});}
       else if(preview)effects.push('Esmeralda · 25% ×5');
     }
     rawWordScore+=value;
@@ -441,15 +446,15 @@ function score(word,tiles,preview=false){
     if(!specialsOff&&t?.kind==='gold')goldCount++;
   });
   let wordMultiplier=1;
-  if(!specialsOff&&goldCount>=2){wordMultiplier*=goldCount;effects.push(`${goldCount} doradas · Word Score ×${goldCount}`);}
+  if(!specialsOff&&goldCount>=2){wordMultiplier*=goldCount;effects.push(`${goldCount} doradas · Word Score ×${goldCount}`);specialEvents.push({kind:'gold',label:'DORADAS',text:'Word ×'+goldCount});}
   const lastTile=tiles.at(-1);
-  if(!specialsOff&&lastTile?.kind==='dot'){wordMultiplier*=2;effects.push('Punto final · Word Score ×2');}
+  if(!specialsOff&&lastTile?.kind==='dot'){wordMultiplier*=2;effects.push('Punto final · Word Score ×2');specialEvents.push({kind:'dot',label:'PUNTO FINAL',text:'Word ×2'});}
   let wordScore=Math.round(rawWordScore*wordMultiplier);
 
   let bonusPoints=lengthBonus(tiles.length);
   if(bonusPoints)effects.push(`Longitud +${bonusPoints}`);
   let finalMultiplier=1;
-  const ctx={word,tiles,prev:state.previousLength,streak:state.validStreak+(preview?1:0),roundWords:state.roundWords,playsLeft:state.playsLeft,challengeId:state.challenge,challengeKind:challenge(state.challenge).kind};
+  const ctx={word,tiles,prev:state.previousLength,streak:state.validStreak+(preview?1:0),roundWords:state.roundWords,playsLeft:state.playsLeft,challengeId:state.challenge,challengeKind:challenge(state.challenge).kind,specialRound:!!state.specialRound};
   for(const id of state.modifiers){
     const m=C.modifiers.find(x=>x.id===id);if(!m||!cond(m.condition,ctx))continue;
     if(m.effect==='flat')bonusPoints+=m.value;
@@ -458,12 +463,12 @@ function score(word,tiles,preview=false){
     else if(m.effect==='repeatFlat')bonusPoints+=([...word].length-new Set([...word]).size)*m.value;
     else if(m.effect==='rareFlat')bonusPoints+=[...word].filter(x=>RARE.has(strip(x).toUpperCase())).length*m.value;
     else if(m.effect==='specialFlat')bonusPoints+=tiles.filter(t=>t&&t.kind&&t.kind!=='normal').length*m.value;
-    effects.push(m.effect==='mult'?`${m.name} ×${m.value}`:`${m.name} +bonus`);
+    const activation=m.effect==='mult'?`${m.name} ×${m.value}`:`${m.name} +bonus`;effects.push(activation);triggeredModifiers.push({id:m.id,name:m.name,text:m.effect==='mult'?'×'+m.value:'+bonus'});
   }
-  if(!specialsOff&&tiles.some(t=>t.kind==='volatile')){finalMultiplier*=1.35;effects.push('Explosiva · Final ×1,35');}
+  if(!specialsOff&&tiles.some(t=>t.kind==='volatile')){finalMultiplier*=1.35;effects.push('Explosiva · Final ×1,35');specialEvents.push({kind:'volatile',label:'EXPLOSIVA',text:'Final ×1,35'});}
   let total=Math.round((wordScore+bonusPoints)*finalMultiplier);
   if(sr==='minSixZero'&&tiles.length<6){total=0;effects.push('Ronda especial · menos de 6 fichas = 0');}
-  return{subtotal:wordScore+bonusPoints,multiplier:finalMultiplier,total,wordScore,bonusPoints,wordMultiplier,finalMultiplier,effects,emeraldHits,lengthBonus:lengthBonus(tiles.length),tilePoints};
+  return{subtotal:wordScore+bonusPoints,multiplier:finalMultiplier,total,wordScore,bonusPoints,wordMultiplier,finalMultiplier,effects,emeraldHits,lengthBonus:lengthBonus(tiles.length),tilePoints,triggeredModifiers,specialEvents};
 }
 function reserveTemplateFromTile(t){
   return{kind:t.kind||'normal',letter:t.letter||null,bonus:t.bonus||0,charge:t.charge||0};
@@ -540,17 +545,72 @@ function sellModifier(id){
   state.modifiers.splice(i,1);state.shufflesLeft+=value;saveRun();return value;
 }
 function skipReward(){state.shufflesLeft+=2;saveRun();return 2;}
+function missionMatches(mission,word){
+  if(!mission)return false;
+  const w=normalize(word),p=strip(w),a=[...w],u=new Set(a).size;
+  switch(mission.condition){
+    case'accent':return/[áéíóúü]/.test(w);
+    case'ntilde':return w.includes('ñ');
+    case'prefixDes':return p.startsWith('des')&&a.length>=6;
+    case'suffixMente':return p.endsWith('mente')&&a.length>=7;
+    case'longUnique':return a.length>=7&&u===a.length;
+    default:return false;
+  }
+}
+function missionHasPlayable(run,mission){
+  if(!run?.board?.length||!mission)return false;
+  const usable=playabilityTiles(run.board,run),counts=letterCounts(usable.map(t=>t.letter));
+  for(const entry of wordIndex){
+    if(entry.rank>=PLAYABILITY_COMMON_LIMIT)break;
+    if(entry.length<4||!missionMatches(mission,entry.word))continue;
+    if(run.challenge&&run.challenge!=='none'&&!challengeOK(run.challenge,entry.word))continue;
+    if(!specialWordAllowed(entry.word,run)||!wordFitsCounts(entry.signature,counts))continue;
+    return true;
+  }
+  return false;
+}
+function pickLinguisticMission(run=state,r=Math.random){
+  const pool=(C.linguisticMissions||[]).filter(m=>missionHasPlayable(run,m));
+  return pool.length?pick(pool,r):null;
+}
+function shopRandom(run=state){
+  if(run?.mode!=='daily')return Math.random;
+  let i=0;const seed=((Number(run.dailySeed||daySeed())+Number(run.round||1)*7919)>>>0)||1;
+  return()=>seededValue(seed,i++);
+}
+function generateShopStock(run=state,r=null){
+  const rng=r||shopRandom(run),items=(C.shopItems||[]).slice();
+  if(!items.length)return[];
+  const utility=items.filter(x=>['play','refresh','reroll','tinta'].includes(x.effect));
+  const chosen=[];const first=pick(utility.length?utility:items,rng);if(first)chosen.push(first);
+  const pool=items.filter(x=>!chosen.some(y=>y.id===x.id));
+  while(chosen.length<Math.min(5,items.length)&&pool.length){
+    const i=Math.floor(rng()*pool.length);chosen.push(pool.splice(i,1)[0]);
+  }
+  const sale=chosen.length?Math.floor(rng()*chosen.length):-1;
+  return chosen.map((item,i)=>({id:item.id,price:i===sale?Math.max(1,Math.floor(item.cost*.75)):item.cost,discount:i===sale?25:0,sold:false}));
+}
+function shopOffers(){
+  if(!state)return[];
+  if(!Array.isArray(state.shopStock)||!state.shopStock.length)state.shopStock=generateShopStock(state);
+  return state.shopStock.map(o=>({...o,item:shopItem(o.id)})).filter(o=>o.item);
+}
 function shopItem(id){return C.shopItems?.find(x=>x.id===id)||null;}
 function shopStatus(id){
   const item=shopItem(id);
   if(!state||!item)return{ok:false,message:'Artículo no disponible.'};
-  if(Number(state.coins||0)<Number(item.cost||0))return{ok:false,message:`Necesitas ${item.cost} Monedas.`,item};
-  if(item.effect==='upgrade'&&state.upgrades.length>=3)return{ok:false,message:'Ya llevas 3 Mejoras. Usa una antes de comprar otra.',item};
-  return{ok:true,item};
+  if(!Array.isArray(state.shopStock)||!state.shopStock.length)state.shopStock=generateShopStock(state);
+  const offer=state.shopStock.find(x=>x.id===id);
+  if(!offer)return{ok:false,message:'Ese artículo no está en la tienda de esta ronda.',item};
+  if(offer.sold)return{ok:false,message:'Ese artículo ya se ha comprado esta ronda.',item,offer,price:offer.price};
+  const price=Number(offer.price??item.cost??0);
+  if(Number(state.coins||0)<price)return{ok:false,message:`Necesitas ${price} Monedas.`,item,offer,price};
+  if(item.effect==='upgrade'&&state.upgrades.length>=3)return{ok:false,message:'Ya llevas 3 Mejoras. Usa una antes de comprar otra.',item,offer,price};
+  return{ok:true,item,offer,price};
 }
 function buyShopItem(id,options={}){
   const status=shopStatus(id);if(!status.ok)return status;
-  const item=status.item,rng=boardRng();
+  const item=status.item,offer=status.offer,price=status.price,rng=boardRng();
   let detail='';
   switch(item.effect){
     case'play':state.playsLeft+=Number(item.amount||1);detail='+1 Jugada';break;
@@ -571,8 +631,8 @@ function buyShopItem(id,options={}){
     }
     default:return{ok:false,message:'Artículo todavía no implementado.',item};
   }
-  state.coins-=Number(item.cost||0);state.shopPurchases=Number(state.shopPurchases||0)+1;saveRun();
-  return{ok:true,item,detail,coins:state.coins};
+  state.coins-=price;state.coinsSpent=Number(state.coinsSpent||0)+price;state.shopPurchases=Number(state.shopPurchases||0)+1;if(offer)offer.sold=true;saveRun();
+  return{ok:true,item,detail,coins:state.coins,price,discount:Number(offer?.discount||0)};
 }
 function coinRewardForPlay(words,tiles){
   const longest=Math.max(0,...(words||[]).map(w=>[...w].length));
@@ -635,11 +695,13 @@ function nextRound(){
   state.totalScore+=seed;
   state.bonuses.nextRoundSeed=0;
   state.target=roundTarget(state.round,state.challenge,state.mode);
-  state.playsLeft+=cfg.roundGain+state.bonuses.extraPlays;
+  state.playsLeft+=cfg.roundGain+state.bonuses.extraPlays+(state.specialRound?Number(state.bonuses.bossPlay||0):0);
   state.shufflesLeft+=state.bonuses.extraShuffles;
   state.roundWords=0;
   state.selected=[];
   stabilizeBoard('nueva ronda');
+  state.shopStock=generateShopStock(state);state.shopRound=state.round;
+  state.mission=pickLinguisticMission(state,boardRng());state.missionDone=false;
   saveRun();
   return true;
 }
@@ -911,6 +973,7 @@ function play(word,tiles){
   const sv=specialValidation(displayWord,tiles);if(!sv.ok)return sv;
   state.validStreak++;state.maxStreak=Math.max(state.maxStreak,state.validStreak);
   const sc=score(displayWord,tiles,false);const effect=specialEffect();const selectedIds=new Set(tiles.map(t=>t.id));
+  const usedSpecials=tiles.filter(t=>t?.kind&&t.kind!=='normal');state.specialTilesUsed=Number(state.specialTilesUsed||0)+usedSpecials.length;for(const t of usedSpecials)state.specialKindUsage[t.kind]=Number(state.specialKindUsage[t.kind]||0)+1;
   for(const t of tiles){t.uses++;if(t.kind==='ink')t.bonus=(t.bonus||0)+1;}
   if(effect!=='specialsOff'){for(const t of state.board)if(t.kind==='diamond'&&!selectedIds.has(t.id))t.charge=(t.charge||0)+5;}
   let playCost=effect==='doublePlay'?2:1,penalty=0;
@@ -918,14 +981,15 @@ function play(word,tiles){
   state.playsLeft-=playCost+penalty;
   for(const t of tiles)if(effect!=='specialsOff'&&t.kind==='potion')state.playsLeft+=Math.max(1,tileScore(t));
   state.roundScore+=sc.total;state.totalScore+=sc.total;state.previousLength=tiles.length;
-  const coinGain=coinRewardForPlay(validated,tiles);state.coins=Number(state.coins||0)+coinGain;state.coinsEarned=Number(state.coinsEarned||0)+coinGain;state.lastCoinGain=coinGain;
+  let missionGain=0,missionCompleted=null;if(state.mission&&!state.missionDone&&validated.some(w=>missionMatches(state.mission,w))){missionCompleted=state.mission;missionGain=Number(state.mission.reward||0);state.missionDone=true;state.missionRewarded=Number(state.missionRewarded||0)+missionGain;state.missionHistory.push({id:state.mission.id,round:state.round,word:validated.find(w=>missionMatches(state.mission,w))||validated[0],reward:missionGain});}
+  const coinGain=coinRewardForPlay(validated,tiles)+missionGain;state.coins=Number(state.coins||0)+coinGain;state.coinsEarned=Number(state.coinsEarned||0)+coinGain;state.lastCoinGain=coinGain;
   for(const valid of validated){state.words.push(valid);state.usedWords.push(valid);career.words[valid]=(career.words[valid]||0)+1;if(valid.length>(state.longestWord||'').length)state.longestWord=valid;if(valid.length>(career.bestWord||'').length)career.bestWord=valid;}
-  state.roundWords++;state.wordLog.push({word:displayWord,score:sc.total,wordScore:sc.wordScore,bonusPoints:sc.bonusPoints,effects:sc.effects,coins:coinGain});
+  state.roundWords++;state.wordLog.push({word:displayWord,score:sc.total,wordScore:sc.wordScore,bonusPoints:sc.bonusPoints,effects:sc.effects,coins:coinGain,mission:missionCompleted?.id||null});
   if(!state.bestPlay||sc.total>state.bestPlay.score)state.bestPlay={word:displayWord,score:sc.total};state.bestCombo=Math.max(state.bestCombo,sc.multiplier);
   if(validated.some(w=>w.length>=7))state.goals[0].done=true;if(validated.some(w=>/[áéíóúü]/.test(w)))state.goals[1].done=true;if(tiles.some(t=>RARE.has(t.letter)))state.goals[2].done=true;
   const rescue=replace(tiles.map(t=>t.id));if(effect==='autoRefresh')refreshBoard(false,true);
   state.selected=[];
-  saveCareer();saveRun();return{ok:true,word:displayWord,words:validated,score:sc,playCost,penalty,rescue,coinGain};
+  saveCareer();saveRun();return{ok:true,word:displayWord,words:validated,score:sc,playCost,penalty,rescue,coinGain,missionGain,missionCompleted};
 }
 function refreshBoard(manual=true,free=false){
   const effect=specialEffect();
@@ -976,5 +1040,5 @@ function useTintaViva(count=6){
 function metric(a){switch(a.metric){case'careerWords':return Object.values(career.words).reduce((s,n)=>s+n,0);case'bestPlay':return Math.max(career.bestPlay,state?.bestPlay?.score||0);case'runScore':return state?.totalScore||0;case'longest':return Math.max((career.bestWord||'').length,(state?.longestWord||'').length);case'ntilde':return state?.words.some(w=>w.includes('ñ'))?1:0;case'accent':return state?.words.some(w=>/[áéíóúü]/.test(w))?1:0;case'streak':return state?.maxStreak||0;case'rare':return state?.words.some(w=>/[jñqxzkw]/i.test(w))?1:0;case'wins':return career.wins;case'uniqueWords':return Object.keys(career.words).length;case'cards':return Object.keys(career.cards).length;case'combo':return Math.max(career.bestCombo,state?.bestCombo||1);case'quick':return career.quickGames;case'daily':return career.dailyGames;case'perfect':return state?.completed&&state?.won&&state.invalidAttempts===0?1:0;case'round':return state?.round||0;default:return 0;}}
 function achievements(){const got=[];for(const a of C.achievements)if(!career.achievements[a.id]&&metric(a)>=a.value){career.achievements[a.id]=Date.now();career.xp+=25;got.push(a);}if(got.length)saveCareer();return got;}
 function finish(won){state.won=!!won;state.completed=true;clearRun();career.games++;if(won&&state.mode!=='quick')career.wins++;if(state.mode==='quick')career.quickGames++;if(state.mode==='daily')career.dailyGames++;career.bestScore=Math.max(career.bestScore,state.totalScore);career.bestPlay=Math.max(career.bestPlay,state.bestPlay?.score||0);career.bestCombo=Math.max(career.bestCombo,state.bestCombo);let xp=Math.round(state.words.length*4+state.round*10+(won?80:0)+state.bonuses.careerXp);if(state.mode==='quick')xp=Math.round(xp*.7);career.xp+=xp;const got=achievements();saveCareer();return{xp,got};}
-window.WordPlayEngine={C,LETTER_VALUES,VOWELS,ACCENTABLE,BOARD_RULES,PLAYABILITY_COMMON_LIMIT,anchorWordCandidates,anchoredBoard,boardQuality,boardPlayability,rescueBoard,stabilizeBoard,isBalancedBoard,repairLoadedBoard,get morphologyReady(){return !!hunspell?.loaded},get state(){return state},set state(v){state=v},get career(){return career},settings,saveSettings,saveRun,loadRun,clearRun,newState,loadDictionary,validate,challenge,chooseChallenge,modeConfig,totalRounds,isSpecialRound,specialRound,specialEffect,roundTarget,slotBonusAt,tileScore,score,rewards,chooseReward,sellModifier,skipReward,shopItem,shopStatus,buyShopItem,useUpgrade,nextRound,play,shuffle,classroomScramble,buyTintaViva,useTintaViva,achievements,finish,strip,vowel,pick,daySeed,runRandom};
+window.WordPlayEngine={C,LETTER_VALUES,VOWELS,ACCENTABLE,BOARD_RULES,PLAYABILITY_COMMON_LIMIT,anchorWordCandidates,anchoredBoard,boardQuality,boardPlayability,rescueBoard,stabilizeBoard,isBalancedBoard,repairLoadedBoard,get morphologyReady(){return !!hunspell?.loaded},get state(){return state},set state(v){state=v},get career(){return career},settings,saveSettings,saveRun,loadRun,clearRun,newState,loadDictionary,validate,challenge,chooseChallenge,modeConfig,totalRounds,isSpecialRound,specialRound,specialEffect,roundTarget,slotBonusAt,tileScore,score,rewards,chooseReward,sellModifier,skipReward,shopItem,shopOffers,shopStatus,buyShopItem,generateShopStock,missionMatches,pickLinguisticMission,useUpgrade,nextRound,play,shuffle,classroomScramble,buyTintaViva,useTintaViva,achievements,finish,strip,vowel,pick,daySeed,runRandom};
 })();
