@@ -30,9 +30,11 @@ for (const required of [
   './content.js','./lexicon.js','./vendor/typo.js','./engine.js','./bridge.js','./app.js','./layout.js','./sound.js','./game-feel.js','./styles.css','./responsive.css','./arcade.css'
 ]) if (!index.includes(required)) throw new Error(`Falta ${required} en index.html`);
 
-if(!index.includes('20260919-art-anchor6-v1'))throw new Error('Los assets de Word Play no llevan la versión de arte y ancla 6+ actual');
+if(!index.includes('20260919-upgrade-state-fix-v1'))throw new Error('Los assets de Word Play no llevan la versión de corrección de estado de mejoras');
 if(!app.includes('dictionaryReady')||!app.includes('launchButtons'))throw new Error('La partida puede arrancar antes de cargar el diccionario');
 if(app.includes("visibilitychange"))throw new Error('Cambiar de pestaña no debe activar Tinta Viva automáticamente');
+if(!/function applyUpgrade[\s\S]*const upgradeId=activeUpgrade[\s\S]*activeUpgrade=null[\s\S]*render\(\)/.test(app))throw new Error('Aplicar una Mejora debe desarmar el modo de selección tras una sola ficha');
+if(!app.includes('sanitizeSelection'))throw new Error('La UI no sanea selecciones cuyos IDs ya no existen en el tablero');
 
 for (const required of ['100dvh','overflow:hidden','.board','.reward-card','.collection-body','.boss-badge']) {
   if (!css.replaceAll(' ', '').includes(required.replaceAll(' ', ''))) throw new Error(`Falta ${required} en styles.css`);
@@ -189,6 +191,70 @@ if(!upgraded.ok||E.state.board.find(t=>t.id===targetId)?.bonus!==beforeBonus+5||
 const beforeRefresh=E.state.shufflesLeft;
 if(E.skipReward()!==2||E.state.shufflesLeft!==beforeRefresh+2)throw new Error('Pasar recompensa no concede +2 renovaciones');
 
+function wordTiles(run,word){
+  const needed=[...E.strip(word).toUpperCase()];
+  const used=new Set(),tiles=[];
+  for(const letter of needed){
+    const t=run.board.find(x=>!used.has(x.id)&&x.letter===letter);
+    if(!t)return null;
+    used.add(t.id);tiles.push(t);
+  }
+  return tiles;
+}
+function findPlayableFromBoard(run,exclude=new Set(),minLen=4){
+  for(const w of localWords.slice(0,E.PLAYABILITY_COMMON_LIMIT)){
+    if(exclude.has(w))continue;
+    const n=E.strip(w);
+    if([...n].length<minLen||[...n].length>10)continue;
+    if(!E.validate(w).ok)continue;
+    const tiles=wordTiles(run,w);
+    if(tiles)return{word:w,tiles};
+  }
+  return null;
+}
+
+// Regresión reportada: usar una carta sobre una letra no puede dejar el juego en estado de "aplicar mejora".
+E.state=E.newState('normal');
+E.state.upgrades=[{id:'up_plus5',uses:2}];
+E.state.selected=[{id:E.state.board[1].id,char:E.state.board[1].letter}];
+const upgradeTarget=E.state.board[0].id;
+const upgradeResult=E.useUpgrade('up_plus5',upgradeTarget);
+if(!upgradeResult.ok)throw new Error('No se pudo aplicar la mejora de regresión');
+if(E.state.selected.length)throw new Error('La selección queda sucia después de aplicar una Mejora');
+const remainingUpgrade=E.state.upgrades.find(x=>x.id==='up_plus5');
+if(!remainingUpgrade||remainingUpgrade.uses!==1)throw new Error('Una Mejora multiuso no conserva correctamente su uso restante');
+
+const beforeWords=E.state.words.length;
+const firstPlayable=findPlayableFromBoard(E.state,new Set(),4);
+if(!firstPlayable)throw new Error('No hay una palabra jugable tras aplicar una Mejora');
+E.state.selected=firstPlayable.tiles.map((t,i)=>({id:t.id,char:[...E.strip(firstPlayable.word).toUpperCase()][i]}));
+const firstPlayed=E.play(firstPlayable.word,firstPlayable.tiles);
+if(!firstPlayed.ok)throw new Error(`La primera palabra después de una Mejora falla: ${firstPlayed.message}`);
+if(E.state.selected.length)throw new Error('JUGAR PALABRA no limpia la palabra seleccionada después de una jugada válida');
+if(E.state.words.length!==beforeWords+1)throw new Error('La primera palabra tras una Mejora no se contabiliza');
+
+const secondPlayable=findPlayableFromBoard(E.state,new Set(E.state.usedWords),4);
+if(!secondPlayable)throw new Error('No hay segunda palabra jugable tras la reposición');
+E.state.selected=secondPlayable.tiles.map((t,i)=>({id:t.id,char:[...E.strip(secondPlayable.word).toUpperCase()][i]}));
+const secondPlayed=E.play(secondPlayable.word,secondPlayable.tiles);
+if(!secondPlayed.ok)throw new Error(`La segunda palabra después de una Mejora falla: ${secondPlayed.message}`);
+if(E.state.selected.length)throw new Error('La segunda jugada deja la palabra antigua en pantalla/estado');
+if(E.state.words.length!==beforeWords+2)throw new Error('Las nuevas palabras dejan de contabilizarse después de usar una Mejora');
+
+// Todas las Mejoras que apuntan a ficha deben mantener tablero y selección coherentes.
+for(const u of C.upgrades){
+  E.state=E.newState('normal');
+  E.state.upgrades=[{id:u.id,uses:u.uses}];
+  E.state.selected=[{id:E.state.board[1].id,char:E.state.board[1].letter}];
+  const target=E.state.board.find(t=>t.kind==='normal')||E.state.board[0];
+  const result=E.useUpgrade(u.id,target.id);
+  if(!result.ok)throw new Error(`La Mejora ${u.id} falla al aplicarse: ${result.message}`);
+  if(E.state.selected.length)throw new Error(`La Mejora ${u.id} deja selección residual`);
+  if(E.state.board.length!==16)throw new Error(`La Mejora ${u.id} rompe el tamaño del tablero`);
+  const q=E.boardPlayability(E.state.board,E.state);
+  if(!q.safe||q.len6<1)throw new Error(`La Mejora ${u.id} deja un tablero no jugable: ${JSON.stringify(q)}`);
+}
+
 E.state=E.newState('normal');
 const nightmare=['X','U','I','Ñ','B','W','I','Z','T','U','Y','J','V','K','M','I'];
 E.state.board.forEach((t,i)=>t.letter=nightmare[i]);
@@ -300,16 +366,10 @@ for(let i=0;i<10;i++){
 }
 
 E.state=E.newState('normal');
-const anchor=E.anchorWordCandidates(E.state).find(x=>x.length>=6);
-if(!anchor)throw new Error('No hay palabra ancla frecuente de 6+');
-const chosen=[];
-for(const letter of [...E.strip(anchor.word).toUpperCase()]){
-  const tile=E.state.board.find(t=>!chosen.includes(t)&&t.letter===letter);
-  if(!tile)throw new Error(`El tablero anclado no contiene realmente «${anchor.word}»`);
-  chosen.push(tile);
-}
-const played=E.play(anchor.word,chosen);
-if(!played.ok)throw new Error(`No se pudo jugar la palabra ancla «${anchor.word}»: ${played.message}`);
+const anchorPlayable=findPlayableFromBoard(E.state,new Set(),6);
+if(!anchorPlayable)throw new Error('El tablero anclado no contiene ninguna palabra jugable de 6+');
+const played=E.play(anchorPlayable.word,anchorPlayable.tiles);
+if(!played.ok)throw new Error(`No se pudo jugar una palabra de 6+ del tablero: ${played.message}`);
 assertLongWord(E.state,'reposición tras jugar palabra');
 
 E.state=E.newState('normal');
@@ -371,4 +431,4 @@ for(const [w,h] of [[700,430],[520,360],[390,250],[900,500]]){
   const s=layoutSize(w,h);if(s*4+21>w+1||s*4+21>h+1)throw new Error(`El tablero puede desbordar ${w}×${h}`);
 }
 
-console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/color/core-loop/slots/upgrades/special-rounds/special-tiles/deadlock-rescue/tinta-economy/reward-art/anchor-6plus/classroom-copy-guard/morphology-esES/bridge/audio/daily OK`);
+console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/color/core-loop/slots/upgrades/special-rounds/special-tiles/deadlock-rescue/tinta-economy/reward-art/anchor-6plus/upgrade-state-regression/classroom-copy-guard/morphology-esES/bridge/audio/daily OK`);

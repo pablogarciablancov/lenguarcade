@@ -7,7 +7,12 @@ const fmt=n=>new Intl.NumberFormat('es-ES').format(Math.round(Number(n)||0));
 function state(){return E.state}
 function showFeedback(t,type=''){ui.feedback.textContent=t;ui.feedback.className=`feedback ${type}`;}
 function syncSpecialChars(){const s=state();if(!s)return;s.selected.forEach((x,i)=>{const t=s.board.find(q=>q.id===x.id);if(t?.kind==='mirror'&&i>0)x.char=s.selected[i-1].char;if(t?.kind==='plus')x.char='+';if(t?.kind==='bang')x.char='!';});}
-function currentWord(){syncSpecialChars();return state().selected.map(x=>x.char).join('').toLowerCase();}
+function sanitizeSelection(){
+  const s=state();if(!s)return;
+  const ids=new Set(s.board.map(t=>t.id));
+  s.selected=s.selected.filter(x=>ids.has(x.id));
+}
+function currentWord(){sanitizeSelection();syncSpecialChars();return state().selected.map(x=>x.char).join('').toLowerCase();}
 function showModal(m){ui.backdrop.classList.remove('hidden');[ui.reward,ui.difficulty,ui.info,ui.pause,ui.collection,ui.wordlog,ui.end].forEach(x=>x.classList.add('hidden'));m.classList.remove('hidden');}
 function hideModal(){ui.backdrop.classList.add('hidden');[ui.reward,ui.difficulty,ui.info,ui.pause,ui.collection,ui.wordlog,ui.end].forEach(x=>x.classList.add('hidden'));}
 function renderCareer(){const c=E.career,u=Object.keys(c.words).length,lvl=Math.floor(c.xp/250)+1,within=c.xp%250;ui.best.textContent=fmt(c.bestScore);ui.bestWord.textContent=c.bestWord?c.bestWord.toUpperCase():'—';ui.games.textContent=c.games;ui.unique.textContent=u;ui.level.textContent=`Nivel léxico ${lvl}`;ui.xp.textContent=`${within} / 250 XP`;ui.xpBar.style.width=`${within/250*100}%`;const r=E.loadRun();ui.cont.classList.toggle('hidden',!r);if(r)ui.contSummary.textContent=`Ronda ${r.round} · ${fmt(r.totalScore)} pts`;}
@@ -77,8 +82,15 @@ function renderBoard(){
   }
 }
 function applyUpgrade(tileId){
-  if(!activeUpgrade)return;state().selected=[];const res=E.useUpgrade(activeUpgrade,tileId);
-  if(res.ok){showFeedback(res.rescue?.rescued?'Tinta de rescate: he renovado el tablero para evitar un atasco.':res.message,'good');if(!state().upgrades.some(x=>x.id===activeUpgrade))activeUpgrade=null;}else showFeedback(res.message,'warn');render();
+  if(!activeUpgrade)return;
+  const upgradeId=activeUpgrade;
+  state().selected=[];
+  const res=E.useUpgrade(upgradeId,tileId);
+  if(res.ok){
+    activeUpgrade=null;
+    showFeedback(res.rescue?.rescued?'Mejora aplicada · el tablero se ha reajustado para mantenerlo jugable.':res.message,'good');
+  }else showFeedback(res.message,'warn');
+  render();
 }
 function selectTile(id,forcedChar=null){const s=state(),t=s.board.find(x=>x.id===id);if(!t||tileLocked(t)||s.selected.some(x=>x.id===id))return;if(t.kind==='mirror'&&!s.selected.length){showFeedback('El Espejo necesita una ficha a su izquierda.','warn');return;}const specialChar=t.kind==='wild'?'A':t.kind==='mirror'?s.selected.at(-1)?.char||'A':t.kind==='plus'?'+':t.kind==='bang'?'!':t.letter;s.selected.push({id:t.id,char:forcedChar||specialChar});renderBoard();renderWord();}
 function cycleWild(current){const alpha='ABCDEFGHIJKLMNÑOPQRSTUVWXYZ';const i=alpha.indexOf(String(current||'A').toUpperCase());return alpha[(i+1)%alpha.length];}
