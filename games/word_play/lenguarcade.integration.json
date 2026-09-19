@@ -11,5 +11,5 @@
     "saveProgress": true,
     "supabaseCatalog": true
   },
-  "notes": "Roguelike de palabras con español completo, tablero equilibrado y rescate automático de atascos. Core loop con Word Score + Bonus Points + Final Score, Renovaciones, Modificadores, Mejoras, Obsequios, fichas especiales y rondas especiales. Tinta Viva es ahora una habilidad consumible de la run: 1 carga inicial, muta 6 fichas sin gastar Jugadas/Renovaciones; completar rondas da Tinta (+1 normal, +2 especial) y 3 Tintas compran una carga. Modo Aula mantiene bloqueo de copiar/arrastrar, pero cambiar de pestaña no altera el tablero."
+  "notes": "Roguelike de palabras con español completo, tablero equilibrado, rescate automático de atascos y garantía de una palabra frecuente de 6+. Core loop con Word Score + Bonus Points + Final Score, Renovaciones, Modificadores, Mejoras, Obsequios, fichas especiales y rondas especiales. Tinta Viva usa su propia moneda Tinta. Se añade una segunda economía de Monedas: 4 iniciales, ganancias por palabra y por ronda, y una Tienda de run para comprar Jugadas, Renovaciones, rerolls, Tinta Viva, letras elegidas, fichas especiales y Mejoras. Las fichas muestran su valor y cada palabra reproduce un desglose animado por letra, bonus, multiplicador, total y Monedas."
 }
