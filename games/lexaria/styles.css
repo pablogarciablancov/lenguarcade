@@ -565,3 +565,44 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
 .mode-start:hover{transform:translateY(-2px);box-shadow:inset 0 1px rgba(255,255,255,.05),0 14px 30px rgba(0,0,0,.34)}
 .trainer-card{background:linear-gradient(160deg,#12384a,#061d29);border-color:rgba(98,231,255,.16)}
 .trainer-card:hover{transform:translateY(-3px);border-color:rgba(98,231,255,.42);box-shadow:0 18px 40px rgba(0,0,0,.36)}
+
+
+/* ===== Lexario art atlas ===== */
+.lex-sprite{
+  --sx:0;--sy:0;
+  display:block;flex:0 0 auto;
+  width:64px;aspect-ratio:1;
+  background-image:url("./assets/lexarios-sprites.svg");
+  background-repeat:no-repeat;
+  background-size:600% 500%;
+  background-position:calc(var(--sx) * 20%) calc(var(--sy) * 25%);
+  filter:drop-shadow(0 7px 9px rgba(0,0,0,.38));
+  transform:translateZ(0)
+}
+.unit-card .unit-sprite{width:min(70%,72px);margin:5px auto 18px}
+.inspect-sprite{width:62px}
+.market-sprite{width:48px;margin:0 auto}
+.training-sprite{width:44px}
+.battle-sprite{width:min(72%,82px);margin-top:6px}
+.codex-sprite{width:78px;margin:3px auto 0}
+.codex-mystery{height:78px;display:grid;place-items:center;font-size:45px}
+.hero-sprite{width:clamp(120px,12vw,185px);filter:drop-shadow(0 18px 18px rgba(0,0,0,.4))}
+.hero-card .hero-sprite{font-size:0}
+.hero-card .hero-sprite+ b{margin-top:8px}
+
+.unit-card:hover .lex-sprite{transform:translateY(-2px) scale(1.035)}
+.unit-card.chromatic .lex-sprite{filter:drop-shadow(0 7px 9px rgba(0,0,0,.38)) saturate(1.35) hue-rotate(28deg) brightness(1.08)}
+.battle-unit.casting .battle-sprite{animation:spriteCast .28s ease}
+@keyframes spriteCast{40%{transform:translateY(-8px) scale(1.13);filter:drop-shadow(0 0 16px rgba(255,239,142,.75)) brightness(1.35)}}
+.battle-unit.enemy .battle-sprite{transform:scaleX(-1)}
+.offer-portrait{min-height:49px}
+.offer-portrait .market-sprite{justify-self:center}
+.game-card-header{min-height:65px}
+.codex-entry{overflow:hidden}
+
+@media(max-height:820px) and (min-width:821px){
+  .unit-card .unit-sprite{width:min(61%,58px);margin:3px auto 16px}
+  .inspect-sprite{width:48px}
+  .market-sprite{width:38px}
+  .battle-sprite{width:min(62%,62px)}
+}
