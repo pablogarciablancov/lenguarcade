@@ -4,6 +4,65 @@ const E=window.WordPlayEngine,C=E.C,$=id=>document.getElementById(id);
 const ui={menu:$('menuScreen'),game:$('gameScreen'),dict:$('dictionaryStatus'),level:$('profileLevel'),best:$('bestScore'),bestWord:$('bestWord'),games:$('gamesPlayed'),unique:$('uniqueWords'),xp:$('careerXpLabel'),xpBar:$('careerXpBar'),cont:$('continueBtn'),contSummary:$('continueSummary'),round:$('roundLabel'),challenge:$('challengeLabel'),mode:$('modeLabel'),roundScore:$('roundScore'),target:$('targetScore'),progress:$('roundProgress'),boss:$('bossBadge'),plays:$('playsLeft'),shuffles:$('shufflesLeft'),rerolls:$('rerollsLeft'),mods:$('modifierList'),modCount:$('modifierCount'),upgrades:$('upgradeList'),upgradeCount:$('upgradeCount'),chTitle:$('challengeTitle'),chDesc:$('challengeDescription'),hint:$('wordHint'),preview:$('previewScore'),wordScore:$('wordScorePreview'),bonusScore:$('bonusScorePreview'),finalScore:$('finalScorePreview'),builder:$('wordBuilder'),combo:$('comboPreview'),board:$('board'),feedback:$('feedback'),total:$('totalScore'),words:$('wordsPlayed'),streak:$('streakValue'),runBest:$('runBestWord'),bestCombo:$('bestCombo'),reserve:$('reserveCount'),last:$('lastPlayCard'),goals:$('runGoalList'),backdrop:$('modalBackdrop'),reward:$('rewardModal'),rewardChoices:$('rewardChoices'),rewardRound:$('rewardRoundLabel'),rerollBtn:$('rerollRewardBtn'),skipReward:$('skipRewardBtn'),difficulty:$('difficultyModal'),info:$('infoModal'),infoTitle:$('infoTitle'),infoBody:$('infoBody'),pause:$('pauseModal'),collection:$('collectionModal'),collectionBody:$('collectionBody'),wordlog:$('wordLogModal'),wordlogList:$('wordLogList'),end:$('endModal'),endEye:$('endEyebrow'),endTitle:$('endTitle'),endStats:$('endStats'),newAchievements:$('newAchievements'),motion:$('reduceMotionToggle'),sound:$('soundToggle'),classroom:$('classroomModeToggle'),coinWallet:$('coinWallet'),coinValue:$('coinValue'),shopBtn:$('shopBtn'),shop:$('shopModal'),shopCoins:$('shopCoins'),shopGrid:$('shopGrid'),shopMessage:$('shopMessage'),letterPicker:$('letterPicker'),letterGrid:$('letterGrid'),cancelLetter:$('cancelLetterBtn'),inkWallet:$('inkWallet'),inkValue:$('inkValue'),tintaBtn:$('tintaVivaBtn'),tintaCharges:$('tintaCharges')};
 let rewardOptions=[],dictionaryReady=false,activeUpgrade=null;
 const fmt=n=>new Intl.NumberFormat('es-ES').format(Math.round(Number(n)||0));
+const escAttr=v=>String(v??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function specialKind(item){
+  const effectMap={makeGold:'gold',makeEmerald:'emerald',makeDot:'dot',makeDiamond:'diamond',makeWild:'wild'};
+  if(item?.tileKind)return item.tileKind;
+  if(effectMap[item?.effect])return effectMap[item.effect];
+  if(C.specialTileTypes?.[item?.effect])return item.effect;
+  return null;
+}
+function specialHelp(kind){
+  const def=C.specialTileTypes?.[kind];
+  return def?.desc?(def.name+': '+def.desc):'';
+}
+function itemTip(item){
+  if(!item)return'';
+  const kind=specialKind(item),extra=kind?specialHelp(kind):'';
+  const desc=String(item.desc||'');
+  return [item.name?item.name+'.':'',desc,extra&&!desc.includes(extra.split(':')[0])?extra:''].filter(Boolean).join(' ');
+}
+function tileTip(t){
+  if(!t)return'';
+  const value=E.tileScore(t),points=value===1?'punto':'puntos';
+  const base=(t.kind==='wild'?'Comodín':t.letter)+' · '+value+' '+points+'.';
+  const extra=t.kind&&t.kind!=='normal'?specialHelp(t.kind):'Ficha normal: su valor se suma al Word Score.';
+  return base+' '+extra;
+}
+function setTip(el,text){if(el&&text)el.dataset.tip=text;}
+function installStaticTips(){
+  setTip(ui.plays?.closest('article'),'Jugadas: cada palabra válida consume normalmente 1. Si llegas a 0 antes de alcanzar el objetivo, termina la run.');
+  setTip(ui.shuffles?.closest('article'),'Renovaciones: cambian el tablero completo. No cuentan como palabra ni gastan una Jugada, salvo reglas especiales.');
+  setTip(ui.rerolls?.closest('article'),'Rerolls de recompensa: al superar una ronda puedes gastar 1 para descartar las 3 cartas ofrecidas y recibir 3 nuevas.');
+  setTip(ui.coinWallet,'Monedas: las ganas formando palabras y superando rondas. Se gastan en la Tienda durante esta run.');
+  setTip(ui.inkWallet,'Tinta: recurso separado de las Monedas. Sirve para comprar nuevas cargas de Tinta Viva.');
+  setTip(ui.shopBtn,'Tienda: compra Jugadas, Renovaciones, rerolls, letras, fichas especiales y Mejoras con Monedas.');
+  setTip($('shuffleBtn'),'Renovar: sustituye el tablero por otro jugable y consume 1 Renovación.');
+  setTip($('wordLogBtn'),'Historial: revisa las palabras jugadas, su puntuación y las Monedas obtenidas.');
+  setTip($('undoBtn'),'Deshacer: quita la última ficha de la palabra actual.');
+  setTip($('clearBtn'),'Limpiar: devuelve todas las fichas seleccionadas al tablero.');
+  setTip($('submitBtn'),'Jugar palabra: valida la palabra, calcula puntos y consume una Jugada si es válida.');
+  setTip(ui.roundScore?.closest('.score-block'),'Puntuación de ronda: alcanza el objetivo indicado para superar la ronda.');
+}
+function initTooltips(){
+  const tip=document.createElement('div');tip.className='hover-tooltip';tip.setAttribute('role','tooltip');document.body.appendChild(tip);
+  let active=null;
+  const show=el=>{
+    if(!el?.dataset?.tip)return;
+    active=el;tip.textContent=el.dataset.tip;tip.classList.add('visible');
+    const r=el.getBoundingClientRect(),tr=tip.getBoundingClientRect();
+    let left=Math.min(window.innerWidth-tr.width-8,Math.max(8,r.left+r.width/2-tr.width/2));
+    let top=r.top-tr.height-10;
+    if(top<8)top=Math.min(window.innerHeight-tr.height-8,r.bottom+10);
+    tip.style.left=left+'px';tip.style.top=top+'px';
+  };
+  const hide=el=>{if(!el||active===el){active=null;tip.classList.remove('visible');}};
+  document.addEventListener('pointerover',e=>{const el=e.target.closest?.('[data-tip]');if(el&&el!==active)show(el);});
+  document.addEventListener('pointerout',e=>{const el=e.target.closest?.('[data-tip]');if(el&&!el.contains(e.relatedTarget))hide(el);});
+  document.addEventListener('focusin',e=>{const el=e.target.closest?.('[data-tip]');if(el)show(el);});
+  document.addEventListener('focusout',e=>{const el=e.target.closest?.('[data-tip]');if(el)hide(el);});
+  window.addEventListener('resize',()=>hide());
+}
 function state(){return E.state}
 function showFeedback(t,type=''){ui.feedback.textContent=t;ui.feedback.className=`feedback ${type}`;}
 function syncSpecialChars(){const s=state();if(!s)return;s.selected.forEach((x,i)=>{const t=s.board.find(q=>q.id===x.id);if(t?.kind==='mirror'&&i>0)x.char=s.selected[i-1].char;if(t?.kind==='plus')x.char='+';if(t?.kind==='bang')x.char='!';});}
@@ -41,7 +100,7 @@ function render(){
   const canBuy=Number(s.tintaCharges||0)<=0&&Number(s.ink||0)>=3;
   ui.tintaBtn.classList.toggle('can-buy',canBuy);
   ui.tintaBtn.classList.toggle('empty',Number(s.tintaCharges||0)<=0&&!canBuy);
-  ui.tintaBtn.title=Number(s.tintaCharges||0)>0?'Muta 6 fichas sin gastar recursos':canBuy?'Compra 1 carga por 3 Tintas':'Necesitas 3 Tintas para comprar otra carga';
+  ui.tintaBtn.title=Number(s.tintaCharges||0)>0?'Muta 6 fichas sin gastar recursos':canBuy?'Compra 1 carga por 3 Tintas':'Necesitas 3 Tintas para comprar otra carga';ui.tintaBtn.dataset.tip=ui.tintaBtn.title;
   renderMods();renderUpgrades();renderBoard();renderWord();
   ui.goals.innerHTML=s.goals.map(g=>'<div class="goal-item '+(g.done?'done':'')+'"><span>'+(g.done?'✓':'○')+'</span><span>'+g.label+'</span></div>').join('');
   const auto=E.specialEffect()==='autoRefresh';$('shuffleBtn').disabled=auto?s.playsLeft<=0:s.shufflesLeft<=0;$('shuffleBtn').textContent=auto?'↻ Renovar · 1 jugada':'↻ Renovar';
@@ -50,14 +109,14 @@ function renderMods(){
   const s=state();ui.modCount.textContent=s.modifiers.length+'/6';
   if(!s.modifiers.length){ui.mods.className='modifier-list empty-list';ui.mods.innerHTML='<p>Aún no tienes modificadores.</p>';return;}
   const prices={common:1,uncommon:2,rare:3,epic:3,legendary:4};ui.mods.className='modifier-list';
-  ui.mods.innerHTML=s.modifiers.map(id=>C.modifiers.find(x=>x.id===id)).filter(Boolean).map(m=>'<article class="modifier-card rarity-'+m.rarity+'"><strong><span>'+m.name+'</span><em class="rarity-tag">'+m.rarity+'</em></strong><span>'+m.desc+'</span><button class="sell-mod" type="button" data-sell="'+m.id+'">Vender · +'+(prices[m.rarity]||1)+' ↻</button></article>').join('');
+  ui.mods.innerHTML=s.modifiers.map(id=>C.modifiers.find(x=>x.id===id)).filter(Boolean).map(m=>'<article class="modifier-card rarity-'+m.rarity+'" data-tip="'+escAttr(itemTip(m))+'"><strong><span>'+m.name+'</span><em class="rarity-tag">'+m.rarity+'</em></strong><span>'+m.desc+'</span><button class="sell-mod" type="button" data-sell="'+m.id+'">Vender · +'+(prices[m.rarity]||1)+' ↻</button></article>').join('');
   ui.mods.querySelectorAll('[data-sell]').forEach(b=>b.addEventListener('click',()=>{const n=E.sellModifier(b.dataset.sell);if(n){showFeedback('Modificador vendido · +'+n+' renovaciones','good');render();}}));
 }
 function renderUpgrades(){
   const s=state();ui.upgradeCount.textContent=s.upgrades.length+'/3';
   if(!s.upgrades.length){ui.upgrades.className='upgrade-list empty-list';ui.upgrades.innerHTML='<p>Elige una Mejora al superar rondas.</p>';return;}
   ui.upgrades.className='upgrade-list';
-  ui.upgrades.innerHTML=s.upgrades.map(o=>{const u=C.upgrades.find(x=>x.id===o.id);return u?'<button type="button" class="upgrade-card rarity-'+u.rarity+' '+(activeUpgrade===o.id?'active':'')+'" data-upgrade="'+o.id+'"><strong>'+u.name+'<em>×'+o.uses+'</em></strong><span>'+u.desc+'</span></button>':'';}).join('');
+  ui.upgrades.innerHTML=s.upgrades.map(o=>{const u=C.upgrades.find(x=>x.id===o.id);return u?'<button type="button" class="upgrade-card rarity-'+u.rarity+' '+(activeUpgrade===o.id?'active':'')+'" data-upgrade="'+o.id+'" data-tip="'+escAttr(itemTip(u))+'"><strong>'+u.name+'<em>×'+o.uses+'</em></strong><span>'+u.desc+'</span></button>':'';}).join('');
   ui.upgrades.querySelectorAll('[data-upgrade]').forEach(b=>b.addEventListener('click',()=>{activeUpgrade=activeUpgrade===b.dataset.upgrade?null:b.dataset.upgrade;showFeedback(activeUpgrade?'Selecciona una ficha para aplicar la mejora.':'Mejora deseleccionada.','');renderUpgrades();renderBoard();}));
 }
 function tileLocked(t){const s=state(),effect=E.specialEffect();return effect==='topLocked'&&s.roundWords<4&&(s.specialData.lockedIds||[]).includes(t.id);}
@@ -77,7 +136,7 @@ function renderBoard(){
   for(const t of s.board){
     const b=document.createElement('button');b.type='button';const locked=tileLocked(t);
     b.className='tile '+t.kind+' '+valueClass(t)+' '+(s.selected.some(x=>x.id===t.id)?'selected ':'')+(locked?'locked ':'')+(highlighted===t.id?'highlighted ':'')+(activeUpgrade?'upgrade-target':'');
-    b.dataset.value=E.tileScore(t);b.dataset.bonus=t.bonus||0;b.dataset.kind=t.kind;const glyph={wild:'★',mirror:'◀',bang:'!',plus:'+'}[t.kind];b.innerHTML='<span class="tile-letter">'+(glyph||t.letter)+'</span><span class="tile-points">'+E.tileScore(t)+'</span>';if(locked)b.disabled=true;
+    b.dataset.value=E.tileScore(t);b.dataset.bonus=t.bonus||0;b.dataset.kind=t.kind;b.dataset.tip=tileTip(t);const glyph={wild:'★',mirror:'◀',bang:'!',plus:'+'}[t.kind];b.innerHTML='<span class="tile-letter">'+(glyph||t.letter)+'</span><span class="tile-points">'+E.tileScore(t)+'</span>';if(locked)b.disabled=true;
     b.addEventListener('click',()=>activeUpgrade?applyUpgrade(t.id):selectTile(t.id));ui.board.appendChild(b);
   }
 }
@@ -99,7 +158,7 @@ function renderWord(){
   for(let i=0;i<maxSlots;i++){
     const selected=s.selected[i],bonus=E.slotBonusAt(i),el=document.createElement(selected?'button':'div');
     if(selected){
-      const t=s.board.find(q=>q.id===selected.id);el.type='button';el.className='word-slot filled '+(t?.kind||'normal')+' '+valueClass(t);
+      const t=s.board.find(q=>q.id===selected.id);el.type='button';el.className='word-slot filled '+(t?.kind||'normal')+' '+valueClass(t);if(t)el.dataset.tip=tileTip(t);
       el.innerHTML='<span class="slot-bonus">'+(bonus?'+'+bonus:'')+'</span><strong>'+selected.char+'</strong><small>'+E.tileScore(t)+'</small>';
       el.addEventListener('click',()=>{if(t?.kind==='wild'){selected.char=cycleWild(selected.char);renderWord();return;}if(['mirror','plus','bang'].includes(t?.kind)){s.selected.splice(i,1);renderBoard();renderWord();return;}const base=E.strip(selected.char).toUpperCase(),cycle=E.ACCENTABLE[base];if(cycle){const j=cycle.indexOf(selected.char.toUpperCase());selected.char=cycle[(j+1)%cycle.length];renderWord();}else{s.selected.splice(i,1);renderBoard();renderWord();}});
     }else{el.className='word-slot empty '+(bonus?'bonus':'');el.innerHTML='<span class="slot-bonus">'+(bonus?'+'+bonus:'')+'</span><strong>'+(i+1)+'</strong>';}
@@ -126,7 +185,7 @@ function play(){
 }
 function shopCard(item){
   const status=E.shopStatus(item.id),disabled=!status.ok;
-  return '<button class="shop-card '+(disabled?'disabled':'')+'" data-shop="'+item.id+'" type="button" '+(disabled?'disabled':'')+'>'+
+  return '<button class="shop-card '+(disabled?'disabled':'')+'" data-shop="'+item.id+'" data-tip="'+escAttr(itemTip(item))+'" type="button" '+(disabled?'disabled':'')+'>'+
     '<div class="shop-card-art">'+rewardArtSvg(item)+'</div>'+
     '<div class="shop-card-copy"><span class="shop-kind">'+(item.effect==='letter'?'LETRA':item.effect==='upgrade'?'MEJORA':'RECURSO')+'</span><strong>'+item.name+'</strong><p>'+item.desc+'</p></div>'+
     '<span class="shop-price"><i></i>'+item.cost+'</span>'+
@@ -134,7 +193,7 @@ function shopCard(item){
 }
 function renderLetterPicker(){
   const alphabet='ABCDEFGHIJKLMNÑOPQRSTUVWXYZ';
-  ui.letterGrid.innerHTML=[...alphabet].map(letter=>'<button type="button" data-letter="'+letter+'"><strong>'+letter+'</strong><span>'+Number(E.LETTER_VALUES?.[letter]||1)+' pts</span></button>').join('');
+  ui.letterGrid.innerHTML=[...alphabet].map(letter=>'<button type="button" data-letter="'+letter+'" data-tip="Añade una '+letter+' a la reserva. Valor base: '+Number(E.LETTER_VALUES?.[letter]||1)+' puntos."><strong>'+letter+'</strong><span>'+Number(E.LETTER_VALUES?.[letter]||1)+' pts</span></button>').join('');
   ui.letterGrid.querySelectorAll('[data-letter]').forEach(b=>b.addEventListener('click',()=>buyShopLetter(b.dataset.letter)));
 }
 function renderShop(message=''){
@@ -209,7 +268,7 @@ function renderRewards(){
   ui.rewardChoices.innerHTML=rewardOptions.map(r=>{
     const type=rewardType(r),accent=rewardAccent(r),art=rewardArtSvg(r);
     const meta=r.type==='upgrade'?r.uses+' USOS':r.type==='modifier'?state().modifiers.length+'/6 ACTIVOS':r.type==='bagTile'?'A LA RESERVA':'EFECTO DE RUN';
-    return '<button class="reward-card rarity-'+r.rarity+' card-'+accent+'" data-id="'+r.id+'" type="button">'+
+    return '<button class="reward-card rarity-'+r.rarity+' card-'+accent+'" data-id="'+r.id+'" data-tip="'+escAttr(itemTip(r))+'" type="button">'+
       '<span class="card-corner top-left"></span><span class="card-corner top-right"></span>'+
       '<div class="reward-art">'+art+'<i></i></div>'+
       '<div class="reward-card-body">'+
@@ -241,7 +300,7 @@ function finish(won){
   ui.endStats.innerHTML=stats.map(([a,b])=>'<article><span>'+a+'</span><strong>'+b+'</strong></article>').join('');
   ui.newAchievements.classList.toggle('hidden',!out.got.length);if(out.got.length)ui.newAchievements.innerHTML='<strong>🏆 Nuevos logros</strong><div>'+out.got.map(a=>a.name).join(' · ')+'</div>';showModal(ui.end);renderCareer();
 }
-function collection(tab='cards'){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));const c=E.career;if(tab==='cards')ui.collectionBody.innerHTML=[...C.modifiers,...C.upgrades,...C.gifts].map(x=>`<article class="collection-card rarity-${x.rarity} ${c.cards[x.id]?'':'locked'}"><strong>${c.cards[x.id]?x.name:'???'}</strong><span>${c.cards[x.id]?x.desc:`${x.rarity} · aún no descubierta`}</span></article>`).join('');else if(tab==='achievements')ui.collectionBody.innerHTML=C.achievements.map(a=>`<article class="collection-card ${c.achievements[a.id]?'':'locked'}"><strong>${c.achievements[a.id]?'🏆':'○'} ${a.name}</strong><span>${a.desc}</span></article>`).join('');else{const words=Object.entries(c.words).sort((a,b)=>b[1]-a[1]);ui.collectionBody.innerHTML=words.map(([w,n])=>`<article class="collection-card"><strong>${w.toUpperCase()}</strong><span>Usada ${n} ${n===1?'vez':'veces'}</span></article>`).join('')||'<article class="collection-card"><strong>Aún vacío</strong><span>Juega palabras para llenar tu archivo.</span></article>';}}
+function collection(tab='cards'){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));const c=E.career;if(tab==='cards')ui.collectionBody.innerHTML=[...C.modifiers,...C.upgrades,...C.gifts].map(x=>`<article class="collection-card rarity-${x.rarity} ${c.cards[x.id]?'':'locked'}" ${c.cards[x.id]?`data-tip="${escAttr(itemTip(x))}"`:''}><strong>${c.cards[x.id]?x.name:'???'}</strong><span>${c.cards[x.id]?x.desc:`${x.rarity} · aún no descubierta`}</span></article>`).join('');else if(tab==='achievements')ui.collectionBody.innerHTML=C.achievements.map(a=>`<article class="collection-card ${c.achievements[a.id]?'':'locked'}"><strong>${c.achievements[a.id]?'🏆':'○'} ${a.name}</strong><span>${a.desc}</span></article>`).join('');else{const words=Object.entries(c.words).sort((a,b)=>b[1]-a[1]);ui.collectionBody.innerHTML=words.map(([w,n])=>`<article class="collection-card"><strong>${w.toUpperCase()}</strong><span>Usada ${n} ${n===1?'vez':'veces'}</span></article>`).join('')||'<article class="collection-card"><strong>Aún vacío</strong><span>Juega palabras para llenar tu archivo.</span></article>';}}
 function showCollection(tab){collection(tab);showModal(ui.collection);}
 function howTo(first=false){
   ui.infoTitle.textContent=first?'Primera partida':'Cómo se juega';
@@ -290,6 +349,8 @@ function wire(){
 
 }
 wire();
+installStaticTips();
+initTooltips();
 const launchButtons=[$('newGameBtn'),$('quickGameBtn'),$('dailyGameBtn'),ui.cont].filter(Boolean);
 launchButtons.forEach(b=>b.disabled=true);
 renderCareer();
