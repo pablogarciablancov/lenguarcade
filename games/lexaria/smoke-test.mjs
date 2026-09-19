@@ -7,6 +7,7 @@ const game=fs.readFileSync(new URL('./game.js',import.meta.url),'utf8');
 const bridge=fs.readFileSync(new URL('./bridge.js',import.meta.url),'utf8');
 const index=fs.readFileSync(new URL('./index.html',import.meta.url),'utf8');
 const styles=fs.readFileSync(new URL('./styles.css',import.meta.url),'utf8');
+const sprites=fs.readFileSync(new URL('./assets/lexarios-sprites.svg',import.meta.url),'utf8');
 const sandbox={window:{}};
 vm.createContext(sandbox);
 vm.runInContext(source,sandbox);
@@ -53,9 +54,12 @@ for(const required of [
 ]) assert.ok(game.includes(required),'Falta lógica UX: '+required);
 
 for(const required of ['REQUEST_OPPONENTS','PUBLISH_SQUAD','OPPONENTS']) assert.ok(bridge.includes(required),'Falta bridge PvP: '+required);
-for(const required of ['overflow:hidden!important','.position-guide','.offer-stats','.student-battle-layout','.currency-counter','.battle-projectile','.ability-callout','.market-ability']) assert.ok(styles.includes(required),'Falta estilo UX: '+required);
+for(const required of ['overflow:hidden!important','.position-guide','.offer-stats','.student-battle-layout','.currency-counter','.battle-projectile','.ability-callout','.market-ability','lexarios-sprites.svg','.hero-sprite','.battle-sprite']) assert.ok(styles.includes(required),'Falta estilo UX: '+required);
+assert.equal((sprites.match(/transform="translate\(/g)||[]).length,30,'El atlas debe contener 30 Lexarios');
+assert.ok(game.includes('function spriteMarkup'),'Falta el resolver del atlas de Lexarios');
+assert.equal((game.match(/esc\(c\.emoji\)/g)||[]).length,0,'No deben quedar placeholders emoji para criaturas');
 
 new vm.Script(game,{filename:'game.js'});
 new vm.Script(bridge,{filename:'bridge.js'});
 
-console.log('Lexaria smoke test: OK · 30 criaturas · 3000 preguntas · niveles 1/1.7/3 · entrenamiento 5% · combate visual · arena asíncrona');
+console.log('Lexaria smoke test: OK · 30 criaturas con sprites · 3000 preguntas · niveles 1/1.7/3 · entrenamiento 5% · combate visual · arena asíncrona');
