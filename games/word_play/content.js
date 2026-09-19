@@ -87,7 +87,10 @@ window.WordPlayContent = (() => {
     {id:'gift_emerald',name:'Dos esmeraldas',rarity:'uncommon',desc:'Añade 2 fichas Esmeralda a la reserva especial.',type:'bagTile',effect:'emerald',count:2},
     {id:'gift_wild',name:'Dos comodines',rarity:'uncommon',desc:'Añade 2 comodines a la reserva especial.',type:'bagTile',effect:'wild',count:2},
     {id:'gift_potion',name:'Poción de jugadas',rarity:'rare',desc:'Añade una ficha Poción a la reserva especial.',type:'bagTile',effect:'potion',count:1},
-    {id:'gift_glass',name:'Cristales',rarity:'rare',desc:'Añade 2 fichas de Cristal a la reserva especial.',type:'bagTile',effect:'glass',count:2}
+    {id:'gift_glass',name:'Cristales',rarity:'rare',desc:'Añade 2 fichas de Cristal a la reserva especial.',type:'bagTile',effect:'glass',count:2},
+    {id:'gift_mirror',name:'Espejos',rarity:'rare',desc:'Añade 2 fichas Espejo a la reserva especial.',type:'bagTile',effect:'mirror',count:2},
+    {id:'gift_bang',name:'Exclamación',rarity:'rare',desc:'Añade una ficha Exclamación a la reserva especial.',type:'bagTile',effect:'bang',count:1},
+    {id:'gift_plus',name:'Conector',rarity:'legendary',desc:'Añade una ficha Conector para jugar dos palabras a la vez.',type:'bagTile',effect:'plus',count:1}
   ];
 
 
@@ -140,6 +143,9 @@ window.WordPlayContent = (() => {
     dot:{name:'Punto',desc:'Si cierra la palabra, Word Score ×2.'},
     potion:{name:'Poción',desc:'Al jugarla, suma su valor a tus Jugadas y se rompe.'},
     glass:{name:'Cristal',desc:'Se rompe al jugarla.'},
+    mirror:{name:'Espejo',desc:'Copia la letra y el valor de la ficha situada a su izquierda.'},
+    bang:{name:'Exclamación',desc:'Debe cerrar la jugada y vale la suma de las fichas que dejas en el tablero.'},
+    plus:{name:'Conector',desc:'Permite puntuar dos palabras válidas en una sola jugada.'},
     wild:{name:'Comodín',desc:'Puede representar cualquier letra y vale 0.'},
     ink:{name:'Tinta',desc:'Gana +1 de valor cada vez que se usa.'},
     crown:{name:'Corona',desc:'Añade +25 a su valor.'},
