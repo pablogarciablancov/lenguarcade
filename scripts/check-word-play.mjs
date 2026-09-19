@@ -24,6 +24,9 @@ for (const required of [
   './content.js','./lexicon.js','./engine.js','./bridge.js','./app.js','./layout.js','./sound.js','./game-feel.js','./styles.css','./responsive.css','./arcade.css'
 ]) if (!index.includes(required)) throw new Error(`Falta ${required} en index.html`);
 
+if(!index.includes('20260919-playable-v2'))throw new Error('Los assets de Word Play no llevan versión de caché actual');
+if(!app.includes('dictionaryReady')||!app.includes('launchButtons'))throw new Error('La partida puede arrancar antes de cargar el diccionario');
+
 for (const required of ['100dvh','overflow:hidden','.board','.reward-card','.collection-body','.boss-badge']) {
   if (!css.replaceAll(' ', '').includes(required.replaceAll(' ', ''))) throw new Error(`Falta ${required} en styles.css`);
 }
@@ -47,7 +50,7 @@ if(!/CC BY-SA 4\.0/i.test(notices)||!/FrequencyWords/i.test(notices))throw new E
 for (const required of ['computeTileSize','ResizeObserver','MutationObserver','visualViewport','--tile-size','--board-gap']) {
   if (!layout.includes(required)) throw new Error(`Falta ${required} en layout.js`);
 }
-for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','rewardTier','bossPlay','rareLuck','specialFlat','BOARD_RULES','pickBalancedLetter','rebalanceBoard']) {
+for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','rewardTier','bossPlay','rareLuck','specialFlat','BOARD_RULES','pickBalancedLetter','rebalanceBoard','boardQuality','wordIndex','candidateBoards','repairLoadedBoard','improvePlayability']) {
   if (!engine.includes(required)) throw new Error(`Falta ${required} en engine.js`);
 }
 for (const required of ['renderCareer','renderBoard','openReward','collection','wordLog']) {
@@ -156,6 +159,24 @@ E.shuffle();
 assertBalancedBoard(E.state.board,'jefe Ñ');
 if(!E.state.board.some(t=>t.letter==='Ñ'))throw new Error('El jefe de la Ñ perdió la Ñ con el nuevo balanceador');
 
+const normalQuality=E.boardQuality(E.newState('normal').board,'none');
+if(!normalQuality.meets)throw new Error(`El generador crea un tablero equilibrado pero poco jugable: ${JSON.stringify(normalQuality)}`);
+
+for(let i=0;i<24;i++){
+  const sample=E.newState('normal');
+  assertBalancedBoard(sample.board,`tablero jugable ${i}`);
+  const q=E.boardQuality(sample.board,'none');
+  if(!q.meets)throw new Error(`tablero jugable ${i}: no alcanza mínimos ${JSON.stringify(q)}`);
+}
+
+const legacy=E.newState('normal');
+const badLetters=['Y','A','A','A','C','A','A','A','A','A','A','F','B','E','A','A'];
+legacy.board.forEach((t,i)=>t.letter=badLetters[i]);
+const repaired=E.repairLoadedBoard(legacy);
+assertBalancedBoard(repaired.board,'partida antigua reparada');
+const repairedQuality=E.boardQuality(repaired.board,repaired.challenge);
+if(!repairedQuality.meets)throw new Error('La reparación de una partida antigua no mejora su jugabilidad');
+
 const daily1=E.newState('daily');
 const letters1=daily1.board.map(t=>t.letter).join('');
 E.state=daily1;
@@ -180,4 +201,4 @@ for(const [w,h] of [[700,430],[520,360],[390,250],[900,500]]){
   const s=layoutSize(w,h);if(s*4+21>w+1||s*4+21>h+1)throw new Error(`El tablero puede desbordar ${w}×${h}`);
 }
 
-console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/arcade/lexicon/bosses/synergies/balanced-board/bridge/audio/daily OK`);
+console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/arcade/lexicon/bosses/synergies/balanced-board/playability/cache-migration/bridge/audio/daily OK`);
