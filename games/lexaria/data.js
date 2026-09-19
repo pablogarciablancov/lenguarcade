@@ -121,10 +121,21 @@ const achievements = [
   {id:'rank6',name:'Mercado de élite',icon:'◆',desc:'Alcanza rango de mercado 6.',metric:'maxRank',value:6}
 ];
 
-const orthoPairs = [
-  ['haber','a ver'],['vaya','valla'],['hecho','echo'],['hasta','asta'],['honda','onda'],
-  ['bello','vello'],['tubo','tuvo'],['grabar','gravar'],['rebelar','revelar'],['botar','votar'],
-  ['bienes','vienes'],['cabo','cavo'],['hierba','hierva'],['rayar','rallar'],['sabia','savia']
+const orthoContexts = [
+  ['Completa: «Tiene que ___ una solución».','haber',['haber','a ver','haver','aver'],'En esta perífrasis se usa el infinitivo «haber».'],
+  ['Completa: «Vamos ___ qué ocurre».','a ver',['a ver','haber','aver','haver'],'«A ver» equivale aquí a «veamos».'],
+  ['Completa: «Ojalá ___ todo bien».','vaya',['vaya','valla','baya','balla'],'«Vaya» es una forma del verbo ir.'],
+  ['Completa: «La ___ rodea el jardín».','valla',['valla','vaya','baya','balla'],'Una «valla» es una cerca.'],
+  ['Completa: «He ___ todos los ejercicios».','hecho',['hecho','echo','e echo','he echo'],'El participio de hacer es «hecho».'],
+  ['Completa: «Yo ___ azúcar al café».','echo',['echo','hecho','he echo','ecco'],'«Echo» es una forma del verbo echar.'],
+  ['Completa: «El agua pasa por un ___».','tubo',['tubo','tuvo','tubó','tuvó'],'«Tubo» es el conducto; «tuvo» es del verbo tener.'],
+  ['Completa: «Ayer ___ mucha suerte».','tuvo',['tuvo','tubo','tubó','tuvó'],'«Tuvo» es la tercera persona del pretérito de tener.'],
+  ['Completa: «Voy a ___ un vídeo».','grabar',['grabar','gravar','grabarh','grabarv'],'«Grabar» significa registrar sonido o imagen.'],
+  ['Completa: «El impuesto puede ___ el producto».','gravar',['gravar','grabar','grabár','gravár'],'«Gravar» significa imponer una carga o tributo.'],
+  ['Completa: «No quiso ___ el secreto».','revelar',['revelar','rebelar','revelár','rebelár'],'«Revelar» significa descubrir o dar a conocer.'],
+  ['Completa: «Decidieron ___ contra la orden».','rebelarse',['rebelarse','revelarse','rebelárse','revelárse'],'«Rebelarse» significa sublevarse u oponerse.'],
+  ['Completa: «Caminamos ___ la plaza».','hasta',['hasta','asta','hastá','astha'],'«Hasta» es la preposición que marca el término de un recorrido.'],
+  ['Completa: «El toro tenía un ___ rota».','asta',['asta','hasta','astha','hástа'],'«Asta» puede designar el cuerno de un animal.']
 ];
 const accents = [
   ['camión','aguda'],['café','aguda'],['pared','aguda'],['reloj','aguda'],['árbol','llana'],
@@ -210,15 +221,10 @@ function choices(correct,pool,rng){
 function qOrthography(rng){
   const mode=Math.floor(rng()*3);
   if(mode===0){
-    const pair=pick(orthoPairs,rng);
-    const which=rng()<.5?0:1;
-    const word=pair[which];
-    const prompt=which===0?'¿Cuál es la forma que encaja en «Tiene que '+word+' una solución»?':'Elige la palabra correcta: «Vamos '+word+' qué ocurre».';
-    const all=shuffle([pair[0],pair[1],'h'+pair[1],pair[0]+'s'],rng).slice(0,4);
-    if(!all.includes(word))all[0]=word;
-    const ans=shuffle(Array.from(new Set(all)).concat(['haber','a ver']).slice(0,4),rng);
-    if(!ans.includes(word))ans[0]=word;
-    return {category:'ortografia',prompt,answers:ans,correct:ans.indexOf(word),explanation:'La forma adecuada en este contexto es «'+word+'».'};
+    const q=pick(orthoContexts,rng);
+    const zipped=q[2].map((x,i)=>({x,i}));
+    const random=shuffle(zipped,rng);
+    return {category:'ortografia',prompt:q[0],answers:random.map(v=>v.x),correct:random.findIndex(v=>v.x===q[1]),explanation:q[3]};
   }
   if(mode===1){
     const item=pick(accents,rng);
