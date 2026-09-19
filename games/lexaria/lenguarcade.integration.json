@@ -1,0 +1,15 @@
+{
+  "$schema": "lenguarcade-integration-v1",
+  "gameId": "lexaria",
+  "name": "Lexaria",
+  "status": "laboratorio",
+  "integration": "embedded",
+  "entry": "games/lexaria/index.html",
+  "banner": "lexaria",
+  "requires": {
+    "studentRunner": true,
+    "saveProgress": true,
+    "supabaseCatalog": true
+  },
+  "notes": "Prototipo original inspirado en el bucle estratégico de Batomon Showdown: entrenador, mercado sin reloj, equipo 3x2 de hasta 6 criaturas, reserva de 4, fusiones, reliquias, recursos de efecto inmediato, autobatallas, eventos de liga, variantes cromáticas, Lexipedia, historial y logros. La progresión pedagógica se integra mediante sesiones de entrenamiento de Ortografía, Verbos, Léxico, Morfología, Sintaxis y Literatura. Esta rama no debe modificar el catálogo central; la integración pública se hará posteriormente desde una rama integration/*."
+}
