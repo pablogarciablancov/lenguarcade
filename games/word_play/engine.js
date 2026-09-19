@@ -541,6 +541,7 @@ function useUpgrade(id,tileId){
   const owned=state.upgrades.find(x=>x.id===id&&x.uses>0);if(!owned)return{ok:false,message:'Mejora agotada.'};
   const def=C.upgrades.find(x=>x.id===id);const t=state.board.find(x=>x.id===tileId);
   if(!def||!t)return{ok:false,message:'Selecciona una ficha válida.'};
+  state.selected=[];
   const rng=boardRng();
   switch(def.effect){
     case'holdRefresh':{
@@ -566,6 +567,7 @@ function useUpgrade(id,tileId){
   }
   owned.uses--;
   if(owned.uses<=0)state.upgrades=state.upgrades.filter(x=>x!==owned);
+  state.selected=[];
   const rescue=stabilizeBoard('mejora');saveRun();return{ok:true,message:`${def.name} aplicada.`,rescue};
 }
 function nextRound(){
@@ -596,9 +598,10 @@ function boardRng(){return state.mode==='daily'?runRandom:Math.random}
 function currentSetup(){return challenge(state.challenge).setup||''}
 function retile(old,letter=null,context=null,forceType=''){
   const setup=currentSetup();
+  const rng=boardRng();
   const source=(context||state.board).filter(t=>t.id!==old.id);
-  const chosen=letter||pickBalancedLetter(source,boardRng,setup,forceType);
-  const n=tile(chosen,boardRng);
+  const chosen=letter||pickBalancedLetter(source,rng,setup,forceType);
+  const n=tile(chosen,rng);
   Object.assign(n,{kind:old.kind,bonus:old.bonus,uses:old.uses});
   return n;
 }
@@ -640,7 +643,7 @@ function rebalanceBoard(){
       const old=state.board[idx];
       const candidates=LETTER_POOL.filter(([l])=>setupAllows(l,setup)&&!counts.has(l)&&(counts.get(l)||0)<(BOARD_RULES.maxCopies[l]||1));
       if(candidates.length){
-        state.board[idx]=retile(old,weightedFrom(candidates,boardRng));
+        state.board[idx]=retile(old,weightedFrom(candidates,boardRng()));
         continue;
       }
     }
@@ -777,7 +780,7 @@ function ensureBoard(){
   if(setup==='rare'&&!state.board.some(t=>RARE.has(t.letter))){
     const rarePool=LETTER_POOL.filter(([l])=>['J','Ñ','Q','X','Z'].includes(l));
     const i=duplicateIndex(null);
-    state.board[i]=retile(state.board[i],weightedFrom(rarePool,boardRng));
+    state.board[i]=retile(state.board[i],weightedFrom(rarePool,boardRng()));
   }
   rebalanceBoard();
 }
@@ -787,26 +790,28 @@ function returnTileToReserve(t){
   if(t.kind!=='normal'||(t.bonus||0)>0||(t.charge||0)>0)state.reserveTiles.push(reserveTemplateFromTile(t));
 }
 function freshReplacement(old=null){
+  const rng=boardRng();
   const chance=Math.min(.58,(state.reserveTiles.length||0)/Math.max(6,(state.reserveTiles.length||0)+4));
-  if(state.reserveTiles.length&&boardRng()<chance){
-    const i=Math.floor(boardRng()*state.reserveTiles.length);
+  if(state.reserveTiles.length&&rng()<chance){
+    const i=Math.floor(rng()*state.reserveTiles.length);
     const tpl=state.reserveTiles.splice(i,1)[0];
-    const letter=tpl.letter&&/^[A-ZÑ]$/.test(tpl.letter)?tpl.letter:pickBalancedLetter(state.board,boardRng,currentSetup());
-    const n=tile(letter,boardRng);Object.assign(n,tpl,{letter});return n;
+    const letter=tpl.letter&&/^[A-ZÑ]$/.test(tpl.letter)?tpl.letter:pickBalancedLetter(state.board,rng,currentSetup());
+    const n=tile(letter,rng);Object.assign(n,tpl,{letter});return n;
   }
   const source=old||{id:'none',kind:'normal',bonus:0,uses:0};
-  const chosen=pickBalancedLetter(state.board.filter(t=>t.id!==source.id),boardRng,currentSetup());
-  return tile(chosen,boardRng);
+  const chosen=pickBalancedLetter(state.board.filter(t=>t.id!==source.id),rng,currentSetup());
+  return tile(chosen,rng);
 }
 function injectReserveTiles(max=2){
   let inserted=0;
+  const rng=boardRng();
   while(state.reserveTiles.length&&inserted<max){
-    if(inserted>0&&boardRng()>.55)break;
+    if(inserted>0&&rng()>.55)break;
     const idxs=state.board.map((t,i)=>({t,i})).filter(x=>x.t.kind==='normal');
     if(!idxs.length)break;
-    const slot=pick(idxs,boardRng);const tpl=state.reserveTiles.splice(Math.floor(boardRng()*state.reserveTiles.length),1)[0];
+    const slot=pick(idxs,rng);const tpl=state.reserveTiles.splice(Math.floor(rng()*state.reserveTiles.length),1)[0];
     const letter=tpl.letter&&/^[A-ZÑ]$/.test(tpl.letter)?tpl.letter:slot.t.letter;
-    const n=tile(letter,boardRng);Object.assign(n,tpl,{letter});state.board[slot.i]=n;inserted++;
+    const n=tile(letter,rng);Object.assign(n,tpl,{letter});state.board[slot.i]=n;inserted++;
   }
 }
 function replace(ids){
@@ -868,7 +873,9 @@ function play(word,tiles){
   state.roundWords++;state.wordLog.push({word:displayWord,score:sc.total,wordScore:sc.wordScore,bonusPoints:sc.bonusPoints,effects:sc.effects});
   if(!state.bestPlay||sc.total>state.bestPlay.score)state.bestPlay={word:displayWord,score:sc.total};state.bestCombo=Math.max(state.bestCombo,sc.multiplier);
   if(validated.some(w=>w.length>=7))state.goals[0].done=true;if(validated.some(w=>/[áéíóúü]/.test(w)))state.goals[1].done=true;if(tiles.some(t=>RARE.has(t.letter)))state.goals[2].done=true;
-  const rescue=replace(tiles.map(t=>t.id));if(effect==='autoRefresh')refreshBoard(false,true);saveCareer();saveRun();return{ok:true,word:displayWord,words:validated,score:sc,playCost,penalty,rescue};
+  const rescue=replace(tiles.map(t=>t.id));if(effect==='autoRefresh')refreshBoard(false,true);
+  state.selected=[];
+  saveCareer();saveRun();return{ok:true,word:displayWord,words:validated,score:sc,playCost,penalty,rescue};
 }
 function refreshBoard(manual=true,free=false){
   const effect=specialEffect();
