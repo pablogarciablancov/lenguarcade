@@ -92,7 +92,20 @@ function saveState(reason){
   emitProgress(reason||"autosave");
 }
 
-function serializeRun(){\n  if(!game)return null;\n  return {\n    heroId:game.hero.id,regionId:game.region.id,difficultyId:game.diff.id,\n    equippedWeaponId:state.equippedWeaponId,secondaryWeaponId:state.secondaryWeaponId,\n    hp:Math.max(1,game.player.hp),x:game.player.x,y:game.player.y,\n    carried:Object.assign({},game.carried),kills:game.kills,runKills:game.runKills,\n    giantStarted:game.giantStarted,bossSpawned:game.bossSpawned,\n    bossHp:game.boss&&!game.boss.dead?game.boss.hp:null,bossShieldIndex:game.bossShieldIndex,\n    savedAt:Date.now()\n  };\n}\n\nfunction emitProgress(reason){
+function serializeRun(){
+  if(!game)return null;
+  return {
+    heroId:game.hero.id,regionId:game.region.id,difficultyId:game.diff.id,
+    equippedWeaponId:state.equippedWeaponId,secondaryWeaponId:state.secondaryWeaponId,
+    hp:Math.max(1,game.player.hp),x:game.player.x,y:game.player.y,
+    carried:Object.assign({},game.carried),kills:game.kills,runKills:game.runKills,
+    giantStarted:game.giantStarted,bossSpawned:game.bossSpawned,
+    bossHp:game.boss&&!game.boss.dead?game.boss.hp:null,bossShieldIndex:game.bossShieldIndex,
+    savedAt:Date.now()
+  };
+}
+
+function emitProgress(reason){
   try{
     if(window.parent&&window.parent!==window){
       window.parent.postMessage({
@@ -482,14 +495,47 @@ function useHint(){
 
 function finishChallenge(){
   var cc=challengeContext;if(!cc||!cc.done)return;
-  var correctButton=Array.prototype.some.call($("challengeOptions").children,function(b){return b.classList.contains("correct")&&!b.disabled;});\n  var result={\n    correct:correctButton,\n    clean:cc.attempts===1&&!cc.usedHint,\n    rewardFactor:correctButton?(cc.attempts===1?(cc.usedHint?0.75:1):0.5):0\n  };
+  var correctButton=Array.prototype.some.call($("challengeOptions").children,function(b){return b.classList.contains("correct")&&!b.disabled;});
+  var result={
+    correct:correctButton,
+    clean:cc.attempts===1&&!cc.usedHint,
+    rewardFactor:correctButton?(cc.attempts===1?(cc.usedHint?0.75:1):0.5):0
+  };
   els.challengeModal.classList.add("hidden");els.modalBackdrop.classList.add("hidden");
   var cb=cc.onResolve;challengeContext=null;
   if(game&&currentScreen==="game")game.paused=false;
   if(typeof cb==="function")cb(result);
 }
 
-function startExpedition(snapshot){\n  closeGeneric();\n  var snap=snapshot||null;\n  if(snap){\n    state.heroId=snap.heroId||state.heroId;state.regionId=snap.regionId||state.regionId;state.difficultyId=snap.difficultyId||state.difficultyId;\n    state.equippedWeaponId=snap.equippedWeaponId||state.equippedWeaponId;state.secondaryWeaponId=snap.secondaryWeaponId||state.secondaryWeaponId;\n  }\n  var hero=findHero(state.heroId),region=findRegion(state.regionId),diff=findDifficulty(state.difficultyId);\n  game=createGameState(hero,region,diff);\n  showScreen("game");\n  resizeGameCanvas();\n  if(snap){\n    game.player.hp=clamp(Number(snap.hp)||hero.hp,1,hero.hp);\n    game.player.x=clamp(Number(snap.x)||game.player.x,25,els.gameCanvas.clientWidth-25);\n    game.player.y=clamp(Number(snap.y)||game.player.y,65,els.gameCanvas.clientHeight-30);\n    game.carried=Object.assign({wood:0,ore:0,fragments:0},snap.carried||{});\n    game.kills=Math.max(0,Number(snap.kills)||0);game.runKills=Math.max(0,Number(snap.runKills)||game.kills);\n    game.giantStarted=!!snap.giantStarted;game.bossShieldIndex=Math.max(0,Number(snap.bossShieldIndex)||0);\n    if(snap.bossSpawned){spawnBoss();if(game.boss&&snap.bossHp!=null)game.boss.hp=clamp(Number(snap.bossHp)||game.boss.maxHp,1,game.boss.maxHp);}\n    else{for(var i=0;i<(game.giantStarted?6:5);i++)spawnEnemy(game.giantStarted);}\n  }else{\n    state.activeRun=null;spawnInitialEnemies();\n  }\n  updateGameHud();\n  notice(snap?"EXPEDICIÓN RECUPERADA":region.name,1400);\n  lastTime=performance.now();\n  if(loopId)cancelAnimationFrame(loopId);\n  loopId=requestAnimationFrame(loop);\n}
+function startExpedition(snapshot){
+  closeGeneric();
+  var snap=snapshot||null;
+  if(snap){
+    state.heroId=snap.heroId||state.heroId;state.regionId=snap.regionId||state.regionId;state.difficultyId=snap.difficultyId||state.difficultyId;
+    state.equippedWeaponId=snap.equippedWeaponId||state.equippedWeaponId;state.secondaryWeaponId=snap.secondaryWeaponId||state.secondaryWeaponId;
+  }
+  var hero=findHero(state.heroId),region=findRegion(state.regionId),diff=findDifficulty(state.difficultyId);
+  game=createGameState(hero,region,diff);
+  showScreen("game");
+  resizeGameCanvas();
+  if(snap){
+    game.player.hp=clamp(Number(snap.hp)||hero.hp,1,hero.hp);
+    game.player.x=clamp(Number(snap.x)||game.player.x,25,els.gameCanvas.clientWidth-25);
+    game.player.y=clamp(Number(snap.y)||game.player.y,65,els.gameCanvas.clientHeight-30);
+    game.carried=Object.assign({wood:0,ore:0,fragments:0},snap.carried||{});
+    game.kills=Math.max(0,Number(snap.kills)||0);game.runKills=Math.max(0,Number(snap.runKills)||game.kills);
+    game.giantStarted=!!snap.giantStarted;game.bossShieldIndex=Math.max(0,Number(snap.bossShieldIndex)||0);
+    if(snap.bossSpawned){spawnBoss();if(game.boss&&snap.bossHp!=null)game.boss.hp=clamp(Number(snap.bossHp)||game.boss.maxHp,1,game.boss.maxHp);}
+    else{for(var i=0;i<(game.giantStarted?6:5);i++)spawnEnemy(game.giantStarted);}
+  }else{
+    state.activeRun=null;spawnInitialEnemies();
+  }
+  updateGameHud();
+  notice(snap?"EXPEDICIÓN RECUPERADA":region.name,1400);
+  lastTime=performance.now();
+  if(loopId)cancelAnimationFrame(loopId);
+  loopId=requestAnimationFrame(loop);
+}
 
 function createGameState(hero,region,diff){
   var w=window.innerWidth,h=window.innerHeight;
@@ -1053,7 +1099,8 @@ els.gameCanvas.addEventListener("contextmenu",function(ev){ev.preventDefault();}
   $("touchAbility").addEventListener("click",ability);$("touchDodge").addEventListener("click",dodge);
 })();
 
-window.addEventListener("beforeunload",function(){if(game&&currentScreen==="game"&&!game.ended)saveState("beforeunload");});\ndocument.addEventListener("visibilitychange",function(){if(document.hidden&&game&&currentScreen==="game"&&!game.paused){saveState("visibility_autosave");pauseGame();}});
+window.addEventListener("beforeunload",function(){if(game&&currentScreen==="game"&&!game.ended)saveState("beforeunload");});
+document.addEventListener("visibilitychange",function(){if(document.hidden&&game&&currentScreen==="game"&&!game.paused){saveState("visibility_autosave");pauseGame();}});
 window.addEventListener("blur",function(){if(game&&currentScreen==="game"&&!game.paused)pauseGame();});
 window.addEventListener("resize",function(){resizeGameCanvas();if(currentScreen==="camp")renderCamp();});
 
