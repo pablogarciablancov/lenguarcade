@@ -6,13 +6,14 @@
   <meta name="theme-color" content="#07141d">
   <title>Lexaria · LenguArcade</title>
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./academy.css">
 </head>
 <body>
 <main id="app" class="app-shell">
   <section id="titleScreen" class="screen title-screen">
     <div class="title-noise"></div>
     <header class="title-topbar">
-      <span class="micro-label">LENGUARCADE · LABORATORIO</span>
+      <span class="micro-label">LENGUARCADE · ACADEMIA DE LEXARIA</span>
       <div class="top-actions">
         <button class="icon-btn" data-open="howtoModal" aria-label="Cómo se juega">?</button>
         <button class="icon-btn" data-open="settingsModal" aria-label="Ajustes">⚙</button>
@@ -53,7 +54,7 @@
 
   <section id="shopScreen" class="screen shop-screen hidden">
     <header class="run-topbar">
-      <div class="trainer-chip" id="trainerChip"></div>
+      <div class="academy-brand"><strong>LEXARIA</strong><small>ACADEMIA DE CRIATURAS</small></div>
       <div class="run-counters">
         <div><span>❤️ VIDAS</span><strong id="livesValue">10</strong></div>
         <div class="day-counter"><span>📅 JORNADA</span><strong id="dayValue">1</strong></div>
@@ -72,8 +73,8 @@
       <div class="day-flow-steps"><span class="active">1 COMPRA</span><i>›</i><span class="active">2 COLOCA</span><i>›</i><span class="active">3 ENTRENA</span><i>›</i><span>4 COMBATE</span><i>›</i><span>NUEVA JORNADA</span></div>
     </div>
 
-    <div class="shop-layout">
       <aside class="run-sidebar">
+<section class="side-card academy-trainer"><div class="side-card-title">TU ENTRENADOR</div><div class="academy-crest" aria-hidden="true">✒</div><div class="trainer-chip" id="trainerChip"></div><p>Las palabras cambian el mundo.</p></section>
         <section class="side-card">
           <div class="side-card-title"><span>RELIQUIAS</span><b id="relicCount">0</b></div>
           <div id="relicBag" class="relic-bag empty"><p>Fusiona Lexarios para obtener reliquias.</p></div>
@@ -88,10 +89,19 @@
           <div id="synergyList" class="synergy-list"></div>
         </section>
       </aside>
+    <section class="market-panel">
+      <div class="market-head">
+        <div class="market-title-copy"><h2>MERCADO <small id="marketWallet">Tienes 12 🖋️</small></h2></div>
+        <div class="market-actions">
+          <button id="lockBtn" class="secondary">🔒 FIJAR</button>
+          <button id="rerollBtn" class="secondary">↻ CAMBIAR <small>3</small></button>
 
-      <section class="board-panel">
+        </div>
+      </div>
+      <div id="marketRow" class="market-row"></div>
+    </section>      <section class="board-panel">
         <div class="panel-heading formation-heading">
-          <div><span class="micro-label">TU EQUIPO · ARRASTRA PARA COLOCAR</span><h2>Formación</h2></div>
+          <div><span class="micro-label">TU FORMACIÓN</span><h2>Arrastra para colocar</h2></div>
           <div class="formation-totals">
             <div title="Suma de la vida de los 6 Lexarios activos"><span>❤️ VIDA TOTAL</span><strong id="formationHp">0</strong></div>
             <div title="Suma del daño base de los 6 Lexarios activos"><span>⚔️ DAÑO TOTAL</span><strong id="formationDamage">0</strong></div>
@@ -107,26 +117,12 @@
           <div class="bench-label"><b>RESERVA</b><small>No combate · sí cuenta para fusionar · 4 huecos</small></div>
           <div id="benchBoard" class="bench-board"></div>
         </div>
-      </section>
-
-      <aside class="inspect-panel">
+      </section>      <aside class="inspect-panel">
         <div id="inspectCard" class="inspect-card empty">
           <div class="inspect-placeholder">Selecciona un Lexario para ver estadísticas, habilidad y entrenamiento.</div>
         </div>
       </aside>
-    </div>
-
-    <section class="market-panel">
-      <div class="market-head">
-        <div class="market-title-copy"><span class="micro-label">MERCADO · BUSCA ROLES, COMBOS Y FUSIONES</span><h2>Construye una estrategia <small id="marketWallet">Tienes 12 🖋️</small></h2><p>El precio marca rareza, no “lo bueno que es”. Mira su rol, habilidad, posición recomendada y si activa un combo.</p></div>
-        <div class="market-actions">
-          <button id="lockBtn" class="secondary">🔒 FIJAR</button>
-          <button id="rerollBtn" class="secondary">↻ CAMBIAR <small>3</small></button>
-          <button id="battleBtn" class="battle-btn">COMBATIR ➜</button>
-        </div>
-      </div>
-      <div id="marketRow" class="market-row"></div>
-    </section>
+<footer class="academy-footer"><span>✦ Compra · coloca · entrena · combate</span><button class="secondary" data-open="howtoModal">CÓMO JUGAR</button><button id="battleBtn" class="battle-btn">⚔ COMBATIR</button></footer>
   </section>
 
   <section id="studentBattleScreen" class="screen student-battle-screen hidden">
