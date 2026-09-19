@@ -69,10 +69,22 @@ window.addEventListener('message',event=>{
     if(!timer)poll();
   }
   if(msg.type==='REQUEST_CHECKPOINT')checkpoint('host_request');
+  if(msg.type==='OPPONENTS'){
+    window.LexariaGame?.setStudentOpponents?.(msg.payload?.opponents||[]);
+  }
 });
 window.addEventListener('pagehide',()=>checkpoint('pagehide'));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')checkpoint('visibility_hidden');});
 const readyTimer=setInterval(()=>{if(initialized){clearInterval(readyTimer);return;}post('READY',{gameId:GAME_ID,version:1});},900);
 post('READY',{gameId:GAME_ID,version:1});
-window.LexariaBridge={checkpoint,result,sessionStarted:session};
+function requestOpponents(){
+  if(!initialized)return;
+  post('REQUEST_OPPONENTS',{mode:'student_async',limit:8});
+}
+function publishSquad(squad){
+  if(!initialized||!squad)return;
+  post('PUBLISH_SQUAD',{mode:'student_async',squad});
+  checkpoint('publish_squad');
+}
+window.LexariaBridge={checkpoint,result,sessionStarted:session,requestOpponents,publishSquad};
 })();
