@@ -23,9 +23,10 @@
         <div class="brand-ribbon">UNIVERSO DE CRIATURAS LINGÜÍSTICAS</div>
         <h1>LEX<span>ARIA</span></h1>
         <p class="title-subtitle">Colecciona Lexarios. Entrénalos con Lengua. Construye una combinación imposible.</p>
-        <div class="title-actions">
-          <button id="newRunBtn" class="primary big">NUEVA LIGA</button>
-          <button id="continueRunBtn" class="secondary big hidden">CONTINUAR</button>
+        <div class="title-actions mode-actions">
+          <button id="newRunBtn" class="primary big mode-start"><span class="mode-icon">🗺️</span><span><b>MODO AVENTURA</b><small>Construye tu equipo · entrena · consigue 10 victorias</small></span></button>
+          <button id="studentBattleBtn" class="secondary big mode-start"><span class="mode-icon">⚔️</span><span><b>COMBATE ENTRE ALUMNOS</b><small>Publica tu formación y desafía equipos de tu clase</small></span></button>
+          <button id="continueRunBtn" class="secondary big hidden">CONTINUAR AVENTURA</button>
           <button id="practiceBtn" class="secondary">ENTRENAMIENTO LIBRE</button>
         </div>
       </div>
@@ -54,17 +55,22 @@
     <header class="run-topbar">
       <div class="trainer-chip" id="trainerChip"></div>
       <div class="run-counters">
-        <div><span>VIDAS</span><strong id="livesValue">10</strong></div>
-        <div><span>DÍA</span><strong id="dayValue">1</strong></div>
-        <div><span>VICTORIAS</span><strong id="winsValue">0/10</strong></div>
-        <div><span>TINTA</span><strong id="goldValue">12</strong></div>
-        <div><span>RANGO</span><strong id="rankValue">1</strong></div>
+        <div><span>❤️ VIDAS</span><strong id="livesValue">10</strong></div>
+        <div class="day-counter"><span>📅 JORNADA</span><strong id="dayValue">1</strong></div>
+        <div><span>🏆 VICTORIAS</span><strong id="winsValue">0/10</strong></div>
+        <div class="currency-counter" title="La Tinta sirve para comprar Lexarios y Recursos"><span>🖋️ TU TINTA</span><strong id="goldValue">12</strong></div>
+        <div><span>◆ MERCADO</span><strong id="rankValue">1</strong></div>
       </div>
       <div class="top-actions">
         <button class="icon-btn" data-open="codexModal">▦</button>
         <button class="icon-btn" data-open="settingsModal">⚙</button>
       </div>
     </header>
+
+    <div class="day-flow" id="dayFlow">
+      <div class="day-flow-title"><b id="dayFlowTitle">JORNADA 1 · PREPARACIÓN</b><span id="dayFlowIncome">Al terminar el combate pasarás a la jornada 2 y recibirás nueva Tinta.</span></div>
+      <div class="day-flow-steps"><span class="active">1 COMPRA</span><i>›</i><span class="active">2 COLOCA</span><i>›</i><span class="active">3 ENTRENA</span><i>›</i><span>4 COMBATE</span><i>›</i><span>NUEVA JORNADA</span></div>
+    </div>
 
     <div class="shop-layout">
       <aside class="run-sidebar">
@@ -84,13 +90,21 @@
       </aside>
 
       <section class="board-panel">
-        <div class="panel-heading">
-          <div><span class="micro-label">TU EQUIPO</span><h2>Formación</h2></div>
-          <p>Arrastra o pulsa para mover. La adyacencia importa.</p>
+        <div class="panel-heading formation-heading">
+          <div><span class="micro-label">TU EQUIPO · ARRASTRA PARA COLOCAR</span><h2>Formación</h2></div>
+          <div class="formation-totals">
+            <div title="Suma de la vida de los 6 Lexarios activos"><span>❤️ VIDA TOTAL</span><strong id="formationHp">0</strong></div>
+            <div title="Suma del daño base de los 6 Lexarios activos"><span>⚔️ DAÑO TOTAL</span><strong id="formationDamage">0</strong></div>
+          </div>
+        </div>
+        <div class="position-guide">
+          <div><b>VANGUARDIA</b><span>+10% vida</span></div>
+          <div class="adjacency-help"><span>↔</span><small>Los vecinos ortogonales activan algunas habilidades.</small></div>
+          <div><b>RETAGUARDIA</b><span>−8% tiempo de habilidad</span></div>
         </div>
         <div id="teamBoard" class="team-board"></div>
         <div class="bench-wrap">
-          <div class="bench-label">RESERVA <small>4 huecos</small></div>
+          <div class="bench-label"><b>RESERVA</b><small>No combate · sí cuenta para fusionar · 4 huecos</small></div>
           <div id="benchBoard" class="bench-board"></div>
         </div>
       </section>
@@ -104,7 +118,7 @@
 
     <section class="market-panel">
       <div class="market-head">
-        <div><span class="micro-label">MERCADO DEL DÍA</span><h2>Recluta y combina</h2></div>
+        <div><span class="micro-label">MERCADO · LOS PRECIOS SE PAGAN CON 🖋️ TINTA</span><h2>Recluta y combina <small id="marketWallet">Tienes 12 🖋️</small></h2></div>
         <div class="market-actions">
           <button id="lockBtn" class="secondary">🔒 FIJAR</button>
           <button id="rerollBtn" class="secondary">↻ CAMBIAR <small>3</small></button>
@@ -113,6 +127,27 @@
       </div>
       <div id="marketRow" class="market-row"></div>
     </section>
+  </section>
+
+  <section id="studentBattleScreen" class="screen student-battle-screen hidden">
+    <header class="section-header student-header">
+      <button class="back-btn" data-action="back-title">←</button>
+      <div><span class="micro-label">MODO COMBATE ENTRE ALUMNOS</span><h2>Arena de clase</h2><p>Tu rival no necesita estar conectado: combates contra la última formación que haya publicado.</p></div>
+      <div class="student-sync" id="studentSyncStatus">Esperando conexión con LenguArcade…</div>
+    </header>
+    <div class="student-battle-layout">
+      <section class="student-squad-panel">
+        <div class="panel-heading"><div><span class="micro-label">TU FORMACIÓN</span><h2>Equipo publicado</h2></div></div>
+        <div id="duelSquadPreview" class="duel-squad-preview"></div>
+        <div id="duelSquadStats" class="duel-squad-stats"></div>
+        <p class="student-help">Puedes publicar la formación actual de tu Aventura. No se gasta Tinta, no pierdes vidas y el resultado no modifica tu progreso de Aventura.</p>
+        <button id="publishSquadBtn" class="primary full">PUBLICAR FORMACIÓN ACTUAL</button>
+      </section>
+      <section class="opponents-panel">
+        <div class="panel-heading"><div><span class="micro-label">RIVALES DE TU CLASE</span><h2>Elige oponente</h2></div><button id="refreshOpponentsBtn" class="secondary">↻ ACTUALIZAR</button></div>
+        <div id="opponentList" class="opponent-list"></div>
+      </section>
+    </div>
   </section>
 
   <section id="battleScreen" class="screen battle-screen hidden">
@@ -167,9 +202,11 @@
         <article><b>1</b><h3>Compra</h3><p>Cada día aparecen cuatro Lexarios y un recurso. El mercado no tiene temporizador.</p></article>
         <article><b>2</b><h3>Combina</h3><p>3 copias de nivel 1 → nivel 2. 2 copias de nivel 2 → nivel 3. Cada fusión da una reliquia.</p></article>
         <article><b>3</b><h3>Entrena</h3><p>Gasta sesiones respondiendo preguntas de Lengua. Los aciertos mejoran permanentemente la criatura.</p></article>
-        <article><b>4</b><h3>Coloca</h3><p>Seis huecos en 3×2. Algunas habilidades afectan a aliados adyacentes o del mismo tipo.</p></article>
-        <article><b>5</b><h3>Combate</h3><p>La batalla es automática. Gana 10 encuentros antes de quedarte sin vidas.</p></article>
-        <article><b>6</b><h3>Rompe el juego</h3><p>Entrenadores, reliquias, niveles, variantes cromáticas y sinergias pueden disparar las estadísticas.</p></article>
+        <article><b>4</b><h3>Coloca</h3><p>Arrastra Lexarios. La vanguardia gana vida; la retaguardia lanza antes. La adyacencia activa habilidades concretas.</p></article>
+        <article><b>5</b><h3>Usa la reserva</h3><p>Los 4 Lexarios de reserva no combaten, pero siguen contando para conseguir copias y fusionar niveles.</p></article>
+        <article><b>6</b><h3>Avanza jornadas</h3><p>Cada jornada es: comprar → colocar → entrenar → combatir. Tras el combate empieza otra, recibes Tinta y se renueva el mercado.</p></article>
+        <article><b>7</b><h3>Combate</h3><p>La batalla es automática. En Aventura, consigue 10 victorias antes de quedarte sin vidas.</p></article>
+        <article><b>8</b><h3>Duelo de clase</h3><p>Publica una formación y desafía copias guardadas de los equipos de tus compañeros, sin alterar tu Aventura.</p></article>
       </div>
     </section>
 
