@@ -98,9 +98,9 @@
           </div>
         </div>
         <div class="position-guide">
-          <div><b>VANGUARDIA</b><span>+10% vida</span></div>
-          <div class="adjacency-help"><span>↔</span><small>Los vecinos ortogonales activan algunas habilidades.</small></div>
-          <div><b>RETAGUARDIA</b><span>−8% tiempo de habilidad</span></div>
+          <div class="front-rule"><b>🛡️ VANGUARDIA</b><span>+25% vida · habilidades 10% más lentas</span></div>
+          <div class="adjacency-help"><span>✦</span><small>Centro = más vecinos. Algunas habilidades y entrenadores premian la adyacencia.</small></div>
+          <div class="back-rule"><b>⚡ RETAGUARDIA</b><span>−10% vida · habilidades 15% más rápidas</span></div>
         </div>
         <div id="teamBoard" class="team-board"></div>
         <div class="bench-wrap">
@@ -118,7 +118,7 @@
 
     <section class="market-panel">
       <div class="market-head">
-        <div><span class="micro-label">MERCADO · LOS PRECIOS SE PAGAN CON 🖋️ TINTA</span><h2>Recluta y combina <small id="marketWallet">Tienes 12 🖋️</small></h2></div>
+        <div><span class="micro-label">MERCADO · BUSCA ROLES, COMBOS Y FUSIONES</span><h2>Construye una estrategia <small id="marketWallet">Tienes 12 🖋️</small></h2></div>
         <div class="market-actions">
           <button id="lockBtn" class="secondary">🔒 FIJAR</button>
           <button id="rerollBtn" class="secondary">↻ CAMBIAR <small>3</small></button>
@@ -157,14 +157,17 @@
       <div class="battle-trainer right" id="battleEnemyTrainer"></div>
     </header>
     <div class="battle-arena">
+      <div class="battle-explainer"><b>¿QUÉ ESTÁ PASANDO?</b><span>Cada Lexario llena su barra de habilidad. Cuando llega al 100%, lanza su habilidad automáticamente. Mira el nombre, el proyectil y el número flotante.</span></div>
       <div class="hp-cluster">
         <div class="hp-label"><span>TU EQUIPO</span><strong id="playerHpText">700/700</strong></div>
         <div class="hp-track"><i id="playerHpBar"></i><em id="playerShieldBar"></em></div>
       </div>
       <div class="battle-boards">
         <div id="playerBattleBoard" class="battle-board player"></div>
-        <div class="versus-mark">VS</div>
+        <div class="versus-mark"><span>VS</span><small>Las barras se llenan → se lanza la habilidad</small></div>
         <div id="enemyBattleBoard" class="battle-board enemy"></div>
+        <div id="battleFxLayer" class="battle-fx-layer" aria-hidden="true"></div>
+        <div id="abilityCallout" class="ability-callout hidden" aria-hidden="true"></div>
       </div>
       <div class="hp-cluster enemy">
         <div class="hp-label"><span>RIVAL</span><strong id="enemyHpText">700/700</strong></div>
@@ -200,12 +203,12 @@
       <div class="modal-head"><div><span class="micro-label">GUÍA RÁPIDA</span><h2>Cómo se juega</h2></div><button class="icon-btn" data-close-modal>×</button></div>
       <div class="howto-grid">
         <article><b>1</b><h3>Compra</h3><p>Cada día aparecen cuatro Lexarios y un recurso. El mercado no tiene temporizador.</p></article>
-        <article><b>2</b><h3>Combina</h3><p>3 copias de nivel 1 → nivel 2. 2 copias de nivel 2 → nivel 3. Cada fusión da una reliquia.</p></article>
-        <article><b>3</b><h3>Entrena</h3><p>Gasta sesiones respondiendo preguntas de Lengua. Los aciertos mejoran permanentemente la criatura.</p></article>
-        <article><b>4</b><h3>Coloca</h3><p>Arrastra Lexarios. La vanguardia gana vida; la retaguardia lanza antes. La adyacencia activa habilidades concretas.</p></article>
+        <article><b>2</b><h3>Sube de nivel</h3><p>3 copias de Nv.1 → Nv.2. Después, 2 copias de Nv.2 → Nv.3. Nv.2 multiplica las estadísticas ×1,7 y Nv.3 ×3.</p></article>
+        <article><b>3</b><h3>Entrena</h3><p>Cada respuesta correcta da +1 entrenamiento = +5% de vida y +5% de potencia. Las fusiones conservan y suman el entrenamiento.</p></article>
+        <article><b>4</b><h3>Coloca con intención</h3><p>Vanguardia: +25% vida pero 10% más lenta. Retaguardia: 15% más rápida pero −10% vida. El centro tiene más vecinos para combos de adyacencia.</p></article>
         <article><b>5</b><h3>Usa la reserva</h3><p>Los 4 Lexarios de reserva no combaten, pero siguen contando para conseguir copias y fusionar niveles.</p></article>
         <article><b>6</b><h3>Avanza jornadas</h3><p>Cada jornada es: comprar → colocar → entrenar → combatir. Tras el combate empieza otra, recibes Tinta y se renueva el mercado.</p></article>
-        <article><b>7</b><h3>Combate</h3><p>La batalla es automática. En Aventura, consigue 10 victorias antes de quedarte sin vidas.</p></article>
+        <article><b>7</b><h3>Combate</h3><p>No hay ataques ocultos: cada barra de habilidad se carga y, al llenarse, el Lexario lanza su poder. El combate muestra quién actúa y cuánto daño, cura o escudo genera.</p></article>
         <article><b>8</b><h3>Duelo de clase</h3><p>Publica una formación y desafía copias guardadas de los equipos de tus compañeros, sin alterar tu Aventura.</p></article>
       </div>
     </section>
