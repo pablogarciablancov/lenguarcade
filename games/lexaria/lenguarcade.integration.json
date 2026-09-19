@@ -9,7 +9,8 @@
   "requires": {
     "studentRunner": true,
     "saveProgress": true,
-    "supabaseCatalog": true
+    "supabaseCatalog": true,
+    "classroomAsyncSquads": true
   },
-  "notes": "Prototipo original inspirado en el bucle estratégico de Batomon Showdown: entrenador, mercado sin reloj, equipo 3x2 de hasta 6 criaturas, reserva de 4, fusiones, reliquias, recursos de efecto inmediato, autobatallas, eventos de liga, variantes cromáticas, Lexipedia, historial y logros. La progresión pedagógica se integra mediante sesiones de entrenamiento de Ortografía, Verbos, Léxico, Morfología, Sintaxis y Literatura. Esta rama no debe modificar el catálogo central; la integración pública se hará posteriormente desde una rama integration/*."
+  "notes": "Prototipo original de autobattler lingüístico con dos modos separados: Aventura (jornadas de preparación + combate, Tinta, vidas, mercado, entrenamiento, fusiones, reliquias y 10 victorias) y Arena de clase asíncrona. La UI distingue Tinta disponible/precios, muestra atributos antes de comprar, explica vanguardia (+10% vida), retaguardia (-8% cooldown), reserva (no combate pero cuenta para fusiones), permite drag & drop y enseña vida/daño total de las formaciones. El bridge declara PUBLISH_SQUAD / REQUEST_OPPONENTS / OPPONENTS; la integración central posterior debe persistir snapshots de formación por alumno en Supabase sin tocar el progreso de Aventura."
 }
