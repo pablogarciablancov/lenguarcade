@@ -24,6 +24,7 @@ let pendingRelicRewards=0;
 let dragSource=null;
 let studentOpponents=[];
 let battleContext='adventure';
+let duelRunContext=null;
 
 const $=id=>document.getElementById(id);
 const qsa=s=>Array.from(document.querySelectorAll(s));
@@ -48,9 +49,10 @@ function allUnitRefs(){
 }
 function allUnits(){return allUnitRefs().map(x=>x.unit);}
 function creatureOf(unit){return unit?D.creature(unit.creatureId):null;}
-function trainer(){return run?D.trainer(run.trainerId):null;}
-function hasRelic(id){return !!run&&run.relics.includes(id);}
-function countRelicEffect(effect){return !run?0:run.relics.map(D.relic).filter(Boolean).filter(r=>r.effect===effect).reduce((a,r)=>a+(Number(r.value)||0),0);}
+function rulesRun(){return battleContext==='student'&&duelRunContext?duelRunContext:run;}
+function trainer(){const rr=rulesRun();return rr?D.trainer(rr.trainerId):null;}
+function hasRelic(id){const rr=rulesRun();return !!rr&&Array.isArray(rr.relics)&&rr.relics.includes(id);}
+function countRelicEffect(effect){const rr=rulesRun();return !rr?0:(rr.relics||[]).map(D.relic).filter(Boolean).filter(r=>r.effect===effect).reduce((a,r)=>a+(Number(r.value)||0),0);}
 function teamTypeCounts(units){
   const counts={};
   (units||run?.team.filter(Boolean)||[]).forEach(u=>{
@@ -344,15 +346,19 @@ function rerollShop(){
 function renderMarket(){
   const host=$('marketRow');if(!host)return;
   host.innerHTML=run.shop.map((o,i)=>{
+    const affordable=run.gold>=o.price;
     if(o.kind==='creature'){
       const c=D.creature(o.creatureId);
-      return '<article class="offer-card '+(o.bought?'bought ':'')+(o.chromatic?'chromatic':'')+'">'+
-        '<div class="offer-body"><span class="unit-emoji">'+esc(c.emoji)+'</span><h4>'+esc(c.name)+(o.chromatic?' ✦':'')+'</h4><p>'+esc(c.types.map(t=>D.TYPES[t].name).join(' · '))+' · '+esc(D.RARITIES[c.rarity].name)+'</p></div>'+
-        '<div class="offer-footer"><span class="price">◉ '+o.price+'</span><button class="primary" data-buy="'+i+'">RECLUTAR</button></div>'+
+      return '<article class="offer-card '+(o.bought?'bought ':'')+(o.chromatic?'chromatic ':'')+(affordable?'':'unaffordable')+'">'+
+        '<div class="offer-body"><span class="unit-emoji">'+esc(c.emoji)+'</span><h4>'+esc(c.name)+(o.chromatic?' ✦':'')+'</h4>'+
+        '<div class="offer-type-row">'+c.types.map(t=>'<span class="offer-type">'+esc(D.TYPES[t].name)+'</span>').join('')+'<span class="offer-type">'+esc(D.RARITIES[c.rarity].name)+'</span></div>'+
+        '<div class="offer-stats"><span>❤️ '+format(c.hp)+'</span><span>⚔️ '+format(c.damage)+'</span><span>⏱ '+c.cooldown.toFixed(1)+'s</span></div>'+
+        '<p class="offer-ability"><b>'+esc(c.ability.name)+':</b> '+esc(c.ability.text)+'</p></div>'+
+        '<div class="offer-footer"><span class="price">🖋️ '+o.price+'</span><button class="primary '+(affordable?'':'cant-afford')+'" data-buy="'+i+'" '+(!affordable?'disabled':'')+'>'+(affordable?'COMPRAR · '+o.price:'FALTAN '+(o.price-run.gold))+'</button></div>'+
       '</article>';
     }
     const r=D.resource(o.resourceId);
-    return '<article class="offer-card resource '+(o.bought?'bought':'')+'"><div class="offer-body"><span class="unit-emoji">'+esc(r.icon)+'</span><h4>'+esc(r.name)+'</h4><p>'+esc(r.text)+'</p></div><div class="offer-footer"><span class="price">◉ '+o.price+'</span><button class="primary" data-buy="'+i+'">USAR</button></div></article>';
+    return '<article class="offer-card resource '+(o.bought?'bought ':'')+(affordable?'':'unaffordable')+'"><div class="offer-body"><span class="unit-emoji">'+esc(r.icon)+'</span><h4>'+esc(r.name)+'</h4><div class="offer-type-row"><span class="offer-type">RECURSO</span><span class="offer-type">1 uso/día</span></div><p class="offer-ability">'+esc(r.text)+'</p></div><div class="offer-footer"><span class="price">🖋️ '+o.price+'</span><button class="primary '+(affordable?'':'cant-afford')+'" data-buy="'+i+'" '+(!affordable?'disabled':'')+'>'+(affordable?'USAR · '+o.price:'FALTAN '+(o.price-run.gold))+'</button></div></article>';
   }).join('');
 }
 function freeRef(){
@@ -612,7 +618,126 @@ function enemyForDay(){
   }
   return{trainer:D.pick(D.trainers,rng),team};
 }
+
+function makeDuelSquad(){
+  if(!run||!run.team.some(Boolean))return null;
+  return {
+    version:1,
+    trainerId:run.trainerId,
+    relics:(run.relics||[]).slice(),
+    team:JSON.parse(JSON.stringify(run.team)),
+    publishedAt:nowIso(),
+    stats:formationTotals(run.team)
+  };
+}
+function showStudentBattle(){
+  if(!run)run=loadRun();
+  showScreen('studentBattleScreen');
+  renderStudentBattle();
+  window.LexariaBridge?.requestOpponents?.();
+}
+function renderStudentBattle(){
+  const snap=career.duelSquad||makeDuelSquad();
+  const preview=$('duelSquadPreview'),statsHost=$('duelSquadStats');
+  if(snap&&snap.team?.some(Boolean)){
+    preview.innerHTML=snap.team.map((u,i)=>u?unitCard(u,false,'duel',i):'<div class="board-slot"></div>').join('');
+    const totals=snap.stats||formationTotals(snap.team);
+    statsHost.innerHTML='<div><span>❤️ VIDA TOTAL</span><b>'+format(totals.hp)+'</b></div><div><span>⚔️ DAÑO TOTAL</span><b>'+format(totals.damage)+'</b></div>';
+  }else{
+    preview.innerHTML='<div class="opponent-empty" style="grid-column:1/-1">Todavía no tienes una formación. Entra en Aventura, recluta Lexarios y vuelve aquí.</div>';
+    statsHost.innerHTML='';
+  }
+  $('publishSquadBtn').disabled=!run?.team?.some(Boolean);
+  renderOpponents();
+}
+function publishCurrentSquad(){
+  const snap=makeDuelSquad();
+  if(!snap)return toast('Necesitas una formación activa en Aventura.','bad');
+  career.duelSquad=snap;
+  saveCareer();
+  renderStudentBattle();
+  window.LexariaBridge?.publishSquad?.(snap);
+  toast('Formación publicada para la Arena de clase.','good');
+}
+function mockStudentOpponents(){
+  if(!run?.team?.some(Boolean))return [];
+  const names=['Rival de prueba · Alba','Rival de prueba · Hugo','Rival de prueba · Inés','Rival de prueba · Mateo'];
+  return names.map((name,k)=>{
+    const rng=D.seeded((run.id||'lexaria')+'_duel_mock_'+k);
+    const team=Array(6).fill(null).map((_,i)=>{
+      if(i>=3+k%3&&rng()<.28)return null;
+      const pool=D.creatures.filter(c=>({common:1,uncommon:2,rare:3,epic:4,legendary:5}[c.rarity]||1)<=Math.max(2,run.rank||1));
+      const c=D.pick(pool.length?pool:D.creatures,rng);
+      return createUnit(c.id,rng()<.01,1+(run.day>6&&rng()<.28?1:0),Math.max(0,Math.floor((run.day-1)/4)));
+    });
+    return{id:'mock_'+k,name,trainerId:D.pick(D.trainers,rng).id,relics:[],team,practice:true};
+  });
+}
+function setStudentOpponents(list){
+  studentOpponents=Array.isArray(list)?list.filter(o=>o&&Array.isArray(o.team)):[];
+  const status=$('studentSyncStatus');
+  if(status){
+    status.textContent=studentOpponents.length?'Conectado · '+studentOpponents.length+' formaciones de clase':'Conectado · todavía no hay formaciones publicadas';
+    status.classList.add('online');
+  }
+  renderOpponents();
+}
+function refreshStudentOpponents(){
+  window.LexariaBridge?.requestOpponents?.();
+  renderOpponents();
+}
+function opponentTotals(op){
+  let hp=0,damage=0;
+  (op.team||[]).forEach((u,i)=>{
+    if(!u)return;
+    const st=studentOpponentStats(u,i,op.team,op);
+    hp+=st.hp;damage+=st.damage;
+  });
+  return{hp:Math.round(hp),damage:Math.round(damage)};
+}
+function renderOpponents(){
+  const host=$('opponentList');if(!host)return;
+  const real=studentOpponents;
+  const list=real.length?real:mockStudentOpponents();
+  if(!list.length){
+    host.innerHTML='<div class="opponent-empty">Crea primero un equipo en Modo Aventura. Cuando Lexaria esté integrado en LenguArcade, aquí aparecerán las formaciones publicadas por tus compañeros.</div>';
+    return;
+  }
+  host.innerHTML=list.slice(0,8).map((op,i)=>{
+    const t=D.trainer(op.trainerId),tot=opponentTotals(op);
+    return '<article class="opponent-card"><span class="opponent-avatar">'+esc(t?.emoji||'🎓')+'</span><div><h3>'+esc(op.name||('Alumno '+(i+1)))+(op.practice?' · PRUEBA':'')+'</h3><p>'+esc(t?.name||'Entrenador')+'</p><div class="opponent-power"><span>❤️ '+format(tot.hp)+'</span><span>⚔️ '+format(tot.damage)+'</span></div></div><button class="primary" data-duel-opponent="'+i+'" data-duel-source="'+(real.length?'real':'mock')+'">DESAFIAR</button></article>';
+  }).join('');
+}
+function studentOpponentStats(u,index,team,snapshot){
+  const c=creatureOf(u);if(!c)return{hp:1,damage:1,cooldown:3};
+  const levelMult=[0,1,1.65,2.65,4.1][clamp(u.level,1,4)];
+  const trainMult=1+(u.training||0)*.045;
+  let hp=c.hp*levelMult*trainMult,damage=c.damage*levelMult*trainMult,cooldown=c.cooldown;
+  const counts={};team.filter(Boolean).forEach(x=>creatureOf(x)?.types.forEach(t=>counts[t]=(counts[t]||0)+1));
+  let syn=0;c.types.forEach(t=>{const n=counts[t]||0;syn=Math.max(syn,n>=6?.20:n>=4?.12:n>=2?.05:0);});
+  hp*=1+syn;damage*=1+syn;
+  if(index<3)hp*=1.10;else cooldown*=.92;
+  const tr=D.trainer(snapshot?.trainerId);
+  if(tr?.effect==='ortho'&&c.types.includes('ortografia')){hp*=1.18;damage*=1.18;}
+  if(tr?.effect==='verbs'&&c.types.includes('verbos'))cooldown*=.85;
+  return{hp:Math.round(hp),damage:Math.round(damage),cooldown:Math.max(.8,cooldown)};
+}
+function startStudentBattle(index,source){
+  const own=career.duelSquad||makeDuelSquad();
+  if(!own?.team?.some(Boolean))return toast('Publica primero una formación.','bad');
+  const list=source==='real'?studentOpponents:mockStudentOpponents();
+  const op=list[index];if(!op)return toast('Ese rival ya no está disponible.','bad');
+  battleContext='student';
+  duelRunContext={trainerId:own.trainerId,relics:own.relics||[],team:own.team,day:1,stats:{damage:0,biggestHit:0,maxShield:0,casts:0}};
+  selected=null;showScreen('battleScreen');
+  battle=createBattleState(own.team,op.team,D.trainer(op.trainerId),op);
+  battle.opponentName=op.name||'Rival';
+  renderBattleStatic(D.trainer(op.trainerId));
+  applyBattleStart();renderBattle();
+  clearInterval(battleTimer);battleTimer=setInterval(battleTick,100);
+}
 function startBattle(){
+  battleContext='adventure';duelRunContext=null;
   if(!run.team.some(Boolean))return toast('Necesitas al menos un Lexario en el equipo.','bad');
   selected=null;
   showScreen('battleScreen');
@@ -625,9 +750,9 @@ function startBattle(){
   battleTimer=setInterval(battleTick,100);
   window.LexariaBridge?.checkpoint?.('battle_start');
 }
-function buildSide(team,kind){
+function buildSide(team,kind,opponentSnapshot){
   const units=team.map((u,i)=>u?{
-    unit:JSON.parse(JSON.stringify(u)),index:i,stats:kind==='player'?unitStats(u,i,team):enemyStats(u,i,team),
+    unit:JSON.parse(JSON.stringify(u)),index:i,stats:kind==='player'?unitStats(u,i,team):(battleContext==='student'?studentOpponentStats(u,i,team,opponentSnapshot):enemyStats(u,i,team)),
     cooldown:0,casts:0,ramp:0,clutch:false
   }:null);
   const hp=Math.round(160+units.filter(Boolean).reduce((s,b)=>s+b.stats.hp*.82,0));
@@ -638,15 +763,16 @@ function enemyStats(u,index,team){
   const scale=1+Math.max(0,run.day-1)*.035;
   return{hp:Math.round(c.hp*levelMult*scale),damage:Math.round(c.damage*levelMult*scale),cooldown:Math.max(.85,c.cooldown*(1-Math.min(.16,run.day*.008)))};
 }
-function createBattleState(playerTeam,enemyTeam,enemyTrainer){
-  return{player:buildSide(playerTeam,'player'),enemy:buildSide(enemyTeam,'enemy'),enemyTrainer,time:0,sudden:0,ended:false,log:[],rng:D.seeded(run.id+'_battle_'+run.day),firstAbilityDone:{player:false,enemy:false},speed:1};
+function createBattleState(playerTeam,enemyTeam,enemyTrainer,opponentSnapshot){
+  const seedBase=battleContext==='student'?(career.duelSquad?.publishedAt||Date.now())+'_'+(opponentSnapshot?.id||'rival'):(run.id+'_battle_'+run.day);
+  return{player:buildSide(playerTeam,'player'),enemy:buildSide(enemyTeam,'enemy',opponentSnapshot),enemyTrainer,time:0,sudden:0,ended:false,log:[],rng:D.seeded(seedBase),firstAbilityDone:{player:false,enemy:false},speed:1,opponentSnapshot};
 }
 function renderBattleStatic(enemyTrainer){
   const t=trainer();
   $('battlePlayerTrainer').innerHTML='<span class="avatar">'+esc(t?.emoji||'🎓')+'</span><span>'+esc(t?.name||'Tú')+'</span>';
   $('battleEnemyTrainer').innerHTML='<span>'+esc(enemyTrainer?.name||'Rival')+'</span><span class="avatar">'+esc(enemyTrainer?.emoji||'🎭')+'</span>';
-  $('battleDayLabel').textContent='DÍA '+run.day;
-  $('battleVsLabel').textContent='ENCUENTRO '+(run.wins+1);
+  $('battleDayLabel').textContent=battleContext==='student'?'ARENA DE CLASE':'JORNADA '+run.day;
+  $('battleVsLabel').textContent=battleContext==='student'?(battle.opponentName||'DUELO'):'ENCUENTRO '+(run.wins+1);
   $('battleLog').innerHTML='';
   renderBattleBoard('playerBattleBoard',battle.player);
   renderBattleBoard('enemyBattleBoard',battle.enemy);
@@ -667,7 +793,7 @@ function logBattle(text){
 function sideName(side){return side.kind==='player'?'Tu equipo':'El rival';}
 function addShield(side,amount){
   side.shield=Math.max(0,side.shield+Math.round(amount));side.lastSupport=amount;
-  if(side.kind==='player'){run.stats.maxShield=Math.max(run.stats.maxShield,side.shield);career.metrics.maxShield=Math.max(career.metrics.maxShield,side.shield);}
+  if(side.kind==='player'&&battleContext==='adventure'&&run){run.stats.maxShield=Math.max(run.stats.maxShield,side.shield);career.metrics.maxShield=Math.max(career.metrics.maxShield,side.shield);}
 }
 function heal(side,amount){
   const real=Math.max(0,Math.min(side.maxHp-side.hp,Math.round(amount)));side.hp+=real;side.lastSupport=real;return real;
@@ -682,7 +808,7 @@ function directHit(target,amount,source){
   let remaining=dmg;
   if(target.shield>0){const absorbed=Math.min(target.shield,remaining);target.shield-=absorbed;remaining-=absorbed;}
   target.hp=Math.max(0,target.hp-remaining);
-  if(battle&&source?.kind==='player'){run.stats.damage+=dmg;run.stats.biggestHit=Math.max(run.stats.biggestHit,dmg);career.metrics.biggestHit=Math.max(career.metrics.biggestHit,dmg);}
+  if(battle&&source?.kind==='player'&&battleContext==='adventure'&&run){run.stats.damage+=dmg;run.stats.biggestHit=Math.max(run.stats.biggestHit,dmg);career.metrics.biggestHit=Math.max(career.metrics.biggestHit,dmg);}
   return dmg;
 }
 function applyBattleStart(){
@@ -708,7 +834,7 @@ function castAbility(side,target,b,free){
   if(side.silence>0&&!free){side.silence--;b.cooldown=b.stats.cooldown*.75;logBattle(sideName(side)+' pierde un lanzamiento por silencio.');return;}
   const c=creatureOf(b.unit),a=c.ability;
   side.castCount++;b.casts++;
-  if(side.kind==='player'){run.stats.casts++;}
+  if(side.kind==='player'&&battleContext==='adventure'&&run){run.stats.casts++;}
   const mult=(side.kind==='player'&&!battle.firstAbilityDone.player&&hasRelic('lupa'))?2:1;
   if(side.kind==='player')battle.firstAbilityDone.player=true;else battle.firstAbilityDone.enemy=true;
   for(let repeat=0;repeat<mult;repeat++){
@@ -933,6 +1059,7 @@ function renderHistory(){
 
 function bind(){
   $('newRunBtn')?.addEventListener('click',chooseTrainerScreen);
+  $('studentBattleBtn')?.addEventListener('click',showStudentBattle);
   $('continueRunBtn')?.addEventListener('click',continueRun);
   $('practiceBtn')?.addEventListener('click',showPractice);
   $('codexBtn')?.addEventListener('click',()=>{renderCodex();openModal('codexModal');});
@@ -942,6 +1069,8 @@ function bind(){
   $('lockBtn')?.addEventListener('click',lockShop);
   $('battleBtn')?.addEventListener('click',startBattle);
   $('trainBtn')?.addEventListener('click',trainSelected);
+  $('publishSquadBtn')?.addEventListener('click',publishCurrentSquad);
+  $('refreshOpponentsBtn')?.addEventListener('click',refreshStudentOpponents);
   $('resultContinueBtn')?.addEventListener('click',continueAfterBattle);
   $('speedBtn')?.addEventListener('click',()=>{battleSpeed=battleSpeed===1?2:battleSpeed===2?4:1;$('speedBtn').textContent='×'+battleSpeed+' VELOCIDAD';});
   $('endAgainBtn')?.addEventListener('click',()=>resetAfterEnd(true));
@@ -963,6 +1092,7 @@ function bind(){
     const back=e.target.closest('[data-action="back-title"]');if(back){backHome();return;}
     const choose=e.target.closest('[data-trainer]');if(choose){newRun(choose.dataset.trainer);return;}
     const buy=e.target.closest('[data-buy]');if(buy){buyOffer(Number(buy.dataset.buy));return;}
+    const duel=e.target.closest('[data-duel-opponent]');if(duel){startStudentBattle(Number(duel.dataset.duelOpponent),duel.dataset.duelSource);return;}
     const slot=e.target.closest('[data-slot]');if(slot){slotClick(slot.dataset.slot,Number(slot.dataset.index));return;}
     const action=e.target.closest('[data-action]')?.dataset.action;
     if(action==='train-selected'){trainSelected();return;}
@@ -984,6 +1114,41 @@ function bind(){
       evaluateAchievements();saveCareer();
       setTimeout(()=>{renderPractice();newPracticeQuestion();},900);return;
     }
+  });
+  document.addEventListener('dragstart',e=>{
+    const card=e.target.closest('.unit-card[draggable="true"]');
+    if(!card||!run)return;
+    dragSource={area:card.dataset.area,index:Number(card.dataset.index)};
+    card.classList.add('dragging');
+    if(e.dataTransfer){e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',card.dataset.unit||'lexario');}
+  });
+  document.addEventListener('dragover',e=>{
+    const slot=e.target.closest('[data-slot]');
+    if(!slot||!dragSource)return;
+    e.preventDefault();
+    qsa('[data-slot].drag-over').forEach(x=>x.classList.remove('drag-over'));
+    slot.classList.add('drag-over');
+    if(e.dataTransfer)e.dataTransfer.dropEffect='move';
+  });
+  document.addEventListener('dragleave',e=>{
+    const slot=e.target.closest('[data-slot]');
+    if(slot&&!slot.contains(e.relatedTarget))slot.classList.remove('drag-over');
+  });
+  document.addEventListener('drop',e=>{
+    const slot=e.target.closest('[data-slot]');
+    if(!slot||!dragSource)return;
+    e.preventDefault();
+    const from=dragSource;
+    const to={area:slot.dataset.slot,index:Number(slot.dataset.index)};
+    qsa('[data-slot].drag-over').forEach(x=>x.classList.remove('drag-over'));
+    qsa('.unit-card.dragging').forEach(x=>x.classList.remove('dragging'));
+    dragSource=null;
+    moveUnit(from,to);
+  });
+  document.addEventListener('dragend',()=>{
+    dragSource=null;
+    qsa('[data-slot].drag-over').forEach(x=>x.classList.remove('drag-over'));
+    qsa('.unit-card.dragging').forEach(x=>x.classList.remove('dragging'));
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
   window.addEventListener('pagehide',()=>{saveRun('pagehide');saveCareer();});
