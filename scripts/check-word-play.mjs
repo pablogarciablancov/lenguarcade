@@ -29,7 +29,7 @@ for (const required of [
   './content.js','./lexicon.js','./vendor/typo.js','./engine.js','./bridge.js','./app.js','./layout.js','./sound.js','./game-feel.js','./styles.css','./responsive.css','./arcade.css'
 ]) if (!index.includes(required)) throw new Error(`Falta ${required} en index.html`);
 
-if(!index.includes('20260919-tinta-economy-v1'))throw new Error('Los assets de Word Play no llevan la versión de economía de Tinta actual');
+if(!index.includes('20260919-tinta-cards-v2'))throw new Error('Los assets de Word Play no llevan la versión de Tinta y cartas actual');
 if(!app.includes('dictionaryReady')||!app.includes('launchButtons'))throw new Error('La partida puede arrancar antes de cargar el diccionario');
 if(app.includes("visibilitychange"))throw new Error('Cambiar de pestaña no debe activar Tinta Viva automáticamente');
 
@@ -40,7 +40,7 @@ for (const required of ['--tile-size','--board-gap','grid-template-columns:repea
   if (!responsive.replaceAll(' ', '').includes(required.replaceAll(' ', ''))) throw new Error(`Falta ${required} en responsive.css`);
 }
 
-for (const required of ['.wp-fx-layer','.wp-score-pop','.word-slot','.score-breakdown','.difficulty-grid','.upgrade-card','.tile.emerald','.tile.dot','.tile.mirror','.tile.bang','.tile.plus','.tile.normal.value-1','.tile.normal.value-4','.tile.normal.value-9','.word-slot.normal.value-3','.ink-power','.ink-wallet','.tinta-viva-btn','.classroom-toggle','user-select:none','.reward-card.rarity-legendary','.board::before','.tile.gold']) {
+for (const required of ['.wp-fx-layer','.wp-score-pop','.word-slot','.score-breakdown','.difficulty-grid','.upgrade-card','.tile.emerald','.tile.dot','.tile.mirror','.tile.bang','.tile.plus','.tile.normal.value-1','.tile.normal.value-4','.tile.normal.value-9','.word-slot.normal.value-3','.ink-power','.ink-wallet','.tinta-viva-btn','.reward-art','.reward-art-rune','.reward-card-body','.rarity-gem','.card-corner','.classroom-toggle','user-select:none','.reward-card.rarity-legendary','.board::before','.tile.gold']) {
   if (!arcade.includes(required)) throw new Error(`Falta ${required} en arcade.css`);
 }
 for (const required of ['WordPlayLexicon','additions','strict','blocked','rejectPatterns','es-ES']) {
@@ -66,7 +66,7 @@ for (const required of ['computeTileSize','ResizeObserver','MutationObserver','v
 for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','BOARD_RULES','pickBalancedLetter','rebalanceBoard','boardQuality','wordIndex','candidateBoards','repairLoadedBoard','improvePlayability','HUNSPELL_AFF','HUNSPELL_DIC','loadHunspell','morphologyReady','modeConfig','totalRounds','specialRound','specialEffect','slotBonusAt','useUpgrade','sellModifier','skipReward','refreshBoard','boardPlayability','rescueBoard','stabilizeBoard','classroomScramble','buyTintaViva','useTintaViva']) {
   if (!engine.includes(required)) throw new Error(`Falta ${required} en engine.js`);
 }
-for (const required of ['renderCareer','renderBoard','renderUpgrades','valueClass','wordScorePreview','difficultyModal','openReward','skipReward','collection','wordLog','classroomMode','tintaBtn','buyTintaViva','useTintaViva','copy']) {
+for (const required of ['renderCareer','renderBoard','renderUpgrades','valueClass','wordScorePreview','difficultyModal','openReward','skipReward','collection','wordLog','classroomMode','tintaBtn','buyTintaViva','useTintaViva','rewardArt','rewardAccent','rarity-gem','copy']) {
   if (!app.includes(required)) throw new Error(`Falta ${required} en app.js`);
 }
 for (const required of ["const GAME_ID='word_play'","post('READY'","post('INITIALIZED'","post('CHECKPOINT'","post('RESULT'",'SESSION_STARTED']) {
