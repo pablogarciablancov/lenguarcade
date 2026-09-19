@@ -52,7 +52,7 @@ function loadCatalog(){
     if(game.integration==="embedded"&&!game.entry)fail(game.id+": embedded necesita entry");
   }
   const official=catalog.games.filter(game=>game.official);
-  if(official.length!==10)fail("debe haber exactamente 10 juegos oficiales; hay "+official.length);
+  if(official.length!==11)fail("debe haber exactamente 11 juegos oficiales; hay "+official.length);
   return catalog;
 }
 function resolvedGame(catalog,game){

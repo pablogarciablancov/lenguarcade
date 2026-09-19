@@ -2,7 +2,7 @@
   "$schema": "lenguarcade-integration-v1",
   "gameId": "word_play",
   "name": "Word Play",
-  "status": "en pruebas",
+  "status": "listo",
   "integration": "embedded",
   "entry": "games/word_play/index.html",
   "banner": "board",
@@ -11,5 +11,5 @@
     "saveProgress": true,
     "supabaseCatalog": true
   },
-  "notes": "Roguelike de palabras con español completo, tablero equilibrado y garantía de una palabra frecuente de 6+. Economía dual: Tinta para Tinta Viva y Monedas para una Tienda de run rotatoria de 5 artículos por ronda, con una oferta y compras únicas. Se añaden sinergias visibles entre Modificadores, misiones lingüísticas opcionales con recompensa, tutorial contextual no modal, activaciones visuales de cartas/fichas, estados dinámicos de especiales y resumen final de build. Se corrigen efectos muertos heredados (Precisión 4 letras, Especialista/Salvoconducto para rondas especiales) y Ficha Eco pasa a duplicar realmente su valor."
+  "notes": "Juego oficial de LenguArcade. Roguelike de palabras con español completo, tablero equilibrado y garantía de una palabra frecuente de 6+. Economía dual: Tinta para Tinta Viva y Monedas para Tienda rotatoria; cartas, mejoras, misiones lingüísticas, sinergias, fichas especiales, tutorial contextual, activaciones visuales y resumen final de build. Integración embedded con guardado, bridge de sesión/progreso y catálogo Supabase."
 }

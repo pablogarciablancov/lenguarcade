@@ -13,7 +13,7 @@ const canonicalMigration=fs.readFileSync(path.join(root,"supabase","migrations",
 
 if(catalog.schema!=="lenguarcade-game-catalog-v1") throw new Error("Catálogo: schema canónico incorrecto.");
 const official=catalog.games.filter(game=>game.official);
-if(official.length!==10) throw new Error("Catálogo: deben existir exactamente 10 juegos oficiales.");
+if(official.length!==11) throw new Error("Catálogo: deben existir exactamente 11 juegos oficiales.");
 
 const ids=new Set();
 for(const game of catalog.games){
@@ -74,9 +74,18 @@ if(!battlegrafia ||
 if(catalog.games.some(game=>game.id==="battlegrafia_v2")){
   throw new Error("El catálogo canónico no debe exponer una segunda entrada Battlegrafía 2.0.");
 }
+const wordPlay=catalog.games.find(game=>game.id==="word_play");
+if(!wordPlay ||
+   wordPlay.active!==true ||
+   wordPlay.official!==true ||
+   wordPlay.status!=="listo" ||
+   wordPlay.entry!=="games/word_play/" ||
+   wordPlay.integration!=="embedded"){
+  throw new Error("Word Play debe estar integrado como juego oficial de producción.");
+}
 if(catalog.games.some(game=>/rim[oó]polis/i.test(game.id+" "+game.name)) ||
    code.includes("Rimópolis") || dashboard.includes("Rimópolis") || student.includes("Rimópolis")){
   throw new Error("Rimópolis no debe volver al catálogo activo.");
 }
 
-console.log("Catálogo canónico LenguArcade: 10 oficiales; Battlegrafía Fantasy Arcade ya es la versión de producción.");
+console.log("Catálogo canónico LenguArcade: 11 oficiales; Battlegrafía Fantasy Arcade ya es la versión de producción.");
