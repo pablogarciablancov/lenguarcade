@@ -10,7 +10,30 @@ function currentWord(){return state().selected.map(x=>x.char).join('').toLowerCa
 function showModal(m){ui.backdrop.classList.remove('hidden');[ui.reward,ui.difficulty,ui.info,ui.pause,ui.collection,ui.wordlog,ui.end].forEach(x=>x.classList.add('hidden'));m.classList.remove('hidden');}
 function hideModal(){ui.backdrop.classList.add('hidden');[ui.reward,ui.difficulty,ui.info,ui.pause,ui.collection,ui.wordlog,ui.end].forEach(x=>x.classList.add('hidden'));}
 function renderCareer(){const c=E.career,u=Object.keys(c.words).length,lvl=Math.floor(c.xp/250)+1,within=c.xp%250;ui.best.textContent=fmt(c.bestScore);ui.bestWord.textContent=c.bestWord?c.bestWord.toUpperCase():'—';ui.games.textContent=c.games;ui.unique.textContent=u;ui.level.textContent=`Nivel léxico ${lvl}`;ui.xp.textContent=`${within} / 250 XP`;ui.xpBar.style.width=`${within/250*100}%`;const r=E.loadRun();ui.cont.classList.toggle('hidden',!r);if(r)ui.contSummary.textContent=`Ronda ${r.round} · ${fmt(r.totalScore)} pts`;}
-function render(){const s=state();if(!s)return;const ch=E.challenge(s.challenge);ui.game.dataset.challengeKind=ch.kind||'normal';ui.game.dataset.challengeId=ch.id||'none';document.documentElement.classList.toggle('reduce-motion',!!E.settings.reduceMotion);ui.mode.textContent=s.mode==='quick'?'PARTIDA RÁPIDA':s.mode==='daily'?'RETO DEL DÍA':'MODO ROGUELIKE';ui.round.textContent=s.mode==='quick'?'10 PALABRAS':`RONDA ${s.round}`;ui.challenge.textContent=ch.title;ui.chTitle.textContent=ch.title;ui.chDesc.textContent=ch.desc;ui.boss.classList.toggle('hidden',ch.kind!=='boss');ui.boss.textContent=ch.kind==='boss'?'JEFE':'RONDA JEFE';ui.roundScore.textContent=fmt(s.roundScore);ui.target.textContent=s.mode==='quick'?'∞':fmt(s.target);ui.progress.style.width=s.mode==='quick'?`${Math.min(100,(10-s.playsLeft)*10)}%`:`${Math.min(100,s.roundScore/s.target*100)}%`;ui.plays.textContent=s.playsLeft;ui.shuffles.textContent=s.shufflesLeft;ui.rerolls.textContent=s.rerollsLeft;ui.total.textContent=fmt(s.totalScore);ui.words.textContent=s.words.length;ui.streak.textContent=s.validStreak;ui.runBest.textContent=s.bestPlay?s.bestPlay.word.toUpperCase():'—';ui.bestCombo.textContent=`×${Number(s.bestCombo||1).toFixed(s.bestCombo%1?2:0)}`;renderMods();renderBoard();renderWord();ui.goals.innerHTML=s.goals.map(g=>`<div class="goal-item ${g.done?'done':''}"><span>${g.done?'✓':'○'}</span><span>${g.label}</span></div>`).join('');$('shuffleBtn').disabled=s.shufflesLeft<=0;}
+function render(){
+  const s=state();if(!s)return;
+  const ch=E.challenge(s.challenge),cfg=E.modeConfig(s.mode),sr=E.specialRound(s.specialRound);
+  ui.game.dataset.challengeKind=sr?'special':(ch.kind||'normal');
+  ui.game.dataset.challengeId=sr?.id||ch.id||'none';
+  ui.game.dataset.mode=s.mode;
+  document.documentElement.classList.toggle('reduce-motion',!!E.settings.reduceMotion);
+  ui.mode.textContent=s.mode==='quick'?'PARTIDA RÁPIDA':s.mode==='daily'?'RETO DEL DÍA':cfg.name.toUpperCase()+' MODE';
+  ui.round.textContent=s.mode==='quick'?'30 JUGADAS':'RONDA '+s.round+' / '+E.totalRounds(s.mode);
+  ui.challenge.textContent=sr?sr.title:ch.title;
+  ui.chTitle.textContent=sr?'Ronda especial · '+sr.title:ch.title;
+  ui.chDesc.textContent=sr?sr.desc:ch.desc;
+  ui.boss.classList.toggle('hidden',!sr);ui.boss.textContent=sr?'ESPECIAL':'';
+  ui.roundScore.textContent=fmt(s.roundScore);ui.target.textContent=s.mode==='quick'?'∞':fmt(s.target);
+  const cfgPlays=cfg.startPlays||10;
+  ui.progress.style.width=s.mode==='quick'?Math.min(100,Math.max(0,(cfgPlays-s.playsLeft)/Math.max(1,cfgPlays)*100))+'%':Math.min(100,s.roundScore/Math.max(1,s.target)*100)+'%';
+  ui.plays.textContent=Math.max(0,s.playsLeft);ui.shuffles.textContent=s.shufflesLeft;ui.rerolls.textContent=s.rerollsLeft;
+  ui.total.textContent=fmt(s.totalScore);ui.words.textContent=s.words.length;ui.streak.textContent=s.validStreak;
+  ui.runBest.textContent=s.bestPlay?s.bestPlay.word.toUpperCase():'—';
+  ui.bestCombo.textContent='×'+Number(s.bestCombo||1).toFixed(s.bestCombo%1?2:0);ui.reserve.textContent=s.reserveTiles?.length||0;
+  renderMods();renderUpgrades();renderBoard();renderWord();
+  ui.goals.innerHTML=s.goals.map(g=>'<div class="goal-item '+(g.done?'done':'')+'"><span>'+(g.done?'✓':'○')+'</span><span>'+g.label+'</span></div>').join('');
+  const auto=E.specialEffect()==='autoRefresh';$('shuffleBtn').disabled=auto?s.playsLeft<=0:s.shufflesLeft<=0;$('shuffleBtn').textContent=auto?'↻ Renovar · 1 jugada':'↻ Renovar';
+}
 function renderMods(){const s=state();ui.modCount.textContent=s.modifiers.length;if(!s.modifiers.length){ui.mods.className='modifier-list empty-list';ui.mods.innerHTML='<p>Aún no tienes mejoras.</p>';return;}ui.mods.className='modifier-list';ui.mods.innerHTML=s.modifiers.map(id=>C.modifiers.find(x=>x.id===id)).filter(Boolean).map(m=>`<article class="modifier-card rarity-${m.rarity}"><strong>${m.name}<em class="rarity-tag">${m.rarity}</em></strong><span>${m.desc}</span></article>`).join('');}
 function renderBoard(){const s=state();ui.board.innerHTML='';for(const t of s.board){const b=document.createElement('button');b.type='button';b.className=`tile ${t.kind} ${s.selected.some(x=>x.id===t.id)?'selected':''}`;b.dataset.value=E.tileScore(t);b.dataset.bonus=t.bonus||0;b.textContent=t.letter;b.addEventListener('click',()=>selectTile(t.id));ui.board.appendChild(b);}}
 function selectTile(id){const s=state(),t=s.board.find(x=>x.id===id);if(!t||s.selected.some(x=>x.id===id))return;s.selected.push({id:t.id,char:t.letter});renderBoard();renderWord();}
