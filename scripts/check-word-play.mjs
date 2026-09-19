@@ -65,7 +65,7 @@ for (const required of ['computeTileSize','ResizeObserver','MutationObserver','v
 for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','BOARD_RULES','pickBalancedLetter','rebalanceBoard','boardQuality','wordIndex','candidateBoards','repairLoadedBoard','improvePlayability','HUNSPELL_AFF','HUNSPELL_DIC','loadHunspell','morphologyReady','modeConfig','totalRounds','specialRound','specialEffect','slotBonusAt','useUpgrade','sellModifier','skipReward','refreshBoard']) {
   if (!engine.includes(required)) throw new Error(`Falta ${required} en engine.js`);
 }
-for (const required of ['renderCareer','renderBoard','renderUpgrades','scoreBreakdown','difficultyModal','openReward','skipReward','collection','wordLog']) {
+for (const required of ['renderCareer','renderBoard','renderUpgrades','wordScorePreview','difficultyModal','openReward','skipReward','collection','wordLog']) {
   if (!app.includes(required)) throw new Error(`Falta ${required} en app.js`);
 }
 for (const required of ["const GAME_ID='word_play'","post('READY'","post('INITIALIZED'","post('CHECKPOINT'","post('RESULT'",'SESSION_STARTED']) {
