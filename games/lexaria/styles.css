@@ -545,3 +545,23 @@ body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{an
   .market-ability p{-webkit-line-clamp:1}.fit-notes{display:none}
   .battle-arena{grid-template-rows:24px 46px minmax(0,1fr) 46px 45px 58px}
 }
+
+
+.market-title-copy p{margin:1px 0 0;font-size:6.8px;color:#6f9aa6}
+.hp-label span:after{content:none!important}
+
+/* portada y selección con más lenguaje de videojuego */
+.title-screen{
+  background:
+    radial-gradient(circle at 72% 42%,rgba(98,231,255,.13),transparent 23%),
+    radial-gradient(circle at 24% 78%,rgba(189,140,255,.09),transparent 27%),
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(180deg,#04121a,#071a25);
+  background-size:auto,auto,30px 30px,30px 30px,auto
+}
+.title-copy h1{text-shadow:0 3px 0 #092c3a,0 10px 30px rgba(0,0,0,.55),0 0 35px rgba(98,231,255,.08)}
+.mode-start{border:1px solid rgba(98,231,255,.22);box-shadow:inset 0 1px rgba(255,255,255,.04),0 9px 24px rgba(0,0,0,.25)}
+.mode-start:hover{transform:translateY(-2px);box-shadow:inset 0 1px rgba(255,255,255,.05),0 14px 30px rgba(0,0,0,.34)}
+.trainer-card{background:linear-gradient(160deg,#12384a,#061d29);border-color:rgba(98,231,255,.16)}
+.trainer-card:hover{transform:translateY(-3px);border-color:rgba(98,231,255,.42);box-shadow:0 18px 40px rgba(0,0,0,.36)}
