@@ -54,6 +54,8 @@ let practiceStats={correct:0,attempts:0,streak:0};
 let battle=null;
 let battleTimer=null;
 let battleSpeed=1;
+let battlePaused=false;
+let battleInspectRef=null;
 let pendingRelicRewards=0;
 let dragSource=null;
 let studentOpponents=[];
@@ -117,7 +119,8 @@ function abilityMeta(c){return ABILITY_META[c?.ability?.kind]||{role:'VERSÁTIL'
 function spriteMarkup(c,extra){
   if(!c)return '<span class="lex-sprite missing" aria-hidden="true"></span>';
   const i=Math.max(0,D.creatures.findIndex(x=>x.id===c.id)),x=i%6,y=Math.floor(i/6);
-  return '<span class="lex-sprite '+esc(extra||'')+'" style="--sx:'+x+';--sy:'+y+'" aria-hidden="true"></span>';
+  const ox=-(x*100),oy=-(y*100);
+  return '<span class="lex-sprite '+esc(extra||'')+'" style="--sx:'+x+';--sy:'+y+';--ox:'+ox+'%;--oy:'+oy+'%" aria-hidden="true"><img src="./assets/lexarios-fantasy.webp" alt="" draggable="false"></span>';
 }
 function levelStars(level){const l=clamp(Number(level)||1,1,3);return '★'.repeat(l)+'☆'.repeat(3-l);}
 function fusionInfo(creatureId,level,includeIncoming){
@@ -221,6 +224,7 @@ function renderTitleMeta(){
   if($('historyCount'))$('historyCount').textContent=(career.history?.length||0)+' ligas';
 }
 function backHome(){
+  setBattlePaused(false,true);battleInspectRef=null;
   selected=null;battleContext='adventure';duelRunContext=null;
   showScreen('titleScreen');
   renderTitleMeta();
@@ -838,6 +842,7 @@ function startStudentBattle(index,source){
   battleContext='student';
   duelRunContext={trainerId:own.trainerId,relics:own.relics||[],team:own.team,day:1,stats:{damage:0,biggestHit:0,maxShield:0,casts:0}};
   selected=null;showScreen('battleScreen');
+  setBattlePaused(false,true);battleInspectRef=null;
   battle=createBattleState(own.team,op.team,D.trainer(op.trainerId),op);
   battle.opponentName=op.name||'Rival';
   renderBattleStatic(D.trainer(op.trainerId));
@@ -849,6 +854,7 @@ function startBattle(){
   if(!run.team.some(Boolean))return toast('Necesitas al menos un Lexario en el equipo.','bad');
   selected=null;
   showScreen('battleScreen');
+  setBattlePaused(false,true);battleInspectRef=null;
   const enemy=enemyForDay();
   battle=createBattleState(run.team,enemy.team,enemy.trainer);
   renderBattleStatic(enemy.trainer);
@@ -893,13 +899,71 @@ function renderBattleBoard(id,side){
   $(id).innerHTML=side.units.map((b,i)=>{
     if(!b)return '<div class="battle-unit empty '+(i<3?'front':'back')+'"></div>';
     const c=creatureOf(b.unit),meta=abilityMeta(c);
-    return '<div class="battle-unit '+(i<3?'front ':'back ')+(b.unit.chromatic?'chromatic ':'')+'" data-battle-side="'+side.kind+'" data-battle-index="'+i+'">'+
+    return '<div class="battle-unit '+(i<3?'front ':'back ')+(b.unit.chromatic?'chromatic ':'')+'" data-battle-side="'+side.kind+'" data-battle-index="'+i+'" role="button" tabindex="0" aria-label="Inspeccionar '+esc(c.name)+'">'+
       '<div class="battle-unit-top"><span class="battle-stars">'+levelStars(b.unit.level)+'</span><span class="battle-role">'+esc(meta.icon)+' '+esc(meta.role)+'</span></div>'+
       spriteMarkup(c,'battle-sprite')+'<span class="unit-name">'+esc(c.name)+'</span>'+
       '<span class="battle-ability-name">'+esc(c.ability.name)+'</span>'+
       '<div class="cooldown-label"><span>HABILIDAD</span><b>0%</b></div><div class="cooldown-ring"><i></i></div>'+
     '</div>';
   }).join('');
+}
+function setBattlePaused(paused,silent){
+  battlePaused=!!paused;
+  document.body.classList.toggle('battle-paused',battlePaused);
+  const btn=$('pauseBtn');
+  if(btn)btn.textContent=battlePaused?'▶ REANUDAR':'⏸ PAUSAR';
+  if(battle&&!battle.ended&&$('battleStatus')){
+    $('battleStatus').textContent=battlePaused?'PAUSA · selecciona cualquier Lexario para ver su ficha':'Combate reanudado…';
+  }
+  if(!battlePaused&&!$('battleInspectModal')?.classList.contains('hidden'))closeModal();
+  if(!silent&&battle&&!battle.ended)toast(battlePaused?'Combate en pausa. Puedes inspeccionar cualquier Lexario.':'Combate reanudado.',battlePaused?'':'good');
+}
+function toggleBattlePause(){
+  if(!battle||battle.ended)return;
+  setBattlePaused(!battlePaused);
+}
+function battleStatusBadges(side){
+  const out=[];
+  if(side.burn>0)out.push('🔥 Quemadura '+side.burn);
+  if(side.poison>0)out.push('☣ Veneno '+side.poison);
+  if(side.shock>0)out.push('⚡ Descarga '+side.shock);
+  if(side.haste>0)out.push('⏩ Velocidad +'+Math.round(side.haste));
+  if(side.guard>0)out.push('🛡 Guardia '+Math.round(side.guard));
+  if(side.silence>0)out.push('⌁ Silencio '+side.silence);
+  return out;
+}
+function renderBattleInspect(sideKey,index){
+  const side=battle?.[sideKey],b=side?.units?.[index];
+  if(!b)return;
+  const c=creatureOf(b.unit),meta=abilityMeta(c);
+  if(!c)return;
+  const trainPct=Math.round((b.unit.training||0)*TRAINING_STEP*100);
+  const recharge=Math.round(100*(1-clamp(b.cooldown/b.stats.cooldown,0,1)));
+  const row=index<3?'🛡️ VANGUARDIA':'⚡ RETAGUARDIA';
+  const status=battleStatusBadges(side);
+  const rarity=D.RARITIES[c.rarity]?.name||c.rarity;
+  $('battleInspectTitle').textContent=c.name;
+  $('battleInspectBody').innerHTML=
+    '<div class="battle-inspect-hero">'+spriteMarkup(c,'battle-inspect-sprite')+
+      '<div><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span><h3>'+esc(c.name)+(b.unit.chromatic?' ✦':'')+'</h3><div class="level-stars">'+levelStars(b.unit.level)+' <small>Nv.'+b.unit.level+' · '+esc(rarity)+'</small></div>'+
+      '<div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div></div></div>'+
+    '<div class="battle-inspect-stats">'+
+      '<div><span>❤️ Vida efectiva</span><b>'+format(b.stats.hp)+'</b></div>'+
+      '<div><span>⚔️ Potencia</span><b>'+format(b.stats.damage)+'</b></div>'+
+      '<div><span>⏱ Recarga</span><b>'+b.stats.cooldown.toFixed(1)+' s</b></div>'+
+      '<div><span>🎓 Entreno</span><b>+'+trainPct+'%</b></div>'+
+    '</div>'+
+    '<div class="battle-inspect-team"><div><span>VIDA COMPARTIDA</span><b>'+format(side.hp)+' / '+format(side.maxHp)+'</b></div><div><span>ESCUDO</span><b>'+format(side.shield)+'</b></div><div><span>HABILIDAD LISTA</span><b>'+recharge+'%</b></div></div>'+
+    '<div class="ability-box featured"><div class="ability-title"><b>'+esc(c.ability.name)+'</b><span>'+esc(meta.tags.join(' · '))+'</span></div><p>'+esc(c.ability.text)+'</p><small>Cada '+b.stats.cooldown.toFixed(1)+' s aproximadamente. '+(sideKey==='player'?'Aliado':'Rival')+'.</small></div>'+
+    '<div class="battle-inspect-position"><b>'+row+'</b><span>'+(index<3?'+25% vida · habilidad 10% más lenta':'−10% vida · habilidad 15% más rápida')+'</span></div>'+
+    '<div class="battle-status-tags">'+(status.length?status.map(s=>'<span>'+esc(s)+'</span>').join(''):'<span class="clear">Sin estados activos</span>')+'</div>';
+}
+function openBattleInspect(sideKey,index){
+  if(!battle||battle.ended)return;
+  if(!battlePaused)setBattlePaused(true,true);
+  battleInspectRef={side:sideKey,index};
+  renderBattleInspect(sideKey,index);
+  openModal('battleInspectModal');
 }
 function logBattle(text){
   battle.log.unshift({t:battle.time,text});battle.log=battle.log.slice(0,14);
@@ -1041,7 +1105,7 @@ function statusTick(side,target){
   side.haste=Math.max(0,side.haste-.7);side.guard=Math.max(0,side.guard-.25);
 }
 function battleTick(){
-  if(!battle||battle.ended)return;
+  if(!battle||battle.ended||battlePaused)return;
   const dt=.1*battleSpeed;battle.time+=dt;
   ['player','enemy'].forEach(k=>{
     const side=battle[k],target=k==='player'?battle.enemy:battle.player;
@@ -1064,7 +1128,7 @@ function renderBattle(){
   $('playerHpBar').style.width=(p.hp/p.maxHp*100)+'%';$('enemyHpBar').style.width=(e.hp/e.maxHp*100)+'%';
   $('playerShieldBar').style.width=Math.min(100,p.shield/p.maxHp*100)+'%';$('enemyShieldBar').style.width=Math.min(100,e.shield/e.maxHp*100)+'%';
   $('battleTime').textContent=battle.time.toFixed(1);
-  $('battleStatus').textContent=battle.time>=30?'MUERTE SÚBITA · '+battle.sudden+' pulsos':'Quemadura '+p.burn+' · Veneno '+p.poison+' · Descarga '+p.shock;
+  $('battleStatus').textContent=battlePaused?'PAUSA · haz clic en un Lexario para inspeccionarlo':(battle.time>=30?'MUERTE SÚBITA · '+battle.sudden+' pulsos':'Quemadura '+p.burn+' · Veneno '+p.poison+' · Descarga '+p.shock);
   ['player','enemy'].forEach(k=>battle[k].units.forEach(b=>{
     if(!b)return;
     const unitEl=document.querySelector('[data-battle-side="'+k+'"][data-battle-index="'+b.index+'"]');
@@ -1077,7 +1141,7 @@ function renderBattle(){
 }
 function finishBattle(){
   if(!battle||battle.ended)return;
-  battle.ended=true;clearInterval(battleTimer);
+  battle.ended=true;setBattlePaused(false,true);battleInspectRef=null;clearInterval(battleTimer);
   let won=battle.enemy.hp<=0&&battle.player.hp>0;
   if(battle.time>=45&&battle.enemy.hp>0&&battle.player.hp>0)won=(battle.player.hp/battle.player.maxHp)>=(battle.enemy.hp/battle.enemy.maxHp);
 
@@ -1250,7 +1314,9 @@ function bind(){
   $('publishSquadBtn')?.addEventListener('click',publishCurrentSquad);
   $('refreshOpponentsBtn')?.addEventListener('click',refreshStudentOpponents);
   $('resultContinueBtn')?.addEventListener('click',continueAfterBattle);
-  $('speedBtn')?.addEventListener('click',()=>{battleSpeed=battleSpeed===1?2:battleSpeed===2?4:1;$('speedBtn').textContent='×'+battleSpeed+' VELOCIDAD';});
+  $('pauseBtn')?.addEventListener('click',toggleBattlePause);
+  $('battleResumeBtn')?.addEventListener('click',()=>setBattlePaused(false));
+  $('speedBtn')?.addEventListener('click',()=>{battleSpeed=battleSpeed===1?2:battleSpeed===2?4:1;$('speedBtn').textContent='⏩ ×'+battleSpeed;});
   $('endAgainBtn')?.addEventListener('click',()=>resetAfterEnd(true));
   $('endHomeBtn')?.addEventListener('click',()=>resetAfterEnd(false));
   $('motionToggle')?.addEventListener('change',e=>{settings.reduceMotion=e.target.checked;localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));loadSettingsToBody();});
@@ -1271,6 +1337,7 @@ function bind(){
     const choose=e.target.closest('[data-trainer]');if(choose){newRun(choose.dataset.trainer);return;}
     const buy=e.target.closest('[data-buy]');if(buy){buyOffer(Number(buy.dataset.buy));return;}
     const duel=e.target.closest('[data-duel-opponent]');if(duel){startStudentBattle(Number(duel.dataset.duelOpponent),duel.dataset.duelSource);return;}
+    const battleUnit=e.target.closest('[data-battle-side][data-battle-index]');if(battleUnit&&battle&&!battle.ended){openBattleInspect(battleUnit.dataset.battleSide,Number(battleUnit.dataset.battleIndex));return;}
     const slot=e.target.closest('[data-slot]');if(slot){slotClick(slot.dataset.slot,Number(slot.dataset.index));return;}
     const action=e.target.closest('[data-action]')?.dataset.action;
     if(action==='train-selected'){trainSelected();return;}
@@ -1328,7 +1395,13 @@ function bind(){
     qsa('[data-slot].drag-over').forEach(x=>x.classList.remove('drag-over'));
     qsa('.unit-card.dragging').forEach(x=>x.classList.remove('dragging'));
   });
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){closeModal();return;}
+    if((e.key==='Enter'||e.key===' ')&&document.activeElement?.matches?.('[data-battle-side][data-battle-index]')){
+      e.preventDefault();
+      const el=document.activeElement;openBattleInspect(el.dataset.battleSide,Number(el.dataset.battleIndex));
+    }
+  });
   window.addEventListener('pagehide',()=>{saveRun('pagehide');saveCareer();});
 }
 function init(){
