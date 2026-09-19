@@ -45,15 +45,17 @@ for(const required of [
 ]) assert.ok(index.includes(required),'Falta UI: '+required);
 
 for(const required of [
-  'function moveUnit','dragstart','function formationTotals','Vanguardia · +10% vida',
+  'function moveUnit','dragstart','function formationTotals','TRAINING_STEP=.05',
+  'LEVEL_MULT={1:1,2:1.7,3:3','while(incoming.level<3)','training+=x.unit.training',
+  'function strategicFit','function abilityMeta','function battleActionFx',
   'function showStudentBattle','function publishCurrentSquad','function startStudentBattle',
-  "battleContext==='student'","COMPRAR · "
+  "battleContext==='student'","RECLUTAR"
 ]) assert.ok(game.includes(required),'Falta lógica UX: '+required);
 
 for(const required of ['REQUEST_OPPONENTS','PUBLISH_SQUAD','OPPONENTS']) assert.ok(bridge.includes(required),'Falta bridge PvP: '+required);
-for(const required of ['overflow:hidden!important','.position-guide','.offer-stats','.student-battle-layout','.currency-counter']) assert.ok(styles.includes(required),'Falta estilo UX: '+required);
+for(const required of ['overflow:hidden!important','.position-guide','.offer-stats','.student-battle-layout','.currency-counter','.battle-projectile','.ability-callout','.market-ability']) assert.ok(styles.includes(required),'Falta estilo UX: '+required);
 
 new vm.Script(game,{filename:'game.js'});
 new vm.Script(bridge,{filename:'bridge.js'});
 
-console.log('Lexaria smoke test: OK · 30 criaturas · 3000 preguntas · drag/drop · UX económica · arena asíncrona');
+console.log('Lexaria smoke test: OK · 30 criaturas · 3000 preguntas · niveles 1/1.7/3 · entrenamiento 5% · combate visual · arena asíncrona');
