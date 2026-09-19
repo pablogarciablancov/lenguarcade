@@ -301,7 +301,7 @@ function rewardArt(r){
     extraShuffle:'art-refresh',instantShuffle:'art-refresh',reroll:'art-refresh',
     lengthMult:'art-long',letterMult:'art-score',roundSeed:'art-score',nextRoundSeed:'art-score',
     careerXp:'art-xp',rareLuck:'art-rare',
-    gold:'art-gold',makeGold:'art-gold',
+    gold:'art-gold',makeGold:'art-gold',echo:'art-duplicate',
     diamond:'art-diamond',makeDiamond:'art-diamond',
     emerald:'art-emerald',makeEmerald:'art-emerald',
     dot:'art-dot',makeDot:'art-dot',
@@ -359,7 +359,7 @@ function afterReward(){
 function choose(r){if(!E.chooseReward(r)){showFeedback('No puedes llevar más de ese tipo.','warn');return;}afterReward();}
 function reroll(){if(state().rerollsLeft<=0)return;state().rerollsLeft--;rewardOptions=E.rewards();renderRewards();ui.rerollBtn.disabled=state().rerollsLeft<=0;E.saveRun();render();}
 function skipReward(){const n=E.skipReward();showFeedback('Pasas la recompensa · +'+n+' renovaciones','good');afterReward();}
-function start(mode){if(!dictionaryReady){showFeedback('Espera un instante: estoy preparando el diccionario.','warn');return;}hideModal();E.state=E.newState(mode);ui.menu.classList.add('hidden');ui.game.classList.remove('hidden');render();E.saveRun();setTimeout(()=>showCoach('resources','Tus tres recursos','Jugadas permiten formar palabras; Renovaciones cambian el tablero; los Rerolls cambian las tres cartas de recompensa.'),350);if(E.career.games===0)howTo(true);}
+function start(mode){if(!dictionaryReady){showFeedback('Espera un instante: estoy preparando el diccionario.','warn');return;}hideModal();E.state=E.newState(mode);ui.menu.classList.add('hidden');ui.game.classList.remove('hidden');render();E.saveRun();setTimeout(()=>showCoach('resources','Tus tres recursos','Jugadas permiten formar palabras; Renovaciones cambian el tablero; los Rerolls cambian las tres cartas de recompensa.'),350);}
 function resumeRun(){if(!dictionaryReady)return;const r=E.loadRun();if(!r)return;E.state=r;ui.menu.classList.add('hidden');ui.game.classList.remove('hidden');render();}
 function finish(won){
   const out=E.finish(won),s=state();ui.endEye.textContent=won?'PARTIDA COMPLETADA':'FIN DE PARTIDA';ui.endTitle.textContent=won?'¡Estrategia completada!':'Tu partida';
