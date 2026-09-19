@@ -11,5 +11,5 @@
     "saveProgress": true,
     "supabaseCatalog": true
   },
-  "notes": "Roguelike de palabras con 50 modificadores, 16 recompensas, 18 desafíos, 24 logros, colección, XP léxico, modo rápido y reto diario determinista. El juego incluye un léxico local de unas 49.500 formas, capa ortográfica para español de España, bridge de progreso, sonido procedural y tema visual arcade. Mantener en pruebas hasta completar la validación docente del léxico y el equilibrio."
+  "notes": "Roguelike de palabras con 60 modificadores, 18 recompensas, 18 desafíos, 24 logros, colección, XP léxico, modo rápido y reto diario determinista. Las rondas 3/6/9/12 son jefes lingüísticos con objetivo ajustado, preparación de tablero y botín mejorado; algunas rondas intermedias añaden condiciones. Incluye léxico local de unas 49.500 formas, capa ortográfica y filtros escolares para español de España, bridge de progreso, sonido procedural y tema arcade. Mantener en pruebas hasta completar validación docente del léxico y telemetría de equilibrio."
 }
