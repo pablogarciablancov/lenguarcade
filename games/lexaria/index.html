@@ -32,9 +32,9 @@
         </div>
       </div>
       <div class="hero-creatures" aria-hidden="true">
-        <div class="hero-card h1"><span class="lex-sprite hero-sprite" style="--sx:0;--sy:0;--ox:0%;--oy:0%"><img src="./assets/lexarios-fantasy.webp" alt="" draggable="false"></span><b>Brontilde</b></div>
-        <div class="hero-card h2"><span class="lex-sprite hero-sprite" style="--sx:5;--sy:0;--ox:-500%;--oy:0%"><img src="./assets/lexarios-fantasy.webp" alt="" draggable="false"></span><b>Flexión</b></div>
-        <div class="hero-card h3"><span class="lex-sprite hero-sprite" style="--sx:4;--sy:1;--ox:-400%;--oy:-100%"><img src="./assets/lexarios-fantasy.webp" alt="" draggable="false"></span><b>Lexifin</b></div>
+        <div class="hero-card h1"><span class="lex-sprite hero-sprite" aria-hidden="true"><svg viewBox="12 8 76 84" preserveAspectRatio="xMidYMid meet" focusable="false"><image href="./assets/lexarios-fantasy.webp" x="0" y="0" width="600" height="500" preserveAspectRatio="none"/></svg></span><b>Brontilde</b></div>
+        <div class="hero-card h2"><span class="lex-sprite hero-sprite" aria-hidden="true"><svg viewBox="12 8 76 84" preserveAspectRatio="xMidYMid meet" focusable="false"><image href="./assets/lexarios-fantasy.webp" x="-500" y="0" width="600" height="500" preserveAspectRatio="none"/></svg></span><b>Flexión</b></div>
+        <div class="hero-card h3"><span class="lex-sprite hero-sprite" aria-hidden="true"><svg viewBox="16 8 74 84" preserveAspectRatio="xMidYMid meet" focusable="false"><image href="./assets/lexarios-fantasy.webp" x="-400" y="-100" width="600" height="500" preserveAspectRatio="none"/></svg></span><b>Lexifin</b></div>
       </div>
     </div>
     <footer class="title-footer">
@@ -63,6 +63,7 @@
         <div><span>◆ MERCADO</span><strong id="rankValue">1</strong></div>
       </div>
       <div class="top-actions">
+        <button id="saveExitBtn" class="save-exit-btn" type="button">💾 GUARDAR Y SALIR</button>
         <button class="icon-btn" data-open="codexModal">▦</button>
         <button class="icon-btn" data-open="settingsModal">⚙</button>
       </div>
@@ -149,13 +150,14 @@
   <section id="battleScreen" class="screen battle-screen hidden">
     <header class="battle-header">
       <div class="battle-trainer left" id="battlePlayerTrainer"></div>
-      <div class="battle-title"><span id="battleDayLabel">JORNADA 1</span><strong id="battleVsLabel">ENCUENTRO</strong></div>
+      <div class="battle-title"><span id="battleDayLabel">JORNADA 1</span><strong id="battleVsLabel">ENCUENTRO</strong><small id="battleFieldName" class="battle-field-name">Patio de la Academia</small></div>
       <div class="battle-trainer right" id="battleEnemyTrainer"></div>
     </header>
     <div class="battle-arena">
       <div class="battle-toolbar" aria-label="Controles del combate">
         <button id="pauseBtn" class="battle-control-btn" type="button">⏸ PAUSAR</button>
         <button id="speedBtn" class="battle-control-btn" type="button">⏩ ×1</button>
+        <button id="battleSaveExitBtn" class="battle-control-btn save" type="button">💾 SALIR</button>
         <div class="battle-timer"><span>TIEMPO</span><strong id="battleTime">0.0</strong></div>
       </div>
 
@@ -275,6 +277,7 @@
       <div class="battle-inspect-actions">
         <button id="battleResumeBtn" class="primary">▶ REANUDAR BATALLA</button>
         <button class="secondary" data-close-modal>SEGUIR INSPECCIONANDO</button>
+        <button id="battleSaveExitModalBtn" class="secondary save-exit-modal">💾 GUARDAR Y SALIR</button>
       </div>
     </section>
 
