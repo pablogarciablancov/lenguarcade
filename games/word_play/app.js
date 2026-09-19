@@ -34,7 +34,20 @@ function render(){
   ui.goals.innerHTML=s.goals.map(g=>'<div class="goal-item '+(g.done?'done':'')+'"><span>'+(g.done?'✓':'○')+'</span><span>'+g.label+'</span></div>').join('');
   const auto=E.specialEffect()==='autoRefresh';$('shuffleBtn').disabled=auto?s.playsLeft<=0:s.shufflesLeft<=0;$('shuffleBtn').textContent=auto?'↻ Renovar · 1 jugada':'↻ Renovar';
 }
-function renderMods(){const s=state();ui.modCount.textContent=s.modifiers.length;if(!s.modifiers.length){ui.mods.className='modifier-list empty-list';ui.mods.innerHTML='<p>Aún no tienes mejoras.</p>';return;}ui.mods.className='modifier-list';ui.mods.innerHTML=s.modifiers.map(id=>C.modifiers.find(x=>x.id===id)).filter(Boolean).map(m=>`<article class="modifier-card rarity-${m.rarity}"><strong>${m.name}<em class="rarity-tag">${m.rarity}</em></strong><span>${m.desc}</span></article>`).join('');}
+function renderMods(){
+  const s=state();ui.modCount.textContent=s.modifiers.length+'/6';
+  if(!s.modifiers.length){ui.mods.className='modifier-list empty-list';ui.mods.innerHTML='<p>Aún no tienes modificadores.</p>';return;}
+  const prices={common:1,uncommon:2,rare:3,epic:3,legendary:4};ui.mods.className='modifier-list';
+  ui.mods.innerHTML=s.modifiers.map(id=>C.modifiers.find(x=>x.id===id)).filter(Boolean).map(m=>'<article class="modifier-card rarity-'+m.rarity+'"><strong><span>'+m.name+'</span><em class="rarity-tag">'+m.rarity+'</em></strong><span>'+m.desc+'</span><button class="sell-mod" type="button" data-sell="'+m.id+'">Vender · +'+(prices[m.rarity]||1)+' ↻</button></article>').join('');
+  ui.mods.querySelectorAll('[data-sell]').forEach(b=>b.addEventListener('click',()=>{const n=E.sellModifier(b.dataset.sell);if(n){showFeedback('Modificador vendido · +'+n+' renovaciones','good');render();}}));
+}
+function renderUpgrades(){
+  const s=state();ui.upgradeCount.textContent=s.upgrades.length+'/3';
+  if(!s.upgrades.length){ui.upgrades.className='upgrade-list empty-list';ui.upgrades.innerHTML='<p>Elige una Mejora al superar rondas.</p>';return;}
+  ui.upgrades.className='upgrade-list';
+  ui.upgrades.innerHTML=s.upgrades.map(o=>{const u=C.upgrades.find(x=>x.id===o.id);return u?'<button type="button" class="upgrade-card rarity-'+u.rarity+' '+(activeUpgrade===o.id?'active':'')+'" data-upgrade="'+o.id+'"><strong>'+u.name+'<em>×'+o.uses+'</em></strong><span>'+u.desc+'</span></button>':'';}).join('');
+  ui.upgrades.querySelectorAll('[data-upgrade]').forEach(b=>b.addEventListener('click',()=>{activeUpgrade=activeUpgrade===b.dataset.upgrade?null:b.dataset.upgrade;showFeedback(activeUpgrade?'Selecciona una ficha para aplicar la mejora.':'Mejora deseleccionada.','');renderUpgrades();renderBoard();}));
+}
 function renderBoard(){const s=state();ui.board.innerHTML='';for(const t of s.board){const b=document.createElement('button');b.type='button';b.className=`tile ${t.kind} ${s.selected.some(x=>x.id===t.id)?'selected':''}`;b.dataset.value=E.tileScore(t);b.dataset.bonus=t.bonus||0;b.textContent=t.letter;b.addEventListener('click',()=>selectTile(t.id));ui.board.appendChild(b);}}
 function selectTile(id){const s=state(),t=s.board.find(x=>x.id===id);if(!t||s.selected.some(x=>x.id===id))return;s.selected.push({id:t.id,char:t.letter});renderBoard();renderWord();}
 function renderWord(){const s=state(),w=currentWord();ui.builder.innerHTML='';s.selected.forEach((x,i)=>{const t=s.board.find(q=>q.id===x.id),b=document.createElement('button');b.type='button';b.className=`word-chip ${E.VOWELS.has(E.strip(x.char).toUpperCase())?'vowel':''}`;b.innerHTML=`${x.char}<small>${E.tileScore(t)}</small>`;b.addEventListener('click',()=>{const base=E.strip(x.char).toUpperCase(),cycle=E.ACCENTABLE[base];if(cycle){const j=cycle.indexOf(x.char.toUpperCase());x.char=cycle[(j+1)%cycle.length];renderWord();}else{s.selected.splice(i,1);renderBoard();renderWord();}});ui.builder.appendChild(b);});if(!w){ui.hint.textContent='Selecciona fichas para formar una palabra';ui.preview.textContent='0 pts';ui.combo.innerHTML='';return;}ui.hint.textContent='Pulsa una vocal seleccionada para cambiar su tilde';const tiles=s.selected.map(x=>s.board.find(t=>t.id===x.id)).filter(Boolean),sc=E.score(w,tiles,true);ui.preview.textContent=`${fmt(sc.total)} pts`;ui.combo.innerHTML=sc.effects.slice(0,5).map(e=>`<span class="combo-chip">${e}</span>`).join('');}
