@@ -1091,3 +1091,53 @@ html.reduce-motion *,html.reduce-motion *::before,html.reduce-motion *::after{an
   .wp-word-score-sequence{width:min(94vw,560px);padding:9px}
   .wp-score-letter{min-width:34px;height:39px}
 }
+
+
+/* Microayuda contextual */
+.hover-tooltip{
+  position:fixed;
+  z-index:120;
+  max-width:min(320px,calc(100vw - 16px));
+  padding:8px 10px;
+  border-radius:9px;
+  color:#f6f8ff;
+  background:linear-gradient(180deg,rgba(28,24,54,.98),rgba(12,17,34,.98));
+  border:1px solid rgba(150,185,255,.2);
+  box-shadow:0 12px 30px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.05);
+  font-size:.67rem;
+  line-height:1.38;
+  font-weight:650;
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(4px) scale(.98);
+  transition:opacity .11s ease,transform .11s ease;
+}
+.hover-tooltip.visible{opacity:1;transform:none}
+[data-tip]{cursor:help}
+button[data-tip]{cursor:pointer}
+
+/* El valor de letra queda integrado, sin burbuja alrededor */
+.tile::after{content:none!important}
+.tile-points{
+  right:8%!important;
+  bottom:6%!important;
+  min-width:0!important;
+  height:auto!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  color:#172033!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  font-size:clamp(.48rem,.82vw,.68rem)!important;
+  line-height:1!important;
+  font-weight:950!important;
+  opacity:.78;
+  text-shadow:0 1px 0 rgba(255,255,255,.42);
+}
+.tile.gold .tile-points,.tile.dot .tile-points,.tile.potion .tile-points,.tile.volatile .tile-points{color:#311c0a!important}
+.tile.diamond .tile-points,.tile.emerald .tile-points,.tile.wild .tile-points,.tile.mirror .tile-points,.tile.plus .tile-points{color:#122333!important}
+
+@media(max-width:760px){
+  .hover-tooltip{display:none}
+}
