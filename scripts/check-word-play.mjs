@@ -30,7 +30,7 @@ for (const required of [
   './content.js','./lexicon.js','./vendor/typo.js','./engine.js','./bridge.js','./app.js','./layout.js','./sound.js','./game-feel.js','./styles.css','./responsive.css','./arcade.css'
 ]) if (!index.includes(required)) throw new Error(`Falta ${required} en index.html`);
 
-if(!index.includes('20260920-roguelike-polish-v3'))throw new Error('Los assets de Word Play no llevan la versión de pulido roguelike v3');
+if(!index.includes('20260920-fast-bridge-v1'))throw new Error('Los assets de Word Play no llevan la versión del bridge rápido');
 if(!app.includes('dictionaryReady')||!app.includes('launchButtons'))throw new Error('La partida puede arrancar antes de cargar el diccionario');
 if(app.includes("visibilitychange"))throw new Error('Cambiar de pestaña no debe activar Tinta Viva automáticamente');
 if(!/function applyUpgrade[\s\S]*const upgradeId=activeUpgrade[\s\S]*activeUpgrade=null[\s\S]*render\(\)/.test(app))throw new Error('Aplicar una Mejora debe desarmar el modo de selección tras una sola ficha');
@@ -79,9 +79,12 @@ for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL
 for (const required of ['renderCareer','renderBoard','renderUpgrades','valueClass','wordScorePreview','difficultyModal','openReward','skipReward','collection','wordLog','classroomMode','tintaBtn','buyTintaViva','useTintaViva','rewardArt','rewardArtSvg','rewardAccent','reward-art.svg','rarity-gem','openShop','renderShop','buyFromShop','buyShopLetter','tile-points','scoreWord','copy','initTooltips','installStaticTips','specialHelp','tileTip','data-tip','Rerolls de recompensa','activeSynergies','buildProfile','showCoach','missionChip','gold-ready','shopOffers','sale-badge']) {
   if (!app.includes(required)) throw new Error(`Falta ${required} en app.js`);
 }
-for (const required of ["const GAME_ID='word_play'","post('READY'","post('INITIALIZED'","post('CHECKPOINT'","post('RESULT'",'SESSION_STARTED']) {
+for (const required of ["const GAME_ID='word_play'","post('READY'","post('INITIALIZED'","post('CHECKPOINT'","post('RESULT'",'SESSION_STARTED','lenguarcade-bootstrap','REQUEST_EXIT','CHECKPOINT_CONFIRMED','CHECKPOINT_FAILED','CLOSE_READY','saveAndExit','AUTOSAVE_MS=30000','[3,4].includes(Number(run.version))']) {
   if (!bridge.includes(required)) throw new Error(`Falta bridge: ${required}`);
 }
+if(!/function readBootstrap\(\)[\s\S]*window\.name[\s\S]*initialize\(bootstrap,'bootstrap'\)/.test(bridge))throw new Error('Word Play no usa el contexto bootstrap para restaurar sin esperar al handshake');
+if(!/function saveAndExit\(\)[\s\S]*checkpoint\('exit'\)[\s\S]*EXIT_FALLBACK_MS/.test(bridge))throw new Error('La salida no fuerza un checkpoint inmediato con fallback');
+if(!app.includes('WordPlayBridge.saveAndExit'))throw new Error('Guardar y salir no usa el bridge al estar embebido');
 for (const required of ['AudioContext','Oscillator','WordPlaySound','MutationObserver']) {
   if (!sound.includes(required)) throw new Error(`Falta sonido: ${required}`);
 }
@@ -559,4 +562,4 @@ for(const [w,h] of [[700,430],[520,360],[390,250],[900,500]]){
   const s=layoutSize(w,h);if(s*4+21>w+1||s*4+21>h+1)throw new Error(`El tablero puede desbordar ${w}×${h}`);
 }
 
-console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/color/core-loop/slots/upgrades/special-rounds/special-tiles/deadlock-rescue/tinta-economy/reward-art/anchor-6plus/upgrade-state-regression/shop-rotation/synergies/linguistic-missions/context-coach/special-activations/build-summary/score-animation/tooltips-special-help/classroom-copy-guard/morphology-esES/bridge/audio/daily OK`);
+console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/color/core-loop/slots/upgrades/special-rounds/special-tiles/deadlock-rescue/tinta-economy/reward-art/anchor-6plus/upgrade-state-regression/shop-rotation/synergies/linguistic-missions/context-coach/special-activations/build-summary/score-animation/tooltips-special-help/classroom-copy-guard/morphology-esES/fast-bootstrap/fast-exit/bridge/audio/daily OK`);

@@ -385,7 +385,17 @@ function wire(){
   $('quickGameBtn').onclick=()=>start('quick');$('dailyGameBtn').onclick=()=>start('daily');ui.cont.onclick=resumeRun;
   $('howToBtn').onclick=()=>howTo(false);$('helpBtn').onclick=()=>howTo(false);$('pauseBtn').onclick=()=>showModal(ui.pause);ui.shopBtn.onclick=openShop;$('closeShopBtn').onclick=hideModal;ui.cancelLetter.onclick=()=>{ui.letterPicker.classList.add('hidden');ui.shopMessage.textContent='Elige otro artículo o cierra la tienda.';};
   $('collectionBtn').onclick=()=>showCollection('cards');$('achievementsBtn').onclick=()=>showCollection('achievements');$('closeCollectionBtn').onclick=hideModal;$('closeWordLogBtn').onclick=hideModal;$('wordLogBtn').onclick=wordLog;$('closeInfoBtn').onclick=hideModal;$('resumeBtn').onclick=hideModal;
-  $('saveExitBtn').onclick=()=>{E.saveRun();menu();};$('abandonBtn').onclick=()=>{E.clearRun();menu();};
+  $('saveExitBtn').onclick=()=>{
+    E.saveRun();
+    if(window.__LENGUARCADE_EMBEDDED&&window.WordPlayBridge?.saveAndExit){
+      hideModal();
+      showFeedback('Guardado local listo · sincronizando con LenguArcade…','good');
+      window.WordPlayBridge.saveAndExit();
+      return;
+    }
+    menu();
+  };
+  $('abandonBtn').onclick=()=>{E.clearRun();menu();};
   $('undoBtn').onclick=()=>{state().selected.pop();renderBoard();renderWord();};$('clearBtn').onclick=()=>{state().selected=[];renderBoard();renderWord();};$('submitBtn').onclick=play;
   $('shuffleBtn').onclick=()=>{if(E.shuffle()){showFeedback(E.specialEffect()==='autoRefresh'?'Tablero renovado · -1 jugada':'Tablero renovado.','good');render();}};
   ui.rerollBtn.onclick=reroll;ui.skipReward.onclick=skipReward;
