@@ -113,7 +113,7 @@ window.WordPlayContent = (() => {
   ];
 
   const specialRounds = [
-    {id:'limit_tiles',title:'Palabra encogida',desc:'Empiezas pudiendo usar 4 fichas; el límite aumenta tras cada palabra.',effect:'maxTiles'},
+    {id:'limit_tiles',title:'Palabra encogida',desc:'Empiezas pudiendo usar 6 fichas; el límite aumenta tras cada palabra.',effect:'maxTiles'},
     {id:'first_locked',title:'Primera letra sellada',desc:'Todas las palabras deben empezar por la letra indicada.',effect:'firstLocked'},
     {id:'specials_off',title:'Magia anulada',desc:'Las fichas especiales no activan sus poderes durante esta ronda.',effect:'specialsOff'},
     {id:'top_locked',title:'Fila congelada',desc:'Las cuatro fichas superiores quedan bloqueadas durante 4 palabras.',effect:'topLocked'},
@@ -159,7 +159,7 @@ window.WordPlayContent = (() => {
     {id:'consonant',title:'Golpe consonante',desc:'La palabra debe empezar por consonante.',kind:'constraint',targetMult:.96},
     {id:'noA',title:'La A prohibida',desc:'No puedes usar la letra A.',kind:'constraint',targetMult:.94},
     {id:'unique',title:'Sin repetir',desc:'No puedes repetir ninguna letra.',kind:'constraint',targetMult:.94},
-    {id:'exact5',title:'Cinco exactas',desc:'Solo palabras de exactamente 5 letras.',kind:'constraint',targetMult:.92},
+    {id:'exact6c',title:'Seis exactas',desc:'Solo palabras de exactamente 6 letras.',kind:'constraint',targetMult:.92},
     {id:'endsS',title:'Final en S',desc:'La palabra debe terminar en S.',kind:'constraint',targetMult:.93},
     {id:'twoVowels',title:'Vocal doble',desc:'Debe contener al menos dos vocales.',kind:'constraint',targetMult:.96},
 
