@@ -175,10 +175,11 @@ function newRun(trainerId){
   run={
     version:1,id:uid('league'),startedAt:nowIso(),completed:false,trainerId:t.id,
     day:1,wins:0,lives:10,gold:12,rank:1,freeRerolls:t.effect==='balanced'?1:0,
-    trainingLeft:t.effect==='teacher'?5:4,team:Array(TEAM_SIZE).fill(null),bench:Array(BENCH_SIZE).fill(null),
+    trainingLeft:t.effect==='teacher'?5:3,team:Array(TEAM_SIZE).fill(null),bench:Array(BENCH_SIZE).fill(null),
     relics:[],shop:[],locked:false,itemUse:1,discount:0,rarityBoost:0,trainingBonus:0,
     secondChance:true,losses:0,eventsSeen:[],flags:{},stats:{buys:0,trainingCorrect:0,trainingAttempts:0,trainingStreak:0,maxTrainingStreak:0,merges:0,maxLevel:1,chromatics:0,biggestHit:0,maxShield:0,damage:0,casts:0}
   };
+  if(t.effect==='balanced')run.trainingLeft+=1;
   if(t.effect==='lexicon')run.trainingLeft+=1;
   rollShop(true);
   saveRun('new_run');
@@ -377,12 +378,13 @@ function buyOffer(index){
   if(o.kind==='resource'&&run.itemUse<=0)return toast('Ya has usado el Recurso de este día.','bad');
   run.gold-=o.price;o.bought=true;
   if(o.kind==='creature'){
+    const wasDiscovered=!!career.discovered[o.creatureId];
     if(!addCreature(o.creatureId,o.chromatic)){run.gold+=o.price;o.bought=false;return;}
     run.stats.buys++;career.metrics.buys++;
     if(o.chromatic)toast('¡Variante cromática encontrada!','good');
     const t=trainer();
-    if(t?.effect==='lexicon'&&!run.flags['lexicon_'+run.day+'_'+o.creatureId]&&career.discovered[o.creatureId]){
-      run.trainingLeft+=1;run.flags['lexicon_'+run.day+'_'+o.creatureId]=true;
+    if(t?.effect==='lexicon'&&!wasDiscovered&&!run.flags['lexicon_new_'+run.day]){
+      run.trainingLeft+=1;run.flags['lexicon_new_'+run.day]=true;
     }
     if(run.discount>0)run.discount=0;
   }else{
@@ -420,7 +422,7 @@ function openRelicReward(){
 function chooseRelic(id){
   if(!run.relics.includes(id))run.relics.push(id);
   pendingRelicRewards=Math.max(0,pendingRelicRewards-1);
-  saveRun('relic');renderRun();closeModal();
+  evaluateAchievements();saveCareer();saveRun('relic');renderRun();closeModal();
   if(pendingRelicRewards>0)setTimeout(openRelicReward,120);
 }
 
@@ -962,7 +964,21 @@ document.addEventListener('DOMContentLoaded',init);
 
 return {
   get run(){return run;},get career(){return career;},
-  restore(s){if(s){localStorage.setItem(RUN_KEY,JSON.stringify(s));run=loadRun();}},
+  restore(payload){
+    if(!payload)return;
+    const pack=payload?.save||payload;
+    if(pack?.career){
+      const base=loadCareer();
+      career=Object.assign(base,pack.career,{metrics:Object.assign(base.metrics,pack.career.metrics||{}),history:Array.isArray(pack.career.history)?pack.career.history:base.history});
+      localStorage.setItem(CAREER_KEY,JSON.stringify(career));
+    }
+    const incoming=pack?.run||((pack?.version===1&&pack?.trainerId)?pack:null);
+    if(incoming){
+      localStorage.setItem(RUN_KEY,JSON.stringify(incoming));
+      run=loadRun();
+    }
+    renderTitleMeta();
+  },
   metrics(){
     return {
       wins:run?.wins||0,day:run?.day||0,lives:run?.lives||0,rank:run?.rank||0,
