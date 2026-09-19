@@ -242,7 +242,7 @@
       "icon": "🔠",
       "entry": "games/word_play/",
       "description": "Roguelike de palabras con cartas, tienda, mejoras, misiones lingüísticas, fichas especiales, combos y progresión léxica.",
-      "banner": "board",
+      "banner": "word-play-banner-v2.webp",
       "active": true,
       "integration": "embedded"
     }
