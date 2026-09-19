@@ -583,7 +583,13 @@ function renderTrainingQuestion(){
   if(!currentQuestion)return;
   const q=currentQuestion.data,u=currentQuestion.mode==='run'?unitAt(currentQuestion.ref):null,c=u?creatureOf(u):null;
   $('trainingTitle').textContent=currentQuestion.mode==='run'?'Entrenar '+c.name:'Entrenamiento libre';
-  const target=currentQuestion.mode==='run'?'<div class="training-target"><span class="unit-emoji">'+esc(c.emoji)+'</span><div><b>'+esc(c.name)+'</b><small> · '+esc(D.TYPES[q.category].name)+' · entrenamiento '+u.training+' = +'+Math.round((u.training||0)*TRAINING_STEP*100)+'% vida/potencia</small></div><strong>ACIERTO = +5%</strong></div>':'';
+  let projectedGain=1;
+  if(currentQuestion.mode==='run'){
+    projectedGain+=run.trainingBonus||0;
+    if(trainer()?.effect==='teacher')projectedGain*=2;
+    if(u?.chromatic&&hasRelic('folio_dorado'))projectedGain*=2;
+  }
+  const target=currentQuestion.mode==='run'?'<div class="training-target"><span class="unit-emoji">'+esc(c.emoji)+'</span><div><b>'+esc(c.name)+'</b><small> · '+esc(D.TYPES[q.category].name)+' · entrenamiento '+u.training+' = +'+Math.round((u.training||0)*TRAINING_STEP*100)+'% vida/potencia</small></div><strong>ACIERTO = +'+Math.round(projectedGain*TRAINING_STEP*100)+'%</strong></div>':'';
   $('trainingBody').innerHTML=target+
     '<div class="question-meta"><span>'+esc(D.TYPES[q.category].name)+'</span><span>Elige una respuesta</span></div>'+
     '<div class="question-card" style="margin-top:10px"><h3>'+esc(q.prompt)+'</h3><div class="answers">'+q.answers.map((a,i)=>'<button class="answer-btn" data-answer="'+i+'">'+esc(a)+'</button>').join('')+'</div><div id="trainingFeedback" style="margin-top:12px;color:var(--muted)"></div></div>';
@@ -597,7 +603,7 @@ function answerTraining(index){
   buttons[index]?.classList.add(correct?'correct':'wrong');
   if(!correct)buttons[q.correct]?.classList.add('correct');
   const feedback=$('trainingFeedback');
-  if(feedback)feedback.innerHTML='<b style="color:'+(correct?'var(--green)':'var(--red)')+'">'+(correct?'Correcto · entrenamiento mejorado.':'No exactamente.')+'</b> '+(correct?'<strong style="color:var(--gold)">+5% vida y potencia por cada punto obtenido. </strong>':'')+esc(q.explanation);
+  if(feedback)feedback.innerHTML='<b style="color:'+(correct?'var(--green)':'var(--red)')+'">'+(correct?'Correcto.':'No exactamente.')+'</b> '+esc(q.explanation);
   if(currentQuestion.mode==='run'){
     run.trainingLeft=Math.max(0,run.trainingLeft-1);
     run.stats.trainingAttempts++;career.metrics.trainingAttempts++;
@@ -607,6 +613,7 @@ function answerTraining(index){
       if(trainer()?.effect==='teacher')gain*=2;
       if(u?.chromatic&&hasRelic('folio_dorado'))gain*=2;
       if(u)u.training=Math.min(20,(u.training||0)+gain);
+      if(feedback)feedback.innerHTML='<b style="color:var(--green)">Correcto · +'+Math.round(gain*TRAINING_STEP*100)+'% vida y potencia.</b> '+esc(q.explanation);
       run.stats.trainingCorrect++;run.stats.trainingStreak++;run.stats.maxTrainingStreak=Math.max(run.stats.maxTrainingStreak,run.stats.trainingStreak);
       career.metrics.trainingCorrect++;career.metrics.trainingStreak++;career.metrics.maxTrainingStreak=Math.max(career.metrics.maxTrainingStreak,career.metrics.trainingStreak);
       career.xp+=12;
