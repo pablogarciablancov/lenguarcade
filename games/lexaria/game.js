@@ -114,6 +114,11 @@ function adjacentIndexes(index){
 }
 function adjacencyCount(index,team){return adjacentIndexes(index).filter(i=>team[i]).length;}
 function abilityMeta(c){return ABILITY_META[c?.ability?.kind]||{role:'VERSÁTIL',icon:'✦',row:'back',tags:['HABILIDAD']};}
+function spriteMarkup(c,extra){
+  if(!c)return '<span class="lex-sprite missing" aria-hidden="true"></span>';
+  const i=Math.max(0,D.creatures.findIndex(x=>x.id===c.id)),x=i%6,y=Math.floor(i/6);
+  return '<span class="lex-sprite '+esc(extra||'')+'" style="--sx:'+x+';--sy:'+y+'" aria-hidden="true"></span>';
+}
 function levelStars(level){const l=clamp(Number(level)||1,1,3);return '★'.repeat(l)+'☆'.repeat(3-l);}
 function fusionInfo(creatureId,level,includeIncoming){
   const l=clamp(Number(level)||1,1,3);
@@ -327,7 +332,7 @@ function unitCard(u,isSel,area,index){
   return '<button draggable="true" class="unit-card '+(u.chromatic?'chromatic ':'')+(isSel?'selected':'')+'" data-unit="'+esc(u.uid)+'" data-area="'+esc(area||'')+'" data-index="'+String(index??'')+'" data-rarity="'+esc(c.rarity)+'">'+
     '<i class="rarity-line"></i><span class="unit-level">'+levelStars(u.level)+'</span><span class="unit-power">🎓 +'+trainPct+'%</span>'+
     '<span class="unit-role">'+esc(meta.icon)+' '+esc(meta.role)+'</span>'+
-    '<span class="unit-emoji">'+esc(c.emoji)+'</span><span class="unit-name">'+esc(c.name)+'</span>'+
+    spriteMarkup(c,'unit-sprite')+'<span class="unit-name">'+esc(c.name)+'</span>'+
   '</button>';
 }
 function slotClick(area,index){
@@ -367,7 +372,7 @@ function renderInspect(){
     :'<b>📦 RESERVA</b><span>No combate. Sí cuenta para conseguir copias y fusionar.</span>';
   host.className='inspect-card';
   host.innerHTML=
-    '<div class="inspect-hero game-card-header"><span class="big-emoji">'+esc(c.emoji)+'</span><div class="inspect-name"><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span><h3>'+esc(c.name)+(u.chromatic?' ✦':'')+'</h3><div class="level-stars">'+levelStars(u.level)+' <small>Nv.'+u.level+'</small></div></div></div>'+
+    '<div class="inspect-hero game-card-header">'+spriteMarkup(c,'inspect-sprite')+'<div class="inspect-name"><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span><h3>'+esc(c.name)+(u.chromatic?' ✦':'')+'</h3><div class="level-stars">'+levelStars(u.level)+' <small>Nv.'+u.level+'</small></div></div></div>'+
     '<div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+
     '<div class="stat-grid game-stats"><div><span>❤️ Vida efectiva</span><b>'+format(stats.hp)+'</b></div><div><span>⚔️ Potencia</span><b>'+format(stats.damage)+'</b></div><div><span>⏱ Habilidad</span><b>'+stats.cooldown.toFixed(1)+'s</b></div><div><span>🎓 Entreno</span><b>+'+trainPct+'%</b></div></div>'+
     '<div class="ability-box featured"><div class="ability-title"><b>'+esc(c.ability.name)+'</b><span>'+esc(meta.tags.join(' · '))+'</span></div><p>'+esc(c.ability.text)+'</p><small>Cada '+stats.cooldown.toFixed(1)+' s, cuando se llena su barra, lanza esta habilidad automáticamente.</small></div>'+
@@ -427,7 +432,7 @@ function renderMarket(){
       const rowLabel=meta.row==='front'?'🛡️ DELANTE':'⚡ DETRÁS';
       return '<article class="offer-card game-offer '+(o.bought?'bought ':'')+(o.chromatic?'chromatic ':'')+(affordable?'':'unaffordable')+'" data-role="'+esc(meta.role)+'">'+
         '<div class="offer-topline"><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span><span class="rarity-name">'+esc(D.RARITIES[c.rarity].name)+'</span></div>'+
-        '<div class="offer-body"><div class="offer-portrait"><span class="unit-emoji">'+esc(c.emoji)+'</span><div><h4>'+esc(c.name)+(o.chromatic?' ✦':'')+'</h4><small>'+rowLabel+'</small></div></div>'+
+        '<div class="offer-body"><div class="offer-portrait">'+spriteMarkup(c,'market-sprite')+'<div><h4>'+esc(c.name)+(o.chromatic?' ✦':'')+'</h4><small>'+rowLabel+'</small></div></div>'+
         '<div class="offer-type-row">'+c.types.map(t=>'<span class="offer-type">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+
         '<div class="offer-stats"><span>❤️ '+format(c.hp)+'</span><span>⚔️ '+format(c.damage)+'</span><span>⏱ '+c.cooldown.toFixed(1)+'s</span></div>'+
         '<div class="market-ability"><b>'+esc(c.ability.name)+'</b><p>'+esc(c.ability.text)+'</p><div>'+meta.tags.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div>'+
@@ -589,7 +594,7 @@ function renderTrainingQuestion(){
     if(trainer()?.effect==='teacher')projectedGain*=2;
     if(u?.chromatic&&hasRelic('folio_dorado'))projectedGain*=2;
   }
-  const target=currentQuestion.mode==='run'?'<div class="training-target"><span class="unit-emoji">'+esc(c.emoji)+'</span><div><b>'+esc(c.name)+'</b><small> · '+esc(D.TYPES[q.category].name)+' · entrenamiento '+u.training+' = +'+Math.round((u.training||0)*TRAINING_STEP*100)+'% vida/potencia</small></div><strong>ACIERTO = +'+Math.round(projectedGain*TRAINING_STEP*100)+'%</strong></div>':'';
+  const target=currentQuestion.mode==='run'?'<div class="training-target">'+spriteMarkup(c,'training-sprite')+'<div><b>'+esc(c.name)+'</b><small> · '+esc(D.TYPES[q.category].name)+' · entrenamiento '+u.training+' = +'+Math.round((u.training||0)*TRAINING_STEP*100)+'% vida/potencia</small></div><strong>ACIERTO = +'+Math.round(projectedGain*TRAINING_STEP*100)+'%</strong></div>':'';
   $('trainingBody').innerHTML=target+
     '<div class="question-meta"><span>'+esc(D.TYPES[q.category].name)+'</span><span>Elige una respuesta</span></div>'+
     '<div class="question-card" style="margin-top:10px"><h3>'+esc(q.prompt)+'</h3><div class="answers">'+q.answers.map((a,i)=>'<button class="answer-btn" data-answer="'+i+'">'+esc(a)+'</button>').join('')+'</div><div id="trainingFeedback" style="margin-top:12px;color:var(--muted)"></div></div>';
@@ -890,7 +895,7 @@ function renderBattleBoard(id,side){
     const c=creatureOf(b.unit),meta=abilityMeta(c);
     return '<div class="battle-unit '+(i<3?'front ':'back ')+(b.unit.chromatic?'chromatic ':'')+'" data-battle-side="'+side.kind+'" data-battle-index="'+i+'">'+
       '<div class="battle-unit-top"><span class="battle-stars">'+levelStars(b.unit.level)+'</span><span class="battle-role">'+esc(meta.icon)+' '+esc(meta.role)+'</span></div>'+
-      '<span class="unit-emoji">'+esc(c.emoji)+'</span><span class="unit-name">'+esc(c.name)+'</span>'+
+      spriteMarkup(c,'battle-sprite')+'<span class="unit-name">'+esc(c.name)+'</span>'+
       '<span class="battle-ability-name">'+esc(c.ability.name)+'</span>'+
       '<div class="cooldown-label"><span>HABILIDAD</span><b>0%</b></div><div class="cooldown-ring"><i></i></div>'+
     '</div>';
@@ -1213,7 +1218,7 @@ function filterCodex(){
   const list=D.creatures.filter(c=>(!search||c.name.toLowerCase().includes(search))&&(!type||c.types.includes(type))&&(!rarity||c.rarity===rarity));
   $('codexGrid').innerHTML=list.map(c=>{
     const unlocked=!!career.discovered[c.id],b=career.badges[c.id]||{};
-    return '<article class="codex-entry '+(unlocked?'':'locked')+'"><span class="unit-emoji">'+(unlocked?esc(c.emoji):'❔')+'</span><h3>'+(unlocked?esc(c.name):'???')+'</h3><p>'+(unlocked?esc(c.types.map(t=>D.TYPES[t].name).join(' · ')):'No descubierto')+'</p><p>'+(unlocked?esc(c.ability.name):'')+'</p><div class="badge-row"><span class="mini-badge '+(b.trophy?'on':'')+'" title="Ganar una liga">🏆</span><span class="mini-badge '+(b.medal?'on':'')+'" title="Ganar con nivel 3+">🎖</span><span class="mini-badge '+(b.star?'on':'')+'" title="Ganar con variante cromática">★</span></div></article>';
+    return '<article class="codex-entry '+(unlocked?'':'locked')+'">'+(unlocked?spriteMarkup(c,'codex-sprite'):'<span class="codex-mystery">❔</span>')+'<h3>'+(unlocked?esc(c.name):'???')+'</h3><p>'+(unlocked?esc(c.types.map(t=>D.TYPES[t].name).join(' · ')):'No descubierto')+'</p><p>'+(unlocked?esc(c.ability.name):'')+'</p><div class="badge-row"><span class="mini-badge '+(b.trophy?'on':'')+'" title="Ganar una liga">🏆</span><span class="mini-badge '+(b.medal?'on':'')+'" title="Ganar con nivel 3+">🎖</span><span class="mini-badge '+(b.star?'on':'')+'" title="Ganar con variante cromática">★</span></div></article>';
   }).join('');
 }
 function renderAchievements(){
