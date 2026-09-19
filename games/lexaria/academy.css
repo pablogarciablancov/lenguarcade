@@ -235,3 +235,62 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
   .battle-unit .battle-sprite{height:min(62%,64px)!important}.battle-unit .unit-name{font-size:7px!important}.battle-role{display:none!important}.versus-mark small{display:none}.battle-footer{grid-template-columns:1fr}.battle-log{display:none}
   .battle-inspect-stats{grid-template-columns:1fr 1fr}.battle-inspect-hero{grid-template-columns:90px 1fr}.battle-inspect-sprite{width:86px!important;height:86px!important}
 }
+
+
+/* ===== LEXARIA SCENARIOS + TRAINERS + SAFE SPRITES · v5 ===== */
+.lex-sprite{background:none!important;background-image:none!important;overflow:hidden!important}
+.lex-sprite>img{display:none!important}
+.lex-sprite>svg{display:block;width:100%;height:100%;overflow:hidden}
+.lex-sprite>svg image{image-rendering:auto}
+.trainer-sprite{display:block;overflow:visible;filter:drop-shadow(0 5px 5px #0005)}
+.trainer-portrait{display:grid!important;place-items:center!important;overflow:hidden}
+.trainer-select-sprite{width:min(100%,116px);height:auto;max-height:100%}
+.trainer-avatar-mini{width:31px;height:36px;flex:0 0 31px;filter:drop-shadow(0 2px 2px #0005)}
+.trainer-chip{display:flex!important;flex-direction:row!important;align-items:center!important;gap:7px!important;text-align:left!important}
+.trainer-chip .avatar{display:none!important}
+.battle-trainer-sprite{width:38px;height:43px;flex:0 0 38px}
+.battle-trainer{display:flex;align-items:center;gap:6px}
+.battle-trainer.right{justify-content:flex-end}
+.opponent-avatar-sprite{width:52px;height:58px;flex:0 0 52px}
+.opponent-card{align-items:center}
+.save-exit-btn{height:32px;padding:4px 9px;border:1px solid #7a9bb7;border-radius:6px;background:linear-gradient(#284f78,#102c4a);box-shadow:inset 0 0 0 1px #0b2138,0 2px 0 #07182a;color:#eaf6ff;font-size:9px;font-weight:950;white-space:nowrap}
+.save-exit-btn:hover{border-color:#ffe09a;color:#fff3c3}
+.battle-control-btn.save{background:linear-gradient(#f7e5b1,#d39d45);color:#37230e;border-color:#7a5629}
+.save-exit-modal{border-color:#d0ad62!important;color:#ffe5aa!important}
+.battle-screen[data-battlefield="academy"]{background:url('./assets/battlefields/academy.svg') center/cover no-repeat!important}
+.battle-screen[data-battlefield="emerald-grove"]{background:url('./assets/battlefields/emerald-grove.svg') center/cover no-repeat!important}
+.battle-screen[data-battlefield="sunken-library"]{background:url('./assets/battlefields/sunken-library.svg') center/cover no-repeat!important}
+.battle-screen[data-battlefield="storm-cliffs"]{background:url('./assets/battlefields/storm-cliffs.svg') center/cover no-repeat!important}
+.battle-screen[data-battlefield="lunar-arena"]{background:url('./assets/battlefields/lunar-arena.svg') center/cover no-repeat!important}
+.battle-screen:before{content:"";position:absolute;inset:58px 0 0;pointer-events:none;z-index:0;background:linear-gradient(180deg,#071b2c14,#071b2c00 35%,#03182220)}
+.battle-header,.battle-arena{position:relative;z-index:1}
+.battle-field-name{display:block;margin-top:1px;font-size:7px!important;color:#ffe6a5!important;letter-spacing:.08em;text-transform:uppercase}
+.battle-unit:after{content:""!important;position:absolute!important;left:50%!important;bottom:15px!important;transform:translateX(-50%)!important;width:min(82%,92px)!important;height:24px!important;border-radius:50%!important;background:radial-gradient(ellipse at center,#3d6c4588 0 45%,#244b3370 46% 60%,transparent 62%)!important;border:1px solid #d7e2b14a!important;box-shadow:inset 0 2px 5px #fff2,0 5px 8px #0003!important;z-index:0!important;pointer-events:none!important}
+.battle-board.player .battle-unit:after{border-color:#9bd8ff66!important}
+.battle-board.enemy .battle-unit:after{border-color:#ffd1bb66!important}
+.battle-unit.empty{opacity:1!important}
+.battle-unit.empty:before{content:"+";position:absolute;left:50%;bottom:19px;transform:translateX(-50%);width:min(70%,78px);height:18px;border:1px dashed #edf5d755;border-radius:50%;display:grid;place-items:center;color:#f5f5df66;font-size:12px;z-index:1}
+.battle-unit:not(.empty) .battle-sprite{z-index:2!important}
+.battle-unit:not(.empty) .unit-name{z-index:3!important}
+.battle-board{isolation:isolate}
+.battle-arena{background:linear-gradient(180deg,#ffffff08,#07182705 60%,#00121c18)!important}
+.battle-footer{opacity:.92}
+.battle-status,.battle-log{backdrop-filter:blur(3px)}
+.battle-hud{backdrop-filter:none}
+.battle-toolbar{gap:6px!important}
+.battle-toolbar .battle-control-btn{min-width:90px}
+.battle-toolbar .battle-timer{min-width:68px}
+.bench-slot .unit-sprite{height:min(70%,62px)!important;width:auto!important;max-width:82%!important}
+.bench-slot .lex-sprite>svg{width:100%;height:100%}
+@media(max-height:720px) and (min-width:901px){
+  .save-exit-btn{height:27px;padding:3px 6px;font-size:7.5px}
+  .battle-trainer-sprite{width:31px;height:35px;flex-basis:31px}
+  .battle-field-name{font-size:6px!important}
+  .battle-toolbar .battle-control-btn{min-width:76px}
+}
+@media(max-width:900px){
+  .save-exit-btn{font-size:0;width:32px;padding:0}.save-exit-btn:before{content:"💾";font-size:15px}
+  .battle-control-btn.save{font-size:0;min-width:38px!important}.battle-control-btn.save:before{content:"💾";font-size:14px}
+  .battle-trainer-sprite{width:28px;height:33px;flex-basis:28px}
+  .battle-field-name{display:none}
+}
