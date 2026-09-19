@@ -11,5 +11,5 @@
     "saveProgress": true,
     "supabaseCatalog": true
   },
-  "notes": "Roguelike de palabras con tablero equilibrado y evaluado por jugabilidad, 60 modificadores, 18 recompensas, 18 desafíos y 24 logros. Incluye léxico frecuente local, filtros escolares y una capa morfológica Hunspell es_ES de RLA-ES interpretada localmente con Typo.js: admite conjugaciones verbales, flexión nominal/adjetival y derivación reglada por prefijos/sufijos. Mantener en pruebas hasta completar validación docente del léxico y telemetría de equilibrio."
+  "notes": "Roguelike de palabras con español completo (Hunspell es_ES), tablero equilibrado y evaluado por jugabilidad. Core loop ampliado: Word Score + Bonus Points + Final Score; bonus por ranuras de longitud; seis dificultades/modos; Renovaciones; máximo 6 Modificadores vendibles; máximo 3 Mejoras consumibles; Obsequios que añaden fichas a una reserva especial; fichas Dorada, Diamante, Esmeralda, Punto, Poción, Cristal, Espejo, Exclamación, Conector y Comodín; rondas especiales con reglas sistémicas. Mantener en pruebas hasta cerrar balance y validación visual."
 }

@@ -45,7 +45,7 @@ function watchBossLoot(){
   let open=false;
   const check=()=>{
     const now=!reward.classList.contains('hidden')&&reward.classList.contains('boss-loot');
-    if(now&&!open)spawn('wp-boss-clear','JEFE SUPERADO');
+    if(now&&!open)spawn('wp-boss-clear','RONDA SUPERADA');
     open=now;
   };
   new MutationObserver(check).observe(reward,{attributes:true,attributeFilter:['class']});
