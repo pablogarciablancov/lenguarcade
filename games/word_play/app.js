@@ -50,11 +50,22 @@ function renderUpgrades(){
   ui.upgrades.querySelectorAll('[data-upgrade]').forEach(b=>b.addEventListener('click',()=>{activeUpgrade=activeUpgrade===b.dataset.upgrade?null:b.dataset.upgrade;showFeedback(activeUpgrade?'Selecciona una ficha para aplicar la mejora.':'Mejora deseleccionada.','');renderUpgrades();renderBoard();}));
 }
 function tileLocked(t){const s=state(),effect=E.specialEffect();return effect==='topLocked'&&s.roundWords<4&&(s.specialData.lockedIds||[]).includes(t.id);}
+function valueClass(t){
+  if(!t||t.kind!=='normal')return'';
+  const v=Math.max(0,Number(E.tileScore(t)||0));
+  if(v<=1)return'value-1';
+  if(v===2)return'value-2';
+  if(v===3)return'value-3';
+  if(v===4)return'value-4';
+  if(v===5)return'value-5';
+  if(v<=8)return'value-6';
+  return'value-9';
+}
 function renderBoard(){
   const s=state();ui.board.innerHTML='';const highlighted=s.specialData?.highlightedId;
   for(const t of s.board){
     const b=document.createElement('button');b.type='button';const locked=tileLocked(t);
-    b.className='tile '+t.kind+' '+(s.selected.some(x=>x.id===t.id)?'selected ':'')+(locked?'locked ':'')+(highlighted===t.id?'highlighted ':'')+(activeUpgrade?'upgrade-target':'');
+    b.className='tile '+t.kind+' '+valueClass(t)+' '+(s.selected.some(x=>x.id===t.id)?'selected ':'')+(locked?'locked ':'')+(highlighted===t.id?'highlighted ':'')+(activeUpgrade?'upgrade-target':'');
     b.dataset.value=E.tileScore(t);b.dataset.bonus=t.bonus||0;b.dataset.kind=t.kind;const glyph={wild:'★',mirror:'◀',bang:'!',plus:'+'}[t.kind];b.textContent=glyph||t.letter;if(locked)b.disabled=true;
     b.addEventListener('click',()=>activeUpgrade?applyUpgrade(t.id):selectTile(t.id));ui.board.appendChild(b);
   }
@@ -70,7 +81,7 @@ function renderWord(){
   for(let i=0;i<maxSlots;i++){
     const selected=s.selected[i],bonus=E.slotBonusAt(i),el=document.createElement(selected?'button':'div');
     if(selected){
-      const t=s.board.find(q=>q.id===selected.id);el.type='button';el.className='word-slot filled '+(t?.kind||'normal');
+      const t=s.board.find(q=>q.id===selected.id);el.type='button';el.className='word-slot filled '+(t?.kind||'normal')+' '+valueClass(t);
       el.innerHTML='<span class="slot-bonus">'+(bonus?'+'+bonus:'')+'</span><strong>'+selected.char+'</strong><small>'+E.tileScore(t)+'</small>';
       el.addEventListener('click',()=>{if(t?.kind==='wild'){selected.char=cycleWild(selected.char);renderWord();return;}if(['mirror','plus','bang'].includes(t?.kind)){s.selected.splice(i,1);renderBoard();renderWord();return;}const base=E.strip(selected.char).toUpperCase(),cycle=E.ACCENTABLE[base];if(cycle){const j=cycle.indexOf(selected.char.toUpperCase());selected.char=cycle[(j+1)%cycle.length];renderWord();}else{s.selected.splice(i,1);renderBoard();renderWord();}});
     }else{el.className='word-slot empty '+(bonus?'bonus':'');el.innerHTML='<span class="slot-bonus">'+(bonus?'+'+bonus:'')+'</span><strong>'+(i+1)+'</strong>';}
