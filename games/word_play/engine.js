@@ -162,7 +162,9 @@ function isBalancedBoard(b,setup=''){
 function repairLoadedBoard(run){
   if(!run||!Array.isArray(run.board))return run;
   const setup=challenge(run.challenge).setup||'';
-  if(isBalancedBoard(run.board,setup))return run;
+  const balanced=isBalancedBoard(run.board,setup);
+  const playable=wordIndex.length<500||boardQuality(run.board,run.challenge).meets;
+  if(balanced&&playable)return run;
   const previous=state;
   state=run;
   const upgrades=run.board.filter(t=>t&&t.kind&&t.kind!=='normal').map(t=>({kind:t.kind,bonus:t.bonus||0,uses:t.uses||0}));
