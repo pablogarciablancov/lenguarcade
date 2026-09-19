@@ -295,3 +295,81 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
   .battle-trainer-sprite{width:28px;height:33px;flex-basis:28px}
   .battle-field-name{display:none}
 }
+
+/* ===== LEXARIA GENERATED ART · v6 ===== */
+/* 50 Lexarios: cinco tiras de 10 celdas ya separadas al exportar. */
+.lex-sprite{
+  background-repeat:no-repeat!important;
+  background-size:1000% 100%!important;
+  background-position:var(--lex-pos,0%) 50%!important;
+  background-color:#081927!important;
+  border-radius:10px;
+  overflow:hidden!important;
+  contain:paint;
+}
+.lex-sprite>svg,.lex-sprite>img{display:none!important}
+.market-sprite,.unit-sprite,.inspect-sprite,.training-sprite,.battle-sprite,.codex-sprite{
+  background-color:#081927!important;
+  box-shadow:inset 0 0 0 1px #ffffff12;
+}
+.market-sprite{border-radius:10px}
+.unit-sprite,.battle-sprite{border-radius:12px}
+.inspect-sprite,.training-sprite,.codex-sprite{border-radius:14px}
+.bench-slot .unit-sprite{object-fit:contain!important;transform:none!important}
+
+/* Entrenadores ilustrados: dos tiras de cuatro personajes, IDs de guardado intactos. */
+.trainer-sprite{
+  display:block!important;
+  background-repeat:no-repeat!important;
+  background-size:400% 100%!important;
+  background-position:var(--trainer-pos,0%) center!important;
+  background-color:transparent!important;
+  border-radius:0!important;
+  overflow:hidden!important;
+  flex:none;
+}
+.trainer-select-sprite{width:min(100%,132px)!important;height:164px!important;max-height:none!important}
+.trainer-avatar-mini{width:34px!important;height:42px!important;flex-basis:34px!important}
+.battle-trainer-sprite{width:43px!important;height:51px!important;flex-basis:43px!important}
+.opponent-avatar-sprite{width:58px!important;height:70px!important;flex-basis:58px!important}
+
+/* Campos de batalla generados. Las propias imágenes ya contienen los 12 círculos de posición. */
+.battle-screen[data-battlefield="academy"]{background:url('./assets/generated/battle-academy.svg') center/cover no-repeat!important}
+.battle-screen[data-battlefield="ice"]{background:url('./assets/generated/battle-ice.svg') center/cover no-repeat!important}
+.battle-screen[data-battlefield="crystal"]{background:url('./assets/generated/battle-crystal.svg') center/cover no-repeat!important}
+.battle-screen[data-battlefield="sunset"]{background:url('./assets/generated/battle-sunset.svg') center/cover no-repeat!important}
+.battle-unit:after,.battle-unit.empty:before{display:none!important}
+.battle-board{padding:2px 5px 4px!important;gap:0 6px!important}
+.battle-unit{justify-content:flex-end!important;padding:4px 1px 10px!important}
+.battle-unit .battle-sprite{
+  height:min(78%,112px)!important;
+  max-width:92%!important;
+  background-color:#07182718!important;
+  box-shadow:none!important;
+  filter:drop-shadow(0 7px 5px #0008);
+}
+.battle-unit .unit-name{margin-bottom:1px}
+.battle-arena{background:linear-gradient(180deg,#07182705,#07182700 58%,#00121c16)!important}
+.battle-screen:before{background:linear-gradient(180deg,#071b2c18 0,#071b2c00 28%,#00121c12 100%)!important}
+
+/* Las ilustraciones necesitan más aire que el atlas antiguo. */
+.offer-portrait .market-sprite{height:clamp(58px,9vh,82px)!important;max-width:94%!important}
+.unit-card .unit-sprite{height:min(72%,82px)!important;max-width:88%!important}
+.bench-slot .unit-sprite{height:min(68%,58px)!important;max-width:84%!important}
+.game-card-header .inspect-sprite{width:86px!important;height:86px!important;max-width:86px!important}
+.codex-sprite{width:74px!important;height:74px!important}
+.training-sprite{width:104px!important;height:104px!important}
+
+@media(max-height:720px) and (min-width:901px){
+  .trainer-select-sprite{height:126px!important}
+  .battle-trainer-sprite{width:35px!important;height:42px!important;flex-basis:35px!important}
+  .battle-unit .battle-sprite{height:min(75%,84px)!important}
+  .offer-portrait .market-sprite{height:clamp(47px,7.5vh,60px)!important}
+  .game-card-header .inspect-sprite{width:62px!important;height:62px!important}
+}
+
+/* v7 · vector art integrated in repository; keep the illustrated battlefield visible below the combat grid. */
+.battle-screen[data-battlefield] .battle-board{background:transparent!important;box-shadow:none!important;border-color:#d8bd7a55!important}
+.battle-screen[data-battlefield] .battle-unit{background:linear-gradient(180deg,#08182708,#07131f28)!important;border-color:#e7cf9166!important;box-shadow:none!important}
+.battle-screen[data-battlefield] .battle-unit:hover{background:linear-gradient(180deg,#fff2bd10,#0a1b2b38)!important;border-color:#ffe19caa!important}
+.battle-screen[data-battlefield] .battle-unit .unit-name{background:#07172bd6;padding:1px 4px;border-radius:5px}
