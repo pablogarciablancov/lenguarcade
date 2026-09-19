@@ -25,11 +25,11 @@ const bridge = read('bridge.js');
 const sound = read('sound.js');
 
 for (const required of [
-  'id="board"','id="wordBuilder"','id="rewardChoices"','id="collectionModal"','id="dailyGameBtn"',
+  'id="board"','id="wordBuilder"','id="scoreBreakdown"','id="upgradeList"','id="difficultyModal"','id="skipRewardBtn"','id="rewardChoices"','id="collectionModal"','id="dailyGameBtn"',
   './content.js','./lexicon.js','./vendor/typo.js','./engine.js','./bridge.js','./app.js','./layout.js','./sound.js','./game-feel.js','./styles.css','./responsive.css','./arcade.css'
 ]) if (!index.includes(required)) throw new Error(`Falta ${required} en index.html`);
 
-if(!index.includes('20260919-morphology-v1'))throw new Error('Los assets de Word Play no llevan la versión morfológica actual');
+if(!index.includes('20260919-core-loop-v2'))throw new Error('Los assets de Word Play no llevan la versión del core loop actual');
 if(!app.includes('dictionaryReady')||!app.includes('launchButtons'))throw new Error('La partida puede arrancar antes de cargar el diccionario');
 
 for (const required of ['100dvh','overflow:hidden','.board','.reward-card','.collection-body','.boss-badge']) {
@@ -39,7 +39,7 @@ for (const required of ['--tile-size','--board-gap','grid-template-columns:repea
   if (!responsive.replaceAll(' ', '').includes(required.replaceAll(' ', ''))) throw new Error(`Falta ${required} en responsive.css`);
 }
 
-for (const required of ['.wp-fx-layer','.wp-score-pop','.wp-boss-clear','.reward-modal.boss-loot','.reward-card.rarity-legendary','.game-screen[data-challenge-kind="boss"]','.board::before','.tile.gold']) {
+for (const required of ['.wp-fx-layer','.wp-score-pop','.word-slot','.score-breakdown','.difficulty-grid','.upgrade-card','.tile.emerald','.tile.dot','.tile.mirror','.tile.bang','.tile.plus','.reward-card.rarity-legendary','.board::before','.tile.gold']) {
   if (!arcade.includes(required)) throw new Error(`Falta ${required} en arcade.css`);
 }
 for (const required of ['WordPlayLexicon','additions','strict','blocked','rejectPatterns','es-ES']) {
@@ -62,10 +62,10 @@ if(!typo.includes('Typo = function')||!typo.includes('_parseAFF'))throw new Erro
 for (const required of ['computeTileSize','ResizeObserver','MutationObserver','visualViewport','--tile-size','--board-gap']) {
   if (!layout.includes(required)) throw new Error(`Falta ${required} en layout.js`);
 }
-for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','rewardTier','bossPlay','rareLuck','specialFlat','BOARD_RULES','pickBalancedLetter','rebalanceBoard','boardQuality','wordIndex','candidateBoards','repairLoadedBoard','improvePlayability','HUNSPELL_AFF','HUNSPELL_DIC','loadHunspell','morphologyReady']) {
+for (const required of ['DICTIONARY_URLS','./dictionary-es-50k.txt','LETTER_POOL','validate','score','rewards','localStorage','achievements','dailySeed','rngCounter','runRandom','state?.won','roundTarget','BOARD_RULES','pickBalancedLetter','rebalanceBoard','boardQuality','wordIndex','candidateBoards','repairLoadedBoard','improvePlayability','HUNSPELL_AFF','HUNSPELL_DIC','loadHunspell','morphologyReady','modeConfig','totalRounds','specialRound','specialEffect','slotBonusAt','useUpgrade','sellModifier','skipReward','refreshBoard']) {
   if (!engine.includes(required)) throw new Error(`Falta ${required} en engine.js`);
 }
-for (const required of ['renderCareer','renderBoard','openReward','collection','wordLog']) {
+for (const required of ['renderCareer','renderBoard','renderUpgrades','scoreBreakdown','difficultyModal','openReward','skipReward','collection','wordLog']) {
   if (!app.includes(required)) throw new Error(`Falta ${required} en app.js`);
 }
 for (const required of ["const GAME_ID='word_play'","post('READY'","post('INITIALIZED'","post('CHECKPOINT'","post('RESULT'",'SESSION_STARTED']) {
@@ -84,18 +84,19 @@ const LX = sandbox.window.WordPlayLexicon;
 if (!C) throw new Error('content.js no expone WordPlayContent');
 if (!LX||LX.locale!=='es-ES'||!LX.strict?.ortografia) throw new Error('lexicon.js no expone la capa española esperada');
 if (C.modifiers.length < 60) throw new Error(`Solo hay ${C.modifiers.length} modificadores`);
-if (C.gifts.length < 18) throw new Error(`Solo hay ${C.gifts.length} recompensas`);
-if (C.challenges.length < 18) throw new Error(`Solo hay ${C.challenges.length} desafíos`);
+if (C.gifts.length < 25) throw new Error(`Solo hay ${C.gifts.length} obsequios/recursos`);
+if (C.upgrades.length < 15) throw new Error(`Solo hay ${C.upgrades.length} mejoras activas`);
+if (C.specialRounds.length < 9) throw new Error(`Solo hay ${C.specialRounds.length} rondas especiales`);
+if (Object.keys(C.modes||{}).length < 6) throw new Error('Faltan dificultades/modos');
 if (C.achievements.length < 20) throw new Error(`Solo hay ${C.achievements.length} logros`);
-for (const list of [C.modifiers,C.gifts,C.challenges,C.achievements]) {
+for (const list of [C.modifiers,C.gifts,C.upgrades,C.specialRounds,C.challenges,C.achievements]) {
   const ids = list.map(x => x.id);
   if (new Set(ids).size !== ids.length) throw new Error('Hay IDs duplicados en content.js');
 }
-
-const bosses=C.challenges.filter(x=>x.kind==='boss');
-if(bosses.length<8)throw new Error(`Hay pocos jefes lingüísticos: ${bosses.length}`);
-if(bosses.some(x=>!(x.targetMult>0&&x.targetMult<1)||!x.rewardTier))throw new Error('Todos los jefes deben ajustar objetivo y definir botín');
-if(!C.modifiers.some(x=>x.id==='cazajefes')||!C.gifts.some(x=>x.id==='boss_play'))throw new Error('Faltan sinergias específicas de jefe');
+if(JSON.stringify(C.wordLengthSlots)!==JSON.stringify([0,0,0,0,5,5,5,10,10,15,15,20]))throw new Error('La escalera de bonus por longitud no coincide con el diseño');
+for(const kind of ['gold','diamond','emerald','dot','potion','glass','mirror','bang','plus','wild']){
+  if(!C.specialTileTypes[kind])throw new Error(`Falta ficha especial ${kind}`);
+}
 
 // Sintaxis de todos los módulos.
 for (const [name, code] of [['lexicon.js',lexicon],['vendor/typo.js',typo],['engine.js',engine],['app.js',app],['layout.js',layout],['bridge.js',bridge],['sound.js',sound],['game-feel.js',gameFeel]]) {
@@ -143,19 +144,42 @@ if(accentCheck.ok||!accentCheck.accent||!String(accentCheck.message).includes('o
 
 if(E.validate('john').ok)throw new Error('El filtro escolar acepta un nombre propio extranjero frecuente');
 if(E.validate('jajaja').ok)throw new Error('El filtro escolar acepta ruido de chat');
-const bossId=E.chooseChallenge(3,'normal');
-if(E.challenge(bossId).kind!=='boss')throw new Error('La ronda 3 no genera un jefe');
-const constraintId=E.chooseChallenge(4,'normal');
-if(!['none','constraint'].includes(E.challenge(constraintId).kind))throw new Error('Las rondas intermedias generan un tipo de reto inválido');
-if(!(E.roundTarget(3,bossId)>0&&E.roundTarget(3,bossId)<300))throw new Error('El objetivo de jefe no aplica su multiplicador');
+if(E.validate('casa').ok!==true)throw new Error('Una palabra válida de 4 letras debe aceptarse');
+if(E.validate('sol').ok)throw new Error('Las palabras de 3 letras deben rechazarse en el nuevo loop');
+if(E.slotBonusAt(0)!==0||E.slotBonusAt(3)!==0||E.slotBonusAt(4)!==5||E.slotBonusAt(7)!==10||E.slotBonusAt(9)!==15)throw new Error('Bonus de ranuras incorrectos');
+if(E.totalRounds('normal')!==12||E.totalRounds('legendary')!==14||E.totalRounds('marathon')!==20)throw new Error('Número de rondas incorrecto por modo');
+if(!E.isSpecialRound(5,'normal')||!E.isSpecialRound(14,'legendary')||E.isSpecialRound(4,'normal'))throw new Error('Calendario de rondas especiales incorrecto');
+const normalStart=E.newState('normal');
+if(normalStart.playsLeft!==10||normalStart.shufflesLeft!==4)throw new Error('Recursos iniciales de Normal incorrectos');
+const legendaryStart=E.newState('legendary');
+if(legendaryStart.playsLeft!==8||legendaryStart.shufflesLeft!==3||legendaryStart.target!==60)throw new Error('Recursos/objetivo inicial de Legendario incorrectos');
+
+E.state=E.newState('normal');
+E.state.modifiers=[];
+const mk=(letter,kind='normal',extra={})=>Object.assign({id:'t-'+letter+'-'+Math.random(),letter,kind,bonus:0,uses:0},extra);
+let sc=E.score('casa',[mk('C'),mk('A'),mk('S'),mk('A')],true);
+if(sc.wordScore!==6||sc.bonusPoints!==0||sc.total!==6)throw new Error(`Score base de 4 letras incorrecto: ${JSON.stringify(sc)}`);
+sc=E.score('casas',[mk('C'),mk('A'),mk('S'),mk('A'),mk('S')],true);
+if(sc.wordScore!==7||sc.bonusPoints!==5||sc.total!==12)throw new Error(`Bonus de quinta ficha incorrecto: ${JSON.stringify(sc)}`);
+sc=E.score('casa',[mk('C','gold'),mk('A','gold'),mk('S'),mk('A')],true);
+if(sc.wordScore!==12)throw new Error('Dos doradas no multiplican Word Score ×2');
+sc=E.score('casa',[mk('C'),mk('A'),mk('S'),mk('A','dot')],true);
+if(sc.wordScore!==12)throw new Error('Punto final no duplica Word Score');
+
+E.state=E.newState('normal');
+const targetId=E.state.board[0].id;
+E.state.upgrades=[{id:'up_plus5',uses:1}];
+const beforeBonus=E.state.board[0].bonus||0;
+const upgraded=E.useUpgrade('up_plus5',targetId);
+if(!upgraded.ok||E.state.board.find(t=>t.id===targetId)?.bonus!==beforeBonus+5||E.state.upgrades.length!==0)throw new Error('Upgrade +5 no consume uso o no modifica ficha');
+const beforeRefresh=E.state.shufflesLeft;
+if(E.skipReward()!==2||E.state.shufflesLeft!==beforeRefresh+2)throw new Error('Pasar recompensa no concede +2 renovaciones');
+
 E.state=E.newState('normal');
 E.state.challenge='ntilde';
+E.state.shufflesLeft=1;
 E.shuffle();
-if(!E.state.board.some(t=>t.letter==='Ñ'))throw new Error('El jefe de la Ñ no garantiza una Ñ tras barajar');
-const bossRewards=E.rewards();
-const rarityRank={common:0,uncommon:1,rare:2,epic:3,legendary:4};
-if(!bossRewards.some(x=>(rarityRank[x.rarity]||0)>=3))throw new Error('El Guardián de la Ñ no garantiza botín épico');
-
+if(!E.state.board.some(t=>t.letter==='Ñ'))throw new Error('La regla lingüística de Ñ no garantiza una Ñ al renovar');
 function assertBalancedBoard(board,label='tablero',minVowels=E.BOARD_RULES.minVowels,maxVowels=E.BOARD_RULES.maxVowels){
   if(!Array.isArray(board)||board.length!==16)throw new Error(`${label}: debe tener 16 fichas`);
   const counts=new Map();
@@ -228,4 +252,4 @@ for(const [w,h] of [[700,430],[520,360],[390,250],[900,500]]){
   const s=layoutSize(w,h);if(s*4+21>w+1||s*4+21>h+1)throw new Error(`El tablero puede desbordar ${w}×${h}`);
 }
 
-console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/arcade/lexicon/bosses/synergies/balanced-board/playability/cache-migration/morphology-esES/bridge/audio/daily OK`);
+console.log(`Word Play: OK · ${C.modifiers.length} modificadores · ${C.gifts.length} recompensas · ${C.challenges.length} desafíos · ${C.achievements.length} logros · responsive/color/core-loop/slots/upgrades/special-rounds/special-tiles/playability/morphology-esES/bridge/audio/daily OK`);
