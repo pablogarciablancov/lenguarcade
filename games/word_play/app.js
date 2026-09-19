@@ -1,8 +1,8 @@
 (() => {
 'use strict';
 const E=window.WordPlayEngine,C=E.C,$=id=>document.getElementById(id);
-const ui={menu:$('menuScreen'),game:$('gameScreen'),dict:$('dictionaryStatus'),level:$('profileLevel'),best:$('bestScore'),bestWord:$('bestWord'),games:$('gamesPlayed'),unique:$('uniqueWords'),xp:$('careerXpLabel'),xpBar:$('careerXpBar'),cont:$('continueBtn'),contSummary:$('continueSummary'),round:$('roundLabel'),challenge:$('challengeLabel'),mode:$('modeLabel'),roundScore:$('roundScore'),target:$('targetScore'),progress:$('roundProgress'),boss:$('bossBadge'),plays:$('playsLeft'),shuffles:$('shufflesLeft'),rerolls:$('rerollsLeft'),mods:$('modifierList'),modCount:$('modifierCount'),upgrades:$('upgradeList'),upgradeCount:$('upgradeCount'),chTitle:$('challengeTitle'),chDesc:$('challengeDescription'),hint:$('wordHint'),preview:$('previewScore'),wordScore:$('wordScorePreview'),bonusScore:$('bonusScorePreview'),finalScore:$('finalScorePreview'),builder:$('wordBuilder'),combo:$('comboPreview'),board:$('board'),feedback:$('feedback'),total:$('totalScore'),words:$('wordsPlayed'),streak:$('streakValue'),runBest:$('runBestWord'),bestCombo:$('bestCombo'),reserve:$('reserveCount'),last:$('lastPlayCard'),goals:$('runGoalList'),backdrop:$('modalBackdrop'),reward:$('rewardModal'),rewardChoices:$('rewardChoices'),rewardRound:$('rewardRoundLabel'),rerollBtn:$('rerollRewardBtn'),skipReward:$('skipRewardBtn'),difficulty:$('difficultyModal'),info:$('infoModal'),infoTitle:$('infoTitle'),infoBody:$('infoBody'),pause:$('pauseModal'),collection:$('collectionModal'),collectionBody:$('collectionBody'),wordlog:$('wordLogModal'),wordlogList:$('wordLogList'),end:$('endModal'),endEye:$('endEyebrow'),endTitle:$('endTitle'),endStats:$('endStats'),newAchievements:$('newAchievements'),motion:$('reduceMotionToggle'),sound:$('soundToggle'),classroom:$('classroomModeToggle'),classroomBadge:$('classroomBadge')};
-let rewardOptions=[],dictionaryReady=false,activeUpgrade=null,hiddenAt=0;
+const ui={menu:$('menuScreen'),game:$('gameScreen'),dict:$('dictionaryStatus'),level:$('profileLevel'),best:$('bestScore'),bestWord:$('bestWord'),games:$('gamesPlayed'),unique:$('uniqueWords'),xp:$('careerXpLabel'),xpBar:$('careerXpBar'),cont:$('continueBtn'),contSummary:$('continueSummary'),round:$('roundLabel'),challenge:$('challengeLabel'),mode:$('modeLabel'),roundScore:$('roundScore'),target:$('targetScore'),progress:$('roundProgress'),boss:$('bossBadge'),plays:$('playsLeft'),shuffles:$('shufflesLeft'),rerolls:$('rerollsLeft'),mods:$('modifierList'),modCount:$('modifierCount'),upgrades:$('upgradeList'),upgradeCount:$('upgradeCount'),chTitle:$('challengeTitle'),chDesc:$('challengeDescription'),hint:$('wordHint'),preview:$('previewScore'),wordScore:$('wordScorePreview'),bonusScore:$('bonusScorePreview'),finalScore:$('finalScorePreview'),builder:$('wordBuilder'),combo:$('comboPreview'),board:$('board'),feedback:$('feedback'),total:$('totalScore'),words:$('wordsPlayed'),streak:$('streakValue'),runBest:$('runBestWord'),bestCombo:$('bestCombo'),reserve:$('reserveCount'),last:$('lastPlayCard'),goals:$('runGoalList'),backdrop:$('modalBackdrop'),reward:$('rewardModal'),rewardChoices:$('rewardChoices'),rewardRound:$('rewardRoundLabel'),rerollBtn:$('rerollRewardBtn'),skipReward:$('skipRewardBtn'),difficulty:$('difficultyModal'),info:$('infoModal'),infoTitle:$('infoTitle'),infoBody:$('infoBody'),pause:$('pauseModal'),collection:$('collectionModal'),collectionBody:$('collectionBody'),wordlog:$('wordLogModal'),wordlogList:$('wordLogList'),end:$('endModal'),endEye:$('endEyebrow'),endTitle:$('endTitle'),endStats:$('endStats'),newAchievements:$('newAchievements'),motion:$('reduceMotionToggle'),sound:$('soundToggle'),classroom:$('classroomModeToggle'),inkWallet:$('inkWallet'),inkValue:$('inkValue'),tintaBtn:$('tintaVivaBtn'),tintaCharges:$('tintaCharges')};
+let rewardOptions=[],dictionaryReady=false,activeUpgrade=null;
 const fmt=n=>new Intl.NumberFormat('es-ES').format(Math.round(Number(n)||0));
 function state(){return E.state}
 function showFeedback(t,type=''){ui.feedback.textContent=t;ui.feedback.className=`feedback ${type}`;}
@@ -30,7 +30,13 @@ function render(){
   ui.plays.textContent=Math.max(0,s.playsLeft);ui.shuffles.textContent=s.shufflesLeft;ui.rerolls.textContent=s.rerollsLeft;
   ui.total.textContent=fmt(s.totalScore);ui.words.textContent=s.words.length;ui.streak.textContent=s.validStreak;
   ui.runBest.textContent=s.bestPlay?s.bestPlay.word.toUpperCase():'—';
-  ui.bestCombo.textContent='×'+Number(s.bestCombo||1).toFixed(s.bestCombo%1?2:0);ui.reserve.textContent=s.reserveTiles?.length||0;ui.classroomBadge.classList.toggle('hidden',!E.settings.classroomMode);
+  ui.bestCombo.textContent='×'+Number(s.bestCombo||1).toFixed(s.bestCombo%1?2:0);ui.reserve.textContent=s.reserveTiles?.length||0;
+  ui.inkValue.textContent=Number(s.ink||0);
+  ui.tintaCharges.textContent='×'+Number(s.tintaCharges||0);
+  const canBuy=Number(s.tintaCharges||0)<=0&&Number(s.ink||0)>=3;
+  ui.tintaBtn.classList.toggle('can-buy',canBuy);
+  ui.tintaBtn.classList.toggle('empty',Number(s.tintaCharges||0)<=0&&!canBuy);
+  ui.tintaBtn.title=Number(s.tintaCharges||0)>0?'Muta 6 fichas sin gastar recursos':canBuy?'Compra 1 carga por 3 Tintas':'Necesitas 3 Tintas para comprar otra carga';
   renderMods();renderUpgrades();renderBoard();renderWord();
   ui.goals.innerHTML=s.goals.map(g=>'<div class="goal-item '+(g.done?'done':'')+'"><span>'+(g.done?'✓':'○')+'</span><span>'+g.label+'</span></div>').join('');
   const auto=E.specialEffect()==='autoRefresh';$('shuffleBtn').disabled=auto?s.playsLeft<=0:s.shufflesLeft<=0;$('shuffleBtn').textContent=auto?'↻ Renovar · 1 jugada':'↻ Renovar';
@@ -115,8 +121,11 @@ function renderRewards(){
   ui.rewardChoices.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>choose(rewardOptions.find(r=>r.id===b.dataset.id))));
 }
 function afterReward(){
-  hideModal();if(!E.nextRound())return finish(true);render();const sr=E.specialRound(state().specialRound),ch=E.challenge(state().challenge);
-  showFeedback(sr?'¡Ronda especial! '+sr.title:ch.kind==='constraint'?'Regla activa: '+ch.title:'Nueva ronda. Construye una palabra potente.','good');
+  hideModal();if(!E.nextRound())return finish(true);
+  const gain=Number(state().lastInkGain||0);
+  render();const sr=E.specialRound(state().specialRound),ch=E.challenge(state().challenge);
+  const prefix=gain?('+'+gain+' Tinta · '):'';
+  showFeedback(prefix+(sr?'¡Ronda especial! '+sr.title:ch.kind==='constraint'?'Regla activa: '+ch.title:'Nueva ronda. Construye una palabra potente.'),'good');
 }
 function choose(r){if(!E.chooseReward(r)){showFeedback('No puedes llevar más de ese tipo.','warn');return;}afterReward();}
 function reroll(){if(state().rerollsLeft<=0)return;state().rerollsLeft--;rewardOptions=E.rewards();renderRewards();ui.rerollBtn.disabled=state().rerollsLeft<=0;E.saveRun();render();}
@@ -133,7 +142,7 @@ function collection(tab='cards'){document.querySelectorAll('.tab-btn').forEach(b
 function showCollection(tab){collection(tab);showModal(ui.collection);}
 function howTo(first=false){
   ui.infoTitle.textContent=first?'Primera partida':'Cómo se juega';
-  ui.infoBody.innerHTML='<div class="info-step"><strong>1 · Forma palabras de 4+ fichas</strong><br>El valor de las letras crea el <b>Word Score</b>.</div><div class="info-step"><strong>2 · Las ranuras largas dan Bonus</strong><br>Las cuatro primeras no suman bonus; desde la quinta aparecen +5, +10, +15…</div><div class="info-step"><strong>3 · Word + Bonus = Final</strong><br>Los Modificadores y fichas especiales pueden multiplicar Word Score o Final Score.</div><div class="info-step"><strong>4 · Renovaciones</strong><br>Renuevan el tablero. Las fichas especiales viven en una reserva y pueden volver a aparecer.</div><div class="info-step"><strong>5 · Construye tu run</strong><br>Hasta 6 Modificadores permanentes y 3 Mejoras consumibles. También hay Obsequios que añaden fichas especiales.</div><div class="info-step"><strong>6 · Rondas especiales</strong><br>Cambian las reglas: primera letra sellada, vocales a cero, 2 jugadas por palabra, tablero inestable…</div><div class="info-step"><strong>7 · Español completo</strong><br>Se aceptan conjugaciones y derivaciones válidas; pulsa una vocal seleccionada para cambiar su tilde.</div><div class="info-step"><strong>8 · Tinta viva</strong><br>En Modo Aula el tablero no se puede copiar. Si cambias de pestaña durante una jugada, varias fichas mutan sin gastar recursos.</div>';showModal(ui.info);
+  ui.infoBody.innerHTML='<div class="info-step"><strong>1 · Forma palabras de 4+ fichas</strong><br>El valor de las letras crea el <b>Word Score</b>.</div><div class="info-step"><strong>2 · Las ranuras largas dan Bonus</strong><br>Las cuatro primeras no suman bonus; desde la quinta aparecen +5, +10, +15…</div><div class="info-step"><strong>3 · Word + Bonus = Final</strong><br>Los Modificadores y fichas especiales pueden multiplicar Word Score o Final Score.</div><div class="info-step"><strong>4 · Renovaciones</strong><br>Renuevan el tablero. Las fichas especiales viven en una reserva y pueden volver a aparecer.</div><div class="info-step"><strong>5 · Construye tu run</strong><br>Hasta 6 Modificadores permanentes y 3 Mejoras consumibles. También hay Obsequios que añaden fichas especiales.</div><div class="info-step"><strong>6 · Rondas especiales</strong><br>Cambian las reglas: primera letra sellada, vocales a cero, 2 jugadas por palabra, tablero inestable…</div><div class="info-step"><strong>7 · Español completo</strong><br>Se aceptan conjugaciones y derivaciones válidas; pulsa una vocal seleccionada para cambiar su tilde.</div><div class="info-step"><strong>8 · Tinta Viva</strong><br>Empiezas con 1 carga. Actívala para mutar 6 fichas sin gastar Jugadas ni Renovaciones. Superar rondas da Tinta y 3 Tintas compran una carga nueva. El Modo Aula bloquea copiar el tablero, pero cambiar de pestaña ya no altera la partida.</div>';showModal(ui.info);
 }
 function wordLog(){ui.wordlogList.innerHTML=state().wordLog.slice().reverse().map(x=>'<div class="word-log-entry"><strong>'+x.word.toUpperCase()+'</strong><span>W '+fmt(x.wordScore||0)+' · B +'+fmt(x.bonusPoints||0)+' · '+fmt(x.score)+' pts</span></div>').join('')||'<p class="empty-list">Aún no has jugado ninguna palabra.</p>';showModal(ui.wordlog);}
 function menu(){hideModal();ui.game.classList.add('hidden');ui.menu.classList.remove('hidden');E.state=null;renderCareer();}
@@ -147,9 +156,22 @@ function wire(){
   $('undoBtn').onclick=()=>{state().selected.pop();renderBoard();renderWord();};$('clearBtn').onclick=()=>{state().selected=[];renderBoard();renderWord();};$('submitBtn').onclick=play;
   $('shuffleBtn').onclick=()=>{if(E.shuffle()){showFeedback(E.specialEffect()==='autoRefresh'?'Tablero renovado · -1 jugada':'Tablero renovado.','good');render();}};
   ui.rerollBtn.onclick=reroll;ui.skipReward.onclick=skipReward;
+  ui.tintaBtn.onclick=()=>{
+    const st=state();if(!st)return;
+    if(Number(st.tintaCharges||0)>0){
+      activeUpgrade=null;
+      const out=E.useTintaViva(6);
+      if(out.ok){render();showFeedback('Tinta Viva: 6 fichas han mutado. Cargas restantes: '+out.charges+'.','good');}
+      else showFeedback(out.message,'warn');
+      return;
+    }
+    const buy=E.buyTintaViva(3);
+    if(buy.ok){render();showFeedback('Has comprado 1 carga de Tinta Viva por 3 Tintas.','good');}
+    else showFeedback(buy.message,'warn');
+  };
   $('playAgainBtn').onclick=()=>{const m=state()?.mode||'normal';hideModal();start(m);};$('endMenuBtn').onclick=menu;
   document.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>collection(b.dataset.tab));ui.motion.checked=E.settings.reduceMotion;ui.sound.checked=E.settings.sound;ui.classroom.checked=E.settings.classroomMode;document.documentElement.classList.toggle('reduce-motion',!!E.settings.reduceMotion);
-  ui.motion.onchange=()=>{E.settings.reduceMotion=ui.motion.checked;document.documentElement.classList.toggle('reduce-motion',!!E.settings.reduceMotion);E.saveSettings();window.WordPlayGameFeel?.syncMotionClass?.();};ui.sound.onchange=()=>{E.settings.sound=ui.sound.checked;E.saveSettings();};ui.classroom.onchange=()=>{E.settings.classroomMode=ui.classroom.checked;E.saveSettings();render();showFeedback(E.settings.classroomMode?'Tinta viva activada.':'Tinta viva desactivada.','good');};
+  ui.motion.onchange=()=>{E.settings.reduceMotion=ui.motion.checked;document.documentElement.classList.toggle('reduce-motion',!!E.settings.reduceMotion);E.saveSettings();window.WordPlayGameFeel?.syncMotionClass?.();};ui.sound.onchange=()=>{E.settings.sound=ui.sound.checked;E.saveSettings();};ui.classroom.onchange=()=>{E.settings.classroomMode=ui.classroom.checked;E.saveSettings();render();showFeedback(E.settings.classroomMode?'Modo Aula activado.':'Modo Aula desactivado.','good');};
   document.addEventListener('keydown',e=>{
     if(ui.game.classList.contains('hidden')||!state()||!ui.backdrop.classList.contains('hidden'))return;
     if(e.key==='Enter'){e.preventDefault();play();}else if(e.key==='Backspace'){e.preventDefault();state().selected.pop();renderBoard();renderWord();}else if(e.key==='Escape')showModal(ui.pause);
@@ -160,23 +182,9 @@ function wire(){
     if(!E.settings.classroomMode||!gameIsActive())return;
     e.preventDefault();showFeedback('Modo Aula: el tablero no se puede copiar.','warn');
   });
-  ui.board.addEventListener('contextmenu',e=>{if(E.settings.classroomMode){e.preventDefault();showFeedback('Tinta viva protege el tablero durante la partida.','warn');}});
+  ui.board.addEventListener('contextmenu',e=>{if(E.settings.classroomMode){e.preventDefault();showFeedback('Modo Aula: el tablero está protegido frente a copia y arrastre.','warn');}});
   ui.board.addEventListener('dragstart',e=>{if(E.settings.classroomMode)e.preventDefault();});
-  document.addEventListener('visibilitychange',()=>{
-    if(document.hidden){
-      if(E.settings.classroomMode&&gameIsActive()&&ui.backdrop.classList.contains('hidden'))hiddenAt=Date.now();
-      return;
-    }
-    if(!hiddenAt)return;
-    const elapsed=Date.now()-hiddenAt;hiddenAt=0;
-    if(elapsed<700||!E.settings.classroomMode||!gameIsActive()||state().mode==='daily')return;
-    activeUpgrade=null;
-    const out=E.classroomScramble(6);
-    if(out.changed){
-      render();
-      showFeedback('Tinta viva: '+out.changed+' fichas han mutado al volver a la partida.','warn');
-    }
-  });
+
 }
 wire();
 const launchButtons=[$('newGameBtn'),$('quickGameBtn'),$('dailyGameBtn'),ui.cont].filter(Boolean);
