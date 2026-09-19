@@ -133,14 +133,16 @@ function newState(mode='normal'){
   const daily=mode==='daily',quick=mode==='quick',dailySeedValue=daily?daySeed():null;
   let counter=0;
   const r=daily?()=>seededValue(dailySeedValue,counter++):Math.random;
+  const cfg=modeConfig(mode);
   const challengeId=chooseChallenge(1,mode);
-  return{
-    version:3,mode,round:1,roundScore:0,totalScore:0,
-    target:quick?999999:roundTarget(1,challengeId),
-    playsLeft:quick?10:5,shufflesLeft:quick?3:2,rerollsLeft:1,
-    board:board(r,'',challengeId),selected:[],modifiers:[],
+  const run={
+    version:4,mode,round:1,roundScore:0,totalScore:0,
+    target:quick?999999:roundTarget(1,challengeId,mode),
+    playsLeft:cfg.startPlays,shufflesLeft:cfg.startRefreshes,rerollsLeft:1,
+    board:board(r,'',challengeId),selected:[],modifiers:[],upgrades:[],reserveTiles:[],
     bonuses:{extraPlays:0,extraShuffles:0,roundSeed:0,nextRoundSeed:0,lengthMult:1,letterMult:1,careerXp:0,bossPlay:0,rareLuck:0},
-    challenge:challengeId,words:[],wordLog:[],usedWords:[],validStreak:0,maxStreak:0,invalidAttempts:0,
+    challenge:challengeId,specialRound:null,specialData:{},specialHistory:[],
+    words:[],wordLog:[],usedWords:[],validStreak:0,maxStreak:0,invalidAttempts:0,
     longestWord:'',bestPlay:null,bestCombo:1,previousLength:0,roundWords:0,discoveredCards:[],
     goals:[
       {id:'long7',label:'Juega una palabra de 7+ letras',done:false},
@@ -149,6 +151,10 @@ function newState(mode='normal'){
     ],
     completed:false,won:false,dailySeed:dailySeedValue,rngCounter:counter
   };
+  run.specialRound=chooseSpecialRound(1,mode,r);
+  if(run.specialRound)run.specialHistory.push(run.specialRound);
+  run.specialData=makeSpecialData(run,r);
+  return run;
 }
 function saveRun(){if(state&&!state.completed)localStorage.setItem(SAVE_KEY,JSON.stringify(state));}
 function isBalancedBoard(b,setup=''){
@@ -177,7 +183,21 @@ function repairLoadedBoard(run){
   localStorage.setItem(SAVE_KEY,JSON.stringify(run));
   return run;
 }
-function loadRun(){try{const r=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(!r||r.version!==3||r.completed)return null;if(r.mode==='daily'){if(!Number.isFinite(r.dailySeed))r.dailySeed=daySeed();if(!Number.isFinite(r.rngCounter))r.rngCounter=0;}if(typeof r.won!=='boolean')r.won=false;r.bonuses=Object.assign({extraPlays:0,extraShuffles:0,roundSeed:0,nextRoundSeed:0,lengthMult:1,letterMult:1,careerXp:0,bossPlay:0,rareLuck:0},r.bonuses||{});r.target=r.mode==='quick'?999999:roundTarget(r.round,r.challenge);return repairLoadedBoard(r);}catch{return null;}}
+function loadRun(){try{
+  const r=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
+  if(!r||![3,4].includes(r.version)||r.completed)return null;
+  r.version=4;
+  if(r.mode==='daily'){if(!Number.isFinite(r.dailySeed))r.dailySeed=daySeed();if(!Number.isFinite(r.rngCounter))r.rngCounter=0;}
+  if(typeof r.won!=='boolean')r.won=false;
+  r.bonuses=Object.assign({extraPlays:0,extraShuffles:0,roundSeed:0,nextRoundSeed:0,lengthMult:1,letterMult:1,careerXp:0,bossPlay:0,rareLuck:0},r.bonuses||{});
+  r.upgrades=Array.isArray(r.upgrades)?r.upgrades:[];
+  r.reserveTiles=Array.isArray(r.reserveTiles)?r.reserveTiles:[];
+  r.specialHistory=Array.isArray(r.specialHistory)?r.specialHistory:[];
+  r.specialRound=r.specialRound||null;
+  r.specialData=r.specialData||{};
+  r.target=r.mode==='quick'?999999:roundTarget(r.round,r.challenge,r.mode);
+  return repairLoadedBoard(r);
+}catch{return null;}}
 function clearRun(){localStorage.removeItem(SAVE_KEY);}
 async function loadHunspell(){
   try{
@@ -241,7 +261,7 @@ function rebuild(){
 }
 function validate(raw){
   const w=normalize(raw);
-  if(w.length<3)return{ok:false,message:'Necesitas al menos 3 letras.'};
+  if(w.length<4)return{ok:false,message:'Necesitas al menos 4 letras.'};
   if(BLOCKED.has(w)||(LX.rejectPatterns||[]).some(re=>re&&typeof re.test==='function'&&re.test(w)))return{ok:false,message:'Esa forma no está disponible en el modo escolar.'};
   const strict=STRICT.get(w);
   if(strict)return{ok:false,accent:true,message:`Casi: prueba con «${strict}».`};
@@ -262,29 +282,105 @@ function validate(raw){
 }
 function challenge(id){return C.challenges.find(x=>x.id===id)||C.challenges[0];}
 function challengeOK(id,w){const a=[...w],p=strip(w);switch(id){case'none':return true;case'min5':return a.length>=5;case'min6':return a.length>=6;case'vowel':return vowel(a[0]);case'consonant':return!vowel(a[0]);case'noA':return!p.includes('a');case'noE':return!p.includes('e');case'accent':return/[áéíóúü]/.test(w);case'ntilde':return w.includes('ñ');case'unique':return new Set(a).size===a.length;case'exact5':return a.length===5;case'exact6':return a.length===6;case'rare':return/[jñqxz]/i.test(w);case'endsS':return w.endsWith('s');case'twoVowels':return a.filter(vowel).length>=2;case'threeVowels':return a.filter(vowel).length>=3;case'longAccent':return a.length>=6&&/[áéíóúü]/.test(w);case'noCommon':return!/[aeáé]/.test(w);default:return true;}}
-function chooseChallenge(round,mode){
-  if(mode==='quick')return'none';
-  const bosses=C.challenges.filter(x=>x.kind==='boss');
-  const constraints=C.challenges.filter(x=>x.kind==='constraint');
-  if(round%3===0){
-    const i=mode==='daily'?(daySeed()+round*7)%bosses.length:Math.floor(Math.random()*bosses.length);
-    return bosses[i]?.id||'none';
+function modeConfig(mode=state?.mode||'normal'){
+  if(mode==='daily')return C.modes.normal;
+  return C.modes[mode]||C.modes.normal;
+}
+function totalRounds(mode=state?.mode||'normal'){return modeConfig(mode).rounds||12;}
+function isSpecialRound(round,mode=state?.mode||'normal'){return modeConfig(mode).specialRounds.includes(Number(round));}
+function specialRound(id){return C.specialRounds.find(x=>x.id===id)||null;}
+function chooseSpecialRound(round,mode=state?.mode||'normal',r=Math.random){
+  if(!isSpecialRound(round,mode))return null;
+  const used=new Set(state?.specialHistory||[]);
+  let pool=C.specialRounds.filter(x=>!used.has(x.id));
+  if(!pool.length)pool=C.specialRounds.slice();
+  return pick(pool,r)?.id||null;
+}
+function makeSpecialData(run,r=Math.random){
+  const sr=specialRound(run.specialRound);
+  const data={};
+  if(!sr)return data;
+  if(sr.effect==='firstLocked'){
+    const candidates=run.board.filter(t=>/^[A-ZÑ]$/.test(t.letter));
+    data.lockedLetter=(pick(candidates,r)?.letter||'R');
   }
-  if(round>=4&&round%2===0){
+  if(sr.effect==='topLocked')data.lockedIds=run.board.slice(0,4).map(t=>t.id);
+  if(sr.effect==='highlighted')data.highlightedId=pick(run.board,r)?.id||null;
+  return data;
+}
+function specialEffect(run=state){return specialRound(run?.specialRound)?.effect||'';}
+function chooseChallenge(round,mode){
+  if(mode==='quick'||isSpecialRound(round,mode))return'none';
+  const constraints=C.challenges.filter(x=>x.kind==='constraint');
+  if(round>=4&&round%3===0){
     const i=mode==='daily'?(daySeed()+round*5)%constraints.length:Math.floor(Math.random()*constraints.length);
     return constraints[i]?.id||'none';
   }
   return'none';
 }
-function roundTarget(round,challengeId){
-  const base=TARGETS[Math.max(0,Math.min(TARGETS.length-1,Number(round||1)-1))]||TARGETS[0];
+function roundTarget(round,challengeId,mode=state?.mode||'normal'){
+  const cfg=modeConfig(mode);
+  const base=cfg.targets[Math.max(0,Math.min(cfg.targets.length-1,Number(round||1)-1))]||cfg.targets.at(-1)||50;
   const mult=Number(challenge(challengeId).targetMult||1);
-  return Math.max(50,Math.round(base*mult/5)*5);
+  return Math.max(20,Math.round(base*mult/5)*5);
 }
 function cond(id,ctx){const a=[...ctx.word],p=strip(ctx.word),v=a.filter(vowel).length,c=a.length-v,u=new Set(a).size,r=a.filter(x=>RARE.has(strip(x).toUpperCase())).length,special=(ctx.tiles||[]).filter(t=>t&&t.kind&&t.kind!=='normal'),vowels=a.filter(vowel).map(x=>strip(x));switch(id){case'always':return true;case'startsVowel':return vowel(a[0]);case'startsConsonant':return!vowel(a[0]);case'endsVowel':return vowel(a.at(-1));case'endsConsonant':return!vowel(a.at(-1));case'len3':return a.length===3;case'len5':return a.length===5;case'len6':return a.length===6;case'len7':return a.length===7;case'len8':return a.length===8;case'min7':return a.length>=7;case'accent':return/[áéíóúü]/.test(ctx.word);case'ntilde':return ctx.word.includes('ñ');case'noA':return!p.includes('a');case'noE':return!p.includes('e');case'noO':return!p.includes('o');case'rareLetter':return r>0;case'containsJ':return p.includes('j');case'containsZ':return p.includes('z');case'containsX':return p.includes('x');case'containsQ':return p.includes('q');case'doubleVowel':return/[aeiouáéíóúü]{2}/i.test(ctx.word);case'tripleConsonant':return/[^aeiouáéíóúü]{3}/i.test(ctx.word);case'longerThanPrev':return ctx.prev>0&&a.length>ctx.prev;case'shorterThanPrev':return ctx.prev>0&&a.length<ctx.prev;case'streak3':return ctx.streak>=3;case'streak5':return ctx.streak>=5;case'firstPlay':return ctx.roundWords===0;case'lastPlay':return ctx.playsLeft===1;case'evenLength':return a.length%2===0;case'oddLength':return a.length%2===1;case'twoA':return(p.match(/a/g)||[]).length>=2;case'twoE':return(p.match(/e/g)||[]).length>=2;case'threeVowels':return v>=3;case'fiveConsonants':return c>=5;case'allUnique':return u===a.length;case'palindrome':return a.length>=3&&ctx.word===[...ctx.word].reverse().join('');case'startsM':return p.startsWith('m');case'startsP':return p.startsWith('p');case'endsS':return p.endsWith('s');case'endsN':return p.endsWith('n');case'vowelEdges':return vowel(a[0])&&vowel(a.at(-1));case'sameEdges':return a.length>2&&a[0]===a.at(-1);case'sixUnique':return u>=6;case'max4':return a.length<=4;case'min10':return a.length>=10;case'perfectWord':return a.length>=8&&u===a.length;case'accentLong':return a.length>=7&&/[áéíóúü]/.test(ctx.word);case'twoRare':return r>=2;case'specialTile':return special.length>=1;case'twoSpecialTiles':return special.length>=2;case'bossRound':return ctx.challengeKind==='boss';case'accentAndRare':return/[áéíóúü]/.test(ctx.word)&&r>=1;case'fourVowels':return v>=4;case'crownTile':return special.some(t=>t.kind==='crown');case'min9':return a.length>=9;case'threeRare':return r>=3;case'uniqueVowels':return vowels.length>0&&new Set(vowels).size===vowels.length;default:return false;}}
-function lengthBonus(n){const t={3:0,4:2,5:6,6:12,7:22,8:36,9:54,10:76,11:102,12:132};return Math.round((t[n]??(n>12?132+(n-12)*36:0))*(state?.bonuses.lengthMult||1));}
-function tileScore(t){let v=(LETTER_VALUES[t.letter]||1)+(t.bonus||0);if(t.kind==='gold')v*=2;if(t.kind==='diamond')v*=3;if(t.kind==='echo')v*=2;if(t.kind==='crown')v+=25;return Math.round(v*(state?.bonuses.letterMult||1));}
-function score(word,tiles,preview=false){let subtotal=tiles.reduce((s,t)=>s+tileScore(t),0)+lengthBonus([...word].length),mult=1;const effects=[];if(lengthBonus([...word].length))effects.push(`Longitud +${lengthBonus([...word].length)}`);const ctx={word,tiles,prev:state.previousLength,streak:state.validStreak+(preview?1:0),roundWords:state.roundWords,playsLeft:state.playsLeft,challengeId:state.challenge,challengeKind:challenge(state.challenge).kind};for(const id of state.modifiers){const m=C.modifiers.find(x=>x.id===id);if(!m||!cond(m.condition,ctx))continue;if(m.effect==='flat')subtotal+=m.value;else if(m.effect==='mult')mult*=m.value;else if(m.effect==='uniqueFlat')subtotal+=new Set([...word]).size*m.value;else if(m.effect==='repeatFlat')subtotal+=([...word].length-new Set([...word]).size)*m.value;else if(m.effect==='rareFlat')subtotal+=[...word].filter(x=>RARE.has(strip(x).toUpperCase())).length*m.value;else if(m.effect==='specialFlat')subtotal+=tiles.filter(t=>t&&t.kind&&t.kind!=='normal').length*m.value;effects.push(m.effect==='mult'?`${m.name} ×${m.value}`:`${m.name} +bonus`);}if(tiles.some(t=>t.kind==='volatile')){mult*=1.35;effects.push('Ficha explosiva ×1,35');}return{subtotal,multiplier:mult,total:Math.round(subtotal*mult),effects};}
+function slotBonusAt(index){return Number(C.wordLengthSlots[index]||0);}
+function lengthBonus(n){
+  let total=0;
+  for(let i=0;i<n;i++)total+=slotBonusAt(i);
+  return Math.round(total*(state?.bonuses.lengthMult||1));
+}
+function tileScore(t){
+  if(!t)return 0;
+  if(t.kind==='wild')return 0;
+  let v=(LETTER_VALUES[t.letter]||1)+(t.bonus||0)+(t.kind==='diamond'?(t.charge||0):0);
+  if(t.kind==='crown')v+=25;
+  return Math.round(v*(state?.bonuses.letterMult||1));
+}
+function score(word,tiles,preview=false){
+  const sr=specialEffect();
+  const specialsOff=sr==='specialsOff';
+  let rawWordScore=0;
+  let goldCount=0;
+  let emeraldHits=0;
+  const effects=[];
+  tiles.forEach((t,i)=>{
+    let value=tileScore(t);
+    if(sr==='vowelsZero'&&vowel(word[i]||''))value=0;
+    if(!specialsOff&&t?.kind==='emerald'){
+      const hit=preview?false:boardRng()<.25;
+      if(hit){value*=5;emeraldHits++;effects.push(`Esmeralda ×5`);}
+      else if(preview)effects.push('Esmeralda · 25% ×5');
+    }
+    rawWordScore+=value;
+    if(!specialsOff&&t?.kind==='gold')goldCount++;
+  });
+  let wordMultiplier=1;
+  if(!specialsOff&&goldCount>=2){wordMultiplier*=goldCount;effects.push(`${goldCount} doradas · Word Score ×${goldCount}`);}
+  const lastTile=tiles.at(-1);
+  if(!specialsOff&&lastTile?.kind==='dot'){wordMultiplier*=2;effects.push('Punto final · Word Score ×2');}
+  let wordScore=Math.round(rawWordScore*wordMultiplier);
+
+  let bonusPoints=lengthBonus(tiles.length);
+  if(bonusPoints)effects.push(`Longitud +${bonusPoints}`);
+  let finalMultiplier=1;
+  const ctx={word,tiles,prev:state.previousLength,streak:state.validStreak+(preview?1:0),roundWords:state.roundWords,playsLeft:state.playsLeft,challengeId:state.challenge,challengeKind:challenge(state.challenge).kind};
+  for(const id of state.modifiers){
+    const m=C.modifiers.find(x=>x.id===id);if(!m||!cond(m.condition,ctx))continue;
+    if(m.effect==='flat')bonusPoints+=m.value;
+    else if(m.effect==='mult')finalMultiplier*=m.value;
+    else if(m.effect==='uniqueFlat')bonusPoints+=new Set([...word]).size*m.value;
+    else if(m.effect==='repeatFlat')bonusPoints+=([...word].length-new Set([...word]).size)*m.value;
+    else if(m.effect==='rareFlat')bonusPoints+=[...word].filter(x=>RARE.has(strip(x).toUpperCase())).length*m.value;
+    else if(m.effect==='specialFlat')bonusPoints+=tiles.filter(t=>t&&t.kind&&t.kind!=='normal').length*m.value;
+    effects.push(m.effect==='mult'?`${m.name} ×${m.value}`:`${m.name} +bonus`);
+  }
+  if(!specialsOff&&tiles.some(t=>t.kind==='volatile')){finalMultiplier*=1.35;effects.push('Explosiva · Final ×1,35');}
+  let total=Math.round((wordScore+bonusPoints)*finalMultiplier);
+  if(sr==='minSixZero'&&tiles.length<6){total=0;effects.push('Ronda especial · menos de 6 fichas = 0');}
+  return{subtotal:wordScore+bonusPoints,multiplier:finalMultiplier,total,wordScore,bonusPoints,wordMultiplier,finalMultiplier,effects,emeraldHits,lengthBonus:lengthBonus(tiles.length)};
+}
 function applyGift(r){switch(r.effect){case'extraPlay':state.bonuses.extraPlays+=r.value;break;case'extraShuffle':state.bonuses.extraShuffles+=r.value;break;case'reroll':state.rerollsLeft+=r.value;break;case'lengthMult':state.bonuses.lengthMult+=r.value;break;case'letterMult':state.bonuses.letterMult+=r.value;break;case'roundSeed':state.bonuses.roundSeed+=r.value;break;case'instantShuffle':state.shufflesLeft+=r.value;break;case'instantPlay':state.playsLeft+=r.value;break;case'nextRoundSeed':state.bonuses.nextRoundSeed+=r.value;break;case'careerXp':state.bonuses.careerXp+=r.value;break;case'bossPlay':state.bonuses.bossPlay+=r.value;break;case'rareLuck':state.bonuses.rareLuck+=r.value;break;}}
 function rewards(){
   const luck=Math.max(0,Number(state.bonuses.rareLuck||0));
