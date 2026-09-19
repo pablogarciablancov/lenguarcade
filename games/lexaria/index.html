@@ -63,6 +63,7 @@
         <div><span>◆ MERCADO</span><strong id="rankValue">1</strong></div>
       </div>
       <div class="top-actions">
+        <button id="saveExitBtn" class="save-exit-btn" type="button">💾 GUARDAR Y SALIR</button>
         <button class="icon-btn" data-open="codexModal">▦</button>
         <button class="icon-btn" data-open="settingsModal">⚙</button>
       </div>
@@ -149,13 +150,14 @@
   <section id="battleScreen" class="screen battle-screen hidden">
     <header class="battle-header">
       <div class="battle-trainer left" id="battlePlayerTrainer"></div>
-      <div class="battle-title"><span id="battleDayLabel">JORNADA 1</span><strong id="battleVsLabel">ENCUENTRO</strong></div>
+      <div class="battle-title"><span id="battleDayLabel">JORNADA 1</span><strong id="battleVsLabel">ENCUENTRO</strong><small id="battleFieldName" class="battle-field-name">Patio de la Academia</small></div>
       <div class="battle-trainer right" id="battleEnemyTrainer"></div>
     </header>
     <div class="battle-arena">
       <div class="battle-toolbar" aria-label="Controles del combate">
         <button id="pauseBtn" class="battle-control-btn" type="button">⏸ PAUSAR</button>
         <button id="speedBtn" class="battle-control-btn" type="button">⏩ ×1</button>
+        <button id="battleSaveExitBtn" class="battle-control-btn save" type="button">💾 SALIR</button>
         <div class="battle-timer"><span>TIEMPO</span><strong id="battleTime">0.0</strong></div>
       </div>
 
@@ -275,6 +277,7 @@
       <div class="battle-inspect-actions">
         <button id="battleResumeBtn" class="primary">▶ REANUDAR BATALLA</button>
         <button class="secondary" data-close-modal>SEGUIR INSPECCIONANDO</button>
+        <button id="battleSaveExitModalBtn" class="secondary save-exit-modal">💾 GUARDAR Y SALIR</button>
       </div>
     </section>
 
