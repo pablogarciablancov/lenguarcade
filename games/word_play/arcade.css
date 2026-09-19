@@ -1141,3 +1141,263 @@ button[data-tip]{cursor:pointer}
 @media(max-width:760px){
   .hover-tooltip{display:none}
 }
+
+
+/* Pulido roguelike v3 · sinergias, misiones, tienda rotatoria y activaciones */
+.mission-chip{
+  flex:0 0 auto;
+  max-width:230px;
+  min-height:30px;
+  padding:5px 9px;
+  border-radius:999px;
+  color:#fff2b9;
+  background:linear-gradient(180deg,rgba(121,73,18,.94),rgba(74,39,11,.94));
+  border:1px solid rgba(255,217,112,.32);
+  font-size:.52rem;
+  font-weight:950;
+  letter-spacing:.055em;
+  cursor:help;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 16px rgba(255,193,72,.08);
+}
+.mission-chip.done{
+  color:#baffdf;
+  background:linear-gradient(180deg,rgba(26,101,77,.92),rgba(15,64,54,.94));
+  border-color:rgba(86,243,182,.28);
+}
+.synergy-strip{
+  display:grid;
+  gap:4px;
+  margin-bottom:2px;
+}
+.synergy-strip span{
+  display:block;
+  padding:5px 7px;
+  border-radius:8px;
+  color:#ffe996;
+  background:linear-gradient(90deg,rgba(255,189,52,.12),rgba(201,39,232,.08));
+  border:1px solid rgba(255,213,86,.16);
+  font-size:.53rem;
+  font-weight:950;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+  box-shadow:inset 3px 0 0 rgba(255,215,83,.58);
+}
+.modifier-card.triggered{
+  animation:modifierTriggered .82s cubic-bezier(.2,.8,.2,1);
+  border-color:rgba(255,231,130,.72)!important;
+  box-shadow:0 0 24px rgba(255,202,68,.24),inset 0 0 18px rgba(255,225,112,.08)!important;
+}
+@keyframes modifierTriggered{
+  0%{transform:translateX(0) scale(1);filter:brightness(1)}
+  22%{transform:translateX(5px) scale(1.025);filter:brightness(1.35)}
+  55%{transform:translateX(2px) scale(1.01)}
+  100%{transform:none;filter:none}
+}
+
+/* Estados vivos de fichas especiales */
+.tile-state{
+  position:absolute;
+  left:7%;
+  top:6%;
+  z-index:5;
+  padding:2px 4px;
+  border-radius:5px;
+  color:#fff;
+  background:rgba(18,26,45,.58);
+  border:1px solid rgba(255,255,255,.22);
+  font-size:clamp(.38rem,.64vw,.54rem);
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-.02em;
+  pointer-events:none;
+  text-shadow:0 1px 3px rgba(0,0,0,.45);
+}
+.tile.diamond.charged{
+  animation:diamondCharge 2s ease-in-out infinite;
+}
+.tile.gold.gold-ready{
+  box-shadow:
+    inset 0 -7px 0 rgba(93,55,0,.2),
+    0 0 0 2px rgba(255,246,165,.62),
+    0 0 26px rgba(255,209,102,.48),
+    0 8px 18px rgba(0,0,0,.3)!important;
+  transform:translateY(-2px) scale(1.018);
+}
+.word-builder.gold-combo{
+  filter:drop-shadow(0 0 15px rgba(255,211,83,.34));
+}
+@keyframes diamondCharge{
+  50%{filter:brightness(1.13);box-shadow:inset 0 -7px 0 rgba(0,94,140,.16),0 0 26px rgba(85,231,255,.48),0 8px 18px rgba(0,0,0,.3)!important}
+}
+
+/* Tienda rotatoria */
+.shop-card.on-sale{
+  border-color:rgba(255,214,84,.34);
+  background:
+    radial-gradient(circle at 100% 0,rgba(255,204,72,.12),transparent 42%),
+    linear-gradient(145deg,rgba(79,47,91,.94),rgba(17,28,53,.96));
+}
+.sale-badge{
+  position:absolute;
+  left:8px;
+  top:8px;
+  z-index:4;
+  padding:3px 6px;
+  border-radius:999px;
+  color:#3e2600;
+  background:linear-gradient(180deg,#fff3a4,#ffc440);
+  font-size:.5rem;
+  font-weight:950;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+.shop-price del{
+  margin-right:4px;
+  color:#7e5f30;
+  opacity:.72;
+  font-size:.52rem;
+}
+.shop-card.sold{
+  opacity:.42;
+  filter:saturate(.5);
+}
+.sold-label{
+  position:absolute;
+  inset:auto 8px 8px auto;
+  padding:3px 6px;
+  border-radius:6px;
+  color:#ced5e3;
+  background:rgba(15,22,38,.88);
+  border:1px solid rgba(255,255,255,.08);
+  font-size:.48rem;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+
+/* Callouts al activarse cartas y fichas */
+.wp-activation-stack{
+  position:absolute;
+  right:clamp(12px,3vw,42px);
+  top:23%;
+  display:grid;
+  gap:6px;
+  justify-items:end;
+  width:min(310px,42vw);
+}
+.wp-activation{
+  --delay:calc(var(--i) * 90ms);
+  min-width:150px;
+  max-width:100%;
+  padding:7px 10px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  color:#fff;
+  background:linear-gradient(90deg,rgba(36,28,68,.96),rgba(17,30,53,.96));
+  border:1px solid rgba(164,139,255,.26);
+  box-shadow:0 8px 22px rgba(0,0,0,.34);
+  opacity:0;
+  transform:translateX(28px) scale(.96);
+  animation:activationIn 1.45s ease forwards;
+  animation-delay:var(--delay);
+}
+.wp-activation strong{
+  font-size:.58rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.wp-activation span{color:#d6d8eb;font-size:.56rem;font-weight:850}
+.wp-activation.special{
+  border-color:rgba(85,231,255,.28);
+  background:linear-gradient(90deg,rgba(19,78,94,.95),rgba(38,25,83,.95));
+}
+.wp-activation.special.emerald{border-color:rgba(72,229,125,.4)}
+.wp-activation.special.gold{border-color:rgba(255,211,77,.45)}
+.wp-activation.special.dot{border-color:rgba(255,105,144,.42)}
+.wp-activation.mission{
+  border-color:rgba(255,215,90,.44);
+  background:linear-gradient(90deg,rgba(97,65,10,.96),rgba(49,28,64,.96));
+}
+@keyframes activationIn{
+  0%{opacity:0;transform:translateX(28px) scale(.96)}
+  16%,72%{opacity:1;transform:none}
+  100%{opacity:0;transform:translateX(10px)}
+}
+
+/* Tutorial contextual, no modal */
+.coach-mark{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:110;
+  width:min(330px,calc(100vw - 36px));
+  padding:12px 38px 12px 13px;
+  border-radius:14px;
+  color:#edf7ff;
+  background:
+    radial-gradient(circle at 100% 0,rgba(85,231,255,.12),transparent 45%),
+    linear-gradient(160deg,rgba(27,31,63,.98),rgba(10,18,35,.98));
+  border:1px solid rgba(118,194,255,.22);
+  box-shadow:0 18px 46px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.05);
+  opacity:0;
+  transform:translateY(18px) scale(.97);
+  pointer-events:none;
+  transition:opacity .18s ease,transform .18s ease;
+}
+.coach-mark.visible{opacity:1;transform:none;pointer-events:auto}
+.coach-mark>span{
+  display:block;
+  color:#7feaff;
+  font-size:.58rem;
+  font-weight:950;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+.coach-mark p{margin:4px 0 0;color:#c7d5e7;font-size:.67rem;line-height:1.42}
+.coach-mark button{
+  position:absolute;
+  right:7px;
+  top:7px;
+  width:26px;
+  height:26px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.08);
+  color:#d9e7f7;
+  background:rgba(255,255,255,.05);
+  cursor:pointer;
+}
+
+/* Resumen final de build */
+.build-summary{
+  margin:10px 0 14px;
+  padding:13px 14px;
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 100% 0,rgba(201,39,232,.12),transparent 38%),
+    linear-gradient(145deg,rgba(45,31,77,.82),rgba(18,27,49,.86));
+  border:1px solid rgba(164,119,255,.19);
+}
+.build-summary h3{margin:3px 0 4px;font-size:1rem;color:#fff}
+.build-summary p{margin:0;color:#bac6db;font-size:.68rem;line-height:1.4}
+.build-summary small{display:block;margin-top:8px;color:#91a2bc;font-size:.56rem}
+.build-synergies{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.build-synergies span{
+  padding:4px 7px;
+  border-radius:999px;
+  color:#ffe996;
+  background:rgba(255,199,62,.08);
+  border:1px solid rgba(255,210,76,.15);
+  font-size:.5rem;
+  font-weight:900;
+}
+
+@media(max-width:900px){
+  .mission-chip{max-width:180px}
+  .wp-activation-stack{right:10px;top:20%;width:min(260px,46vw)}
+}
+@media(max-width:760px){
+  .mission-chip{max-width:145px;font-size:.46rem;padding:4px 6px}
+  .wp-activation-stack{left:50%;right:auto;top:18%;transform:translateX(-50%);justify-items:center;width:min(92vw,420px)}
+  .coach-mark{right:10px;bottom:10px;width:min(360px,calc(100vw - 20px))}
+}
