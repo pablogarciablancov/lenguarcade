@@ -57,13 +57,13 @@ const creatures = [
 ];
 
 const trainers = [
-  {id:'filologa',name:'Vera la Filóloga',emoji:'🧭',class:'EQUILIBRIO',powerName:'Revisión completa',power:'Cada día obtienes 1 cambio de mercado gratuito y +1 sesión de entrenamiento.',effect:'balanced'},
+  {id:'filologa',name:'Bruno el Filólogo',emoji:'🧭',class:'EQUILIBRIO',powerName:'Revisión completa',power:'Cada día obtienes 1 cambio de mercado gratuito y +1 sesión de entrenamiento.',effect:'balanced'},
   {id:'corrector',name:'Álex el Corrector',emoji:'🖍️',class:'ORTOGRAFÍA',powerName:'Lápiz rojo',power:'Los Lexarios de Ortografía ganan +18% de vida y daño. El primer entrenamiento correcto del día devuelve la sesión.',effect:'ortho'},
-  {id:'verbologa',name:'Iria Verbóloga',emoji:'⏱️',class:'VERBOS',powerName:'Tiempo compuesto',power:'Los Lexarios de Verbos lanzan habilidades un 15% más rápido. En los días pares recibes +2 Tinta.',effect:'verbs'},
+  {id:'verbologa',name:'Gael el Verbólogo',emoji:'⏱️',class:'VERBOS',powerName:'Tiempo compuesto',power:'Los Lexarios de Verbos lanzan habilidades un 15% más rápido. En los días pares recibes +2 Tinta.',effect:'verbs'},
   {id:'lexicografo',name:'Leo el Lexicógrafo',emoji:'📖',class:'COLECCIÓN',powerName:'Palabra nueva',power:'La primera criatura nueva que descubres cada día cuesta 1 Tinta menos y da +1 sesión.',effect:'lexicon'},
-  {id:'estratega',name:'Mara la Estratega',emoji:'♟️',class:'FORMACIÓN',powerName:'Orden de batalla',power:'Los aliados adyacentes reciben +7% de daño y escudo por cada vecino.',effect:'adjacency'},
+  {id:'estratega',name:'Darío el Estratega',emoji:'♟️',class:'FORMACIÓN',powerName:'Orden de batalla',power:'Los aliados adyacentes reciben +7% de daño y escudo por cada vecino.',effect:'adjacency'},
   {id:'mercader',name:'Nico el Mercader',emoji:'🪙',class:'ECONOMÍA',powerName:'Margen editorial',power:'Los Recursos cuestan 1 menos y los cambios de mercado cuestan 2 en vez de 3.',effect:'economy'},
-  {id:'maestra',name:'Clara la Maestra',emoji:'🎓',class:'ENTRENAMIENTO',powerName:'Clase magistral',power:'Empiezas con 5 sesiones al día. Los aciertos perfectos otorgan el doble de mejora permanente.',effect:'teacher'},
+  {id:'maestra',name:'Hugo el Maestro',emoji:'🎓',class:'ENTRENAMIENTO',powerName:'Clase magistral',power:'Empiezas con 5 sesiones al día. Los aciertos perfectos otorgan el doble de mejora permanente.',effect:'teacher'},
   {id:'archivero',name:'Rui el Archivero',emoji:'🗂️',class:'RELIQUIAS',powerName:'Fondo reservado',power:'En cada segunda fusión puedes elegir entre 4 reliquias en lugar de 3.',effect:'relics'}
 ];
 
