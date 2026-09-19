@@ -103,7 +103,7 @@ window.WordPlayContent = (() => {
     {id:'threeVowels',title:'La Hidra Vocálica',desc:'JEFE · Cada palabra necesita al menos tres vocales.',kind:'boss',targetMult:.84,rewardTier:'rare',setup:'vowels'},
     {id:'longAccent',title:'El Maestro Ortográfico',desc:'JEFE · 6+ letras y al menos una tilde.',kind:'boss',targetMult:.72,rewardTier:'epic',setup:'vowels'},
     {id:'noCommon',title:'El Vacío',desc:'JEFE · No puedes utilizar A ni E.',kind:'boss',targetMult:.76,rewardTier:'epic',setup:'noCommon'}
-  ]
+  ];
 
   const achievements = [
     ['first','Primera palabra','Juega tu primera palabra.','careerWords',1],
