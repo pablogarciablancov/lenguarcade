@@ -622,13 +622,17 @@ function enemyForDay(){
 
 function makeDuelSquad(){
   if(!run||!run.team.some(Boolean))return null;
+  const previousContext=battleContext,previousDuel=duelRunContext;
+  battleContext='adventure';duelRunContext=null;
+  const stats=formationTotals(run.team);
+  battleContext=previousContext;duelRunContext=previousDuel;
   return {
     version:1,
     trainerId:run.trainerId,
     relics:(run.relics||[]).slice(),
     team:JSON.parse(JSON.stringify(run.team)),
     publishedAt:nowIso(),
-    stats:formationTotals(run.team)
+    stats
   };
 }
 function showStudentBattle(){
@@ -637,6 +641,11 @@ function showStudentBattle(){
   const snap=career.duelSquad||makeDuelSquad();
   duelRunContext=snap?{trainerId:snap.trainerId,relics:snap.relics||[],team:snap.team,day:1,stats:{damage:0,biggestHit:0,maxShield:0,casts:0}}:null;
   showScreen('studentBattleScreen');
+  const status=$('studentSyncStatus');
+  if(status&&!window.__LENGUARCADE_EMBEDDED){
+    status.textContent='Laboratorio local · rivales de prueba';
+    status.classList.remove('online');
+  }
   renderStudentBattle();
   window.LexariaBridge?.requestOpponents?.();
 }
@@ -658,6 +667,7 @@ function publishCurrentSquad(){
   const snap=makeDuelSquad();
   if(!snap)return toast('Necesitas una formación activa en Aventura.','bad');
   career.duelSquad=snap;
+  duelRunContext={trainerId:snap.trainerId,relics:snap.relics||[],team:snap.team,day:1,stats:{damage:0,biggestHit:0,maxShield:0,casts:0}};
   saveCareer();
   renderStudentBattle();
   window.LexariaBridge?.publishSquad?.(snap);
@@ -773,8 +783,10 @@ function createBattleState(playerTeam,enemyTeam,enemyTrainer,opponentSnapshot){
 }
 function renderBattleStatic(enemyTrainer){
   const t=trainer();
-  $('battlePlayerTrainer').innerHTML='<span class="avatar">'+esc(t?.emoji||'🎓')+'</span><span>'+esc(t?.name||'Tú')+'</span>';
-  $('battleEnemyTrainer').innerHTML='<span>'+esc(enemyTrainer?.name||'Rival')+'</span><span class="avatar">'+esc(enemyTrainer?.emoji||'🎭')+'</span>';
+  const pTotal={hp:battle.player.units.filter(Boolean).reduce((a,b)=>a+b.stats.hp,0),damage:battle.player.units.filter(Boolean).reduce((a,b)=>a+b.stats.damage,0)};
+  const eTotal={hp:battle.enemy.units.filter(Boolean).reduce((a,b)=>a+b.stats.hp,0),damage:battle.enemy.units.filter(Boolean).reduce((a,b)=>a+b.stats.damage,0)};
+  $('battlePlayerTrainer').innerHTML='<span class="avatar">'+esc(t?.emoji||'🎓')+'</span><span>'+esc(t?.name||'Tú')+'<small class="battle-formation-summary">❤️ <b>'+format(pTotal.hp)+'</b> · ⚔️ <b>'+format(pTotal.damage)+'</b></small></span>';
+  $('battleEnemyTrainer').innerHTML='<span>'+esc(enemyTrainer?.name||'Rival')+'<small class="battle-formation-summary">❤️ <b>'+format(eTotal.hp)+'</b> · ⚔️ <b>'+format(eTotal.damage)+'</b></small></span><span class="avatar">'+esc(enemyTrainer?.emoji||'🎭')+'</span>';
   $('battleDayLabel').textContent=battleContext==='student'?'ARENA DE CLASE':'JORNADA '+run.day;
   $('battleVsLabel').textContent=battleContext==='student'?(battle.opponentName||'DUELO'):'ENCUENTRO '+(run.wins+1);
   $('battleLog').innerHTML='';
