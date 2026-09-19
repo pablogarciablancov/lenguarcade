@@ -1,0 +1,38 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+
+const source=fs.readFileSync(new URL('./data.js',import.meta.url),'utf8');
+const sandbox={window:{}};
+vm.createContext(sandbox);
+vm.runInContext(source,sandbox);
+const D=sandbox.window.LexariaData;
+
+assert.equal(D.creatures.length,30,'Debe haber 30 Lexarios en el prototipo');
+assert.ok(D.trainers.length>=8,'Debe haber al menos 8 entrenadores');
+assert.ok(D.relics.length>=15,'Debe haber al menos 15 reliquias');
+assert.ok(D.resources.length>=10,'Debe haber al menos 10 recursos');
+assert.ok(D.achievements.length>=20,'Debe haber al menos 20 logros');
+
+for(const category of Object.keys(D.TYPES)){
+  for(let i=0;i<500;i++){
+    const q=D.question(category,category+'_'+i);
+    assert.equal(q.category,category);
+    assert.equal(q.answers.length,4);
+    assert.ok(q.correct>=0&&q.correct<4);
+    assert.ok(q.answers[q.correct]);
+    assert.ok(q.prompt);
+    assert.ok(q.explanation);
+  }
+}
+
+const ids=new Set();
+for(const c of D.creatures){
+  assert.ok(!ids.has(c.id),'ID duplicado: '+c.id);
+  ids.add(c.id);
+  assert.ok(c.types.length>=1);
+  assert.ok(c.types.every(t=>D.TYPES[t]));
+  assert.ok(D.RARITIES[c.rarity]);
+  assert.ok(c.ability?.kind);
+}
+console.log('Lexaria smoke test: OK · 30 criaturas · 3000 preguntas generadas verificadas');
