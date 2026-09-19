@@ -3,6 +3,7 @@
 const C=window.WordPlayContent,LX=window.WordPlayLexicon||{additions:[],strict:{},blocked:[],rejectPatterns:[]};
 const DICTIONARY_URLS=['./dictionary-es-50k.txt','https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/es/es_50k.txt'];
 const HUNSPELL_AFF='./hunspell/es_ES.aff',HUNSPELL_DIC='./hunspell/es_ES.dic';
+const PLAYABILITY_COMMON_LIMIT=12000;
 const SAVE_KEY='lenguarcade.wordplay.run.v3',CAREER_KEY='lenguarcade.wordplay.career.v3',SETTINGS_KEY='lenguarcade.wordplay.settings.v1';
 const LETTER_POOL=[['A',13],['E',13],['O',10],['S',8],['R',8],['N',7],['I',7],['L',6],['D',5],['T',5],['U',5],['C',4],['M',3],['P',3],['B',2],['G',2],['V',2],['H',2],['F',1.5],['Y',1.5],['Q',1],['J',1],['Ñ',.8],['X',.5],['Z',.5],['K',.12],['W',.12]];
 const LETTER_VALUES={A:1,E:1,I:1,O:1,N:1,R:1,S:1,L:1,U:1,D:2,T:2,B:3,C:3,G:3,M:3,P:3,F:4,H:4,V:4,Y:4,Q:5,Ñ:5,J:7,X:7,Z:9,K:10,W:10};
@@ -12,9 +13,9 @@ const BOARD_RULES={
   maxVowels:7,
   maxCopies:{A:3,E:3,I:3,O:3,U:2,S:2,R:2,N:2,L:2,D:2,T:2,C:2,M:2,P:2,B:2,G:2,V:2,H:2,F:2,Y:2,Q:1,J:1,Ñ:1,X:1,Z:1,K:1,W:1},
   quality:{
-    normal:{total:30,len4:16,len5:7,len6:2},
-    constraint:{total:14,len4:8,len5:3,len6:1},
-    boss:{total:7,len4:4,len5:2,len6:1}
+    normal:{total:18,len4:10,len5:4,len6:1},
+    constraint:{total:8,len4:5,len5:2,len6:0},
+    boss:{total:5,len4:3,len5:1,len6:0}
   },
   candidateBoards:8,
   replacementAttempts:5
@@ -106,6 +107,7 @@ function boardQuality(b,challengeId='none'){
   const stats={total:0,len4:0,len5:0,len6:0,len7:0,score:0,meets:false};
   if(!wordIndex.length)return Object.assign(stats,{score:1,meets:true});
   for(const entry of wordIndex){
+    if(entry.rank>=PLAYABILITY_COMMON_LIMIT)continue;
     if(challengeId!=='none'&&!challengeOK(challengeId,entry.word))continue;
     if(!wordFitsCounts(entry.signature,counts))continue;
     stats.total++;
@@ -249,7 +251,9 @@ async function loadDictionary(onStatus){
 function rebuild(){
   accentMap=new Map();
   wordIndex=[];
+  let rank=0;
   for(const w of dictionary){
+    const wordRank=rank++;
     const k=strip(w);
     if(!accentMap.has(k))accentMap.set(k,[]);
     accentMap.get(k).push(w);
@@ -257,7 +261,7 @@ function rebuild(){
     const letters=[...k.toUpperCase()];
     if(!letters.every(ch=>/^[A-ZÑ]$/.test(ch)))continue;
     const counts=letterCounts(letters);
-    wordIndex.push({word:w,length:letters.length,signature:[...counts.entries()]});
+    wordIndex.push({word:w,length:letters.length,signature:[...counts.entries()],rank:wordRank});
   }
 }
 function validate(raw){
@@ -616,6 +620,7 @@ function boardPlayability(b=state?.board||[],run=state){
   const stats={total:0,len4:0,len5:0,len6:0,longest:0,safe:false,threshold:1};
   if(wordIndex.length<500)return Object.assign(stats,{safe:true,total:99,len4:99,len5:99,len6:99,longest:9});
   for(const entry of wordIndex){
+    if(entry.rank>=PLAYABILITY_COMMON_LIMIT)continue;
     if(entry.length<4)continue;
     if(run?.challenge&&run.challenge!=='none'&&!challengeOK(run.challenge,entry.word))continue;
     if(!specialWordAllowed(entry.word,run))continue;
@@ -827,5 +832,5 @@ function classroomScramble(count=6){
 function metric(a){switch(a.metric){case'careerWords':return Object.values(career.words).reduce((s,n)=>s+n,0);case'bestPlay':return Math.max(career.bestPlay,state?.bestPlay?.score||0);case'runScore':return state?.totalScore||0;case'longest':return Math.max((career.bestWord||'').length,(state?.longestWord||'').length);case'ntilde':return state?.words.some(w=>w.includes('ñ'))?1:0;case'accent':return state?.words.some(w=>/[áéíóúü]/.test(w))?1:0;case'streak':return state?.maxStreak||0;case'rare':return state?.words.some(w=>/[jñqxzkw]/i.test(w))?1:0;case'wins':return career.wins;case'uniqueWords':return Object.keys(career.words).length;case'cards':return Object.keys(career.cards).length;case'combo':return Math.max(career.bestCombo,state?.bestCombo||1);case'quick':return career.quickGames;case'daily':return career.dailyGames;case'perfect':return state?.completed&&state?.won&&state.invalidAttempts===0?1:0;case'round':return state?.round||0;default:return 0;}}
 function achievements(){const got=[];for(const a of C.achievements)if(!career.achievements[a.id]&&metric(a)>=a.value){career.achievements[a.id]=Date.now();career.xp+=25;got.push(a);}if(got.length)saveCareer();return got;}
 function finish(won){state.won=!!won;state.completed=true;clearRun();career.games++;if(won&&state.mode!=='quick')career.wins++;if(state.mode==='quick')career.quickGames++;if(state.mode==='daily')career.dailyGames++;career.bestScore=Math.max(career.bestScore,state.totalScore);career.bestPlay=Math.max(career.bestPlay,state.bestPlay?.score||0);career.bestCombo=Math.max(career.bestCombo,state.bestCombo);let xp=Math.round(state.words.length*4+state.round*10+(won?80:0)+state.bonuses.careerXp);if(state.mode==='quick')xp=Math.round(xp*.7);career.xp+=xp;const got=achievements();saveCareer();return{xp,got};}
-window.WordPlayEngine={C,LETTER_VALUES,VOWELS,ACCENTABLE,BOARD_RULES,boardQuality,boardPlayability,rescueBoard,stabilizeBoard,isBalancedBoard,repairLoadedBoard,get morphologyReady(){return !!hunspell?.loaded},get state(){return state},set state(v){state=v},get career(){return career},settings,saveSettings,saveRun,loadRun,clearRun,newState,loadDictionary,validate,challenge,chooseChallenge,modeConfig,totalRounds,isSpecialRound,specialRound,specialEffect,roundTarget,slotBonusAt,tileScore,score,rewards,chooseReward,sellModifier,skipReward,useUpgrade,nextRound,play,shuffle,classroomScramble,achievements,finish,strip,vowel,pick,daySeed,runRandom};
+window.WordPlayEngine={C,LETTER_VALUES,VOWELS,ACCENTABLE,BOARD_RULES,PLAYABILITY_COMMON_LIMIT,boardQuality,boardPlayability,rescueBoard,stabilizeBoard,isBalancedBoard,repairLoadedBoard,get morphologyReady(){return !!hunspell?.loaded},get state(){return state},set state(v){state=v},get career(){return career},settings,saveSettings,saveRun,loadRun,clearRun,newState,loadDictionary,validate,challenge,chooseChallenge,modeConfig,totalRounds,isSpecialRound,specialRound,specialEffect,roundTarget,slotBonusAt,tileScore,score,rewards,chooseReward,sellModifier,skipReward,useUpgrade,nextRound,play,shuffle,classroomScramble,achievements,finish,strip,vowel,pick,daySeed,runRandom};
 })();
