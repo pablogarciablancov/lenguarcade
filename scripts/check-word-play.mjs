@@ -303,7 +303,7 @@ E.state=E.newState('normal');
 const anchor=E.anchorWordCandidates(E.state).find(x=>x.length>=6);
 if(!anchor)throw new Error('No hay palabra ancla frecuente de 6+');
 const chosen=[];
-for(const letter of [...anchor.word.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ñ/g,'Ñ').toUpperCase()]){
+for(const letter of [...E.strip(anchor.word).toUpperCase()]){
   const tile=E.state.board.find(t=>!chosen.includes(t)&&t.letter===letter);
   if(!tile)throw new Error(`El tablero anclado no contiene realmente «${anchor.word}»`);
   chosen.push(tile);
