@@ -112,6 +112,18 @@ window.WordPlayContent = (() => {
     {id:'up_plus10',name:'Imprenta +10',rarity:'legendary',desc:'Añade +10 permanentemente al valor de una ficha.',type:'upgrade',effect:'addScore',value:10,uses:2}
   ];
 
+  const shopItems = [
+    {id:'shop_play',name:'Jugada extra',desc:'+1 Jugada ahora mismo.',cost:4,effect:'play',amount:1,artKey:'art-play'},
+    {id:'shop_refresh',name:'Renovación',desc:'+1 Renovación para cambiar el tablero.',cost:3,effect:'refresh',amount:1,artKey:'art-refresh'},
+    {id:'shop_reroll',name:'Reroll',desc:'+1 cambio de opciones de recompensa.',cost:5,effect:'reroll',amount:1,artKey:'art-refresh'},
+    {id:'shop_tinta',name:'Carga de Tinta Viva',desc:'+1 uso de Tinta Viva.',cost:6,effect:'tinta',amount:1,artKey:'art-transmute'},
+    {id:'shop_letter',name:'Letra a la carta',desc:'Elige una letra y añádela a la reserva.',cost:5,effect:'letter',amount:1,artKey:'art-vowels'},
+    {id:'shop_wild',name:'Comodín',desc:'Añade un Comodín a la reserva especial.',cost:7,effect:'reserveTile',tileKind:'wild',amount:1,artKey:'art-wild'},
+    {id:'shop_gold',name:'Ficha Dorada',desc:'Añade una Dorada a la reserva especial.',cost:8,effect:'reserveTile',tileKind:'gold',amount:1,artKey:'art-gold'},
+    {id:'shop_diamond',name:'Ficha Diamante',desc:'Añade un Diamante a la reserva especial.',cost:10,effect:'reserveTile',tileKind:'diamond',amount:1,artKey:'art-diamond'},
+    {id:'shop_upgrade',name:'Mejora misteriosa',desc:'Compra una Mejora aleatoria si tienes hueco.',cost:9,effect:'upgrade',amount:1,artKey:'art-transmute'}
+  ];
+
   const specialRounds = [
     {id:'limit_tiles',title:'Palabra encogida',desc:'Empiezas pudiendo usar 6 fichas; el límite aumenta tras cada palabra.',effect:'maxTiles'},
     {id:'first_locked',title:'Primera letra sellada',desc:'Todas las palabras deben empezar por la letra indicada.',effect:'firstLocked'},
@@ -201,5 +213,5 @@ window.WordPlayContent = (() => {
     ['allround','Doce estaciones','Llega a la ronda 12.','round',12]
   ].map(([id,name,desc,metric,value])=>({id,name,desc,metric,value}));
 
-  return {modifiers,gifts,upgrades,specialRounds,modes,wordLengthSlots,specialTileTypes,challenges,achievements};
+  return {modifiers,gifts,upgrades,shopItems,specialRounds,modes,wordLengthSlots,specialTileTypes,challenges,achievements};
 })();
