@@ -184,7 +184,7 @@ const deadStats=E.boardPlayability(E.state.board,E.state);
 if(deadStats.safe)throw new Error(`El tablero de atasco de producción se considera seguro: ${JSON.stringify(deadStats)}`);
 const playsBeforeRescue=E.state.playsLeft,refreshBeforeRescue=E.state.shufflesLeft;
 const rescued=E.rescueBoard('test de atasco',true);
-if(!rescued.rescued||!rescued.after.safe)throw new Error('El rescate automático no recupera un tablero muerto');
+if(!rescued.rescued||!rescued.after.safe)throw new Error(`El rescate automático no recupera un tablero muerto: ${JSON.stringify(rescued)}`);
 if(E.state.playsLeft!==playsBeforeRescue||E.state.shufflesLeft!==refreshBeforeRescue)throw new Error('El rescate automático consume Jugadas o Renovaciones');
 if(E.state.selected.length)throw new Error('El rescate automático deja una selección antigua');
 
