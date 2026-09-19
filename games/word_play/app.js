@@ -43,6 +43,12 @@ function installStaticTips(){
   setTip($('clearBtn'),'Limpiar: devuelve todas las fichas seleccionadas al tablero.');
   setTip($('submitBtn'),'Jugar palabra: valida la palabra, calcula puntos y consume una Jugada si es válida.');
   setTip(ui.roundScore?.closest('.score-block'),'Puntuación de ronda: alcanza el objetivo indicado para superar la ronda.');
+  setTip(ui.rerollBtn,'Cambiar opciones: gasta 1 reroll para sustituir las 3 cartas de recompensa por 3 nuevas.');
+  setTip(ui.skipReward,'Pasar: renuncias a elegir una carta y recibes +2 Renovaciones.');
+  setTip($('helpBtn'),'Ayuda: resumen de las reglas, recursos y sistemas de la partida.');
+  setTip($('pauseBtn'),'Menú de pausa: guarda, abandona o cambia opciones de accesibilidad.');
+  setTip($('challengeBanner'),'Regla de la ronda: esta condición modifica qué palabras valen o cómo puntúan.');
+
 }
 function initTooltips(){
   const tip=document.createElement('div');tip.className='hover-tooltip';tip.setAttribute('role','tooltip');document.body.appendChild(tip);
