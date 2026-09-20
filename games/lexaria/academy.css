@@ -453,9 +453,9 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
   background-size:cover!important;
   background-repeat:no-repeat!important;
 }
-.battle-screen[data-battlefield="academy"]{background-image:url('./assets/generated/battle-academy-final.jpg?v=20260920-rarity10')!important}
-.battle-screen[data-battlefield="crystal"]{background-image:url('./assets/generated/battle-crystal-final.jpg?v=20260920-rarity10')!important}
-.battle-screen[data-battlefield="sunset"]{background-image:url('./assets/generated/battle-sunset-final.jpg?v=20260920-rarity10')!important}
+.battle-screen[data-battlefield="academy"]{background-image:url('./assets/generated/battle-academy-final.jpg?v=20260920-projectile11')!important}
+.battle-screen[data-battlefield="crystal"]{background-image:url('./assets/generated/battle-crystal-final.jpg?v=20260920-projectile11')!important}
+.battle-screen[data-battlefield="sunset"]{background-image:url('./assets/generated/battle-sunset-final.jpg?v=20260920-projectile11')!important}
 .battle-screen:before{
   content:""!important;
   position:absolute!important;
@@ -958,3 +958,138 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
   .unit-rarity{top:2px;font-size:5.5px}
   .market-rarity{font-size:5.5px}
 }
+
+/* ===== LEXARIA PHYSICAL PROJECTILES · v17 =====
+   Viewport-level effects are immune to battle arena clipping/positioning. */
+.battle-projectile-live{
+  --fx:#7cecff;--fx2:#fff;
+  position:fixed!important;
+  left:0;top:0;
+  width:30px;height:30px;
+  z-index:2147483000!important;
+  pointer-events:none!important;
+  transform:translate(-50%,-50%);
+  transform-origin:center;
+  will-change:left,top,transform,opacity;
+  filter:drop-shadow(0 0 8px var(--fx)) drop-shadow(0 0 18px var(--fx));
+}
+.battle-projectile-live .projectile-core{
+  position:absolute;
+  left:50%;top:50%;
+  width:26px;height:26px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 38% 35%,#fff 0 12%,var(--fx2) 14% 34%,var(--fx) 38% 65%,rgba(255,255,255,.12) 68%,transparent 72%);
+  border:2px solid rgba(255,255,255,.72);
+  box-shadow:0 0 8px #fff,0 0 17px var(--fx),0 0 30px var(--fx);
+}
+.battle-projectile-live .projectile-core:after{
+  content:"";
+  position:absolute;
+  inset:5px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,.78);
+}
+.battle-projectile-live .projectile-trail{
+  position:absolute;
+  right:14px;
+  top:50%;
+  width:clamp(54px,7vw,100px);
+  height:12px;
+  transform:translateY(-50%);
+  border-radius:999px 0 0 999px;
+  background:linear-gradient(90deg,transparent 0%,rgba(var(--fx-rgb,124,236,255),.08) 18%,var(--fx) 72%,#fff 100%);
+  filter:blur(1.2px);
+  opacity:.9;
+  box-shadow:0 0 12px var(--fx);
+}
+.battle-muzzle-live,
+.battle-impact-live{
+  --fx:#7cecff;--fx2:#fff;
+  position:fixed!important;
+  z-index:2147482999!important;
+  pointer-events:none!important;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+}
+.battle-muzzle-live{
+  width:38px;height:38px;
+  background:radial-gradient(circle,#fff 0 14%,var(--fx2) 18% 38%,var(--fx) 42% 58%,transparent 62%);
+  box-shadow:0 0 12px #fff,0 0 24px var(--fx);
+  animation:lexariaMuzzleLive .26s ease-out forwards!important;
+}
+@keyframes lexariaMuzzleLive{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.25)}
+  28%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.7)}
+}
+.battle-impact-live{
+  width:62px;height:62px;
+  border:5px solid var(--fx);
+  background:radial-gradient(circle,rgba(255,255,255,.95) 0 10%,var(--fx2) 13% 22%,rgba(var(--fx-rgb,124,236,255),.34) 24% 48%,transparent 52%);
+  box-shadow:0 0 16px #fff,0 0 30px var(--fx),inset 0 0 18px var(--fx);
+  animation:lexariaImpactLive .72s ease-out forwards!important;
+}
+.battle-impact-live:before,.battle-impact-live:after{
+  content:"";
+  position:absolute;
+  left:50%;top:50%;
+  width:78px;height:5px;
+  border-radius:999px;
+  background:linear-gradient(90deg,transparent,var(--fx),#fff,var(--fx),transparent);
+  box-shadow:0 0 12px var(--fx);
+}
+.battle-impact-live:before{transform:translate(-50%,-50%) rotate(34deg)}
+.battle-impact-live:after{transform:translate(-50%,-50%) rotate(-34deg)}
+@keyframes lexariaImpactLive{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.28)}
+  18%{opacity:1;transform:translate(-50%,-50%) scale(.9)}
+  55%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.9)}
+}
+.battle-float-live{
+  position:fixed!important;
+  z-index:2147483001!important;
+  pointer-events:none!important;
+  transform:translate(-50%,-50%);
+  font:1000 26px/1 'Trebuchet MS',sans-serif;
+  color:#fff;
+  text-shadow:0 2px 3px #000,0 0 10px #000;
+  animation:lexariaFloatLive 1.5s ease-out forwards!important;
+}
+.battle-float-live.damage{color:#ffebe7}
+.battle-float-live.heal{color:#8dffb8}
+.battle-float-live.shield{color:#8ee9ff}
+.battle-float-live.effective{color:#ffe67d}
+.battle-float-live.resisted{color:#c8d4df}
+.battle-float-live small{
+  display:block;
+  margin-top:5px;
+  font-size:10px;
+  letter-spacing:.08em;
+  color:#fff;
+  text-align:center;
+}
+.battle-float-live.effective small{color:#ffe15a}
+.battle-float-live.resisted small{color:#aebdca}
+@keyframes lexariaFloatLive{
+  0%{opacity:0;transform:translate(-50%,-15%) scale(.74)}
+  15%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}
+  72%{opacity:1;transform:translate(-50%,-84%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-126%) scale(.94)}
+}
+
+/* Per-type projectile colors. */
+.battle-projectile-live.fx-ortografia,.battle-muzzle-live.fx-ortografia,.battle-impact-live.fx-ortografia{--fx:#ff76a8;--fx2:#fff2f8;--fx-rgb:255,118,168}
+.battle-projectile-live.fx-verbos,.battle-muzzle-live.fx-verbos,.battle-impact-live.fx-verbos{--fx:#43c9ff;--fx2:#dcf7ff;--fx-rgb:67,201,255}
+.battle-projectile-live.fx-lexico,.battle-muzzle-live.fx-lexico,.battle-impact-live.fx-lexico{--fx:#5be892;--fx2:#e2ffd0;--fx-rgb:91,232,146}
+.battle-projectile-live.fx-morfologia,.battle-muzzle-live.fx-morfologia,.battle-impact-live.fx-morfologia{--fx:#ffc94f;--fx2:#fff3bc;--fx-rgb:255,201,79}
+.battle-projectile-live.fx-sintaxis,.battle-muzzle-live.fx-sintaxis,.battle-impact-live.fx-sintaxis{--fx:#a980ff;--fx2:#eadcff;--fx-rgb:169,128,255}
+.battle-projectile-live.fx-literatura,.battle-muzzle-live.fx-literatura,.battle-impact-live.fx-literatura{--fx:#ff8b62;--fx2:#ffe2d7;--fx-rgb:255,139,98}
+
+/* Reduced motion still shows a real, shorter physical flight rather than hiding it. */
+.reduce-motion .battle-projectile-live{transition:none!important}
+.reduce-motion .battle-muzzle-live,
+.reduce-motion .battle-impact-live,
+.reduce-motion .battle-float-live{animation-duration:.45s!important}
