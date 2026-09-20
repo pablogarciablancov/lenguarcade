@@ -1306,7 +1306,9 @@ function battleActionFx(side,target,b,c,a,dealt,healed,shielded){
     }
     const n=document.createElement('b');
     n.className='battle-float '+(dealt>0?'damage':healed>0?'heal':'shield')+(typeMult>1.05?' effective':typeMult<.95?' resisted':'');
-    n.innerHTML=dealt>0?'−'+format(dealt)+(typeMult!==1?'<small>'+matchupLabel(typeMult)+'</small>'):(healed>0?'+'+format(healed)+'<small>CURA</small>':'+'+format(shielded)+'<small>ESCUDO</small>');
+    if(dealt>0)n.innerHTML='−'+format(dealt)+(typeMult!==1?'<small>'+matchupLabel(typeMult)+'</small>':'');
+    else if(healed>0)n.innerHTML='+'+format(healed)+'<small>CURA</small>';
+    else n.innerHTML='+'+format(shielded)+'<small>ESCUDO</small>';
     n.style.left=(hr.left+hr.width/2-lr.left)+'px';n.style.top=(hr.top+hr.height*.18-lr.top)+'px';
     layer.appendChild(n);setTimeout(()=>n.remove(),1450);
   };
