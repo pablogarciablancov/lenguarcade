@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#07141d">
   <title>Lexaria · LenguArcade</title>
-  <link rel="stylesheet" href="./styles.css?v=20260920-lexaria-polish8">
-  <link rel="stylesheet" href="./academy.css?v=20260920-lexaria-polish8">
+  <link rel="stylesheet" href="./styles.css?v=20260920-lexaria-types9">
+  <link rel="stylesheet" href="./academy.css?v=20260920-lexaria-types9">
 </head>
 <body>
 <main id="app" class="app-shell">
@@ -214,7 +214,7 @@
         <article><b>4</b><h3>Coloca con intención</h3><p>Vanguardia: +25% vida pero 10% más lenta. Retaguardia: 15% más rápida pero −10% vida. El centro tiene más vecinos para combos de adyacencia.</p></article>
         <article><b>5</b><h3>Usa la reserva</h3><p>Los 4 Lexarios de reserva no combaten, pero siguen contando para conseguir copias y fusionar niveles.</p></article>
         <article><b>6</b><h3>Avanza jornadas</h3><p>Cada jornada es: comprar → colocar → entrenar → combatir. Tras el combate empieza otra, recibes Tinta y se renueva el mercado.</p></article>
-        <article><b>7</b><h3>Combate</h3><p>No hay ataques ocultos: cada barra de habilidad se carga y, al llenarse, el Lexario lanza su poder. El combate muestra quién actúa y cuánto daño, cura o escudo genera.</p></article>
+        <article><b>7</b><h3>Combate y tipos</h3><p>Cada Lexario ataca con su tipo principal. Una ventaja de tipo hace ×1,30 de daño y una desventaja ×0,80. Antes de combatir verás el equipo rival y los tipos recomendados.</p></article>
         <article><b>8</b><h3>Duelo de clase</h3><p>Publica una formación y desafía copias guardadas de los equipos de tus compañeros, sin alterar tu Aventura.</p></article>
       </div>
     </section>
@@ -272,6 +272,30 @@
       <div id="historyList" class="history-list"></div>
     </section>
 
+    <section id="battleBriefingModal" class="modal battle-briefing-modal hidden">
+      <div class="modal-head"><div><span class="micro-label">INFORME PREVIO</span><h2 id="battleBriefingTitle">Próximo rival</h2></div><button id="battleBriefingBackBtn" class="icon-btn" aria-label="Volver">×</button></div>
+      <div class="briefing-layout">
+        <section class="briefing-enemy-panel">
+          <div class="briefing-heading"><span>FORMACIÓN RIVAL</span><small>Estos son los Lexarios que te esperan.</small></div>
+          <div id="battleBriefingEnemy" class="briefing-enemy-grid"></div>
+        </section>
+        <aside class="briefing-analysis">
+          <div class="briefing-block"><span class="micro-label">TIPOS DEL RIVAL</span><div id="battleBriefingThreats" class="briefing-threats"></div></div>
+          <div class="briefing-block"><span class="micro-label">TIPOS RECOMENDADOS</span><div id="battleBriefingCounters" class="briefing-counters"></div></div>
+          <p id="battleBriefingTip" class="briefing-tip"></p>
+          <div class="type-cycle-mini">
+            <span data-type="lexico">Léxico → Verbos</span>
+            <span data-type="verbos">Verbos → Sintaxis</span>
+            <span data-type="sintaxis">Sintaxis → Literatura</span>
+            <span data-type="literatura">Literatura → Ortografía</span>
+            <span data-type="ortografia">Ortografía → Morfología</span>
+            <span data-type="morfologia">Morfología → Léxico</span>
+          </div>
+        </aside>
+      </div>
+      <div class="briefing-actions"><button class="secondary" id="battleBriefingBackBtnAlt" data-close-modal>VOLVER A PREPARAR</button><button class="primary big" id="battleBriefingStartBtn">⚔ ENTRAR EN BATALLA</button></div>
+    </section>
+
     <section id="battleInspectModal" class="modal battle-inspect-modal hidden">
       <div class="modal-head"><div><span class="micro-label">COMBATE EN PAUSA</span><h2 id="battleInspectTitle">Lexario</h2></div><button class="icon-btn" data-close-modal aria-label="Cerrar">×</button></div>
       <div id="battleInspectBody" class="battle-inspect-body"></div>
@@ -292,8 +316,8 @@
 
   <div id="toastHost" class="toast-host"></div>
 </main>
-<script src="./data.js?v=20260920-lexaria-polish8"></script>
-<script src="./game.js?v=20260920-lexaria-polish8"></script>
-<script src="./bridge.js?v=20260920-lexaria-polish8"></script>
+<script src="./data.js?v=20260920-lexaria-types9"></script>
+<script src="./game.js?v=20260920-lexaria-types9"></script>
+<script src="./bridge.js?v=20260920-lexaria-types9"></script>
 </body>
 </html>
