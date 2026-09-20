@@ -453,9 +453,9 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
   background-size:cover!important;
   background-repeat:no-repeat!important;
 }
-.battle-screen[data-battlefield="academy"]{background-image:url('./assets/generated/battle-academy-final.jpg?v=20260920-exact6')!important}
-.battle-screen[data-battlefield="crystal"]{background-image:url('./assets/generated/battle-crystal-final.jpg?v=20260920-exact6')!important}
-.battle-screen[data-battlefield="sunset"]{background-image:url('./assets/generated/battle-sunset-final.jpg?v=20260920-exact6')!important}
+.battle-screen[data-battlefield="academy"]{background-image:url('./assets/generated/battle-academy-final.jpg?v=20260920-exact7')!important}
+.battle-screen[data-battlefield="crystal"]{background-image:url('./assets/generated/battle-crystal-final.jpg?v=20260920-exact7')!important}
+.battle-screen[data-battlefield="sunset"]{background-image:url('./assets/generated/battle-sunset-final.jpg?v=20260920-exact7')!important}
 .battle-screen:before{
   content:""!important;
   position:absolute!important;

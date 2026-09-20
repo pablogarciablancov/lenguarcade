@@ -17,8 +17,8 @@ const BATTLEFIELDS=[
   {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal-final.jpg'},
   {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset-final.jpg'}
 ];
-const LEXARIO_ATLASES=['./assets/generated/lexarios-atlas-hq-1.png?v=20260920-exact6','./assets/generated/lexarios-atlas-hq-2.png?v=20260920-exact6'];
-const TRAINER_ATLAS='./assets/generated/trainers-atlas-final-hq.png?v=20260920-exact6';
+const LEXARIO_ATLASES=['./assets/generated/lexarios-atlas-hq-1.png?v=20260920-exact7','./assets/generated/lexarios-atlas-hq-2.png?v=20260920-exact7'];
+const TRAINER_ATLAS='./assets/generated/trainers-atlas-final-hq.png?v=20260920-exact7';
 
 const TRAINER_ART={
   filologa:{skin:'#e8bb91',hair:'#604127',coat:'#284f76',accent:'#e5bb54',beard:'#604127',glasses:false,badge:'A'},
