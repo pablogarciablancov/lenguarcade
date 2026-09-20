@@ -27,8 +27,8 @@ const BATTLEFIELDS=[
   {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal-final.jpg'},
   {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset-final.jpg'}
 ];
-const LEXARIO_ATLASES=['./assets/generated/lexarios-atlas-hq-1.png?v=20260920-types9','./assets/generated/lexarios-atlas-hq-2.png?v=20260920-types9'];
-const TRAINER_ATLAS='./assets/generated/trainers-atlas-final-hq.png?v=20260920-types9';
+const LEXARIO_ATLASES=['./assets/generated/lexarios-atlas-hq-1.png?v=20260920-rarity10','./assets/generated/lexarios-atlas-hq-2.png?v=20260920-rarity10'];
+const TRAINER_ATLAS='./assets/generated/trainers-atlas-final-hq.png?v=20260920-rarity10';
 
 const TRAINER_ART={
   filologa:{skin:'#e8bb91',hair:'#604127',coat:'#284f76',accent:'#e5bb54',beard:'#604127',glasses:false,badge:'A'},
@@ -181,6 +181,11 @@ function matchupLabel(mult){
   if(mult>1.05)return'¡MUY EFICAZ!';
   if(mult<.95)return'POCO EFICAZ';
   return'NEUTRO';
+}
+function rarityName(c){return D.RARITIES[c?.rarity]?.name||'Común';}
+function rarityBadge(c,extra){
+  if(!c)return'';
+  return '<span class="rarity-badge '+esc(extra||'')+'" data-rarity="'+esc(c.rarity)+'">'+esc(rarityName(c).toUpperCase())+'</span>';
 }
 function typeGuideHtml(c){
   const t=primaryType(c),rule=TYPE_MATCHUPS[t];
@@ -512,7 +517,7 @@ function unitCard(u,isSel,area,index){
   const c=creatureOf(u); if(!c)return '';
   const meta=abilityMeta(c),trainPct=Math.round((u.training||0)*TRAINING_STEP*100);
   return '<button draggable="true" class="unit-card '+(u.chromatic?'chromatic ':'')+(isSel?'selected':'')+'" data-unit="'+esc(u.uid)+'" data-area="'+esc(area||'')+'" data-index="'+String(index??'')+'" data-rarity="'+esc(c.rarity)+'" data-type="'+esc(primaryType(c))+'">'+
-    '<i class="rarity-line"></i><span class="unit-level">'+levelStars(u.level)+'</span><span class="unit-power">🎓 +'+trainPct+'%</span>'+
+    '<i class="rarity-line"></i>'+rarityBadge(c,'unit-rarity')+'<span class="unit-level">'+levelStars(u.level)+'</span><span class="unit-power">🎓 +'+trainPct+'%</span>'+
     '<span class="unit-role">'+esc(meta.icon)+' '+esc(meta.role)+'</span>'+
     spriteMarkup(c,'unit-sprite')+'<span class="unit-name">'+esc(c.name)+'</span>'+
   '</button>';
@@ -555,9 +560,9 @@ function renderInspect(){
       ?'<b>🛡️ VANGUARDIA</b><span>+25% vida · habilidades 10% más lentas. '+neighbors+' vecino'+(neighbors===1?'':'s')+'.</span>'
       :'<b>⚡ RETAGUARDIA</b><span>−10% vida · habilidades 15% más rápidas. '+neighbors+' vecino'+(neighbors===1?'':'s')+'.</span>')
     :'<b>📦 RESERVA</b><span>No combate. Sí cuenta para fusionar.</span>';
-  host.className='inspect-card';host.dataset.type=primaryType(c);
+  host.className='inspect-card';host.dataset.type=primaryType(c);host.dataset.rarity=c.rarity;
   host.innerHTML=
-    '<div class="inspect-hero game-card-header">'+spriteMarkup(c,'inspect-sprite')+'<div class="inspect-name"><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span><h3>'+esc(c.name)+(u.chromatic?' ✦':'')+'</h3><div class="level-stars">'+levelStars(u.level)+' <small>Nv.'+u.level+'</small></div></div></div>'+
+    '<div class="inspect-hero game-card-header">'+spriteMarkup(c,'inspect-sprite')+'<div class="inspect-name">'+rarityBadge(c,'inspect-rarity')+'<span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span><h3>'+esc(c.name)+(u.chromatic?' ✦':'')+'</h3><div class="level-stars">'+levelStars(u.level)+' <small>Nv.'+u.level+'</small></div></div></div>'+
     '<div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+typeGuideHtml(c)+
     '<div class="stat-grid game-stats"><div><span>❤️ Vida</span><b>'+format(stats.hp)+'</b></div><div><span>⚔️ Potencia</span><b>'+format(stats.damage)+'</b></div><div><span>⏱ Habilidad</span><b>'+stats.cooldown.toFixed(1)+'s</b></div><div><span>🎓 Entreno</span><b>+'+trainPct+'%</b></div></div>'+
     '<div class="ability-box featured"><div class="ability-title"><b>'+esc(c.ability.name)+'</b></div><p>'+esc(c.ability.text)+'</p></div>'+
@@ -569,7 +574,7 @@ function renderInspect(){
 function renderMarketDetail(host,index){
   const o=run.shop[index];if(!o||o.bought)return;
   const affordable=run.gold>=o.price;
-  host.className='inspect-card market-detail-card';host.dataset.type='';
+  host.className='inspect-card market-detail-card';host.dataset.type='';host.dataset.rarity='';
   if(o.kind==='resource'){
     const r=D.resource(o.resourceId);
     host.innerHTML='<div class="market-detail-resource"><span class="market-detail-resource-icon">'+esc(r.icon)+'</span><span class="micro-label">RECURSO</span><h3>'+esc(r.name)+'</h3><p>'+esc(r.text)+'</p></div>'+
@@ -596,7 +601,7 @@ function sellSelected(){
 }
 
 function rarityRoll(rank,boost){
-  const keys=Object.keys(D.RARITIES), idx=clamp((rank||1)-1+(boost||0),0,5);
+  const keys=['common','rare','epic','legendary'], idx=clamp((rank||1)-1+(boost||0),0,5);
   const weights=keys.map(k=>D.RARITIES[k].weight[idx]||0);
   const total=weights.reduce((a,b)=>a+b,0);
   let x=Math.random()*total;
@@ -633,7 +638,7 @@ function renderMarket(){
     if(o.kind==='creature'){
       const c=D.creature(o.creatureId);
       return '<button type="button" class="market-tile '+(active?'selected ':'')+(o.bought?'bought ':'')+(o.chromatic?'chromatic ':'')+(affordable?'':'unaffordable')+'" data-market-select="'+i+'" data-rarity="'+esc(c.rarity)+'" data-type="'+esc(primaryType(c))+'" aria-label="Ver '+esc(c.name)+'">'+
-        spriteMarkup(c,'market-sprite')+
+        spriteMarkup(c,'market-sprite')+rarityBadge(c,'market-rarity')+
         '<span class="market-tile-caption"><b>'+esc(c.name)+(o.chromatic?' ✦':'')+'</b><small>🖋️ '+o.price+'</small></span>'+
       '</button>';
     }
@@ -904,7 +909,7 @@ function enemyForDay(){
   const team=Array(TEAM_SIZE).fill(null);
   for(let i=0;i<count;i++){
     const available=D.creatures.filter(c=>{
-      const tier={common:1,uncommon:2,rare:3,epic:5,legendary:7}[c.rarity]||1;
+      const tier={common:1,rare:3,epic:5,legendary:7}[c.rarity]||1;
       return tier<=Math.min(7,run.day+1);
     });
     const c=D.pick(available,rng);
@@ -977,7 +982,7 @@ function mockStudentOpponents(){
     const rng=D.seeded((run.id||'lexaria')+'_duel_mock_'+k);
     const team=Array(6).fill(null).map((_,i)=>{
       if(i>=3+k%3&&rng()<.28)return null;
-      const pool=D.creatures.filter(c=>({common:1,uncommon:2,rare:3,epic:4,legendary:5}[c.rarity]||1)<=Math.max(2,run.rank||1));
+      const pool=D.creatures.filter(c=>({common:1,rare:3,epic:4,legendary:5}[c.rarity]||1)<=Math.max(2,run.rank||1));
       const c=D.pick(pool.length?pool:D.creatures,rng);
       return createUnit(c.id,rng()<.01,1+(run.day>6&&rng()<.28?1:0),Math.max(0,Math.floor((run.day-1)/4)));
     });
@@ -1074,7 +1079,7 @@ function renderBattleBriefing(enemy){
   }).join('');
   $('battleBriefingTitle').textContent='Jornada '+run.day+' · '+esc(enemy.trainer?.name||'Rival');
   $('battleBriefingEnemy').innerHTML=enemyUnits.map(x=>
-    '<article class="briefing-lexario" data-type="'+esc(primaryType(x.c))+'">'+spriteMarkup(x.c,'briefing-sprite')+
+    '<article class="briefing-lexario" data-type="'+esc(primaryType(x.c))+'" data-rarity="'+esc(x.c.rarity)+'">'+spriteMarkup(x.c,'briefing-sprite')+rarityBadge(x.c,'briefing-rarity')+
       '<div><b>'+esc(x.c.name)+'</b><small>'+x.c.types.map(t=>esc(D.TYPES[t].name)).join(' · ')+' · '+levelStars(x.u.level)+'</small></div>'+
     '</article>'
   ).join('');
@@ -1569,7 +1574,7 @@ function filterCodex(){
   const list=D.creatures.filter(c=>(!search||c.name.toLowerCase().includes(search))&&(!type||c.types.includes(type))&&(!rarity||c.rarity===rarity));
   $('codexGrid').innerHTML=list.map(c=>{
     const unlocked=!!career.discovered[c.id],b=career.badges[c.id]||{};
-    return '<article class="codex-entry '+(unlocked?'':'locked')+'" data-type="'+(unlocked?esc(primaryType(c)):'')+'">'+(unlocked?spriteMarkup(c,'codex-sprite'):'<span class="codex-mystery">❔</span>')+'<h3>'+(unlocked?esc(c.name):'???')+'</h3><p>'+(unlocked?esc(c.types.map(t=>D.TYPES[t].name).join(' · ')):'No descubierto')+'</p><p>'+(unlocked?esc(c.ability.name):'')+'</p><div class="badge-row"><span class="mini-badge '+(b.trophy?'on':'')+'" title="Ganar una liga">🏆</span><span class="mini-badge '+(b.medal?'on':'')+'" title="Ganar con nivel 3+">🎖</span><span class="mini-badge '+(b.star?'on':'')+'" title="Ganar con variante cromática">★</span></div></article>';
+    return '<article class="codex-entry '+(unlocked?'':'locked')+'" data-type="'+(unlocked?esc(primaryType(c)):'')+'" data-rarity="'+(unlocked?esc(c.rarity):'')+'">'+(unlocked?spriteMarkup(c,'codex-sprite')+rarityBadge(c,'codex-rarity'):'<span class="codex-mystery">❔</span>')+'<h3>'+(unlocked?esc(c.name):'???')+'</h3><p>'+(unlocked?esc(c.types.map(t=>D.TYPES[t].name).join(' · ')):'No descubierto')+'</p><p>'+(unlocked?esc(c.ability.name):'')+'</p><div class="badge-row"><span class="mini-badge '+(b.trophy?'on':'')+'" title="Ganar una liga">🏆</span><span class="mini-badge '+(b.medal?'on':'')+'" title="Ganar con nivel 3+">🎖</span><span class="mini-badge '+(b.star?'on':'')+'" title="Ganar con variante cromática">★</span></div></article>';
   }).join('');
 }
 function renderAchievements(){
