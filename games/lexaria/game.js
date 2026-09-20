@@ -182,6 +182,11 @@ function matchupLabel(mult){
   if(mult<.95)return'POCO EFICAZ';
   return'NEUTRO';
 }
+function typeGuideHtml(c){
+  const t=primaryType(c),rule=TYPE_MATCHUPS[t];
+  if(!rule)return'';
+  return '<div class="type-guide" data-type="'+esc(t)+'"><span>▲ fuerte contra <b>'+esc(D.TYPES[rule.strong]?.name||rule.strong)+'</b></span><span>▼ débil contra <b>'+esc(D.TYPES[rule.weak]?.name||rule.weak)+'</b></span></div>';
+}
 function spriteMeta(c){
   const i=Math.max(0,D.creatures.findIndex(x=>x.id===c?.id));
   const atlas=i<25?0:1,local=i%25;
@@ -550,10 +555,10 @@ function renderInspect(){
       ?'<b>🛡️ VANGUARDIA</b><span>+25% vida · habilidades 10% más lentas. '+neighbors+' vecino'+(neighbors===1?'':'s')+'.</span>'
       :'<b>⚡ RETAGUARDIA</b><span>−10% vida · habilidades 15% más rápidas. '+neighbors+' vecino'+(neighbors===1?'':'s')+'.</span>')
     :'<b>📦 RESERVA</b><span>No combate. Sí cuenta para fusionar.</span>';
-  host.className='inspect-card';
+  host.className='inspect-card';host.dataset.type=primaryType(c);
   host.innerHTML=
     '<div class="inspect-hero game-card-header">'+spriteMarkup(c,'inspect-sprite')+'<div class="inspect-name"><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span><h3>'+esc(c.name)+(u.chromatic?' ✦':'')+'</h3><div class="level-stars">'+levelStars(u.level)+' <small>Nv.'+u.level+'</small></div></div></div>'+
-    '<div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+
+    '<div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+typeGuideHtml(c)+
     '<div class="stat-grid game-stats"><div><span>❤️ Vida</span><b>'+format(stats.hp)+'</b></div><div><span>⚔️ Potencia</span><b>'+format(stats.damage)+'</b></div><div><span>⏱ Habilidad</span><b>'+stats.cooldown.toFixed(1)+'s</b></div><div><span>🎓 Entreno</span><b>+'+trainPct+'%</b></div></div>'+
     '<div class="ability-box featured"><div class="ability-title"><b>'+esc(c.ability.name)+'</b></div><p>'+esc(c.ability.text)+'</p></div>'+
     '<div class="progress-box compact-progress"><div><b>FUSIÓN</b><span>'+levelStars(u.level)+'</span></div><p>'+(fusion.max?'Nivel máximo.':fusion.text+' para el siguiente nivel.')+'</p></div>'+
@@ -575,7 +580,7 @@ function renderMarketDetail(host,index){
   host.dataset.type=primaryType(c);
   host.innerHTML=
     '<div class="market-detail-hero">'+spriteMarkup(c,'market-detail-sprite')+'<div><span class="rarity-name">'+esc(D.RARITIES[c.rarity].name)+'</span><h3>'+esc(c.name)+(o.chromatic?' ✦':'')+'</h3><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span></div></div>'+
-    '<div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+
+    '<div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+typeGuideHtml(c)+
     '<div class="market-detail-stats"><div><span>❤️ VIDA</span><b>'+format(c.hp)+'</b></div><div><span>⚔️ POTENCIA</span><b>'+format(c.damage)+'</b></div><div><span>⏱️ HABILIDAD</span><b>'+c.cooldown.toFixed(1)+'s</b></div></div>'+
     '<div class="market-detail-ability"><small>HABILIDAD</small><b>'+esc(c.ability.name)+'</b><p>'+esc(c.ability.text)+'</p></div>'+
     '<div class="market-detail-notes"><span>'+(meta.row==='front'?'🛡️ Mejor delante':'⚡ Mejor detrás')+'</span><span>Fusión: '+(fusion.current>=fusion.needed?'lista para Nv.2':fusion.text)+'</span>'+(fit[0]?'<span>✦ '+esc(fit[0])+'</span>':'')+'</div>'+
