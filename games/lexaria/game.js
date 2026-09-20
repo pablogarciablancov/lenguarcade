@@ -27,8 +27,8 @@ const BATTLEFIELDS=[
   {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal-final.jpg'},
   {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset-final.jpg'}
 ];
-const LEXARIO_ATLASES=['./assets/generated/lexarios-atlas-hq-1.png?v=20260920-rarity10','./assets/generated/lexarios-atlas-hq-2.png?v=20260920-rarity10'];
-const TRAINER_ATLAS='./assets/generated/trainers-atlas-final-hq.png?v=20260920-rarity10';
+const LEXARIO_ATLASES=['./assets/generated/lexarios-atlas-hq-1.png?v=20260920-projectile11','./assets/generated/lexarios-atlas-hq-2.png?v=20260920-projectile11'];
+const TRAINER_ATLAS='./assets/generated/trainers-atlas-final-hq.png?v=20260920-projectile11';
 
 const TRAINER_ART={
   filologa:{skin:'#e8bb91',hair:'#604127',coat:'#284f76',accent:'#e5bb54',beard:'#604127',glasses:false,badge:'A'},
@@ -1273,61 +1273,95 @@ function battleActionFx(side,target,b,c,a,dealt,healed,shielded){
     :targetUnits.find(x=>!x.classList.contains('empty'))||targetBoard;
   const sourceAnchor=source?.querySelector('.battle-sprite')||source;
   const targetAnchor=targetEl?.querySelector('.battle-sprite')||targetEl;
-  const fxType=primaryType(c),travel=720,impactAt=610;
-  const typeMult=Number(b.lastTypeMult)||1;
+  const fxType=primaryType(c),typeMult=Number(b.lastTypeMult)||1;
+  const travel=settings.reduceMotion?460:860;
+  const impactAt=travel-110;
 
   if(source){source.classList.remove('casting');void source.offsetWidth;source.classList.add('casting');}
 
-  let impactPoint=null;
-  if(layer&&sourceAnchor&&targetAnchor&&dealt>0){
-    const lr=layer.getBoundingClientRect(),sr=sourceAnchor.getBoundingClientRect(),tr=targetAnchor.getBoundingClientRect();
-    const x1=sr.left+sr.width*.52-lr.left,y1=sr.top+sr.height*.50-lr.top;
-    const x2=tr.left+tr.width*.48-lr.left,y2=tr.top+tr.height*.50-lr.top;
-    impactPoint={x:x2,y:y2,lr};
-    const bolt=document.createElement('i');
-    bolt.className='battle-projectile fx-'+fxType+' '+side.kind;
+  const spawnViewportImpact=(x,y)=>{
+    const impact=document.createElement('i');
+    impact.className='battle-impact-live fx-'+fxType;
+    impact.style.left=x+'px';impact.style.top=y+'px';
+    document.body.appendChild(impact);
+    setTimeout(()=>impact.remove(),760);
+  };
+
+  if(sourceAnchor&&targetAnchor&&dealt>0){
+    const sr=sourceAnchor.getBoundingClientRect(),tr=targetAnchor.getBoundingClientRect();
+    const x1=sr.left+sr.width*(side.kind==='player'?.68:.32);
+    const y1=sr.top+sr.height*.48;
+    const x2=tr.left+tr.width*(target.kind==='player'?.65:.35);
+    const y2=tr.top+tr.height*.48;
+    const dx=x2-x1,dy=y2-y1,dist=Math.max(1,Math.hypot(dx,dy));
+    const angle=Math.atan2(dy,dx)*180/Math.PI;
+    const arc=Math.min(54,Math.max(18,dist*.08));
+
+    const muzzle=document.createElement('i');
+    muzzle.className='battle-muzzle-live fx-'+fxType;
+    muzzle.style.left=x1+'px';muzzle.style.top=y1+'px';
+    document.body.appendChild(muzzle);
+    setTimeout(()=>muzzle.remove(),260);
+
+    const bolt=document.createElement('div');
+    bolt.className='battle-projectile-live fx-'+fxType+' '+side.kind;
+    bolt.innerHTML='<i class="projectile-trail"></i><i class="projectile-core"></i>';
     bolt.style.left=x1+'px';bolt.style.top=y1+'px';
-    bolt.style.setProperty('--dx',(x2-x1)+'px');bolt.style.setProperty('--dy',(y2-y1)+'px');
-    bolt.style.setProperty('--travel',travel+'ms');
-    layer.appendChild(bolt);
-    setTimeout(()=>{
-      const impact=document.createElement('i');
-      impact.className='battle-impact fx-'+fxType;
-      impact.style.left=x2+'px';impact.style.top=y2+'px';
-      layer.appendChild(impact);
-      if(targetEl){
-        targetEl.classList.remove('hit');void targetEl.offsetWidth;targetEl.classList.add('hit');
-        setTimeout(()=>targetEl.classList.remove('hit'),520);
+    bolt.style.setProperty('--flight-angle',angle+'deg');
+    document.body.appendChild(bolt);
+
+    const started=performance.now();
+    const tick=(now)=>{
+      if(!bolt.isConnected)return;
+      const raw=Math.min(1,(now-started)/travel);
+      const ease=raw<.5?2*raw*raw:1-Math.pow(-2*raw+2,2)/2;
+      const x=x1+dx*ease;
+      const y=y1+dy*ease-Math.sin(Math.PI*ease)*arc;
+      const tangentY=dy-arc*Math.PI*Math.cos(Math.PI*ease);
+      const tangentAngle=Math.atan2(tangentY,dx)*180/Math.PI;
+      bolt.style.left=x+'px';
+      bolt.style.top=y+'px';
+      bolt.style.transform='translate(-50%,-50%) rotate('+tangentAngle+'deg) scale('+(0.88+raw*.18)+')';
+      bolt.style.opacity=raw<.07?String(raw/.07):raw>.92?String((1-raw)/.08):'1';
+      if(raw<1)requestAnimationFrame(tick);
+      else{
+        bolt.remove();
+        spawnViewportImpact(x2,y2);
+        if(targetEl){
+          targetEl.classList.remove('hit');void targetEl.offsetWidth;targetEl.classList.add('hit');
+          setTimeout(()=>targetEl.classList.remove('hit'),520);
+        }
       }
-      setTimeout(()=>impact.remove(),760);
-    },impactAt);
-    setTimeout(()=>bolt.remove(),travel+120);
+    };
+    requestAnimationFrame(tick);
   }
 
   const spawnFloat=()=>{
     const floatHost=dealt>0?targetAnchor:(sourceAnchor||ownBoard);
-    if(!layer||!floatHost||!(dealt>0||healed>0||shielded>0))return;
-    const lr=layer.getBoundingClientRect(),hr=floatHost.getBoundingClientRect();
-    if(dealt<=0){
+    if(!floatHost||!(dealt>0||healed>0||shielded>0))return;
+    const hr=floatHost.getBoundingClientRect();
+    if(dealt<=0&&layer){
+      const lr=layer.getBoundingClientRect();
       const pulse=document.createElement('i');
       pulse.className='battle-support-pulse '+(healed>0?'heal':'shield');
       pulse.style.left=(hr.left+hr.width/2-lr.left)+'px';pulse.style.top=(hr.top+hr.height/2-lr.top)+'px';
       layer.appendChild(pulse);setTimeout(()=>pulse.remove(),900);
     }
     const n=document.createElement('b');
-    n.className='battle-float '+(dealt>0?'damage':healed>0?'heal':'shield')+(typeMult>1.05?' effective':typeMult<.95?' resisted':'');
+    n.className='battle-float-live '+(dealt>0?'damage':healed>0?'heal':'shield')+(typeMult>1.05?' effective':typeMult<.95?' resisted':'');
     if(dealt>0)n.innerHTML='−'+format(dealt)+(typeMult!==1?'<small>'+matchupLabel(typeMult)+'</small>':'');
     else if(healed>0)n.innerHTML='+'+format(healed)+'<small>CURA</small>';
     else n.innerHTML='+'+format(shielded)+'<small>ESCUDO</small>';
-    n.style.left=(hr.left+hr.width/2-lr.left)+'px';n.style.top=(hr.top+hr.height*.18-lr.top)+'px';
-    layer.appendChild(n);setTimeout(()=>n.remove(),1450);
+    n.style.left=(hr.left+hr.width/2)+'px';n.style.top=(hr.top+hr.height*.18)+'px';
+    document.body.appendChild(n);
+    setTimeout(()=>n.remove(),1550);
   };
-  setTimeout(spawnFloat,dealt>0?impactAt:250);
+  setTimeout(spawnFloat,dealt>0?impactAt:260);
 
   if(callout){
     callout.className='ability-callout '+side.kind;
     callout.innerHTML='<span>'+esc(c.name)+'</span><b>'+esc(a.name)+'</b><small>'+(dealt>0?format(dealt)+' daño · '+matchupLabel(typeMult):healed>0?format(healed)+' de cura':shielded>0?format(shielded)+' de escudo':'efecto de equipo')+'</small>';
-    setTimeout(()=>{if(callout)callout.className='ability-callout hidden';},1550);
+    setTimeout(()=>{if(callout)callout.className='ability-callout hidden';},1650);
   }
 }
 function castAbility(side,target,b,free){
