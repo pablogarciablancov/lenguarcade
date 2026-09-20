@@ -13,10 +13,10 @@ const TRAINING_STEP=.05;
 const LEVEL_MULT={1:1,2:1.7,3:3,4:4.5};
 
 const BATTLEFIELDS=[
-  {id:'academy',name:'Patio Celeste',image:'battle-academy.webp'},
-  {id:'ice',name:'Valle Helado',image:'battle-ice.webp'},
-  {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal.webp'},
-  {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset.webp'}
+  {id:'academy',name:'Patio Celeste',image:'battle-academy-v5.webp'},
+  {id:'ice',name:'Valle Helado',image:'battle-ice-v5.webp'},
+  {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal-v5.webp'},
+  {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset-v5.webp'}
 ];
 
 const TRAINER_ART={
@@ -164,10 +164,26 @@ function renderStaticHeroSprites(){
   });
 }
 const BATTLEFIELD_LAYOUT={
-  academy:{w:1672,h:941,player:[[165,555],[365,555],[555,555],[165,705],[365,705],[555,705]],enemy:[[1115,555],[1315,555],[1510,555],[1115,705],[1315,705],[1510,705]]},
-  ice:{w:1672,h:941,player:[[160,565],[365,565],[570,565],[160,710],[365,710],[570,710]],enemy:[[1110,565],[1315,565],[1520,565],[1110,710],[1315,710],[1520,710]]},
-  crystal:{w:1672,h:941,player:[[160,560],[365,560],[570,560],[160,705],[365,705],[570,705]],enemy:[[1110,560],[1315,560],[1520,560],[1110,705],[1315,705],[1520,705]]},
-  sunset:{w:1672,h:941,player:[[149,537],[367,537],[577,540],[142,675],[374,677],[602,679]],enemy:[[1118,537],[1328,537],[1532,540],[1110,675],[1322,677],[1534,679]]}
+  academy:{
+    w:1672,h:941,
+    player:[[148,509],[357,509],[566,509],[116,661],[337,661],[557,661]],
+    enemy:[[1088,508],[1293,508],[1504,508],[1096,662],[1313,662],[1530,662]]
+  },
+  ice:{
+    w:1672,h:941,
+    player:[[180,485],[410,485],[642,485],[155,630],[406,630],[653,630]],
+    enemy:[[1010,485],[1242,485],[1475,485],[998,630],[1248,630],[1492,630]]
+  },
+  crystal:{
+    w:1672,h:941,
+    player:[[175,491],[377,491],[570,491],[154,678],[370,678],[584,678]],
+    enemy:[[1078,490],[1274,490],[1475,490],[1059,677],[1279,677],[1500,677]]
+  },
+  sunset:{
+    w:1672,h:941,
+    player:[[153,537],[371,536],[574,540],[142,673],[376,675],[599,680]],
+    enemy:[[1074,533],[1296,532],[1521,537],[1058,671],[1294,671],[1535,675]]
+  }
 };
 function applyBattlefieldSlotLayout(){
   const screen=$('battleScreen');
