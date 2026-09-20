@@ -366,7 +366,9 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
   .battle-unit .battle-sprite{height:min(75%,84px)!important}
   .offer-portrait .market-sprite{height:clamp(47px,7.5vh,60px)!important}
   .game-card-header .inspect-sprite{width:62px!important;height:62px!important}
-}\n\n/* ===== LEXARIA · GENERATED ASSETS V5 =====
+}
+
+/* ===== LEXARIA · GENERATED ASSETS V5 =====
    Exact generated creatures/trainers and exact generated battlefields.
    One clean presentation layer: no procedural replacements, no black cells, no atlas bleed. */
 
