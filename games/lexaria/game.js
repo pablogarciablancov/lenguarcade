@@ -491,10 +491,10 @@ function moveUnit(from,to){
 function clearSelection(){selected=null;marketSelection=null;renderBoards();renderMarket();renderInspect();}
 function renderInspect(){
   const host=$('inspectCard'); if(!host)return;
-  const u=unitAt(selected);
-  if(!u&&Number.isInteger(marketSelection)&&run?.shop?.[marketSelection]&&!run.shop[marketSelection].bought){
+  if(Number.isInteger(marketSelection)&&run?.shop?.[marketSelection]&&!run.shop[marketSelection].bought){
     renderMarketDetail(host,marketSelection);return;
   }
+  const u=unitAt(selected);
   if(!u){host.className='inspect-card empty';host.innerHTML='<div class="inspect-placeholder"><b>Selecciona algo</b><span>Haz clic en un Lexario del mercado para ver su ficha o en uno de tu equipo para gestionarlo.</span></div>';return;}
   const c=creatureOf(u),stats=unitStats(u,selected?.index,run.team),meta=abilityMeta(c);
   const fusion=fusionInfo(c.id,u.level,false);
@@ -572,7 +572,7 @@ function rerollShop(){
   if(!run)return;
   if(run.freeRerolls>0)run.freeRerolls--;
   else{const cost=rerollCost();if(run.gold<cost)return toast('No tienes suficiente Tinta.','bad');run.gold-=cost;}
-  run.locked=false;rollShop(true);marketSelection=0;selected=null;saveRun('reroll');renderRun();
+  run.locked=false;rollShop(true);marketSelection=0;saveRun('reroll');renderRun();
 }
 function renderMarket(){
   const host=$('marketRow');if(!host)return;
@@ -594,8 +594,8 @@ function renderMarket(){
 }
 function selectMarketOffer(index){
   if(!run?.shop?.[index]||run.shop[index].bought)return;
-  marketSelection=index;selected=null;
-  renderBoards();renderMarket();renderInspect();
+  marketSelection=index;
+  renderMarket();renderInspect();
 }
 function freeRef(){
   let i=run.team.findIndex(x=>!x);if(i>=0)return{area:'team',index:i};
@@ -663,7 +663,7 @@ function buyOffer(index){
   }else{
     run.itemUse--;applyResource(D.resource(o.resourceId));
   }
-  marketSelection=run.shop.findIndex((x,j)=>!x.bought&&j!==index);if(marketSelection<0)marketSelection=null;selected=null;
+  marketSelection=run.shop.findIndex((x,j)=>!x.bought&&j!==index);if(marketSelection<0)marketSelection=null;
   evaluateAchievements();saveCareer();saveRun('buy');renderRun();
   if(pendingRelicRewards>0)setTimeout(openRelicReward,80);
 }
