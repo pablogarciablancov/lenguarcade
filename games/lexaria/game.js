@@ -136,30 +136,31 @@ function adjacencyCount(index,team){return adjacentIndexes(index).filter(i=>team
 function abilityMeta(c){return ABILITY_META[c?.ability?.kind]||{role:'VERSÁTIL',icon:'✦',row:'back',tags:['HABILIDAD']};}
 function spriteMeta(c){
   const i=Math.max(0,D.creatures.findIndex(x=>x.id===c?.id));
-  const row=Math.floor(i/10)+1,col=i%10;
-  return{row,pos:(col/9*100).toFixed(4)};
+  const col=i%10,row=Math.floor(i/10);
+  return{x:(col/9*100).toFixed(4),y:(row/4*100).toFixed(4)};
 }
 function spriteMarkup(c,extra){
   if(!c)return '<span class="lex-sprite missing" aria-hidden="true"></span>';
   const m=spriteMeta(c);
-  return "<span class=\"lex-sprite "+esc(extra||"")+"\" aria-hidden=\"true\" style=\"--lex-image:url('./assets/generated/lexarios-row-"+m.row+".webp');--lex-pos:"+m.pos+"%\"></span>";
+  return "<span class=\"lex-sprite "+esc(extra||"")+"\" aria-hidden=\"true\" style=\"--lex-image:url('./assets/generated/lexarios-generated-v5.webp');--lex-x:"+m.x+"%;--lex-y:"+m.y+"%\"></span>";
 }
 function trainerSpriteMeta(t){
   const i=Math.max(0,D.trainers.findIndex(x=>x.id===t?.id));
-  const row=Math.floor(i/4)+1,col=i%4;
-  return{row,pos:(col/3*100).toFixed(4)};
+  const col=i%4,row=Math.floor(i/4);
+  return{x:(col/3*100).toFixed(4),y:(row*100).toFixed(4)};
 }
 function trainerSpriteMarkup(t,extra){
   if(!t)return '';
   const m=trainerSpriteMeta(t);
-  return "<span class=\"trainer-sprite "+esc(extra||"")+"\" role=\"img\" aria-label=\""+esc(t.name)+"\" style=\"--trainer-image:url('./assets/generated/trainers-row-"+m.row+".webp');--trainer-pos:"+m.pos+"%\"></span>";
+  return "<span class=\"trainer-sprite "+esc(extra||"")+"\" role=\"img\" aria-label=\""+esc(t.name)+"\" style=\"--trainer-image:url('./assets/generated/trainers-generated-v5.webp');--trainer-x:"+m.x+"%;--trainer-y:"+m.y+"%\"></span>";
 }
 function renderStaticHeroSprites(){
   qsa('[data-lexario-id]').forEach(el=>{
     const c=D.creature(el.dataset.lexarioId);if(!c)return;
     const m=spriteMeta(c);
-    el.style.setProperty('--lex-image',"url('./assets/generated/lexarios-row-"+m.row+".webp')");
-    el.style.setProperty('--lex-pos',m.pos+'%');
+    el.style.setProperty('--lex-image',"url('./assets/generated/lexarios-generated-v5.webp')");
+    el.style.setProperty('--lex-x',m.x+'%');
+    el.style.setProperty('--lex-y',m.y+'%');
   });
 }
 const BATTLEFIELD_LAYOUT={
