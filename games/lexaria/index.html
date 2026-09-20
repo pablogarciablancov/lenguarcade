@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#07141d">
   <title>Lexaria · LenguArcade</title>
-  <link rel="stylesheet" href="./styles.css?v=20260920-lexaria-types9">
-  <link rel="stylesheet" href="./academy.css?v=20260920-lexaria-types9">
+  <link rel="stylesheet" href="./styles.css?v=20260920-lexaria-rarity10">
+  <link rel="stylesheet" href="./academy.css?v=20260920-lexaria-rarity10">
 </head>
 <body>
 <main id="app" class="app-shell">
@@ -93,7 +93,7 @@
       </aside>
     <section class="market-panel">
       <div class="market-head">
-        <div class="market-title-copy"><h2>MERCADO <small id="marketWallet">Tienes 12 🖋️</small></h2></div>
+        <div class="market-title-copy"><h2>MERCADO <small id="marketWallet">Tienes 12 🖋️</small></h2><div class="rarity-legend" aria-label="Rarezas"><span data-rarity="common">COMÚN</span><span data-rarity="rare">RARO</span><span data-rarity="epic">ÉPICO</span><span data-rarity="legendary">LEGENDARIO</span></div></div>
         <div class="market-actions">
           <button id="lockBtn" class="secondary">🔒 FIJAR</button>
           <button id="rerollBtn" class="secondary">↻ CAMBIAR <small>3</small></button>
@@ -208,8 +208,8 @@
     <section id="howtoModal" class="modal hidden">
       <div class="modal-head"><div><span class="micro-label">GUÍA RÁPIDA</span><h2>Cómo se juega</h2></div><button class="icon-btn" data-close-modal>×</button></div>
       <div class="howto-grid">
-        <article><b>1</b><h3>Compra</h3><p>Cada día aparecen cuatro Lexarios y un recurso. El mercado no tiene temporizador.</p></article>
-        <article><b>2</b><h3>Sube de nivel</h3><p>3 copias de Nv.1 → Nv.2. Después, 2 copias de Nv.2 → Nv.3. Nv.2 multiplica las estadísticas ×1,7 y Nv.3 ×3.</p></article>
+        <article><b>1</b><h3>Compra y rareza</h3><p>Cada día aparecen cuatro Lexarios y un recurso. Los Lexarios pueden ser <b>Comunes, Raros, Épicos o Legendarios</b>: cuanto mayor es la rareza, menos aparecen y más cuestan.</p></article>
+        <article><b>2</b><h3>Sube de nivel</h3><p>3 copias de Nv.1 → Nv.2. Después, 2 copias de Nv.2 → Nv.3. Nv.2 multiplica las estadísticas ×1,7 y Nv.3 ×3. Por ahora, Nv.3 es el máximo.</p></article>
         <article><b>3</b><h3>Entrena</h3><p>Cada respuesta correcta da +1 entrenamiento = +5% de vida y +5% de potencia. Las fusiones conservan y suman el entrenamiento.</p></article>
         <article><b>4</b><h3>Coloca con intención</h3><p>Vanguardia: +25% vida pero 10% más lenta. Retaguardia: 15% más rápida pero −10% vida. El centro tiene más vecinos para combos de adyacencia.</p></article>
         <article><b>5</b><h3>Usa la reserva</h3><p>Los 4 Lexarios de reserva no combaten, pero siguen contando para conseguir copias y fusionar niveles.</p></article>
@@ -316,8 +316,8 @@
 
   <div id="toastHost" class="toast-host"></div>
 </main>
-<script src="./data.js?v=20260920-lexaria-types9"></script>
-<script src="./game.js?v=20260920-lexaria-types9"></script>
-<script src="./bridge.js?v=20260920-lexaria-types9"></script>
+<script src="./data.js?v=20260920-lexaria-rarity10"></script>
+<script src="./game.js?v=20260920-lexaria-rarity10"></script>
+<script src="./bridge.js?v=20260920-lexaria-rarity10"></script>
 </body>
 </html>

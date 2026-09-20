@@ -453,9 +453,9 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
   background-size:cover!important;
   background-repeat:no-repeat!important;
 }
-.battle-screen[data-battlefield="academy"]{background-image:url('./assets/generated/battle-academy-final.jpg?v=20260920-types9')!important}
-.battle-screen[data-battlefield="crystal"]{background-image:url('./assets/generated/battle-crystal-final.jpg?v=20260920-types9')!important}
-.battle-screen[data-battlefield="sunset"]{background-image:url('./assets/generated/battle-sunset-final.jpg?v=20260920-types9')!important}
+.battle-screen[data-battlefield="academy"]{background-image:url('./assets/generated/battle-academy-final.jpg?v=20260920-rarity10')!important}
+.battle-screen[data-battlefield="crystal"]{background-image:url('./assets/generated/battle-crystal-final.jpg?v=20260920-rarity10')!important}
+.battle-screen[data-battlefield="sunset"]{background-image:url('./assets/generated/battle-sunset-final.jpg?v=20260920-rarity10')!important}
 .battle-screen:before{
   content:""!important;
   position:absolute!important;
@@ -872,3 +872,89 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
 .type-guide{display:flex;flex-wrap:wrap;gap:4px;margin:1px 0 3px}
 .type-guide span{flex:1 1 110px;padding:4px 5px;border-radius:5px;background:rgba(var(--type-rgb),.09);border:1px solid rgba(var(--type-rgb),.25);font-size:7px;color:#bcd3e3}
 .type-guide span:first-child b{color:#9df0bd}.type-guide span:last-child b{color:#ffb1bb}
+
+/* ===== LEXARIA COLOR + RARITY PASS · v16 ===== */
+
+/* Stronger type identity: cards should read by color immediately. */
+.unit-card[data-type],.market-tile[data-type],.codex-entry[data-type],.briefing-lexario[data-type]{
+  background:
+    radial-gradient(circle at 50% 18%,rgba(var(--type-rgb),.42),transparent 46%),
+    linear-gradient(155deg,rgba(var(--type-rgb),.34) 0%,rgba(var(--type-rgb),.16) 42%,#07182d 78%)!important;
+}
+.unit-card[data-type]:after,.market-tile[data-type]:after,.codex-entry[data-type]:after,.briefing-lexario[data-type]:after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.09),transparent 34%,rgba(var(--type-rgb),.12));
+  mix-blend-mode:screen;opacity:.8
+}
+.unit-card[data-type] .unit-name,.market-tile[data-type] .market-tile-caption{
+  background:linear-gradient(90deg,rgba(var(--type-rgb),.22),#06172bdc)!important
+}
+
+/* Four Lexario rarities: frame + glow, independent from linguistic type. */
+[data-rarity="common"]{--rarity:#b9c6d2;--rarity-rgb:185,198,210}
+[data-rarity="rare"]{--rarity:#56b8ff;--rarity-rgb:86,184,255}
+[data-rarity="epic"]{--rarity:#bb72ff;--rarity-rgb:187,114,255}
+[data-rarity="legendary"]{--rarity:#ffd05d;--rarity-rgb:255,208,93}
+
+.unit-card[data-rarity],.market-tile[data-rarity],.codex-entry[data-rarity],.briefing-lexario[data-rarity],.inspect-card[data-rarity]{
+  border-color:rgba(var(--rarity-rgb),.88)!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--rarity-rgb),.20),
+    inset 0 0 22px rgba(var(--rarity-rgb),.08),
+    0 7px 18px #0005!important;
+}
+.unit-card[data-rarity="rare"],.market-tile[data-rarity="rare"],.codex-entry[data-rarity="rare"]{
+  box-shadow:inset 0 0 0 1px #8ed0ff66,inset 0 0 25px #4eb5ff16,0 0 10px #4eb5ff24,0 7px 18px #0005!important
+}
+.unit-card[data-rarity="epic"],.market-tile[data-rarity="epic"],.codex-entry[data-rarity="epic"]{
+  box-shadow:inset 0 0 0 1px #d5a2ff78,inset 0 0 28px #bb72ff24,0 0 14px #bb72ff35,0 7px 18px #0005!important
+}
+.unit-card[data-rarity="legendary"],.market-tile[data-rarity="legendary"],.codex-entry[data-rarity="legendary"],.briefing-lexario[data-rarity="legendary"]{
+  box-shadow:inset 0 0 0 1px #fff0a6,inset 0 0 32px #ffd05d30,0 0 18px #ffc43d55,0 8px 22px #0006!important;
+  animation:legendaryCardGlow 2.8s ease-in-out infinite
+}
+@keyframes legendaryCardGlow{
+  0%,100%{filter:none}
+  50%{filter:brightness(1.07) saturate(1.08)}
+}
+.reduce-motion [data-rarity="legendary"]{animation:none!important}
+
+/* Compact rarity ribbons. */
+.rarity-badge{
+  --rarity:#b9c6d2;--rarity-rgb:185,198,210;
+  display:inline-flex;align-items:center;justify-content:center;gap:3px;
+  padding:2px 5px;border:1px solid rgba(var(--rarity-rgb),.78);border-radius:999px;
+  background:linear-gradient(180deg,rgba(var(--rarity-rgb),.28),#07182de8);
+  color:var(--rarity);font-size:6.5px;font-weight:1000;letter-spacing:.08em;line-height:1;
+  text-shadow:0 1px 2px #000;box-shadow:0 2px 6px #0004
+}
+.rarity-badge[data-rarity="rare"],.rarity-legend [data-rarity="rare"]{--rarity:#56b8ff;--rarity-rgb:86,184,255}
+.rarity-badge[data-rarity="epic"],.rarity-legend [data-rarity="epic"]{--rarity:#bb72ff;--rarity-rgb:187,114,255}
+.rarity-badge[data-rarity="legendary"],.rarity-legend [data-rarity="legendary"]{--rarity:#ffd05d;--rarity-rgb:255,208,93}
+.unit-rarity{position:absolute;left:50%;top:4px;transform:translateX(-50%);z-index:4}
+.market-rarity{position:absolute;left:6px;top:6px;z-index:4}
+.codex-rarity{position:absolute;left:7px;top:7px;z-index:4}
+.briefing-rarity{position:absolute;left:6px;top:6px;z-index:4}
+.inspect-rarity{margin-bottom:3px}
+
+.rarity-legend{display:flex;gap:4px;margin-top:2px;align-items:center;flex-wrap:wrap}
+.rarity-legend span{
+  --rarity:#b9c6d2;--rarity-rgb:185,198,210;
+  padding:2px 5px;border-radius:999px;border:1px solid rgba(var(--rarity-rgb),.56);
+  color:var(--rarity);background:rgba(var(--rarity-rgb),.10);
+  font-size:6.5px;font-weight:1000;letter-spacing:.06em
+}
+.rarity-legend [data-rarity="common"]{--rarity:#b9c6d2;--rarity-rgb:185,198,210}
+.rarity-legend [data-rarity="legendary"]{box-shadow:0 0 8px #ffd05d35}
+
+/* Market detail rarity should remain obvious even with strong type color. */
+.market-detail-card[data-rarity="rare"] .rarity-name{color:#56b8ff!important}
+.market-detail-card[data-rarity="epic"] .rarity-name{color:#cf9bff!important}
+.market-detail-card[data-rarity="legendary"] .rarity-name{color:#ffd86f!important;text-shadow:0 0 8px #ffca4866}
+.market-detail-card[data-rarity="common"] .rarity-name{color:#c8d3dc!important}
+
+@media(max-height:720px) and (min-width:901px){
+  .rarity-legend span{font-size:5.8px;padding:1px 4px}
+  .unit-rarity{top:2px;font-size:5.5px}
+  .market-rarity{font-size:5.5px}
+}
