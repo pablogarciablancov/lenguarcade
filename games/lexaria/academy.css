@@ -443,3 +443,114 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
 
 /* Keep grid rows stable after battle boards become an absolute overlay. */
 .battle-toolbar{grid-row:1!important}.battle-hud{grid-row:2!important}.battle-footer{grid-row:4!important}
+
+/* ===== LEXARIA · GENERATED ART FINAL · v12 =====
+   Real generated sprite sheets, transparent cells with generous padding.
+   No procedural substitute, no black cell background, no neighbouring-sprite bleed. */
+.lex-sprite{
+  display:block!important;
+  background-image:var(--lex-image)!important;
+  background-size:1000% 100%!important;
+  background-position:var(--lex-pos,0%) center!important;
+  background-repeat:no-repeat!important;
+  background-color:transparent!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+.lex-sprite>svg{display:none!important}
+.trainer-sprite{
+  display:block!important;
+  background-image:var(--trainer-image)!important;
+  background-size:400% 100%!important;
+  background-position:var(--trainer-pos,0%) center!important;
+  background-repeat:no-repeat!important;
+  background-color:transparent!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+.trainer-sprite>svg{display:none!important}
+
+.market-sprite,.unit-sprite,.inspect-sprite,.training-sprite,.battle-sprite,.codex-sprite,
+.offer-portrait .market-sprite,.unit-card .unit-sprite,.bench-slot .unit-sprite{
+  background-color:transparent!important;
+  box-shadow:none!important;
+}
+.hero-sprite{width:100%!important;height:100%!important;max-width:none!important}
+.offer-portrait .market-sprite{height:clamp(72px,11vh,104px)!important;max-width:100%!important}
+.unit-card .unit-sprite{height:min(78%,96px)!important;max-width:96%!important}
+.bench-slot .unit-sprite{height:min(74%,72px)!important;max-width:92%!important}
+.game-card-header .inspect-sprite{width:104px!important;height:104px!important;max-width:104px!important}
+.codex-sprite{width:92px!important;height:92px!important}
+.training-sprite{width:122px!important;height:122px!important}
+
+.battle-screen{position:relative!important;overflow:hidden!important;background-color:#07141d!important}
+.battle-screen[data-battlefield="academy"]{background-image:url('./assets/generated/battle-academy.webp')!important;background-position:center!important;background-size:cover!important;background-repeat:no-repeat!important}
+.battle-screen[data-battlefield="ice"]{background-image:url('./assets/generated/battle-ice.webp')!important;background-position:center!important;background-size:cover!important;background-repeat:no-repeat!important}
+.battle-screen[data-battlefield="crystal"]{background-image:url('./assets/generated/battle-crystal.webp')!important;background-position:center!important;background-size:cover!important;background-repeat:no-repeat!important}
+.battle-screen[data-battlefield="sunset"]{background-image:url('./assets/generated/battle-sunset.webp')!important;background-position:center!important;background-size:cover!important;background-repeat:no-repeat!important}
+.battle-screen:before{background:linear-gradient(180deg,#06131f80 0,#06131f18 26%,#02080d08 56%,#02080d35 100%)!important;pointer-events:none!important}
+
+.battle-arena{position:static!important;background:transparent!important}
+.battle-boards{
+  position:absolute!important;inset:0!important;display:block!important;
+  width:100%!important;height:100%!important;pointer-events:none!important;z-index:4!important;
+}
+.battle-board{
+  position:absolute!important;inset:0!important;display:block!important;
+  width:100%!important;height:100%!important;padding:0!important;margin:0!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;pointer-events:none!important;
+}
+.battle-unit{
+  position:absolute!important;
+  width:clamp(112px,10.5vw,170px)!important;
+  height:clamp(150px,26vh,194px)!important;
+  min-width:0!important;min-height:0!important;
+  display:flex!important;align-items:center!important;justify-content:flex-end!important;
+  padding:0 2px 15px!important;
+  transform:translate(-50%,-86%)!important;
+  transform-origin:50% 86%!important;
+  pointer-events:auto!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important;
+}
+.battle-unit.empty{opacity:0!important;pointer-events:none!important}
+.battle-unit:after,.battle-unit.empty:before{display:none!important}
+.battle-unit .battle-sprite{
+  width:100%!important;height:calc(100% - 28px)!important;max-width:100%!important;max-height:none!important;
+  margin:0 0 5px!important;background-color:transparent!important;
+  filter:drop-shadow(0 8px 7px #0009)!important;
+}
+.battle-board.enemy .battle-sprite{transform:scaleX(-1)!important}
+.battle-unit .unit-name{
+  position:absolute!important;left:50%!important;bottom:14px!important;transform:translateX(-50%)!important;
+  max-width:94%!important;white-space:nowrap!important;background:#07172bdd!important;
+  padding:1px 5px!important;border-radius:6px!important;
+}
+.battle-unit .battle-ability-name{display:none!important}
+.battle-unit-top{top:-1px!important;left:2px!important;right:2px!important}
+.battle-unit .cooldown-ring{left:7%!important;right:7%!important;bottom:2px!important}
+.battle-unit .cooldown-label{left:7%!important;right:7%!important;bottom:5px!important}
+.battle-unit:not(.empty):hover,.battle-paused .battle-unit:not(.empty):focus{
+  transform:translate(-50%,-88%) scale(1.035)!important;
+}
+.versus-mark{
+  position:absolute!important;left:50%!important;top:61%!important;transform:translate(-50%,-50%)!important;
+  z-index:8!important;pointer-events:none!important;
+}
+.battle-fx-layer{position:absolute!important;inset:0!important;z-index:9!important;pointer-events:none!important}
+.battle-toolbar,.battle-hud,.battle-footer{position:relative!important;z-index:12!important}
+.battle-toolbar{grid-row:1!important}.battle-hud{grid-row:2!important}.battle-footer{grid-row:4!important}
+
+.battle-unit.casting .battle-sprite{animation:lexariaRealCast .30s ease!important}
+@keyframes lexariaRealCast{40%{transform:translateY(-10px) scale(1.08);filter:drop-shadow(0 0 18px #fff0a6) brightness(1.18)}}
+.battle-board.enemy .battle-unit.casting .battle-sprite{animation:lexariaRealCastEnemy .30s ease!important}
+@keyframes lexariaRealCastEnemy{0%,100%{transform:scaleX(-1)}40%{transform:scaleX(-1) translateY(-10px) scale(1.08);filter:drop-shadow(0 0 18px #fff0a6) brightness(1.18)}}
+
+@media(max-height:720px) and (min-width:901px){
+  .battle-unit{width:clamp(96px,9.8vw,150px)!important;height:clamp(132px,25vh,174px)!important}
+  .battle-unit .battle-sprite{height:calc(100% - 25px)!important}
+}
+@media(max-width:900px){
+  .battle-unit{width:clamp(82px,15vw,124px)!important;height:clamp(118px,23vh,158px)!important}
+}
