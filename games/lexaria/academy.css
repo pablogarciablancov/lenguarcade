@@ -609,7 +609,7 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
 .trainer-carousel{position:relative;width:100%;height:100%;display:grid;place-items:center;overflow:hidden}
 .trainer-reel{position:absolute;inset:0;perspective:1200px;overflow:hidden}
 .trainer-carousel-card{
-  --reel-offset:0;
+  --reel-x:0vw;--reel-rot:0deg;--reel-scale:1;
   position:absolute!important;
   left:50%!important;top:50%!important;
   width:clamp(260px,25vw,360px)!important;
@@ -617,10 +617,7 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
   min-height:0!important;
   padding:12px!important;
   border-radius:20px!important;
-  transform:
-    translate(calc(-50% + var(--reel-offset) * min(31vw,430px)),-50%)
-    rotate(calc(var(--reel-offset) * -7deg))
-    scale(calc(1 - min(abs(var(--reel-offset)),2) * .12));
+  transform:translate(calc(-50% + var(--reel-x)),-50%) rotate(var(--reel-rot)) scale(var(--reel-scale));
   opacity:0;pointer-events:none;
   transition:transform .48s cubic-bezier(.2,.78,.18,1),opacity .32s ease,filter .35s ease!important;
   background:linear-gradient(180deg,#315b86 0%,#112e53 58%,#071a35 100%)!important;
