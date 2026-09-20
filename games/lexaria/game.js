@@ -17,8 +17,8 @@ const BATTLEFIELDS=[
   {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal-final.jpg'},
   {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset-final.jpg'}
 ];
-const LEXARIO_ATLAS='./assets/generated/lexarios-atlas-final.png?v=20260920-exact5';
-const TRAINER_ATLAS='./assets/generated/trainers-atlas-final.png?v=20260920-exact5';
+const LEXARIO_ATLASES=['./assets/generated/lexarios-atlas-hq-1.png?v=20260920-exact6','./assets/generated/lexarios-atlas-hq-2.png?v=20260920-exact6'];
+const TRAINER_ATLAS='./assets/generated/trainers-atlas-final-hq.png?v=20260920-exact6';
 
 const TRAINER_ART={
   filologa:{skin:'#e8bb91',hair:'#604127',coat:'#284f76',accent:'#e5bb54',beard:'#604127',glasses:false,badge:'A'},
@@ -137,12 +137,13 @@ function adjacencyCount(index,team){return adjacentIndexes(index).filter(i=>team
 function abilityMeta(c){return ABILITY_META[c?.ability?.kind]||{role:'VERSÁTIL',icon:'✦',row:'back',tags:['HABILIDAD']};}
 function spriteMeta(c){
   const i=Math.max(0,D.creatures.findIndex(x=>x.id===c?.id));
-  return{col:i%10,row:Math.floor(i/10)};
+  const atlas=i<25?0:1,local=i%25;
+  return{atlas,col:local%5,row:Math.floor(local/5)};
 }
 function spriteMarkup(c,extra){
   if(!c)return '<span class="lex-sprite missing" aria-hidden="true"></span>';
   const m=spriteMeta(c);
-  return '<span class="lex-sprite '+esc(extra||'')+'" aria-hidden="true" style="--lex-col:'+m.col+';--lex-row:'+m.row+'"><img src="'+LEXARIO_ATLAS+'" alt="" draggable="false"></span>';
+  return '<span class="lex-sprite '+esc(extra||'')+'" aria-hidden="true" style="--lex-col:'+m.col+';--lex-row:'+m.row+'"><img src="'+LEXARIO_ATLASES[m.atlas]+'" alt="" draggable="false"></span>';
 }
 function trainerSpriteMeta(t){
   const i=Math.max(0,D.trainers.findIndex(x=>x.id===t?.id));
@@ -159,7 +160,7 @@ function renderStaticHeroSprites(){
     const m=spriteMeta(c);
     el.style.setProperty('--lex-col',m.col);
     el.style.setProperty('--lex-row',m.row);
-    el.innerHTML='<img src="'+LEXARIO_ATLAS+'" alt="" draggable="false">';
+    el.innerHTML='<img src="'+LEXARIO_ATLASES[m.atlas]+'" alt="" draggable="false">';
   });
 }
 const BATTLEFIELD_LAYOUT={
