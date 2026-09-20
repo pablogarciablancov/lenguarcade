@@ -142,7 +142,7 @@ function spriteMeta(c){
 function spriteMarkup(c,extra){
   if(!c)return '<span class="lex-sprite missing" aria-hidden="true"></span>';
   const m=spriteMeta(c);
-  return '<span class="lex-sprite '+esc(extra||'')+'" aria-hidden="true" style="--lex-image:url(\\'./assets/generated/lexarios-row-'+m.row+'.webp\\');--lex-pos:'+m.pos+'%"></span>';
+  return "<span class=\"lex-sprite "+esc(extra||"")+"\" aria-hidden=\"true\" style=\"--lex-image:url('./assets/generated/lexarios-row-"+m.row+".webp');--lex-pos:"+m.pos+"%\"></span>";
 }
 function trainerSpriteMeta(t){
   const i=Math.max(0,D.trainers.findIndex(x=>x.id===t?.id));
@@ -152,7 +152,7 @@ function trainerSpriteMeta(t){
 function trainerSpriteMarkup(t,extra){
   if(!t)return '';
   const m=trainerSpriteMeta(t);
-  return '<span class="trainer-sprite '+esc(extra||'')+'" role="img" aria-label="'+esc(t.name)+'" style="--trainer-image:url(\\'./assets/generated/trainers-row-'+m.row+'.webp\\');--trainer-pos:'+m.pos+'%"></span>';
+  return "<span class=\"trainer-sprite "+esc(extra||"")+"\" role=\"img\" aria-label=\""+esc(t.name)+"\" style=\"--trainer-image:url('./assets/generated/trainers-row-"+m.row+".webp');--trainer-pos:"+m.pos+"%\"></span>";
 }
 function renderStaticHeroSprites(){
   qsa('[data-lexario-id]').forEach(el=>{
