@@ -797,8 +797,8 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
 .battle-unit[data-type] .battle-role{color:var(--type)!important}
 
 /* Every side intentionally faces the opponent. */
-.battle-board.player .battle-sprite{transform:scaleX(1)!important;transform-origin:center!important}
-.battle-board.enemy .battle-sprite{transform:scaleX(-1)!important;transform-origin:center!important}
+.battle-board.player .battle-sprite{transform:scaleX(1);transform-origin:center!important}
+.battle-board.enemy .battle-sprite{transform:scaleX(-1);transform-origin:center!important}
 .battle-board.player .battle-unit.casting .battle-sprite{animation:lexariaCastRight .42s ease!important}
 .battle-board.enemy .battle-unit.casting .battle-sprite{animation:lexariaCastLeft .42s ease!important}
 @keyframes lexariaCastRight{45%{transform:translateX(10px) scaleX(1) scale(1.08);filter:drop-shadow(0 0 14px #fff4b5) brightness(1.2)}}
@@ -868,3 +868,7 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
   .briefing-layout{grid-template-columns:1fr;overflow:auto;max-height:68vh}.briefing-enemy-grid{grid-template-columns:repeat(3,minmax(90px,1fr))}
   .briefing-analysis{min-height:280px}.briefing-actions{position:sticky;bottom:0;background:#081b31;padding-top:8px}
 }
+
+.type-guide{display:flex;flex-wrap:wrap;gap:4px;margin:1px 0 3px}
+.type-guide span{flex:1 1 110px;padding:4px 5px;border-radius:5px;background:rgba(var(--type-rgb),.09);border:1px solid rgba(var(--type-rgb),.25);font-size:7px;color:#bcd3e3}
+.type-guide span:first-child b{color:#9df0bd}.type-guide span:last-child b{color:#ffb1bb}
