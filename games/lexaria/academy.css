@@ -428,6 +428,10 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
   user-select:none!important;
   pointer-events:none!important;
 }
+.trainer-select-sprite{height:min(100%,164px)!important;width:auto!important;max-height:164px!important}
+.trainer-avatar-mini{width:30px!important;height:auto!important;flex-basis:30px!important}
+.opponent-avatar-sprite{width:50px!important;height:auto!important;flex-basis:50px!important}
+.battle-trainer-sprite{width:34px!important;height:auto!important;flex-basis:34px!important}
 
 .hero-sprite{width:100%!important;height:auto!important;max-width:none!important}
 .offer-portrait .market-sprite{width:clamp(72px,11vh,104px)!important;height:auto!important;max-width:100%!important}
@@ -517,6 +521,8 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
   filter:drop-shadow(0 8px 7px #0009)!important;
 }
 .battle-board.enemy .battle-sprite{transform:scaleX(-1)}
+.battle-board.enemy .battle-sprite>img,
+.battle-board.enemy .battle-unit.casting .battle-sprite>img{transform:none!important}
 .battle-unit-top{
   position:absolute!important;
   top:0!important;
@@ -585,7 +591,8 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
 @media(max-height:720px) and (min-width:901px){
   .battle-unit{width:clamp(96px,9vw,142px)!important;height:clamp(132px,23vh,166px)!important}
   .battle-unit .battle-sprite{width:clamp(92px,8.6vw,136px)!important}
-  .battle-trainer-sprite{width:35px!important;height:auto!important;flex-basis:35px!important}
+  .trainer-select-sprite{height:126px!important;width:auto!important;max-height:126px!important}
+  .battle-trainer-sprite{width:30px!important;height:auto!important;flex-basis:30px!important}
   .offer-portrait .market-sprite{width:clamp(58px,8vh,76px)!important}
   .game-card-header .inspect-sprite{width:76px!important}
 }
