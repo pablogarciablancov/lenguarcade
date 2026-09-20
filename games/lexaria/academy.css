@@ -453,9 +453,9 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
   background-size:cover!important;
   background-repeat:no-repeat!important;
 }
-.battle-screen[data-battlefield="academy"]{background-image:url('./assets/generated/battle-academy-final.jpg?v=20260920-exact7')!important}
-.battle-screen[data-battlefield="crystal"]{background-image:url('./assets/generated/battle-crystal-final.jpg?v=20260920-exact7')!important}
-.battle-screen[data-battlefield="sunset"]{background-image:url('./assets/generated/battle-sunset-final.jpg?v=20260920-exact7')!important}
+.battle-screen[data-battlefield="academy"]{background-image:url('./assets/generated/battle-academy-final.jpg?v=20260920-polish8')!important}
+.battle-screen[data-battlefield="crystal"]{background-image:url('./assets/generated/battle-crystal-final.jpg?v=20260920-polish8')!important}
+.battle-screen[data-battlefield="sunset"]{background-image:url('./assets/generated/battle-sunset-final.jpg?v=20260920-polish8')!important}
 .battle-screen:before{
   content:""!important;
   position:absolute!important;
@@ -599,4 +599,173 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
 @media(max-width:900px){
   .battle-unit{width:clamp(88px,13vw,122px)!important;height:clamp(122px,20vh,152px)!important}
   .battle-unit .battle-sprite{width:clamp(84px,12.4vw,116px)!important}
+}
+
+/* ===== LEXARIA SIMPLIFIED UI + BATTLE POLISH · v14 ===== */
+
+/* Trainer selection: vertical reel / gallery. */
+.trainer-screen{overflow:hidden!important}
+.trainer-grid{display:block!important;position:relative!important;width:100%!important;max-width:none!important;height:100%!important;padding:0!important;overflow:hidden!important}
+.trainer-carousel{position:relative;width:100%;height:100%;display:grid;place-items:center;overflow:hidden}
+.trainer-reel{position:absolute;inset:0;perspective:1200px;overflow:hidden}
+.trainer-carousel-card{
+  --reel-offset:0;
+  position:absolute!important;
+  left:50%!important;top:50%!important;
+  width:clamp(260px,25vw,360px)!important;
+  height:min(82%,610px)!important;
+  min-height:0!important;
+  padding:12px!important;
+  border-radius:20px!important;
+  transform:
+    translate(calc(-50% + var(--reel-offset) * min(31vw,430px)),-50%)
+    rotate(calc(var(--reel-offset) * -7deg))
+    scale(calc(1 - min(abs(var(--reel-offset)),2) * .12));
+  opacity:0;pointer-events:none;
+  transition:transform .48s cubic-bezier(.2,.78,.18,1),opacity .32s ease,filter .35s ease!important;
+  background:linear-gradient(180deg,#315b86 0%,#112e53 58%,#071a35 100%)!important;
+  border:2px solid #d6ba78!important;
+  box-shadow:0 24px 60px #0008,inset 0 0 0 2px #07172c!important;
+}
+.trainer-carousel-card.near{opacity:.48;pointer-events:auto;filter:saturate(.7) brightness(.78)}
+.trainer-carousel-card.active{opacity:1;pointer-events:auto;filter:none;z-index:5;transform:translate(-50%,-50%) rotate(0) scale(1)!important}
+.trainer-carousel-card .trainer-portrait{
+  height:min(58%,360px)!important;min-height:210px!important;flex:0 0 auto!important;
+  border-radius:16px!important;background:radial-gradient(circle at 50% 30%,#8db9d044,#0a2240 72%)!important;
+  overflow:hidden!important;border:1px solid #d7c28b66!important;
+}
+.trainer-carousel-card .trainer-select-sprite{height:100%!important;width:auto!important;max-height:none!important;margin:auto!important}
+.trainer-card-copy{display:flex;flex-direction:column;min-height:0;gap:5px;padding:6px 4px 2px}
+.trainer-carousel-card .class{font-size:9px!important;color:#ffe19a!important}
+.trainer-carousel-card h3{font:900 clamp(20px,2vw,28px) Georgia,serif!important;margin:0!important;color:#fff2ca!important}
+.trainer-carousel-card .trainer-power{margin:2px 0 4px!important;padding:9px 10px!important;min-height:0!important;background:#081c36c9!important;border-color:#6e8fad!important}
+.trainer-carousel-card .trainer-power b{font-size:11px!important;color:#ffe09a!important;margin:0 0 3px!important}
+.trainer-carousel-card .trainer-power span{display:block;font-size:10px!important;line-height:1.35;color:#d8e7f4}
+.trainer-carousel-card .choose-trainer{margin-top:auto;padding:9px!important}
+.trainer-nav{
+  position:absolute;top:50%;z-index:12;width:54px;height:72px;transform:translateY(-50%);
+  border:1px solid #d5bb7e;border-radius:14px;background:#0b294bdc;color:#ffe6aa;
+  font:900 44px/1 Georgia,serif;box-shadow:0 8px 20px #0007;cursor:pointer
+}
+.trainer-nav:hover{background:#17416d;transform:translateY(-50%) scale(1.05)}
+.trainer-nav.prev{left:clamp(12px,6vw,90px)}.trainer-nav.next{right:clamp(12px,6vw,90px)}
+.trainer-dots{position:absolute;z-index:13;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:7px}
+.trainer-dots button{width:8px;height:8px;padding:0;border-radius:50%;border:1px solid #d9c38c;background:#284d70}
+.trainer-dots button.active{width:22px;border-radius:999px;background:#f3cb70}
+
+/* Sidebar: trainer is the visual focus; no decorative quill. */
+.academy-trainer{min-height:88px!important;display:grid!important;grid-template-rows:auto minmax(0,1fr)!important}
+.academy-crest{display:none!important}
+.trainer-chip{height:100%;min-height:0;align-items:center!important;gap:8px!important}
+.trainer-chip .trainer-avatar-mini{width:50px!important;flex-basis:50px!important;max-height:68px!important}
+.trainer-chip>span{display:flex;min-width:0;flex-direction:column;line-height:1.1}
+.trainer-chip>span>b{font-size:11px;color:#fff2c7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trainer-chip>span>small{margin-top:3px;font-size:7px;color:#9fc2dc;white-space:normal;line-height:1.2}
+
+/* Synergies explain themselves and only show types currently present. */
+.synergy-card{min-height:0}
+.synergy-explainer{display:block!important;margin:5px 0 6px!important;font-size:8px!important;line-height:1.3!important;color:#bad2e5!important}
+.synergy-explainer b{color:#ffe0a0}
+.synergy-list{gap:4px!important;margin-top:0!important}
+.synergy{display:block!important;padding:5px 6px!important;min-height:0!important;background:#0a2038!important}
+.synergy-line{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.synergy-line span{font-size:8px;font-weight:900;color:#dcecff}
+.synergy-line b{font-size:7px;color:#9cbad1;white-space:nowrap}
+.synergy.active .synergy-line b{color:#ffe09a}
+.synergy-meter{height:4px;margin-top:4px;border-radius:999px;background:#031422;overflow:hidden}
+.synergy-meter i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#4db6e8,#f2c96d)}
+.synergy small{display:block;margin-top:2px;font-size:6.5px;color:#7fa4bf}
+.synergy-empty{font-size:8px;line-height:1.35;color:#a9c7dc;padding:6px;border:1px dashed #3e627f;border-radius:6px}
+
+/* Market: visual browser first, detail card second. */
+.market-panel{overflow:hidden!important}
+.market-row{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important;align-items:stretch}
+.market-tile{
+  position:relative;display:grid;grid-template-rows:minmax(0,1fr) auto;place-items:center;min-width:0;min-height:0;
+  padding:5px;border:1px solid #4c708f;border-radius:10px;background:linear-gradient(180deg,#12324f,#071a31);
+  color:#edf7ff;cursor:pointer;overflow:hidden;transition:transform .16s ease,border-color .16s ease,filter .16s ease
+}
+.market-tile:hover{transform:translateY(-2px);border-color:#9dd9ff;filter:brightness(1.07)}
+.market-tile.selected{border-color:#f0c96f;box-shadow:inset 0 0 0 2px #f0c96f55,0 0 15px #f0c96f22}
+.market-tile.bought{opacity:.22;pointer-events:none}
+.market-tile .market-sprite{width:min(94%,150px)!important;height:auto!important;aspect-ratio:1!important;max-width:none!important;background:transparent!important;box-shadow:none!important;transform:none!important}
+.market-tile-caption{width:100%;display:flex;align-items:center;justify-content:space-between;gap:4px;padding:3px 3px 1px}
+.market-tile-caption b{min-width:0;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff3cd}
+.market-tile-caption small{font-size:8px;color:#f1cb70;white-space:nowrap}
+.market-resource-icon{font-size:clamp(36px,6vh,62px);filter:drop-shadow(0 5px 5px #0005)}
+.market-tile.resource{background:linear-gradient(180deg,#3d3358,#171c35)}
+.market-detail-card{display:flex!important;flex-direction:column!important;gap:7px!important}
+.market-detail-hero{display:grid;grid-template-columns:minmax(82px,42%) 1fr;gap:8px;align-items:center}
+.market-detail-sprite{width:100%!important;height:auto!important;aspect-ratio:1!important;max-width:140px!important;margin:auto!important}
+.market-detail-hero h3{margin:2px 0 5px;font:900 21px Georgia,serif;color:#fff0c7}
+.market-detail-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.market-detail-stats>div{padding:6px 3px;border-radius:6px;background:#081d34;border:1px solid #355675;text-align:center}
+.market-detail-stats span,.market-detail-buy small,.market-detail-ability small{display:block;font-size:6.5px;color:#8fb2cd;font-weight:900;letter-spacing:.06em}
+.market-detail-stats b{display:block;margin-top:2px;font-size:13px;color:#fff1c6}
+.market-detail-ability{padding:7px;border:1px solid #3c6080;border-radius:7px;background:#0a223c}
+.market-detail-ability b{display:block;margin:2px 0 3px;color:#9ce0ff;font-size:11px}
+.market-detail-ability p{margin:0!important;font-size:8px!important;line-height:1.35!important;color:#c4d8e8!important}
+.market-detail-notes{display:flex;flex-wrap:wrap;gap:4px}
+.market-detail-notes span{padding:3px 5px;border-radius:999px;background:#102d49;border:1px solid #456783;font-size:7px;color:#d8e8f4}
+.market-detail-buy{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:7px;padding-top:5px;border-top:1px solid #31516d}
+.market-detail-buy>span b{display:block;font-size:17px;color:#ffe09a}
+.market-detail-buy button{min-width:110px}
+.market-detail-resource{text-align:center;margin:auto 0}
+.market-detail-resource-icon{display:block;font-size:64px}.market-detail-resource h3{font-size:20px;margin:5px}.market-detail-resource p{font-size:9px!important;color:#c1d5e4!important;line-height:1.4!important}
+
+/* Battle: keep atlas transparency, align feet to the baked circles and remove any card-like square. */
+.battle-unit{transform:translate(-50%,-79%)!important}
+.battle-unit:not(.empty):hover,.battle-paused .battle-unit:not(.empty):focus{transform:translate(-50%,-81%) scale(1.025)!important}
+.battle-unit .battle-sprite,
+.battle-unit .battle-sprite>img{
+  background:transparent!important;background-color:transparent!important;box-shadow:none!important;border:0!important;border-radius:0!important;
+}
+.battle-unit .battle-sprite{overflow:hidden!important;isolation:auto!important}
+.battle-unit.hit{animation:lexarioHit .34s cubic-bezier(.2,.8,.2,1)!important}
+@keyframes lexarioHit{0%,100%{filter:none}22%{filter:brightness(1.8);transform:translate(-50%,-79%) translateX(-7px) rotate(-2deg)}52%{transform:translate(-50%,-79%) translateX(6px) rotate(2deg)}}
+
+/* VFX now travel from the casting Lexario to a real opposing Lexario. */
+.battle-projectile{
+  --fx:#7cecff;--fx2:#ffffff;
+  position:absolute!important;height:7px!important;width:var(--fx-len)!important;border-radius:999px!important;
+  transform-origin:0 50%!important;transform:translateY(-50%) rotate(var(--fx-angle)) scaleX(0)!important;
+  background:linear-gradient(90deg,transparent 0%,var(--fx) 18%,var(--fx2) 78%,#fff 100%)!important;
+  box-shadow:0 0 8px var(--fx),0 0 18px var(--fx)!important;
+  animation:lexariaProjectile .42s cubic-bezier(.15,.75,.2,1) forwards!important;opacity:.95
+}
+.battle-projectile:after{
+  content:""!important;position:absolute!important;right:-8px!important;top:50%!important;width:18px!important;height:18px!important;
+  transform:translateY(-50%)!important;border-radius:50%!important;background:radial-gradient(circle,#fff 0 24%,var(--fx2) 25% 46%,var(--fx) 48% 70%,transparent 72%)!important;
+  box-shadow:0 0 16px var(--fx)!important
+}
+@keyframes lexariaProjectile{0%{transform:translateY(-50%) rotate(var(--fx-angle)) scaleX(.05);opacity:0}18%{opacity:1}82%{opacity:1}100%{transform:translateY(-50%) rotate(var(--fx-angle)) scaleX(1);opacity:0}}
+.fx-ortografia{--fx:#ffd460;--fx2:#fff5b9}.fx-verbos{--fx:#45d7ff;--fx2:#c8f7ff}.fx-lexico{--fx:#5be48e;--fx2:#d3ff9d}.fx-morfologia{--fx:#ff9c4d;--fx2:#ffe0a1}.fx-sintaxis{--fx:#9d79ff;--fx2:#dfc8ff}.fx-literatura{--fx:#ef6cff;--fx2:#ffc0f7}
+.battle-impact{
+  --fx:#7cecff;position:absolute!important;width:44px;height:44px;border-radius:50%;transform:translate(-50%,-50%);
+  border:4px solid var(--fx);box-shadow:0 0 10px var(--fx),inset 0 0 13px var(--fx);animation:lexariaImpact .48s ease-out forwards
+}
+.battle-impact:before,.battle-impact:after{content:"";position:absolute;inset:50%;width:54px;height:4px;border-radius:4px;background:var(--fx);box-shadow:0 0 10px var(--fx)}
+.battle-impact:before{transform:translate(-50%,-50%) rotate(35deg)}.battle-impact:after{transform:translate(-50%,-50%) rotate(-35deg)}
+@keyframes lexariaImpact{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-10deg)}28%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.65) rotate(18deg)}}
+.battle-support-pulse{position:absolute;width:34px;height:34px;border-radius:50%;transform:translate(-50%,-50%);animation:supportPulse .56s ease-out forwards}
+.battle-support-pulse.heal{border:4px solid #61ef9e;box-shadow:0 0 18px #61ef9e,inset 0 0 13px #61ef9e}.battle-support-pulse.shield{border:4px solid #67ddff;box-shadow:0 0 18px #67ddff,inset 0 0 13px #67ddff}
+@keyframes supportPulse{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}35%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(2.1)}}
+.battle-float{z-index:15!important;font-size:20px!important;animation:floatNumber .8s ease-out forwards!important}
+
+/* Keep the simplified layout useful on 1366x768 and lower heights. */
+@media(max-height:720px) and (min-width:901px){
+  .trainer-carousel-card{height:min(84%,520px)!important;width:clamp(235px,23vw,310px)!important}
+  .trainer-carousel-card .trainer-portrait{height:56%!important;min-height:180px!important}
+  .trainer-carousel-card .trainer-power span{font-size:8.5px!important}
+  .market-tile .market-sprite{width:min(92%,105px)!important}
+  .market-detail-hero{grid-template-columns:76px 1fr}.market-detail-sprite{max-width:82px!important}
+  .market-detail-ability p{font-size:7px!important}
+  .synergy-explainer{font-size:7px!important}
+}
+@media(max-width:900px){
+  .trainer-carousel-card{width:min(72vw,330px)!important;height:min(78%,540px)!important}
+  .trainer-carousel-card.near{opacity:.2}
+  .trainer-nav{width:42px;height:58px;font-size:34px}.trainer-nav.prev{left:6px}.trainer-nav.next{right:6px}
+  .market-row{grid-template-columns:repeat(5,minmax(100px,1fr))!important;overflow-x:auto!important}
+  .market-tile{min-height:145px}
 }
