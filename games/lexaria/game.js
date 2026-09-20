@@ -17,8 +17,8 @@ const BATTLEFIELDS=[
   {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal-final.jpg'},
   {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset-final.jpg'}
 ];
-const LEXARIO_ATLASES=['./assets/generated/lexarios-atlas-hq-1.png?v=20260920-exact7','./assets/generated/lexarios-atlas-hq-2.png?v=20260920-exact7'];
-const TRAINER_ATLAS='./assets/generated/trainers-atlas-final-hq.png?v=20260920-exact7';
+const LEXARIO_ATLASES=['./assets/generated/lexarios-atlas-hq-1.png?v=20260920-polish8','./assets/generated/lexarios-atlas-hq-2.png?v=20260920-polish8'];
+const TRAINER_ATLAS='./assets/generated/trainers-atlas-final-hq.png?v=20260920-polish8';
 
 const TRAINER_ART={
   filologa:{skin:'#e8bb91',hair:'#604127',coat:'#284f76',accent:'#e5bb54',beard:'#604127',glasses:false,badge:'A'},
@@ -67,6 +67,8 @@ let run=null;
 let career=loadCareer();
 let settings=loadSettings();
 let selected=null;
+let trainerCarouselIndex=0;
+let marketSelection=0;
 let currentQuestion=null;
 let practiceCategory='ortografia';
 let practiceStats={correct:0,attempts:0,streak:0};
@@ -310,17 +312,50 @@ function backHome(){
 
 function chooseTrainerScreen(){
   showScreen('trainerScreen');
+  trainerCarouselIndex=0;
   const host=$('trainerChoices'); if(!host)return;
-  host.innerHTML=D.trainers.map(t=>
-    '<article class="trainer-card">'+
-      '<div class="trainer-portrait">'+trainerSpriteMarkup(t,'trainer-select-sprite')+'</div>'+
-      '<span class="class">'+esc(t.class)+'</span>'+
-      '<h3>'+esc(t.name)+'</h3>'+
-      '<p>'+esc(t.power)+'</p>'+
-      '<div class="trainer-power"><b>'+esc(t.powerName)+'</b>'+esc(t.power)+'</div>'+
-      '<button class="primary full choose-trainer" data-trainer="'+esc(t.id)+'">ELEGIR ENTRENADOR</button>'+
-    '</article>'
-  ).join('');
+  host.innerHTML=
+    '<div class="trainer-carousel" aria-label="Galería de entrenadores">'+
+      '<button class="trainer-nav prev" type="button" data-trainer-nav="-1" aria-label="Entrenador anterior">‹</button>'+
+      '<div class="trainer-reel">'+
+        D.trainers.map((t,i)=>
+          '<article class="trainer-card trainer-carousel-card" data-trainer-card="'+i+'" tabindex="0">'+
+            '<div class="trainer-portrait">'+trainerSpriteMarkup(t,'trainer-select-sprite')+'</div>'+
+            '<div class="trainer-card-copy">'+
+              '<span class="class">'+esc(t.class)+'</span>'+
+              '<h3>'+esc(t.name)+'</h3>'+
+              '<div class="trainer-power"><b>'+esc(t.powerName)+'</b><span>'+esc(t.power)+'</span></div>'+
+              '<button class="primary full choose-trainer" data-trainer="'+esc(t.id)+'">ELEGIR ENTRENADOR</button>'+
+            '</div>'+
+          '</article>'
+        ).join('')+
+      '</div>'+
+      '<button class="trainer-nav next" type="button" data-trainer-nav="1" aria-label="Entrenador siguiente">›</button>'+
+      '<div class="trainer-dots">'+D.trainers.map((_,i)=>'<button type="button" data-trainer-jump="'+i+'" aria-label="Ver entrenador '+(i+1)+'"></button>').join('')+'</div>'+
+    '</div>';
+  updateTrainerCarousel();
+}
+function updateTrainerCarousel(){
+  const cards=qsa('[data-trainer-card]'),dots=qsa('[data-trainer-jump]'),n=D.trainers.length;
+  cards.forEach(card=>{
+    const i=Number(card.dataset.trainerCard);
+    let diff=(i-trainerCarouselIndex+n)%n;
+    if(diff>n/2)diff-=n;
+    const abs=Math.abs(diff),near=abs<=2;
+    card.style.setProperty('--reel-x',(diff*29)+'vw');
+    card.style.setProperty('--reel-rot',(diff*-7)+'deg');
+    card.style.setProperty('--reel-scale',diff===0?'1':abs===1?'.86':'.74');
+    card.classList.toggle('active',diff===0);
+    card.classList.toggle('near',near);
+    card.setAttribute('aria-hidden',diff===0?'false':'true');
+    card.tabIndex=diff===0?0:-1;
+  });
+  dots.forEach((dot,i)=>dot.classList.toggle('active',i===trainerCarouselIndex));
+}
+function moveTrainerCarousel(delta){
+  const n=D.trainers.length;
+  trainerCarouselIndex=(trainerCarouselIndex+delta+n)%n;
+  updateTrainerCarousel();
 }
 function newRun(trainerId){
   battleContext='adventure';duelRunContext=null;
@@ -347,13 +382,14 @@ function continueRun(){
 }
 function showShop(){
   if(!run)return backHome();
+  if(!Number.isInteger(marketSelection)||marketSelection<0||marketSelection>=run.shop.length||run.shop[marketSelection]?.bought){marketSelection=run.shop.findIndex(o=>!o.bought);if(marketSelection<0)marketSelection=null;}
   showScreen('shopScreen');
   renderRun();
 }
 function renderRun(){
   if(!run)return;
   const t=trainer();
-  $('trainerChip').innerHTML=trainerSpriteMarkup(t,'trainer-avatar-mini')+'<span>'+esc(t?.name||'Entrenador')+'</span>';
+  $('trainerChip').innerHTML=trainerSpriteMarkup(t,'trainer-avatar-mini')+'<span><b>'+esc(t?.name||'Entrenador')+'</b><small>'+esc(t?.class||'')+' · '+esc(t?.powerName||'')+'</small></span>';
   $('livesValue').textContent=run.lives;
   $('dayValue').textContent=run.day;
   $('winsValue').textContent=run.wins+'/'+WIN_TARGET;
@@ -379,9 +415,23 @@ function renderRelics(){
 function renderSynergies(){
   const host=$('synergyList'); if(!host)return;
   const counts=teamTypeCounts();
-  host.innerHTML=Object.values(D.TYPES).map(t=>{
-    const n=counts[t.id]||0,active=n>=2,step=n>=6?'20%':n>=4?'12%':n>=2?'5%':'—';
-    return '<div class="synergy '+(active?'active':'')+'"><span>'+esc(t.icon)+' '+esc(t.name)+'</span><b>'+n+(active?' · +'+step:'')+'</b></div>';
+  const rows=Object.values(D.TYPES).map(t=>({t,n:counts[t.id]||0})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n);
+  if(!rows.length){
+    host.innerHTML='<div class="synergy-empty">Añade <b>2 Lexarios del mismo tipo</b> para activar tu primera sinergia.</div>';
+    return;
+  }
+  host.innerHTML=rows.map(({t,n})=>{
+    const bonus=n>=6?20:n>=4?12:n>=2?5:0;
+    const next=n<2?2:n<4?4:n<6?6:null;
+    const target=next||6;
+    const pct=Math.min(100,Math.round(n/target*100));
+    const status=bonus?('+'+bonus+'% VIDA Y POTENCIA'):(next-n)+' para activar';
+    const nextText=next?(n+'/'+next+' · siguiente nivel'):'6/6 · máximo';
+    return '<div class="synergy '+(bonus?'active':'')+'">'+
+      '<div class="synergy-line"><span>'+esc(t.icon)+' '+esc(t.name)+'</span><b>'+status+'</b></div>'+
+      '<div class="synergy-meter"><i style="width:'+pct+'%"></i></div>'+
+      '<small>'+nextText+'</small>'+
+    '</div>';
   }).join('');
 }
 function formationTotals(team){
@@ -422,8 +472,8 @@ function slotClick(area,index){
   const unit=arr[index];
   if(!unit){selected=null;renderBoards();renderInspect();return;}
   if(selected&&selected.area===area&&selected.index===index)selected=null;
-  else selected={area,index};
-  renderBoards();renderInspect();
+  else{selected={area,index};marketSelection=null;}
+  renderBoards();renderMarket();renderInspect();
 }
 function moveUnit(from,to){
   if(!run||!from||!to)return;
@@ -438,33 +488,52 @@ function moveUnit(from,to){
   if(selected&&selected.area===from.area&&selected.index===from.index)selected={area:to.area,index:to.index};
   saveRun('drag_unit');renderRun();
 }
-function clearSelection(){selected=null;renderBoards();renderInspect();}
+function clearSelection(){selected=null;marketSelection=null;renderBoards();renderMarket();renderInspect();}
 function renderInspect(){
   const host=$('inspectCard'); if(!host)return;
+  if(Number.isInteger(marketSelection)&&run?.shop?.[marketSelection]&&!run.shop[marketSelection].bought){
+    renderMarketDetail(host,marketSelection);return;
+  }
   const u=unitAt(selected);
-  if(!u){host.className='inspect-card empty';host.innerHTML='<div class="inspect-placeholder"><b>Selecciona un Lexario</b><span>Verás su rol, habilidad, progreso de fusión, entrenamiento y la razón para colocarlo delante o detrás.</span></div>';return;}
+  if(!u){host.className='inspect-card empty';host.innerHTML='<div class="inspect-placeholder"><b>Selecciona algo</b><span>Haz clic en un Lexario del mercado para ver su ficha o en uno de tu equipo para gestionarlo.</span></div>';return;}
   const c=creatureOf(u),stats=unitStats(u,selected?.index,run.team),meta=abilityMeta(c);
   const fusion=fusionInfo(c.id,u.level,false);
   const trainPct=Math.round((u.training||0)*TRAINING_STEP*100);
   const neighbors=selected?.area==='team'?adjacencyCount(selected.index,run.team):0;
   const posText=selected?.area==='team'
     ?(selected.index<3
-      ?'<b>🛡️ VANGUARDIA</b><span>+25% vida · habilidades 10% más lentas. '+neighbors+' vecino'+(neighbors===1?'':'s')+' activo'+(neighbors===1?'':'s')+'.</span>'
-      :'<b>⚡ RETAGUARDIA</b><span>−10% vida · habilidades 15% más rápidas. '+neighbors+' vecino'+(neighbors===1?'':'s')+' activo'+(neighbors===1?'':'s')+'.</span>')
-    :'<b>📦 RESERVA</b><span>No combate. Sí cuenta para conseguir copias y fusionar.</span>';
+      ?'<b>🛡️ VANGUARDIA</b><span>+25% vida · habilidades 10% más lentas. '+neighbors+' vecino'+(neighbors===1?'':'s')+'.</span>'
+      :'<b>⚡ RETAGUARDIA</b><span>−10% vida · habilidades 15% más rápidas. '+neighbors+' vecino'+(neighbors===1?'':'s')+'.</span>')
+    :'<b>📦 RESERVA</b><span>No combate. Sí cuenta para fusionar.</span>';
   host.className='inspect-card';
   host.innerHTML=
     '<div class="inspect-hero game-card-header">'+spriteMarkup(c,'inspect-sprite')+'<div class="inspect-name"><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span><h3>'+esc(c.name)+(u.chromatic?' ✦':'')+'</h3><div class="level-stars">'+levelStars(u.level)+' <small>Nv.'+u.level+'</small></div></div></div>'+
     '<div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+
-    '<div class="stat-grid game-stats"><div><span>❤️ Vida efectiva</span><b>'+format(stats.hp)+'</b></div><div><span>⚔️ Potencia</span><b>'+format(stats.damage)+'</b></div><div><span>⏱ Habilidad</span><b>'+stats.cooldown.toFixed(1)+'s</b></div><div><span>🎓 Entreno</span><b>+'+trainPct+'%</b></div></div>'+
-    '<div class="ability-box featured"><div class="ability-title"><b>'+esc(c.ability.name)+'</b><span>'+esc(meta.tags.join(' · '))+'</span></div><p>'+esc(c.ability.text)+'</p><small>Cada '+stats.cooldown.toFixed(1)+' s, cuando se llena su barra, lanza esta habilidad automáticamente.</small></div>'+
-    '<div class="progress-box"><div><b>SUBIDA DE NIVEL</b><span>'+levelStars(u.level)+'</span></div>'+
-      (fusion.max?'<p>Nivel máximo alcanzado.</p>':'<p>Fusiona copias iguales: <strong>'+fusion.text+'</strong> '+(u.level===1?'copias Nv.1 → Nv.2 (×1,7 estadísticas)':'copias Nv.2 → Nv.3 (×3 estadísticas)')+'.</p>')+
-      '<div class="fusion-pips">'+(fusion.max?'<i class="on"></i><i class="on"></i><i class="on"></i>':Array.from({length:fusion.needed},(_,i)=>'<i class="'+(i<fusion.current?'on':'')+'"></i>').join(''))+'</div></div>'+
-    '<div class="progress-box training-progress"><div><b>ENTRENAMIENTO</b><span>+'+trainPct+'%</span></div><p>Cada acierto = <strong>+1 punto = +5% vida y +5% potencia</strong>. Al fusionar, los puntos de las copias se suman (máx. +20).</p></div>'+
-    '<div class="position-card '+(selected?.area==='team'?(selected.index<3?'front':'back'):'reserve')+'">'+posText+'<small>Recomendación de rol: '+(meta.row==='front'?'Vanguardia':'Retaguardia')+'.</small></div>'+
+    '<div class="stat-grid game-stats"><div><span>❤️ Vida</span><b>'+format(stats.hp)+'</b></div><div><span>⚔️ Potencia</span><b>'+format(stats.damage)+'</b></div><div><span>⏱ Habilidad</span><b>'+stats.cooldown.toFixed(1)+'s</b></div><div><span>🎓 Entreno</span><b>+'+trainPct+'%</b></div></div>'+
+    '<div class="ability-box featured"><div class="ability-title"><b>'+esc(c.ability.name)+'</b></div><p>'+esc(c.ability.text)+'</p></div>'+
+    '<div class="progress-box compact-progress"><div><b>FUSIÓN</b><span>'+levelStars(u.level)+'</span></div><p>'+(fusion.max?'Nivel máximo.':fusion.text+' para el siguiente nivel.')+'</p></div>'+
+    '<div class="position-card '+(selected?.area==='team'?(selected.index<3?'front':'back'):'reserve')+'">'+posText+'</div>'+
     '<div class="inspect-actions"><button class="primary" data-action="train-selected">ENTRENAR (+5%)</button><button class="secondary" data-action="sell-selected">VENDER +'+sellValue(u)+'</button></div>'+
-    '<button class="secondary full" style="margin-top:7px" data-action="clear-selection">CERRAR FICHA</button>';
+    '<button class="secondary full" style="margin-top:7px" data-action="clear-selection">CERRAR</button>';
+}
+function renderMarketDetail(host,index){
+  const o=run.shop[index];if(!o||o.bought)return;
+  const affordable=run.gold>=o.price;
+  host.className='inspect-card market-detail-card';
+  if(o.kind==='resource'){
+    const r=D.resource(o.resourceId);
+    host.innerHTML='<div class="market-detail-resource"><span class="market-detail-resource-icon">'+esc(r.icon)+'</span><span class="micro-label">RECURSO</span><h3>'+esc(r.name)+'</h3><p>'+esc(r.text)+'</p></div>'+
+      '<div class="market-detail-buy"><span><small>PRECIO</small><b>🖋️ '+o.price+'</b></span><button class="primary '+(affordable?'':'cant-afford')+'" data-buy="'+index+'" '+(!affordable?'disabled':'')+'>'+(affordable?'USAR RECURSO':'FALTA TINTA')+'</button></div>';
+    return;
+  }
+  const c=D.creature(o.creatureId),meta=abilityMeta(c),fit=strategicFit(c),fusion=fusionInfo(c.id,1,true);
+  host.innerHTML=
+    '<div class="market-detail-hero">'+spriteMarkup(c,'market-detail-sprite')+'<div><span class="rarity-name">'+esc(D.RARITIES[c.rarity].name)+'</span><h3>'+esc(c.name)+(o.chromatic?' ✦':'')+'</h3><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span></div></div>'+
+    '<div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+
+    '<div class="market-detail-stats"><div><span>❤️ VIDA</span><b>'+format(c.hp)+'</b></div><div><span>⚔️ POTENCIA</span><b>'+format(c.damage)+'</b></div><div><span>⏱️ HABILIDAD</span><b>'+c.cooldown.toFixed(1)+'s</b></div></div>'+
+    '<div class="market-detail-ability"><small>HABILIDAD</small><b>'+esc(c.ability.name)+'</b><p>'+esc(c.ability.text)+'</p></div>'+
+    '<div class="market-detail-notes"><span>'+(meta.row==='front'?'🛡️ Mejor delante':'⚡ Mejor detrás')+'</span><span>Fusión: '+(fusion.current>=fusion.needed?'lista para Nv.2':fusion.text)+'</span>'+(fit[0]?'<span>✦ '+esc(fit[0])+'</span>':'')+'</div>'+
+    '<div class="market-detail-buy"><span><small>PRECIO</small><b>🖋️ '+o.price+'</b></span><button class="primary '+(affordable?'':'cant-afford')+'" data-buy="'+index+'" '+(!affordable?'disabled':'')+'>'+(affordable?'RECLUTAR':'FALTAN '+(o.price-run.gold))+'</button></div>';
 }
 function sellValue(u){return Math.max(1,Math.floor(D.rarityPrice(creatureOf(u)?.rarity||'common')*.6)*u.level);}
 function sellSelected(){
@@ -503,30 +572,30 @@ function rerollShop(){
   if(!run)return;
   if(run.freeRerolls>0)run.freeRerolls--;
   else{const cost=rerollCost();if(run.gold<cost)return toast('No tienes suficiente Tinta.','bad');run.gold-=cost;}
-  run.locked=false;rollShop(true);saveRun('reroll');renderRun();
+  run.locked=false;rollShop(true);marketSelection=0;saveRun('reroll');renderRun();
 }
 function renderMarket(){
   const host=$('marketRow');if(!host)return;
+  if(Number.isInteger(marketSelection)&&(marketSelection<0||marketSelection>=run.shop.length||run.shop[marketSelection]?.bought))marketSelection=run.shop.findIndex(o=>!o.bought);
   host.innerHTML=run.shop.map((o,i)=>{
-    const affordable=run.gold>=o.price;
+    const affordable=run.gold>=o.price,active=i===marketSelection;
     if(o.kind==='creature'){
-      const c=D.creature(o.creatureId),meta=abilityMeta(c),fit=strategicFit(c),fusion=fusionInfo(c.id,1,true);
-      const rowLabel=meta.row==='front'?'🛡️ DELANTE':'⚡ DETRÁS';
-      return '<article class="offer-card game-offer '+(o.bought?'bought ':'')+(o.chromatic?'chromatic ':'')+(affordable?'':'unaffordable')+'" data-role="'+esc(meta.role)+'" data-rarity="'+esc(c.rarity)+'">'+
-        '<div class="offer-topline"><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span><span class="rarity-name">'+esc(D.RARITIES[c.rarity].name)+'</span></div>'+
-        '<div class="offer-body"><div class="offer-portrait">'+spriteMarkup(c,'market-sprite')+'<div><h4>'+esc(c.name)+(o.chromatic?' ✦':'')+'</h4><small>'+rowLabel+'</small></div></div>'+
-        '<div class="offer-type-row">'+c.types.map(t=>'<span class="offer-type">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+
-        '<div class="offer-stats"><span>❤️ '+format(c.hp)+'</span><span>⚔️ '+format(c.damage)+'</span><span>⏱ '+c.cooldown.toFixed(1)+'s</span></div>'+
-        '<div class="market-ability"><b>'+esc(c.ability.name)+'</b><p>'+esc(c.ability.text)+'</p><div>'+meta.tags.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div>'+
-        (fit.length?'<div class="fit-notes">'+fit.map(x=>'<span>✦ '+esc(x)+'</span>').join('')+'</div>':'')+
-        '<div class="fusion-preview"><b>FUSIÓN</b><span>'+(fusion.current>=fusion.needed?'¡SUBE A Nv.2!':fusion.text+' hacia Nv.2')+'</span></div>'+
-        '</div>'+
-        '<div class="offer-footer"><span class="price">🖋️ '+o.price+'</span><button class="primary '+(affordable?'':'cant-afford')+'" data-buy="'+i+'" '+(!affordable?'disabled':'')+'>'+(affordable?'RECLUTAR':'FALTAN '+(o.price-run.gold))+'</button></div>'+
-      '</article>';
+      const c=D.creature(o.creatureId);
+      return '<button type="button" class="market-tile '+(active?'selected ':'')+(o.bought?'bought ':'')+(o.chromatic?'chromatic ':'')+(affordable?'':'unaffordable')+'" data-market-select="'+i+'" data-rarity="'+esc(c.rarity)+'" aria-label="Ver '+esc(c.name)+'">'+
+        spriteMarkup(c,'market-sprite')+
+        '<span class="market-tile-caption"><b>'+esc(c.name)+(o.chromatic?' ✦':'')+'</b><small>🖋️ '+o.price+'</small></span>'+
+      '</button>';
     }
     const r=D.resource(o.resourceId);
-    return '<article class="offer-card resource game-offer '+(o.bought?'bought ':'')+(affordable?'':'unaffordable')+'"><div class="offer-topline"><span class="role-badge">◆ RECURSO</span><span class="rarity-name">1 uso/jornada</span></div><div class="offer-body"><span class="unit-emoji">'+esc(r.icon)+'</span><h4>'+esc(r.name)+'</h4><div class="market-ability resource-copy"><b>EFECTO INMEDIATO</b><p>'+esc(r.text)+'</p></div></div><div class="offer-footer"><span class="price">🖋️ '+o.price+'</span><button class="primary '+(affordable?'':'cant-afford')+'" data-buy="'+i+'" '+(!affordable?'disabled':'')+'>'+(affordable?'USAR':'FALTAN '+(o.price-run.gold))+'</button></div></article>';
+    return '<button type="button" class="market-tile resource '+(active?'selected ':'')+(o.bought?'bought ':'')+(affordable?'':'unaffordable')+'" data-market-select="'+i+'" aria-label="Ver '+esc(r.name)+'">'+
+      '<span class="market-resource-icon">'+esc(r.icon)+'</span><span class="market-tile-caption"><b>'+esc(r.name)+'</b><small>🖋️ '+o.price+'</small></span>'+
+    '</button>';
   }).join('');
+}
+function selectMarketOffer(index){
+  if(!run?.shop?.[index]||run.shop[index].bought)return;
+  marketSelection=index;
+  renderMarket();renderInspect();
 }
 function freeRef(){
   let i=run.team.findIndex(x=>!x);if(i>=0)return{area:'team',index:i};
@@ -594,6 +663,7 @@ function buyOffer(index){
   }else{
     run.itemUse--;applyResource(D.resource(o.resourceId));
   }
+  marketSelection=run.shop.findIndex((x,j)=>!x.bought&&j!==index);if(marketSelection<0)marketSelection=null;
   evaluateAchievements();saveCareer();saveRun('buy');renderRun();
   if(pendingRelicRewards>0)setTimeout(openRelicReward,80);
 }
@@ -1097,29 +1167,55 @@ function battleActionFx(side,target,b,c,a,dealt,healed,shielded){
   const targetBoard=$(target.kind==='player'?'playerBattleBoard':'enemyBattleBoard');
   const ownBoard=$(side.kind==='player'?'playerBattleBoard':'enemyBattleBoard');
   const layer=$('battleFxLayer'),callout=$('abilityCallout');
+  const targetUnits=targetBoard?Array.from(targetBoard.querySelectorAll('.battle-unit:not(.empty)')):[];
+  const targetEl=targetUnits.length?targetUnits[(b.casts+b.index)%targetUnits.length]:targetBoard;
+  const sourceAnchor=source?.querySelector('.battle-sprite')||source;
+  const targetAnchor=targetEl?.querySelector('.battle-sprite')||targetEl;
+  const fxType=(c.types&&c.types[0])||'ortografia';
+
   if(source){source.classList.remove('casting');void source.offsetWidth;source.classList.add('casting');}
-  if(dealt>0&&targetBoard){
-    targetBoard.classList.remove('team-hit');void targetBoard.offsetWidth;targetBoard.classList.add('team-hit');
-    setTimeout(()=>targetBoard.classList.remove('team-hit'),260);
+  if(dealt>0&&targetEl){
+    setTimeout(()=>{
+      targetEl.classList.remove('hit');void targetEl.offsetWidth;targetEl.classList.add('hit');
+      setTimeout(()=>targetEl.classList.remove('hit'),360);
+    },250);
   }
-  if(layer&&source&&targetBoard&&dealt>0){
-    const lr=layer.getBoundingClientRect(),sr=source.getBoundingClientRect(),tr=targetBoard.getBoundingClientRect();
-    const x1=sr.left+sr.width/2-lr.left,y1=sr.top+sr.height/2-lr.top;
-    const x2=tr.left+tr.width/2-lr.left,y2=tr.top+tr.height/2-lr.top;
+
+  if(layer&&sourceAnchor&&targetAnchor&&dealt>0){
+    const lr=layer.getBoundingClientRect(),sr=sourceAnchor.getBoundingClientRect(),tr=targetAnchor.getBoundingClientRect();
+    const x1=sr.left+sr.width/2-lr.left,y1=sr.top+sr.height*.50-lr.top;
+    const x2=tr.left+tr.width/2-lr.left,y2=tr.top+tr.height*.52-lr.top;
+    const dx=x2-x1,dy=y2-y1,len=Math.max(24,Math.hypot(dx,dy)),ang=Math.atan2(dy,dx)*180/Math.PI;
     const bolt=document.createElement('i');
-    bolt.className='battle-projectile '+side.kind;
-    bolt.style.left=x1+'px';bolt.style.top=y1+'px';bolt.style.setProperty('--dx',(x2-x1)+'px');bolt.style.setProperty('--dy',(y2-y1)+'px');
-    layer.appendChild(bolt);setTimeout(()=>bolt.remove(),420);
+    bolt.className='battle-projectile fx-'+fxType+' '+side.kind;
+    bolt.style.left=x1+'px';bolt.style.top=y1+'px';bolt.style.setProperty('--fx-len',len+'px');bolt.style.setProperty('--fx-angle',ang+'deg');
+    layer.appendChild(bolt);
+    setTimeout(()=>{
+      const impact=document.createElement('i');
+      impact.className='battle-impact fx-'+fxType;
+      impact.style.left=x2+'px';impact.style.top=y2+'px';
+      layer.appendChild(impact);
+      setTimeout(()=>impact.remove(),520);
+    },260);
+    setTimeout(()=>bolt.remove(),520);
   }
-  const floatHost=dealt>0?targetBoard:ownBoard;
+
+  const floatHost=dealt>0?targetAnchor:(sourceAnchor||ownBoard);
   if(layer&&floatHost&&(dealt>0||healed>0||shielded>0)){
     const lr=layer.getBoundingClientRect(),hr=floatHost.getBoundingClientRect();
+    if(dealt<=0){
+      const pulse=document.createElement('i');
+      pulse.className='battle-support-pulse '+(healed>0?'heal':'shield');
+      pulse.style.left=(hr.left+hr.width/2-lr.left)+'px';pulse.style.top=(hr.top+hr.height/2-lr.top)+'px';
+      layer.appendChild(pulse);setTimeout(()=>pulse.remove(),600);
+    }
     const n=document.createElement('b');
     n.className='battle-float '+(dealt>0?'damage':healed>0?'heal':'shield');
     n.textContent=dealt>0?'−'+format(dealt):healed>0?'+'+format(healed)+' CURA':'+'+format(shielded)+' ESCUDO';
-    n.style.left=(hr.left+hr.width/2-lr.left)+'px';n.style.top=(hr.top+hr.height*.34-lr.top)+'px';
-    layer.appendChild(n);setTimeout(()=>n.remove(),760);
+    n.style.left=(hr.left+hr.width/2-lr.left)+'px';n.style.top=(hr.top+hr.height*.20-lr.top)+'px';
+    layer.appendChild(n);setTimeout(()=>n.remove(),820);
   }
+
   if(callout){
     callout.className='ability-callout '+side.kind;
     callout.innerHTML='<span>'+esc(c.name)+'</span><b>'+esc(a.name)+'</b><small>'+(dealt>0?format(dealt)+' daño':healed>0?format(healed)+' de cura':shielded>0?format(shielded)+' de escudo':'efecto de equipo')+'</small>';
@@ -1420,7 +1516,11 @@ function bind(){
     }
     if(e.target.closest('[data-close-modal]')){closeModal();return;}
     const back=e.target.closest('[data-action="back-title"]');if(back){backHome();return;}
+    const nav=e.target.closest('[data-trainer-nav]');if(nav){moveTrainerCarousel(Number(nav.dataset.trainerNav));return;}
+    const jump=e.target.closest('[data-trainer-jump]');if(jump){trainerCarouselIndex=Number(jump.dataset.trainerJump);updateTrainerCarousel();return;}
+    const tcard=e.target.closest('[data-trainer-card]');if(tcard&&!e.target.closest('[data-trainer]')){trainerCarouselIndex=Number(tcard.dataset.trainerCard);updateTrainerCarousel();return;}
     const choose=e.target.closest('[data-trainer]');if(choose){newRun(choose.dataset.trainer);return;}
+    const market=e.target.closest('[data-market-select]');if(market){selectMarketOffer(Number(market.dataset.marketSelect));return;}
     const buy=e.target.closest('[data-buy]');if(buy){buyOffer(Number(buy.dataset.buy));return;}
     const duel=e.target.closest('[data-duel-opponent]');if(duel){startStudentBattle(Number(duel.dataset.duelOpponent),duel.dataset.duelSource);return;}
     const battleUnit=e.target.closest('[data-battle-side][data-battle-index]');if(battleUnit&&battle&&!battle.ended){openBattleInspect(battleUnit.dataset.battleSide,Number(battleUnit.dataset.battleIndex));return;}
@@ -1446,6 +1546,7 @@ function bind(){
       setTimeout(()=>{renderPractice();newPracticeQuestion();},900);return;
     }
   });
+  document.addEventListener('keydown',e=>{if(!$('trainerScreen')?.classList.contains('hidden')){if(e.key==='ArrowLeft'){moveTrainerCarousel(-1);e.preventDefault();}else if(e.key==='ArrowRight'){moveTrainerCarousel(1);e.preventDefault();}}});
   document.addEventListener('dragstart',e=>{
     const card=e.target.closest('.unit-card[draggable="true"]');
     if(!card||!run)return;
