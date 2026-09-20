@@ -341,8 +341,10 @@ function updateTrainerCarousel(){
     const i=Number(card.dataset.trainerCard);
     let diff=(i-trainerCarouselIndex+n)%n;
     if(diff>n/2)diff-=n;
-    const near=Math.abs(diff)<=2;
-    card.style.setProperty('--reel-offset',String(diff));
+    const abs=Math.abs(diff),near=abs<=2;
+    card.style.setProperty('--reel-x',(diff*29)+'vw');
+    card.style.setProperty('--reel-rot',(diff*-7)+'deg');
+    card.style.setProperty('--reel-scale',diff===0?'1':abs===1?'.86':'.74');
     card.classList.toggle('active',diff===0);
     card.classList.toggle('near',near);
     card.setAttribute('aria-hidden',diff===0?'false':'true');
