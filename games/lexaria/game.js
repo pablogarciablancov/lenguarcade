@@ -11,14 +11,24 @@ const WIN_TARGET=10;
 const CHROMATIC_RATE=200;
 const TRAINING_STEP=.05;
 const LEVEL_MULT={1:1,2:1.7,3:3,4:4.5};
+const TYPE_MATCHUPS={
+  ortografia:{strong:'morfologia',weak:'literatura'},
+  morfologia:{strong:'lexico',weak:'ortografia'},
+  lexico:{strong:'verbos',weak:'morfologia'},
+  verbos:{strong:'sintaxis',weak:'lexico'},
+  sintaxis:{strong:'literatura',weak:'verbos'},
+  literatura:{strong:'ortografia',weak:'sintaxis'}
+};
+const TYPE_STRONG_MULT=1.30;
+const TYPE_WEAK_MULT=.80;
 
 const BATTLEFIELDS=[
   {id:'academy',name:'Patio Celeste',image:'battle-academy-final.jpg'},
   {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal-final.jpg'},
   {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset-final.jpg'}
 ];
-const LEXARIO_ATLASES=['./assets/generated/lexarios-atlas-hq-1.png?v=20260920-polish8','./assets/generated/lexarios-atlas-hq-2.png?v=20260920-polish8'];
-const TRAINER_ATLAS='./assets/generated/trainers-atlas-final-hq.png?v=20260920-polish8';
+const LEXARIO_ATLASES=['./assets/generated/lexarios-atlas-hq-1.png?v=20260920-types9','./assets/generated/lexarios-atlas-hq-2.png?v=20260920-types9'];
+const TRAINER_ATLAS='./assets/generated/trainers-atlas-final-hq.png?v=20260920-types9';
 
 const TRAINER_ART={
   filologa:{skin:'#e8bb91',hair:'#604127',coat:'#284f76',accent:'#e5bb54',beard:'#604127',glasses:false,badge:'A'},
@@ -69,6 +79,7 @@ let settings=loadSettings();
 let selected=null;
 let trainerCarouselIndex=0;
 let marketSelection=0;
+let pendingAdventureEnemy=null;
 let currentQuestion=null;
 let practiceCategory='ortografia';
 let practiceStats={correct:0,attempts:0,streak:0};
@@ -137,6 +148,40 @@ function adjacentIndexes(index){
 }
 function adjacencyCount(index,team){return adjacentIndexes(index).filter(i=>team[i]).length;}
 function abilityMeta(c){return ABILITY_META[c?.ability?.kind]||{role:'VERSÁTIL',icon:'✦',row:'back',tags:['HABILIDAD']};}
+function primaryType(c){return c?.types?.[0]||'lexico';}
+function typeFactor(attackerType,defenderType){
+  const rule=TYPE_MATCHUPS[attackerType];
+  if(!rule||!defenderType)return 1;
+  if(rule.strong===defenderType)return TYPE_STRONG_MULT;
+  if(rule.weak===defenderType)return TYPE_WEAK_MULT;
+  return 1;
+}
+function creatureTypeFactor(attacker,defender){
+  if(!attacker||!defender)return 1;
+  const at=primaryType(attacker),defs=defender.types||[];
+  if(!defs.length)return 1;
+  return defs.reduce((sum,t)=>sum+typeFactor(at,t),0)/defs.length;
+}
+function counterTypeFor(defenderType){
+  return Object.keys(TYPE_MATCHUPS).find(t=>TYPE_MATCHUPS[t].strong===defenderType)||null;
+}
+function battleTargetMatch(attacker,targetSide,b){
+  const candidates=(targetSide?.units||[]).map((unit,index)=>unit?{unit,index,c:creatureOf(unit.unit)}:null).filter(Boolean);
+  if(!candidates.length)return{index:0,mult:1,target:null};
+  let best=-Infinity,choices=[];
+  candidates.forEach(x=>{
+    const mult=creatureTypeFactor(attacker,x.c);
+    if(mult>best+.001){best=mult;choices=[{...x,mult}];}
+    else if(Math.abs(mult-best)<.001)choices.push({...x,mult});
+  });
+  const pick=choices[(Math.max(0,(b?.casts||0)+(b?.index||0)))%choices.length]||choices[0];
+  return{index:pick.index,mult:pick.mult,target:pick.c};
+}
+function matchupLabel(mult){
+  if(mult>1.05)return'¡MUY EFICAZ!';
+  if(mult<.95)return'POCO EFICAZ';
+  return'NEUTRO';
+}
 function spriteMeta(c){
   const i=Math.max(0,D.creatures.findIndex(x=>x.id===c?.id));
   const atlas=i<25?0:1,local=i%25;
@@ -461,7 +506,7 @@ function renderBoards(){
 function unitCard(u,isSel,area,index){
   const c=creatureOf(u); if(!c)return '';
   const meta=abilityMeta(c),trainPct=Math.round((u.training||0)*TRAINING_STEP*100);
-  return '<button draggable="true" class="unit-card '+(u.chromatic?'chromatic ':'')+(isSel?'selected':'')+'" data-unit="'+esc(u.uid)+'" data-area="'+esc(area||'')+'" data-index="'+String(index??'')+'" data-rarity="'+esc(c.rarity)+'">'+
+  return '<button draggable="true" class="unit-card '+(u.chromatic?'chromatic ':'')+(isSel?'selected':'')+'" data-unit="'+esc(u.uid)+'" data-area="'+esc(area||'')+'" data-index="'+String(index??'')+'" data-rarity="'+esc(c.rarity)+'" data-type="'+esc(primaryType(c))+'">'+
     '<i class="rarity-line"></i><span class="unit-level">'+levelStars(u.level)+'</span><span class="unit-power">🎓 +'+trainPct+'%</span>'+
     '<span class="unit-role">'+esc(meta.icon)+' '+esc(meta.role)+'</span>'+
     spriteMarkup(c,'unit-sprite')+'<span class="unit-name">'+esc(c.name)+'</span>'+
@@ -519,7 +564,7 @@ function renderInspect(){
 function renderMarketDetail(host,index){
   const o=run.shop[index];if(!o||o.bought)return;
   const affordable=run.gold>=o.price;
-  host.className='inspect-card market-detail-card';
+  host.className='inspect-card market-detail-card';host.dataset.type='';
   if(o.kind==='resource'){
     const r=D.resource(o.resourceId);
     host.innerHTML='<div class="market-detail-resource"><span class="market-detail-resource-icon">'+esc(r.icon)+'</span><span class="micro-label">RECURSO</span><h3>'+esc(r.name)+'</h3><p>'+esc(r.text)+'</p></div>'+
@@ -527,6 +572,7 @@ function renderMarketDetail(host,index){
     return;
   }
   const c=D.creature(o.creatureId),meta=abilityMeta(c),fit=strategicFit(c),fusion=fusionInfo(c.id,1,true);
+  host.dataset.type=primaryType(c);
   host.innerHTML=
     '<div class="market-detail-hero">'+spriteMarkup(c,'market-detail-sprite')+'<div><span class="rarity-name">'+esc(D.RARITIES[c.rarity].name)+'</span><h3>'+esc(c.name)+(o.chromatic?' ✦':'')+'</h3><span class="role-badge">'+esc(meta.icon)+' '+esc(meta.role)+'</span></div></div>'+
     '<div class="type-pills">'+c.types.map(t=>'<span class="type-pill">'+esc(D.TYPES[t].name)+'</span>').join('')+'</div>'+
@@ -581,7 +627,7 @@ function renderMarket(){
     const affordable=run.gold>=o.price,active=i===marketSelection;
     if(o.kind==='creature'){
       const c=D.creature(o.creatureId);
-      return '<button type="button" class="market-tile '+(active?'selected ':'')+(o.bought?'bought ':'')+(o.chromatic?'chromatic ':'')+(affordable?'':'unaffordable')+'" data-market-select="'+i+'" data-rarity="'+esc(c.rarity)+'" aria-label="Ver '+esc(c.name)+'">'+
+      return '<button type="button" class="market-tile '+(active?'selected ':'')+(o.bought?'bought ':'')+(o.chromatic?'chromatic ':'')+(affordable?'':'unaffordable')+'" data-market-select="'+i+'" data-rarity="'+esc(c.rarity)+'" data-type="'+esc(primaryType(c))+'" aria-label="Ver '+esc(c.name)+'">'+
         spriteMarkup(c,'market-sprite')+
         '<span class="market-tile-caption"><b>'+esc(c.name)+(o.chromatic?' ✦':'')+'</b><small>🖋️ '+o.price+'</small></span>'+
       '</button>';
@@ -997,13 +1043,56 @@ function startStudentBattle(index,source){
   applyBattleStart();renderBattle();
   clearInterval(battleTimer);battleTimer=setInterval(battleTick,100);
 }
-function startBattle(){
+function openBattleBriefing(){
+  battleContext='adventure';duelRunContext=null;
+  if(!run.team.some(Boolean))return toast('Necesitas al menos un Lexario en el equipo.','bad');
+  pendingAdventureEnemy=enemyForDay();
+  renderBattleBriefing(pendingAdventureEnemy);
+  openModal('battleBriefingModal');
+}
+function renderBattleBriefing(enemy){
+  if(!enemy)return;
+  const enemyUnits=enemy.team.map((u,i)=>u?{u,i,c:creatureOf(u)}:null).filter(Boolean);
+  const typeCounts={};
+  enemyUnits.forEach(x=>x.c.types.forEach(t=>typeCounts[t]=(typeCounts[t]||0)+1));
+  const dominant=Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]);
+  const counters=[...new Set(dominant.slice(0,3).map(([t])=>counterTypeFor(t)).filter(Boolean))];
+  const myTypes=teamTypeCounts(run.team.filter(Boolean));
+  const recommendations=counters.map(t=>{
+    const count=myTypes[t]||0;
+    const target=TYPE_MATCHUPS[t]?.strong;
+    return '<div class="brief-counter '+(count?'owned':'missing')+'" data-type="'+esc(t)+'"><span>'+esc(D.TYPES[t].icon)+'</span><div><b>'+esc(D.TYPES[t].name)+'</b><small>fuerte contra '+esc(D.TYPES[target]?.name||target)+(count?' · tienes '+count:' · no tienes ninguno activo')+'</small></div></div>';
+  }).join('');
+  const threats=dominant.map(([t,n])=>{
+    const counter=counterTypeFor(t);
+    return '<span class="brief-threat" data-type="'+esc(t)+'"><b>'+esc(D.TYPES[t].icon)+' '+esc(D.TYPES[t].name)+'</b><small>'+n+' rival'+(n===1?'':'es')+' · responde con '+esc(D.TYPES[counter]?.name||'otro tipo')+'</small></span>';
+  }).join('');
+  $('battleBriefingTitle').textContent='Jornada '+run.day+' · '+esc(enemy.trainer?.name||'Rival');
+  $('battleBriefingEnemy').innerHTML=enemyUnits.map(x=>
+    '<article class="briefing-lexario" data-type="'+esc(primaryType(x.c))+'">'+spriteMarkup(x.c,'briefing-sprite')+
+      '<div><b>'+esc(x.c.name)+'</b><small>'+x.c.types.map(t=>esc(D.TYPES[t].name)).join(' · ')+' · '+levelStars(x.u.level)+'</small></div>'+
+    '</article>'
+  ).join('');
+  $('battleBriefingThreats').innerHTML=threats||'<span class="brief-threat">Sin datos de tipo.</span>';
+  $('battleBriefingCounters').innerHTML=recommendations||'<div class="brief-counter neutral"><div><b>Equipo equilibrado</b><small>No hay una ventaja de tipo clara.</small></div></div>';
+  const matchupSummary=run.team.filter(Boolean).map(u=>{
+    const c=creatureOf(u);
+    const best=enemyUnits.reduce((m,x)=>Math.max(m,creatureTypeFactor(c,x.c)),1);
+    return{c,best};
+  }).sort((a,b)=>b.best-a.best);
+  $('battleBriefingTip').innerHTML=matchupSummary[0]&&matchupSummary[0].best>1
+    ?'<b>Consejo:</b> '+esc(matchupSummary[0].c.name)+' puede aprovechar una ventaja de tipo en este combate.'
+    :'<b>Consejo:</b> revisa Vanguardia/Retaguardia y las sinergias antes de entrar.';
+}
+function startBattle(enemyOverride){
   battleContext='adventure';duelRunContext=null;
   if(!run.team.some(Boolean))return toast('Necesitas al menos un Lexario en el equipo.','bad');
   selected=null;
+  closeModal();
   showScreen('battleScreen');
   setBattlePaused(false,true);battleInspectRef=null;
-  const enemy=enemyForDay();
+  const enemy=enemyOverride||pendingAdventureEnemy||enemyForDay();
+  pendingAdventureEnemy=null;
   battle=createBattleState(run.team,enemy.team,enemy.trainer);
   renderBattleStatic(enemy.trainer);
   applyBattleStart();
@@ -1052,7 +1141,7 @@ function renderBattleBoard(id,side){
   $(id).innerHTML=side.units.map((b,i)=>{
     if(!b)return '<div class="battle-unit empty '+(i<3?'front':'back')+'"></div>';
     const c=creatureOf(b.unit),meta=abilityMeta(c);
-    return '<div class="battle-unit '+(i<3?'front ':'back ')+(b.unit.chromatic?'chromatic ':'')+'" data-battle-side="'+side.kind+'" data-battle-index="'+i+'" role="button" tabindex="0" aria-label="Inspeccionar '+esc(c.name)+'">'+
+    return '<div class="battle-unit '+(i<3?'front ':'back ')+(b.unit.chromatic?'chromatic ':'')+'" data-battle-side="'+side.kind+'" data-battle-index="'+i+'" data-type="'+esc(primaryType(c))+'" role="button" tabindex="0" aria-label="Inspeccionar '+esc(c.name)+'">'+
       '<div class="battle-unit-top"><span class="battle-stars">'+levelStars(b.unit.level)+'</span><span class="battle-role">'+esc(meta.icon)+' '+esc(meta.role)+'</span></div>'+
       spriteMarkup(c,'battle-sprite')+'<span class="unit-name">'+esc(c.name)+'</span>'+
       '<span class="battle-ability-name">'+esc(c.ability.name)+'</span>'+
@@ -1131,7 +1220,8 @@ function heal(side,amount){
   const real=Math.max(0,Math.min(side.maxHp-side.hp,Math.round(amount)));side.hp+=real;side.lastSupport=real;return real;
 }
 function directHit(target,amount,source){
-  let dmg=Math.max(1,Math.round(amount));
+  const typeMult=Number(source?.currentTypeMult)||1;
+  let dmg=Math.max(1,Math.round(amount*typeMult));
   if(target.guard>0)dmg=Math.round(dmg*(1-clamp(target.guard/100,0,.65)));
   if(target.shock>0){const extra=Math.round(target.shock*4);dmg+=extra;target.shock=Math.max(0,target.shock-1);}
   if(target.kind==='player'&&hasRelic('goma')&&!target.fatalGuardUsed&&target.hp-dmg<=target.maxHp*.25){
@@ -1167,59 +1257,65 @@ function battleActionFx(side,target,b,c,a,dealt,healed,shielded){
   const targetBoard=$(target.kind==='player'?'playerBattleBoard':'enemyBattleBoard');
   const ownBoard=$(side.kind==='player'?'playerBattleBoard':'enemyBattleBoard');
   const layer=$('battleFxLayer'),callout=$('abilityCallout');
-  const targetUnits=targetBoard?Array.from(targetBoard.querySelectorAll('.battle-unit:not(.empty)')):[];
-  const targetEl=targetUnits.length?targetUnits[(b.casts+b.index)%targetUnits.length]:targetBoard;
+  const targetUnits=targetBoard?Array.from(targetBoard.querySelectorAll('.battle-unit')):[];
+  const targetEl=targetUnits[b.lastTargetIndex]&&!targetUnits[b.lastTargetIndex].classList.contains('empty')
+    ?targetUnits[b.lastTargetIndex]
+    :targetUnits.find(x=>!x.classList.contains('empty'))||targetBoard;
   const sourceAnchor=source?.querySelector('.battle-sprite')||source;
   const targetAnchor=targetEl?.querySelector('.battle-sprite')||targetEl;
-  const fxType=(c.types&&c.types[0])||'ortografia';
+  const fxType=primaryType(c),travel=720,impactAt=610;
+  const typeMult=Number(b.lastTypeMult)||1;
 
   if(source){source.classList.remove('casting');void source.offsetWidth;source.classList.add('casting');}
-  if(dealt>0&&targetEl){
-    setTimeout(()=>{
-      targetEl.classList.remove('hit');void targetEl.offsetWidth;targetEl.classList.add('hit');
-      setTimeout(()=>targetEl.classList.remove('hit'),360);
-    },250);
-  }
 
+  let impactPoint=null;
   if(layer&&sourceAnchor&&targetAnchor&&dealt>0){
     const lr=layer.getBoundingClientRect(),sr=sourceAnchor.getBoundingClientRect(),tr=targetAnchor.getBoundingClientRect();
-    const x1=sr.left+sr.width/2-lr.left,y1=sr.top+sr.height*.50-lr.top;
-    const x2=tr.left+tr.width/2-lr.left,y2=tr.top+tr.height*.52-lr.top;
-    const dx=x2-x1,dy=y2-y1,len=Math.max(24,Math.hypot(dx,dy)),ang=Math.atan2(dy,dx)*180/Math.PI;
+    const x1=sr.left+sr.width*.52-lr.left,y1=sr.top+sr.height*.50-lr.top;
+    const x2=tr.left+tr.width*.48-lr.left,y2=tr.top+tr.height*.50-lr.top;
+    impactPoint={x:x2,y:y2,lr};
     const bolt=document.createElement('i');
     bolt.className='battle-projectile fx-'+fxType+' '+side.kind;
-    bolt.style.left=x1+'px';bolt.style.top=y1+'px';bolt.style.setProperty('--fx-len',len+'px');bolt.style.setProperty('--fx-angle',ang+'deg');
+    bolt.style.left=x1+'px';bolt.style.top=y1+'px';
+    bolt.style.setProperty('--dx',(x2-x1)+'px');bolt.style.setProperty('--dy',(y2-y1)+'px');
+    bolt.style.setProperty('--travel',travel+'ms');
     layer.appendChild(bolt);
     setTimeout(()=>{
       const impact=document.createElement('i');
       impact.className='battle-impact fx-'+fxType;
       impact.style.left=x2+'px';impact.style.top=y2+'px';
       layer.appendChild(impact);
-      setTimeout(()=>impact.remove(),520);
-    },260);
-    setTimeout(()=>bolt.remove(),520);
+      if(targetEl){
+        targetEl.classList.remove('hit');void targetEl.offsetWidth;targetEl.classList.add('hit');
+        setTimeout(()=>targetEl.classList.remove('hit'),520);
+      }
+      setTimeout(()=>impact.remove(),760);
+    },impactAt);
+    setTimeout(()=>bolt.remove(),travel+120);
   }
 
-  const floatHost=dealt>0?targetAnchor:(sourceAnchor||ownBoard);
-  if(layer&&floatHost&&(dealt>0||healed>0||shielded>0)){
+  const spawnFloat=()=>{
+    const floatHost=dealt>0?targetAnchor:(sourceAnchor||ownBoard);
+    if(!layer||!floatHost||!(dealt>0||healed>0||shielded>0))return;
     const lr=layer.getBoundingClientRect(),hr=floatHost.getBoundingClientRect();
     if(dealt<=0){
       const pulse=document.createElement('i');
       pulse.className='battle-support-pulse '+(healed>0?'heal':'shield');
       pulse.style.left=(hr.left+hr.width/2-lr.left)+'px';pulse.style.top=(hr.top+hr.height/2-lr.top)+'px';
-      layer.appendChild(pulse);setTimeout(()=>pulse.remove(),600);
+      layer.appendChild(pulse);setTimeout(()=>pulse.remove(),900);
     }
     const n=document.createElement('b');
-    n.className='battle-float '+(dealt>0?'damage':healed>0?'heal':'shield');
-    n.textContent=dealt>0?'−'+format(dealt):healed>0?'+'+format(healed)+' CURA':'+'+format(shielded)+' ESCUDO';
-    n.style.left=(hr.left+hr.width/2-lr.left)+'px';n.style.top=(hr.top+hr.height*.20-lr.top)+'px';
-    layer.appendChild(n);setTimeout(()=>n.remove(),820);
-  }
+    n.className='battle-float '+(dealt>0?'damage':healed>0?'heal':'shield')+(typeMult>1.05?' effective':typeMult<.95?' resisted':'');
+    n.innerHTML=dealt>0?'−'+format(dealt)+(typeMult!==1?'<small>'+matchupLabel(typeMult)+'</small>'):(healed>0?'+'+format(healed)+'<small>CURA</small>':'+'+format(shielded)+'<small>ESCUDO</small>');
+    n.style.left=(hr.left+hr.width/2-lr.left)+'px';n.style.top=(hr.top+hr.height*.18-lr.top)+'px';
+    layer.appendChild(n);setTimeout(()=>n.remove(),1450);
+  };
+  setTimeout(spawnFloat,dealt>0?impactAt:250);
 
   if(callout){
     callout.className='ability-callout '+side.kind;
-    callout.innerHTML='<span>'+esc(c.name)+'</span><b>'+esc(a.name)+'</b><small>'+(dealt>0?format(dealt)+' daño':healed>0?format(healed)+' de cura':shielded>0?format(shielded)+' de escudo':'efecto de equipo')+'</small>';
-    setTimeout(()=>{if(callout)callout.className='ability-callout hidden';},900);
+    callout.innerHTML='<span>'+esc(c.name)+'</span><b>'+esc(a.name)+'</b><small>'+(dealt>0?format(dealt)+' daño · '+matchupLabel(typeMult):healed>0?format(healed)+' de cura':shielded>0?format(shielded)+' de escudo':'efecto de equipo')+'</small>';
+    setTimeout(()=>{if(callout)callout.className='ability-callout hidden';},1550);
   }
 }
 function castAbility(side,target,b,free){
@@ -1237,6 +1333,10 @@ function castAbility(side,target,b,free){
   b.cooldown=b.stats.cooldown/Math.max(.45,1+(side.haste/100));
 }
 function executeAbility(a,side,target,b,c){
+  const match=battleTargetMatch(c,target,b);
+  const prevTypeMult=side.currentTypeMult;
+  side.currentTypeMult=match.mult;
+  b.lastTargetIndex=match.index;b.lastTypeMult=match.mult;
   const p=abilityPower(b,a.power||c.damage);
   const beforeHp=side.hp,beforeShield=side.shield;
   let dealt=0;
@@ -1273,6 +1373,7 @@ function executeAbility(a,side,target,b,c){
     default:dealt=directHit(target,p,side);
   }
   const healed=Math.max(0,side.hp-beforeHp),shielded=Math.max(0,side.shield-beforeShield);
+  side.currentTypeMult=prevTypeMult;
   battleActionFx(side,target,b,c,a,dealt,healed,shielded);
   if(dealt>0)logBattle('<b>'+esc(c.name)+'</b> usa '+esc(a.name)+' → <strong>'+format(dealt)+' daño</strong>.');
   else if(healed>0||shielded>0)logBattle('<b>'+esc(c.name)+'</b> usa '+esc(a.name)+' → '+(healed>0?format(healed)+' cura ':'')+(shielded>0?format(shielded)+' escudo':'')+'.');
@@ -1461,7 +1562,7 @@ function filterCodex(){
   const list=D.creatures.filter(c=>(!search||c.name.toLowerCase().includes(search))&&(!type||c.types.includes(type))&&(!rarity||c.rarity===rarity));
   $('codexGrid').innerHTML=list.map(c=>{
     const unlocked=!!career.discovered[c.id],b=career.badges[c.id]||{};
-    return '<article class="codex-entry '+(unlocked?'':'locked')+'">'+(unlocked?spriteMarkup(c,'codex-sprite'):'<span class="codex-mystery">❔</span>')+'<h3>'+(unlocked?esc(c.name):'???')+'</h3><p>'+(unlocked?esc(c.types.map(t=>D.TYPES[t].name).join(' · ')):'No descubierto')+'</p><p>'+(unlocked?esc(c.ability.name):'')+'</p><div class="badge-row"><span class="mini-badge '+(b.trophy?'on':'')+'" title="Ganar una liga">🏆</span><span class="mini-badge '+(b.medal?'on':'')+'" title="Ganar con nivel 3+">🎖</span><span class="mini-badge '+(b.star?'on':'')+'" title="Ganar con variante cromática">★</span></div></article>';
+    return '<article class="codex-entry '+(unlocked?'':'locked')+'" data-type="'+(unlocked?esc(primaryType(c)):'')+'">'+(unlocked?spriteMarkup(c,'codex-sprite'):'<span class="codex-mystery">❔</span>')+'<h3>'+(unlocked?esc(c.name):'???')+'</h3><p>'+(unlocked?esc(c.types.map(t=>D.TYPES[t].name).join(' · ')):'No descubierto')+'</p><p>'+(unlocked?esc(c.ability.name):'')+'</p><div class="badge-row"><span class="mini-badge '+(b.trophy?'on':'')+'" title="Ganar una liga">🏆</span><span class="mini-badge '+(b.medal?'on':'')+'" title="Ganar con nivel 3+">🎖</span><span class="mini-badge '+(b.star?'on':'')+'" title="Ganar con variante cromática">★</span></div></article>';
   }).join('');
 }
 function renderAchievements(){
@@ -1488,7 +1589,10 @@ function bind(){
   $('historyBtn')?.addEventListener('click',()=>{renderHistory();openModal('historyModal');});
   $('rerollBtn')?.addEventListener('click',rerollShop);
   $('lockBtn')?.addEventListener('click',lockShop);
-  $('battleBtn')?.addEventListener('click',startBattle);
+  $('battleBtn')?.addEventListener('click',openBattleBriefing);
+  $('battleBriefingStartBtn')?.addEventListener('click',()=>startBattle(pendingAdventureEnemy));
+  $('battleBriefingBackBtn')?.addEventListener('click',()=>{pendingAdventureEnemy=null;closeModal();});
+  $('battleBriefingBackBtnAlt')?.addEventListener('click',()=>{pendingAdventureEnemy=null;});
   $('saveExitBtn')?.addEventListener('click',saveAndExit);
   $('battleSaveExitBtn')?.addEventListener('click',saveAndExit);
   $('battleSaveExitModalBtn')?.addEventListener('click',saveAndExit);
