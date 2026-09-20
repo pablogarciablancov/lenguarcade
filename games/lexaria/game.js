@@ -14,6 +14,8 @@ const LEVEL_MULT={1:1,2:1.7,3:3,4:4.5};
 
 const BATTLEFIELDS=[
   {id:'academy',name:'Patio Celeste',image:'battle-academy.webp'},
+  {id:'ice',name:'Valle Helado',image:'battle-ice.webp'},
+  {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal.webp'},
   {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset.webp'}
 ];
 
@@ -132,44 +134,56 @@ function adjacentIndexes(index){
 }
 function adjacencyCount(index,team){return adjacentIndexes(index).filter(i=>team[i]).length;}
 function abilityMeta(c){return ABILITY_META[c?.ability?.kind]||{role:'VERSÁTIL',icon:'✦',row:'back',tags:['HABILIDAD']};}
-function spriteHash(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
-function creatureVectorSvg(c){
-  if(!c)return '';
-  const palettes={ortografia:['#ff6f61','#ffc36b','#7d2839'],verbos:['#48a8ff','#68e7ff','#214b89'],lexico:['#52d68e','#a7ef72','#245d40'],morfologia:['#f6b74e','#ff7e50','#86481f'],sintaxis:['#9b78ff','#65aaff','#47378f'],literatura:['#e46cff','#ff9f67','#742f76']};
-  const rarity={common:'#b9cfdd',uncommon:'#75dfa8',rare:'#72b9ff',epic:'#c58bff',legendary:'#ffd66a'};
-  const p=palettes[c.types[0]]||palettes.lexico,q=palettes[c.types[1]]||p,h=spriteHash(c.id),a=h%10;
-  const p1=p[0],p2=q[1],dark=p[2],glow=rarity[c.rarity]||'#b9cfdd';
-  let body='';
-  if(a===0)body='<path d="M60 164Q47 122 75 91L96 63 114 82 140 64 168 93Q190 123 174 166Q150 190 118 188Q83 188 60 164Z" fill="url(#g)" stroke="'+dark+'" stroke-width="7"/><path d="M73 103 49 86 65 120M163 103l27-17-17 31" fill="'+p2+'" stroke="'+dark+'" stroke-width="6"/><path d="M168 150q34 8 23 39q-28 14-49-7" fill="'+p1+'" stroke="'+dark+'" stroke-width="7"/>';
-  else if(a===1)body='<path d="M63 165Q45 132 66 96L54 58 89 82Q116 68 144 82L180 58 166 99Q187 132 169 166Q148 192 116 191Q84 192 63 165Z" fill="url(#g)" stroke="'+dark+'" stroke-width="7"/><path d="M79 157q37 21 75 0" fill="none" stroke="'+p2+'" stroke-width="11" stroke-linecap="round"/>';
-  else if(a===2)body='<path d="M56 169 65 99 95 77 106 48 129 72 151 51 163 86 186 105 178 171 154 195 88 195Z" fill="url(#g)" stroke="'+dark+'" stroke-width="8"/><path d="M69 115 43 128 68 142M169 116l28 13-27 15" fill="'+p2+'" stroke="'+dark+'" stroke-width="7"/>';
-  else if(a===3)body='<path d="M123 70Q98 82 92 113Q67 103 43 116Q63 130 86 132Q90 166 119 176Q150 171 157 138Q182 136 206 117Q177 103 156 113Q150 82 123 70Z" fill="url(#g)" stroke="'+dark+'" stroke-width="7"/><path d="M95 104Q76 82 53 83Q69 113 92 122M157 103q20-21 43-20q-16 30-40 39" fill="'+p2+'" stroke="'+dark+'" stroke-width="6"/>';
-  else if(a===4)body='<path d="M70 170Q48 138 64 103Q79 72 116 71Q155 69 177 99Q198 129 181 164Q161 194 124 196Q88 195 70 170Z" fill="url(#g)" stroke="'+dark+'" stroke-width="7"/><path d="M66 115Q33 104 35 139Q56 158 77 147M180 113q31-14 35 20q-18 24-43 15" fill="'+p2+'" stroke="'+dark+'" stroke-width="7"/>';
-  else if(a===5)body='<path d="M73 173Q56 137 77 98L94 72 113 85 133 69 160 93Q184 127 171 166Q151 194 120 194Q91 194 73 173Z" fill="url(#g)" stroke="'+dark+'" stroke-width="7"/><path d="M92 83Q72 58 52 69Q73 84 84 104M147 84q21-27 42-17q-18 19-28 39" fill="'+p2+'" stroke="'+dark+'" stroke-width="7"/>';
-  else if(a===6)body='<path d="M64 164Q51 129 72 98Q93 69 126 75Q161 69 180 100Q196 131 178 163Q158 191 122 191Q85 192 64 164Z" fill="url(#g)" stroke="'+dark+'" stroke-width="7"/><path d="M77 164q43-26 87 0" fill="none" stroke="'+p2+'" stroke-width="10" stroke-linecap="round"/><circle cx="55" cy="93" r="13" fill="'+p2+'" opacity=".75"/>';
-  else if(a===7)body='<path d="M75 178 67 100 95 81 102 49 122 69 144 49 151 81 180 101 170 180 145 198 100 198Z" fill="url(#g)" stroke="'+dark+'" stroke-width="7"/><path d="M80 113 51 119 80 137M165 112l30 8-29 17" fill="'+p2+'" stroke="'+dark+'" stroke-width="7"/><path d="M99 91h46l-5 29q-18 12-36 0Z" fill="#17243a" stroke="'+p2+'" stroke-width="5"/>';
-  else if(a===8)body='<path d="M176 86Q135 60 97 82Q68 99 78 125Q90 146 125 151Q153 155 158 170Q160 188 132 195" fill="none" stroke="'+p1+'" stroke-width="31" stroke-linecap="round"/><path d="M154 70Q184 59 198 83Q210 106 188 121Q166 132 147 114Q133 97 154 70Z" fill="url(#g)" stroke="'+dark+'" stroke-width="7"/><path d="M193 116 220 129 190 139Z" fill="'+p2+'" stroke="'+dark+'" stroke-width="6"/>';
-  else body='<path d="M60 172 68 105 91 84 108 51 125 81 146 54 162 84 185 108 177 173 153 195 86 195Z" fill="url(#g)" stroke="'+dark+'" stroke-width="7"/><path d="M84 101 55 84 72 117M163 101l28-18-15 35" fill="'+p2+'" stroke="'+dark+'" stroke-width="6"/>';
-  const horns=(h>>4)%3===0?'<path d="M98 79 91 48 111 72M143 79l10-30 8 35" fill="'+p2+'" stroke="'+dark+'" stroke-width="6"/>':'';
-  const wings=(h>>6)%3===0?'<path d="M79 117Q43 91 29 116Q48 143 85 145M164 116q36-27 51-1q-17 30-53 30" fill="'+p2+'" opacity=".83" stroke="'+dark+'" stroke-width="6"/>':'';
-  const crystals=(h>>8)%2===0?'<g fill="'+glow+'" stroke="'+dark+'" stroke-width="4"><path d="M70 158 58 128 79 137Z"/><path d="M176 156 191 128 169 137Z"/></g>':'';
-  const motif=c.types[0]==='sintaxis'?'<path d="M102 139h43M123 120v38" stroke="'+glow+'" stroke-width="5" stroke-linecap="round" opacity=".78"/>':c.types[0]==='verbos'?'<path d="M123 114v31m0-31 13 9m-13 22-13-9" stroke="'+glow+'" stroke-width="5" stroke-linecap="round"/>':c.types[0]==='morfologia'?'<path d="M108 127 123 113 138 127 123 145Z" fill="none" stroke="'+glow+'" stroke-width="5"/>':c.types[0]==='literatura'?'<path d="M109 137q13-12 26 0q-13 18-26 0Z" fill="'+glow+'" opacity=".8"/>':'<path d="M107 135h33" stroke="'+glow+'" stroke-width="5" stroke-linecap="round"/>';
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="'+p1+'"/><stop offset=".58" stop-color="'+p2+'"/><stop offset="1" stop-color="'+dark+'"/></linearGradient><filter id="s" x="-35%" y="-35%" width="170%" height="180%"><feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000" flood-opacity=".44"/></filter></defs><ellipse cx="124" cy="208" rx="66" ry="14" fill="#000" opacity=".2"/><g filter="url(#s)">'+wings+body+horns+crystals+motif+'<ellipse cx="103" cy="119" rx="12" ry="13" fill="#fff"/><ellipse cx="143" cy="119" rx="12" ry="13" fill="#fff"/><ellipse cx="106" cy="121" rx="5" ry="6" fill="#132236"/><ellipse cx="146" cy="121" rx="5" ry="6" fill="#132236"/><circle cx="108" cy="118" r="2" fill="#fff"/><circle cx="148" cy="118" r="2" fill="#fff"/><path d="M109 151Q123 160 138 150" fill="none" stroke="'+dark+'" stroke-width="5" stroke-linecap="round"/></g></svg>';
+function spriteMeta(c){
+  const i=Math.max(0,D.creatures.findIndex(x=>x.id===c?.id));
+  const row=Math.floor(i/10)+1,col=i%10;
+  return{row,pos:(col/9*100).toFixed(4)};
 }
 function spriteMarkup(c,extra){
   if(!c)return '<span class="lex-sprite missing" aria-hidden="true"></span>';
-  return '<span class="lex-sprite '+esc(extra||'')+'" aria-hidden="true">'+creatureVectorSvg(c)+'</span>';
+  const m=spriteMeta(c);
+  return "<span class=\"lex-sprite "+esc(extra||"")+"\" aria-hidden=\"true\" style=\"--lex-image:url('./assets/generated/lexarios-row-"+m.row+".webp');--lex-pos:"+m.pos+"%\"></span>";
 }
-function trainerVectorSvg(t){
-  const a=TRAINER_ART[t?.id]||TRAINER_ART.filologa;
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 300" aria-hidden="true"><defs><filter id="ts" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000" flood-opacity=".38"/></filter></defs><g filter="url(#ts)"><path d="M38 276Q48 203 120 187Q193 204 202 276Z" fill="'+a.coat+'" stroke="#10243a" stroke-width="6"/><path d="M92 194 120 232 149 194 136 177 104 177Z" fill="'+a.accent+'"/><rect x="107" y="151" width="27" height="36" rx="10" fill="'+a.skin+'"/><ellipse cx="121" cy="116" rx="50" ry="61" fill="'+a.skin+'" stroke="#10243a" stroke-width="6"/><path d="M72 109Q72 55 112 47Q155 41 171 80L160 66Q152 53 145 48Q119 31 92 46Q69 60 72 109Z" fill="'+a.hair+'" stroke="#10243a" stroke-width="6"/><ellipse cx="102" cy="112" rx="10" ry="8" fill="#fff"/><ellipse cx="141" cy="112" rx="10" ry="8" fill="#fff"/><circle cx="104" cy="113" r="4" fill="#132235"/><circle cx="143" cy="113" r="4" fill="#132235"/>'+(a.glasses?'<rect x="88" y="101" width="28" height="22" rx="7" fill="none" stroke="#1c2633" stroke-width="4"/><rect x="127" y="101" width="28" height="22" rx="7" fill="none" stroke="#1c2633" stroke-width="4"/><path d="M116 109h11" stroke="#1c2633" stroke-width="4"/>':'')+'<path d="M92 133Q120 156 151 132Q146 168 121 176Q97 168 92 133Z" fill="'+a.beard+'"/><circle cx="190" cy="52" r="23" fill="'+a.accent+'" stroke="#fff2c7" stroke-width="3"/><path d="M190 38 196 49 208 51 199 60 201 73 190 67 179 73 181 60 172 51 184 49Z" fill="#15304b"/></g></svg>';
+function trainerSpriteMeta(t){
+  const i=Math.max(0,D.trainers.findIndex(x=>x.id===t?.id));
+  const row=Math.floor(i/4)+1,col=i%4;
+  return{row,pos:(col/3*100).toFixed(4)};
 }
 function trainerSpriteMarkup(t,extra){
   if(!t)return '';
-  return '<span class="trainer-sprite '+esc(extra||'')+'" role="img" aria-label="'+esc(t.name)+'">'+trainerVectorSvg(t)+'</span>';
+  const m=trainerSpriteMeta(t);
+  return "<span class=\"trainer-sprite "+esc(extra||"")+"\" role=\"img\" aria-label=\""+esc(t.name)+"\" style=\"--trainer-image:url('./assets/generated/trainers-row-"+m.row+".webp');--trainer-pos:"+m.pos+"%\"></span>";
 }
 function renderStaticHeroSprites(){
-  qsa('[data-lexario-id]').forEach(el=>{const c=D.creature(el.dataset.lexarioId);if(c)el.innerHTML=creatureVectorSvg(c);});
+  qsa('[data-lexario-id]').forEach(el=>{
+    const c=D.creature(el.dataset.lexarioId);if(!c)return;
+    const m=spriteMeta(c);
+    el.style.setProperty('--lex-image',"url('./assets/generated/lexarios-row-"+m.row+".webp')");
+    el.style.setProperty('--lex-pos',m.pos+'%');
+  });
+}
+const BATTLEFIELD_LAYOUT={
+  academy:{w:1672,h:941,player:[[165,555],[365,555],[555,555],[165,705],[365,705],[555,705]],enemy:[[1115,555],[1315,555],[1510,555],[1115,705],[1315,705],[1510,705]]},
+  ice:{w:1672,h:941,player:[[160,565],[365,565],[570,565],[160,710],[365,710],[570,710]],enemy:[[1110,565],[1315,565],[1520,565],[1110,710],[1315,710],[1520,710]]},
+  crystal:{w:1672,h:941,player:[[160,560],[365,560],[570,560],[160,705],[365,705],[570,705]],enemy:[[1110,560],[1315,560],[1520,560],[1110,705],[1315,705],[1520,705]]},
+  sunset:{w:1672,h:941,player:[[149,537],[367,537],[577,540],[142,675],[374,677],[602,679]],enemy:[[1118,537],[1328,537],[1532,540],[1110,675],[1322,677],[1534,679]]}
+};
+function applyBattlefieldSlotLayout(){
+  const screen=$('battleScreen');
+  if(!screen||screen.classList.contains('hidden')||!battle)return;
+  const cfg=BATTLEFIELD_LAYOUT[battle.battlefield?.id]||BATTLEFIELD_LAYOUT.academy;
+  const rect=screen.getBoundingClientRect();
+  if(!rect.width||!rect.height)return;
+  const scale=Math.max(rect.width/cfg.w,rect.height/cfg.h);
+  const ox=(rect.width-cfg.w*scale)/2,oy=(rect.height-cfg.h*scale)/2;
+  [['playerBattleBoard','player'],['enemyBattleBoard','enemy']].forEach(([id,side])=>{
+    const board=$(id);if(!board)return;
+    Array.from(board.children).forEach((el,i)=>{
+      const p=cfg[side][i];if(!p)return;
+      el.style.setProperty('left',(ox+p[0]*scale)+'px','important');
+      el.style.setProperty('top',(oy+p[1]*scale)+'px','important');
+    });
+  });
 }
 function battlefieldFor(seedBase){
   const rng=D.seeded(String(seedBase||'lexaria')+'_battlefield');
@@ -961,6 +975,8 @@ function renderBattleStatic(enemyTrainer){
   $('battleLog').innerHTML='';
   renderBattleBoard('playerBattleBoard',battle.player);
   renderBattleBoard('enemyBattleBoard',battle.enemy);
+  requestAnimationFrame(applyBattlefieldSlotLayout);
+  setTimeout(applyBattlefieldSlotLayout,80);
 }
 function renderBattleBoard(id,side){
   $(id).innerHTML=side.units.map((b,i)=>{
@@ -1476,6 +1492,7 @@ function bind(){
 }
 function init(){
   loadSettingsToBody();renderTitleMeta();renderStaticHeroSprites();bind();
+  window.addEventListener('resize',()=>{if(battle)applyBattlefieldSlotLayout();},{passive:true});
   window.addEventListener('lexaria:restore',e=>{if(e.detail){localStorage.setItem(RUN_KEY,JSON.stringify(e.detail));renderTitleMeta();}});
 }
 document.addEventListener('DOMContentLoaded',init);
