@@ -13,11 +13,12 @@ const TRAINING_STEP=.05;
 const LEVEL_MULT={1:1,2:1.7,3:3,4:4.5};
 
 const BATTLEFIELDS=[
-  {id:'academy',name:'Patio Celeste',image:'battle-academy.webp'},
-  {id:'ice',name:'Valle Helado',image:'battle-ice.webp'},
-  {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal.webp'},
-  {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset.webp'}
+  {id:'academy',name:'Patio Celeste',image:'battle-academy-final.jpg'},
+  {id:'crystal',name:'Gruta de Cristal',image:'battle-crystal-final.jpg'},
+  {id:'sunset',name:'Ruinas del Ocaso',image:'battle-sunset-final.jpg'}
 ];
+const LEXARIO_ATLASES=['./assets/generated/lexarios-atlas-hq-1.png?v=20260920-exact6','./assets/generated/lexarios-atlas-hq-2.png?v=20260920-exact6'];
+const TRAINER_ATLAS='./assets/generated/trainers-atlas-final-hq.png?v=20260920-exact6';
 
 const TRAINER_ART={
   filologa:{skin:'#e8bb91',hair:'#604127',coat:'#284f76',accent:'#e5bb54',beard:'#604127',glasses:false,badge:'A'},
@@ -136,37 +137,36 @@ function adjacencyCount(index,team){return adjacentIndexes(index).filter(i=>team
 function abilityMeta(c){return ABILITY_META[c?.ability?.kind]||{role:'VERSÁTIL',icon:'✦',row:'back',tags:['HABILIDAD']};}
 function spriteMeta(c){
   const i=Math.max(0,D.creatures.findIndex(x=>x.id===c?.id));
-  const row=Math.floor(i/10)+1,col=i%10;
-  return{row,pos:(col/9*100).toFixed(4)};
+  const atlas=i<25?0:1,local=i%25;
+  return{atlas,col:local%5,row:Math.floor(local/5)};
 }
 function spriteMarkup(c,extra){
   if(!c)return '<span class="lex-sprite missing" aria-hidden="true"></span>';
   const m=spriteMeta(c);
-  return "<span class=\"lex-sprite "+esc(extra||"")+"\" aria-hidden=\"true\" style=\"--lex-image:url('./assets/generated/lexarios-row-"+m.row+".webp');--lex-pos:"+m.pos+"%\"></span>";
+  return '<span class="lex-sprite '+esc(extra||'')+'" aria-hidden="true" style="--lex-col:'+m.col+';--lex-row:'+m.row+'"><img src="'+LEXARIO_ATLASES[m.atlas]+'" alt="" draggable="false"></span>';
 }
 function trainerSpriteMeta(t){
   const i=Math.max(0,D.trainers.findIndex(x=>x.id===t?.id));
-  const row=Math.floor(i/4)+1,col=i%4;
-  return{row,pos:(col/3*100).toFixed(4)};
+  return{col:i%4,row:Math.floor(i/4)};
 }
 function trainerSpriteMarkup(t,extra){
   if(!t)return '';
   const m=trainerSpriteMeta(t);
-  return "<span class=\"trainer-sprite "+esc(extra||"")+"\" role=\"img\" aria-label=\""+esc(t.name)+"\" style=\"--trainer-image:url('./assets/generated/trainers-row-"+m.row+".webp');--trainer-pos:"+m.pos+"%\"></span>";
+  return '<span class="trainer-sprite '+esc(extra||'')+'" role="img" aria-label="'+esc(t.name)+'" style="--trainer-col:'+m.col+';--trainer-row:'+m.row+'"><img src="'+TRAINER_ATLAS+'" alt="" draggable="false"></span>';
 }
 function renderStaticHeroSprites(){
   qsa('[data-lexario-id]').forEach(el=>{
     const c=D.creature(el.dataset.lexarioId);if(!c)return;
     const m=spriteMeta(c);
-    el.style.setProperty('--lex-image',"url('./assets/generated/lexarios-row-"+m.row+".webp')");
-    el.style.setProperty('--lex-pos',m.pos+'%');
+    el.style.setProperty('--lex-col',m.col);
+    el.style.setProperty('--lex-row',m.row);
+    el.innerHTML='<img src="'+LEXARIO_ATLASES[m.atlas]+'" alt="" draggable="false">';
   });
 }
 const BATTLEFIELD_LAYOUT={
-  academy:{w:1672,h:941,player:[[165,555],[365,555],[555,555],[165,705],[365,705],[555,705]],enemy:[[1115,555],[1315,555],[1510,555],[1115,705],[1315,705],[1510,705]]},
-  ice:{w:1672,h:941,player:[[160,565],[365,565],[570,565],[160,710],[365,710],[570,710]],enemy:[[1110,565],[1315,565],[1520,565],[1110,710],[1315,710],[1520,710]]},
-  crystal:{w:1672,h:941,player:[[160,560],[365,560],[570,560],[160,705],[365,705],[570,705]],enemy:[[1110,560],[1315,560],[1520,560],[1110,705],[1315,705],[1520,705]]},
-  sunset:{w:1672,h:941,player:[[149,537],[367,537],[577,540],[142,675],[374,677],[602,679]],enemy:[[1118,537],[1328,537],[1532,540],[1110,675],[1322,677],[1534,679]]}
+  academy:{w:1536,h:864,player:[[141,471],[333,471],[522,471],[141,611],[332,611],[522,611]],enemy:[[986,471],[1174,471],[1362,471],[988,611],[1176,611],[1364,611]]},
+  crystal:{w:1536,h:864,player:[[162,452],[347,453],[533,453],[162,623],[347,623],[533,623]],enemy:[[1017,453],[1196,453],[1372,453],[1014,623],[1198,623],[1372,623]]},
+  sunset:{w:1536,h:864,player:[[137,493],[337,493],[530,496],[130,620],[344,622],[553,623]],enemy:[[1027,493],[1220,493],[1407,496],[1020,620],[1214,622],[1409,623]]}
 };
 function applyBattlefieldSlotLayout(){
   const screen=$('battleScreen');
