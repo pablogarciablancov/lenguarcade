@@ -22,10 +22,22 @@ function missionProgressValue(
   progress: Array<Record<string, unknown>>,
   missionEvents: Array<Record<string, unknown>>,
 ) {
-  const gameId = String(mission.game_id || "");
+  const rawGameId = String(mission.game_id || "");
+  const gameId = rawGameId === "general" ? "" : rawGameId;
   const type = String(mission.mission_type || "");
   const activeFrom = mission.active_from ? Date.parse(String(mission.active_from)) : Number.NaN;
   const activeTo = mission.active_to ? Date.parse(String(mission.active_to)) : Number.NaN;
+  const scoped = gameId ? progress.filter(row => String(row.game_id) === gameId) : progress;
+
+  if (type === "save") {
+    return scoped.filter(row => {
+      const savedAt = Date.parse(String(row.last_activity_at || ""));
+      if (!Number.isFinite(savedAt)) return false;
+      if (Number.isFinite(activeFrom) && savedAt < activeFrom) return false;
+      if (Number.isFinite(activeTo) && savedAt > activeTo) return false;
+      return true;
+    }).length;
+  }
 
   if (Number.isFinite(activeFrom)) {
     const events = missionEvents.filter(row => {
@@ -42,7 +54,6 @@ function missionProgressValue(
     return 0;
   }
 
-  const scoped = gameId ? progress.filter(row => String(row.game_id) === gameId) : progress;
   if (type === "sessions") {
     return scoped.reduce((sum, row) => sum + Number(row.sessions || 0), 0);
   }
@@ -63,6 +74,7 @@ function missionProgressValue(
 function missionTypeLabel(type: unknown) {
   return ({
     sessions:"Partidas",
+    save:"Progreso guardado",
     variety:"Juegos distintos",
     xp:"XP conseguido",
     accuracy:"Precisión",
@@ -229,7 +241,8 @@ Deno.serve(async (request) => {
         const current = missionProgressValue(mission, progress, missionEventsResult.data || []);
         const target = Math.max(0, Number(mission.target || 0));
         const completed = target > 0 && current >= target;
-        const gameId = String(mission.game_id || "");
+        const storedGameId = String(mission.game_id || "");
+        const gameId = storedGameId === "general" ? "" : storedGameId;
         return {
           id:mission.id,
           title:mission.title,
