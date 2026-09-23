@@ -3102,7 +3102,11 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
     };
     try{renderDashboard=window.renderDashboard;}catch(error){}
   }
-  renderHomeOverview(window.currentDashboard||{});
+  try{
+    renderHomeOverview(typeof currentDashboard!=='undefined'&&currentDashboard?currentDashboard:{});
+  }catch(error){
+    renderHomeOverview({});
+  }
   setTimeout(arrangeProfileTools,0);
 })();
 </script>
