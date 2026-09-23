@@ -22,6 +22,8 @@ const teacherHtml=read("apps-script/LenguArcade_Profesor.html");
 
 [
   ["progreso de misión","function missionProgressValue("],
+  ["objetivo de guardado",'type === "save"'],
+  ["ámbito global legado",'rawGameId === "general"'],
   ["objetivo de XP",'type === "xp"'],
   ["misiones por organización",'.eq("organization_id", organizationId)'],
   ["filtro por clase","classroomIds.has"],
@@ -33,6 +35,7 @@ const teacherHtml=read("apps-script/LenguArcade_Profesor.html");
 
 [
   ["guardar misión",'action === "saveMission"'],
+  ["tipo misión guardado",'"save"'],
   ["cerrar misión",'action === "archiveMission"'],
   ["validación de tipos","MISSION_TYPES"],
   ["inicio automático de misiones nuevas","!mission.id && !activeFrom"],
@@ -47,6 +50,9 @@ if(!studentHtml.includes("__LA_MISSION_BOARD_V1__")||!studentHtml.includes("Tabl
 }
 if(!teacherHtml.includes("__LA_MISSION_MANAGER_V1__")||!teacherHtml.includes("Activas y programadas")){
   errors.push("El profesor no tiene el gestor visual de misiones.");
+}
+if(!teacherHtml.includes("Guardar progreso")){
+  errors.push("El gestor docente no ofrece misiones de guardado.");
 }
 if(!teacherHtml.includes("Sesión del taller")){
   errors.push("La gestión de misiones no debe sustituir la Sesión del taller.");
