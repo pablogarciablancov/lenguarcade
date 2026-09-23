@@ -101,7 +101,7 @@ async function resetPinsForFilter(admin: any, organizationId: string, classCode:
 }
 
 
-const MISSION_TYPES = new Set(["sessions", "variety", "xp", "accuracy"]);
+const MISSION_TYPES = new Set(["sessions", "save", "variety", "xp", "accuracy"]);
 
 function cleanMissionText(value: unknown, max = 500) {
   return String(value || "").trim().slice(0, max);
@@ -110,6 +110,7 @@ function cleanMissionText(value: unknown, max = 500) {
 function missionTypeLabel(value: unknown) {
   return ({
     sessions:"Partidas",
+    save:"Progreso guardado",
     variety:"Juegos distintos",
     xp:"XP conseguido",
     accuracy:"Precisión",
@@ -182,7 +183,7 @@ async function handleMissionAction(
   }
 
   let gameId = cleanMissionText(mission.gameId, 80) || null;
-  if (missionType === "variety") gameId = null;
+  if (missionType === "variety" || gameId === "general") gameId = null;
   if (gameId) {
     const { data:game, error:gameError } = await admin.from("games")
       .select("id")
