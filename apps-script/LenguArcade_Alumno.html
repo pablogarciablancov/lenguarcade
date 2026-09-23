@@ -2848,7 +2848,7 @@ return base(result,gameRecord);};}
   }
   function mbTypeLabel(mission){
     if(mission.typeLabel)return mission.typeLabel;
-    return ({sessions:'Partidas',variety:'Juegos distintos',xp:'XP conseguido',accuracy:'Precisión'})[mission.missionType]||'Objetivo';
+    return ({sessions:'Partidas',save:'Progreso guardado',variety:'Juegos distintos',xp:'XP conseguido',accuracy:'Precisión'})[mission.missionType]||'Objetivo';
   }
   function mbUnit(mission,value){
     if(mission.missionType==='accuracy')return Math.round(value)+'%';
@@ -2885,6 +2885,225 @@ return base(result,gameRecord);};}
     if(typeof currentDashboard!=='undefined'&&currentDashboard)renderMissionBoard(currentDashboard.missions||[]);
   }
   install();
+})();
+</script>
+
+<style id="la-student-home-profile-polish">
+/* Pulido 2026-09-23: Inicio útil y Perfil compacto. */
+body.la-screen-nav[data-la-screen="inicio"] .main,
+body.la-screen-nav[data-la-screen="perfil"] .main{overflow:hidden}
+
+body.la-screen-nav[data-la-screen="inicio"] #inicio{
+  grid-template-columns:minmax(0,1.12fr) minmax(400px,.92fr);
+  gap:16px;
+  margin-bottom:0;
+  align-content:start;
+}
+#inicio .topCard{padding:16px}
+#inicio .brand{min-height:190px}
+#inicio .brandIcon{width:66px;height:66px;border-radius:19px;background-size:61px}
+#inicio .title{font-size:38px}
+#inicio .profile{grid-template-columns:64px 1fr;gap:12px}
+#inicio .avatar{width:64px;height:96px}
+#inicio .who{font-size:19px}
+#inicio .stats{gap:8px;margin-top:8px}
+#inicio .stat{padding:9px 10px;border-radius:15px}
+#inicio .stat b{font-size:21px}
+
+.homeOverview{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:1.12fr 1fr .92fr;
+  gap:14px;
+  min-height:clamp(250px,calc(100vh - 430px),390px);
+}
+.homeQuickCard{
+  min-width:0;
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:16px;
+  background:linear-gradient(155deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
+  box-shadow:0 12px 32px rgba(0,0,0,.14);
+  display:flex;
+  flex-direction:column;
+}
+body.light .homeQuickCard{background:linear-gradient(155deg,#fff,#f5f7ff)}
+.homeQuickHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+.homeQuickHead h3{margin:2px 0 0;font-size:16px}
+.homeQuickIcon{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:rgba(124,77,255,.16);border:1px solid var(--line)}
+.homeGameList,.homeMissionList,.homeProgressList{display:grid;gap:8px;min-height:0}
+.homeGameRow{
+  width:100%;
+  margin:0;
+  padding:10px 11px;
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr) auto;
+  gap:10px;
+  align-items:center;
+  text-align:left;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(0,0,0,.14);
+  box-shadow:none;
+}
+body.light .homeGameRow{background:rgba(94,53,177,.045);color:var(--text)}
+.homeGameRow:hover{border-color:rgba(0,212,255,.42);background:rgba(0,212,255,.07)}
+.homeGameRow .homeGameIcon{font-size:23px;text-align:center}
+.homeGameRow strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.homeGameRow small{display:block;color:var(--muted);font-weight:600;margin-top:2px}
+.homeGameRow .homeGo{font-size:18px;color:var(--secondary)}
+.homeMissionItem{padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(124,77,255,.07)}
+.homeMissionItem strong{display:block;font-size:13px;margin-bottom:4px}
+.homeMissionMeta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:11px}
+.homeMiniBar{height:7px;margin-top:8px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.09)}
+.homeMiniFill{height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--secondary),var(--primary))}
+.homeProgressList{grid-template-columns:1fr 1fr}
+.homeProgressMetric{padding:11px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.12)}
+body.light .homeProgressMetric{background:rgba(94,53,177,.04)}
+.homeProgressMetric span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em}
+.homeProgressMetric b{display:block;font-size:20px;margin-top:3px}
+.homeQuickEmpty{color:var(--muted);font-size:12px;line-height:1.5;padding:8px 2px}
+
+body.la-screen-nav[data-la-screen="perfil"] #perfil{
+  margin:0;
+  padding:16px;
+}
+#perfil .head{margin-bottom:12px}
+#perfil .profileSettings{
+  max-width:none!important;
+  width:100%;
+  grid-template-columns:minmax(230px,265px) minmax(0,1fr)!important;
+  gap:16px!important;
+  align-items:start;
+}
+#perfil .avatarBuilder{padding:14px;gap:10px}
+#perfil .avatarBuilder h3{margin-bottom:2px}
+#perfil .avatarBuilder .avatarPreview{width:100%;max-height:350px;aspect-ratio:2/3}
+#perfil .avatarActions button{padding:11px}
+#perfil .avatarStatus{min-height:0;font-size:12px;line-height:1.4}
+#perfil .profileToolsColumn{
+  min-width:0;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  align-content:start;
+}
+#perfil .profileToolsColumn>h3{grid-column:1/-1;margin:2px 0 0}
+#perfil .profileToolsColumn .avatarProfileIntro{height:auto;display:block}
+#perfil .profileToolsColumn .avatarProfileIntroCard{
+  max-width:none!important;
+  height:100%;
+  padding:17px;
+  border-radius:18px;
+}
+#perfil #gamePairCodeBox{margin-top:0!important;max-width:none!important}
+#perfil #gamePairCodeBox button{width:auto}
+#perfil .avatarProfileIntroCard strong{font-size:17px}
+#perfil .avatarProfileIntroCard p{font-size:12px;line-height:1.5}
+
+@media(max-width:1160px){
+  body.la-screen-nav[data-la-screen="inicio"] .main,
+  body.la-screen-nav[data-la-screen="perfil"] .main{overflow:auto}
+  body.la-screen-nav[data-la-screen="inicio"] #inicio{grid-template-columns:1fr}
+  .homeOverview{grid-column:auto;grid-template-columns:1fr 1fr;min-height:0}
+  .homeQuickCard:last-child{grid-column:1/-1}
+  #perfil .profileSettings{grid-template-columns:240px minmax(0,1fr)!important}
+  #perfil .profileToolsColumn{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .homeOverview{grid-template-columns:1fr}
+  .homeQuickCard:last-child{grid-column:auto}
+  #inicio .brand{min-height:160px}
+  #inicio .profile{grid-template-columns:64px 1fr}
+  #inicio .stats{grid-template-columns:1fr 1fr}
+  #perfil .profileSettings{grid-template-columns:1fr!important}
+  #perfil .avatarBuilder{max-width:300px}
+  #perfil .profileToolsColumn{grid-template-columns:1fr}
+}
+</style>
+<script>
+(function(){
+  if(window.__LA_HOME_PROFILE_POLISH__)return;
+  window.__LA_HOME_PROFILE_POLISH__=true;
+
+  function homePct(value,target){
+    value=Math.max(0,Number(value||0));target=Math.max(0,Number(target||0));
+    return target?Math.max(0,Math.min(100,Math.round(value/target*100))):0;
+  }
+  function homeDate(value){
+    if(!value)return 'Sin partidas todavía';
+    var d=new Date(value);if(Number.isNaN(d.getTime()))return 'Progreso guardado';
+    return new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short'}).format(d);
+  }
+  function renderHomeOverview(dashboard){
+    var inicio=document.getElementById('inicio');if(!inicio)return;
+    var host=document.getElementById('homeOverview');
+    if(!host){
+      host=document.createElement('div');
+      host.id='homeOverview';
+      host.className='homeOverview';
+      inicio.appendChild(host);
+    }
+    var games=(dashboard&&Array.isArray(dashboard.games)?dashboard.games:[]).filter(function(g){return !g.locked;});
+    games.sort(function(a,b){
+      var ad=Date.parse(String(a&&a.progress&&a.progress.lastActivity||''))||0;
+      var bd=Date.parse(String(b&&b.progress&&b.progress.lastActivity||''))||0;
+      if(ad!==bd)return bd-ad;
+      return Number((b.progress&&b.progress.sessions)||0)-Number((a.progress&&a.progress.sessions)||0);
+    });
+    var recent=games.filter(function(g){return Number(g.progress&&g.progress.sessions||0)>0||String(g.progress&&g.progress.lastActivity||'');}).slice(0,3);
+    if(!recent.length)recent=games.slice(0,3);
+    var gameHtml=recent.length?recent.map(function(g){
+      var progress=g.progress||{};
+      var detail=Number(progress.sessions||0)>0?Number(progress.sessions||0)+' partida'+(Number(progress.sessions||0)===1?'':'s'):homeDate(progress.lastActivity);
+      return '<button type="button" class="homeGameRow" data-home-game="'+esc(g.gameId)+'"><span class="homeGameIcon">'+esc(g.icono||'🎮')+'</span><span><strong>'+esc(g.nombre||'Juego')+'</strong><small>'+esc(detail)+'</small></span><span class="homeGo">›</span></button>';
+    }).join(''):'<div class="homeQuickEmpty">En cuanto abras un juego, aparecerá aquí para continuar rápidamente.</div>';
+
+    var pending=(dashboard&&Array.isArray(dashboard.missions)?dashboard.missions:[]).filter(function(m){return !m.completed;}).slice(0,2);
+    var missionHtml=pending.length?pending.map(function(m){
+      var progress=Number(m.rawProgress!=null?m.rawProgress:m.progress||0),target=Number(m.target||0),pct=homePct(progress,target);
+      return '<div class="homeMissionItem"><strong>'+esc(m.title||'Misión')+'</strong><div class="homeMissionMeta"><span>'+esc(m.typeLabel||'Objetivo')+'</span><span>'+Math.min(progress,target||progress)+' / '+target+'</span></div><div class="homeMiniBar"><div class="homeMiniFill" style="width:'+pct+'%"></div></div></div>';
+    }).join(''):'<div class="homeQuickEmpty">No tienes misiones pendientes. Buen momento para explorar otro juego.</div>';
+
+    var general=(dashboard&&dashboard.general)||{};
+    var grade=(dashboard&&dashboard.grade&&dashboard.grade.score)||0;
+    host.innerHTML=
+      '<section class="homeQuickCard"><div class="homeQuickHead"><div><div class="sub">ACCESO RÁPIDO</div><h3>Seguir jugando</h3></div><span class="homeQuickIcon">🎮</span></div><div class="homeGameList">'+gameHtml+'</div></section>'+
+      '<section class="homeQuickCard"><div class="homeQuickHead"><div><div class="sub">RETOS</div><h3>Misiones pendientes</h3></div><span class="homeQuickIcon">🎯</span></div><div class="homeMissionList">'+missionHtml+'</div></section>'+
+      '<section class="homeQuickCard"><div class="homeQuickHead"><div><div class="sub">RESUMEN</div><h3>Tu progreso</h3></div><span class="homeQuickIcon">⚡</span></div><div class="homeProgressList">'+
+        '<div class="homeProgressMetric"><span>Partidas</span><b>'+Number(general.sessions||0)+'</b></div>'+
+        '<div class="homeProgressMetric"><span>Juegos</span><b>'+Number(general.gamesPlayed||0)+'</b></div>'+
+        '<div class="homeProgressMetric"><span>Precisión</span><b>'+Math.round(Number(general.accuracy||0))+'%</b></div>'+
+        '<div class="homeProgressMetric"><span>Nota</span><b>'+esc(grade)+'</b></div>'+
+      '</div></section>';
+
+    [].slice.call(host.querySelectorAll('[data-home-game]')).forEach(function(button){
+      button.onclick=function(){if(typeof openGame==='function')openGame(button.getAttribute('data-home-game'));};
+    });
+  }
+
+  function arrangeProfileTools(){
+    var profile=document.getElementById('perfil');
+    var settings=profile&&profile.querySelector('.profileSettings');
+    if(!settings||settings.children.length<2)return;
+    var tools=settings.children[1];
+    tools.classList.add('profileToolsColumn');
+    var pair=document.getElementById('gamePairCodeBox');
+    if(pair&&pair.parentNode!==tools)tools.appendChild(pair);
+  }
+
+  var baseRender=window.renderDashboard;
+  if(typeof baseRender==='function'){
+    window.renderDashboard=function(dashboard){
+      var result=baseRender.apply(this,arguments);
+      renderHomeOverview(dashboard||{});
+      setTimeout(arrangeProfileTools,0);
+      return result;
+    };
+    try{renderDashboard=window.renderDashboard;}catch(error){}
+  }
+  renderHomeOverview(window.currentDashboard||{});
+  setTimeout(arrangeProfileTools,0);
 })();
 </script>
 
