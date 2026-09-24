@@ -192,13 +192,29 @@ function loginStudentPanelWithGoogle(supabaseAccessToken) {
       apikey:LA_SUPABASE_PUBLIC_KEY_,
       Authorization:'Bearer ' + cleanToken
     },
-    payload:JSON.stringify({ googleAccessToken:ScriptApp.getOAuthToken() }),
+    // El token OAuth acredita al propietario de Apps Script (servidor), mientras que
+    // el correo del alumno procede de Session.getActiveUser(). Nunca se acepta un
+    // correo enviado por el navegador como prueba de identidad.
+    payload:JSON.stringify({
+      googleAccessToken:ScriptApp.getOAuthToken(),
+      studentEmail:email
+    }),
     muteHttpExceptions:true
   });
   const text = response.getContentText();
   let data = {};
   try { data = JSON.parse(text || '{}'); } catch (error) {}
   if (response.getResponseCode() < 200 || response.getResponseCode() >= 300 || !data.ok) {
+    const code = String(data.error || '');
+    if (code === 'student_not_found') {
+      throw new Error('Tu cuenta del colegio está identificada, pero todavía no aparece entre los alumnos activos sincronizados con Classroom. Pide a tu profesor que vuelva a sincronizar la clase.');
+    }
+    if (code === 'invalid_student_email') {
+      throw new Error('Para entrar como alumno debes usar tu cuenta @alumno.fomento.edu.');
+    }
+    if (code === 'bridge_not_authorized') {
+      throw new Error('No se ha podido validar el acceso seguro de LenguArcade. Avisa a tu profesor para que revise la conexión con Google.');
+    }
     throw new Error(data.error || 'Supabase no ha aceptado la sesion de alumno con Google.');
   }
   data.email = email;

@@ -2108,9 +2108,8 @@ mountGamePairCodePanel();
     disable('[data-google-student-login]',true);
     authStatus('Comprobando tu cuenta de Google del colegio...');
     try{
-      let result=null;
-      try{result=await loginGoogleViaSupabase('student');}catch(supabaseError){console.warn('Login Google Supabase alumno no disponible, usando respaldo.',supabaseError);}
-      if(!result)result=await baseCall('loginWithGoogleAccount',['student']);
+      const result=await loginGoogleViaSupabase('student');
+      if(!result)throw new Error('No se ha podido crear la sesión segura de LenguArcade.');
       finishGoogleStudentLogin(result,'Sesión iniciada con Google del colegio.');
     }catch(error){
       authStatus(error.message||'No se ha podido iniciar sesión con Google.');

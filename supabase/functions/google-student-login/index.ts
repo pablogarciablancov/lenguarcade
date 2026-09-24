@@ -5,6 +5,14 @@ function cleanEmail(value: unknown) {
   return String(value || "").trim().toLowerCase();
 }
 
+function isStudentEmail(email: string) {
+  return email.endsWith("@alumno.fomento.edu");
+}
+
+function isTeacherEmail(email: string) {
+  return email.endsWith("@fomento.edu") && !isStudentEmail(email);
+}
+
 async function readGoogleUser(accessToken: string) {
   const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
     headers: { Authorization:`Bearer ${accessToken}` },
@@ -28,11 +36,12 @@ Deno.serve(async (request) => {
   try {
     const body = await request.json().catch(() => ({}));
     const googleAccessToken = String(body.googleAccessToken || "").trim();
+    const assertedStudentEmail = cleanEmail(body.studentEmail);
     if (!googleAccessToken) return jsonResponse({ ok:false, error:"missing_google_token" }, 400);
 
     const googleUser = await readGoogleUser(googleAccessToken);
-    const email = cleanEmail(googleUser?.email);
-    if (!email.endsWith("@alumno.fomento.edu") || googleUser?.email_verified === false) {
+    const googleEmail = cleanEmail(googleUser?.email);
+    if (!googleEmail || googleUser?.email_verified === false) {
       return jsonResponse({ ok:false, error:"forbidden_google_account" }, 403);
     }
 
@@ -46,13 +55,51 @@ Deno.serve(async (request) => {
     const admin = createClient(supabaseUrl, serviceRoleKey, {
       auth:{ persistSession:false, autoRefreshToken:false },
     });
-    const { data:profile, error:profileError } = await admin
+
+    let email = googleEmail;
+    let organizationId = "";
+    let loginSource = "direct_google";
+
+    if (assertedStudentEmail) {
+      // Apps Script se ejecuta como el propietario. Su token OAuth acredita que
+      // esta afirmación procede del servidor autorizado; el correo del alumno
+      // lo obtiene Apps Script con Session.getActiveUser().
+      if (!isTeacherEmail(googleEmail)) {
+        return jsonResponse({ ok:false, error:"bridge_not_authorized" }, 403);
+      }
+      if (!isStudentEmail(assertedStudentEmail)) {
+        return jsonResponse({ ok:false, error:"invalid_student_email" }, 403);
+      }
+
+      const { data:teacherProfile, error:teacherError } = await admin
+        .from("profiles")
+        .select("id,organization_id")
+        .eq("email", googleEmail)
+        .in("role", ["teacher", "admin"])
+        .eq("active", true)
+        .maybeSingle();
+      if (teacherError) throw teacherError;
+      if (!teacherProfile) {
+        return jsonResponse({ ok:false, error:"bridge_not_authorized" }, 403);
+      }
+
+      email = assertedStudentEmail;
+      organizationId = String(teacherProfile.organization_id || "");
+      loginSource = "apps_script_assertion";
+    } else if (!isStudentEmail(googleEmail)) {
+      // Compatibilidad con un posible acceso Google directo de alumno.
+      return jsonResponse({ ok:false, error:"forbidden_google_account" }, 403);
+    }
+
+    let profileQuery = admin
       .from("profiles")
-      .select("id,email,first_name,last_name,role")
+      .select("id,email,first_name,last_name,role,organization_id")
       .eq("email", email)
       .eq("role", "student")
-      .eq("active", true)
-      .maybeSingle();
+      .eq("active", true);
+    if (organizationId) profileQuery = profileQuery.eq("organization_id", organizationId);
+
+    const { data:profile, error:profileError } = await profileQuery.maybeSingle();
     if (profileError) throw profileError;
     if (!profile) return jsonResponse({ ok:false, error:"student_not_found" }, 404);
 
@@ -75,6 +122,7 @@ Deno.serve(async (request) => {
     return jsonResponse({
       ok:true,
       expiresAt,
+      loginSource,
       profile:{
         id:profile.id,
         email:profile.email,
