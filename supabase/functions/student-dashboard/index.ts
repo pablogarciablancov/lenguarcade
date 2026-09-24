@@ -41,6 +41,7 @@ function missionProgressValue(
 
   if (Number.isFinite(activeFrom)) {
     const events = missionEvents.filter(row => {
+      if (String(row.event_type || "") === "teacher_adjustment") return false;
       if (gameId && String(row.game_id) !== gameId) return false;
       const occurredAt = Date.parse(String(row.occurred_at || ""));
       if (!Number.isFinite(occurredAt) || occurredAt < activeFrom) return false;
@@ -96,6 +97,7 @@ Deno.serve(async (request) => {
       enrollmentsResult,
       missionsResult,
       missionEventsResult,
+      adjustmentsResult,
       evaluationsResult,
     ] = await Promise.all([
       admin.from("profiles")
@@ -129,10 +131,16 @@ Deno.serve(async (request) => {
         .eq("organization_id", organizationId)
         .eq("active", true),
       admin.from("game_events")
-        .select("game_id,xp_delta,accuracy,occurred_at")
+        .select("game_id,event_type,xp_delta,accuracy,occurred_at")
         .eq("profile_id", profileId)
         .order("occurred_at", { ascending:false })
         .limit(500),
+      admin.from("game_events")
+        .select("xp_delta,feathers_delta,occurred_at")
+        .eq("profile_id", profileId)
+        .eq("event_type", "teacher_adjustment")
+        .order("occurred_at", { ascending:false })
+        .limit(1000),
       admin.from("evaluations")
         .select("scope,game_id,score,breakdown,updated_at")
         .eq("profile_id", profileId),
@@ -147,6 +155,7 @@ Deno.serve(async (request) => {
       enrollmentsResult.error,
       missionsResult.error,
       missionEventsResult.error,
+      adjustmentsResult.error,
       evaluationsResult.error,
     ].find(Boolean);
     if (failure || !profileResult.data) {
@@ -159,8 +168,13 @@ Deno.serve(async (request) => {
     const progressByGame = new Map(progress.map(row => [row.game_id, row]));
     const attempts = progress.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
     const successes = progress.reduce((sum, row) => sum + Number(row.successes || 0), 0);
-    const xp = progress.reduce((sum, row) => sum + Number(row.xp || 0), 0);
-    const feathers = progress.reduce((sum, row) => sum + Number(row.feathers || 0), 0);
+    const baseXp = progress.reduce((sum, row) => sum + Number(row.xp || 0), 0);
+    const baseFeathers = progress.reduce((sum, row) => sum + Number(row.feathers || 0), 0);
+    const adjustments = adjustmentsResult.data || [];
+    const manualXp = adjustments.reduce((sum, row) => sum + Number(row.xp_delta || 0), 0);
+    const manualFeathers = adjustments.reduce((sum, row) => sum + Number(row.feathers_delta || 0), 0);
+    const xp = Math.max(0, baseXp + manualXp);
+    const feathers = Math.max(0, baseFeathers + manualFeathers);
     const sessions = progress.reduce((sum, row) => sum + Number(row.sessions || 0), 0);
     const level = Math.floor(xp / 500) + 1;
     const classroomRelation = (enrollmentsResult.data || [])[0]?.classrooms;
@@ -297,14 +311,20 @@ Deno.serve(async (request) => {
         xpGeneral:xp,
         nivelGeneral:level,
         plumas:feathers,
+        ajusteXpProfesor:manualXp,
+        ajustePlumasProfesor:manualFeathers,
         ultimaSesion:profile.last_login_at || "",
       },
       general:{
         xp,
+        baseXp,
+        manualXp,
         level,
         nextLevelXp:level * 500,
         levelProgress:Math.round((xp % 500) / 5),
         plumas:feathers,
+        basePlumas:baseFeathers,
+        manualPlumas:manualFeathers,
         percentage,
         accuracy,
         sessions,
