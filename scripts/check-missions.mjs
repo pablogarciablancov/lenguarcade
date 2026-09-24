@@ -6,6 +6,7 @@ const read=(file)=>fs.readFileSync(path.join(root,file),"utf8");
 const errors=[];
 
 const migration=read("supabase/migrations/20260907075752_mission_board_management.sql");
+const statusMigration=read("supabase/migrations/20260924183000_add_mission_publication_status.sql");
 const studentDashboard=read("supabase/functions/student-dashboard/index.ts");
 const teacherDashboard=read("supabase/functions/teacher-dashboard/index.ts");
 const studentHtml=read("apps-script/LenguArcade_Alumno.html");
@@ -37,6 +38,8 @@ const teacherHtml=read("apps-script/LenguArcade_Profesor.html");
   ["guardar misión",'action === "saveMission"'],
   ["tipo misión guardado",'"save"'],
   ["cerrar misión",'action === "archiveMission"'],
+  ["pausar o reanudar misión",'action === "setMissionStatus"'],
+  ["estado de publicación","publication_status"],
   ["validación de tipos","MISSION_TYPES"],
   ["inicio automático de misiones nuevas","!mission.id && !activeFrom"],
   ["resolución de clase","resolveMissionClassroom"],
@@ -48,8 +51,16 @@ const teacherHtml=read("apps-script/LenguArcade_Profesor.html");
 if(!studentHtml.includes("__LA_MISSION_BOARD_V1__")||!studentHtml.includes("Tablón de misiones")){
   errors.push("El alumno no tiene el tablón visual de misiones.");
 }
-if(!teacherHtml.includes("__LA_MISSION_MANAGER_V1__")||!teacherHtml.includes("Activas y programadas")){
-  errors.push("El profesor no tiene el gestor visual de misiones.");
+if(!teacherHtml.includes("__LA_MISSION_MANAGER_V2__")||
+   !teacherHtml.includes("Misión rápida")||
+   !teacherHtml.includes("Guardar borrador")){
+  errors.push("El profesor no tiene el gestor visual de misiones V2.");
+}
+if(!statusMigration.includes("publication_status")||
+   !statusMigration.includes("'draft'")||
+   !statusMigration.includes("'paused'")||
+   !statusMigration.includes("'closed'")){
+  errors.push("La migración no registra los estados de publicación de las misiones.");
 }
 if(!teacherHtml.includes("Guardar progreso")){
   errors.push("El gestor docente no ofrece misiones de guardado.");
