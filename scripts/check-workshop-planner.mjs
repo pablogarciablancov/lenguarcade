@@ -39,7 +39,7 @@ expect(activatePlan.includes("applyWorkshopPlanAccess_"), "Abrir una sesión deb
 expect(activatePlan.includes("saveWorkshopSession("), "Abrir una sesión debe convertir la preparación en sesión publicada.");
 expect(activatePlan.includes("classroomOpen:!!openNow"), "La activación debe distinguir abrir en clase de publicar solo para casa.");
 
-expect(html.includes("Taller · Preparar sesiones"), "El panel debe presentar Taller como preparador de sesiones.");
+expect(html.includes("Talleres · Diseña y lanza sesiones"), "El panel debe presentar Talleres como planificador de sesiones.");
 expect(
   html.includes("Tus talleres") &&
   html.includes("Próximos") &&
