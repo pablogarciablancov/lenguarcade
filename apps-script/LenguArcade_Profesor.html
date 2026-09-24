@@ -165,6 +165,17 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
 .gameAccessRow button{width:auto!important;margin:0!important;padding:7px 10px!important;white-space:nowrap}.gameAccessRow.closed{opacity:.78}.gameAccessStatus{margin-top:10px}
 @media(max-width:840px){.playerAdminGrid{grid-template-columns:1fr}.studentListTools{justify-content:stretch}.teacherPlayerShortcut,.studentClassPicker{width:100%}.playerAdjustmentFields{grid-template-columns:1fr}.gameAccessList{grid-template-columns:1fr}}
 </style>
+<style id="la-game-access-manager-style">
+.gameControlCard{min-width:0}.gameControlHead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px}.gameControlHead h2{margin:2px 0 4px}.gameControlHead p{margin:0}
+.gameControlScope{width:min(250px,100%);flex:0 0 230px}.gameControlQuick{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px;border:1px solid var(--line);border-radius:16px;background:rgba(124,77,255,.055);margin-bottom:12px}.gameControlQuick button{width:auto;margin:0}
+.gameControlList{display:grid;gap:8px}.gameControlRow{display:grid;grid-template-columns:minmax(180px,1fr) minmax(120px,.65fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}
+.gameControlInfo{display:flex;align-items:center;gap:9px;min-width:0}.gameControlInfo .gameIcon{font-size:20px}.gameControlInfo strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gameControlInfo small{display:block;color:var(--muted);margin-top:2px}
+.gameControlState{display:flex;align-items:center;gap:8px;min-width:0}.gameControlMeter{height:7px;flex:1;min-width:64px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.gameControlMeter span{display:block;height:100%;background:linear-gradient(90deg,#00d4ff,#7c4dff)}
+.gameControlPill{font-size:10px;font-weight:900;padding:5px 7px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}.gameControlPill.open{color:#70dda9}.gameControlPill.closed{color:#ff9e9e}.gameControlPill.mixed{color:#ffd782}.gameControlPill.empty{color:var(--muted)}
+.gameControlActions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.gameControlActions button{width:auto!important;margin:0!important;padding:7px 9px!important;font-size:11px!important;white-space:nowrap}
+.gameUsageSection{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}.gameUsageSection h3{margin:0 0 10px}
+@media(max-width:980px){.gameControlHead{align-items:stretch;flex-direction:column}.gameControlScope{width:100%;flex-basis:auto}.gameControlRow{grid-template-columns:1fr}.gameControlActions{justify-content:flex-start}}
+</style>
 </head>
 <body>
   <div class="app">
@@ -238,7 +249,30 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
             </div>
             <div style="overflow:auto"><table><thead><tr><th>Alumno</th><th>Clase</th><th>XP</th><th>Nivel</th><th>Sesiones</th><th>Juegos</th><th>Precisión</th><th>Nota</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
           </div>
-          <div class="card" id="juegos"><h2>Juegos más usados</h2><div id="popularGames"></div></div>
+          <div class="card gameControlCard" id="juegos">
+            <div class="gameControlHead">
+              <div>
+                <div class="sub">CONTROL DE ACCESO</div>
+                <h2>Juegos disponibles</h2>
+                <p class="sub">Abre o cierra juegos para todos los alumnos o para una clase concreta.</p>
+              </div>
+              <div class="field gameControlScope">
+                <label>Aplicar a</label>
+                <select id="gameAccessClassSelect"><option value="">Todos los alumnos</option></select>
+              </div>
+            </div>
+            <div class="gameControlQuick">
+              <button type="button" id="openAllGamesBtn">🔓 Abrir todos</button>
+              <button type="button" class="dangerAction" id="closeAllGamesBtn">🔒 Cerrar todos</button>
+              <span class="rosterPill" id="gameAccessScopeSummary">Cargando...</span>
+            </div>
+            <div class="gameControlList" id="gameAccessControlList"></div>
+            <div class="gameUsageSection">
+              <h3>Uso en el ámbito seleccionado</h3>
+              <div id="popularGames"></div>
+            </div>
+            <div class="status" id="gameAccessControlStatus">Los cambios se aplican al instante y no borran ningún progreso.</div>
+          </div>
         </section>
 
         <section class="cols">
@@ -418,6 +452,10 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
         $('studentsClassSelect').innerHTML='<option value="">Todos los alumnos</option>'+classOptions;
         $('studentsClassSelect').value=classValue;
       }
+      if($('gameAccessClassSelect')){
+        $('gameAccessClassSelect').innerHTML='<option value="">Todos los alumnos</option>'+classOptions;
+        $('gameAccessClassSelect').value=classValue;
+      }
     }
     function renderTeacher(data){
       renderFilters(data);
@@ -432,11 +470,61 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       $('studentsBody').innerHTML=(data.students||[]).map(student=>`<tr class="studentRow" data-student="${esc(student.studentId)}"><td><div class="studentIdentity"><div class="studentIdentityText"><strong>${esc(student.nombre)}</strong><br><span class="sub">${esc(student.email)}</span></div><button type="button" class="ghost studentAccessBtn" data-player-access="${esc(student.studentId)}">🎮 Accesos</button></div></td><td>${esc(student.clase)}</td><td>${student.xp}</td><td>${student.level}</td><td>${student.sessions}</td><td>${student.gamesPlayed}</td><td>${student.accuracy}%</td><td><strong>${student.grade}</strong></td></tr>`).join('');
       document.querySelectorAll('.studentRow').forEach(row=>row.onclick=()=>openStudentDetail(row.dataset.student));
       document.querySelectorAll('[data-player-access]').forEach(button=>button.onclick=event=>{event.stopPropagation();openStudentDetail(button.dataset.playerAccess,'access');});
+      renderGameAccessControl(data);
       $('popularGames').innerHTML=(data.popularGames||[]).map(game=>`<div class="gameMini" style="--img:url('${bannerUrl(game.gameId)}')"><div><strong>${esc(game.icono||'')} ${esc(game.nombre)}</strong><span>${game.sessions} sesiones</span><div class="bar" style="margin-top:8px"><div class="fill" style="width:${game.percent}%"></div></div></div></div>`).join('')||'<div class="sub">Sin partidas todavía.</div>';
       $('errors').innerHTML=(data.errorSummary||[]).map(row=>`<div class="box"><strong>${esc(row.label)}</strong><br><span class="sub">${row.count} apariciones</span></div>`).join('')||'<div class="sub">Sin errores registrados.</div>';
       $('recommendations').innerHTML=(data.recommendations||[]).map(text=>`<div class="box">${esc(text)}</div>`).join('');
       renderFocus(data.focus,data.focusProgress||[]);
     }
+    function gameAccessStateLabel(state){
+      return state==='open'?'Todos abiertos':state==='closed'?'Todos cerrados':state==='mixed'?'Acceso mixto':'Sin alumnos';
+    }
+    function currentAccessScopeLabel(){
+      const select=$('gameAccessClassSelect');
+      if(!select||!select.value)return 'Todos los alumnos';
+      return select.options[select.selectedIndex]?.textContent||select.value;
+    }
+    function renderGameAccessControl(data){
+      const rows=data.gameAccessOverview||[];
+      const total=rows[0]?.total??(data.students||[]).length;
+      $('gameAccessScopeSummary').textContent=total+' alumno'+(total===1?'':'s')+' · '+rows.length+' juegos';
+      $('gameAccessControlList').innerHTML=rows.map(game=>{
+        const percentage=game.total?Math.round((game.open/game.total)*100):0;
+        return `<div class="gameControlRow"><div class="gameControlInfo"><span class="gameIcon">${esc(game.icono||'🎮')}</span><div><strong>${esc(game.nombre)}</strong><small>${game.open} abiertos · ${game.closed} cerrados</small></div></div><div class="gameControlState"><div class="gameControlMeter"><span style="width:${percentage}%"></span></div><span class="gameControlPill ${esc(game.state)}">${esc(gameAccessStateLabel(game.state))}</span></div><div class="gameControlActions"><button type="button" class="ghost" data-bulk-game-open="${esc(game.gameId)}">Abrir</button><button type="button" class="dangerAction" data-bulk-game-close="${esc(game.gameId)}">Cerrar</button><button type="button" data-bulk-game-only="${esc(game.gameId)}" data-game-name="${esc(game.nombre)}">Solo este</button></div></div>`;
+      }).join('')||'<div class="sub">No hay juegos disponibles.</div>';
+      document.querySelectorAll('[data-bulk-game-open]').forEach(button=>button.onclick=()=>changeBulkGameAccess({gameId:button.dataset.bulkGameOpen,enabled:true}));
+      document.querySelectorAll('[data-bulk-game-close]').forEach(button=>button.onclick=()=>changeBulkGameAccess({gameId:button.dataset.bulkGameClose,enabled:false}));
+      document.querySelectorAll('[data-bulk-game-only]').forEach(button=>button.onclick=()=>{
+        const scope=currentAccessScopeLabel();
+        const name=button.dataset.gameName||'este juego';
+        if(confirm('¿Dejar solo '+name+' abierto para '+scope+'?\n\nLos demás juegos quedarán cerrados, pero conservarán todo su progreso.')){
+          changeBulkGameAccess({gameId:button.dataset.bulkGameOnly,mode:'only'});
+        }
+      });
+    }
+    async function changeBulkGameAccess(options){
+      if(busy)return;
+      const classCode=$('gameAccessClassSelect')?.value||'';
+      const scope=currentAccessScopeLabel();
+      const mode=options?.mode||'set';
+      setBusy(true,mode==='only'?'Preparando un único juego...':(options?.enabled?'Abriendo juegos...':'Cerrando juegos...'));
+      try{
+        const result=await edge('teacher-dashboard',{
+          action:'setBulkGameAccess',
+          classCode,
+          gameId:options?.gameId||'',
+          enabled:options?.enabled===true,
+          mode
+        });
+        await loadTeacher(true);
+        if(mode==='only')$('gameAccessControlStatus').textContent='Solo '+(result.gameName||'el juego seleccionado')+' queda abierto para '+scope+'.';
+        else if(options?.gameId)$('gameAccessControlStatus').textContent=(options.enabled?'Juego abierto para ':'Juego cerrado para ')+scope+'.';
+        else $('gameAccessControlStatus').textContent=(options.enabled?'Todos los juegos abiertos para ':'Todos los juegos cerrados para ')+scope+'.';
+      }catch(error){
+        $('gameAccessControlStatus').textContent='No se pudo cambiar el acceso: '+(error.code||error.message||error);
+      }finally{setBusy(false);}
+    }
+
     function renderFocus(student,progress){
       if(!student){$('focus').innerHTML='<div class="sub">Sin datos para este filtro.</div>';return;}
       $('focus').innerHTML=`<h3>${esc(student.nombre)}</h3><div class="sub">${esc(student.email)} · ${esc(student.clase)}</div><div class="kpis" style="grid-template-columns:repeat(3,1fr);margin-top:12px"><div class="kpi"><span>XP</span><b>${student.xp}</b></div><div class="kpi"><span>Nivel</span><b>${student.level}</b></div><div class="kpi"><span>Nota</span><b>${student.grade}</b></div></div>`+progress.map(row=>`<div class="box"><div class="boxHead"><strong>${esc(row.gameName)}</strong><span>${row.percentage}%</span></div><div class="bar" style="margin-top:8px"><div class="fill" style="width:${row.percentage}%"></div></div></div>`).join('');
@@ -753,9 +841,27 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       $('logoutBtn').onclick=logout;
       $('loginBtn').onclick=loginTeacher;
       $('refreshBtn').onclick=()=>loadTeacher();
-      $('classSelect').onchange=()=>{if($('studentsClassSelect'))$('studentsClassSelect').value=$('classSelect').value;loadTeacher();};
+      $('classSelect').onchange=()=>{
+        if($('studentsClassSelect'))$('studentsClassSelect').value=$('classSelect').value;
+        if($('gameAccessClassSelect'))$('gameAccessClassSelect').value=$('classSelect').value;
+        loadTeacher();
+      };
       $('gameSelect').onchange=()=>loadTeacher();
-      if($('studentsClassSelect'))$('studentsClassSelect').onchange=()=>{$('classSelect').value=$('studentsClassSelect').value;loadTeacher();};
+      if($('studentsClassSelect'))$('studentsClassSelect').onchange=()=>{
+        $('classSelect').value=$('studentsClassSelect').value;
+        if($('gameAccessClassSelect'))$('gameAccessClassSelect').value=$('studentsClassSelect').value;
+        loadTeacher();
+      };
+      if($('gameAccessClassSelect'))$('gameAccessClassSelect').onchange=()=>{
+        $('classSelect').value=$('gameAccessClassSelect').value;
+        if($('studentsClassSelect'))$('studentsClassSelect').value=$('gameAccessClassSelect').value;
+        loadTeacher();
+      };
+      if($('openAllGamesBtn'))$('openAllGamesBtn').onclick=()=>changeBulkGameAccess({enabled:true});
+      if($('closeAllGamesBtn'))$('closeAllGamesBtn').onclick=()=>{
+        const scope=currentAccessScopeLabel();
+        if(confirm('¿Cerrar TODOS los juegos para '+scope+'?\n\nNo se borrará ningún progreso y podrás volver a abrirlos cuando quieras.'))changeBulkGameAccess({enabled:false});
+      };
       $('studentModalClose').onclick=()=>{$('studentModal').classList.remove('open');currentPlayerDetailId='';currentPlayerDetailFocus='';};
       $('applyPlayerAdjustmentBtn').onclick=applyPlayerAdjustment;
       $('resetPlayerProgressBtn').onclick=resetPlayerProgress;
