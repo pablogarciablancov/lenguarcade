@@ -2341,6 +2341,13 @@ body.light .workshopGameRow{background:rgba(94,53,177,.04)}
       copy.catalogEstado=copy.catalogEstado||copy.estado;
       if(access.enabled){
         copy.estado='✅ Disponible hoy';
+        if(copy.catalogLocked===false&&(copy.lockedByTeacher||copy.lockedByWorkshop||copy.accessEnabled===false)){
+          copy.locked=false;
+          copy.lockedByTeacher=false;
+          copy.lockedByWorkshop=false;
+          copy.accessEnabled=true;
+          copy.buttonLabel=Number(copy.progress&&copy.progress.sessions||0)>0?'Continuar':'Jugar';
+        }
       }else{
         copy.locked=true;
         copy.estado='🔒 Cerrado hoy';
@@ -2576,7 +2583,15 @@ body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionS
       var game=games[index];if(!game)return;var allowed=sessionAllowsGame(game.gameId);var button=card.querySelector('.play');var chip=card.querySelector('.chip');
       card.classList.toggle('sessionLocked',allowed===false);
       if(allowed===false){if(button){button.disabled=true;button.textContent='No disponible';}if(chip)chip.textContent=s.active?'🔒 Fuera de la misión':'🔒 Sesión cerrada';}
-      else if(allowed===true){if(button&&!game.locked)button.disabled=false;if(chip&&!game.locked)chip.textContent=s.mode==='home'?'🏠 Disponible en casa':'✅ Disponible en la sesión';}
+      else if(allowed===true){
+        var canWorkshopOpen=game.catalogLocked===false&&(game.lockedByTeacher||game.lockedByWorkshop||game.locked===false);
+        if(button&&canWorkshopOpen){
+          button.disabled=false;
+          button.textContent=Number(game.progress&&game.progress.sessions||0)>0?'Continuar':'Jugar';
+        }
+        if(canWorkshopOpen)card.classList.remove('sessionLocked','locked');
+        if(chip&&canWorkshopOpen)chip.textContent=s.mode==='home'?'🏠 Disponible en casa':'✅ Disponible en la sesión';
+      }
     });
   }
 
