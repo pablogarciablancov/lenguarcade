@@ -279,6 +279,164 @@ async function handleMissionAction(
   return jsonResponse({ ok:true, action:"saveMission", mission:data });
 }
 
+
+async function resolveBulkAccessTargets(
+  admin: any,
+  organizationId: string,
+  classCode: string,
+) {
+  const [{ data:profiles, error:profilesError }, { data:classrooms, error:classroomsError }] = await Promise.all([
+    admin.from("profiles")
+      .select("id,source")
+      .eq("organization_id", organizationId)
+      .eq("role", "student")
+      .eq("active", true),
+    admin.from("classrooms")
+      .select("id,legacy_class_code")
+      .eq("organization_id", organizationId)
+      .eq("active", true),
+  ]);
+  if (profilesError) throw profilesError;
+  if (classroomsError) throw classroomsError;
+
+  const allProfiles = profiles || [];
+  if (!classCode) {
+    return allProfiles
+      .filter(profile => String(profile.source || "").toLowerCase() !== "test")
+      .map(profile => String(profile.id));
+  }
+
+  const classroom = (classrooms || []).find(row =>
+    String(row.id) === classCode || String(row.legacy_class_code || "") === classCode
+  );
+  if (!classroom) throw new Error("access_class_not_found");
+
+  const { data:enrollments, error:enrollmentsError } = await admin
+    .from("classroom_enrollments")
+    .select("profile_id")
+    .eq("classroom_id", classroom.id)
+    .eq("active", true);
+  if (enrollmentsError) throw enrollmentsError;
+  const enrolled = new Set((enrollments || []).map(row => String(row.profile_id)));
+  return allProfiles
+    .filter(profile => enrolled.has(String(profile.id)))
+    .map(profile => String(profile.id));
+}
+
+async function handleBulkGameAccess(
+  admin: any,
+  organizationId: string,
+  teacherProfileId: string,
+  body: Record<string, unknown>,
+) {
+  const classCode = String(body.classCode || "").trim();
+  const mode = String(body.mode || "set").trim().toLowerCase();
+  const requestedGameId = String(body.gameId || "").trim().slice(0, 80);
+  const enabled = body.enabled === true;
+
+  if (!["set", "only"].includes(mode)) {
+    return jsonResponse({ ok:false, error:"invalid_access_mode" }, 400);
+  }
+  if (mode === "only" && !requestedGameId) {
+    return jsonResponse({ ok:false, error:"missing_game_id" }, 400);
+  }
+
+  let targetProfileIds: string[] = [];
+  try {
+    targetProfileIds = await resolveBulkAccessTargets(admin, organizationId, classCode);
+  } catch (error) {
+    if (String((error as Error)?.message || error) === "access_class_not_found") {
+      return jsonResponse({ ok:false, error:"access_class_not_found" }, 404);
+    }
+    throw error;
+  }
+
+  const { data:games, error:gamesError } = await admin.from("games")
+    .select("id,name")
+    .eq("active", true)
+    .eq("official", true)
+    .order("sort_order");
+  if (gamesError) throw gamesError;
+  const officialGames = games || [];
+  const selectedGame = requestedGameId
+    ? officialGames.find(game => String(game.id) === requestedGameId)
+    : null;
+  if (requestedGameId && !selectedGame) {
+    return jsonResponse({ ok:false, error:"game_not_found" }, 404);
+  }
+
+  if (!targetProfileIds.length) {
+    return jsonResponse({
+      ok:true,
+      action:"bulkGameAccess",
+      mode,
+      classCode,
+      playerCount:0,
+      gameCount:mode === "only" ? 1 : (requestedGameId ? 1 : officialGames.length),
+      changed:0,
+    });
+  }
+
+  const deleteOverrides = async (gameIds: string[]) => {
+    if (!gameIds.length) return;
+    for (let start = 0; start < targetProfileIds.length; start += 250) {
+      const profileChunk = targetProfileIds.slice(start, start + 250);
+      const { error } = await admin.from("profile_game_access")
+        .delete()
+        .in("profile_id", profileChunk)
+        .in("game_id", gameIds);
+      if (error) throw error;
+    }
+  };
+
+  const closeGames = async (gameIds: string[]) => {
+    if (!gameIds.length) return;
+    const now = new Date().toISOString();
+    const rows: Record<string, unknown>[] = [];
+    for (const profileId of targetProfileIds) {
+      for (const gameId of gameIds) {
+        rows.push({
+          profile_id:profileId,
+          game_id:gameId,
+          enabled:false,
+          updated_by:teacherProfileId,
+          updated_at:now,
+        });
+      }
+    }
+    for (let start = 0; start < rows.length; start += 500) {
+      const { error } = await admin.from("profile_game_access")
+        .upsert(rows.slice(start, start + 500), { onConflict:"profile_id,game_id" });
+      if (error) throw error;
+    }
+  };
+
+  if (mode === "only") {
+    const selectedId = String(selectedGame!.id);
+    await deleteOverrides([selectedId]);
+    await closeGames(officialGames.map(game => String(game.id)).filter(id => id !== selectedId));
+  } else {
+    const targetGames = requestedGameId
+      ? [String(selectedGame!.id)]
+      : officialGames.map(game => String(game.id));
+    if (enabled) await deleteOverrides(targetGames);
+    else await closeGames(targetGames);
+  }
+
+  return jsonResponse({
+    ok:true,
+    action:"bulkGameAccess",
+    mode,
+    classCode,
+    playerCount:targetProfileIds.length,
+    gameCount:mode === "only" ? officialGames.length : (requestedGameId ? 1 : officialGames.length),
+    changed:targetProfileIds.length * (mode === "only" ? officialGames.length : (requestedGameId ? 1 : officialGames.length)),
+    gameId:requestedGameId,
+    gameName:selectedGame?.name || "",
+    enabled:mode === "only" ? null : enabled,
+  });
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers:corsHeaders });
   if (request.method !== "POST") return jsonResponse({ ok:false, error:"method_not_allowed" }, 405);
@@ -300,6 +458,9 @@ Deno.serve(async (request) => {
       const resetResult = await resetPinsForFilter(admin, organizationId, classCode);
       return jsonResponse(resetResult, resetResult.ok === false ? 404 : 200);
     }
+    if (action === "setBulkGameAccess") {
+      return await handleBulkGameAccess(admin, organizationId, teacherProfileId, body);
+    }
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
@@ -315,6 +476,7 @@ Deno.serve(async (request) => {
       errorsResult,
       missionsResult,
       adjustmentsResult,
+      gameAccessResult,
     ] = await Promise.all([
       admin.from("profiles")
         .select("id,email,first_name,last_name,last_login_at,source")
@@ -360,11 +522,15 @@ Deno.serve(async (request) => {
         .eq("event_type", "teacher_adjustment")
         .order("occurred_at", { ascending:false })
         .limit(5000),
+      admin.from("profile_game_access")
+        .select("profile_id,game_id,enabled")
+        .eq("enabled", false),
     ]);
     const failure = [
       profilesResult.error, teacherProfileResult.error, classroomsResult.error, enrollmentsResult.error,
       gamesResult.error, progressResult.error, eventsResult.error,
       achievementsResult.error, errorsResult.error, missionsResult.error, adjustmentsResult.error,
+      gameAccessResult.error,
     ].find(Boolean);
     if (failure) throw failure;
 
@@ -454,6 +620,24 @@ Deno.serve(async (request) => {
     const totalSessions = popularGames.reduce((sum, game) => sum + game.sessions, 0) || 1;
     popularGames.forEach(game => game.percent = Math.round((game.sessions / totalSessions) * 100));
 
+    const closedAccess = (gameAccessResult.data || []).filter(row =>
+      row.enabled === false && profileIds.has(row.profile_id)
+    );
+    const gameAccessOverview = games.map(game => {
+      const closed = closedAccess.filter(row => row.game_id === game.id).length;
+      const total = profiles.length;
+      const open = Math.max(0, total - closed);
+      return {
+        gameId:game.id,
+        nombre:game.name,
+        icono:game.icon,
+        total,
+        open,
+        closed,
+        state:total === 0 ? "empty" : (closed === 0 ? "open" : (closed >= total ? "closed" : "mixed")),
+      };
+    });
+
     const errorCounts = new Map<string, number>();
     for (const row of errorsResult.data || []) {
       if (!profileIds.has(row.profile_id) || (gameId && row.game_id !== gameId)) continue;
@@ -541,6 +725,7 @@ Deno.serve(async (request) => {
       teacherPlayer,
       games,
       popularGames,
+      gameAccessOverview,
       errorSummary,
       recommendations,
       focus,
