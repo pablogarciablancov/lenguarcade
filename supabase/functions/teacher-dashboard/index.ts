@@ -508,6 +508,131 @@ async function handleBulkGameAccess(
   });
 }
 
+
+async function handleWorkshopGameAccess(
+  admin: any,
+  organizationId: string,
+  teacherProfileId: string,
+  body: Record<string, unknown>,
+) {
+  const classCode = String(body.classCode || "").trim();
+  if (!classCode) return jsonResponse({ ok:false, error:"workshop_class_required" }, 400);
+
+  let targetProfileIds: string[] = [];
+  try {
+    targetProfileIds = await resolveBulkAccessTargets(admin, organizationId, classCode);
+  } catch (error) {
+    if (String((error as Error)?.message || error) === "access_class_not_found") {
+      return jsonResponse({ ok:false, error:"access_class_not_found" }, 404);
+    }
+    throw error;
+  }
+
+  const active = body.active === true;
+  if (!targetProfileIds.length) {
+    return jsonResponse({ ok:true, action:"workshopGameAccess", classCode, playerCount:0, active });
+  }
+
+  const clearOverrides = async () => {
+    for (let start = 0; start < targetProfileIds.length; start += 250) {
+      const profileChunk = targetProfileIds.slice(start, start + 250);
+      const { error } = await admin.from("workshop_game_access")
+        .delete()
+        .in("profile_id", profileChunk);
+      if (error) throw error;
+    }
+  };
+
+  if (!active) {
+    await clearOverrides();
+    return jsonResponse({
+      ok:true,
+      action:"workshopGameAccess",
+      classCode,
+      playerCount:targetProfileIds.length,
+      active:false,
+      changed:0,
+    });
+  }
+
+  const requestedIds = Array.isArray(body.gameIds)
+    ? body.gameIds.map(value => String(value || "").trim().slice(0, 80)).filter(Boolean)
+    : [];
+  const requestedSet = new Set(requestedIds);
+
+  const { data:games, error:gamesError } = await admin.from("games")
+    .select("id")
+    .eq("active", true)
+    .eq("official", true)
+    .order("sort_order");
+  if (gamesError) throw gamesError;
+  const officialGames = games || [];
+  const officialIds = new Set(officialGames.map(game => String(game.id)));
+  const invalidIds = requestedIds.filter(id => !officialIds.has(id));
+  if (invalidIds.length) {
+    return jsonResponse({ ok:false, error:"workshop_game_not_found", gameIds:invalidIds }, 400);
+  }
+
+  const parseIso = (value: unknown) => {
+    const text = String(value || "").trim();
+    if (!text) return null;
+    const parsed = new Date(text);
+    if (Number.isNaN(parsed.getTime())) throw new Error("invalid_workshop_window");
+    return parsed.toISOString();
+  };
+
+  let activeFrom: string | null = null;
+  let activeTo: string | null = null;
+  try {
+    activeFrom = parseIso(body.activeFrom);
+    activeTo = parseIso(body.activeTo);
+  } catch {
+    return jsonResponse({ ok:false, error:"invalid_workshop_window" }, 400);
+  }
+  if ((activeFrom && !activeTo) || (!activeFrom && activeTo) ||
+      (activeFrom && activeTo && Date.parse(activeTo) <= Date.parse(activeFrom))) {
+    return jsonResponse({ ok:false, error:"invalid_workshop_window" }, 400);
+  }
+
+  await clearOverrides();
+
+  const now = new Date().toISOString();
+  const rows: Record<string, unknown>[] = [];
+  for (const profileId of targetProfileIds) {
+    for (const game of officialGames) {
+      const selected = requestedSet.has(String(game.id));
+      rows.push({
+        profile_id:profileId,
+        game_id:String(game.id),
+        enabled:selected,
+        active_from:selected ? activeFrom : null,
+        active_to:selected ? activeTo : null,
+        updated_by:teacherProfileId,
+        updated_at:now,
+      });
+    }
+  }
+
+  for (let start = 0; start < rows.length; start += 500) {
+    const { error } = await admin.from("workshop_game_access")
+      .upsert(rows.slice(start, start + 500), { onConflict:"profile_id,game_id" });
+    if (error) throw error;
+  }
+
+  return jsonResponse({
+    ok:true,
+    action:"workshopGameAccess",
+    classCode,
+    playerCount:targetProfileIds.length,
+    gameCount:officialGames.length,
+    selectedGameCount:requestedSet.size,
+    active:true,
+    activeFrom,
+    activeTo,
+    changed:rows.length,
+  });
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers:corsHeaders });
   if (request.method !== "POST") return jsonResponse({ ok:false, error:"method_not_allowed" }, 405);
@@ -532,6 +657,9 @@ Deno.serve(async (request) => {
     }
     if (action === "setBulkGameAccess") {
       return await handleBulkGameAccess(admin, organizationId, teacherProfileId, body);
+    }
+    if (action === "setWorkshopGameAccess") {
+      return await handleWorkshopGameAccess(admin, organizationId, teacherProfileId, body);
     }
 
     const today = new Date();
