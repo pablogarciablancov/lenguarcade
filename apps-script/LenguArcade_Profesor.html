@@ -1393,6 +1393,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     try{
       workshopEditingPlanId='';
       var result=await sessionCall('getWorkshopPlannerAdmin',[classCode]);
+      await syncWorkshopSupabaseAccess(classCode,result&&result.activeSession);
       mount.innerHTML='<div id="workshopActiveHost"></div><div class="workshopPlannerGrid"><section class="workshopPlanLibrary"><div class="workshopPanelTitle"><div><h3>Tus talleres</h3><div class="sub">Próximos, borradores y sesiones ya utilizadas.</div></div><button type="button" id="workshopNewPlan">＋ Crear taller</button></div><div class="workshopListSummary" id="workshopListSummary"></div><div class="workshopPlanTabs" id="workshopPlanTabs"></div><div id="workshopPlanList" class="workshopPlanList"></div></section><section class="workshopPlanEditor"><div class="workshopPanelTitle"><div><h3>Preparar la sesión</h3><div class="sub">Guardar no publica nada automáticamente.</div></div></div><div id="workshopPlanEditorBody" class="workshopPlanEditorBody"></div></section></div>';
       document.getElementById('workshopNewPlan').onclick=newPlannerPlan;
       renderWorkshopPlanner(result);
@@ -1455,6 +1456,40 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     }
   }
 
+  function workshopAccessIso(value){
+    if(!value)return '';
+    var date=new Date(value);
+    return Number.isNaN(date.getTime())?'':date.toISOString();
+  }
+  async function syncWorkshopSupabaseAccess(classCode,session){
+    if(typeof edge!=='function'||!classCode)return null;
+    if(!session||!session.published){
+      return edge('teacher-dashboard',{
+        action:'setWorkshopGameAccess',
+        classCode:classCode,
+        active:false
+      });
+    }
+    var gameIds=[];
+    var activeFrom='';
+    var activeTo='';
+    if(session.classroomOpen){
+      gameIds=Array.isArray(session.gameIds)?session.gameIds:[];
+    }else if(session.homeEnabled&&session.homeStart&&session.homeEnd){
+      gameIds=Array.isArray(session.gameIds)?session.gameIds:[];
+      activeFrom=workshopAccessIso(session.homeStart);
+      activeTo=workshopAccessIso(session.homeEnd);
+    }
+    return edge('teacher-dashboard',{
+      action:'setWorkshopGameAccess',
+      classCode:classCode,
+      gameIds:gameIds,
+      active:true,
+      activeFrom:activeFrom,
+      activeTo:activeTo
+    });
+  }
+
   async function savePreparedPlan(mode){
     if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode)return;
     var payload=plannerPayload();if(!payload.gameIds.length){plannerStatus('Selecciona al menos un juego para esta sesión.',true);return;}
@@ -1466,6 +1501,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       workshopEditingPlanId=planId;
       if(mode==='open'||mode==='publish'){
         saved=await sessionCall('activateWorkshopPlan',[classCode,planId,mode==='open']);
+        await syncWorkshopSupabaseAccess(classCode,saved&&saved.activeSession);
       }
       renderWorkshopPlanner(saved);
       workshopEditingPlanId=planId;
@@ -1477,8 +1513,15 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
   async function activatePreparedPlan(planId,openNow){
     if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode)return;
     setTeacherSessionBusy(true);plannerStatus(openNow?'Abriendo la sesión…':'Publicando la sesión…');
-    try{renderWorkshopPlanner(await sessionCall('activateWorkshopPlan',[classCode,planId,!!openNow]));workshopEditingPlanId=String(planId);renderPlannerList();renderPlannerEditor(plannerPlan(planId));plannerStatus(openNow?'Sesión abierta. Los alumnos ya pueden entrar en los juegos seleccionados.':'Sesión publicada.');if(typeof loadTeacherWorkshopState==='function')loadTeacherWorkshopState(classCode,false);}
-    catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo activar: '+(error.message||error),true);}
+    try{
+      var result=await sessionCall('activateWorkshopPlan',[classCode,planId,!!openNow]);
+      await syncWorkshopSupabaseAccess(classCode,result&&result.activeSession);
+      renderWorkshopPlanner(result);
+      workshopEditingPlanId=String(planId);
+      renderPlannerList();renderPlannerEditor(plannerPlan(planId));
+      plannerStatus(openNow?'Sesión abierta. Los juegos seleccionados tienen prioridad temporal sobre los bloqueos normales.':'Sesión publicada.');
+      if(typeof loadTeacherWorkshopState==='function')loadTeacherWorkshopState(classCode,false);
+    }catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo activar: '+(error.message||error),true);}
   }
   async function deletePreparedPlan(planId){
     if(teacherSessionBusy)return;var plan=plannerPlan(planId);if(!plan||plan.active)return;
@@ -1492,19 +1535,33 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     if(s.planId)return activatePreparedPlan(s.planId,true);
     setTeacherSessionBusy(true);try{
       var payload={title:s.title,message:s.message,targetXp:s.targetXp,homeEnabled:s.homeEnabled,homeStart:s.homeStart,homeEnd:s.homeEnd,gameIds:s.gameIds,planId:s.planId||''};
-      await sessionCall('setWorkshopClassroomSessionOpen',[teacherCurrentClass(),true,payload]);await loadWorkshopPlanner();
+      var classCode=teacherCurrentClass();
+      var result=await sessionCall('setWorkshopClassroomSessionOpen',[classCode,true,payload]);
+      await syncWorkshopSupabaseAccess(classCode,result&&result.session);
+      await loadWorkshopPlanner();
     }catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo abrir: '+(error.message||error),true);}
   }
   async function closeActivePlannerSession(){
     if(teacherSessionBusy)return;setTeacherSessionBusy(true);
-    try{renderWorkshopPlanner(await sessionCall('closeWorkshopPlannerSession',[teacherCurrentClass()]));plannerStatus('La sesión queda cerrada en clase. El horario de casa, si existe, se mantiene.');}
-    catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo cerrar: '+(error.message||error),true);}
+    try{
+      var classCode=teacherCurrentClass();
+      var result=await sessionCall('closeWorkshopPlannerSession',[classCode]);
+      await syncWorkshopSupabaseAccess(classCode,result&&result.activeSession);
+      renderWorkshopPlanner(result);
+      plannerStatus('La sesión queda cerrada en clase. El horario de casa, si existe, se mantiene y los permisos normales quedan preservados.');
+    }catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo cerrar: '+(error.message||error),true);}
   }
   async function retireActivePlannerSession(){
     if(teacherSessionBusy)return;if(!window.confirm('¿Retirar la sesión actual? Dejará de aparecer a los alumnos y los juegos de esta clase quedarán cerrados hasta la próxima sesión.'))return;
     setTeacherSessionBusy(true);
-    try{renderWorkshopPlanner(await sessionCall('retireWorkshopPlannerSession',[teacherCurrentClass()]));plannerStatus('Sesión retirada. Puedes abrir otra preparación cuando quieras.');if(typeof loadTeacherWorkshopState==='function')loadTeacherWorkshopState(teacherCurrentClass(),false);}
-    catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo retirar: '+(error.message||error),true);}
+    try{
+      var classCode=teacherCurrentClass();
+      var result=await sessionCall('retireWorkshopPlannerSession',[classCode]);
+      await syncWorkshopSupabaseAccess(classCode,result&&result.activeSession);
+      renderWorkshopPlanner(result);
+      plannerStatus('Sesión retirada. Se han restaurado los permisos normales de juegos de la clase.');
+      if(typeof loadTeacherWorkshopState==='function')loadTeacherWorkshopState(classCode,false);
+    }catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo retirar: '+(error.message||error),true);}
   }
 
   window.laCreateWorkshopPlan=async function(){
