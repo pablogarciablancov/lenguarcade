@@ -1536,7 +1536,20 @@ function retryGameConnection(){
   runner.connectionTimer=setTimeout(retryGameConnection,getEmbeddedGameConnectionDelay(runner.game));
 }
 
-function destroyGameRunner(){
+async function refreshDashboardAfterGame(){
+  if(!token||!currentDashboard)return;
+  try{
+    const dashboard=await callServer('getStudentDashboardByToken',[token]);
+    if(!dashboard)return;
+    currentDashboard=dashboard;
+    saveCache('LA_DASHBOARD_CACHE',dashboard);
+    renderDashboard(dashboard);
+    if(typeof applyStudentSessionToCards==='function')applyStudentSessionToCards();
+  }catch(error){
+    console.warn('No se pudo refrescar el perfil después de jugar.',error);
+  }
+}
+function destroyGameRunner(refreshAfterClose){
   if(!$('gameRunner'))return;
   if(activeGameRunner?.connectionTimer)clearTimeout(activeGameRunner.connectionTimer);
   stopGameInitHandshake(activeGameRunner);
@@ -1551,6 +1564,7 @@ function destroyGameRunner(){
   closeGameOpponentLogin();
   document.body.style.overflow='';
   activeGameRunner=null;
+  if(refreshAfterClose)setTimeout(refreshDashboardAfterGame,80);
 }
 
 function requestCloseGameRunner(){
@@ -2584,7 +2598,7 @@ body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionS
 .workshopSessionActions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}.workshopSessionActions button{margin:0!important}.workshopSessionHelp{grid-column:1/-1;color:var(--muted);font-size:11px;line-height:1.45}
 .studentMissionCard{margin:0 0 16px;padding:16px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,rgba(124,77,255,.16),rgba(0,212,255,.10));box-shadow:0 12px 34px rgba(0,0,0,.12)}
 .studentMissionHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.studentMissionHead h2{margin:0 0 5px;font-size:20px}.studentMissionBadge{display:inline-flex;padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900;border:1px solid var(--line);white-space:nowrap}.studentMissionBadge.open{background:rgba(54,211,153,.14)}.studentMissionBadge.home{background:rgba(0,212,255,.14)}.studentMissionBadge.closed{background:rgba(255,255,255,.07);color:var(--muted)}
-.studentMissionMessage{margin-top:10px;line-height:1.5}.studentMissionMeta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.studentMissionMeta span{padding:6px 9px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted)}
+.studentMissionMessage{margin-top:10px;line-height:1.5}.studentMissionMeta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.studentMissionMeta span{padding:6px 9px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted)}.studentMissionProgress{margin-top:12px}.studentMissionProgressHead{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:11px;font-weight:800}.studentMissionProgressTrack{height:8px;margin-top:6px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden}.studentMissionProgressFill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#7c4dff,#00d4ff);transition:width .25s ease}.studentMissionDone{display:inline-flex;padding:5px 8px;border-radius:999px;background:rgba(59,211,155,.13);border:1px solid rgba(59,211,155,.3);color:#7ff0bd;font-size:10px;font-weight:900}
 .game.sessionLocked{filter:saturate(.2);opacity:.56}.game.sessionLocked .play{background:rgba(255,255,255,.10)!important;color:#d8deef!important;box-shadow:none!important}
 @media(max-width:760px){.workshopSessionForm{grid-template-columns:1fr}.workshopSessionForm .wide,.workshopSessionHome,.workshopGamePicker,.workshopSessionActions,.workshopSessionHelp{grid-column:auto}.workshopGamePicker,.workshopSessionHomeTimes{grid-template-columns:1fr}.studentMissionHead,.workshopSessionTop{flex-direction:column}}
 </style>
@@ -2609,8 +2623,18 @@ body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionS
     var existing=document.getElementById('studentMissionCard');var s=workshopSessionState&&workshopSessionState.session;
     if(!s||!s.published){if(existing)existing.remove();return;}
     if(!existing){existing=document.createElement('div');existing.id='studentMissionCard';existing.className='studentMissionCard';section.insertBefore(existing,section.firstChild);}
-    var meta=[];if(s.targetXp>0)meta.push('<span>🎯 Objetivo: '+sessionEsc(s.targetXp)+' XP</span>');if(s.gameIds&&s.gameIds.length)meta.push('<span>🎮 '+sessionEsc(s.gameIds.length)+' juegos</span>');if(s.homeEnabled)meta.push('<span>🏠 '+sessionEsc(missionWindowText(s))+'</span>');
-    existing.innerHTML='<div class="studentMissionHead"><div><div class="sub">MISIÓN ACTUAL</div><h2>'+sessionEsc(s.title||'Sesión LenguArcade')+'</h2></div><span class="studentMissionBadge '+sessionModeClass(s)+'">'+sessionEsc(sessionModeLabel(s))+'</span></div>'+(s.message?'<div class="studentMissionMessage">'+sessionEsc(s.message)+'</div>':'')+'<div class="studentMissionMeta">'+meta.join('')+'</div>';
+    var meta=[];
+    if(s.targetXp>0)meta.push('<span>🎯 Objetivo: '+sessionEsc(s.targetXp)+' XP</span>');
+    if(s.gameIds&&s.gameIds.length)meta.push('<span>🎮 '+sessionEsc(s.gameIds.length)+' juegos</span>');
+    if(s.homeEnabled)meta.push('<span>🏠 '+sessionEsc(missionWindowText(s))+'</span>');
+    var progress='';
+    if(Number(s.targetXp||0)>0){
+      var current=Math.max(0,Number(s.progressXp||0));
+      var target=Math.max(1,Number(s.targetXp||1));
+      var pct=Math.max(0,Math.min(100,Number(s.progressPercent||Math.round(current/target*100))));
+      progress='<div class="studentMissionProgress"><div class="studentMissionProgressHead"><span>'+sessionEsc(current)+' / '+sessionEsc(target)+' XP</span>'+(s.completed?'<span class="studentMissionDone">✓ RETO COMPLETADO</span>':'<span>'+pct+'%</span>')+'</div><div class="studentMissionProgressTrack"><div class="studentMissionProgressFill" style="width:'+pct+'%"></div></div></div>';
+    }
+    existing.innerHTML='<div class="studentMissionHead"><div><div class="sub">MISIÓN ACTUAL</div><h2>'+sessionEsc(s.title||'Sesión LenguArcade')+'</h2></div><span class="studentMissionBadge '+sessionModeClass(s)+'">'+sessionEsc(sessionModeLabel(s))+'</span></div>'+(s.message?'<div class="studentMissionMessage">'+sessionEsc(s.message)+'</div>':'')+'<div class="studentMissionMeta">'+meta.join('')+'</div>'+progress;
   }
 
   function applyStudentSessionToCards(){
