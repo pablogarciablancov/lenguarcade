@@ -100,7 +100,7 @@ Deno.serve(async (request) => {
       adjustmentsResult,
       evaluationsResult,
       gameAccessResult,
-      workshopAccessResult,
+      workshopSessionsResult,
     ] = await Promise.all([
       admin.from("profiles")
         .select("id,email,first_name,last_name,avatar,last_login_at,role")
@@ -149,9 +149,10 @@ Deno.serve(async (request) => {
       admin.from("profile_game_access")
         .select("game_id,enabled")
         .eq("profile_id", profileId),
-      admin.from("workshop_game_access")
-        .select("game_id,enabled,active_from,active_to")
-        .eq("profile_id", profileId),
+      admin.from("workshop_sessions")
+        .select("classroom_id,title,message,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,updated_at")
+        .eq("organization_id", organizationId)
+        .eq("published", true),
     ]);
 
     const failure = [
@@ -166,7 +167,7 @@ Deno.serve(async (request) => {
       adjustmentsResult.error,
       evaluationsResult.error,
       gameAccessResult.error,
-      workshopAccessResult.error,
+      workshopSessionsResult.error,
     ].find(Boolean);
     if (failure || !profileResult.data) {
       console.error("student-dashboard query failed", failure);
@@ -176,17 +177,25 @@ Deno.serve(async (request) => {
     const profile = profileResult.data;
     const progress = progressResult.data || [];
     const accessByGame = new Map((gameAccessResult.data || []).map(row => [String(row.game_id), row.enabled !== false]));
-    const workshopAccessByGame = new Map((workshopAccessResult.data || []).map(row => [String(row.game_id), row]));
-    const workshopAccessValue = (row: Record<string, unknown> | undefined) => {
-      if (!row) return null;
-      if (row.enabled === false) return false;
-      const now = Date.now();
-      const from = row.active_from ? Date.parse(String(row.active_from)) : Number.NaN;
-      const to = row.active_to ? Date.parse(String(row.active_to)) : Number.NaN;
-      if (Number.isFinite(from) && now < from) return false;
-      if (Number.isFinite(to) && now >= to) return false;
-      return true;
-    };
+    const classroomIds = new Set((enrollmentsResult.data || []).map(row => String(row.classroom_id || "")).filter(Boolean));
+    const workshopSessionRow = (workshopSessionsResult.data || []).find(row => classroomIds.has(String(row.classroom_id || ""))) || null;
+    const workshopSelectedGameIds = new Set(
+      Array.isArray(workshopSessionRow?.game_ids)
+        ? workshopSessionRow.game_ids.map((value: unknown) => String(value || ""))
+        : []
+    );
+    const workshopMode = (() => {
+      if (!workshopSessionRow || workshopSessionRow.published !== true) return "none";
+      if (workshopSessionRow.classroom_open === true) return "classroom";
+      if (workshopSessionRow.home_enabled === true) {
+        const now = Date.now();
+        const from = workshopSessionRow.active_from ? Date.parse(String(workshopSessionRow.active_from)) : Number.NaN;
+        const to = workshopSessionRow.active_to ? Date.parse(String(workshopSessionRow.active_to)) : Number.NaN;
+        if (Number.isFinite(from) && Number.isFinite(to) && now >= from && now < to) return "home";
+      }
+      return "closed";
+    })();
+    const workshopActive = workshopMode === "classroom" || workshopMode === "home";
     const progressByGame = new Map(progress.map(row => [row.game_id, row]));
     const attempts = progress.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
     const successes = progress.reduce((sum, row) => sum + Number(row.successes || 0), 0);
@@ -201,23 +210,38 @@ Deno.serve(async (request) => {
     const level = Math.floor(xp / 500) + 1;
     const classroomRelation = (enrollmentsResult.data || [])[0]?.classrooms;
     const classroom = Array.isArray(classroomRelation) ? classroomRelation[0] : classroomRelation || null;
+    const workshopSession = workshopSessionRow ? {
+      classCode:String(classroom?.legacy_class_code || ""),
+      classroomId:String(workshopSessionRow.classroom_id || ""),
+      title:String(workshopSessionRow.title || "Taller"),
+      message:String(workshopSessionRow.message || ""),
+      targetXp:Number(workshopSessionRow.target_xp || 0),
+      published:workshopSessionRow.published === true,
+      classroomOpen:workshopSessionRow.classroom_open === true,
+      homeEnabled:workshopSessionRow.home_enabled === true,
+      homeStart:workshopSessionRow.active_from || "",
+      homeEnd:workshopSessionRow.active_to || "",
+      gameIds:[...workshopSelectedGameIds],
+      planId:String(workshopSessionRow.plan_id || ""),
+      mode:workshopMode,
+      active:workshopActive,
+      updatedAt:workshopSessionRow.updated_at || "",
+    } : null;
 
     const games = (gamesResult.data || []).map(game => {
       const estado = game.status;
       const integration = String(game.integration || "none");
       const locked = isLockedStatus(estado) || !game.url || integration === "none";
       const baseAccessEnabled = accessByGame.get(String(game.id)) !== false;
-      const workshopAccessRow = workshopAccessByGame.get(String(game.id)) as Record<string, unknown> | undefined;
-      const workshopAccessEnabled = workshopAccessValue(workshopAccessRow);
+      const workshopControlsAccess = Boolean(workshopSessionRow);
+      const selectedForWorkshop = workshopSelectedGameIds.has(String(game.id));
+      const workshopAccessEnabled = workshopControlsAccess
+        ? (workshopActive && selectedForWorkshop)
+        : null;
       const accessEnabled = workshopAccessEnabled === null ? baseAccessEnabled : workshopAccessEnabled;
-      const lockedByWorkshop = workshopAccessEnabled !== null && !accessEnabled;
-      const lockedByTeacher = workshopAccessEnabled === null && !baseAccessEnabled;
-      const workshopScheduledClosed = Boolean(
-        workshopAccessRow &&
-        workshopAccessRow.enabled !== false &&
-        !accessEnabled &&
-        (workshopAccessRow.active_from || workshopAccessRow.active_to)
-      );
+      const lockedByWorkshop = workshopControlsAccess && !accessEnabled;
+      const lockedByTeacher = !workshopControlsAccess && !baseAccessEnabled;
+      const workshopScheduledClosed = workshopControlsAccess && selectedForWorkshop && !workshopActive;
       const effectiveLocked = lockedByWorkshop || lockedByTeacher || locked;
       const row = progressByGame.get(game.id) || {
         game_id:game.id,
@@ -252,7 +276,7 @@ Deno.serve(async (request) => {
         integration,
         catalogLocked:locked,
         accessEnabled,
-        accessSource:workshopAccessEnabled === null ? "default" : "workshop",
+        accessSource:workshopControlsAccess ? "workshop" : "default",
         lockedByTeacher,
         lockedByWorkshop,
         locked:effectiveLocked,
@@ -377,6 +401,7 @@ Deno.serve(async (request) => {
         totalGames:games.filter(game => !game.locked).length,
       },
       games,
+      workshopSession,
       events:(eventsResult.data || []).map(row => ({
         resultId:row.result_id,
         gameId:row.game_id,
