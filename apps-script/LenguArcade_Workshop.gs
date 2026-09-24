@@ -525,6 +525,89 @@ function saveWorkshopPlan(classCode, payload) {
   return result;
 }
 
+function saveWorkshopPlanFast(classCode, payload) {
+  var teacherEmail = requireWorkshopTeacher_();
+  ensureSheets_();
+  var cleanClass = workshopSessionCleanClass_(classCode);
+  var clean = workshopPlanValidatePayload_(payload);
+  var planId = workshopPlanCleanId_(payload && payload.planId) || ('plan_' + Utilities.getUuid().replace(/-/g, '').slice(0, 20));
+  var existing = workshopPlanFind_(cleanClass, planId);
+  var now = nowIso_();
+  var record = {
+    planId:planId,
+    classCode:cleanClass,
+    title:clean.title,
+    message:clean.message,
+    targetXp:clean.targetXp,
+    plannedAt:clean.plannedAt,
+    homeEnabled:clean.homeEnabled,
+    homeStart:clean.homeStart,
+    homeEnd:clean.homeEnd,
+    gameIds:JSON.stringify(clean.gameIds),
+    usedAt:existing ? String(existing.usedAt || '') : '',
+    createdAt:existing ? String(existing.createdAt || now) : now,
+    updatedAt:now,
+    updatedBy:teacherEmail
+  };
+  upsertByKeys_(ensureWorkshopPlanSheet_(), ['planId'], record);
+  SpreadsheetApp.flush();
+  return {
+    ok:true,
+    classCode:cleanClass,
+    savedPlanId:planId,
+    plan:workshopPlanPublic_(record, workshopSessionPublic_(workshopSessionFind_(cleanClass)))
+  };
+}
+
+function saveAndActivateWorkshopPlan(classCode, payload, openNow) {
+  var teacherEmail = requireWorkshopTeacher_();
+  ensureSheets_();
+  var cleanClass = workshopSessionCleanClass_(classCode);
+  var clean = workshopPlanValidatePayload_(payload);
+  var planId = workshopPlanCleanId_(payload && payload.planId) || ('plan_' + Utilities.getUuid().replace(/-/g, '').slice(0, 20));
+  var existing = workshopPlanFind_(cleanClass, planId);
+  var now = nowIso_();
+  var planRecord = {
+    planId:planId,
+    classCode:cleanClass,
+    title:clean.title,
+    message:clean.message,
+    targetXp:clean.targetXp,
+    plannedAt:clean.plannedAt,
+    homeEnabled:clean.homeEnabled,
+    homeStart:clean.homeStart,
+    homeEnd:clean.homeEnd,
+    gameIds:JSON.stringify(clean.gameIds),
+    usedAt:now,
+    createdAt:existing ? String(existing.createdAt || now) : now,
+    updatedAt:now,
+    updatedBy:teacherEmail
+  };
+
+  upsertByKeys_(ensureWorkshopPlanSheet_(), ['planId'], planRecord);
+  applyWorkshopPlanAccess_(cleanClass, clean.gameIds, teacherEmail);
+  upsertByKeys_(ensureWorkshopSessionSheet_(), ['classCode'], {
+    classCode:cleanClass,
+    title:clean.title,
+    message:clean.message,
+    targetXp:clean.targetXp,
+    published:true,
+    classroomOpen:!!openNow,
+    homeEnabled:clean.homeEnabled,
+    homeStart:clean.homeStart,
+    homeEnd:clean.homeEnd,
+    gameIds:JSON.stringify(clean.gameIds),
+    planId:planId,
+    updatedAt:now,
+    updatedBy:teacherEmail
+  });
+  SpreadsheetApp.flush();
+
+  var result = getWorkshopPlannerAdmin(cleanClass);
+  result.savedPlanId = planId;
+  return result;
+}
+
 function deleteWorkshopPlan(classCode, planId) {
   requireWorkshopTeacher_();
   ensureSheets_();
@@ -548,16 +631,39 @@ function applyWorkshopPlanAccess_(classCode, gameIds, teacherEmail) {
   var selected = {};
   workshopSessionGameIds_(gameIds).forEach(function(id){ selected[String(id)] = true; });
   var sheet = ensureWorkshopAccessSheet_();
+  var headers = getHeaders_(sheet);
+  var rows = rowsToObjects_(sheet);
+  var byKey = {};
+  rows.forEach(function(row, index) {
+    byKey[String(row.classCode || '') + '|' + String(row.gameId || '')] = index;
+  });
   var now = nowIso_();
+
   getWorkshopCatalog_().forEach(function(game) {
-    upsertByKeys_(sheet, ['classCode','gameId'], {
+    var gameId = String(game.gameId || '');
+    var record = {
       classCode:cleanClass,
-      gameId:String(game.gameId),
-      enabled:!!selected[String(game.gameId)],
+      gameId:gameId,
+      enabled:!!selected[gameId],
       updatedAt:now,
       updatedBy:teacherEmail
-    });
+    };
+    var key = cleanClass + '|' + gameId;
+    if (Object.prototype.hasOwnProperty.call(byKey, key)) {
+      rows[byKey[key]] = Object.assign({}, rows[byKey[key]], record);
+    } else {
+      byKey[key] = rows.length;
+      rows.push(record);
+    }
   });
+
+  if (rows.length) {
+    sheet.getRange(2, 1, rows.length, headers.length).setValues(rows.map(function(row) {
+      return headers.map(function(header){ return row[header] != null ? row[header] : ''; });
+    }));
+  }
+  var extra = sheet.getLastRow() - 1 - rows.length;
+  if (extra > 0) sheet.getRange(rows.length + 2, 1, extra, headers.length).clearContent();
 }
 
 function activateWorkshopPlan(classCode, planId, openNow) {
@@ -567,19 +673,24 @@ function activateWorkshopPlan(classCode, planId, openNow) {
   var row = workshopPlanFind_(cleanClass, planId);
   if (!row) throw new Error('La sesión preparada ya no existe.');
   var plan = workshopPlanPublic_(row, null);
+  var now = nowIso_();
+
   applyWorkshopPlanAccess_(cleanClass, plan.gameIds, teacherEmail);
 
-  var activeResult = saveWorkshopSession(cleanClass, {
+  upsertByKeys_(ensureWorkshopSessionSheet_(), ['classCode'], {
+    classCode:cleanClass,
     title:plan.title,
     message:plan.message,
     targetXp:plan.targetXp,
+    published:true,
+    classroomOpen:!!openNow,
     homeEnabled:plan.homeEnabled,
     homeStart:plan.homeStart,
     homeEnd:plan.homeEnd,
-    gameIds:plan.gameIds,
+    gameIds:JSON.stringify(plan.gameIds),
     planId:plan.planId,
-    published:true,
-    classroomOpen:!!openNow
+    updatedAt:now,
+    updatedBy:teacherEmail
   });
 
   upsertByKeys_(ensureWorkshopPlanSheet_(), ['planId'], {
@@ -593,16 +704,14 @@ function activateWorkshopPlan(classCode, planId, openNow) {
     homeStart:plan.homeStart,
     homeEnd:plan.homeEnd,
     gameIds:JSON.stringify(plan.gameIds),
-    usedAt:nowIso_(),
-    createdAt:String(row.createdAt || nowIso_()),
-    updatedAt:String(row.updatedAt || nowIso_()),
+    usedAt:now,
+    createdAt:String(row.createdAt || now),
+    updatedAt:now,
     updatedBy:teacherEmail
   });
-  SpreadsheetApp.flush();
 
-  var result = getWorkshopPlannerAdmin(cleanClass);
-  result.activeSession = activeResult.session;
-  return result;
+  SpreadsheetApp.flush();
+  return getWorkshopPlannerAdmin(cleanClass);
 }
 
 function closeWorkshopPlannerSession(classCode) {
