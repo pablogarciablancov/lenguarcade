@@ -2063,7 +2063,9 @@ mountGamePairCodePanel();
   async function loginGoogleViaSupabase(kind){
     if(typeof createSupabaseAnonymousSession!=='function'||typeof loadSupabaseDashboard!=='function'||typeof saveSupabaseSession!=='function')return null;
     const auth=await createSupabaseAnonymousSession();
-    const fn=kind==='teacher'?'loginTeacherPanelWithGoogle':'loginStudentPanelWithGoogle';
+    const fn=kind==='teacher'
+      ?'loginTeacherPanelWithGoogle'
+      :(kind==='test'?'loginTeacherTestStudentWithGoogle':'loginStudentPanelWithGoogle');
     await baseCall(fn,[auth.access_token]);
     const dashboard=await loadSupabaseDashboard(auth.access_token);
     saveSupabaseSession(auth);
@@ -2125,6 +2127,22 @@ mountGamePairCodePanel();
       disable('[data-google-teacher-player-login]',false);
     }
   };
+  window.secureTestStudentLogin=async function(){
+    if(busy)return;
+    busy=true;
+    disable('[data-google-test-student-login]',true);
+    authStatus('Preparando un alumno ficticio limpio...');
+    try{
+      const result=await loginGoogleViaSupabase('test');
+      if(!result)throw new Error('No se ha podido iniciar el modo de pruebas.');
+      finishGoogleStudentLogin(result,'Has entrado como Alumno de prueba.');
+    }catch(error){
+      authStatus(error.message||'No se ha podido entrar como alumno de prueba.');
+    }finally{
+      busy=false;
+      disable('[data-google-test-student-login]',false);
+    }
+  };
   window.mountGoogleStudentLogin=function(){
     const card=q('loginCard');
     if(!card)return;
@@ -2146,6 +2164,7 @@ mountGamePairCodePanel();
             '<button type="button" class="teacherToggle" data-teacher-toggle>Soy profesor</button>'+
             '<div class="teacherPanel" data-teacher-panel>'+
               '<button type="button" data-google-teacher-player-login>Entrar como profe-jugador</button>'+
+              '<button type="button" class="teacherToggle" data-google-test-student-login style="margin-top:10px">Entrar como alumno de prueba</button>'+
               '<button type="button" class="teacherToggle" data-open-teacher-panel style="margin-top:10px">Abrir panel del profesor</button>'+
             '</div>'+
           '</div>'+
@@ -2157,10 +2176,12 @@ mountGamePairCodePanel();
     const teacherToggle=card.querySelector('[data-teacher-toggle]');
     const teacherPanel=card.querySelector('[data-teacher-panel]');
     const teacherPlayerButton=card.querySelector('[data-google-teacher-player-login]');
+    const testStudentButton=card.querySelector('[data-google-test-student-login]');
     const teacherPanelButton=card.querySelector('[data-open-teacher-panel]');
     if(studentButton)studentButton.onclick=window.secureStudentLogin;
     if(teacherToggle&&teacherPanel)teacherToggle.onclick=function(){teacherPanel.classList.toggle('open');};
     if(teacherPlayerButton)teacherPlayerButton.onclick=window.secureTeacherLogin;
+    if(testStudentButton)testStudentButton.onclick=window.secureTestStudentLogin;
     if(teacherPanelButton)teacherPanelButton.onclick=goToProfesorPanel;
   };
   try{
