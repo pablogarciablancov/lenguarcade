@@ -1639,12 +1639,25 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
   }
 
   async function goToGeneralAccess(){
+    var embedded=window.self!==window.top;
+    var popup=embedded?window.open('about:blank','_blank'):null;
     try{
       var url=await callApps('getWebAppUrl',[]);
-      window.top.location.replace(url);
+      if(embedded){
+        if(!popup)throw new Error('popup_blocked');
+        popup.location.replace(url);
+      }else{
+        window.location.replace(url);
+      }
     }catch(error){
       var href=String(window.location.href||'');
-      window.top.location.replace(href.split('?')[0]);
+      var fallback=href.split('?')[0];
+      try{
+        if(embedded&&popup&&!popup.closed)popup.location.replace(fallback);
+        else if(!embedded)window.location.replace(fallback);
+      }catch(navigationError){
+        console.warn('No se pudo volver al acceso general.',navigationError);
+      }
     }
   }
 
