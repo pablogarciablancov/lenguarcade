@@ -2052,11 +2052,20 @@ mountGamePairCodePanel();
     if(button)button.disabled=!!value;
   }
   async function goToProfesorPanel(){
+    const embedded=window.self!==window.top;
+    const popup=embedded?window.open('about:blank','_blank'):null;
     try{
       authStatus('Abriendo panel del profesor...');
       const url=await baseCall('getWebAppUrl');
-      window.top.location.href=url+'?page=profesor';
+      const target=url+'?page=profesor';
+      if(embedded){
+        if(!popup)throw new Error('El navegador ha bloqueado la nueva pestaña. Permite ventanas emergentes para LenguArcade y vuelve a intentarlo.');
+        popup.location.replace(target);
+      }else{
+        window.location.assign(target);
+      }
     }catch(error){
+      try{if(popup&&!popup.closed)popup.close();}catch(closeError){}
       authStatus('No se ha podido abrir el panel: '+(error.message||error));
     }
   }
