@@ -308,12 +308,12 @@ Deno.serve(async (request) => {
     });
 
     const nowMs = Date.now();
-    const classroomIds = new Set((enrollmentsResult.data || []).map(row => String(row.classroom_id || "")));
+    const missionClassroomIds = new Set((enrollmentsResult.data || []).map(row => String(row.classroom_id || "")));
     const gameNameById = new Map((gamesResult.data || []).map(game => [String(game.id), String(game.name || game.id)]));
     const missionProgress = (missionsResult.data || [])
       .filter(mission => {
         if (mission.target_profile_id && String(mission.target_profile_id) !== String(profileId)) return false;
-        if (mission.classroom_id && !classroomIds.has(String(mission.classroom_id))) return false;
+        if (mission.classroom_id && !missionClassroomIds.has(String(mission.classroom_id))) return false;
         const from = mission.active_from ? Date.parse(String(mission.active_from)) : Number.NaN;
         const to = mission.active_to ? Date.parse(String(mission.active_to)) : Number.NaN;
         if (Number.isFinite(from) && from > nowMs) return false;
