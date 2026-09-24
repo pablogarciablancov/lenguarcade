@@ -315,7 +315,7 @@ Deno.serve(async (request) => {
       missionsResult,
     ] = await Promise.all([
       admin.from("profiles")
-        .select("id,email,first_name,last_name,last_login_at")
+        .select("id,email,first_name,last_name,last_login_at,source")
         .eq("organization_id", organizationId)
         .eq("role", "student")
         .eq("active", true),
@@ -369,7 +369,8 @@ Deno.serve(async (request) => {
     }
 
     const profiles = (profilesResult.data || []).filter(profile => {
-      if (!classCode) return true;
+      const isTestProfile = String(profile.source || "").toLowerCase() === "test";
+      if (!classCode) return !isTestProfile;
       return (enrollmentsByProfile.get(profile.id) || [])
         .some(classroomId => selectedClassroomIds.has(classroomId));
     });
