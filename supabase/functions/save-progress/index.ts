@@ -31,19 +31,41 @@ Deno.serve(async (request) => {
     const resultId = String(body.resultId || "").trim().slice(0, 180);
     if (!gameId) return jsonResponse({ ok:false, error:"missing_game_id" }, 400);
 
-    const [{ data:game, error:gameError }, { data:gameAccess, error:gameAccessError }] = await Promise.all([
+    const [
+      { data:game, error:gameError },
+      { data:gameAccess, error:gameAccessError },
+      { data:workshopAccess, error:workshopAccessError },
+    ] = await Promise.all([
       admin.from("games").select("id").eq("id", gameId).maybeSingle(),
       admin.from("profile_game_access")
         .select("enabled")
         .eq("profile_id", profileId)
         .eq("game_id", gameId)
         .maybeSingle(),
+      admin.from("workshop_game_access")
+        .select("enabled,active_from,active_to")
+        .eq("profile_id", profileId)
+        .eq("game_id", gameId)
+        .maybeSingle(),
     ]);
     if (gameError) throw gameError;
     if (gameAccessError) throw gameAccessError;
+    if (workshopAccessError) throw workshopAccessError;
     if (!game) return jsonResponse({ ok:false, error:"unknown_game" }, 400);
-    if (gameAccess?.enabled === false) {
-      return jsonResponse({ ok:false, error:"game_access_closed" }, 403);
+
+    let accessEnabled = gameAccess?.enabled !== false;
+    if (workshopAccess) {
+      accessEnabled = workshopAccess.enabled !== false;
+      if (accessEnabled) {
+        const now = Date.now();
+        const from = workshopAccess.active_from ? Date.parse(String(workshopAccess.active_from)) : Number.NaN;
+        const to = workshopAccess.active_to ? Date.parse(String(workshopAccess.active_to)) : Number.NaN;
+        if (Number.isFinite(from) && now < from) accessEnabled = false;
+        if (Number.isFinite(to) && now >= to) accessEnabled = false;
+      }
+    }
+    if (!accessEnabled) {
+      return jsonResponse({ ok:false, error:workshopAccess ? "workshop_game_access_closed" : "game_access_closed" }, 403);
     }
     if (resultId) {
       const { data:duplicate } = await admin.from("game_events")
