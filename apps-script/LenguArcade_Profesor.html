@@ -134,6 +134,17 @@ html.la-teacher-direct-pending body:after{
 @keyframes laTeacherDirectPulse{from{opacity:.35;transform:translateX(-50%) scaleX(.55)}to{opacity:1;transform:translateX(-50%) scaleX(1)}}
 html.la-teacher-direct-fallback #loginCard{display:block!important}
 </style>
+<style id="la-student-class-filter-style">
+.studentListHead{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:14px}
+.studentListHead h2{margin-bottom:4px}
+.studentClassPicker{width:min(260px,100%);flex:0 0 240px}
+.studentClassPicker label{font-weight:800}
+#alumnos table{margin-top:2px}
+@media(max-width:760px){
+  .studentListHead{align-items:stretch;flex-direction:column}
+  .studentClassPicker{width:100%;flex-basis:auto}
+}
+</style>
 </head>
 <body>
   <div class="app">
@@ -192,8 +203,16 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
 
         <section class="layout">
           <div class="card" id="alumnos">
-            <h2>Rendimiento de la clase</h2>
-            <div class="sub" style="margin-bottom:10px">Pulsa un alumno para cargar su ficha completa.</div>
+            <div class="studentListHead">
+              <div>
+                <h2>Rendimiento del alumnado</h2>
+                <div class="sub">Filtra por clase y pulsa un alumno para cargar su ficha completa.</div>
+              </div>
+              <div class="studentClassPicker field">
+                <label>Clase</label>
+                <select id="studentsClassSelect"><option value="">Todos los alumnos</option></select>
+              </div>
+            </div>
             <div style="overflow:auto"><table><thead><tr><th>Alumno</th><th>Clase</th><th>XP</th><th>Nivel</th><th>Sesiones</th><th>Juegos</th><th>Precisión</th><th>Nota</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
           </div>
           <div class="card" id="juegos"><h2>Juegos más usados</h2><div id="popularGames"></div></div>
@@ -325,9 +344,14 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
 
     function renderFilters(data){
       const classValue=$('classSelect').value,gameValue=$('gameSelect').value;
-      $('classSelect').innerHTML='<option value="">Todas</option>'+(data.classes||[]).map(row=>`<option value="${esc(row.classCode)}">${esc(row.nombreVisible)}</option>`).join('');
+      const classOptions=(data.classes||[]).map(row=>`<option value="${esc(row.classCode)}">${esc(row.nombreVisible)}</option>`).join('');
+      $('classSelect').innerHTML='<option value="">Todas</option>'+classOptions;
       $('gameSelect').innerHTML='<option value="">Todos</option>'+(data.games||[]).map(row=>`<option value="${esc(row.id)}">${esc(row.name)}</option>`).join('');
       $('classSelect').value=classValue;$('gameSelect').value=gameValue;
+      if($('studentsClassSelect')){
+        $('studentsClassSelect').innerHTML='<option value="">Todos los alumnos</option>'+classOptions;
+        $('studentsClassSelect').value=classValue;
+      }
     }
     function renderTeacher(data){
       renderFilters(data);
@@ -563,8 +587,9 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       $('logoutBtn').onclick=logout;
       $('loginBtn').onclick=loginTeacher;
       $('refreshBtn').onclick=()=>loadTeacher();
-      $('classSelect').onchange=()=>loadTeacher();
+      $('classSelect').onchange=()=>{if($('studentsClassSelect'))$('studentsClassSelect').value=$('classSelect').value;loadTeacher();};
       $('gameSelect').onchange=()=>loadTeacher();
+      if($('studentsClassSelect'))$('studentsClassSelect').onchange=()=>{$('classSelect').value=$('studentsClassSelect').value;loadTeacher();};
       $('studentModalClose').onclick=()=>$('studentModal').classList.remove('open');
       $('classroomModalClose').onclick=()=>$('classroomModal').classList.remove('open');
       $('classroomSyncBtn').onclick=openClassroomPicker;
