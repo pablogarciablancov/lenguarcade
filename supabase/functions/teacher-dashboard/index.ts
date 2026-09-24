@@ -591,6 +591,22 @@ async function handleWorkshopGameAccess(
     activeTo = null;
   }
 
+  const incomingPlanId = String(session.planId || "").trim().slice(0, 160);
+  const { data:existingSession, error:existingSessionError } = await admin.from("workshop_sessions")
+    .select("plan_id,started_at,published")
+    .eq("classroom_id", classroom.id)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+  if (existingSessionError) throw existingSessionError;
+  const samePublishedPlan = Boolean(
+    existingSession?.published &&
+    existingSession?.started_at &&
+    String(existingSession.plan_id || "") === incomingPlanId
+  );
+  const startedAt = samePublishedPlan
+    ? String(existingSession.started_at)
+    : (classroomOpen ? new Date().toISOString() : (activeFrom || new Date().toISOString()));
+
   const record = {
     classroom_id:String(classroom.id),
     organization_id:organizationId,
@@ -603,7 +619,8 @@ async function handleWorkshopGameAccess(
     active_from:activeFrom,
     active_to:activeTo,
     game_ids:requestedIds,
-    plan_id:String(session.planId || "").trim().slice(0, 160),
+    plan_id:incomingPlanId,
+    started_at:startedAt,
     updated_by:teacherProfileId,
     updated_at:new Date().toISOString(),
   };
