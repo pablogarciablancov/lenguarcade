@@ -118,6 +118,10 @@ function missionTypeLabel(value: unknown) {
 }
 
 function missionStatus(row: Record<string, unknown>) {
+  const publicationStatus = String(row.publication_status || (row.active ? "published" : "closed"));
+  if (publicationStatus === "draft") return "draft";
+  if (publicationStatus === "paused") return "paused";
+  if (publicationStatus === "closed") return "closed";
   const now = Date.now();
   const from = row.active_from ? Date.parse(String(row.active_from)) : Number.NaN;
   const to = row.active_to ? Date.parse(String(row.active_to)) : Number.NaN;
@@ -151,18 +155,33 @@ async function handleMissionAction(
   body: Record<string, unknown>,
 ) {
   const action = String(body.action || "");
-  if (action === "archiveMission") {
+  if (action === "archiveMission" || action === "setMissionStatus") {
     const missionId = cleanMissionText(body.missionId, 160);
     if (!missionId) return jsonResponse({ ok:false, error:"missing_mission_id" }, 400);
+    const requestedStatus = action === "archiveMission"
+      ? "closed"
+      : cleanMissionText(body.publicationStatus, 24).toLowerCase();
+    if (!["draft","published","paused","closed"].includes(requestedStatus)) {
+      return jsonResponse({ ok:false, error:"invalid_mission_status" }, 400);
+    }
     const { data, error } = await admin.from("mission_definitions")
-      .update({ active:false, updated_at:new Date().toISOString() })
+      .update({
+        active:requestedStatus === "published",
+        publication_status:requestedStatus,
+        updated_at:new Date().toISOString(),
+      })
       .eq("organization_id", organizationId)
       .eq("id", missionId)
-      .select("id")
+      .select("id,publication_status,active")
       .maybeSingle();
     if (error) throw error;
     if (!data) return jsonResponse({ ok:false, error:"mission_not_found" }, 404);
-    return jsonResponse({ ok:true, action:"archiveMission", missionId });
+    return jsonResponse({
+      ok:true,
+      action:action === "archiveMission" ? "archiveMission" : "setMissionStatus",
+      missionId,
+      publicationStatus:data.publication_status,
+    });
   }
 
   if (action !== "saveMission") return null;
@@ -232,6 +251,10 @@ async function handleMissionAction(
 
   const featured = Boolean(mission.featured);
   const priority = featured ? 100 : Math.max(-100, Math.min(99, Math.round(Number(mission.priority || 0))));
+  const publicationStatusRaw = cleanMissionText(mission.publicationStatus, 24).toLowerCase();
+  const publicationStatus = ["draft","published","paused","closed"].includes(publicationStatusRaw)
+    ? publicationStatusRaw
+    : "published";
   const id = cleanMissionText(mission.id, 160) ||
     `mission_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
   const record = {
@@ -245,7 +268,8 @@ async function handleMissionAction(
     reward_feathers:0,
     active_from:activeFrom,
     active_to:activeTo,
-    active:true,
+    active:publicationStatus === "published",
+    publication_status:publicationStatus,
     organization_id:organizationId,
     classroom_id:classroomId,
     featured,
@@ -448,7 +472,7 @@ Deno.serve(async (request) => {
     const gameId = String(body.gameId || "");
     const action = String(body.action || "");
 
-    if (action === "saveMission" || action === "archiveMission") {
+    if (action === "saveMission" || action === "archiveMission" || action === "setMissionStatus") {
       const missionResult = await handleMissionAction(admin, organizationId, body);
       if (missionResult) return missionResult;
     }
@@ -501,11 +525,10 @@ Deno.serve(async (request) => {
         .eq("official", true)
         .order("sort_order"),
       admin.from("mission_definitions")
-        .select("id,title,description,game_id,mission_type,target,active_from,active_to,classroom_id,featured,priority,active,updated_at")
+        .select("id,title,description,game_id,mission_type,target,active_from,active_to,classroom_id,featured,priority,active,publication_status,created_at,updated_at")
         .eq("organization_id", organizationId)
-        .eq("active", true)
-        .order("priority", { ascending:false })
-        .order("active_to", { ascending:true, nullsFirst:false }),
+        .order("updated_at", { ascending:false })
+        .limit(250),
     ]);
 
     const structureFailure = [
@@ -791,7 +814,9 @@ Deno.serve(async (request) => {
         className:row.classroom_id ? String(classroomById.get(row.classroom_id)?.name || "") : "Todas las clases",
         featured:Boolean(row.featured),
         priority:Number(row.priority || 0),
+        publicationStatus:String(row.publication_status || (row.active ? "published" : "closed")),
         status:missionStatus(row),
+        createdAt:row.created_at || null,
         updatedAt:row.updated_at,
       })),
       classes:classrooms.map(row => ({
