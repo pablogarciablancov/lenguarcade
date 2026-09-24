@@ -284,7 +284,7 @@ Deno.serve(async (request) => {
   if (request.method !== "POST") return jsonResponse({ ok:false, error:"method_not_allowed" }, 405);
 
   try {
-    const { admin, organizationId } = await requireTeacherSession(request);
+    const { admin, organizationId, profileId:teacherProfileId } = await requireTeacherSession(request);
     const body = await request.json().catch(() => ({}));
     const classCode = String(body.classCode || "");
     const gameId = String(body.gameId || "");
@@ -305,6 +305,7 @@ Deno.serve(async (request) => {
 
     const [
       profilesResult,
+      teacherProfileResult,
       classroomsResult,
       enrollmentsResult,
       gamesResult,
@@ -313,12 +314,19 @@ Deno.serve(async (request) => {
       achievementsResult,
       errorsResult,
       missionsResult,
+      adjustmentsResult,
     ] = await Promise.all([
       admin.from("profiles")
         .select("id,email,first_name,last_name,last_login_at,source")
         .eq("organization_id", organizationId)
         .eq("role", "student")
         .eq("active", true),
+      admin.from("profiles")
+        .select("id,email,first_name,last_name,last_login_at,role,source")
+        .eq("organization_id", organizationId)
+        .eq("id", teacherProfileId)
+        .eq("active", true)
+        .maybeSingle(),
       admin.from("classrooms")
         .select("id,name,section,legacy_class_code,classroom_course_id,last_synced_at")
         .eq("organization_id", organizationId)
@@ -335,7 +343,7 @@ Deno.serve(async (request) => {
       admin.from("game_progress")
         .select("profile_id,game_id,xp,level,percentage,accuracy,attempts,successes,errors,streak,sessions,achievements_count,missions_completed,feathers,last_activity_at"),
       admin.from("game_events")
-        .select("profile_id,game_id,occurred_at")
+        .select("profile_id,game_id,event_type,occurred_at")
         .gte("occurred_at", today.toISOString()),
       admin.from("player_achievements")
         .select("profile_id,game_id"),
@@ -347,11 +355,16 @@ Deno.serve(async (request) => {
         .eq("active", true)
         .order("priority", { ascending:false })
         .order("active_to", { ascending:true, nullsFirst:false }),
+      admin.from("game_events")
+        .select("profile_id,xp_delta,feathers_delta,occurred_at")
+        .eq("event_type", "teacher_adjustment")
+        .order("occurred_at", { ascending:false })
+        .limit(5000),
     ]);
     const failure = [
-      profilesResult.error, classroomsResult.error, enrollmentsResult.error,
+      profilesResult.error, teacherProfileResult.error, classroomsResult.error, enrollmentsResult.error,
       gamesResult.error, progressResult.error, eventsResult.error,
-      achievementsResult.error, errorsResult.error, missionsResult.error,
+      achievementsResult.error, errorsResult.error, missionsResult.error, adjustmentsResult.error,
     ].find(Boolean);
     if (failure) throw failure;
 
@@ -374,6 +387,13 @@ Deno.serve(async (request) => {
       return (enrollmentsByProfile.get(profile.id) || [])
         .some(classroomId => selectedClassroomIds.has(classroomId));
     });
+    const adjustmentByProfile = new Map<string, { xp:number; feathers:number }>();
+    for (const row of adjustmentsResult.data || []) {
+      const current = adjustmentByProfile.get(row.profile_id) || { xp:0, feathers:0 };
+      current.xp += Number(row.xp_delta || 0);
+      current.feathers += Number(row.feathers_delta || 0);
+      adjustmentByProfile.set(row.profile_id, current);
+    }
     const profileIds = new Set(profiles.map(profile => profile.id));
     const progress = (progressResult.data || []).filter(row =>
       profileIds.has(row.profile_id) && (!gameId || row.game_id === gameId)
@@ -389,7 +409,9 @@ Deno.serve(async (request) => {
       const rows = progressByProfile.get(profile.id) || [];
       const attempts = rows.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
       const successes = rows.reduce((sum, row) => sum + Number(row.successes || 0), 0);
-      const xp = rows.reduce((sum, row) => sum + Number(row.xp || 0), 0);
+      const baseXp = rows.reduce((sum, row) => sum + Number(row.xp || 0), 0);
+      const manual = adjustmentByProfile.get(profile.id) || { xp:0, feathers:0 };
+      const xp = Math.max(0, baseXp + manual.xp);
       const classroomIds = enrollmentsByProfile.get(profile.id) || [];
       const classroom = classCode
         ? classroomById.get(classroomIds.find(id => selectedClassroomIds.has(id)) || "")
@@ -406,6 +428,8 @@ Deno.serve(async (request) => {
         clase:classroom?.legacy_class_code || classroom?.name || "",
         pinConfigured:true,
         xp,
+        baseXp,
+        manualXp:manual.xp,
         level:Math.floor(xp / 500) + 1,
         percentage:Math.round(average(rows.map(row => Number(row.percentage || 0)))),
         accuracy:attempts ? Math.round((successes / attempts) * 100) : 0,
@@ -466,11 +490,41 @@ Deno.serve(async (request) => {
       : [];
 
     const eventCount = (eventsResult.data || []).filter(row =>
-      profileIds.has(row.profile_id) && (!gameId || row.game_id === gameId)
+      row.event_type !== "teacher_adjustment" &&
+      profileIds.has(row.profile_id) &&
+      (!gameId || row.game_id === gameId)
     ).length;
     const achievementCount = (achievementsResult.data || []).filter(row =>
       profileIds.has(row.profile_id) && (!gameId || row.game_id === gameId)
     ).length;
+
+    const teacherProfile = teacherProfileResult.data;
+    const teacherRows = (progressResult.data || []).filter(row => row.profile_id === teacherProfileId);
+    const teacherAttempts = teacherRows.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
+    const teacherSuccesses = teacherRows.reduce((sum, row) => sum + Number(row.successes || 0), 0);
+    const teacherBaseXp = teacherRows.reduce((sum, row) => sum + Number(row.xp || 0), 0);
+    const teacherManual = adjustmentByProfile.get(teacherProfileId) || { xp:0, feathers:0 };
+    const teacherXp = Math.max(0, teacherBaseXp + teacherManual.xp);
+    const teacherPlayer = teacherProfile ? {
+      studentId:teacherProfile.id,
+      nombre:`${teacherProfile.first_name || ""} ${teacherProfile.last_name || ""}`.trim() || "Profesor",
+      email:teacherProfile.email,
+      clase:"Profesor",
+      isTeacherPlayer:true,
+      xp:teacherXp,
+      baseXp:teacherBaseXp,
+      manualXp:teacherManual.xp,
+      level:Math.floor(teacherXp / 500) + 1,
+      sessions:teacherRows.reduce((sum, row) => sum + Number(row.sessions || 0), 0),
+      gamesPlayed:teacherRows.filter(row => Number(row.sessions || 0) > 0).length,
+      accuracy:teacherAttempts ? Math.round((teacherSuccesses / teacherAttempts) * 100) : 0,
+      grade:gradeFor(teacherRows),
+      lastActivity:teacherRows
+        .map(row => String(row.last_activity_at || ""))
+        .filter(Boolean)
+        .sort()
+        .pop() || teacherProfile.last_login_at || "",
+    } : null;
 
     return jsonResponse({
       ok:true,
@@ -484,6 +538,7 @@ Deno.serve(async (request) => {
         averageGrade:Math.round(average(students.map(student => student.grade)) * 10) / 10,
       },
       students,
+      teacherPlayer,
       games,
       popularGames,
       errorSummary,
