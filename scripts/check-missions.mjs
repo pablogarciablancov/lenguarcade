@@ -7,6 +7,7 @@ const errors=[];
 
 const migration=read("supabase/migrations/20260907075752_mission_board_management.sql");
 const statusMigration=read("supabase/migrations/20260924183000_add_mission_publication_status.sql");
+const individualMigration=read("supabase/migrations/20260924190000_add_individual_mission_target.sql");
 const studentDashboard=read("supabase/functions/student-dashboard/index.ts");
 const teacherDashboard=read("supabase/functions/teacher-dashboard/index.ts");
 const studentHtml=read("apps-script/LenguArcade_Alumno.html");
@@ -61,6 +62,16 @@ if(!statusMigration.includes("publication_status")||
    !statusMigration.includes("'paused'")||
    !statusMigration.includes("'closed'")){
   errors.push("La migración no registra los estados de publicación de las misiones.");
+}
+if(!teacherHtml.includes("if(existing)return existing")||
+   /function ensureMissionManager\([^)]*\)\s*\{[\s\S]*?fillMissionEditor\(/.test(teacherHtml.match(/function ensureMissionManager\([^)]*\)\s*\{[\s\S]*?\n  \}/)?.[0]||"")){
+  errors.push("El gestor de misiones debe montarse una sola vez y no llamarse recursivamente.");
+}
+if(!individualMigration.includes("target_profile_id")||
+   !teacherDashboard.includes("resolveMissionStudent")||
+   !studentDashboard.includes("mission.target_profile_id")||
+   !teacherHtml.includes('id="missionStudent"')){
+  errors.push("Las misiones individuales no están integradas de extremo a extremo.");
 }
 if(!teacherHtml.includes("Guardar progreso")){
   errors.push("El gestor docente no ofrece misiones de guardado.");
