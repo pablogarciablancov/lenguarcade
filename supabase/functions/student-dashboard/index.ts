@@ -99,6 +99,7 @@ Deno.serve(async (request) => {
       missionEventsResult,
       adjustmentsResult,
       evaluationsResult,
+      gameAccessResult,
     ] = await Promise.all([
       admin.from("profiles")
         .select("id,email,first_name,last_name,avatar,last_login_at,role")
@@ -144,6 +145,9 @@ Deno.serve(async (request) => {
       admin.from("evaluations")
         .select("scope,game_id,score,breakdown,updated_at")
         .eq("profile_id", profileId),
+      admin.from("profile_game_access")
+        .select("game_id,enabled")
+        .eq("profile_id", profileId),
     ]);
 
     const failure = [
@@ -157,6 +161,7 @@ Deno.serve(async (request) => {
       missionEventsResult.error,
       adjustmentsResult.error,
       evaluationsResult.error,
+      gameAccessResult.error,
     ].find(Boolean);
     if (failure || !profileResult.data) {
       console.error("student-dashboard query failed", failure);
@@ -165,6 +170,7 @@ Deno.serve(async (request) => {
 
     const profile = profileResult.data;
     const progress = progressResult.data || [];
+    const accessByGame = new Map((gameAccessResult.data || []).map(row => [String(row.game_id), row.enabled !== false]));
     const progressByGame = new Map(progress.map(row => [row.game_id, row]));
     const attempts = progress.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
     const successes = progress.reduce((sum, row) => sum + Number(row.successes || 0), 0);
@@ -183,7 +189,9 @@ Deno.serve(async (request) => {
     const games = (gamesResult.data || []).map(game => {
       const estado = game.status;
       const integration = String(game.integration || "none");
-      const locked = isLockedStatus(estado) || !game.url || integration === "none";
+      const accessEnabled = accessByGame.get(String(game.id)) !== false;
+      const lockedByTeacher = !accessEnabled;
+      const locked = lockedByTeacher || isLockedStatus(estado) || !game.url || integration === "none";
       const row = progressByGame.get(game.id) || {
         game_id:game.id,
         xp:0,
@@ -215,8 +223,12 @@ Deno.serve(async (request) => {
         descripcion:game.description || "",
         competencias:game.competencies || "",
         integration,
+        accessEnabled,
+        lockedByTeacher,
         locked,
-        buttonLabel:locked ? (isLockedStatus(estado) ? "En revisión" : "No disponible") : (Number(row.sessions || 0) > 0 ? "Continuar" : "Jugar"),
+        buttonLabel:locked
+          ? (lockedByTeacher ? "Cerrado por tu profesor" : (isLockedStatus(estado) ? "En revisión" : "No disponible"))
+          : (Number(row.sessions || 0) > 0 ? "Continuar" : "Jugar"),
         progress:{
           studentId:profile.id,
           gameId:row.game_id,
