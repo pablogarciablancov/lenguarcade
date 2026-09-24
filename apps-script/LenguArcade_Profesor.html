@@ -1127,8 +1127,19 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     }
     var resumen=document.getElementById('resumen');
     if(resumen&&!document.getElementById('taller')){
-      resumen.insertAdjacentHTML('afterend','<section id="taller" class="card workshopShell"><div class="workshopHero workshopHeroV2"><div class="workshopHeroTop"><div><div class="sub">PLANIFICADOR DE CLASE</div><h2>🧩 Talleres · Diseña y lanza sesiones</h2><div class="workshopHeroText">Prepara lo que ocurrirá en clase, guarda borradores y reutiliza sesiones anteriores. Al abrir un taller, LenguArcade deja disponibles únicamente los juegos elegidos.</div></div><button type="button" id="workshopHeroCreate">＋ Crear taller</button></div><div class="workshopHeroOverview"><div><span>📅 Próximos</span><b id="workshopHeroUpcoming">—</b></div><div><span>📝 Borradores</span><b id="workshopHeroDrafts">—</b></div><div><span>✓ Realizados</span><b id="workshopHeroUsed">—</b></div></div><div class="workshopClassBar"><div class="field"><label>1 · Elige la clase</label><select id="workshopClassSelect"><option value="">Selecciona una clase…</option></select></div><div class="workshopClassHint" id="workshopClassHint">Selecciona una clase para empezar.</div></div></div><div id="workshopPlannerMount" class="workshopPlannerMount"><div class="sub">Cargando planificador…</div></div><details class="workshopAdvanced"><summary>⚙️ Ajustes avanzados de disponibilidad</summary><div class="workshopAdvancedBody"><div class="workshopAdvancedIntro"><strong>No necesitas tocar esto para preparar una sesión.</strong> Es un control manual para excepciones. Al abrir una sesión, LenguArcade reconfigura automáticamente estos permisos con los juegos elegidos; al retirar la sesión, los cierra.</div><div class="workshopToolbar"><button type="button" id="workshopOpenAll">Permitir todos</button><button type="button" class="dangerAction" id="workshopCloseAll">Cerrar todos</button><div class="workshopCount" id="workshopCount"></div></div><div class="workshopGameGrid" id="workshopGameGrid"><div class="sub">Selecciona una clase.</div></div><div class="status workshopStatus" id="workshopStatus"></div></div></details></section>');
-      document.getElementById('workshopClassSelect').onchange=function(){var value=this.value;localStorage.setItem('LA_WORKSHOP_SCOPE',value);loadTeacherWorkshopState(value,true);};
+      resumen.insertAdjacentHTML('afterend','<section id="taller" class="card workshopShell"><div class="workshopHero workshopHeroV2"><div class="workshopHeroTop"><div><div class="sub">PLANIFICADOR DE CLASE</div><h2>🧩 Talleres · Diseña y lanza sesiones</h2><div class="workshopHeroText">Prepara lo que ocurrirá en clase, guarda borradores y reutiliza sesiones anteriores. Al abrir un taller, LenguArcade deja disponibles únicamente los juegos elegidos.</div></div><button type="button" id="workshopHeroCreate">＋ Crear taller</button></div><div class="workshopHeroOverview"><div><span>📅 Próximos</span><b id="workshopHeroUpcoming">—</b></div><div><span>📝 Borradores</span><b id="workshopHeroDrafts">—</b></div><div><span>✓ Realizados</span><b id="workshopHeroUsed">—</b></div></div><div class="workshopClassBar"><div class="field"><label>1 · Elige la clase</label><select id="workshopClassSelect"><option value="">Selecciona una clase…</option></select></div><div class="workshopClassHint" id="workshopClassHint">Selecciona una clase para empezar.</div></div></div><div id="workshopPlannerMount" class="workshopPlannerMount"><div class="sub">Cargando planificador…</div></div><details class="workshopAdvanced" id="workshopAdvancedDetails"><summary>⚙️ Ajustes avanzados de disponibilidad</summary><div class="workshopAdvancedBody"><div class="workshopAdvancedIntro"><strong>No necesitas tocar esto para preparar una sesión.</strong> Es un control manual para excepciones. Al abrir una sesión, LenguArcade reconfigura automáticamente estos permisos con los juegos elegidos; al retirar la sesión, los cierra.</div><div class="workshopToolbar"><button type="button" id="workshopOpenAll">Permitir todos</button><button type="button" class="dangerAction" id="workshopCloseAll">Cerrar todos</button><div class="workshopCount" id="workshopCount"></div></div><div class="workshopGameGrid" id="workshopGameGrid"><div class="sub">Selecciona una clase.</div></div><div class="status workshopStatus" id="workshopStatus"></div></div></details></section>');
+      document.getElementById('workshopClassSelect').onchange=function(){
+        var value=this.value;
+        localStorage.setItem('LA_WORKSHOP_SCOPE',value);
+        var hint=document.getElementById('workshopClassHint');
+        if(hint)hint.textContent=value?'Estás preparando el taller para esta clase.':'Elige la clase para ver y preparar sus sesiones.';
+        var advanced=document.getElementById('workshopAdvancedDetails');
+        if(advanced&&advanced.open)loadTeacherWorkshopState(value,true);
+        else{
+          var grid=document.getElementById('workshopGameGrid');
+          if(grid)grid.innerHTML='<div class="sub">Abre “Ajustes avanzados” si necesitas cambiar permisos manuales.</div>';
+        }
+      };
       document.getElementById('workshopHeroCreate').onclick=function(){
         var select=document.getElementById('workshopClassSelect');
         if(!select||!select.value){if(select)select.focus();var hint=document.getElementById('workshopClassHint');if(hint)hint.textContent='Elige primero la clase para la que quieres preparar el taller.';return;}
@@ -1137,6 +1148,10 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       };
       document.getElementById('workshopOpenAll').onclick=function(){setTeacherAllAccess(true);};
       document.getElementById('workshopCloseAll').onclick=function(){setTeacherAllAccess(false);};
+      var advanced=document.getElementById('workshopAdvancedDetails');
+      if(advanced)advanced.addEventListener('toggle',function(){
+        if(advanced.open)loadTeacherWorkshopState(teacherScope(),false);
+      });
     }
   }
   function installTeacherWorkshop(){
@@ -1150,12 +1165,12 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       if(workshopTeacherState&&String(workshopTeacherState.scope||'')===activeClass){
         renderTeacherWorkshopState(workshopTeacherState);
       }else{
-        setTimeout(function(){loadTeacherWorkshopState(activeClass,false);},0);
+        renderTeacherWorkshopState({scope:activeClass,games:[],available:0,total:0});
       }
       return result;
     };
     if(typeof currentTeacher!=='undefined'&&currentTeacher){
-      loadTeacherWorkshopState(teacherWorkshopInitialClass(),false);
+      renderTeacherWorkshopState({scope:teacherWorkshopInitialClass(),games:[],available:0,total:0});
     }
     return true;
   }
@@ -1393,10 +1408,10 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     try{
       workshopEditingPlanId='';
       var result=await sessionCall('getWorkshopPlannerAdmin',[classCode]);
-      await syncWorkshopSupabaseAccess(classCode,result&&result.activeSession);
       mount.innerHTML='<div id="workshopActiveHost"></div><div class="workshopPlannerGrid"><section class="workshopPlanLibrary"><div class="workshopPanelTitle"><div><h3>Tus talleres</h3><div class="sub">Próximos, borradores y sesiones ya utilizadas.</div></div><button type="button" id="workshopNewPlan">＋ Crear taller</button></div><div class="workshopListSummary" id="workshopListSummary"></div><div class="workshopPlanTabs" id="workshopPlanTabs"></div><div id="workshopPlanList" class="workshopPlanList"></div></section><section class="workshopPlanEditor"><div class="workshopPanelTitle"><div><h3>Preparar la sesión</h3><div class="sub">Guardar no publica nada automáticamente.</div></div></div><div id="workshopPlanEditorBody" class="workshopPlanEditorBody"></div></section></div>';
       document.getElementById('workshopNewPlan').onclick=newPlannerPlan;
       renderWorkshopPlanner(result);
+      Promise.resolve(syncWorkshopSupabaseAccess(classCode,result&&result.activeSession)).catch(function(error){console.warn('No se pudo sincronizar el Taller en segundo plano.',error);});
     }catch(error){mount.innerHTML='<div class="workshopPlannerEmpty"><strong>No se pudieron cargar las sesiones</strong>'+sessionEsc(error.message||error)+'</div>';}
   }
   function newPlannerPlan(){workshopEditingPlanId='';workshopTemplateKind='';renderPlannerList();renderPlannerEditor(plannerEditorPlan());}
@@ -1467,27 +1482,49 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       return edge('teacher-dashboard',{
         action:'setWorkshopGameAccess',
         classCode:classCode,
-        active:false
+        active:false,
+        session:session||null
       });
     }
-    var gameIds=[];
-    var activeFrom='';
-    var activeTo='';
-    if(session.classroomOpen){
-      gameIds=Array.isArray(session.gameIds)?session.gameIds:[];
-    }else if(session.homeEnabled&&session.homeStart&&session.homeEnd){
-      gameIds=Array.isArray(session.gameIds)?session.gameIds:[];
-      activeFrom=workshopAccessIso(session.homeStart);
-      activeTo=workshopAccessIso(session.homeEnd);
-    }
+    var gameIds=Array.isArray(session.gameIds)?session.gameIds:[];
+    var activeFrom=session.homeEnabled?workshopAccessIso(session.homeStart):'';
+    var activeTo=session.homeEnabled?workshopAccessIso(session.homeEnd):'';
     return edge('teacher-dashboard',{
       action:'setWorkshopGameAccess',
       classCode:classCode,
       gameIds:gameIds,
       active:true,
       activeFrom:activeFrom,
-      activeTo:activeTo
+      activeTo:activeTo,
+      session:{
+        title:session.title||'',
+        message:session.message||'',
+        targetXp:Number(session.targetXp||0),
+        published:!!session.published,
+        classroomOpen:!!session.classroomOpen,
+        homeEnabled:!!session.homeEnabled,
+        homeStart:session.homeStart||'',
+        homeEnd:session.homeEnd||'',
+        gameIds:gameIds,
+        planId:session.planId||''
+      }
     });
+  }
+  function refreshAdvancedWorkshopStateIfOpen(classCode){
+    var advanced=document.getElementById('workshopAdvancedDetails');
+    if(advanced&&advanced.open&&typeof loadTeacherWorkshopState==='function'){
+      loadTeacherWorkshopState(classCode,false);
+    }
+  }
+  function mergeFastSavedPlan(saved){
+    if(!saved||!saved.plan)return;
+    workshopPlannerState=workshopPlannerState||{plans:[],activeSession:null,catalog:[]};
+    var plans=Array.isArray(workshopPlannerState.plans)?workshopPlannerState.plans.slice():[];
+    var index=plans.findIndex(function(plan){return String(plan.planId)===String(saved.plan.planId);});
+    if(index>=0)plans[index]=saved.plan;else plans.unshift(saved.plan);
+    workshopPlannerState.plans=plans;
+    workshopEditingPlanId=String(saved.savedPlanId||saved.plan.planId||'');
+    renderPlannerActive();renderPlannerList();renderPlannerEditor(saved.plan);
   }
 
   async function savePreparedPlan(mode){
@@ -1496,18 +1533,21 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     if(mode==='publish'&&!payload.homeEnabled){plannerStatus('Activa el acceso en casa antes de publicar la sesión cerrada.',true);return;}
     setTeacherSessionBusy(true);plannerStatus(mode==='open'?'Guardando y abriendo la sesión…':mode==='publish'?'Guardando y publicando la sesión…':'Guardando la preparación…');
     try{
-      var saved=await sessionCall('saveWorkshopPlan',[classCode,payload]);
-      var planId=String(saved.savedPlanId||payload.planId||'');
-      workshopEditingPlanId=planId;
-      if(mode==='open'||mode==='publish'){
-        saved=await sessionCall('activateWorkshopPlan',[classCode,planId,mode==='open']);
+      if(mode==='save'){
+        var fast=await sessionCall('saveWorkshopPlanFast',[classCode,payload]);
+        mergeFastSavedPlan(fast);
+        plannerStatus('Preparación guardada. Los alumnos todavía no ven ningún cambio.');
+      }else{
+        var saved=await sessionCall('saveAndActivateWorkshopPlan',[classCode,payload,mode==='open']);
+        var planId=String(saved.savedPlanId||payload.planId||'');
+        workshopEditingPlanId=planId;
         await syncWorkshopSupabaseAccess(classCode,saved&&saved.activeSession);
+        renderWorkshopPlanner(saved);
+        workshopEditingPlanId=planId;
+        renderPlannerList();renderPlannerEditor(plannerPlan(planId));
+        plannerStatus(mode==='open'?'Sesión guardada y abierta para la clase.':'Sesión publicada; permanecerá cerrada en clase y se abrirá en casa durante el horario indicado.');
       }
-      renderWorkshopPlanner(saved);
-      workshopEditingPlanId=planId;
-      renderPlannerList();renderPlannerEditor(plannerPlan(planId));
-      plannerStatus(mode==='open'?'Sesión guardada y abierta para la clase.':mode==='publish'?'Sesión publicada; permanecerá cerrada en clase y se abrirá en casa durante el horario indicado.':'Preparación guardada. Los alumnos todavía no ven ningún cambio.');
-      if(typeof loadTeacherWorkshopState==='function')loadTeacherWorkshopState(classCode,false);
+      refreshAdvancedWorkshopStateIfOpen(classCode);
     }catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo guardar: '+(error.message||error),true);}
   }
   async function activatePreparedPlan(planId,openNow){
@@ -1520,7 +1560,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       workshopEditingPlanId=String(planId);
       renderPlannerList();renderPlannerEditor(plannerPlan(planId));
       plannerStatus(openNow?'Sesión abierta. Los juegos seleccionados tienen prioridad temporal sobre los bloqueos normales.':'Sesión publicada.');
-      if(typeof loadTeacherWorkshopState==='function')loadTeacherWorkshopState(classCode,false);
+      refreshAdvancedWorkshopStateIfOpen(classCode);
     }catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo activar: '+(error.message||error),true);}
   }
   async function deletePreparedPlan(planId){
@@ -1560,7 +1600,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       await syncWorkshopSupabaseAccess(classCode,result&&result.activeSession);
       renderWorkshopPlanner(result);
       plannerStatus('Sesión retirada. Se han restaurado los permisos normales de juegos de la clase.');
-      if(typeof loadTeacherWorkshopState==='function')loadTeacherWorkshopState(classCode,false);
+      refreshAdvancedWorkshopStateIfOpen(classCode);
     }catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo retirar: '+(error.message||error),true);}
   }
 
