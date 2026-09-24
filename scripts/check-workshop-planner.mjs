@@ -40,10 +40,18 @@ expect(activatePlan.includes("saveWorkshopSession("), "Abrir una sesión debe co
 expect(activatePlan.includes("classroomOpen:!!openNow"), "La activación debe distinguir abrir en clase de publicar solo para casa.");
 
 expect(html.includes("Taller · Preparar sesiones"), "El panel debe presentar Taller como preparador de sesiones.");
-expect(html.includes("Sesiones preparadas"), "Debe existir una biblioteca de sesiones preparadas.");
+expect(
+  html.includes("Tus talleres") &&
+  html.includes("Próximos") &&
+  html.includes("Borradores") &&
+  html.includes("Realizados"),
+  "Debe existir una biblioteca de talleres organizada por estado.",
+);
 expect(html.includes("Guardar preparación"), "Debe quedar claro que guardar no publica.");
 expect(html.includes("Guardar y abrir ahora"), "Debe existir una acción directa para abrir la sesión en clase.");
 expect(html.includes("Guardar y activar horario de casa"), "Debe existir una acción explícita para el acceso programado en casa.");
+expect(html.includes("Crear misión"), "Cada taller debe poder convertirse rápidamente en una misión.");
+expect(html.includes("Sesión de juego") && html.includes("Reto de XP") && html.includes("Trabajo en casa"), "El editor de Taller debe ofrecer plantillas prácticas.");
 expect(html.includes("Ajustes avanzados de disponibilidad"), "El control manual de juegos debe quedar relegado a ajustes avanzados.");
 expect(html.includes("No necesitas tocar esto para preparar una sesión."), "Los ajustes avanzados deben explicar que no son el flujo principal.");
 expect(!html.includes("Control del taller"), "No debe sobrevivir el antiguo encabezado ambiguo Control del taller.");
