@@ -209,11 +209,29 @@ function workshopSessionLocalNow_() {
 }
 
 function workshopSessionNormalizeLocalDateTime_(value) {
+  if (value == null || value === '') return '';
+  var tz = (Session.getScriptTimeZone && Session.getScriptTimeZone()) || 'Europe/Madrid';
+
+  // Google Sheets devuelve las celdas de fecha como objetos Date.
+  if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value.getTime())) {
+    return Utilities.formatDate(value, tz, "yyyy-MM-dd'T'HH:mm");
+  }
+
   var text = String(value || '').trim();
   if (!text) return '';
-  var match = text.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
-  if (!match) throw new Error('Fecha u hora no válida: ' + text);
-  return match[1] + 'T' + match[2];
+
+  // Formato canónico que usa el editor HTML datetime-local.
+  var match = text.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
+  if (match) return match[1] + 'T' + match[2];
+
+  // Compatibilidad con valores antiguos serializados como texto de Date.
+  var legacyText = text.replace(/\s+\([^)]*\)\s*$/, '');
+  var parsed = new Date(legacyText);
+  if (!isNaN(parsed.getTime())) {
+    return Utilities.formatDate(parsed, tz, "yyyy-MM-dd'T'HH:mm");
+  }
+
+  throw new Error('Fecha u hora no válida: ' + text);
 }
 
 function workshopSessionFind_(classCode) {
