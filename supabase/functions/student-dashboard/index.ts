@@ -150,7 +150,7 @@ Deno.serve(async (request) => {
         .select("game_id,enabled")
         .eq("profile_id", profileId),
       admin.from("workshop_sessions")
-        .select("classroom_id,title,message,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,updated_at")
+        .select("classroom_id,title,message,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
         .eq("organization_id", organizationId)
         .eq("published", true),
     ]);
@@ -210,12 +210,32 @@ Deno.serve(async (request) => {
     const level = Math.floor(xp / 500) + 1;
     const classroomRelation = (enrollmentsResult.data || [])[0]?.classrooms;
     const classroom = Array.isArray(classroomRelation) ? classroomRelation[0] : classroomRelation || null;
+    const workshopStartedAt = workshopSessionRow?.started_at || workshopSessionRow?.updated_at || null;
+    const workshopStartedMs = workshopStartedAt ? Date.parse(String(workshopStartedAt)) : Number.NaN;
+    const workshopEndsMs = workshopSessionRow?.active_to ? Date.parse(String(workshopSessionRow.active_to)) : Number.NaN;
+    const workshopXp = workshopSessionRow
+      ? (missionEventsResult.data || []).reduce((sum, row) => {
+          const occurredAt = Date.parse(String(row.occurred_at || ""));
+          if (!Number.isFinite(occurredAt)) return sum;
+          if (Number.isFinite(workshopStartedMs) && occurredAt < workshopStartedMs) return sum;
+          if (Number.isFinite(workshopEndsMs) && occurredAt > workshopEndsMs) return sum;
+          if (!workshopSelectedGameIds.has(String(row.game_id || ""))) return sum;
+          if (String(row.event_type || "") === "teacher_adjustment") return sum;
+          return sum + Math.max(0, Number(row.xp_delta || 0));
+        }, 0)
+      : 0;
+    const workshopTargetXp = Math.max(0, Number(workshopSessionRow?.target_xp || 0));
+    const workshopCompleted = Boolean(workshopSessionRow && workshopTargetXp > 0 && workshopXp >= workshopTargetXp);
     const workshopSession = workshopSessionRow ? {
       classCode:String(classroom?.legacy_class_code || ""),
       classroomId:String(workshopSessionRow.classroom_id || ""),
       title:String(workshopSessionRow.title || "Taller"),
       message:String(workshopSessionRow.message || ""),
-      targetXp:Number(workshopSessionRow.target_xp || 0),
+      targetXp:workshopTargetXp,
+      progressXp:workshopXp,
+      progressPercent:workshopTargetXp > 0 ? Math.min(100, Math.round(workshopXp / workshopTargetXp * 100)) : 0,
+      completed:workshopCompleted,
+      startedAt:workshopStartedAt,
       published:workshopSessionRow.published === true,
       classroomOpen:workshopSessionRow.classroom_open === true,
       homeEnabled:workshopSessionRow.home_enabled === true,
