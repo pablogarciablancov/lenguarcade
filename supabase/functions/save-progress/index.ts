@@ -34,7 +34,7 @@ Deno.serve(async (request) => {
     const [
       { data:game, error:gameError },
       { data:gameAccess, error:gameAccessError },
-      { data:workshopAccess, error:workshopAccessError },
+      { data:enrollments, error:enrollmentsError },
     ] = await Promise.all([
       admin.from("games").select("id").eq("id", gameId).maybeSingle(),
       admin.from("profile_game_access")
@@ -42,30 +42,46 @@ Deno.serve(async (request) => {
         .eq("profile_id", profileId)
         .eq("game_id", gameId)
         .maybeSingle(),
-      admin.from("workshop_game_access")
-        .select("enabled,active_from,active_to")
+      admin.from("classroom_enrollments")
+        .select("classroom_id")
         .eq("profile_id", profileId)
-        .eq("game_id", gameId)
-        .maybeSingle(),
+        .eq("active", true),
     ]);
     if (gameError) throw gameError;
     if (gameAccessError) throw gameAccessError;
-    if (workshopAccessError) throw workshopAccessError;
+    if (enrollmentsError) throw enrollmentsError;
     if (!game) return jsonResponse({ ok:false, error:"unknown_game" }, 400);
 
+    const classroomIds = (enrollments || []).map(row => String(row.classroom_id || "")).filter(Boolean);
+    let workshopSession: Record<string, unknown> | null = null;
+    if (classroomIds.length) {
+      const { data:workshopRows, error:workshopError } = await admin.from("workshop_sessions")
+        .select("classroom_id,published,classroom_open,home_enabled,active_from,active_to,game_ids")
+        .in("classroom_id", classroomIds)
+        .eq("published", true)
+        .limit(1);
+      if (workshopError) throw workshopError;
+      workshopSession = (workshopRows || [])[0] || null;
+    }
+
     let accessEnabled = gameAccess?.enabled !== false;
-    if (workshopAccess) {
-      accessEnabled = workshopAccess.enabled !== false;
-      if (accessEnabled) {
+    let workshopControlsAccess = false;
+    if (workshopSession) {
+      workshopControlsAccess = true;
+      let workshopActive = workshopSession.classroom_open === true;
+      if (!workshopActive && workshopSession.home_enabled === true) {
         const now = Date.now();
-        const from = workshopAccess.active_from ? Date.parse(String(workshopAccess.active_from)) : Number.NaN;
-        const to = workshopAccess.active_to ? Date.parse(String(workshopAccess.active_to)) : Number.NaN;
-        if (Number.isFinite(from) && now < from) accessEnabled = false;
-        if (Number.isFinite(to) && now >= to) accessEnabled = false;
+        const from = workshopSession.active_from ? Date.parse(String(workshopSession.active_from)) : Number.NaN;
+        const to = workshopSession.active_to ? Date.parse(String(workshopSession.active_to)) : Number.NaN;
+        workshopActive = Number.isFinite(from) && Number.isFinite(to) && now >= from && now < to;
       }
+      const gameIds = Array.isArray(workshopSession.game_ids)
+        ? workshopSession.game_ids.map(value => String(value || ""))
+        : [];
+      accessEnabled = workshopActive && gameIds.includes(gameId);
     }
     if (!accessEnabled) {
-      return jsonResponse({ ok:false, error:workshopAccess ? "workshop_game_access_closed" : "game_access_closed" }, 403);
+      return jsonResponse({ ok:false, error:workshopControlsAccess ? "workshop_game_access_closed" : "game_access_closed" }, 403);
     }
     if (resultId) {
       const { data:duplicate } = await admin.from("game_events")
