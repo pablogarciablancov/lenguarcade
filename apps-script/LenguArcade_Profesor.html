@@ -157,7 +157,13 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
 .playerDangerCard{border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.045)}
 .playerAdjustmentHistory{margin-top:14px}.playerAdjustmentHistory h3{margin:0 0 8px}
 .playerAdjustmentRow{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-top:1px solid var(--line);font-size:12px}.playerAdjustmentRow small{display:block;color:var(--muted);margin-top:3px}.playerAdjustmentRow time{color:var(--muted);white-space:nowrap}
-@media(max-width:840px){.playerAdminGrid{grid-template-columns:1fr}.studentListTools{justify-content:stretch}.teacherPlayerShortcut,.studentClassPicker{width:100%}.playerAdjustmentFields{grid-template-columns:1fr}}
+.studentIdentity{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.studentIdentityText{min-width:0}.studentAccessBtn{width:auto!important;margin:0!important;padding:6px 9px!important;font-size:11px!important;white-space:nowrap}
+.gameAccessPanel{margin:18px 0 22px;padding:18px;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.025)}
+.gameAccessHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}.gameAccessHead h2{margin:2px 0 0}
+.gameAccessList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.gameAccessRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.08)}
+.gameAccessName{display:flex;align-items:center;gap:8px;min-width:0}.gameAccessName strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gameAccessState{font-size:10px;color:var(--muted);display:block;margin-top:2px}
+.gameAccessRow button{width:auto!important;margin:0!important;padding:7px 10px!important;white-space:nowrap}.gameAccessRow.closed{opacity:.78}.gameAccessStatus{margin-top:10px}
+@media(max-width:840px){.playerAdminGrid{grid-template-columns:1fr}.studentListTools{justify-content:stretch}.teacherPlayerShortcut,.studentClassPicker{width:100%}.playerAdjustmentFields{grid-template-columns:1fr}.gameAccessList{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -285,6 +291,18 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
   <div class="modal" id="studentModal"><div class="dialog">
     <div class="dialogHead"><div><h2 id="studentModalTitle">Alumno</h2><div class="sub" id="studentModalMail"></div></div><button type="button" class="closeX" id="studentModalClose">Cerrar</button></div>
     <div class="studentDetailGrid" id="studentDetailStats"></div>
+    <section class="gameAccessPanel" id="playerGameAccessPanel">
+      <div class="gameAccessHead">
+        <div>
+          <div class="sub">ACCESO INDIVIDUAL</div>
+          <h2>Juegos disponibles</h2>
+          <p class="sub">Cerrar un juego no borra su progreso. Al volver a abrirlo, el jugador continúa donde estaba.</p>
+        </div>
+        <span class="rosterPill" id="playerGameAccessSummary">Todos abiertos</span>
+      </div>
+      <div class="gameAccessList" id="playerGameAccessList"></div>
+      <div class="status gameAccessStatus" id="playerGameAccessStatus">Puedes cambiar el acceso juego a juego.</div>
+    </section>
     <section class="playerAdminPanel" id="playerAdminPanel">
       <div class="playerAdminHead">
         <div>
@@ -335,6 +353,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
     let session=null,currentTeacher=null,busy=false;
     let rosterState={classes:[],students:[],summary:{}};
     let currentPlayerDetailId='';
+    let currentPlayerDetailFocus='';
 
     function esc(value){return String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));}
     function bannerUrl(id,banner){const direct=String(banner||'');return ASSET_BASE+((/\.(?:png|jpe?g|webp|svg)$/i.test(direct)?direct:'')||BANNERS[id]||'maniacgrafia-banner.jpg');}
@@ -410,8 +429,9 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
         teacherShortcut.classList.toggle('hidden',!teacherPlayer);
         teacherShortcut.textContent=teacherPlayer?`🎮 Mi jugador profesor · Nv.${teacherPlayer.level||1}`:'🎮 Mi jugador profesor';
       }
-      $('studentsBody').innerHTML=(data.students||[]).map(student=>`<tr class="studentRow" data-student="${esc(student.studentId)}"><td><strong>${esc(student.nombre)}</strong><br><span class="sub">${esc(student.email)}</span></td><td>${esc(student.clase)}</td><td>${student.xp}</td><td>${student.level}</td><td>${student.sessions}</td><td>${student.gamesPlayed}</td><td>${student.accuracy}%</td><td><strong>${student.grade}</strong></td></tr>`).join('');
+      $('studentsBody').innerHTML=(data.students||[]).map(student=>`<tr class="studentRow" data-student="${esc(student.studentId)}"><td><div class="studentIdentity"><div class="studentIdentityText"><strong>${esc(student.nombre)}</strong><br><span class="sub">${esc(student.email)}</span></div><button type="button" class="ghost studentAccessBtn" data-player-access="${esc(student.studentId)}">🎮 Accesos</button></div></td><td>${esc(student.clase)}</td><td>${student.xp}</td><td>${student.level}</td><td>${student.sessions}</td><td>${student.gamesPlayed}</td><td>${student.accuracy}%</td><td><strong>${student.grade}</strong></td></tr>`).join('');
       document.querySelectorAll('.studentRow').forEach(row=>row.onclick=()=>openStudentDetail(row.dataset.student));
+      document.querySelectorAll('[data-player-access]').forEach(button=>button.onclick=event=>{event.stopPropagation();openStudentDetail(button.dataset.playerAccess,'access');});
       $('popularGames').innerHTML=(data.popularGames||[]).map(game=>`<div class="gameMini" style="--img:url('${bannerUrl(game.gameId)}')"><div><strong>${esc(game.icono||'')} ${esc(game.nombre)}</strong><span>${game.sessions} sesiones</span><div class="bar" style="margin-top:8px"><div class="fill" style="width:${game.percent}%"></div></div></div></div>`).join('')||'<div class="sub">Sin partidas todavía.</div>';
       $('errors').innerHTML=(data.errorSummary||[]).map(row=>`<div class="box"><strong>${esc(row.label)}</strong><br><span class="sub">${row.count} apariciones</span></div>`).join('')||'<div class="sub">Sin errores registrados.</div>';
       $('recommendations').innerHTML=(data.recommendations||[]).map(text=>`<div class="box">${esc(text)}</div>`).join('');
@@ -422,19 +442,49 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       $('focus').innerHTML=`<h3>${esc(student.nombre)}</h3><div class="sub">${esc(student.email)} · ${esc(student.clase)}</div><div class="kpis" style="grid-template-columns:repeat(3,1fr);margin-top:12px"><div class="kpi"><span>XP</span><b>${student.xp}</b></div><div class="kpi"><span>Nivel</span><b>${student.level}</b></div><div class="kpi"><span>Nota</span><b>${student.grade}</b></div></div>`+progress.map(row=>`<div class="box"><div class="boxHead"><strong>${esc(row.gameName)}</strong><span>${row.percentage}%</span></div><div class="bar" style="margin-top:8px"><div class="fill" style="width:${row.percentage}%"></div></div></div>`).join('');
     }
 
-    async function openStudentDetail(studentId){
+    async function openStudentDetail(studentId,focusSection=''){
       if(busy)return;
       currentPlayerDetailId=String(studentId||'');
+      currentPlayerDetailFocus=String(focusSection||'');
       const summary=(currentTeacher?.students||[]).find(student=>student.studentId===studentId)||
         (currentTeacher?.teacherPlayer?.studentId===studentId?currentTeacher.teacherPlayer:null);
       $('studentModalTitle').textContent=summary?.nombre||'Jugador';$('studentModalMail').textContent='Cargando ficha completa...';
-      $('studentDetailStats').innerHTML='<div class="sub">Cargando...</div>';$('studentDetailProgress').innerHTML='';$('studentDetailActivity').innerHTML='';$('studentDetailAchievements').innerHTML='';$('studentDetailErrors').innerHTML='';$('playerAdjustmentHistory').innerHTML='';$('studentModal').classList.add('open');
+      $('studentDetailStats').innerHTML='<div class="sub">Cargando...</div>';$('studentDetailProgress').innerHTML='';$('studentDetailActivity').innerHTML='';$('studentDetailAchievements').innerHTML='';$('studentDetailErrors').innerHTML='';$('playerAdjustmentHistory').innerHTML='';$('playerGameAccessList').innerHTML='<div class="sub">Cargando accesos...</div>';$('studentModal').classList.add('open');
       try{renderStudentDetail(await edge('teacher-student-detail',{studentId}));}
       catch(error){$('studentDetailStats').innerHTML=`<div class="sub">${esc(error.message||String(error))}</div>`;}
     }
     function signedValue(value,suffix){
       const number=Number(value||0);
       return (number>0?'+':'')+number+(suffix||'');
+    }
+    function renderPlayerGameAccess(detail){
+      const games=detail.gameAccess||detail.progress||[];
+      const closed=games.filter(game=>game.enabled===false||game.accessEnabled===false).length;
+      $('playerGameAccessSummary').textContent=closed?closed+' cerrado'+(closed===1?'':'s'):'Todos abiertos';
+      $('playerGameAccessList').innerHTML=games.map(game=>{
+        const enabled=game.enabled!==false&&game.accessEnabled!==false;
+        const gameId=game.gameId||'';
+        const gameName=game.gameName||game.nombre||gameId;
+        const icon=game.icono||'🎮';
+        return `<div class="gameAccessRow ${enabled?'':'closed'}"><div class="gameAccessName"><span>${esc(icon)}</span><div><strong>${esc(gameName)}</strong><span class="gameAccessState">${enabled?'Acceso abierto':'Acceso cerrado para este jugador'}</span></div></div><button type="button" class="${enabled?'dangerAction':'ghost'}" data-toggle-game-access="${esc(gameId)}" data-next-enabled="${enabled?'0':'1'}">${enabled?'Cerrar':'Abrir'}</button></div>`;
+      }).join('')||'<div class="sub">No hay juegos disponibles.</div>';
+      document.querySelectorAll('[data-toggle-game-access]').forEach(button=>button.onclick=()=>setPlayerGameAccess(button.dataset.toggleGameAccess,button.dataset.nextEnabled==='1'));
+      if(currentPlayerDetailFocus==='access'){
+        setTimeout(()=>{const panel=$('playerGameAccessPanel');if(panel&&typeof panel.scrollIntoView==='function')panel.scrollIntoView({block:'start',behavior:'smooth'});currentPlayerDetailFocus='';},0);
+      }
+    }
+    async function setPlayerGameAccess(gameId,enabled){
+      if(busy||!currentPlayerDetailId||!gameId)return;
+      $('playerGameAccessStatus').textContent=enabled?'Abriendo juego...':'Cerrando juego...';
+      setBusy(true,enabled?'Habilitando juego...':'Cerrando acceso al juego...');
+      try{
+        const detail=await edge('teacher-student-detail',{studentId:currentPlayerDetailId,action:'setGameAccess',gameId,enabled});
+        renderStudentDetail(detail);
+        const action=detail.actionResult||{};
+        $('playerGameAccessStatus').textContent=(enabled?'Acceso abierto: ':'Acceso cerrado: ')+(action.gameName||gameId)+'.';
+      }catch(error){
+        $('playerGameAccessStatus').textContent='No se pudo cambiar el acceso: '+(error.code||error.message||error);
+      }finally{setBusy(false);}
     }
     function renderStudentDetail(detail){
       const student=detail.student,general=detail.general||{};
@@ -453,6 +503,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
         ['Última actividad',formatDate(detail.lastActivity)],
         ['Clase',student.clase]
       ].map(item=>`<div class="detailItem"><span class="sub">${esc(item[0])}</span><b>${esc(item[1])}</b></div>`).join('');
+      renderPlayerGameAccess(detail);
       $('studentDetailProgress').innerHTML=(detail.progress||[]).map(row=>`<div class="box"><div class="boxHead"><strong>${esc(row.icono||'')} ${esc(row.gameName)}</strong><span>${row.percentage}%</span></div><div class="sub">XP: ${row.xp} · Sesiones: ${row.sessions} · Precisión: ${row.accuracy}%</div><div class="sub">Última actividad: ${esc(formatDate(row.lastActivity))}</div><div class="bar" style="margin-top:8px"><div class="fill" style="width:${row.percentage}%"></div></div></div>`).join('')||'<div class="sub">Todavía no hay progreso.</div>';
       $('studentDetailActivity').innerHTML=(detail.events||[]).map(row=>{
         const adjustment=row.eventType==='teacher_adjustment';
@@ -705,7 +756,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       $('classSelect').onchange=()=>{if($('studentsClassSelect'))$('studentsClassSelect').value=$('classSelect').value;loadTeacher();};
       $('gameSelect').onchange=()=>loadTeacher();
       if($('studentsClassSelect'))$('studentsClassSelect').onchange=()=>{$('classSelect').value=$('studentsClassSelect').value;loadTeacher();};
-      $('studentModalClose').onclick=()=>{$('studentModal').classList.remove('open');currentPlayerDetailId='';};
+      $('studentModalClose').onclick=()=>{$('studentModal').classList.remove('open');currentPlayerDetailId='';currentPlayerDetailFocus='';};
       $('applyPlayerAdjustmentBtn').onclick=applyPlayerAdjustment;
       $('resetPlayerProgressBtn').onclick=resetPlayerProgress;
       $('teacherPlayerBtn').onclick=()=>{const player=currentTeacher?.teacherPlayer;if(player)openStudentDetail(player.studentId);};
