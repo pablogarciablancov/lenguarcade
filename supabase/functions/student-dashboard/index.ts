@@ -289,7 +289,7 @@ Deno.serve(async (request) => {
     const percentage = Math.round(average(progress.map(row => Number(row.percentage || 0))));
     const accuracy = attempts ? Math.round((successes / attempts) * 100) : 0;
     const grade = Math.round((
-      Math.min(10, xp / Math.max(1, progress.length) / 80) * 0.25 +
+      Math.min(10, baseXp / Math.max(1, progress.length) / 80) * 0.25 +
       Math.min(10, accuracy / 10) * 0.25 +
       Math.min(10, average(progress.map(row => Number(row.missions_completed || 0))) * 2.5) * 0.20 +
       Math.min(10, average(progress.map(row => Number(row.sessions || 0))) * 2) * 0.15 +
