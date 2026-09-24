@@ -189,9 +189,10 @@ Deno.serve(async (request) => {
     const games = (gamesResult.data || []).map(game => {
       const estado = game.status;
       const integration = String(game.integration || "none");
+      const locked = isLockedStatus(estado) || !game.url || integration === "none";
       const accessEnabled = accessByGame.get(String(game.id)) !== false;
       const lockedByTeacher = !accessEnabled;
-      const locked = lockedByTeacher || isLockedStatus(estado) || !game.url || integration === "none";
+      const effectiveLocked = lockedByTeacher || locked;
       const row = progressByGame.get(game.id) || {
         game_id:game.id,
         xp:0,
@@ -225,8 +226,8 @@ Deno.serve(async (request) => {
         integration,
         accessEnabled,
         lockedByTeacher,
-        locked,
-        buttonLabel:locked
+        locked:effectiveLocked,
+        buttonLabel:effectiveLocked
           ? (lockedByTeacher ? "Cerrado por tu profesor" : (isLockedStatus(estado) ? "En revisión" : "No disponible"))
           : (Number(row.sessions || 0) > 0 ? "Continuar" : "Jugar"),
         progress:{
