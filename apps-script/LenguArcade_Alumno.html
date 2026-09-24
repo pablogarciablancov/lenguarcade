@@ -2332,6 +2332,10 @@ body.light .workshopGameRow{background:rgba(94,53,177,.04)}
     return workshopStudentAccess.games.find(function(game){return String(game.gameId)===String(gameId);})||null;
   }
   function decorateWorkshopGames(games){
+    if((typeof supabaseBackend!=='undefined'&&supabaseBackend)||
+       (typeof currentDashboard!=='undefined'&&currentDashboard&&Object.prototype.hasOwnProperty.call(currentDashboard,'workshopSession'))){
+      return games||[];
+    }
     return (games||[]).map(function(game){
       var access=accessForGame(game.gameId);
       if(!access)return game;
@@ -2357,14 +2361,37 @@ body.light .workshopGameRow{background:rgba(94,53,177,.04)}
     });
   }
   function updateStudentWorkshopHeader(){
-    var section=document.getElementById('juegos');
-    if(!section||!workshopStudentAccess)return;
+    var section=document.getElementById('juegos');if(!section)return;
     var head=section.querySelector('.head');
     var title=head&&head.querySelector('h2');
     var sub=head&&head.querySelector('.sub');
+    var existing=document.getElementById('workshopAccessSummary');
+
+    if((typeof supabaseBackend!=='undefined'&&supabaseBackend)||
+       (typeof currentDashboard!=='undefined'&&currentDashboard&&Object.prototype.hasOwnProperty.call(currentDashboard,'workshopSession'))){
+      var session=currentDashboard&&currentDashboard.workshopSession;
+      if(!session){
+        if(title)title.textContent='Juegos activos';
+        if(sub)sub.textContent='Biblioteca de juegos de Lengua';
+        if(existing)existing.remove();
+        return;
+      }
+      var games=(currentDashboard&&currentDashboard.games)||[];
+      var open=games.filter(function(game){return !game.locked;}).length;
+      if(title)title.textContent='Juegos del taller';
+      if(sub)sub.textContent=session.active
+        ? 'Solo están disponibles los juegos de la sesión actual.'
+        : 'La sesión está preparada, pero ahora mismo permanece cerrada.';
+      if(!existing&&head){
+        existing=document.createElement('span');existing.id='workshopAccessSummary';existing.className='workshopAccessSummary';head.appendChild(existing);
+      }
+      if(existing)existing.textContent='🎮 '+String(open)+' abiertos';
+      return;
+    }
+
+    if(!workshopStudentAccess)return;
     if(title)title.textContent='Juegos del taller';
     if(sub)sub.textContent=String(workshopStudentAccess.available||0)+' de '+String(workshopStudentAccess.total||0)+' disponibles para tu clase';
-    var existing=document.getElementById('workshopAccessSummary');
     if(!existing&&head){
       existing=document.createElement('span');existing.id='workshopAccessSummary';existing.className='workshopAccessSummary';head.appendChild(existing);
     }
@@ -2377,6 +2404,13 @@ body.light .workshopGameRow{background:rgba(94,53,177,.04)}
     updateStudentWorkshopHeader();
   }
   async function refreshStudentWorkshopAccess(silent){
+    if((typeof supabaseBackend!=='undefined'&&supabaseBackend)||
+       (typeof currentDashboard!=='undefined'&&currentDashboard&&Object.prototype.hasOwnProperty.call(currentDashboard,'workshopSession'))){
+      workshopStudentAccess=null;
+      try{localStorage.removeItem(ACCESS_CACHE_KEY);}catch(error){}
+      if(!silent)rerenderStudentGames();else updateStudentWorkshopHeader();
+      return;
+    }
     try{
       var result=await workshopCall('getWorkshopAccessForCurrentUser',[]);
       var changed=JSON.stringify(workshopStudentAccess&&workshopStudentAccess.games||[])!==JSON.stringify(result&&result.games||[]);
@@ -2398,6 +2432,10 @@ body.light .workshopGameRow{background:rgba(94,53,177,.04)}
     };
     var baseOpenGame=openGame;
     openGame=function(gameId){
+      if((typeof supabaseBackend!=='undefined'&&supabaseBackend)||
+         (typeof currentDashboard!=='undefined'&&currentDashboard&&Object.prototype.hasOwnProperty.call(currentDashboard,'workshopSession'))){
+        return baseOpenGame(gameId);
+      }
       var access=accessForGame(gameId);
       if(access&&access.enabled===false){
         var game=null;
@@ -2576,6 +2614,10 @@ body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionS
   }
 
   function applyStudentSessionToCards(){
+    if((typeof supabaseBackend!=='undefined'&&supabaseBackend)||
+       (typeof currentDashboard!=='undefined'&&currentDashboard&&Object.prototype.hasOwnProperty.call(currentDashboard,'workshopSession'))){
+      workshopSessionState={session:(currentDashboard&&currentDashboard.workshopSession)||null};
+    }
     var s=workshopSessionState&&workshopSessionState.session;renderStudentMission();if(!s||!s.published)return;
     var games=(typeof currentDashboard!=='undefined'&&currentDashboard&&currentDashboard.games)||[];
     var cards=[].slice.call(document.querySelectorAll('#games .game'));
@@ -2596,13 +2638,30 @@ body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionS
   }
 
   async function refreshStudentSession(silent){
+    if((typeof supabaseBackend!=='undefined'&&supabaseBackend)||
+       (typeof currentDashboard!=='undefined'&&currentDashboard&&Object.prototype.hasOwnProperty.call(currentDashboard,'workshopSession'))){
+      var before=JSON.stringify(workshopSessionState&&workshopSessionState.session||null);
+      workshopSessionState={session:(currentDashboard&&currentDashboard.workshopSession)||null};
+      var after=JSON.stringify(workshopSessionState.session||null);
+      if(before!==after||!silent){
+        if(typeof currentDashboard!=='undefined'&&currentDashboard&&typeof renderGames==='function')renderGames(currentDashboard.games);
+        applyStudentSessionToCards();
+      }
+      return;
+    }
     try{var result=await sessionCall('getWorkshopSessionForCurrentUser',[]);var before=JSON.stringify(workshopSessionState&&workshopSessionState.session||null);var after=JSON.stringify(result&&result.session||null);workshopSessionState=result;if(before!==after||!silent){if(typeof currentDashboard!=='undefined'&&currentDashboard&&typeof renderGames==='function')renderGames(currentDashboard.games);applyStudentSessionToCards();}}
     catch(error){if(!silent)console.warn('No se pudo consultar la sesión del taller.',error);}
   }
 
   function installStudentSession(){
     if(!document.getElementById('games')||typeof renderGames!=='function'||typeof openGame!=='function')return false;
-    var baseRenderGames=renderGames;renderGames=function(games){var result=baseRenderGames(games);setTimeout(applyStudentSessionToCards,0);return result;};
+    var baseRenderGames=renderGames;renderGames=function(games){
+      if((typeof supabaseBackend!=='undefined'&&supabaseBackend)||
+         (typeof currentDashboard!=='undefined'&&currentDashboard&&Object.prototype.hasOwnProperty.call(currentDashboard,'workshopSession'))){
+        workshopSessionState={session:(currentDashboard&&currentDashboard.workshopSession)||null};
+      }
+      var result=baseRenderGames(games);setTimeout(applyStudentSessionToCards,0);return result;
+    };
     var baseOpenGame=openGame;openGame=function(gameId){var allowed=sessionAllowsGame(gameId);if(allowed===false){var s=workshopSessionState&&workshopSessionState.session;var title=document.getElementById('gameModalTitle');var text=document.getElementById('gameModalText');if(title)title.textContent=s&&s.title?s.title:'Sesión cerrada';if(text)text.textContent=s&&s.active?'Este juego no forma parte de la misión que el profesor ha abierto.':'LenguArcade está cerrado ahora mismo para esta clase. Podrás entrar cuando el profesor abra la sesión o durante un horario de casa autorizado.';var modal=document.getElementById('gameModal');if(modal)modal.classList.add('open');return;}return baseOpenGame(gameId);};
     setTimeout(function(){refreshStudentSession(false);},500);setInterval(function(){refreshStudentSession(true);},30000);return true;
   }
