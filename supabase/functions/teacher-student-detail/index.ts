@@ -111,6 +111,36 @@ Deno.serve(async (request) => {
       }
       await resetPlayerProgress(admin, studentId, teacherProfileId);
       actionResult = { action:"resetProgress", reset:true };
+    } else if (action === "setGameAccess") {
+      const gameId = String(body.gameId || "").trim().slice(0, 80);
+      const enabled = body.enabled === true;
+      if (!gameId) return jsonResponse({ ok:false, error:"missing_game_id" }, 400);
+      const { data:game, error:gameError } = await admin
+        .from("games")
+        .select("id,name,official,active")
+        .eq("id", gameId)
+        .eq("official", true)
+        .eq("active", true)
+        .maybeSingle();
+      if (gameError) throw gameError;
+      if (!game) return jsonResponse({ ok:false, error:"game_not_found" }, 404);
+
+      const { error:accessError } = await admin
+        .from("profile_game_access")
+        .upsert({
+          profile_id:studentId,
+          game_id:gameId,
+          enabled,
+          updated_by:teacherProfileId,
+          updated_at:new Date().toISOString(),
+        }, { onConflict:"profile_id,game_id" });
+      if (accessError) throw accessError;
+      actionResult = {
+        action:"setGameAccess",
+        gameId,
+        gameName:game.name,
+        enabled,
+      };
     } else if (action !== "detail") {
       return jsonResponse({ ok:false, error:"unknown_action" }, 400);
     }
@@ -124,6 +154,7 @@ Deno.serve(async (request) => {
       errorsResult,
       enrollmentsResult,
       evaluationsResult,
+      gameAccessResult,
     ] = await Promise.all([
       admin.from("games")
         .select("id,name,icon,color,status")
@@ -161,11 +192,14 @@ Deno.serve(async (request) => {
         .select("scope,game_id,score,breakdown,updated_at")
         .eq("profile_id", studentId)
         .order("updated_at", { ascending:false }),
+      admin.from("profile_game_access")
+        .select("game_id,enabled,updated_at")
+        .eq("profile_id", studentId),
     ]);
     const failure = [
       gamesResult.error, progressResult.error, eventsResult.error, adjustmentsResult.error,
       achievementsResult.error, errorsResult.error, enrollmentsResult.error,
-      evaluationsResult.error,
+      evaluationsResult.error, gameAccessResult.error,
     ].find(Boolean);
     if (failure) throw failure;
 
@@ -173,6 +207,7 @@ Deno.serve(async (request) => {
     const games = gamesResult.data || [];
     const rows = progressResult.data || [];
     const adjustments = adjustmentsResult.data || [];
+    const accessByGame = new Map((gameAccessResult.data || []).map(row => [String(row.game_id), row]));
     const attempts = rows.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
     const successes = rows.reduce((sum, row) => sum + Number(row.successes || 0), 0);
     const baseXp = rows.reduce((sum, row) => sum + Number(row.xp || 0), 0);
@@ -204,6 +239,7 @@ Deno.serve(async (request) => {
         plumas:Number(row.feathers || 0),
         lastActivity:row.last_activity_at || "",
         rawJson:row.raw_data || {},
+        accessEnabled:accessByGame.get(String(game.id))?.enabled !== false,
       };
     });
     const lastActivity = [
@@ -251,6 +287,13 @@ Deno.serve(async (request) => {
       })),
       lastActivity,
       progress,
+      gameAccess:games.map(game => ({
+        gameId:game.id,
+        gameName:game.name,
+        icono:game.icon,
+        enabled:accessByGame.get(String(game.id))?.enabled !== false,
+        updatedAt:accessByGame.get(String(game.id))?.updated_at || null,
+      })),
       adjustments:adjustments.map(row => ({
         xpDelta:Number(row.xp_delta || 0),
         plumasDelta:Number(row.feathers_delta || 0),
