@@ -100,6 +100,7 @@ Deno.serve(async (request) => {
       adjustmentsResult,
       evaluationsResult,
       gameAccessResult,
+      workshopAccessResult,
     ] = await Promise.all([
       admin.from("profiles")
         .select("id,email,first_name,last_name,avatar,last_login_at,role")
@@ -148,6 +149,9 @@ Deno.serve(async (request) => {
       admin.from("profile_game_access")
         .select("game_id,enabled")
         .eq("profile_id", profileId),
+      admin.from("workshop_game_access")
+        .select("game_id,enabled,active_from,active_to")
+        .eq("profile_id", profileId),
     ]);
 
     const failure = [
@@ -162,6 +166,7 @@ Deno.serve(async (request) => {
       adjustmentsResult.error,
       evaluationsResult.error,
       gameAccessResult.error,
+      workshopAccessResult.error,
     ].find(Boolean);
     if (failure || !profileResult.data) {
       console.error("student-dashboard query failed", failure);
@@ -171,6 +176,17 @@ Deno.serve(async (request) => {
     const profile = profileResult.data;
     const progress = progressResult.data || [];
     const accessByGame = new Map((gameAccessResult.data || []).map(row => [String(row.game_id), row.enabled !== false]));
+    const workshopAccessByGame = new Map((workshopAccessResult.data || []).map(row => [String(row.game_id), row]));
+    const workshopAccessValue = (row: Record<string, unknown> | undefined) => {
+      if (!row) return null;
+      if (row.enabled === false) return false;
+      const now = Date.now();
+      const from = row.active_from ? Date.parse(String(row.active_from)) : Number.NaN;
+      const to = row.active_to ? Date.parse(String(row.active_to)) : Number.NaN;
+      if (Number.isFinite(from) && now < from) return false;
+      if (Number.isFinite(to) && now >= to) return false;
+      return true;
+    };
     const progressByGame = new Map(progress.map(row => [row.game_id, row]));
     const attempts = progress.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
     const successes = progress.reduce((sum, row) => sum + Number(row.successes || 0), 0);
@@ -190,9 +206,19 @@ Deno.serve(async (request) => {
       const estado = game.status;
       const integration = String(game.integration || "none");
       const locked = isLockedStatus(estado) || !game.url || integration === "none";
-      const accessEnabled = accessByGame.get(String(game.id)) !== false;
-      const lockedByTeacher = !accessEnabled;
-      const effectiveLocked = lockedByTeacher || locked;
+      const baseAccessEnabled = accessByGame.get(String(game.id)) !== false;
+      const workshopAccessRow = workshopAccessByGame.get(String(game.id)) as Record<string, unknown> | undefined;
+      const workshopAccessEnabled = workshopAccessValue(workshopAccessRow);
+      const accessEnabled = workshopAccessEnabled === null ? baseAccessEnabled : workshopAccessEnabled;
+      const lockedByWorkshop = workshopAccessEnabled !== null && !accessEnabled;
+      const lockedByTeacher = workshopAccessEnabled === null && !baseAccessEnabled;
+      const workshopScheduledClosed = Boolean(
+        workshopAccessRow &&
+        workshopAccessRow.enabled !== false &&
+        !accessEnabled &&
+        (workshopAccessRow.active_from || workshopAccessRow.active_to)
+      );
+      const effectiveLocked = lockedByWorkshop || lockedByTeacher || locked;
       const row = progressByGame.get(game.id) || {
         game_id:game.id,
         xp:0,
@@ -225,10 +251,14 @@ Deno.serve(async (request) => {
         competencias:game.competencies || "",
         integration,
         accessEnabled,
+        accessSource:workshopAccessEnabled === null ? "default" : "workshop",
         lockedByTeacher,
+        lockedByWorkshop,
         locked:effectiveLocked,
         buttonLabel:effectiveLocked
-          ? (lockedByTeacher ? "Cerrado por tu profesor" : (isLockedStatus(estado) ? "En revisión" : "No disponible"))
+          ? (lockedByWorkshop
+              ? (workshopScheduledClosed ? "Fuera del horario del taller" : "Fuera de este taller")
+              : (lockedByTeacher ? "Cerrado por tu profesor" : (isLockedStatus(estado) ? "En revisión" : "No disponible")))
           : (Number(row.sessions || 0) > 0 ? "Continuar" : "Jugar"),
         progress:{
           studentId:profile.id,
