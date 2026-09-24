@@ -410,7 +410,7 @@ Deno.serve(async (request) => {
       const attempts = rows.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
       const successes = rows.reduce((sum, row) => sum + Number(row.successes || 0), 0);
       const baseXp = rows.reduce((sum, row) => sum + Number(row.xp || 0), 0);
-      const manual = adjustmentByProfile.get(profile.id) || { xp:0, feathers:0 };
+      const manual = gameId ? { xp:0, feathers:0 } : (adjustmentByProfile.get(profile.id) || { xp:0, feathers:0 });
       const xp = Math.max(0, baseXp + manual.xp);
       const classroomIds = enrollmentsByProfile.get(profile.id) || [];
       const classroom = classCode
