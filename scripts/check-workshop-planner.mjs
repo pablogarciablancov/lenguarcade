@@ -5,6 +5,10 @@ import vm from "node:vm";
 const root = path.resolve(".");
 const html = fs.readFileSync(path.join(root, "apps-script", "LenguArcade_Profesor.html"), "utf8");
 const server = fs.readFileSync(path.join(root, "apps-script", "LenguArcade_Workshop.gs"), "utf8");
+const teacherDashboard = fs.readFileSync(path.join(root, "supabase", "functions", "teacher-dashboard", "index.ts"), "utf8");
+const studentDashboard = fs.readFileSync(path.join(root, "supabase", "functions", "student-dashboard", "index.ts"), "utf8");
+const saveProgress = fs.readFileSync(path.join(root, "supabase", "functions", "save-progress", "index.ts"), "utf8");
+const workshopAccessMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "20260924191500_add_workshop_game_access.sql"), "utf8");
 const errors = [];
 
 function expect(condition, message) {
@@ -30,6 +34,32 @@ expect(
   "El planificador debe aceptar fechas Date reales devueltas por Google Sheets.",
 );
 expect(html.includes("window.laCreateWorkshopPlan"), "Crear taller debe poder cargar primero el planificador si hace falta.");
+expect(
+  workshopAccessMigration.includes("workshop_game_access") &&
+  workshopAccessMigration.includes("enable row level security") &&
+  workshopAccessMigration.includes("revoke all"),
+  "Los permisos temporales del Taller deben persistir de forma segura en Supabase.",
+);
+expect(
+  teacherDashboard.includes('action === "setWorkshopGameAccess"') &&
+  teacherDashboard.includes('from("workshop_game_access")'),
+  "El panel docente debe poder sincronizar los permisos temporales del Taller.",
+);
+expect(
+  studentDashboard.includes('from("workshop_game_access")') &&
+  studentDashboard.includes('lockedByWorkshop'),
+  "El panel del alumno debe dar prioridad a los permisos del Taller.",
+);
+expect(
+  saveProgress.includes('from("workshop_game_access")') &&
+  saveProgress.includes('"workshop_game_access_closed"'),
+  "El guardado debe respetar los permisos temporales del Taller.",
+);
+expect(
+  html.includes("syncWorkshopSupabaseAccess") &&
+  html.includes("setWorkshopGameAccess"),
+  "El planificador debe sincronizar sus aperturas y cierres con Supabase.",
+);
 expect(server.includes("planId:String(payload.planId || '')"), "La sesión activa debe conservar el planId de origen.");
 expect(
   /function normalizeWorkshopScope_\([^)]*\)\s*\{[\s\S]*?return scope;\s*\}/.test(server) &&
