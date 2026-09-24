@@ -24,6 +24,12 @@ for (const fn of [
 
 expect(server.includes("SHEET: 'TallerPlanes'"), "Las sesiones preparadas deben persistir en TallerPlanes.");
 expect(server.includes("'plannedAt'"), "Las sesiones preparadas deben admitir una fecha prevista.");
+expect(
+  server.includes("Object.prototype.toString.call(value) === '[object Date]'") &&
+    server.includes("Utilities.formatDate(value, tz"),
+  "El planificador debe aceptar fechas Date reales devueltas por Google Sheets.",
+);
+expect(html.includes("window.laCreateWorkshopPlan"), "Crear taller debe poder cargar primero el planificador si hace falta.");
 expect(server.includes("planId:String(payload.planId || '')"), "La sesión activa debe conservar el planId de origen.");
 expect(
   /function normalizeWorkshopScope_\([^)]*\)\s*\{[\s\S]*?return scope;\s*\}/.test(server) &&
@@ -113,6 +119,14 @@ const context = {
 };
 vm.createContext(context);
 vm.runInContext(server, context);
+
+let sheetDateAccepted = false;
+try {
+  sheetDateAccepted = context.workshopSessionNormalizeLocalDateTime_(new Date("2026-09-10T11:58:00.000Z")) === "2026-09-09T18:00";
+} catch (error) {
+  sheetDateAccepted = false;
+}
+expect(sheetDateAccepted, "Una fecha real de Google Sheets no debe romper la carga del planificador.");
 
 const saved = context.saveWorkshopPlan("C1", {
   title:"Taller 1",
