@@ -1525,6 +1525,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     workshopPlannerState.plans=plans;
     workshopEditingPlanId=String(saved.savedPlanId||saved.plan.planId||'');
     renderPlannerActive();renderPlannerList();renderPlannerEditor(saved.plan);
+    setTeacherSessionBusy(false);
   }
 
   async function savePreparedPlan(mode){
