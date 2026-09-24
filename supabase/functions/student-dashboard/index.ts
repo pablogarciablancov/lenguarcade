@@ -250,6 +250,7 @@ Deno.serve(async (request) => {
         descripcion:game.description || "",
         competencias:game.competencies || "",
         integration,
+        catalogLocked:locked,
         accessEnabled,
         accessSource:workshopAccessEnabled === null ? "default" : "workshop",
         lockedByTeacher,
