@@ -10,6 +10,7 @@ const teacherDashboard = fs.readFileSync(path.join(root, "supabase", "functions"
 const studentDashboard = fs.readFileSync(path.join(root, "supabase", "functions", "student-dashboard", "index.ts"), "utf8");
 const saveProgress = fs.readFileSync(path.join(root, "supabase", "functions", "save-progress", "index.ts"), "utf8");
 const workshopAccessMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "20260924191500_add_workshop_game_access.sql"), "utf8");
+const workshopSessionMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "20260924204500_add_class_workshop_sessions.sql"), "utf8");
 const errors = [];
 
 function expect(condition, message) {
@@ -19,6 +20,8 @@ function expect(condition, message) {
 for (const fn of [
   "getWorkshopPlannerAdmin",
   "saveWorkshopPlan",
+  "saveWorkshopPlanFast",
+  "saveAndActivateWorkshopPlan",
   "deleteWorkshopPlan",
   "activateWorkshopPlan",
   "closeWorkshopPlannerSession",
@@ -37,24 +40,33 @@ expect(
 expect(html.includes("window.laCreateWorkshopPlan"), "Crear taller debe poder cargar primero el planificador si hace falta.");
 expect(
   workshopAccessMigration.includes("workshop_game_access") &&
-  workshopAccessMigration.includes("enable row level security") &&
-  workshopAccessMigration.includes("revoke all"),
-  "Los permisos temporales del Taller deben persistir de forma segura en Supabase.",
+  workshopAccessMigration.includes("enable row level security"),
+  "La migración histórica de permisos temporales debe seguir siendo segura.",
+);
+expect(
+  workshopSessionMigration.includes("workshop_sessions") &&
+  workshopSessionMigration.includes("classroom_id uuid primary key") &&
+  workshopSessionMigration.includes("enable row level security") &&
+  workshopSessionMigration.includes("revoke all"),
+  "La sesión activa del Taller debe persistir una sola vez por clase y quedar protegida.",
 );
 expect(
   teacherDashboard.includes('action === "setWorkshopGameAccess"') &&
-  teacherDashboard.includes('from("workshop_game_access")'),
-  "El panel docente debe poder sincronizar los permisos temporales del Taller.",
+  teacherDashboard.includes('from("workshop_sessions")') &&
+  !teacherDashboard.includes('from("workshop_game_access")'),
+  "El panel docente debe sincronizar el Taller por clase, no materializar permisos por alumno.",
 );
 expect(
-  studentDashboard.includes('from("workshop_game_access")') &&
+  studentDashboard.includes('from("workshop_sessions")') &&
+  studentDashboard.includes('workshopSelectedGameIds') &&
   studentDashboard.includes('lockedByWorkshop'),
-  "El panel del alumno debe dar prioridad a los permisos del Taller.",
+  "El panel del alumno debe derivar el acceso desde la sesión real de su clase.",
 );
 expect(
-  saveProgress.includes('from("workshop_game_access")') &&
-  saveProgress.includes('"workshop_game_access_closed"'),
-  "El guardado debe respetar los permisos temporales del Taller.",
+  saveProgress.includes('from("workshop_sessions")') &&
+  saveProgress.includes('"workshop_game_access_closed"') &&
+  !saveProgress.includes('from("workshop_game_access")'),
+  "El guardado debe validar el Taller por la clase real del alumno.",
 );
 expect(
   html.includes("syncWorkshopSupabaseAccess") &&
@@ -62,10 +74,10 @@ expect(
   "El planificador debe sincronizar sus aperturas y cierres con Supabase.",
 );
 expect(
-  studentHtml.includes("catalogLocked===false") &&
-  studentHtml.includes("copy.locked=false") &&
+  studentHtml.includes("Object.prototype.hasOwnProperty.call(currentDashboard,'workshopSession')") &&
+  studentHtml.includes("workshopSessionState={session:(currentDashboard&&currentDashboard.workshopSession)||null}") &&
   studentHtml.includes("Disponible en la sesión"),
-  "El alumno debe poder abrir en caliente un juego cerrado solo por permiso docente cuando Taller lo habilita.",
+  "El alumno debe usar la sesión de LenguArcade/Supabase y no la cuenta Google para resolver su Taller.",
 );
 expect(server.includes("planId:String(payload.planId || '')"), "La sesión activa debe conservar el planId de origen.");
 expect(
@@ -79,8 +91,9 @@ expect(!savePlan.includes("saveWorkshopSession("), "Guardar una preparación no 
 
 const activatePlan = server.match(/function activateWorkshopPlan\([^)]*\)\s*\{[\s\S]*?\n\}/)?.[0] || "";
 expect(activatePlan.includes("applyWorkshopPlanAccess_"), "Abrir una sesión debe ajustar automáticamente los juegos disponibles.");
-expect(activatePlan.includes("saveWorkshopSession("), "Abrir una sesión debe convertir la preparación en sesión publicada.");
+expect(activatePlan.includes("ensureWorkshopSessionSheet_"), "Abrir una sesión debe persistir la sesión publicada sin releerla varias veces.");
 expect(activatePlan.includes("classroomOpen:!!openNow"), "La activación debe distinguir abrir en clase de publicar solo para casa.");
+expect(server.includes("function saveAndActivateWorkshopPlan("), "Guardar y abrir debe poder resolverse en una sola llamada de Apps Script.");
 
 expect(html.includes("Talleres · Diseña y lanza sesiones"), "El panel debe presentar Talleres como planificador de sesiones.");
 expect(
@@ -97,6 +110,16 @@ expect(html.includes("Crear misión"), "Cada taller debe poder convertirse rápi
 expect(html.includes("Sesión de juego") && html.includes("Reto de XP") && html.includes("Trabajo en casa"), "El editor de Taller debe ofrecer plantillas prácticas.");
 expect(html.includes("Ajustes avanzados de disponibilidad"), "El control manual de juegos debe quedar relegado a ajustes avanzados.");
 expect(html.includes("No necesitas tocar esto para preparar una sesión."), "Los ajustes avanzados deben explicar que no son el flujo principal.");
+expect(
+  html.includes('id="workshopAdvancedDetails"') &&
+  html.includes("if(advanced&&advanced.open)loadTeacherWorkshopState"),
+  "Los ajustes avanzados deben cargarse solo cuando el profesor los abre.",
+);
+expect(
+  html.includes("saveWorkshopPlanFast") &&
+  html.includes("saveAndActivateWorkshopPlan"),
+  "El guardado del Taller debe usar las rutas rápidas y combinar guardar+abrir.",
+);
 expect(!html.includes("Control del taller"), "No debe sobrevivir el antiguo encabezado ambiguo Control del taller.");
 expect(!html.includes("Todas las clases · regla general"), "El planificador no debe ofrecer una regla general como si fuera una clase.");
 
@@ -112,6 +135,43 @@ class MockSheet {
   deleteRow(rowNumber) {
     this.rows.splice(rowNumber - 2, 1);
   }
+  getLastRow() {
+    return this.rows.length + 1;
+  }
+  getLastColumn() {
+    return this.headers.length;
+  }
+  getRange(row, column, numRows, numCols) {
+    const sheet = this;
+    return {
+      setValues(values) {
+        if (row === 1) {
+          sheet.headers = [...values[0]];
+          return;
+        }
+        values.forEach((valuesRow, offset) => {
+          const record = {};
+          sheet.headers.forEach((header, index) => {
+            record[header] = valuesRow[index] ?? "";
+          });
+          sheet.rows[row - 2 + offset] = record;
+        });
+      },
+      clearContent() {
+        const start = Math.max(0, row - 2);
+        sheet.rows.splice(start, numRows || 1);
+      },
+      getValues() {
+        if (row === 1) return [sheet.headers.slice(column - 1, column - 1 + numCols)];
+        const values = [];
+        for (let i = 0; i < numRows; i++) {
+          const record = sheet.rows[row - 2 + i] || {};
+          values.push(sheet.headers.slice(column - 1, column - 1 + numCols).map((header) => record[header] ?? ""));
+        }
+        return values;
+      },
+    };
+  }
 }
 const context = {
   console,
@@ -123,6 +183,7 @@ const context = {
   },
   ensureSheets_: () => {},
   rowsToObjects_: (sheet) => sheet.rows.map((row) => ({ ...row })),
+  getHeaders_: (sheet) => [...sheet.headers],
   upsertByKeys_: (sheet, keys, record) => {
     const index = sheet.rows.findIndex((row) =>
       keys.every((key) => String(row[key] ?? "") === String(record[key] ?? "")),
@@ -202,7 +263,8 @@ expect(accessAfterRetire.games.every((game) => !game.enabled), "Retirar debe cer
 
 for (const call of [
   "getWorkshopPlannerAdmin",
-  "saveWorkshopPlan",
+  "saveWorkshopPlanFast",
+  "saveAndActivateWorkshopPlan",
   "deleteWorkshopPlan",
   "activateWorkshopPlan",
   "closeWorkshopPlannerSession",
