@@ -145,6 +145,20 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
   .studentClassPicker{width:100%;flex-basis:auto}
 }
 </style>
+<style id="la-player-admin-style">
+.studentListTools{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.teacherPlayerShortcut{white-space:nowrap;margin:0 0 1px}
+.playerAdminPanel{margin:18px 0 22px;padding:18px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(135deg,rgba(124,77,255,.08),rgba(0,212,255,.035))}
+.playerAdminHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}.playerAdminHead h2{margin:2px 0 0}
+.playerAdminGrid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(250px,.8fr);gap:14px}
+.playerAdminCard{padding:15px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025)}
+.playerAdminCard h3{margin:0 0 6px}.playerAdjustmentFields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.playerAdminCard .field{margin:10px 0}.playerAdminCard button{width:auto}
+.playerDangerCard{border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.045)}
+.playerAdjustmentHistory{margin-top:14px}.playerAdjustmentHistory h3{margin:0 0 8px}
+.playerAdjustmentRow{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-top:1px solid var(--line);font-size:12px}.playerAdjustmentRow small{display:block;color:var(--muted);margin-top:3px}.playerAdjustmentRow time{color:var(--muted);white-space:nowrap}
+@media(max-width:840px){.playerAdminGrid{grid-template-columns:1fr}.studentListTools{justify-content:stretch}.teacherPlayerShortcut,.studentClassPicker{width:100%}.playerAdjustmentFields{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
   <div class="app">
@@ -208,9 +222,12 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
                 <h2>Rendimiento del alumnado</h2>
                 <div class="sub">Filtra por clase y pulsa un alumno para cargar su ficha completa.</div>
               </div>
-              <div class="studentClassPicker field">
-                <label>Clase</label>
-                <select id="studentsClassSelect"><option value="">Todos los alumnos</option></select>
+              <div class="studentListTools">
+                <button type="button" class="ghost teacherPlayerShortcut hidden" id="teacherPlayerBtn">🎮 Mi jugador profesor</button>
+                <div class="studentClassPicker field">
+                  <label>Clase</label>
+                  <select id="studentsClassSelect"><option value="">Todos los alumnos</option></select>
+                </div>
               </div>
             </div>
             <div style="overflow:auto"><table><thead><tr><th>Alumno</th><th>Clase</th><th>XP</th><th>Nivel</th><th>Sesiones</th><th>Juegos</th><th>Precisión</th><th>Nota</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
@@ -268,6 +285,35 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
   <div class="modal" id="studentModal"><div class="dialog">
     <div class="dialogHead"><div><h2 id="studentModalTitle">Alumno</h2><div class="sub" id="studentModalMail"></div></div><button type="button" class="closeX" id="studentModalClose">Cerrar</button></div>
     <div class="studentDetailGrid" id="studentDetailStats"></div>
+    <section class="playerAdminPanel" id="playerAdminPanel">
+      <div class="playerAdminHead">
+        <div>
+          <div class="sub">CONTROL DEL PROFESOR</div>
+          <h2>Administración del jugador</h2>
+        </div>
+        <span class="rosterPill" id="playerAdminScope">Alumno</span>
+      </div>
+      <div class="playerAdminGrid">
+        <div class="playerAdminCard">
+          <h3>Bonificar o penalizar</h3>
+          <p class="sub">El ajuste modifica el XP y las plumas generales, pero no falsea partidas, precisión ni nota académica.</p>
+          <div class="playerAdjustmentFields">
+            <div class="field"><label>XP</label><input id="playerXpAdjustment" type="number" min="-5000" max="5000" step="10" placeholder="+100 o -50"></div>
+            <div class="field"><label>Plumas</label><input id="playerFeathersAdjustment" type="number" min="-500" max="500" step="1" placeholder="+5 o -2"></div>
+          </div>
+          <div class="field"><label>Motivo</label><input id="playerAdjustmentReason" type="text" maxlength="240" placeholder="Ej.: ayuda al equipo, conducta, reto extra..."></div>
+          <button type="button" id="applyPlayerAdjustmentBtn">Aplicar ajuste</button>
+          <div class="status playerAdminStatus" id="playerAdminStatus">Los cambios quedan registrados en el historial.</div>
+        </div>
+        <div class="playerAdminCard playerDangerCard">
+          <h3>Reiniciar progreso</h3>
+          <p class="sub">Borra partidas, guardados, logros, errores, evaluaciones y ajustes manuales. Conserva la cuenta, la clase y el avatar.</p>
+          <button type="button" class="rosterDanger" id="resetPlayerProgressBtn">Borrar todos los datos de juego</button>
+          <div class="sub" style="margin-top:10px">Se pedirá escribir <strong>BORRAR PROGRESO</strong> para confirmar.</div>
+        </div>
+      </div>
+      <div class="playerAdjustmentHistory" id="playerAdjustmentHistory"></div>
+    </section>
     <h2>Progreso por juego</h2><div class="progressList" id="studentDetailProgress"></div>
     <section class="studentDetailSection"><h2>Actividad reciente</h2><div class="detailTimeline" id="studentDetailActivity"></div></section>
     <section class="studentDetailSection"><h2>Logros desbloqueados</h2><div class="detailTimeline" id="studentDetailAchievements"></div></section>
@@ -288,6 +334,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
     const $=id=>document.getElementById(id);
     let session=null,currentTeacher=null,busy=false;
     let rosterState={classes:[],students:[],summary:{}};
+    let currentPlayerDetailId='';
 
     function esc(value){return String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));}
     function bannerUrl(id,banner){const direct=String(banner||'');return ASSET_BASE+((/\.(?:png|jpe?g|webp|svg)$/i.test(direct)?direct:'')||BANNERS[id]||'maniacgrafia-banner.jpg');}
@@ -357,6 +404,12 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       renderFilters(data);
       const summary=data.summary||{};
       ['studentsTotal','activeStudents','sessionsToday','gamesAvailable','achievementsTotal','averageGrade'].forEach(key=>$(key).textContent=summary[key]??0);
+      const teacherShortcut=$('teacherPlayerBtn');
+      if(teacherShortcut){
+        const teacherPlayer=data.teacherPlayer||null;
+        teacherShortcut.classList.toggle('hidden',!teacherPlayer);
+        teacherShortcut.textContent=teacherPlayer?`🎮 Mi jugador profesor · Nv.${teacherPlayer.level||1}`:'🎮 Mi jugador profesor';
+      }
       $('studentsBody').innerHTML=(data.students||[]).map(student=>`<tr class="studentRow" data-student="${esc(student.studentId)}"><td><strong>${esc(student.nombre)}</strong><br><span class="sub">${esc(student.email)}</span></td><td>${esc(student.clase)}</td><td>${student.xp}</td><td>${student.level}</td><td>${student.sessions}</td><td>${student.gamesPlayed}</td><td>${student.accuracy}%</td><td><strong>${student.grade}</strong></td></tr>`).join('');
       document.querySelectorAll('.studentRow').forEach(row=>row.onclick=()=>openStudentDetail(row.dataset.student));
       $('popularGames').innerHTML=(data.popularGames||[]).map(game=>`<div class="gameMini" style="--img:url('${bannerUrl(game.gameId)}')"><div><strong>${esc(game.icono||'')} ${esc(game.nombre)}</strong><span>${game.sessions} sesiones</span><div class="bar" style="margin-top:8px"><div class="fill" style="width:${game.percent}%"></div></div></div></div>`).join('')||'<div class="sub">Sin partidas todavía.</div>';
@@ -371,20 +424,82 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
 
     async function openStudentDetail(studentId){
       if(busy)return;
-      const summary=(currentTeacher?.students||[]).find(student=>student.studentId===studentId);
-      $('studentModalTitle').textContent=summary?.nombre||'Alumno';$('studentModalMail').textContent='Cargando ficha completa...';
-      $('studentDetailStats').innerHTML='<div class="sub">Cargando...</div>';$('studentDetailProgress').innerHTML='';$('studentDetailActivity').innerHTML='';$('studentDetailAchievements').innerHTML='';$('studentDetailErrors').innerHTML='';$('studentModal').classList.add('open');
+      currentPlayerDetailId=String(studentId||'');
+      const summary=(currentTeacher?.students||[]).find(student=>student.studentId===studentId)||
+        (currentTeacher?.teacherPlayer?.studentId===studentId?currentTeacher.teacherPlayer:null);
+      $('studentModalTitle').textContent=summary?.nombre||'Jugador';$('studentModalMail').textContent='Cargando ficha completa...';
+      $('studentDetailStats').innerHTML='<div class="sub">Cargando...</div>';$('studentDetailProgress').innerHTML='';$('studentDetailActivity').innerHTML='';$('studentDetailAchievements').innerHTML='';$('studentDetailErrors').innerHTML='';$('playerAdjustmentHistory').innerHTML='';$('studentModal').classList.add('open');
       try{renderStudentDetail(await edge('teacher-student-detail',{studentId}));}
       catch(error){$('studentDetailStats').innerHTML=`<div class="sub">${esc(error.message||String(error))}</div>`;}
     }
+    function signedValue(value,suffix){
+      const number=Number(value||0);
+      return (number>0?'+':'')+number+(suffix||'');
+    }
     function renderStudentDetail(detail){
       const student=detail.student,general=detail.general||{};
+      currentPlayerDetailId=String(student.studentId||currentPlayerDetailId||'');
       $('studentModalTitle').textContent=student.nombre;$('studentModalMail').textContent=student.email+' · '+student.clase;
-      $('studentDetailStats').innerHTML=[['XP',general.xp||0],['Nivel',general.level||1],['Sesiones',general.sessions||0],['Nota',detail.grade?.score||0],['Juegos',general.gamesPlayed||0],['Precisión',(general.accuracy||0)+'%'],['Última actividad',formatDate(detail.lastActivity)],['Clase',student.clase]].map(item=>`<div class="detailItem"><span class="sub">${esc(item[0])}</span><b>${esc(item[1])}</b></div>`).join('');
+      $('playerAdminScope').textContent=student.isTeacherPlayer?'Profe-jugador':'Alumno';
+      $('studentDetailStats').innerHTML=[
+        ['XP',general.xp||0],
+        ['Ajuste XP',signedValue(general.manualXp||0,'')],
+        ['Nivel',general.level||1],
+        ['Plumas',general.plumas||0],
+        ['Sesiones',general.sessions||0],
+        ['Nota',detail.grade?.score||0],
+        ['Juegos',general.gamesPlayed||0],
+        ['Precisión',(general.accuracy||0)+'%'],
+        ['Última actividad',formatDate(detail.lastActivity)],
+        ['Clase',student.clase]
+      ].map(item=>`<div class="detailItem"><span class="sub">${esc(item[0])}</span><b>${esc(item[1])}</b></div>`).join('');
       $('studentDetailProgress').innerHTML=(detail.progress||[]).map(row=>`<div class="box"><div class="boxHead"><strong>${esc(row.icono||'')} ${esc(row.gameName)}</strong><span>${row.percentage}%</span></div><div class="sub">XP: ${row.xp} · Sesiones: ${row.sessions} · Precisión: ${row.accuracy}%</div><div class="sub">Última actividad: ${esc(formatDate(row.lastActivity))}</div><div class="bar" style="margin-top:8px"><div class="fill" style="width:${row.percentage}%"></div></div></div>`).join('')||'<div class="sub">Todavía no hay progreso.</div>';
-      $('studentDetailActivity').innerHTML=(detail.events||[]).map(row=>`<div class="box detailMeta"><div><strong>${esc(row.gameId)}</strong><div class="sub">${esc(row.eventType)} · +${row.xpDelta} XP</div></div><time>${esc(formatDate(row.timestamp))}</time></div>`).join('')||'<div class="sub">Sin actividad reciente.</div>';
+      $('studentDetailActivity').innerHTML=(detail.events||[]).map(row=>{
+        const adjustment=row.eventType==='teacher_adjustment';
+        const title=adjustment?'Ajuste del profesor':row.gameId;
+        const reason=adjustment&&row.details?.reason?' · '+esc(row.details.reason):'';
+        return `<div class="box detailMeta"><div><strong>${esc(title)}</strong><div class="sub">${adjustment?'Ajuste manual':esc(row.eventType)} · ${signedValue(row.xpDelta,' XP')} · ${signedValue(row.plumasDelta,' plumas')}${reason}</div></div><time>${esc(formatDate(row.timestamp))}</time></div>`;
+      }).join('')||'<div class="sub">Sin actividad reciente.</div>';
       $('studentDetailAchievements').innerHTML=(detail.achievements||[]).map(row=>`<div class="box detailMeta"><div><strong>${esc(row.title)}</strong><div class="sub">${esc(row.description)}</div></div><time>${esc(formatDate(row.unlockedAt))}</time></div>`).join('')||'<div class="sub">Todavía no ha desbloqueado logros.</div>';
       $('studentDetailErrors').innerHTML=(detail.errors||[]).map(row=>`<div class="box detailMeta"><div><strong>${esc(row.skill||row.gameId)}</strong><div class="sub">${esc(row.errorType)} · ${row.count} apariciones</div></div><time>${esc(formatDate(row.timestamp))}</time></div>`).join('')||'<div class="sub">Sin errores registrados.</div>';
+      const adjustments=detail.adjustments||[];
+      $('playerAdjustmentHistory').innerHTML=adjustments.length
+        ? '<h3>Últimos ajustes manuales</h3>'+adjustments.slice(0,8).map(row=>`<div class="playerAdjustmentRow"><span><strong>${signedValue(row.xpDelta,' XP')}</strong> · ${signedValue(row.plumasDelta,' plumas')}<small>${esc(row.reason||'Sin motivo')}</small></span><time>${esc(formatDate(row.timestamp))}</time></div>`).join('')
+        : '<div class="sub">Todavía no hay bonificaciones ni penalizaciones manuales.</div>';
+      $('playerXpAdjustment').value='';
+      $('playerFeathersAdjustment').value='';
+      $('playerAdjustmentReason').value='';
+      $('playerAdminStatus').textContent=detail.actionResult?.action==='resetProgress'?'Progreso reiniciado correctamente.':detail.actionResult?.action==='adjust'?'Ajuste aplicado y registrado.':'Los cambios quedan registrados en el historial.';
+    }
+
+    async function applyPlayerAdjustment(){
+      if(busy||!currentPlayerDetailId)return;
+      const xpDelta=Number($('playerXpAdjustment').value||0);
+      const feathersDelta=Number($('playerFeathersAdjustment').value||0);
+      const reason=String($('playerAdjustmentReason').value||'').trim();
+      if(!xpDelta&&!feathersDelta){$('playerAdminStatus').textContent='Indica una bonificación o penalización en XP o plumas.';return;}
+      if(reason.length<3){$('playerAdminStatus').textContent='Escribe un motivo breve para que el ajuste quede documentado.';return;}
+      setBusy(true,'Aplicando ajuste al jugador...');
+      try{
+        const detail=await edge('teacher-student-detail',{studentId:currentPlayerDetailId,action:'adjust',xpDelta,feathersDelta,reason});
+        renderStudentDetail(detail);
+        await loadTeacher(true);
+      }catch(error){
+        $('playerAdminStatus').textContent='No se pudo aplicar el ajuste: '+(error.code||error.message||error);
+      }finally{setBusy(false);}
+    }
+    async function resetPlayerProgress(){
+      if(busy||!currentPlayerDetailId)return;
+      const confirmation=prompt('Esta acción borrará todos los datos de juego de este jugador.\n\nEscribe BORRAR PROGRESO para continuar:','');
+      if(confirmation!=='BORRAR PROGRESO'){$('playerAdminStatus').textContent='Reinicio cancelado.';return;}
+      setBusy(true,'Borrando progreso del jugador...');
+      try{
+        const detail=await edge('teacher-student-detail',{studentId:currentPlayerDetailId,action:'resetProgress',confirmText:confirmation});
+        renderStudentDetail(detail);
+        await loadTeacher(true);
+      }catch(error){
+        $('playerAdminStatus').textContent='No se pudo borrar el progreso: '+(error.code||error.message||error);
+      }finally{setBusy(false);}
     }
 
     function decorateStudentProgress(detail){
@@ -590,7 +705,10 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       $('classSelect').onchange=()=>{if($('studentsClassSelect'))$('studentsClassSelect').value=$('classSelect').value;loadTeacher();};
       $('gameSelect').onchange=()=>loadTeacher();
       if($('studentsClassSelect'))$('studentsClassSelect').onchange=()=>{$('classSelect').value=$('studentsClassSelect').value;loadTeacher();};
-      $('studentModalClose').onclick=()=>$('studentModal').classList.remove('open');
+      $('studentModalClose').onclick=()=>{$('studentModal').classList.remove('open');currentPlayerDetailId='';};
+      $('applyPlayerAdjustmentBtn').onclick=applyPlayerAdjustment;
+      $('resetPlayerProgressBtn').onclick=resetPlayerProgress;
+      $('teacherPlayerBtn').onclick=()=>{const player=currentTeacher?.teacherPlayer;if(player)openStudentDetail(player.studentId);};
       $('classroomModalClose').onclick=()=>$('classroomModal').classList.remove('open');
       $('classroomSyncBtn').onclick=openClassroomPicker;
       $('classroomImportBtn').onclick=syncSelectedClassroomCourses;
