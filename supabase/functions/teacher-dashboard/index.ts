@@ -518,47 +518,40 @@ async function handleWorkshopGameAccess(
   const classCode = String(body.classCode || "").trim();
   if (!classCode) return jsonResponse({ ok:false, error:"workshop_class_required" }, 400);
 
-  let targetProfileIds: string[] = [];
-  try {
-    targetProfileIds = await resolveBulkAccessTargets(admin, organizationId, classCode);
-  } catch (error) {
-    if (String((error as Error)?.message || error) === "access_class_not_found") {
-      return jsonResponse({ ok:false, error:"access_class_not_found" }, 404);
-    }
-    throw error;
-  }
+  const { data:classrooms, error:classroomsError } = await admin.from("classrooms")
+    .select("id,legacy_class_code")
+    .eq("organization_id", organizationId)
+    .eq("active", true);
+  if (classroomsError) throw classroomsError;
+  const classroom = (classrooms || []).find(row =>
+    String(row.id) === classCode || String(row.legacy_class_code || "") === classCode
+  );
+  if (!classroom) return jsonResponse({ ok:false, error:"access_class_not_found" }, 404);
 
+  const session = body.session && typeof body.session === "object"
+    ? body.session as Record<string, unknown>
+    : {};
   const active = body.active === true;
-  if (!targetProfileIds.length) {
-    return jsonResponse({ ok:true, action:"workshopGameAccess", classCode, playerCount:0, active });
-  }
-
-  const clearOverrides = async () => {
-    for (let start = 0; start < targetProfileIds.length; start += 250) {
-      const profileChunk = targetProfileIds.slice(start, start + 250);
-      const { error } = await admin.from("workshop_game_access")
-        .delete()
-        .in("profile_id", profileChunk);
-      if (error) throw error;
-    }
-  };
-
-  if (!active) {
-    await clearOverrides();
+  if (!active || session.published === false) {
+    const { error:deleteError } = await admin.from("workshop_sessions")
+      .delete()
+      .eq("classroom_id", classroom.id)
+      .eq("organization_id", organizationId);
+    if (deleteError) throw deleteError;
     return jsonResponse({
       ok:true,
       action:"workshopGameAccess",
       classCode,
-      playerCount:targetProfileIds.length,
       active:false,
-      changed:0,
+      changed:1,
     });
   }
 
   const requestedIds = Array.isArray(body.gameIds)
     ? body.gameIds.map(value => String(value || "").trim().slice(0, 80)).filter(Boolean)
-    : [];
-  const requestedSet = new Set(requestedIds);
+    : Array.isArray(session.gameIds)
+      ? (session.gameIds as unknown[]).map(value => String(value || "").trim().slice(0, 80)).filter(Boolean)
+      : [];
 
   const { data:games, error:gamesError } = await admin.from("games")
     .select("id")
@@ -566,8 +559,7 @@ async function handleWorkshopGameAccess(
     .eq("official", true)
     .order("sort_order");
   if (gamesError) throw gamesError;
-  const officialGames = games || [];
-  const officialIds = new Set(officialGames.map(game => String(game.id)));
+  const officialIds = new Set((games || []).map(game => String(game.id)));
   const invalidIds = requestedIds.filter(id => !officialIds.has(id));
   if (invalidIds.length) {
     return jsonResponse({ ok:false, error:"workshop_game_not_found", gameIds:invalidIds }, 400);
@@ -581,55 +573,56 @@ async function handleWorkshopGameAccess(
     return parsed.toISOString();
   };
 
+  const classroomOpen = session.classroomOpen === true;
+  const homeEnabled = session.homeEnabled === true;
   let activeFrom: string | null = null;
   let activeTo: string | null = null;
   try {
-    activeFrom = parseIso(body.activeFrom);
-    activeTo = parseIso(body.activeTo);
+    activeFrom = parseIso(body.activeFrom || session.homeStart);
+    activeTo = parseIso(body.activeTo || session.homeEnd);
   } catch {
     return jsonResponse({ ok:false, error:"invalid_workshop_window" }, 400);
   }
-  if ((activeFrom && !activeTo) || (!activeFrom && activeTo) ||
-      (activeFrom && activeTo && Date.parse(activeTo) <= Date.parse(activeFrom))) {
+  if (homeEnabled && ((!activeFrom || !activeTo) || Date.parse(activeTo) <= Date.parse(activeFrom))) {
     return jsonResponse({ ok:false, error:"invalid_workshop_window" }, 400);
   }
-
-  await clearOverrides();
-
-  const now = new Date().toISOString();
-  const rows: Record<string, unknown>[] = [];
-  for (const profileId of targetProfileIds) {
-    for (const game of officialGames) {
-      const selected = requestedSet.has(String(game.id));
-      rows.push({
-        profile_id:profileId,
-        game_id:String(game.id),
-        enabled:selected,
-        active_from:selected ? activeFrom : null,
-        active_to:selected ? activeTo : null,
-        updated_by:teacherProfileId,
-        updated_at:now,
-      });
-    }
+  if (!homeEnabled) {
+    activeFrom = null;
+    activeTo = null;
   }
 
-  for (let start = 0; start < rows.length; start += 500) {
-    const { error } = await admin.from("workshop_game_access")
-      .upsert(rows.slice(start, start + 500), { onConflict:"profile_id,game_id" });
-    if (error) throw error;
-  }
+  const record = {
+    classroom_id:String(classroom.id),
+    organization_id:organizationId,
+    title:String(session.title || "").trim().slice(0, 180),
+    message:String(session.message || "").trim().slice(0, 800),
+    target_xp:Math.max(0, Math.min(100000, Math.round(Number(session.targetXp || 0)))),
+    published:true,
+    classroom_open:classroomOpen,
+    home_enabled:homeEnabled,
+    active_from:activeFrom,
+    active_to:activeTo,
+    game_ids:requestedIds,
+    plan_id:String(session.planId || "").trim().slice(0, 160),
+    updated_by:teacherProfileId,
+    updated_at:new Date().toISOString(),
+  };
+
+  const { error:sessionError } = await admin.from("workshop_sessions")
+    .upsert(record, { onConflict:"classroom_id" });
+  if (sessionError) throw sessionError;
 
   return jsonResponse({
     ok:true,
     action:"workshopGameAccess",
     classCode,
-    playerCount:targetProfileIds.length,
-    gameCount:officialGames.length,
-    selectedGameCount:requestedSet.size,
     active:true,
+    classroomOpen,
+    homeEnabled,
+    selectedGameCount:requestedIds.length,
     activeFrom,
     activeTo,
-    changed:rows.length,
+    changed:1,
   });
 }
 
