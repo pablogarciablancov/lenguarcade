@@ -447,6 +447,7 @@ Deno.serve(async (request) => {
     const classCode = String(body.classCode || "");
     const gameId = String(body.gameId || "");
     const action = String(body.action || "");
+
     if (action === "saveMission" || action === "archiveMission") {
       const missionResult = await handleMissionAction(admin, organizationId, body);
       if (missionResult) return missionResult;
@@ -461,22 +462,19 @@ Deno.serve(async (request) => {
     if (action === "setBulkGameAccess") {
       return await handleBulkGameAccess(admin, organizationId, teacherProfileId, body);
     }
+
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
+    // Fase 1: solo estructura y perfiles. Con esto determinamos el conjunto exacto
+    // de jugadores antes de consultar tablas de actividad potencialmente grandes.
     const [
       profilesResult,
       teacherProfileResult,
       classroomsResult,
       enrollmentsResult,
       gamesResult,
-      progressResult,
-      eventsResult,
-      achievementsResult,
-      errorsResult,
       missionsResult,
-      adjustmentsResult,
-      gameAccessResult,
     ] = await Promise.all([
       admin.from("profiles")
         .select("id,email,first_name,last_name,last_login_at,source")
@@ -502,43 +500,30 @@ Deno.serve(async (request) => {
         .eq("active", true)
         .eq("official", true)
         .order("sort_order"),
-      admin.from("game_progress")
-        .select("profile_id,game_id,xp,level,percentage,accuracy,attempts,successes,errors,streak,sessions,achievements_count,missions_completed,feathers,last_activity_at"),
-      admin.from("game_events")
-        .select("profile_id,game_id,event_type,occurred_at")
-        .gte("occurred_at", today.toISOString()),
-      admin.from("player_achievements")
-        .select("profile_id,game_id"),
-      admin.from("game_errors")
-        .select("profile_id,game_id,skill,error_type,error_count"),
       admin.from("mission_definitions")
         .select("id,title,description,game_id,mission_type,target,active_from,active_to,classroom_id,featured,priority,active,updated_at")
         .eq("organization_id", organizationId)
         .eq("active", true)
         .order("priority", { ascending:false })
         .order("active_to", { ascending:true, nullsFirst:false }),
-      admin.from("game_events")
-        .select("profile_id,xp_delta,feathers_delta,occurred_at")
-        .eq("event_type", "teacher_adjustment")
-        .order("occurred_at", { ascending:false })
-        .limit(5000),
-      admin.from("profile_game_access")
-        .select("profile_id,game_id,enabled")
-        .eq("enabled", false),
     ]);
-    const failure = [
-      profilesResult.error, teacherProfileResult.error, classroomsResult.error, enrollmentsResult.error,
-      gamesResult.error, progressResult.error, eventsResult.error,
-      achievementsResult.error, errorsResult.error, missionsResult.error, adjustmentsResult.error,
-      gameAccessResult.error,
+
+    const structureFailure = [
+      profilesResult.error,
+      teacherProfileResult.error,
+      classroomsResult.error,
+      enrollmentsResult.error,
+      gamesResult.error,
+      missionsResult.error,
     ].find(Boolean);
-    if (failure) throw failure;
+    if (structureFailure) throw structureFailure;
 
     const classrooms = classroomsResult.data || [];
     const classroomById = new Map(classrooms.map(row => [row.id, row]));
     const selectedClassroomIds = new Set(classrooms
       .filter(row => !classCode || row.legacy_class_code === classCode || row.id === classCode)
       .map(row => row.id));
+
     const enrollmentsByProfile = new Map<string, string[]>();
     for (const row of enrollmentsResult.data || []) {
       if (!classroomById.has(row.classroom_id)) continue;
@@ -553,6 +538,69 @@ Deno.serve(async (request) => {
       return (enrollmentsByProfile.get(profile.id) || [])
         .some(classroomId => selectedClassroomIds.has(classroomId));
     });
+
+    const profileIds = profiles.map(profile => String(profile.id));
+    const profileIdSet = new Set(profileIds);
+    const activityProfileIds = [...new Set([...profileIds, String(teacherProfileId)])];
+
+    // Fase 2: actividad limitada exclusivamente a los perfiles visibles.
+    // Antes estas consultas leían tablas completas y filtraban después en JS.
+    const emptyResult = { data:[], error:null };
+    const [
+      progressResult,
+      eventsResult,
+      achievementsResult,
+      errorsResult,
+      adjustmentsResult,
+      gameAccessResult,
+    ] = await Promise.all([
+      activityProfileIds.length
+        ? admin.from("game_progress")
+            .select("profile_id,game_id,xp,level,percentage,accuracy,attempts,successes,errors,streak,sessions,achievements_count,missions_completed,feathers,last_activity_at")
+            .in("profile_id", activityProfileIds)
+        : Promise.resolve(emptyResult),
+      profileIds.length
+        ? admin.from("game_events")
+            .select("profile_id,game_id,event_type,occurred_at")
+            .in("profile_id", profileIds)
+            .gte("occurred_at", today.toISOString())
+        : Promise.resolve(emptyResult),
+      profileIds.length
+        ? admin.from("player_achievements")
+            .select("profile_id,game_id")
+            .in("profile_id", profileIds)
+        : Promise.resolve(emptyResult),
+      profileIds.length
+        ? admin.from("game_errors")
+            .select("profile_id,game_id,skill,error_type,error_count")
+            .in("profile_id", profileIds)
+        : Promise.resolve(emptyResult),
+      activityProfileIds.length
+        ? admin.from("game_events")
+            .select("profile_id,xp_delta,feathers_delta,occurred_at")
+            .in("profile_id", activityProfileIds)
+            .eq("event_type", "teacher_adjustment")
+            .order("occurred_at", { ascending:false })
+            .limit(5000)
+        : Promise.resolve(emptyResult),
+      profileIds.length
+        ? admin.from("profile_game_access")
+            .select("profile_id,game_id,enabled")
+            .in("profile_id", profileIds)
+            .eq("enabled", false)
+        : Promise.resolve(emptyResult),
+    ]);
+
+    const activityFailure = [
+      progressResult.error,
+      eventsResult.error,
+      achievementsResult.error,
+      errorsResult.error,
+      adjustmentsResult.error,
+      gameAccessResult.error,
+    ].find(Boolean);
+    if (activityFailure) throw activityFailure;
+
     const adjustmentByProfile = new Map<string, { xp:number; feathers:number }>();
     for (const row of adjustmentsResult.data || []) {
       const current = adjustmentByProfile.get(row.profile_id) || { xp:0, feathers:0 };
@@ -560,12 +608,13 @@ Deno.serve(async (request) => {
       current.feathers += Number(row.feathers_delta || 0);
       adjustmentByProfile.set(row.profile_id, current);
     }
-    const profileIds = new Set(profiles.map(profile => profile.id));
-    const progress = (progressResult.data || []).filter(row =>
-      profileIds.has(row.profile_id) && (!gameId || row.game_id === gameId)
+
+    const allScopedProgress = progressResult.data || [];
+    const studentProgress = allScopedProgress.filter(row =>
+      profileIdSet.has(row.profile_id) && (!gameId || row.game_id === gameId)
     );
     const progressByProfile = new Map<string, Array<Record<string, unknown>>>();
-    for (const row of progress) {
+    for (const row of studentProgress) {
       const values = progressByProfile.get(row.profile_id) || [];
       values.push(row);
       progressByProfile.set(row.profile_id, values);
@@ -608,7 +657,7 @@ Deno.serve(async (request) => {
 
     const games = gamesResult.data || [];
     const popularGames = games.map(game => {
-      const rows = progress.filter(row => row.game_id === game.id);
+      const rows = studentProgress.filter(row => row.game_id === game.id);
       return {
         gameId:game.id,
         nombre:game.name,
@@ -620,9 +669,7 @@ Deno.serve(async (request) => {
     const totalSessions = popularGames.reduce((sum, game) => sum + game.sessions, 0) || 1;
     popularGames.forEach(game => game.percent = Math.round((game.sessions / totalSessions) * 100));
 
-    const closedAccess = (gameAccessResult.data || []).filter(row =>
-      row.enabled === false && profileIds.has(row.profile_id)
-    );
+    const closedAccess = (gameAccessResult.data || []).filter(row => row.enabled === false);
     const gameAccessOverview = games.map(game => {
       const closed = closedAccess.filter(row => row.game_id === game.id).length;
       const total = profiles.length;
@@ -640,7 +687,7 @@ Deno.serve(async (request) => {
 
     const errorCounts = new Map<string, number>();
     for (const row of errorsResult.data || []) {
-      if (!profileIds.has(row.profile_id) || (gameId && row.game_id !== gameId)) continue;
+      if (gameId && row.game_id !== gameId) continue;
       const label = row.skill || row.error_type || row.game_id || "General";
       errorCounts.set(label, (errorCounts.get(label) || 0) + Number(row.error_count || 1));
     }
@@ -648,6 +695,7 @@ Deno.serve(async (request) => {
       .map(([label, count]) => ({ label, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 8);
+
     const recommendations = [];
     if (!students.length) recommendations.push("No hay alumnos en el filtro seleccionado.");
     if (students.some(student => student.sessions === 0)) {
@@ -660,7 +708,7 @@ Deno.serve(async (request) => {
 
     const focus = students[0] || null;
     const focusProgress = focus
-      ? progress.filter(row => row.profile_id === focus.studentId).map(row => {
+      ? studentProgress.filter(row => row.profile_id === focus.studentId).map(row => {
           const game = games.find(item => item.id === row.game_id);
           return {
             gameId:row.game_id,
@@ -674,16 +722,14 @@ Deno.serve(async (request) => {
       : [];
 
     const eventCount = (eventsResult.data || []).filter(row =>
-      row.event_type !== "teacher_adjustment" &&
-      profileIds.has(row.profile_id) &&
-      (!gameId || row.game_id === gameId)
+      row.event_type !== "teacher_adjustment" && (!gameId || row.game_id === gameId)
     ).length;
     const achievementCount = (achievementsResult.data || []).filter(row =>
-      profileIds.has(row.profile_id) && (!gameId || row.game_id === gameId)
+      !gameId || row.game_id === gameId
     ).length;
 
     const teacherProfile = teacherProfileResult.data;
-    const teacherRows = (progressResult.data || []).filter(row => row.profile_id === teacherProfileId);
+    const teacherRows = allScopedProgress.filter(row => row.profile_id === teacherProfileId);
     const teacherAttempts = teacherRows.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
     const teacherSuccesses = teacherRows.reduce((sum, row) => sum + Number(row.successes || 0), 0);
     const teacherBaseXp = teacherRows.reduce((sum, row) => sum + Number(row.xp || 0), 0);
