@@ -4,6 +4,7 @@ import vm from "node:vm";
 
 const root = path.resolve(".");
 const html = fs.readFileSync(path.join(root, "apps-script", "LenguArcade_Profesor.html"), "utf8");
+const studentHtml = fs.readFileSync(path.join(root, "apps-script", "LenguArcade_Alumno.html"), "utf8");
 const server = fs.readFileSync(path.join(root, "apps-script", "LenguArcade_Workshop.gs"), "utf8");
 const teacherDashboard = fs.readFileSync(path.join(root, "supabase", "functions", "teacher-dashboard", "index.ts"), "utf8");
 const studentDashboard = fs.readFileSync(path.join(root, "supabase", "functions", "student-dashboard", "index.ts"), "utf8");
@@ -59,6 +60,12 @@ expect(
   html.includes("syncWorkshopSupabaseAccess") &&
   html.includes("setWorkshopGameAccess"),
   "El planificador debe sincronizar sus aperturas y cierres con Supabase.",
+);
+expect(
+  studentHtml.includes("catalogLocked===false") &&
+  studentHtml.includes("copy.locked=false") &&
+  studentHtml.includes("Disponible en la sesión"),
+  "El alumno debe poder abrir en caliente un juego cerrado solo por permiso docente cuando Taller lo habilita.",
 );
 expect(server.includes("planId:String(payload.planId || '')"), "La sesión activa debe conservar el planId de origen.");
 expect(
