@@ -31,8 +31,20 @@ Deno.serve(async (request) => {
     const resultId = String(body.resultId || "").trim().slice(0, 180);
     if (!gameId) return jsonResponse({ ok:false, error:"missing_game_id" }, 400);
 
-    const { data:game } = await admin.from("games").select("id").eq("id", gameId).maybeSingle();
+    const [{ data:game, error:gameError }, { data:gameAccess, error:gameAccessError }] = await Promise.all([
+      admin.from("games").select("id").eq("id", gameId).maybeSingle(),
+      admin.from("profile_game_access")
+        .select("enabled")
+        .eq("profile_id", profileId)
+        .eq("game_id", gameId)
+        .maybeSingle(),
+    ]);
+    if (gameError) throw gameError;
+    if (gameAccessError) throw gameAccessError;
     if (!game) return jsonResponse({ ok:false, error:"unknown_game" }, 400);
+    if (gameAccess?.enabled === false) {
+      return jsonResponse({ ok:false, error:"game_access_closed" }, 403);
+    }
     if (resultId) {
       const { data:duplicate } = await admin.from("game_events")
         .select("id")
