@@ -128,7 +128,7 @@ Deno.serve(async (request) => {
         .eq("profile_id", profileId)
         .eq("active", true),
       admin.from("mission_definitions")
-        .select("id,title,description,game_id,mission_type,target,reward_xp,reward_feathers,active_from,active_to,classroom_id,featured,priority,organization_id")
+        .select("id,title,description,game_id,mission_type,target,reward_xp,reward_feathers,active_from,active_to,classroom_id,target_profile_id,featured,priority,organization_id")
         .eq("organization_id", organizationId)
         .eq("active", true),
       admin.from("game_events")
@@ -257,6 +257,7 @@ Deno.serve(async (request) => {
     const gameNameById = new Map((gamesResult.data || []).map(game => [String(game.id), String(game.name || game.id)]));
     const missionProgress = (missionsResult.data || [])
       .filter(mission => {
+        if (mission.target_profile_id && String(mission.target_profile_id) !== String(profileId)) return false;
         if (mission.classroom_id && !classroomIds.has(String(mission.classroom_id))) return false;
         const from = mission.active_from ? Date.parse(String(mission.active_from)) : Number.NaN;
         const to = mission.active_to ? Date.parse(String(mission.active_to)) : Number.NaN;
@@ -285,7 +286,7 @@ Deno.serve(async (request) => {
           featured:Boolean(mission.featured),
           priority:Number(mission.priority || 0),
           dueAt:mission.active_to || null,
-          scope:mission.classroom_id ? "classroom" : "global",
+          scope:mission.target_profile_id ? "student" : (mission.classroom_id ? "classroom" : "global"),
           rewardXp:Number(mission.reward_xp || 0),
           rewardPlumas:Number(mission.reward_feathers || 0),
         };
