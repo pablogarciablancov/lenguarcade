@@ -15,6 +15,14 @@ function ensureWorkshopAccessSheet_() {
   return ss.getSheetByName(LA_WORKSHOP_ACCESS_CONFIG_.SHEET);
 }
 
+function ensureWorkshopSheets_() {
+  var ss = getDb_();
+  ensureSheetHeaders_(ss, LA_WORKSHOP_ACCESS_CONFIG_.SHEET, LA_WORKSHOP_ACCESS_CONFIG_.HEADERS);
+  ensureSheetHeaders_(ss, LA_WORKSHOP_SESSION_CONFIG_.SHEET, LA_WORKSHOP_SESSION_CONFIG_.HEADERS);
+  ensureSheetHeaders_(ss, LA_WORKSHOP_PLAN_CONFIG_.SHEET, LA_WORKSHOP_PLAN_CONFIG_.HEADERS);
+  return ss;
+}
+
 function normalizeWorkshopScope_(classCode) {
   var scope = String(classCode || LA_WORKSHOP_ACCESS_CONFIG_.GLOBAL_SCOPE).trim();
   if (!scope || scope.toLowerCase() === 'all' || scope.toLowerCase() === 'todas') {
@@ -98,13 +106,13 @@ function buildWorkshopAccessState_(scope) {
 
 function getWorkshopAccessAdmin(classCode) {
   requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   return buildWorkshopAccessState_(classCode);
 }
 
 function setWorkshopGameAccess(classCode, gameId, enabled) {
   var teacherEmail = requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var scope = normalizeWorkshopScope_(classCode);
   var cleanGameId = String(gameId || '').trim();
   if (!cleanGameId || !findGame_(cleanGameId)) throw new Error('Juego no reconocido.');
@@ -121,7 +129,7 @@ function setWorkshopGameAccess(classCode, gameId, enabled) {
 
 function setWorkshopAllGamesAccess(classCode, enabled) {
   var teacherEmail = requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var scope = normalizeWorkshopScope_(classCode);
   var sheet = ensureWorkshopAccessSheet_();
   var now = nowIso_();
@@ -139,7 +147,7 @@ function setWorkshopAllGamesAccess(classCode, enabled) {
 }
 
 function getWorkshopAccessForCurrentUser() {
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var email = requireActiveGoogleEmail_();
   var student = null;
   if (isStudentGoogleEmail_(email)) {
@@ -275,7 +283,7 @@ function workshopSessionPublic_(row) {
 
 function getWorkshopSessionAdmin(classCode) {
   requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var cleanClass = workshopSessionCleanClass_(classCode);
   var row = workshopSessionFind_(cleanClass);
   var session = workshopSessionPublic_(row) || {
@@ -302,7 +310,7 @@ function getWorkshopSessionAdmin(classCode) {
 
 function saveWorkshopSession(classCode, payload) {
   var teacherEmail = requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var cleanClass = workshopSessionCleanClass_(classCode);
   payload = payload || {};
 
@@ -357,7 +365,7 @@ function setWorkshopClassroomSessionOpen(classCode, open, payload) {
 
 function retireWorkshopSession(classCode) {
   var teacherEmail = requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var cleanClass = workshopSessionCleanClass_(classCode);
   var existing = workshopSessionFind_(cleanClass);
   if (!existing) return getWorkshopSessionAdmin(cleanClass);
@@ -473,7 +481,7 @@ function workshopPlanFind_(classCode, planId) {
 
 function getWorkshopPlannerAdmin(classCode) {
   requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var cleanClass = workshopSessionCleanClass_(classCode);
   var activeSession = workshopSessionPublic_(workshopSessionFind_(cleanClass));
   var plans = workshopPlanRows_()
@@ -496,7 +504,7 @@ function getWorkshopPlannerAdmin(classCode) {
 
 function saveWorkshopPlan(classCode, payload) {
   var teacherEmail = requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var cleanClass = workshopSessionCleanClass_(classCode);
   var clean = workshopPlanValidatePayload_(payload);
   var planId = workshopPlanCleanId_(payload && payload.planId) || ('plan_' + Utilities.getUuid().replace(/-/g, '').slice(0, 20));
@@ -527,7 +535,7 @@ function saveWorkshopPlan(classCode, payload) {
 
 function saveWorkshopPlanFast(classCode, payload) {
   var teacherEmail = requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var cleanClass = workshopSessionCleanClass_(classCode);
   var clean = workshopPlanValidatePayload_(payload);
   var planId = workshopPlanCleanId_(payload && payload.planId) || ('plan_' + Utilities.getUuid().replace(/-/g, '').slice(0, 20));
@@ -561,7 +569,7 @@ function saveWorkshopPlanFast(classCode, payload) {
 
 function saveAndActivateWorkshopPlan(classCode, payload, openNow) {
   var teacherEmail = requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var cleanClass = workshopSessionCleanClass_(classCode);
   var clean = workshopPlanValidatePayload_(payload);
   var planId = workshopPlanCleanId_(payload && payload.planId) || ('plan_' + Utilities.getUuid().replace(/-/g, '').slice(0, 20));
@@ -610,7 +618,7 @@ function saveAndActivateWorkshopPlan(classCode, payload, openNow) {
 
 function deleteWorkshopPlan(classCode, planId) {
   requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var cleanClass = workshopSessionCleanClass_(classCode);
   var cleanId = workshopPlanCleanId_(planId);
   if (!cleanId) throw new Error('Sesión preparada no reconocida.');
@@ -668,7 +676,7 @@ function applyWorkshopPlanAccess_(classCode, gameIds, teacherEmail) {
 
 function activateWorkshopPlan(classCode, planId, openNow) {
   var teacherEmail = requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var cleanClass = workshopSessionCleanClass_(classCode);
   var row = workshopPlanFind_(cleanClass, planId);
   if (!row) throw new Error('La sesión preparada ya no existe.');
@@ -716,7 +724,7 @@ function activateWorkshopPlan(classCode, planId, openNow) {
 
 function closeWorkshopPlannerSession(classCode) {
   requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var cleanClass = workshopSessionCleanClass_(classCode);
   var existing = workshopSessionFind_(cleanClass);
   if (!existing) return getWorkshopPlannerAdmin(cleanClass);
@@ -735,7 +743,7 @@ function closeWorkshopPlannerSession(classCode) {
 
 function retireWorkshopPlannerSession(classCode) {
   var teacherEmail = requireWorkshopTeacher_();
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var cleanClass = workshopSessionCleanClass_(classCode);
   retireWorkshopSession(cleanClass);
   applyWorkshopPlanAccess_(cleanClass, [], teacherEmail);
@@ -744,7 +752,7 @@ function retireWorkshopPlannerSession(classCode) {
 }
 
 function getWorkshopSessionForCurrentUser() {
-  ensureSheets_();
+  ensureWorkshopSheets_();
   var email = requireActiveGoogleEmail_();
   var student = null;
 
