@@ -149,6 +149,36 @@ async function resolveMissionClassroom(
   return classroom.id;
 }
 
+async function resolveMissionStudent(
+  admin: any,
+  organizationId: string,
+  studentId: string,
+  classroomId: string | null,
+) {
+  const clean = cleanMissionText(studentId, 120);
+  if (!clean) return null;
+  const { data:profile, error:profileError } = await admin.from("profiles")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .eq("id", clean)
+    .eq("role", "student")
+    .eq("active", true)
+    .maybeSingle();
+  if (profileError) throw profileError;
+  if (!profile) throw new Error("mission_student_not_found");
+  if (classroomId) {
+    const { data:enrollment, error:enrollmentError } = await admin.from("classroom_enrollments")
+      .select("profile_id")
+      .eq("profile_id", clean)
+      .eq("classroom_id", classroomId)
+      .eq("active", true)
+      .maybeSingle();
+    if (enrollmentError) throw enrollmentError;
+    if (!enrollment) throw new Error("mission_student_not_in_class");
+  }
+  return String(profile.id);
+}
+
 async function handleMissionAction(
   admin: any,
   organizationId: string,
@@ -228,6 +258,22 @@ async function handleMissionAction(
     throw error;
   }
 
+  let targetProfileId: string | null = null;
+  try {
+    targetProfileId = await resolveMissionStudent(
+      admin,
+      organizationId,
+      cleanMissionText(mission.studentId, 120),
+      classroomId,
+    );
+  } catch (error) {
+    const code = String((error as Error)?.message || error);
+    if (code === "mission_student_not_found" || code === "mission_student_not_in_class") {
+      return jsonResponse({ ok:false, error:code }, 400);
+    }
+    throw error;
+  }
+
   function dateOrNull(value: unknown) {
     const text = cleanMissionText(value, 80);
     if (!text) return null;
@@ -272,6 +318,7 @@ async function handleMissionAction(
     publication_status:publicationStatus,
     organization_id:organizationId,
     classroom_id:classroomId,
+    target_profile_id:targetProfileId,
     featured,
     priority,
     updated_at:new Date().toISOString(),
@@ -525,7 +572,7 @@ Deno.serve(async (request) => {
         .eq("official", true)
         .order("sort_order"),
       admin.from("mission_definitions")
-        .select("id,title,description,game_id,mission_type,target,active_from,active_to,classroom_id,featured,priority,active,publication_status,created_at,updated_at")
+        .select("id,title,description,game_id,mission_type,target,active_from,active_to,classroom_id,target_profile_id,featured,priority,active,publication_status,created_at,updated_at")
         .eq("organization_id", organizationId)
         .order("updated_at", { ascending:false })
         .limit(250),
@@ -779,6 +826,21 @@ Deno.serve(async (request) => {
         .pop() || teacherProfile.last_login_at || "",
     } : null;
 
+    const studentDirectory = (profilesResult.data || []).map(profile => {
+      const classroomIds = enrollmentsByProfile.get(profile.id) || [];
+      const classroom = classroomById.get(classroomIds[0] || "");
+      return {
+        studentId:String(profile.id),
+        nombre:`${profile.first_name || ""} ${profile.last_name || ""}`.trim(),
+        email:String(profile.email || ""),
+        classCode:String(classroom?.legacy_class_code || classroom?.id || ""),
+        className:String(classroom?.name || ""),
+        source:String(profile.source || ""),
+      };
+    }).sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+
+    const studentNameById = new Map(studentDirectory.map(row => [row.studentId, row.nombre]));
+
     return jsonResponse({
       ok:true,
       source:"supabase",
@@ -791,6 +853,7 @@ Deno.serve(async (request) => {
         averageGrade:Math.round(average(students.map(student => student.grade)) * 10) / 10,
       },
       students,
+      studentDirectory,
       teacherPlayer,
       games,
       popularGames,
@@ -812,6 +875,8 @@ Deno.serve(async (request) => {
         activeTo:row.active_to || null,
         classCode:row.classroom_id ? String(classroomById.get(row.classroom_id)?.legacy_class_code || row.classroom_id) : "",
         className:row.classroom_id ? String(classroomById.get(row.classroom_id)?.name || "") : "Todas las clases",
+        studentId:row.target_profile_id ? String(row.target_profile_id) : "",
+        studentName:row.target_profile_id ? String(studentNameById.get(String(row.target_profile_id)) || "Alumno") : "",
         featured:Boolean(row.featured),
         priority:Number(row.priority || 0),
         publicationStatus:String(row.publication_status || (row.active ? "published" : "closed")),
