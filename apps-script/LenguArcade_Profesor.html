@@ -1894,125 +1894,247 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
 <style>.elTeacherBox{margin-top:14px;padding:16px;border:1px solid rgba(215,169,66,.3);border-radius:18px;background:linear-gradient(135deg,rgba(215,169,66,.08),rgba(102,167,217,.07))}.elTeacherGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}.elMetric{padding:9px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.13)}.elMetric span{display:block;color:var(--muted);font-size:10px}.elMetric b{font-size:17px}.elSkills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.elSkill{padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.12)}.elSkill small{display:block;color:var(--muted)}@media(max-width:800px){.elTeacherGrid,.elSkills{grid-template-columns:repeat(2,1fr)}}</style><script>(function(){if(window.__LA_ENTRE_LINEAS_TEACHER_PATCH__)return;window.__LA_ENTRE_LINEAS_TEACHER_PATCH__=true;function readRaw(row){try{return typeof row.rawJson==='string'?JSON.parse(row.rawJson||'{}'):(row.rawJson||{});}catch(e){return {};}}function escEL(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}function renderEL(detail){var root=document.getElementById('studentDetailProgress');if(!root)return;var old=document.getElementById('elTeacherBox');if(old)old.remove();var row=(detail.progress||[]).find(function(x){return String(x.gameId)==='entre_lineas';});if(!row)return;var raw=readRaw(row),m=raw.metrics||(raw.rawGameData&&raw.rawGameData.metrics)||{},save=raw.save||(raw.rawGameData&&raw.rawGameData.save)||{},skills=m.skills||(save.profile&&save.profile.skills)||{};if(!Number(row.sessions||0)&&!m.caseId)return;var labels={observation:'Observación',inference:'Inferencia',connection:'Conexión',context:'Contexto',synthesis:'Síntesis',analysis:'Análisis'};var vals=Object.keys(labels).map(function(k){return [k,Number(skills[k]||0)];});var low=vals.slice().sort(function(a,b){return a[1]-b[1];})[0];var metrics=[['Expediente',m.caseId||'—'],['Pistas relevantes',(m.cluesImportant||0)+'/'+(m.cluesTotal||0)],['Conexiones clave',m.keyConnections||0],['Pruebas',Math.round(Number(m.taskScore||0))+'%'],['Ayudas',m.hints||0],['Intentos finales',m.finalAttempts||0],['Notas',m.notesLength||0],['XP',row.xp||0]];var box=document.createElement('section');box.id='elTeacherBox';box.className='elTeacherBox';box.innerHTML='<strong>🔎 Entre Líneas · diagnóstico lector</strong><div class="sub">Última investigación y perfil de comprensión acumulado.</div><div class="elTeacherGrid">'+metrics.map(function(x){return '<div class="elMetric"><span>'+escEL(x[0])+'</span><b>'+escEL(x[1])+'</b></div>';}).join('')+'</div><div class="elSkills">'+vals.map(function(x){return '<div class="elSkill"><small>'+labels[x[0]]+'</small><b>'+Math.round(x[1])+'</b></div>';}).join('')+'</div><div class="sub" style="margin-top:10px">'+(low&&low[1]>0?'Área que conviene reforzar: '+labels[low[0]]+'.':'Completa más expedientes para obtener un diagnóstico estable.')+'</div>';root.parentNode.insertBefore(box,root.nextSibling);}function install(){if(typeof renderStudentDetail!=='function'){setTimeout(install,100);return;}var base=renderStudentDetail;renderStudentDetail=function(detail){var v=base(detail);setTimeout(function(){renderEL(detail||{});},0);return v;};}install();})();</script>
 
 <style id="la-mission-manager-style">
-.missionAdminIntro{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px}.missionAdminIntro h2{margin:0 0 5px}
-.missionAdminGrid{display:grid;grid-template-columns:minmax(320px,420px) minmax(0,1fr);gap:16px;align-items:start}
-.missionEditor{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(124,77,255,.06);position:sticky;top:12px}
-.missionEditorGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.missionEditorGrid .wide{grid-column:1/-1}.missionEditor textarea{width:100%;min-height:92px;resize:vertical;padding:12px 13px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.18);color:var(--text)}body.light .missionEditor textarea{background:#fff}
-.missionEditorActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.missionEditorActions button{margin:0!important}
-.missionActiveList{display:grid;gap:10px}.missionAdminCard{padding:15px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.035)}
-.missionAdminCard.featured{box-shadow:inset 3px 0 0 var(--primary)}.missionAdminHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.missionAdminHead h3{margin:2px 0 5px;font-size:16px}
-.missionAdminMeta{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.missionAdminMeta span,.missionStatusPill{display:inline-flex;padding:6px 8px;border:1px solid var(--line);border-radius:999px;font-size:10px;color:var(--muted)}
-.missionStatusPill.active{color:#6fe0ae}.missionStatusPill.scheduled{color:#7fdcff}.missionStatusPill.expired{color:#ffb0b0}
-.missionAdminActions{display:flex;gap:7px;margin-top:12px}.missionAdminActions button{margin:0!important;padding:8px 11px}.missionEmpty{padding:24px;border:1px dashed var(--line);border-radius:17px;text-align:center;color:var(--muted)}
-.missionEditorHelp{font-size:11px;line-height:1.45;color:var(--muted);margin-top:8px}
-@media(max-width:980px){.missionAdminGrid{grid-template-columns:1fr}.missionEditor{position:static}}@media(max-width:620px){.missionEditorGrid{grid-template-columns:1fr}.missionEditorGrid .wide{grid-column:auto}.missionAdminHead{flex-direction:column}}
+.missionAdminIntro{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}.missionAdminIntro h2{margin:0 0 5px;font-size:27px}.missionAdminIntro p{max-width:720px;margin:0}.missionTopActions{display:flex;gap:8px;flex-wrap:wrap}.missionTopActions button{width:auto!important;margin:0!important}
+.missionSummaryStrip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:14px}.missionSummaryItem{padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03)}.missionSummaryItem span{display:block;color:var(--muted);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.missionSummaryItem b{display:block;margin-top:3px;font-size:20px}
+.missionQuickPanel{display:none;margin-bottom:14px;padding:14px;border:1px solid rgba(0,212,255,.25);border-radius:18px;background:linear-gradient(135deg,rgba(0,212,255,.07),rgba(124,77,255,.07))}.missionQuickPanel.open{display:block}.missionQuickHead{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}.missionQuickHead h3{margin:0}.missionQuickGrid{display:grid;grid-template-columns:1.2fr 1.2fr 1fr .7fr 1.5fr auto;gap:8px;align-items:end}.missionQuickGrid button{width:auto!important;margin:0!important;white-space:nowrap}
+.missionWorkspace{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(360px,.8fr);gap:16px;align-items:start}.missionLibrary,.missionEditor{border:1px solid var(--line);border-radius:19px;background:rgba(255,255,255,.025)}.missionLibrary{padding:14px}.missionEditor{padding:15px;position:sticky;top:12px;background:linear-gradient(145deg,rgba(124,77,255,.065),rgba(0,212,255,.025))}
+.missionLibraryHead{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:10px}.missionLibraryHead h3{margin:0}.missionClassFilter{width:min(240px,100%)}
+.missionTabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.missionTab{width:auto!important;margin:0!important;padding:7px 10px!important;background:rgba(255,255,255,.06)!important;border:1px solid var(--line)!important;color:var(--muted)!important;box-shadow:none!important}.missionTab.active{background:linear-gradient(135deg,rgba(124,77,255,.42),rgba(0,212,255,.22))!important;color:var(--text)!important;border-color:rgba(124,77,255,.55)!important}.missionTab b{margin-left:5px}
+.missionActiveList{display:grid;gap:9px;max-height:660px;overflow:auto;padding-right:3px}.missionAdminCard{padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.08)}body.light .missionAdminCard{background:rgba(94,53,177,.035)}.missionAdminCard.featured{box-shadow:inset 3px 0 0 var(--primary)}
+.missionAdminHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.missionAdminHead h3{margin:2px 0 5px;font-size:15px}.missionAdminDesc{color:var(--muted);font-size:11px;line-height:1.45}.missionAdminMeta{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.missionAdminMeta span,.missionStatusPill{display:inline-flex;padding:5px 7px;border:1px solid var(--line);border-radius:999px;font-size:10px;color:var(--muted)}
+.missionStatusPill.active{color:#6fe0ae}.missionStatusPill.scheduled{color:#7fdcff}.missionStatusPill.draft{color:#d8b4fe}.missionStatusPill.paused{color:#ffd782}.missionStatusPill.closed,.missionStatusPill.expired{color:#ffb0b0}
+.missionAdminActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}.missionAdminActions button{width:auto!important;margin:0!important;padding:7px 9px!important;font-size:11px!important}.missionEmpty{padding:25px 14px;border:1px dashed var(--line);border-radius:16px;text-align:center;color:var(--muted)}
+.missionEditorHead{display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:10px}.missionEditorHead h3{margin:0}.missionEditorMode{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 8px}
+.missionTemplateTitle{font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 7px}.missionTemplates{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:12px}.missionTemplate{width:auto!important;margin:0!important;padding:9px 6px!important;background:rgba(255,255,255,.045)!important;border:1px solid var(--line)!important;box-shadow:none!important;color:var(--text)!important;font-size:10px!important}.missionTemplate.active{border-color:#7c4dff!important;background:rgba(124,77,255,.17)!important}.missionTemplate span{display:block;font-size:17px;margin-bottom:3px}
+.missionEditorGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.missionEditorGrid .wide{grid-column:1/-1}.missionEditor textarea{width:100%;min-height:78px;resize:vertical;padding:11px 12px;border-radius:13px;border:1px solid var(--line);background:rgba(0,0,0,.16);color:var(--text)}body.light .missionEditor textarea{background:#fff}.missionObjectiveHint{grid-column:1/-1;padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.08);font-size:11px;color:var(--muted);line-height:1.4}
+.missionPreview{margin-top:12px;padding:13px;border-radius:16px;border:1px solid rgba(124,77,255,.28);background:linear-gradient(135deg,rgba(124,77,255,.12),rgba(0,212,255,.07))}.missionPreviewTop{display:flex;justify-content:space-between;gap:10px;align-items:start}.missionPreview h4{margin:3px 0 5px;font-size:15px}.missionPreviewMeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.missionPreviewMeta span{padding:5px 7px;border-radius:999px;border:1px solid var(--line);font-size:9px;color:var(--muted)}
+.missionEditorActions{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.missionEditorActions button{width:auto!important;margin:0!important}.missionDraftBtn{background:rgba(255,255,255,.07)!important;border:1px solid var(--line)!important;color:var(--text)!important;box-shadow:none!important}.missionEditorHelp{font-size:10px;line-height:1.4;color:var(--muted);margin-top:8px}
+@media(max-width:1100px){.missionWorkspace{grid-template-columns:1fr}.missionEditor{position:static}.missionActiveList{max-height:none}}@media(max-width:840px){.missionSummaryStrip{grid-template-columns:repeat(3,1fr)}.missionQuickGrid{grid-template-columns:1fr 1fr}.missionTemplates{grid-template-columns:repeat(3,1fr)}}@media(max-width:620px){.missionAdminIntro,.missionLibraryHead,.missionEditorHead{flex-direction:column;align-items:stretch}.missionSummaryStrip{grid-template-columns:1fr 1fr}.missionQuickGrid,.missionEditorGrid{grid-template-columns:1fr}.missionEditorGrid .wide,.missionObjectiveHint{grid-column:auto}.missionTemplates{grid-template-columns:1fr 1fr}}
 </style>
 <script>
 (function(){
-  if(window.__LA_MISSION_MANAGER_V1__)return;
-  window.__LA_MISSION_MANAGER_V1__=true;
+  if(window.__LA_MISSION_MANAGER_V2__)return;
+  window.__LA_MISSION_MANAGER_V2__=true;
   var editingMissionId='';
+  var missionFilter='active';
+  var missionClassFilter='';
 
   function mEsc(value){return String(value==null?'':value).replace(/[&<>"]/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch];});}
-  function missionStatusLabel(status){return status==='scheduled'?'Programada':status==='expired'?'Caducada':'Activa';}
   function dtLocal(value){if(!value)return '';var d=new Date(value);if(Number.isNaN(d.getTime()))return '';var pad=function(n){return String(n).padStart(2,'0');};return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());}
   function isoFromInput(id){var el=document.getElementById(id);if(!el||!el.value)return '';var d=new Date(el.value);return Number.isNaN(d.getTime())?'':d.toISOString();}
   function currentMissionData(){return (typeof currentTeacher!=='undefined'&&currentTeacher)||{missions:[],classes:[],games:[]};}
+  function missionStatusLabel(status){return ({active:'Activa',scheduled:'Programada',draft:'Borrador',paused:'Pausada',closed:'Terminada',expired:'Caducada'})[status]||'Misión';}
+  function missionBucket(m){var s=String(m&&m.status||'active');if(s==='scheduled')return 'scheduled';if(s==='draft')return 'draft';if(s==='paused')return 'paused';if(s==='closed'||s==='expired')return 'closed';return 'active';}
+  function typePreset(type){return ({
+    sessions:{icon:'🎮',label:'Partidas',target:3,title:'Reto de partidas',hint:'El alumno debe completar un número de partidas. Puedes limitarlo a un juego concreto.'},
+    accuracy:{icon:'🎯',label:'Precisión',target:80,title:'Reto de precisión',hint:'Cuenta la mejor precisión registrada durante la ventana de la misión. El objetivo debe estar entre 1 y 100.'},
+    xp:{icon:'⭐',label:'XP',target:100,title:'Reto de XP',hint:'Suma el XP conseguido jugando durante la misión. Las bonificaciones manuales del profesor no cuentan.'},
+    variety:{icon:'🧭',label:'Explorar',target:3,title:'Explorador de LenguArcade',hint:'El alumno debe jugar a varios juegos distintos. Esta misión siempre usa todo LenguArcade.'},
+    save:{icon:'💾',label:'Guardar',target:1,title:'Guarda tu progreso',hint:'Cuenta juegos en los que el alumno haya guardado progreso durante la ventana de la misión.'}
+  })[type]||{icon:'🎯',label:'Objetivo',target:1,title:'Nueva misión',hint:''};}
+  function usableGames(data){return (data.games||[]).filter(function(game){var status=String(game.status||'').toLowerCase();return game.official!==false&&!status.includes('revisi')&&!status.includes('coming');});}
+  function gameName(data,id){var g=(data.games||[]).find(function(x){return String(x.id)===String(id);});return g?(g.icon||'🎮')+' '+g.name:'Todo LenguArcade';}
+  function className(data,code){if(!code)return 'Todas las clases';var row=(data.classes||[]).find(function(x){return String(x.classCode)===String(code);});return row?(row.nombreVisible||code):code;}
 
   function ensureMissionManager(){
     var app=document.getElementById('appContent');if(!app)return null;
-    var section=document.getElementById('misiones');
-    if(section)return section;
-    section=document.createElement('section');section.id='misiones';section.className='card';
+    var old=document.getElementById('misiones');if(old)old.remove();
+    var section=document.createElement('section');section.id='misiones';section.className='card';
     section.innerHTML=
-      '<div class="missionAdminIntro"><div><div class="sub">ENCARGOS Y RETOS</div><h2>Misiones</h2><p class="sub">Crea objetivos que aparecerán en el tablón del alumno. La Sesión del taller sigue controlando qué juegos se pueden abrir; aquí solo defines retos de progreso.</p></div><button type="button" id="missionNewBtn">+ Nueva misión</button></div>'+
-      '<div class="missionAdminGrid"><div class="missionEditor"><h3 id="missionEditorTitle">Nueva misión</h3><div class="missionEditorGrid">'+
-      '<div class="field wide"><label>Título</label><input id="missionTitle" maxlength="180" placeholder="Ej.: Semana de la precisión"></div>'+
-      '<div class="field wide"><label>Instrucciones para el alumno</label><textarea id="missionDescription" maxlength="800" placeholder="Explica qué quieres que consiga y, si hace falta, cómo hacerlo."></textarea></div>'+
-      '<div class="field"><label>Para quién</label><select id="missionClass"></select></div>'+
-      '<div class="field"><label>Tipo de objetivo</label><select id="missionType"><option value="sessions">Jugar partidas</option><option value="save">Guardar progreso</option><option value="variety">Probar juegos distintos</option><option value="xp">Conseguir XP</option><option value="accuracy">Alcanzar precisión</option></select></div>'+
-      '<div class="field"><label>Juego</label><select id="missionGame"></select></div>'+
-      '<div class="field"><label>Objetivo</label><input id="missionTarget" type="number" min="1" step="1" value="1"></div>'+
-      '<div class="field"><label>Visible desde</label><input id="missionFrom" type="datetime-local"></div>'+
-      '<div class="field"><label>Hasta</label><input id="missionTo" type="datetime-local"></div>'+
-      '<label class="wide" style="display:flex;align-items:center;gap:8px;font-weight:800"><input id="missionFeatured" type="checkbox" style="width:auto"> Destacar esta misión en el tablón</label>'+
-      '</div><div class="missionEditorHelp">“Todas las clases” crea una misión global. Si eliges una clase, solo la verán sus alumnos. “Juegos distintos” siempre cuenta todo LenguArcade.</div>'+
-      '<div class="missionEditorActions"><button type="button" id="missionSaveBtn">Guardar misión</button><button type="button" class="ghost" id="missionCancelBtn">Cancelar</button></div><div class="status" id="missionAdminStatus"></div></div>'+
-      '<div><div class="head"><div><h3 style="margin:0">Activas y programadas</h3><div class="sub">Las caducadas dejan de mostrarse al alumno y puedes cerrarlas desde aquí.</div></div></div><div id="missionActiveList" class="missionActiveList"></div></div></div>';
+      '<div class="missionAdminIntro"><div><div class="sub">ENCARGOS Y RETOS</div><h2>Misiones</h2><p class="sub">Convierte una intención de clase en un reto claro para el alumno. Puedes dejarlo en borrador, programarlo, pausarlo o publicarlo al instante.</p></div><div class="missionTopActions"><button type="button" class="ghost" id="missionQuickBtn">⚡ Misión rápida</button><button type="button" id="missionNewBtn">＋ Nueva misión</button></div></div>'+
+      '<div class="missionSummaryStrip" id="missionSummaryStrip"></div>'+
+      '<div class="missionQuickPanel" id="missionQuickPanel"><div class="missionQuickHead"><div><h3>⚡ Publicar una misión en segundos</h3><div class="sub">Elige grupo, juego y objetivo. Podrás editarla después.</div></div><button type="button" class="ghost" id="missionQuickClose">Cerrar</button></div><div class="missionQuickGrid"><div class="field"><label>Para quién</label><select id="missionQuickClass"></select></div><div class="field"><label>Juego</label><select id="missionQuickGame"></select></div><div class="field"><label>Objetivo</label><select id="missionQuickType"><option value="sessions">Partidas</option><option value="xp">XP</option><option value="accuracy">Precisión</option><option value="save">Guardar progreso</option></select></div><div class="field"><label>Cantidad</label><input id="missionQuickTarget" type="number" min="1" value="3"></div><div class="field"><label>Título</label><input id="missionQuickTitle" maxlength="180" placeholder="Se genera automáticamente"></div><button type="button" id="missionQuickPublish">Publicar</button></div><div class="status" id="missionQuickStatus"></div></div>'+
+      '<div class="missionWorkspace"><div class="missionLibrary"><div class="missionLibraryHead"><div><h3>Misiones del curso</h3><div class="sub">Filtra, duplica o pausa sin perder la configuración.</div></div><div class="field missionClassFilter"><label>Clase</label><select id="missionListClass"></select></div></div><div class="missionTabs" id="missionTabs"></div><div id="missionActiveList" class="missionActiveList"></div></div>'+
+      '<aside class="missionEditor"><div class="missionEditorHead"><div><div class="sub">CREADOR DE MISIÓN</div><h3 id="missionEditorTitle">Nueva misión</h3></div><span class="missionEditorMode" id="missionEditorMode">Borrador nuevo</span></div>'+
+      '<div class="missionTemplateTitle">1 · ¿Qué quieres que hagan?</div><div class="missionTemplates" id="missionTemplates">'+
+      '<button type="button" class="missionTemplate" data-mission-template="sessions"><span>🎮</span>Jugar</button><button type="button" class="missionTemplate" data-mission-template="accuracy"><span>🎯</span>Precisión</button><button type="button" class="missionTemplate" data-mission-template="xp"><span>⭐</span>XP</button><button type="button" class="missionTemplate" data-mission-template="variety"><span>🧭</span>Explorar</button><button type="button" class="missionTemplate" data-mission-template="save"><span>💾</span>Guardar</button></div>'+
+      '<div class="missionEditorGrid"><div class="field wide"><label>Título</label><input id="missionTitle" maxlength="180" placeholder="Ej.: Maestro de la tilde"></div><div class="field wide"><label>Mensaje para el alumno</label><textarea id="missionDescription" maxlength="800" placeholder="Explica el reto con una frase breve y clara."></textarea></div><div class="field"><label>Para quién</label><select id="missionClass"></select></div><div class="field"><label>Juego</label><select id="missionGame"></select></div><div class="field"><label id="missionTargetLabel">Objetivo</label><input id="missionTarget" type="number" min="1" step="1" value="3"></div><div class="field"><label>Tipo</label><select id="missionType"><option value="sessions">Jugar partidas</option><option value="save">Guardar progreso</option><option value="variety">Probar juegos distintos</option><option value="xp">Conseguir XP</option><option value="accuracy">Alcanzar precisión</option></select></div><div class="missionObjectiveHint" id="missionObjectiveHint"></div><div class="field"><label>Visible desde</label><input id="missionFrom" type="datetime-local"></div><div class="field"><label>Fecha límite</label><input id="missionTo" type="datetime-local"></div><label class="wide" style="display:flex;align-items:center;gap:8px;font-weight:800"><input id="missionFeatured" type="checkbox" style="width:auto"> ⭐ Destacar en el tablón del alumno</label></div>'+
+      '<div class="missionPreview" id="missionPreview"></div><div class="missionEditorActions"><button type="button" class="missionDraftBtn" id="missionSaveDraftBtn">Guardar borrador</button><button type="button" id="missionPublishBtn">Publicar misión</button><button type="button" class="ghost" id="missionCancelBtn">Nueva / limpiar</button></div><div class="missionEditorHelp">Guardar borrador no muestra nada al alumno. Publicar respeta “Visible desde”: si la fecha es futura, la misión queda programada.</div><div class="status" id="missionAdminStatus"></div></aside></div>';
     var classroom=document.getElementById('classroom');if(classroom&&classroom.parentNode===app)app.insertBefore(section,classroom);else app.appendChild(section);
-    document.getElementById('missionNewBtn').onclick=function(){editingMissionId='';fillMissionEditor(null,currentMissionData());};
-    document.getElementById('missionCancelBtn').onclick=function(){editingMissionId='';fillMissionEditor(null,currentMissionData());};
-    document.getElementById('missionSaveBtn').onclick=saveMissionFromEditor;
-    document.getElementById('missionType').onchange=syncMissionGameAvailability;
+    bindMissionManager();
+    fillMissionEditor(null,currentMissionData(),'sessions');
     return section;
   }
 
-  function syncMissionGameAvailability(){
-    var type=document.getElementById('missionType'),game=document.getElementById('missionGame');if(!type||!game)return;
-    var variety=type.value==='variety';game.disabled=variety;if(variety)game.value='';
+  function bindMissionManager(){
+    document.getElementById('missionNewBtn').onclick=function(){editingMissionId='';fillMissionEditor(null,currentMissionData(),'sessions');};
+    document.getElementById('missionCancelBtn').onclick=function(){editingMissionId='';fillMissionEditor(null,currentMissionData(),'sessions');};
+    document.getElementById('missionQuickBtn').onclick=function(){document.getElementById('missionQuickPanel').classList.toggle('open');renderQuickMissionOptions(currentMissionData());};
+    document.getElementById('missionQuickClose').onclick=function(){document.getElementById('missionQuickPanel').classList.remove('open');};
+    document.getElementById('missionQuickPublish').onclick=publishQuickMission;
+    document.getElementById('missionSaveDraftBtn').onclick=function(){saveMissionFromEditor('draft');};
+    document.getElementById('missionPublishBtn').onclick=function(){saveMissionFromEditor('published');};
+    document.getElementById('missionType').onchange=function(){syncMissionFields(true);};
+    document.getElementById('missionListClass').onchange=function(){missionClassFilter=this.value||'';renderMissionList(currentMissionData());};
+    [].slice.call(document.querySelectorAll('[data-mission-template]')).forEach(function(button){button.onclick=function(){applyMissionTemplate(button.dataset.missionTemplate,true);};});
+    ['missionTitle','missionDescription','missionClass','missionGame','missionTarget','missionFrom','missionTo','missionFeatured'].forEach(function(id){var el=document.getElementById(id);if(el){el.addEventListener(el.type==='checkbox'?'change':'input',renderMissionPreview);el.addEventListener('change',renderMissionPreview);}});
+    document.getElementById('missionQuickType').onchange=function(){var p=typePreset(this.value);document.getElementById('missionQuickTarget').value=p.target;};
   }
 
-  function fillMissionEditor(mission,data){
-    ensureMissionManager();mission=mission||{};
+  function populateMissionSelects(data){
+    var classOptions=['<option value="">Todas las clases</option>'].concat((data.classes||[]).map(function(row){return '<option value="'+mEsc(row.classCode)+'">'+mEsc(row.nombreVisible||row.classCode)+'</option>';})).join('');
+    ['missionClass','missionListClass','missionQuickClass'].forEach(function(id){var el=document.getElementById(id);if(el){var v=el.value;el.innerHTML=classOptions;if([].slice.call(el.options).some(function(o){return o.value===v;}))el.value=v;}});
+    var gameOptions=['<option value="">Cualquier juego</option>'].concat(usableGames(data).map(function(game){return '<option value="'+mEsc(game.id)+'">'+mEsc((game.icon||'🎮')+' '+game.name)+'</option>';})).join('');
+    ['missionGame','missionQuickGame'].forEach(function(id){var el=document.getElementById(id);if(el){var v=el.value;el.innerHTML=gameOptions;if([].slice.call(el.options).some(function(o){return o.value===v;}))el.value=v;}});
+    if(document.getElementById('missionListClass'))document.getElementById('missionListClass').value=missionClassFilter;
+  }
+
+  function renderQuickMissionOptions(data){
+    populateMissionSelects(data);
+    var type=document.getElementById('missionQuickType');var p=typePreset(type.value||'sessions');if(!document.getElementById('missionQuickTarget').value)document.getElementById('missionQuickTarget').value=p.target;
+  }
+
+  function applyMissionTemplate(type,overwrite){
+    var p=typePreset(type);var typeEl=document.getElementById('missionType');if(!typeEl)return;
+    typeEl.value=type;
+    if(overwrite&&!editingMissionId){
+      var title=document.getElementById('missionTitle');if(!title.value||title.dataset.autoTitle==='1'){title.value=p.title;title.dataset.autoTitle='1';}
+      document.getElementById('missionTarget').value=p.target;
+    }
+    syncMissionFields(false);
+  }
+
+  function syncMissionFields(fromTypeSelect){
+    var type=document.getElementById('missionType').value||'sessions';var p=typePreset(type);var game=document.getElementById('missionGame');
+    game.disabled=type==='variety';if(type==='variety')game.value='';
+    document.getElementById('missionTargetLabel').textContent=type==='accuracy'?'Precisión mínima (%)':type==='xp'?'XP a conseguir':type==='variety'?'Juegos distintos':type==='save'?'Juegos con progreso guardado':'Número de partidas';
+    document.getElementById('missionObjectiveHint').textContent=p.hint;
+    [].slice.call(document.querySelectorAll('[data-mission-template]')).forEach(function(btn){btn.classList.toggle('active',btn.dataset.missionTemplate===type);});
+    if(fromTypeSelect&&!editingMissionId){document.getElementById('missionTarget').value=p.target;}
+    renderMissionPreview();
+  }
+
+  function fillMissionEditor(mission,data,template){
+    ensureMissionManager();mission=mission||{};populateMissionSelects(data);
+    editingMissionId=mission.id||'';
     document.getElementById('missionEditorTitle').textContent=mission.id?'Editar misión':'Nueva misión';
-    document.getElementById('missionTitle').value=mission.title||'';
+    document.getElementById('missionEditorMode').textContent=mission.id?missionStatusLabel(mission.status):'Borrador nuevo';
+    var title=document.getElementById('missionTitle');title.value=mission.title||'';title.dataset.autoTitle=mission.id?'0':'1';
     document.getElementById('missionDescription').value=mission.description||'';
-    var classes=['<option value="">Todas las clases</option>'].concat((data.classes||[]).map(function(row){return '<option value="'+mEsc(row.classCode)+'">'+mEsc(row.nombreVisible||row.classCode)+'</option>';}));
-    document.getElementById('missionClass').innerHTML=classes.join('');document.getElementById('missionClass').value=mission.classCode||'';
-    var games=['<option value="">Cualquier juego</option>'].concat((data.games||[]).filter(function(game){var status=String(game.status||'').toLowerCase();return game.official!==false&&!status.includes('revisi')&&!status.includes('coming');}).map(function(game){return '<option value="'+mEsc(game.id)+'">'+mEsc((game.icon||'🎮')+' '+game.name)+'</option>';}));
-    document.getElementById('missionGame').innerHTML=games.join('');document.getElementById('missionGame').value=mission.gameId||'';
-    document.getElementById('missionType').value=mission.missionType||'sessions';
-    document.getElementById('missionTarget').value=Number(mission.target||1);
+    document.getElementById('missionClass').value=mission.classCode||'';
+    document.getElementById('missionGame').value=mission.gameId||'';
+    document.getElementById('missionType').value=mission.missionType||template||'sessions';
+    document.getElementById('missionTarget').value=Number(mission.target||typePreset(template||'sessions').target||1);
     document.getElementById('missionFrom').value=mission.id?dtLocal(mission.activeFrom):dtLocal(new Date().toISOString());
     document.getElementById('missionTo').value=dtLocal(mission.activeTo);
     document.getElementById('missionFeatured').checked=!!mission.featured;
-    syncMissionGameAvailability();
-    document.getElementById('missionAdminStatus').textContent=mission.id?'Modifica lo necesario y guarda.':'Prepara un nuevo encargo para el tablón del alumno.';
+    syncMissionFields(false);
+    document.getElementById('missionAdminStatus').textContent=mission.id?'Editando una misión existente. Guarda borrador para ocultarla o publica para hacerla visible.':'Elige un tipo de reto, completa lo esencial y publícalo cuando esté listo.';
+  }
+
+  function renderMissionPreview(){
+    var root=document.getElementById('missionPreview');if(!root)return;var data=currentMissionData();
+    var title=String((document.getElementById('missionTitle')||{}).value||'Nueva misión').trim()||'Nueva misión';
+    var desc=String((document.getElementById('missionDescription')||{}).value||'').trim();
+    var type=String((document.getElementById('missionType')||{}).value||'sessions');var target=Number((document.getElementById('missionTarget')||{}).value||0);
+    var cls=String((document.getElementById('missionClass')||{}).value||'');var game=String((document.getElementById('missionGame')||{}).value||'');
+    var p=typePreset(type);var due=String((document.getElementById('missionTo')||{}).value||'');
+    root.innerHTML='<div class="missionPreviewTop"><div><div class="sub">ASÍ LA VERÁ EL ALUMNO</div><h4>'+mEsc((document.getElementById('missionFeatured')||{}).checked?'⭐ '+title:title)+'</h4></div><span class="missionStatusPill active">Reto</span></div><div class="missionAdminDesc">'+mEsc(desc||p.hint)+'</div><div class="missionPreviewMeta"><span>'+mEsc(p.icon+' '+p.label+' · '+target)+'</span><span>🎮 '+mEsc(gameName(data,game))+'</span><span>👥 '+mEsc(className(data,cls))+'</span>'+(due?'<span>⏰ '+mEsc(due.replace('T',' · '))+'</span>':'')+'</div>';
+  }
+
+  function renderMissionSummary(data){
+    var missions=data.missions||[];var counts={active:0,scheduled:0,draft:0,paused:0,closed:0};
+    missions.forEach(function(m){counts[missionBucket(m)]++;});
+    var labels=[['active','Activas'],['scheduled','Programadas'],['draft','Borradores'],['paused','Pausadas'],['closed','Terminadas']];
+    document.getElementById('missionSummaryStrip').innerHTML=labels.map(function(x){return '<div class="missionSummaryItem"><span>'+x[1]+'</span><b>'+counts[x[0]]+'</b></div>';}).join('');
+    document.getElementById('missionTabs').innerHTML=labels.map(function(x){return '<button type="button" class="missionTab '+(missionFilter===x[0]?'active':'')+'" data-mission-filter="'+x[0]+'">'+x[1]+' <b>'+counts[x[0]]+'</b></button>';}).join('');
+    [].slice.call(document.querySelectorAll('[data-mission-filter]')).forEach(function(btn){btn.onclick=function(){missionFilter=btn.dataset.missionFilter;renderMissionManager(currentMissionData());};});
   }
 
   function renderMissionList(data){
     var host=document.getElementById('missionActiveList');if(!host)return;
-    var missions=data.missions||[];
-    if(!missions.length){host.innerHTML='<div class="missionEmpty">No hay misiones activas. Crea una cuando quieras proponer un reto al alumnado.</div>';return;}
+    var missions=(data.missions||[]).filter(function(m){
+      if(missionBucket(m)!==missionFilter)return false;
+      if(missionClassFilter&&String(m.classCode||'')!==missionClassFilter)return false;
+      return true;
+    });
+    if(!missions.length){host.innerHTML='<div class="missionEmpty">No hay misiones en esta categoría para el filtro actual.</div>';return;}
     host.innerHTML=missions.map(function(m){
       var deadline=m.activeTo?new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(m.activeTo)):'Sin fecha límite';
-      var scope=m.className||'Todas las clases';var game=m.gameName?m.gameName:'Todo LenguArcade';
-      return '<article class="missionAdminCard '+(m.featured?'featured':'')+'"><div class="missionAdminHead"><div><div class="sub">'+(m.featured?'⭐ DESTACADA · ':'')+mEsc(scope)+'</div><h3>'+mEsc(m.title)+'</h3><div class="sub">'+mEsc(m.description||'Sin instrucciones adicionales.')+'</div></div><span class="missionStatusPill '+mEsc(m.status)+'">'+mEsc(missionStatusLabel(m.status))+'</span></div><div class="missionAdminMeta"><span>🎯 '+mEsc(m.typeLabel)+' · '+mEsc(m.target)+'</span><span>🎮 '+mEsc(game)+'</span><span>⏰ '+mEsc(deadline)+'</span></div><div class="missionAdminActions"><button type="button" class="ghost" data-edit-mission="'+mEsc(m.id)+'">Editar</button><button type="button" class="dangerAction" data-archive-mission="'+mEsc(m.id)+'">Cerrar</button></div></article>';
+      var scope=m.className||'Todas las clases';var game=m.gameName||'Todo LenguArcade';var bucket=missionBucket(m);
+      var secondary=bucket==='paused'?'<button type="button" class="ghost" data-status-mission="'+mEsc(m.id)+'" data-status-value="published">Reanudar</button>':(bucket==='draft'?'<button type="button" data-status-mission="'+mEsc(m.id)+'" data-status-value="published">Publicar</button>':((bucket==='active'||bucket==='scheduled')?'<button type="button" class="ghost" data-status-mission="'+mEsc(m.id)+'" data-status-value="paused">Pausar</button>':''));
+      var close=(bucket==='closed')?'':'<button type="button" class="dangerAction" data-archive-mission="'+mEsc(m.id)+'">Cerrar</button>';
+      return '<article class="missionAdminCard '+(m.featured?'featured':'')+'"><div class="missionAdminHead"><div><div class="sub">'+(m.featured?'⭐ DESTACADA · ':'')+mEsc(scope)+'</div><h3>'+mEsc(m.title)+'</h3><div class="missionAdminDesc">'+mEsc(m.description||'Sin instrucciones adicionales.')+'</div></div><span class="missionStatusPill '+mEsc(m.status)+'">'+mEsc(missionStatusLabel(m.status))+'</span></div><div class="missionAdminMeta"><span>🎯 '+mEsc(m.typeLabel)+' · '+mEsc(m.target)+'</span><span>🎮 '+mEsc(game)+'</span><span>⏰ '+mEsc(deadline)+'</span></div><div class="missionAdminActions"><button type="button" class="ghost" data-edit-mission="'+mEsc(m.id)+'">Editar</button><button type="button" class="ghost" data-duplicate-mission="'+mEsc(m.id)+'">Duplicar</button>'+secondary+close+'</div></article>';
     }).join('');
-    [].slice.call(host.querySelectorAll('[data-edit-mission]')).forEach(function(button){button.onclick=function(){var mission=missions.find(function(m){return m.id===button.dataset.editMission;});if(mission){editingMissionId=mission.id;fillMissionEditor(mission,data);window.scrollTo(0,0);}};});
+    [].slice.call(host.querySelectorAll('[data-edit-mission]')).forEach(function(button){button.onclick=function(){var mission=(data.missions||[]).find(function(m){return m.id===button.dataset.editMission;});if(mission)fillMissionEditor(mission,data);};});
+    [].slice.call(host.querySelectorAll('[data-duplicate-mission]')).forEach(function(button){button.onclick=function(){var mission=(data.missions||[]).find(function(m){return m.id===button.dataset.duplicateMission;});if(!mission)return;var copy=Object.assign({},mission,{id:'',title:(mission.title||'Misión')+' · copia',activeFrom:new Date().toISOString(),publicationStatus:'draft',status:'draft'});fillMissionEditor(copy,data);editingMissionId='';document.getElementById('missionAdminStatus').textContent='Copia preparada como borrador. Ajusta lo necesario antes de publicarla.';};});
+    [].slice.call(host.querySelectorAll('[data-status-mission]')).forEach(function(button){button.onclick=function(){setMissionStatus(button.dataset.statusMission,button.dataset.statusValue);};});
     [].slice.call(host.querySelectorAll('[data-archive-mission]')).forEach(function(button){button.onclick=function(){archiveMission(button.dataset.archiveMission);};});
   }
 
   function renderMissionManager(data){
-    if(!ensureMissionManager())return;
+    if(!document.getElementById('misiones'))ensureMissionManager();
+    populateMissionSelects(data||currentMissionData());
+    renderMissionSummary(data||currentMissionData());
     renderMissionList(data||currentMissionData());
-    var current=(data.missions||[]).find(function(m){return m.id===editingMissionId;});
-    if(editingMissionId&&current)fillMissionEditor(current,data);
-    else if(!editingMissionId)fillMissionEditor(null,data);
+    renderMissionPreview();
   }
 
-  async function saveMissionFromEditor(){
-    var title=String(document.getElementById('missionTitle').value||'').trim();
-    if(title.length<3){document.getElementById('missionAdminStatus').textContent='Escribe un título para la misión.';return;}
-    var payload={id:editingMissionId,title:title,description:document.getElementById('missionDescription').value||'',classCode:document.getElementById('missionClass').value||'',missionType:document.getElementById('missionType').value||'sessions',gameId:document.getElementById('missionGame').value||'',target:Number(document.getElementById('missionTarget').value||0),activeFrom:isoFromInput('missionFrom'),activeTo:isoFromInput('missionTo'),featured:document.getElementById('missionFeatured').checked};
-    var button=document.getElementById('missionSaveBtn');button.disabled=true;document.getElementById('missionAdminStatus').textContent='Guardando misión...';
-    try{await edge('teacher-dashboard',{action:'saveMission',mission:payload});editingMissionId='';await loadTeacher(false);document.getElementById('missionAdminStatus').textContent='Misión guardada y publicada en el tablón.';}catch(error){document.getElementById('missionAdminStatus').textContent='No se pudo guardar: '+(error.message||error);}finally{button.disabled=false;}
+  function missionPayload(publicationStatus){
+    return {
+      id:editingMissionId,
+      title:String(document.getElementById('missionTitle').value||'').trim(),
+      description:document.getElementById('missionDescription').value||'',
+      classCode:document.getElementById('missionClass').value||'',
+      missionType:document.getElementById('missionType').value||'sessions',
+      gameId:document.getElementById('missionGame').value||'',
+      target:Number(document.getElementById('missionTarget').value||0),
+      activeFrom:isoFromInput('missionFrom'),
+      activeTo:isoFromInput('missionTo'),
+      featured:document.getElementById('missionFeatured').checked,
+      publicationStatus:publicationStatus
+    };
+  }
+
+  async function saveMissionFromEditor(publicationStatus){
+    var payload=missionPayload(publicationStatus);var status=document.getElementById('missionAdminStatus');
+    if(payload.title.length<3){status.textContent='Escribe un título para la misión.';return;}
+    if(!payload.target||payload.target<1){status.textContent='Indica un objetivo válido.';return;}
+    var button=publicationStatus==='draft'?document.getElementById('missionSaveDraftBtn'):document.getElementById('missionPublishBtn');button.disabled=true;
+    status.textContent=publicationStatus==='draft'?'Guardando borrador...':'Publicando misión...';
+    try{await edge('teacher-dashboard',{action:'saveMission',mission:payload});editingMissionId='';await loadTeacher(false);status=document.getElementById('missionAdminStatus');if(status)status.textContent=publicationStatus==='draft'?'Borrador guardado. Los alumnos no lo ven.':'Misión publicada en el tablón.';}
+    catch(error){status.textContent='No se pudo guardar: '+(error.message||error);}
+    finally{button.disabled=false;}
+  }
+
+  async function publishQuickMission(){
+    var data=currentMissionData();var type=document.getElementById('missionQuickType').value||'sessions';var p=typePreset(type);
+    var gameId=document.getElementById('missionQuickGame').value||'';var classCode=document.getElementById('missionQuickClass').value||'';var target=Number(document.getElementById('missionQuickTarget').value||p.target);var title=String(document.getElementById('missionQuickTitle').value||'').trim();
+    if(!title)title=p.title+(gameId?' · '+gameName(data,gameId).replace(/^.\s/,''):'');
+    var status=document.getElementById('missionQuickStatus');status.textContent='Publicando...';
+    try{
+      await edge('teacher-dashboard',{action:'saveMission',mission:{title:title,description:p.hint,classCode:classCode,missionType:type,gameId:type==='variety'?'':gameId,target:target,activeFrom:new Date().toISOString(),activeTo:'',featured:false,publicationStatus:'published'}});
+      document.getElementById('missionQuickTitle').value='';await loadTeacher(false);document.getElementById('missionQuickPanel').classList.remove('open');
+    }catch(error){status.textContent='No se pudo publicar: '+(error.message||error);}
+  }
+
+  async function setMissionStatus(id,value){
+    if(!id||!value)return;var status=document.getElementById('missionAdminStatus');if(status)status.textContent='Actualizando misión...';
+    try{await edge('teacher-dashboard',{action:'setMissionStatus',missionId:id,publicationStatus:value});await loadTeacher(false);}
+    catch(error){if(status)status.textContent='No se pudo cambiar el estado: '+(error.message||error);}
   }
 
   async function archiveMission(id){
-    if(!id||!confirm('¿Cerrar esta misión? Dejará de aparecer a los alumnos.'))return;
-    try{await edge('teacher-dashboard',{action:'archiveMission',missionId:id});if(editingMissionId===id)editingMissionId='';await loadTeacher(false);}catch(error){var status=document.getElementById('missionAdminStatus');if(status)status.textContent='No se pudo cerrar la misión: '+(error.message||error);}
+    if(!id||!confirm('¿Cerrar esta misión? Dejará de aparecer a los alumnos, pero seguirá en Terminadas para poder consultarla o duplicarla.'))return;
+    try{await edge('teacher-dashboard',{action:'archiveMission',missionId:id});if(editingMissionId===id)editingMissionId='';await loadTeacher(false);}
+    catch(error){var status=document.getElementById('missionAdminStatus');if(status)status.textContent='No se pudo cerrar la misión: '+(error.message||error);}
   }
+
+  window.laOpenMissionFromWorkshop=function(plan,classCode){
+    var data=currentMissionData();if(typeof window.laShowTeacherScreen==='function')window.laShowTeacherScreen('misiones');
+    var gameIds=plan&&Array.isArray(plan.gameIds)?plan.gameIds:[];var type=Number(plan&&plan.targetXp||0)>0?'xp':'sessions';var target=Number(plan&&plan.targetXp||0)>0?Number(plan.targetXp):Math.max(1,gameIds.length||1);
+    var mission={id:'',title:(plan&&plan.title?plan.title:'Misión del taller'),description:(plan&&plan.message?plan.message:'Completa el reto preparado para esta sesión.'),classCode:classCode||'',missionType:type,gameId:gameIds.length===1?gameIds[0]:'',target:target,activeFrom:new Date().toISOString(),activeTo:'',featured:true,status:'draft'};
+    setTimeout(function(){fillMissionEditor(mission,data,type);editingMissionId='';var status=document.getElementById('missionAdminStatus');if(status)status.textContent='Misión preparada a partir del taller. Todavía no está publicada.';},0);
+  };
 
   function install(){
     if(typeof renderTeacher!=='function'||typeof edge!=='function'){setTimeout(install,120);return;}
-    var base=renderTeacher;renderTeacher=function(data){var result=base(data);setTimeout(function(){renderMissionManager(data||{});},0);return result;};
     ensureMissionManager();
+    var base=renderTeacher;renderTeacher=function(data){var result=base(data);setTimeout(function(){renderMissionManager(data||{});},0);return result;};
     if(typeof currentTeacher!=='undefined'&&currentTeacher)renderMissionManager(currentTeacher);
   }
   install();
 })();
 </script>
-
 </body>
 </html>
