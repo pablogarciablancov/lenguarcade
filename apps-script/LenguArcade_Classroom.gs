@@ -228,6 +228,32 @@ function loginTeacherPanelWithGoogle(supabaseAccessToken) {
   return data;
 }
 
+function loginTeacherTestStudentWithGoogle(supabaseAccessToken) {
+  loginTeacherWithGoogle();
+  const cleanToken = String(supabaseAccessToken || '').trim();
+  if (!cleanToken) throw new Error('No se ha podido crear la sesion segura del alumno de prueba.');
+  const response = UrlFetchApp.fetch(LA_SUPABASE_URL_ + '/functions/v1/google-teacher-login', {
+    method:'post',
+    contentType:'application/json',
+    headers:{
+      apikey:LA_SUPABASE_PUBLIC_KEY_,
+      Authorization:'Bearer ' + cleanToken
+    },
+    payload:JSON.stringify({
+      googleAccessToken:ScriptApp.getOAuthToken(),
+      mode:'test_student'
+    }),
+    muteHttpExceptions:true
+  });
+  const text = response.getContentText();
+  let data = {};
+  try { data = JSON.parse(text || '{}'); } catch (error) {}
+  if (response.getResponseCode() < 200 || response.getResponseCode() >= 300 || !data.ok || !data.testStudent) {
+    throw new Error(data.error || 'Supabase no ha aceptado el alumno de prueba.');
+  }
+  return data;
+}
+
 function callSupabaseClassroomBridge_(accessToken, payload) {
   const cleanToken = String(accessToken || '').trim();
   if (!cleanToken) throw new Error('La sesion del profesor no es valida.');
