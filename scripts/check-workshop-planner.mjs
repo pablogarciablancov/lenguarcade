@@ -106,6 +106,30 @@ expect(
 expect(html.includes("Guardar preparación"), "Debe quedar claro que guardar no publica.");
 expect(html.includes("Guardar y abrir ahora"), "Debe existir una acción directa para abrir la sesión en clase.");
 expect(html.includes("Guardar y activar horario de casa"), "Debe existir una acción explícita para el acceso programado en casa.");
+expect(
+  server.includes("'classCodes'") &&
+  server.includes("'usedByClass'") &&
+  server.includes("workshopPlanClassCodes_") &&
+  server.includes("workshopPlanUsedMap_"),
+  "Una preparación debe poder compartirse entre varias clases sin mezclar el estado de realizado.",
+);
+expect(
+  html.includes("Ruta LenguArcade · 8 talleres en continuidad") &&
+  html.includes("WORKSHOP_ROUTE_PRESETS") &&
+  html.includes("openWorkshopRoutePreset"),
+  "Talleres debe incluir una ruta progresiva lista para seleccionar y activar.",
+);
+expect(
+  html.includes('data-plan-class') &&
+  html.includes("Seleccionar todas") &&
+  html.includes("Compartir la preparación no abre el taller en todas a la vez"),
+  "El editor debe permitir compartir una preparación entre varias clases.",
+);
+expect(
+  html.includes("dangerPlan") &&
+  html.includes("🗑 Eliminar taller"),
+  "Eliminar taller debe mostrarse como una acción destructiva visible.",
+);
 expect(html.includes("Crear misión"), "Cada taller debe poder convertirse rápidamente en una misión.");
 expect(html.includes("Sesión de juego") && html.includes("Reto de XP") && html.includes("Trabajo en casa"), "El editor de Taller debe ofrecer plantillas prácticas.");
 expect(html.includes("Ajustes avanzados de disponibilidad"), "El control manual de juegos debe quedar relegado a ajustes avanzados.");
@@ -235,20 +259,27 @@ const saved = context.saveWorkshopPlan("C1", {
   homeStart:"2026-09-15T18:00",
   homeEnd:"2026-09-15T20:00",
   gameIds:["g1","g3"],
+  classCodes:["C1","C2"],
 });
 const planId = saved.savedPlanId;
 const beforeSession = context.getWorkshopPlannerAdmin("C1");
+const sharedBeforeC2 = context.getWorkshopPlannerAdmin("C2");
 const active = context.activateWorkshopPlan("C1", planId, true);
+const sharedAfterC2 = context.getWorkshopPlannerAdmin("C2");
 const accessAfterOpen = context.buildWorkshopAccessState_("C1");
 const closed = context.closeWorkshopPlannerSession("C1");
 const retired = context.retireWorkshopPlannerSession("C1");
 const accessAfterRetire = context.buildWorkshopAccessState_("C1");
 
 expect(saved.plans.length === 1, "Guardar debe crear una preparación persistente.");
+expect(saved.plans[0].classCodes.join(",") === "C1,C2", "La preparación debe conservar todas las clases seleccionadas.");
+expect(sharedBeforeC2.plans.length === 1, "La misma preparación debe aparecer en la segunda clase sin duplicarla.");
 expect(beforeSession.activeSession === null, "Guardar una preparación no debe publicar una sesión.");
 expect(active.activeSession?.published === true, "Abrir una preparación debe publicarla.");
 expect(active.activeSession?.classroomOpen === true, "Abrir ahora debe habilitar la sesión en clase.");
 expect(active.activeSession?.planId === planId, "La sesión activa debe conservar su planId.");
+expect(active.plans[0].usedAt, "La clase que activa el Taller debe marcarlo como realizado.");
+expect(!sharedAfterC2.plans[0].usedAt, "Activar el Taller en una clase no debe marcarlo como realizado en las demás.");
 expect(
   accessAfterOpen.games.filter((game) => game.enabled).map((game) => game.gameId).join(",") === "g1,g3",
   "Abrir debe dejar disponibles exactamente los juegos de la preparación.",
