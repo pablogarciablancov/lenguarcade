@@ -690,6 +690,12 @@ function deleteWorkshopPlan(classCode, planId) {
   var cleanClass = workshopSessionCleanClass_(classCode);
   var cleanId = workshopPlanCleanId_(planId);
   if (!cleanId) throw new Error('Sesión preparada no reconocida.');
+  var activeElsewhere = workshopSessionRows_().some(function(row) {
+    return workshopSessionBool_(row.published) && workshopPlanCleanId_(row.planId) === cleanId;
+  });
+  if (activeElsewhere) {
+    throw new Error('Retira primero este taller de las clases en las que esté activo.');
+  }
   var sheet = ensureWorkshopPlanSheet_();
   var rows = rowsToObjects_(sheet);
   var index = rows.findIndex(function(row) {
