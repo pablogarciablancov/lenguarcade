@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#140b2c">
+  <title>Versópolis · LenguArcade</title>
+  <link rel="stylesheet" href="./styles.css?v=20260925-v01">
+</head>
+<body>
+<main id="app" class="app">
+  <section id="homeScreen" class="screen home">
+    <div class="homeShade"></div>
+    <header class="topbar"><span>LENGUARCADE · DISTRITO DE LOS VERSOS</span><button id="helpBtn" class="iconBtn" type="button" aria-label="Cómo jugar">?</button></header>
+    <div class="hero">
+      <span class="kicker">BATALLA LÍRICA · V0.1</span>
+      <h1>VERSÓPOLIS</h1>
+      <p>Conquista la ciudad demostrando oído para la rima, sentido del ritmo y dominio de los recursos poéticos.</p>
+      <button id="startBtn" class="primary" type="button">ENTRAR EN LA BATALLA</button>
+      <div id="careerLine" class="careerLine"></div>
+    </div>
+    <div class="districts" aria-hidden="true"><span>RIMA</span><span>RITMO</span><span>IMAGEN</span><span>VOZ</span></div>
+  </section>
+
+  <section id="gameScreen" class="screen game hidden">
+    <header class="hud">
+      <div><span>RONDA</span><strong id="roundText">1 / 8</strong></div>
+      <div><span>PUNTOS</span><strong id="scoreText">0</strong></div>
+      <div><span>RACHA</span><strong id="streakText">×0</strong></div>
+      <button id="exitBtn" class="ghost" type="button">Guardar y salir</button>
+    </header>
+    <div class="cityTrack"><i id="trackFill"></i><b id="districtName">Puerta de la Rima</b></div>
+    <section class="battleCard">
+      <div class="rival"><div class="portrait">♫</div><div><span id="skillTag">RIMA</span><strong id="rivalName">La Voz del Puente</strong></div></div>
+      <div class="promptArea"><span class="mini">RETO DEL DISTRITO</span><h2 id="prompt">Elige el verso correcto.</h2><p id="context"></p></div>
+      <div id="options" class="options"></div>
+      <div id="feedback" class="feedback hidden" role="status"></div>
+      <button id="nextBtn" class="primary hidden" type="button">SIGUIENTE RONDA</button>
+    </section>
+  </section>
+
+  <section id="resultScreen" class="screen result hidden">
+    <div class="resultPanel">
+      <span class="kicker">BATALLA TERMINADA</span>
+      <h2 id="resultTitle">Versópolis te escucha</h2>
+      <div class="scoreSeal" id="finalScore">0</div>
+      <p id="resultText"></p>
+      <div class="resultStats"><span><b id="correctText">0</b> aciertos</span><span><b id="accuracyText">0%</b> precisión</span><span><b id="bestStreakText">0</b> mejor racha</span></div>
+      <button id="againBtn" class="primary" type="button">NUEVA BATALLA</button>
+      <button id="homeBtn" class="ghost" type="button">VOLVER A LA CIUDAD</button>
+    </div>
+  </section>
+
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modalCard"><button id="closeModal" class="modalClose" type="button">×</button><span class="kicker">CÓMO SE JUEGA</span><h2>Escucha el verso antes de responder</h2><p>Superarás ocho retos breves de rima, métrica y recursos expresivos. Cada acierto aumenta la racha y multiplica tus puntos. Cuando falles, verás una explicación antes de continuar.</p><p>Esta es la primera versión jugable: más adelante la ciudad crecerá con creación libre, duelos y batallas de versos.</p></div>
+  </div>
+</main>
+<script src="./app.js?v=20260925-v01"></script>
+<script src="./bridge.js?v=20260925-v01"></script>
+</body>
+</html>

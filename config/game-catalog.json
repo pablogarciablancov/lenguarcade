@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 5,
+  "version": 6,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -78,15 +78,15 @@
         "métrica",
         "creatividad"
       ],
-      "status": "en revisión",
+      "status": "en pruebas",
       "sortOrder": 4,
       "color": "#8b5cf6",
       "icon": "✒️",
-      "entry": "",
-      "description": "Crea poemas, supera retos líricos y progresa como autor dentro de la ciudad de la poesía.",
-      "banner": "city",
+      "entry": "games/versopolis/",
+      "description": "Duelo poético por rondas: reconoce rimas, métrica y recursos expresivos para conquistar Versópolis.",
+      "banner": "versopolis-banner.webp",
       "active": true,
-      "integration": "none"
+      "integration": "embedded"
     },
     {
       "id": "scrabble",
@@ -243,6 +243,53 @@
       "entry": "games/word_play/",
       "description": "Roguelike de palabras con cartas, tienda, mejoras, misiones lingüísticas, fichas especiales, combos y progresión léxica.",
       "banner": "word-play-banner-v2.webp",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "tierras_de_tinta",
+      "official": true,
+      "name": "Tierras de Tinta",
+      "subtitle": "Cada palabra es un arma",
+      "category": "RPG de acción",
+      "competencies": [
+        "ortografía",
+        "morfología",
+        "verbos",
+        "semántica",
+        "literatura",
+        "comprensión"
+      ],
+      "status": "en pruebas",
+      "sortOrder": 12,
+      "color": "#e9a23b",
+      "icon": "🖋️",
+      "entry": "games/tierras_de_tinta/",
+      "description": "RPG de acción y exploración: supera expediciones, derrota criaturas y mejora tu héroe resolviendo desafíos de Lengua.",
+      "banner": "tierras-de-tinta-banner.webp",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "lexaria",
+      "official": true,
+      "name": "Lexaria",
+      "subtitle": "Academia de criaturas lingüísticas",
+      "category": "Estrategia",
+      "competencies": [
+        "lengua",
+        "léxico",
+        "verbos",
+        "literatura",
+        "estrategia"
+      ],
+      "status": "en pruebas",
+      "sortOrder": 13,
+      "color": "#4f8cff",
+      "icon": "✦",
+      "entry": "games/lexaria/",
+      "description": "Auto-battler educativo: colecciona Lexarios, entrena con retos de Lengua, crea sinergias y combate en la Academia.",
+      "banner": "lexaria-banner.webp",
       "active": true,
       "integration": "embedded"
     }

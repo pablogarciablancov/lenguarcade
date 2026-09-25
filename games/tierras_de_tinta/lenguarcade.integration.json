@@ -1,15 +1,15 @@
 {
   "$schema": "lenguarcade-integration-v1",
   "gameId": "tierras_de_tinta",
-  "name": "Tierras de tinta",
-  "status": "laboratorio",
+  "name": "Tierras de Tinta",
+  "status": "en pruebas",
   "integration": "embedded",
   "entry": "games/tierras_de_tinta/index.html",
-  "banner": "",
+  "banner": "tierras-de-tinta-banner.webp",
   "requires": {
     "studentRunner": true,
     "saveProgress": true,
     "supabaseCatalog": true
   },
-  "notes": "Rama de rescate v21. No publicar todavía en el catálogo. Validar primero campamento sin scroll, combate, guardado local, jefes regionales y banco educativo."
+  "notes": "Publicado en el catálogo oficial. Mantiene guardado local y añade bridge moderno de LenguArcade para restauración, checkpoints, guardado central y salida segura."
 }

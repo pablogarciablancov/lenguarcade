@@ -2,15 +2,15 @@
   "$schema": "lenguarcade-integration-v1",
   "gameId": "lexaria",
   "name": "Lexaria",
-  "status": "laboratorio",
+  "status": "en pruebas",
   "integration": "embedded",
   "entry": "games/lexaria/index.html",
-  "banner": "lexaria",
+  "banner": "lexaria-banner.webp",
   "requires": {
     "studentRunner": true,
     "saveProgress": true,
     "supabaseCatalog": true,
     "classroomAsyncSquads": true
   },
-  "notes": "Prototipo original de autobattler lingüístico con dos modos separados: Aventura (jornadas de preparación + combate, Tinta, vidas, mercado, entrenamiento, fusiones, reliquias y 10 victorias) y Arena de clase asíncrona. La UI distingue Tinta disponible/precios, muestra atributos antes de comprar, explica vanguardia (+10% vida), retaguardia (-8% cooldown), reserva (no combate pero cuenta para fusiones), permite drag & drop y enseña vida/daño total de las formaciones. El bridge declara PUBLISH_SQUAD / REQUEST_OPPONENTS / OPPONENTS; la integración central posterior debe persistir snapshots de formación por alumno en Supabase sin tocar el progreso de Aventura."
+  "notes": "Auto-battler oficial en pruebas. Aventura y Arena de clase mantienen su lógica; el bridge central persiste progreso y soporta publicación/consulta de formaciones asíncronas."
 }

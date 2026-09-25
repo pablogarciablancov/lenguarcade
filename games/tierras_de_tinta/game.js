@@ -1120,5 +1120,36 @@ $("resumeGameBtn").addEventListener("click",resumeGame);
 $("pauseSaveBtn").addEventListener("click",function(){saveState("manual_game_save");toast("Partida guardada");});
 $("pauseCampBtn").addEventListener("click",function(){els.pauseModal.classList.add("hidden");els.modalBackdrop.classList.add("hidden");voluntaryReturn();});
 
+window.TierrasDeTinta={
+  getState:function(){
+    var snapshot=state||loadState()||defaultState();
+    try{return JSON.parse(JSON.stringify(snapshot));}catch(err){return snapshot;}
+  },
+  restore:function(saved){
+    try{
+      var raw=saved&&saved.run?saved.run:(saved&&saved.state?saved.state:saved);
+      if(!raw||typeof raw!=="object")return false;
+      state=safeObjectMerge(defaultState(),raw);
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+      renderTitle();
+      if(currentScreen==="camp")renderCamp();
+      return true;
+    }catch(err){console.warn("No se pudo restaurar el progreso central",err);return false;}
+  },
+  metrics:function(){
+    var s=state||loadState()||defaultState();
+    var attempts=Number(s.totalAnswers||0),correct=Number(s.cleanAnswers||0);
+    var accuracy=attempts?Math.round(correct/attempts*100):0;
+    var masteryValues=Object.keys(s.mastery||{}).map(function(k){return Number(s.mastery[k]||0);});
+    var masteryAvg=masteryValues.length?Math.round(masteryValues.reduce(function(a,b){return a+b;},0)/masteryValues.length):0;
+    return {level:Number(s.level||1),xp:Number(s.xp||0),victories:Number(s.victories||0),bossesDefeated:Number(s.bossesDefeated||0),attempts:attempts,correct:correct,errors:Math.max(0,attempts-correct),accuracy:accuracy,mastery:masteryAvg,percentage:Math.min(100,Math.max(masteryAvg,Number(s.unlockedRegionLevel||1)/7*100))};
+  },
+  forceSave:function(reason){
+    if(!state)state=loadState()||defaultState();
+    saveState(reason||"lenguarcade");
+  },
+  currentScreen:function(){return currentScreen;}
+};
+
 renderTitle();
 })();

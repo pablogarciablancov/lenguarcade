@@ -1,0 +1,15 @@
+{
+  "$schema": "lenguarcade-integration-v1",
+  "gameId": "versopolis",
+  "name": "Versópolis",
+  "status": "en pruebas",
+  "integration": "embedded",
+  "entry": "games/versopolis/index.html",
+  "banner": "versopolis-banner.webp",
+  "requires": {
+    "studentRunner": true,
+    "saveProgress": true,
+    "supabaseCatalog": true
+  },
+  "notes": "V0.1 jugable: duelo de ocho rondas sobre rima, métrica, estrofas y recursos literarios, con puntuación, racha, explicaciones y guardado central."
+}
