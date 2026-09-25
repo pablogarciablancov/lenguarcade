@@ -5,7 +5,7 @@
   "status": "en pruebas",
   "integration": "embedded",
   "entry": "games/versopolis/index.html",
-  "banner": "versopolis-banner.webp",
+  "banner": "versopolis-banner.jpg",
   "requires": {
     "studentRunner": true,
     "saveProgress": true,

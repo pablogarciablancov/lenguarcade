@@ -84,7 +84,7 @@
       "icon": "✒️",
       "entry": "games/versopolis/",
       "description": "Duelo poético por rondas: reconoce rimas, métrica y recursos expresivos para conquistar Versópolis.",
-      "banner": "versopolis-banner.webp",
+      "banner": "versopolis-banner.jpg",
       "active": true,
       "integration": "embedded"
     },
@@ -266,7 +266,7 @@
       "icon": "🖋️",
       "entry": "games/tierras_de_tinta/",
       "description": "RPG de acción y exploración: supera expediciones, derrota criaturas y mejora tu héroe resolviendo desafíos de Lengua.",
-      "banner": "tierras-de-tinta-banner.webp",
+      "banner": "tierras-de-tinta-banner.svg",
       "active": true,
       "integration": "embedded"
     },
@@ -289,7 +289,7 @@
       "icon": "✦",
       "entry": "games/lexaria/",
       "description": "Auto-battler educativo: colecciona Lexarios, entrena con retos de Lengua, crea sinergias y combate en la Academia.",
-      "banner": "lexaria-banner.webp",
+      "banner": "lexaria-banner.svg",
       "active": true,
       "integration": "embedded"
     }

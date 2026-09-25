@@ -5,7 +5,7 @@
   "status": "en pruebas",
   "integration": "embedded",
   "entry": "games/lexaria/index.html",
-  "banner": "lexaria-banner.webp",
+  "banner": "lexaria-banner.svg",
   "requires": {
     "studentRunner": true,
     "saveProgress": true,

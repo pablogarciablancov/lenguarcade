@@ -5,7 +5,7 @@
   "status": "en pruebas",
   "integration": "embedded",
   "entry": "games/tierras_de_tinta/index.html",
-  "banner": "tierras-de-tinta-banner.webp",
+  "banner": "tierras-de-tinta-banner.svg",
   "requires": {
     "studentRunner": true,
     "saveProgress": true,

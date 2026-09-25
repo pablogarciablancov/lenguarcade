@@ -96,9 +96,9 @@ if(catalog.games.some(game=>/rim[oó]polis/i.test(game.id+" "+game.name)) ||
 }
 
 for(const expected of [
-  ["versopolis","games/versopolis/","versopolis-banner.webp"],
-  ["tierras_de_tinta","games/tierras_de_tinta/","tierras-de-tinta-banner.webp"],
-  ["lexaria","games/lexaria/","lexaria-banner.webp"]
+  ["versopolis","games/versopolis/","versopolis-banner.jpg"],
+  ["tierras_de_tinta","games/tierras_de_tinta/","tierras-de-tinta-banner.svg"],
+  ["lexaria","games/lexaria/","lexaria-banner.svg"]
 ]){
   const game=catalog.games.find(row=>row.id===expected[0]);
   if(!game || game.entry!==expected[1] || game.banner!==expected[2] || game.integration!=="embedded" || game.active!==true || game.official!==true){
@@ -106,7 +106,7 @@ for(const expected of [
   }
 }
 for(const [label,html] of [["alumno",student],["profesor",teacher]]){
-  for(const pair of [["versopolis","versopolis-banner.webp"],["tierras_de_tinta","tierras-de-tinta-banner.webp"],["lexaria","lexaria-banner.webp"]]){
+  for(const pair of [["versopolis","versopolis-banner.jpg"],["tierras_de_tinta","tierras-de-tinta-banner.svg"],["lexaria","lexaria-banner.svg"]]){
     if(!html.includes(pair[0]+":'"+pair[1]+"'")) throw new Error("Falta portada de "+pair[0]+" en el panel de "+label+".");
   }
 }
