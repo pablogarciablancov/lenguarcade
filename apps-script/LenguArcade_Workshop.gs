@@ -393,8 +393,8 @@ function retireWorkshopSession(classCode) {
 var LA_WORKSHOP_PLAN_CONFIG_ = {
   SHEET: 'TallerPlanes',
   HEADERS: [
-    'planId','classCode','title','message','targetXp','plannedAt',
-    'homeEnabled','homeStart','homeEnd','gameIds','usedAt',
+    'planId','classCode','classCodes','title','message','targetXp','plannedAt',
+    'homeEnabled','homeStart','homeEnd','gameIds','usedAt','usedByClass',
     'createdAt','updatedAt','updatedBy'
   ]
 };
@@ -413,13 +413,58 @@ function workshopPlanCleanId_(value) {
   return String(value || '').trim().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 120);
 }
 
-function workshopPlanPublic_(row, activeSession) {
+function workshopPlanClassCodes_(value, fallbackClassCode) {
+  var result = [];
+  if (Array.isArray(value)) {
+    result = value;
+  } else {
+    var text = String(value || '').trim();
+    if (text) {
+      try {
+        var parsed = JSON.parse(text);
+        if (Array.isArray(parsed)) result = parsed;
+        else result = text.split(',');
+      } catch (error) {
+        result = text.split(',');
+      }
+    }
+  }
+  if (!result.length && fallbackClassCode) result = [fallbackClassCode];
+  var seen = {};
+  return result.map(function(code){ return String(code || '').trim(); }).filter(function(code) {
+    if (!code || code === LA_WORKSHOP_ACCESS_CONFIG_.GLOBAL_SCOPE || seen[code]) return false;
+    seen[code] = true;
+    return true;
+  }).slice(0, 40);
+}
+
+function workshopPlanUsedMap_(value) {
+  if (value && typeof value === 'object' && !Array.isArray(value)) return value;
+  var text = String(value || '').trim();
+  if (!text) return {};
+  try {
+    var parsed = JSON.parse(text);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function workshopPlanPublic_(row, activeSession, viewerClassCode) {
   if (!row) return null;
   var planId = workshopPlanCleanId_(row.planId);
   var active = !!(activeSession && activeSession.published && String(activeSession.planId || '') === planId);
+  var classCodes = workshopPlanClassCodes_(row.classCodes, row.classCode);
+  var usedMap = workshopPlanUsedMap_(row.usedByClass);
+  var viewerClass = String(viewerClassCode || '').trim();
+  var viewerUsedAt = viewerClass ? String(usedMap[viewerClass] || '') : '';
+  if (!viewerUsedAt && viewerClass && !Object.keys(usedMap).length && String(row.classCode || '') === viewerClass) {
+    viewerUsedAt = String(row.usedAt || '');
+  }
   return {
     planId:planId,
-    classCode:String(row.classCode || ''),
+    classCode:String(row.classCode || classCodes[0] || ''),
+    classCodes:classCodes,
     title:String(row.title || 'Sesión del taller'),
     message:String(row.message || ''),
     targetXp:Math.max(0, Number(row.targetXp || 0)),
@@ -428,7 +473,8 @@ function workshopPlanPublic_(row, activeSession) {
     homeStart:workshopSessionNormalizeLocalDateTime_(row.homeStart || ''),
     homeEnd:workshopSessionNormalizeLocalDateTime_(row.homeEnd || ''),
     gameIds:workshopSessionGameIds_(row.gameIds),
-    usedAt:String(row.usedAt || ''),
+    usedAt:viewerUsedAt,
+    usedByClass:usedMap,
     createdAt:String(row.createdAt || ''),
     updatedAt:String(row.updatedAt || ''),
     active:active
@@ -466,7 +512,8 @@ function workshopPlanValidatePayload_(payload) {
     homeEnabled:homeEnabled,
     homeStart:homeStart,
     homeEnd:homeEnd,
-    gameIds:gameIds
+    gameIds:gameIds,
+    classCodes:workshopPlanClassCodes_(payload.classCodes, '')
   };
 }
 
@@ -474,8 +521,8 @@ function workshopPlanFind_(classCode, planId) {
   var cleanClass = workshopSessionCleanClass_(classCode);
   var cleanId = workshopPlanCleanId_(planId);
   return workshopPlanRows_().find(function(row) {
-    return String(row.classCode || '') === cleanClass &&
-      workshopPlanCleanId_(row.planId) === cleanId;
+    return workshopPlanCleanId_(row.planId) === cleanId &&
+      workshopPlanClassCodes_(row.classCodes, row.classCode).indexOf(cleanClass) !== -1;
   }) || null;
 }
 
@@ -485,8 +532,8 @@ function getWorkshopPlannerAdmin(classCode) {
   var cleanClass = workshopSessionCleanClass_(classCode);
   var activeSession = workshopSessionPublic_(workshopSessionFind_(cleanClass));
   var plans = workshopPlanRows_()
-    .filter(function(row){ return String(row.classCode || '') === cleanClass; })
-    .map(function(row){ return workshopPlanPublic_(row, activeSession); })
+    .filter(function(row){ return workshopPlanClassCodes_(row.classCodes, row.classCode).indexOf(cleanClass) !== -1; })
+    .map(function(row){ return workshopPlanPublic_(row, activeSession, cleanClass); })
     .sort(function(a,b) {
       if (a.active !== b.active) return a.active ? -1 : 1;
       if (!!a.plannedAt !== !!b.plannedAt) return a.plannedAt ? -1 : 1;
@@ -510,10 +557,16 @@ function saveWorkshopPlan(classCode, payload) {
   var planId = workshopPlanCleanId_(payload && payload.planId) || ('plan_' + Utilities.getUuid().replace(/-/g, '').slice(0, 20));
   var existing = workshopPlanFind_(cleanClass, planId);
   var now = nowIso_();
+  var selectedClasses = clean.classCodes.length ? clean.classCodes : (existing ? workshopPlanClassCodes_(existing.classCodes, existing.classCode) : [cleanClass]);
+  if (!selectedClasses.length) selectedClasses = [cleanClass];
+  var primaryClass = selectedClasses[0] || cleanClass;
+  var usedMap = existing ? workshopPlanUsedMap_(existing.usedByClass) : {};
+  
 
   upsertByKeys_(ensureWorkshopPlanSheet_(), ['planId'], {
     planId:planId,
-    classCode:cleanClass,
+    classCode:primaryClass,
+    classCodes:JSON.stringify(selectedClasses),
     title:clean.title,
     message:clean.message,
     targetXp:clean.targetXp,
@@ -523,6 +576,7 @@ function saveWorkshopPlan(classCode, payload) {
     homeEnd:clean.homeEnd,
     gameIds:JSON.stringify(clean.gameIds),
     usedAt:existing ? String(existing.usedAt || '') : '',
+    usedByClass:JSON.stringify(usedMap),
     createdAt:existing ? String(existing.createdAt || now) : now,
     updatedAt:now,
     updatedBy:teacherEmail
@@ -541,9 +595,15 @@ function saveWorkshopPlanFast(classCode, payload) {
   var planId = workshopPlanCleanId_(payload && payload.planId) || ('plan_' + Utilities.getUuid().replace(/-/g, '').slice(0, 20));
   var existing = workshopPlanFind_(cleanClass, planId);
   var now = nowIso_();
+  var selectedClasses = clean.classCodes.length ? clean.classCodes : (existing ? workshopPlanClassCodes_(existing.classCodes, existing.classCode) : [cleanClass]);
+  if (!selectedClasses.length) selectedClasses = [cleanClass];
+  var primaryClass = selectedClasses[0] || cleanClass;
+  var usedMap = existing ? workshopPlanUsedMap_(existing.usedByClass) : {};
+  
   var record = {
     planId:planId,
-    classCode:cleanClass,
+    classCode:primaryClass,
+    classCodes:JSON.stringify(selectedClasses),
     title:clean.title,
     message:clean.message,
     targetXp:clean.targetXp,
@@ -553,6 +613,7 @@ function saveWorkshopPlanFast(classCode, payload) {
     homeEnd:clean.homeEnd,
     gameIds:JSON.stringify(clean.gameIds),
     usedAt:existing ? String(existing.usedAt || '') : '',
+    usedByClass:JSON.stringify(usedMap),
     createdAt:existing ? String(existing.createdAt || now) : now,
     updatedAt:now,
     updatedBy:teacherEmail
@@ -563,7 +624,7 @@ function saveWorkshopPlanFast(classCode, payload) {
     ok:true,
     classCode:cleanClass,
     savedPlanId:planId,
-    plan:workshopPlanPublic_(record, workshopSessionPublic_(workshopSessionFind_(cleanClass)))
+    plan:workshopPlanPublic_(record, workshopSessionPublic_(workshopSessionFind_(cleanClass)), cleanClass)
   };
 }
 
@@ -575,9 +636,15 @@ function saveAndActivateWorkshopPlan(classCode, payload, openNow) {
   var planId = workshopPlanCleanId_(payload && payload.planId) || ('plan_' + Utilities.getUuid().replace(/-/g, '').slice(0, 20));
   var existing = workshopPlanFind_(cleanClass, planId);
   var now = nowIso_();
+  var selectedClasses = clean.classCodes.length ? clean.classCodes : (existing ? workshopPlanClassCodes_(existing.classCodes, existing.classCode) : [cleanClass]);
+  if (!selectedClasses.length) selectedClasses = [cleanClass];
+  var primaryClass = selectedClasses[0] || cleanClass;
+  var usedMap = existing ? workshopPlanUsedMap_(existing.usedByClass) : {};
+  usedMap[cleanClass] = now;
   var planRecord = {
     planId:planId,
-    classCode:cleanClass,
+    classCode:primaryClass,
+    classCodes:JSON.stringify(selectedClasses),
     title:clean.title,
     message:clean.message,
     targetXp:clean.targetXp,
@@ -587,6 +654,7 @@ function saveAndActivateWorkshopPlan(classCode, payload, openNow) {
     homeEnd:clean.homeEnd,
     gameIds:JSON.stringify(clean.gameIds),
     usedAt:now,
+    usedByClass:JSON.stringify(usedMap),
     createdAt:existing ? String(existing.createdAt || now) : now,
     updatedAt:now,
     updatedBy:teacherEmail
@@ -625,8 +693,8 @@ function deleteWorkshopPlan(classCode, planId) {
   var sheet = ensureWorkshopPlanSheet_();
   var rows = rowsToObjects_(sheet);
   var index = rows.findIndex(function(row) {
-    return String(row.classCode || '') === cleanClass &&
-      workshopPlanCleanId_(row.planId) === cleanId;
+    return workshopPlanCleanId_(row.planId) === cleanId &&
+      workshopPlanClassCodes_(row.classCodes, row.classCode).indexOf(cleanClass) !== -1;
   });
   if (index < 0) throw new Error('La sesión preparada ya no existe.');
   sheet.deleteRow(index + 2);
@@ -680,8 +748,10 @@ function activateWorkshopPlan(classCode, planId, openNow) {
   var cleanClass = workshopSessionCleanClass_(classCode);
   var row = workshopPlanFind_(cleanClass, planId);
   if (!row) throw new Error('La sesión preparada ya no existe.');
-  var plan = workshopPlanPublic_(row, null);
+  var plan = workshopPlanPublic_(row, null, cleanClass);
   var now = nowIso_();
+  var usedMap = workshopPlanUsedMap_(row.usedByClass);
+  usedMap[cleanClass] = now;
 
   applyWorkshopPlanAccess_(cleanClass, plan.gameIds, teacherEmail);
 
@@ -703,7 +773,8 @@ function activateWorkshopPlan(classCode, planId, openNow) {
 
   upsertByKeys_(ensureWorkshopPlanSheet_(), ['planId'], {
     planId:plan.planId,
-    classCode:cleanClass,
+    classCode:String(row.classCode || plan.classCodes[0] || cleanClass),
+    classCodes:JSON.stringify(plan.classCodes&&plan.classCodes.length?plan.classCodes:[cleanClass]),
     title:plan.title,
     message:plan.message,
     targetXp:plan.targetXp,
@@ -713,6 +784,7 @@ function activateWorkshopPlan(classCode, planId, openNow) {
     homeEnd:plan.homeEnd,
     gameIds:JSON.stringify(plan.gameIds),
     usedAt:now,
+    usedByClass:JSON.stringify(usedMap),
     createdAt:String(row.createdAt || now),
     updatedAt:now,
     updatedBy:teacherEmail
