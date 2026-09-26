@@ -2487,6 +2487,7 @@ body.light .workshopGameRow{background:rgba(94,53,177,.04)}
     }
     if(existing)existing.textContent='🎮 '+String(workshopStudentAccess.available||0)+' abiertos';
   }
+  window.laUpdateStudentWorkshopHeader=updateStudentWorkshopHeader;
   function rerenderStudentGames(){
     try{
       if(typeof currentDashboard!=='undefined'&&currentDashboard&&Array.isArray(currentDashboard.games)&&typeof renderGames==='function')renderGames(currentDashboard.games);
@@ -2736,6 +2737,7 @@ body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionS
       }
     });
   }
+  window.laApplyStudentSessionToCards=applyStudentSessionToCards;
 
   async function refreshStudentSession(silent){
     if((typeof supabaseBackend!=='undefined'&&supabaseBackend)||
@@ -3239,15 +3241,7 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
     var d=new Date(value);if(Number.isNaN(d.getTime()))return 'Progreso guardado';
     return new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short'}).format(d);
   }
-  function renderHomeOverview(dashboard){
-    var inicio=document.getElementById('inicio');if(!inicio)return;
-    var host=document.getElementById('homeOverview');
-    if(!host){
-      host=document.createElement('div');
-      host.id='homeOverview';
-      host.className='homeOverview';
-      inicio.appendChild(host);
-    }
+  function homeGameHtml(dashboard){
     var games=(dashboard&&Array.isArray(dashboard.games)?dashboard.games:[]).filter(function(g){return !g.locked;});
     games.sort(function(a,b){
       var ad=Date.parse(String(a&&a.progress&&a.progress.lastActivity||''))||0;
@@ -3257,11 +3251,33 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
     });
     var recent=games.filter(function(g){return Number(g.progress&&g.progress.sessions||0)>0||String(g.progress&&g.progress.lastActivity||'');}).slice(0,3);
     if(!recent.length)recent=games.slice(0,3);
-    var gameHtml=recent.length?recent.map(function(g){
+    return recent.length?recent.map(function(g){
       var progress=g.progress||{};
       var detail=Number(progress.sessions||0)>0?Number(progress.sessions||0)+' partida'+(Number(progress.sessions||0)===1?'':'s'):homeDate(progress.lastActivity);
       return '<button type="button" class="homeGameRow" data-home-game="'+esc(g.gameId)+'"><span class="homeGameIcon">'+esc(g.icono||'🎮')+'</span><span><strong>'+esc(g.nombre||'Juego')+'</strong><small>'+esc(detail)+'</small></span><span class="homeGo">›</span></button>';
     }).join(''):'<div class="homeQuickEmpty">En cuanto abras un juego, aparecerá aquí para continuar rápidamente.</div>';
+  }
+  function bindHomeGames(host){
+    [].slice.call(host.querySelectorAll('[data-home-game]')).forEach(function(button){
+      button.onclick=function(){if(typeof openGame==='function')openGame(button.getAttribute('data-home-game'));};
+    });
+  }
+  window.laRefreshHomeGameAccess=function(dashboard){
+    var list=document.querySelector('#homeOverview .homeGameList');
+    if(!list)return;
+    list.innerHTML=homeGameHtml(dashboard);
+    bindHomeGames(list);
+  };
+  function renderHomeOverview(dashboard){
+    var inicio=document.getElementById('inicio');if(!inicio)return;
+    var host=document.getElementById('homeOverview');
+    if(!host){
+      host=document.createElement('div');
+      host.id='homeOverview';
+      host.className='homeOverview';
+      inicio.appendChild(host);
+    }
+    var gameHtml=homeGameHtml(dashboard);
 
     var pending=(dashboard&&Array.isArray(dashboard.missions)?dashboard.missions:[]).filter(function(m){return !m.completed;}).slice(0,2);
     var missionHtml=pending.length?pending.map(function(m){
@@ -3281,9 +3297,7 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
         '<div class="homeProgressMetric"><span>Nota</span><b>'+esc(grade)+'</b></div>'+
       '</div></section>';
 
-    [].slice.call(host.querySelectorAll('[data-home-game]')).forEach(function(button){
-      button.onclick=function(){if(typeof openGame==='function')openGame(button.getAttribute('data-home-game'));};
-    });
+    bindHomeGames(host);
   }
 
   function arrangeProfileTools(){
@@ -3312,6 +3326,193 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
     renderHomeOverview({});
   }
   setTimeout(arrangeProfileTools,0);
+})();
+</script>
+
+<script>
+(function(){
+  // La identidad Supabase y la sesión del alumno se gestionan en el bloque de acceso.
+  // Este sincronizador solo consulta el acceso efectivo mientras el alumno está aquí.
+  var fingerprint=null;
+  var lastCheckedAt=0;
+  var generation=-1;
+  var failures=0;
+  var timer=null;
+  var inFlight=null;
+
+  function active(){
+    return supabaseBackend&&secureSessionVerified&&!!token&&!!currentDashboard&&
+      currentDashboard.student&&currentDashboard.student.role==='student';
+  }
+  function resetIfNeeded(){
+    if(generation===studentSessionGeneration)return;
+    generation=studentSessionGeneration;
+    fingerprint=null;
+    lastCheckedAt=0;
+    failures=0;
+  }
+  function armTimer(delay){
+    clearTimeout(timer);
+    timer=null;
+    if(active()&&!document.hidden)timer=setTimeout(requestNow,delay);
+  }
+  function sameWorkshop(oldSession,newSession){
+    if(!oldSession||!newSession)return oldSession===newSession;
+    return ['classroomId','startedAt','planId','title','message','targetXp','published',
+      'classroomOpen','homeEnabled','homeStart','homeEnd','mode','active','updatedAt']
+      .every(function(key){return oldSession[key]===newSession[key];})&&
+      JSON.stringify(oldSession.gameIds||[])===JSON.stringify(newSession.gameIds||[]);
+  }
+  function sameAccess(state){
+    if(!sameWorkshop(currentDashboard.workshopSession||null,state.workshopSession||null))return false;
+    var existing=currentDashboard.games||[];
+    if(existing.length!==state.games.length)return false;
+    return existing.every(function(game,index){
+      var next=state.games[index];
+      return game.gameId===next.gameId&&game.estado===next.estado&&
+        game.catalogLocked===next.catalogLocked&&game.accessEnabled===next.accessEnabled&&
+        game.accessSource===next.accessSource&&game.lockedByTeacher===next.lockedByTeacher&&
+        game.lockedByWorkshop===next.lockedByWorkshop&&game.locked===next.locked;
+    });
+  }
+  function sameGameAccess(game,next){
+    return game.estado===next.estado&&game.catalogLocked===next.catalogLocked&&
+      game.accessEnabled===next.accessEnabled&&game.accessSource===next.accessSource&&
+      game.lockedByTeacher===next.lockedByTeacher&&
+      game.lockedByWorkshop===next.lockedByWorkshop&&game.locked===next.locked;
+  }
+  function paintGame(card,game,session){
+    if(!card)return;
+    card.classList.toggle('locked',!!game.locked);
+    card.classList.toggle('sessionLocked',!!game.lockedByWorkshop);
+    var button=card.querySelector('.play');
+    if(button){button.disabled=!!game.locked;button.textContent=game.buttonLabel;}
+    var chip=card.querySelector('.chip');
+    if(chip){
+      chip.textContent=game.lockedByWorkshop
+        ? (session&&session.active?'🔒 Fuera de la misión':'🔒 Sesión cerrada')
+        : (game.lockedByTeacher?'🔒 Cerrado por el profesor':
+          (session&&!game.locked?(session.mode==='home'?'🏠 Disponible en casa':'✅ Disponible en la sesión'):game.estado));
+    }
+  }
+  function updateAccess(state){
+    var previousSession=currentDashboard.workshopSession||null;
+    var session=state.workshopSession;
+    var sameIdentity=previousSession&&session&&
+      previousSession.classroomId===session.classroomId&&
+      previousSession.startedAt===session.startedAt&&previousSession.planId===session.planId;
+    var xp=sameIdentity?Math.max(0,Number(previousSession.progressXp||0)):0;
+    currentDashboard.workshopSession=session?Object.assign({},session,{
+      progressXp:xp,
+      progressPercent:session.targetXp>0?Math.min(100,Math.round(xp/session.targetXp*100)):0,
+      completed:session.targetXp>0&&xp>=session.targetXp
+    }):null;
+    var cards=document.querySelectorAll('#games .game');
+    var changedGames=false;
+    currentDashboard.games.forEach(function(game,index){
+      var next=state.games[index];
+      if(!next)return;
+      var changed=!sameGameAccess(game,next);
+      Object.assign(game,{
+        estado:next.estado,
+        catalogLocked:next.catalogLocked,
+        accessEnabled:next.accessEnabled,
+        accessSource:next.accessSource,
+        lockedByTeacher:next.lockedByTeacher,
+        lockedByWorkshop:next.lockedByWorkshop,
+        locked:next.locked,
+        buttonLabel:next.locked?next.lockedLabel:(Number(game.progress&&game.progress.sessions||0)>0?'Continuar':'Jugar')
+      });
+      if(changed){changedGames=true;paintGame(cards[index],game,session);}
+    });
+    if(currentDashboard.general)currentDashboard.general.totalGames=currentDashboard.games.filter(function(game){return !game.locked;}).length;
+    if(typeof window.laUpdateStudentWorkshopHeader==='function')window.laUpdateStudentWorkshopHeader();
+    if(typeof window.laApplyStudentSessionToCards==='function')window.laApplyStudentSessionToCards();
+    if(changedGames&&typeof window.laRefreshHomeGameAccess==='function')window.laRefreshHomeGameAccess(currentDashboard);
+    saveCache('LA_DASHBOARD_CACHE',currentDashboard);
+  }
+  function syncAccess(){
+    if(inFlight)return inFlight;
+    if(!active())return Promise.resolve(false);
+    resetIfNeeded();
+    var requestGeneration=generation;
+    inFlight=(async function(){
+      try{
+        var state=await callSupabaseFunction('student-access-state',{},token);
+        if(!active()||requestGeneration!==studentSessionGeneration)return false;
+        if(!state||!state.ok||!state.fingerprint||!Array.isArray(state.games))throw new Error('Estado de acceso incompleto');
+        if(currentDashboard.games.length!==state.games.length||
+          currentDashboard.games.some(function(game,index){return game.gameId!==state.games[index].gameId;})){
+          // Un cambio excepcional del catálogo necesita sus metadatos completos una vez.
+          var dashboard=await loadSupabaseDashboard(token);
+          if(!active()||requestGeneration!==studentSessionGeneration)return false;
+          currentDashboard=dashboard;
+          saveCache('LA_DASHBOARD_CACHE',dashboard);
+          renderDashboard(dashboard);
+        }else if(fingerprint!==state.fingerprint||!sameAccess(state)){
+          updateAccess(state);
+        }
+        fingerprint=state.fingerprint;
+        lastCheckedAt=Date.now();
+        failures=0;
+        return true;
+      }catch(error){
+        failures=Math.min(failures+1,5);
+        throw error;
+      }finally{
+        inFlight=null;
+        armTimer(failures?Math.min(60000,5000*Math.pow(2,failures)):5000);
+      }
+    })();
+    return inFlight;
+  }
+  function requestNow(){
+    clearTimeout(timer);
+    timer=null;
+    if(active()&&!document.hidden)syncAccess().catch(function(){});
+  }
+  function blocked(game,message){
+    document.getElementById('gameModalTitle').textContent=game&&game.nombre||'Juego cerrado';
+    document.getElementById('gameModalText').textContent=message;
+    document.getElementById('gameModal').classList.add('open');
+  }
+  var baseOpenGame=openGame;
+  openGame=async function(gameId){
+    if(!active())return baseOpenGame(gameId);
+    resetIfNeeded();
+    if(!lastCheckedAt||Date.now()-lastCheckedAt>2000||inFlight){
+      try{await syncAccess();}
+      catch(error){
+        blocked(null,'No se puede comprobar el acceso ahora. Revisa la conexión e inténtalo de nuevo.');
+        return;
+      }
+    }
+    if(!active())return;
+    var game=(currentDashboard.games||[]).find(function(item){return item.gameId===gameId;});
+    if(!game)return;
+    if(game.locked){
+      blocked(game,game.lockedByTeacher?'Cerrado por tu profesor':
+        (game.lockedByWorkshop?(currentDashboard.workshopSession&&currentDashboard.workshopSession.active
+          ?'Este juego no forma parte de la misión que el profesor ha abierto.'
+          :'LenguArcade está cerrado ahora mismo para esta clase. Podrás entrar cuando el profesor abra la sesión o durante un horario de casa autorizado.')
+          :(game.buttonLabel||'No disponible')));
+      return;
+    }
+    return baseOpenGame(gameId);
+  };
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){clearTimeout(timer);timer=null;}
+    else requestNow();
+  });
+  window.addEventListener('focus',requestNow);
+  window.addEventListener('online',requestNow);
+  var baseRenderDashboard=renderDashboard;
+  renderDashboard=function(dashboard){
+    var result=baseRenderDashboard.apply(this,arguments);
+    if(active())armTimer(0);
+    return result;
+  };
+  if(active())armTimer(0);
 })();
 </script>
 

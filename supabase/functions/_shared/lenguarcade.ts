@@ -17,7 +17,7 @@ export function jsonResponse(body: unknown, status = 200) {
   });
 }
 
-export async function requireProfileSession(request: Request) {
+export async function requireProfileSession(request: Request, options: { gatewayVerifiedJwt?: boolean } = {}) {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -29,12 +29,35 @@ export async function requireProfileSession(request: Request) {
     });
   }
 
-  const userClient = createClient(supabaseUrl, anonKey, {
-    global:{ headers:{ Authorization:authorization } },
-    auth:{ persistSession:false, autoRefreshToken:false },
-  });
-  const { data:userData, error:userError } = await userClient.auth.getUser();
-  if (userError || !userData.user) {
+  let authUserId = "";
+  if (options.gatewayVerifiedJwt) {
+    // Solo usar en una Edge Function desplegada con verify_jwt=true: el gateway
+    // comprueba la firma y caducidad antes de que la petición llegue aquí.
+    // Evita llamar a /auth/v1/user cada cinco segundos por cada alumno.
+    try {
+      const parts = authorization.slice(7).split(".");
+      if (parts.length !== 3) throw new Error("invalid JWT");
+      const encoded = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const decoded = atob(encoded.padEnd(Math.ceil(encoded.length / 4) * 4, "="));
+      const claims = JSON.parse(new TextDecoder().decode(Uint8Array.from(decoded, char => char.charCodeAt(0))));
+      if (claims.role !== "authenticated" ||
+          !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claims.sub) ||
+          !Number.isFinite(claims.exp) || claims.exp <= Math.floor(Date.now() / 1000)) {
+        throw new Error("invalid claims");
+      }
+      authUserId = claims.sub;
+    } catch (_error) {
+      authUserId = "";
+    }
+  } else {
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global:{ headers:{ Authorization:authorization } },
+      auth:{ persistSession:false, autoRefreshToken:false },
+    });
+    const { data:userData, error:userError } = await userClient.auth.getUser();
+    if (!userError && userData.user) authUserId = userData.user.id;
+  }
+  if (!authUserId) {
     throw new Response(JSON.stringify({ ok:false, error:"unauthorized" }), {
       status:401,
       headers:{ ...corsHeaders, "Content-Type":"application/json; charset=utf-8" },
@@ -48,7 +71,7 @@ export async function requireProfileSession(request: Request) {
   const { data:session, error:sessionError } = await admin
     .from("app_sessions")
     .select("profile_id,expires_at")
-    .eq("auth_user_id", userData.user.id)
+    .eq("auth_user_id", authUserId)
     .is("revoked_at", null)
     .gt("expires_at", now)
     .order("created_at", { ascending:false })
@@ -73,7 +96,7 @@ export async function requireProfileSession(request: Request) {
   }
   return {
     admin,
-    authUserId:userData.user.id,
+    authUserId,
     profileId:session.profile_id,
     organizationId:profile.organization_id,
     profileRole:profile.role,

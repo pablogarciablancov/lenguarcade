@@ -4,6 +4,10 @@
 # working directory name when running `supabase init`.
 project_id = "lenguarcade"
 
+# El sondeo de alumnos confía en la validación JWT previa del gateway.
+[functions.student-access-state]
+verify_jwt = true
+
 [api]
 enabled = true
 # Port to use for the API URL.

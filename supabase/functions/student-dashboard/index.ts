@@ -3,18 +3,10 @@ import {
   jsonResponse,
   requireProfileSession,
 } from "../_shared/lenguarcade.ts";
+import { studentGameAccess, studentGameButtonLabel, workshopModeFor } from "../_shared/student-access.ts";
 
 function average(values: number[]) {
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
-}
-
-function isLockedStatus(status: unknown) {
-  const normalized = String(status || "").trim().toLowerCase();
-  return normalized === "en revisión" ||
-    normalized === "en revision" ||
-    normalized === "próximamente" ||
-    normalized === "proximamente" ||
-    normalized.includes("coming");
 }
 
 function missionProgressValue(
@@ -184,17 +176,7 @@ Deno.serve(async (request) => {
         ? workshopSessionRow.game_ids.map((value: unknown) => String(value || ""))
         : []
     );
-    const workshopMode = (() => {
-      if (!workshopSessionRow || workshopSessionRow.published !== true) return "none";
-      if (workshopSessionRow.classroom_open === true) return "classroom";
-      if (workshopSessionRow.home_enabled === true) {
-        const now = Date.now();
-        const from = workshopSessionRow.active_from ? Date.parse(String(workshopSessionRow.active_from)) : Number.NaN;
-        const to = workshopSessionRow.active_to ? Date.parse(String(workshopSessionRow.active_to)) : Number.NaN;
-        if (Number.isFinite(from) && Number.isFinite(to) && now >= from && now < to) return "home";
-      }
-      return "closed";
-    })();
+    const workshopMode = workshopModeFor(workshopSessionRow);
     const workshopActive = workshopMode === "classroom" || workshopMode === "home";
     const progressByGame = new Map(progress.map(row => [row.game_id, row]));
     const attempts = progress.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
@@ -251,18 +233,7 @@ Deno.serve(async (request) => {
     const games = (gamesResult.data || []).map(game => {
       const estado = game.status;
       const integration = String(game.integration || "none");
-      const locked = isLockedStatus(estado) || !game.url || integration === "none";
-      const baseAccessEnabled = accessByGame.get(String(game.id)) !== false;
-      const workshopControlsAccess = Boolean(workshopSessionRow);
-      const selectedForWorkshop = workshopSelectedGameIds.has(String(game.id));
-      const workshopAccessEnabled = workshopControlsAccess
-        ? (workshopActive && selectedForWorkshop)
-        : null;
-      const accessEnabled = workshopAccessEnabled === null ? baseAccessEnabled : workshopAccessEnabled;
-      const lockedByWorkshop = workshopControlsAccess && !accessEnabled;
-      const lockedByTeacher = !workshopControlsAccess && !baseAccessEnabled;
-      const workshopScheduledClosed = workshopControlsAccess && selectedForWorkshop && !workshopActive;
-      const effectiveLocked = lockedByWorkshop || lockedByTeacher || locked;
+      const access = studentGameAccess(game, accessByGame, workshopSessionRow, workshopSelectedGameIds, workshopActive);
       const row = progressByGame.get(game.id) || {
         game_id:game.id,
         xp:0,
@@ -294,17 +265,13 @@ Deno.serve(async (request) => {
         descripcion:game.description || "",
         competencias:game.competencies || "",
         integration,
-        catalogLocked:locked,
-        accessEnabled,
-        accessSource:workshopControlsAccess ? "workshop" : "default",
-        lockedByTeacher,
-        lockedByWorkshop,
-        locked:effectiveLocked,
-        buttonLabel:effectiveLocked
-          ? (lockedByWorkshop
-              ? (workshopScheduledClosed ? "Fuera del horario del taller" : "Fuera de este taller")
-              : (lockedByTeacher ? "Cerrado por tu profesor" : (isLockedStatus(estado) ? "En revisión" : "No disponible")))
-          : (Number(row.sessions || 0) > 0 ? "Continuar" : "Jugar"),
+        catalogLocked:access.catalogLocked,
+        accessEnabled:access.accessEnabled,
+        accessSource:access.accessSource,
+        lockedByTeacher:access.lockedByTeacher,
+        lockedByWorkshop:access.lockedByWorkshop,
+        locked:access.locked,
+        buttonLabel:studentGameButtonLabel(access, estado, Number(row.sessions || 0)),
         progress:{
           studentId:profile.id,
           gameId:row.game_id,

@@ -26,6 +26,7 @@ const centralServer = fs.readFileSync(path.resolve("apps-script", "LenguArcade_C
 const centralStudent = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Alumno.html"), "utf8");
 const generatedCatalog = fs.readFileSync(path.resolve("apps-script", "LenguArcade_GameCatalog.gs"), "utf8");
 const supabaseDashboard = fs.readFileSync(path.resolve("supabase", "functions", "student-dashboard", "index.ts"), "utf8");
+const supabaseAccess = fs.readFileSync(path.resolve("supabase", "functions", "_shared", "student-access.ts"), "utf8");
 
 for (const required of [
   "include('arena_ui')",
@@ -140,8 +141,9 @@ if (!menuHtml.includes("bg-game-notice") ||
 
 if (!supabaseDashboard.includes('.eq("official", true)') ||
     !supabaseDashboard.includes('const integration = String(game.integration || "none")') ||
-    !supabaseDashboard.includes('const locked = isLockedStatus(estado) || !game.url || integration === "none"') ||
-    !supabaseDashboard.includes('normalized === "en revisión"')) {
+    !supabaseDashboard.includes('studentGameAccess(game, accessByGame, workshopSessionRow, workshopSelectedGameIds, workshopActive)') ||
+    !supabaseAccess.includes('isLockedStatus(game.status) || !game.url || String(game.integration || "none") === "none"') ||
+    !supabaseAccess.includes('normalized === "en revisión"')) {
   errors.push("student-dashboard debe derivar integración y bloqueo desde public.games, sin catálogo paralelo.");
 }
 

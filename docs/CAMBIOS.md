@@ -1,5 +1,14 @@
 # Registro de cambios
 
+## 2026-09-26 · Disponibilidad de juegos en vivo
+
+- La nueva Edge Function `student-access-state` devuelve solo el acceso efectivo de los juegos y la sesión publicada de la clase, con un fingerprint estable. Comparte el cálculo de bloqueos con `student-dashboard`.
+- La función exige JWT validado por el gateway y una `app_sessions` activa mediante `requireProfileSession`. Esta ruta evita una petición a `/auth/v1/user` cada cinco segundos por alumno; las demás funciones conservan su validación anterior.
+- El portal del alumno consulta esta función cada cinco segundos mientras la pestaña está visible. Aplica únicamente los cambios de acceso a tarjetas, misión, cabecera y «Seguir jugando»; al volver a la pestaña comprueba inmediatamente. Los errores temporales conservan el último estado y activan espera progresiva.
+- Antes de abrir un juego, si el acceso lleva más de dos segundos sin comprobarse, se consulta de nuevo y se muestra el modal de cierre si procede. Una partida que ya está abierta no se interrumpe.
+- `npm run check` incluye una prueba de acceso en vivo con reglas por alumno y clase, horarios del taller, treinta consultas ligeras y sincronización simulada del navegador.
+- Trabajo aislado en `integration/2026-09-26-live-access`; el despliegue de Apps Script y la prueba con cuentas reales quedan para la publicación del núcleo tras integrar.
+
 ## 2026-09-26 · Identidad anónima reutilizable en el acceso del alumno
 
 - `LenguArcade_Alumno.html` conserva en el navegador la identidad técnica de Supabase después de cerrar la sesión de LenguArcade. Los accesos con PIN, profesor jugador y Google reutilizan esa identidad; se renueva con el refresh token cuando corresponde.

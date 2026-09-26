@@ -483,3 +483,16 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 19. Verificar que abrir una sesión reconfigura esos permisos con los juegos de la sesión.
 20. Ejecutar `npm.cmd run check` y confirmar el mensaje:
     `Planificador de Taller correcto: sesiones preparadas, activación explícita y permisos automáticos.`
+
+## Disponibilidad de juegos en vivo (2026-09-26)
+
+1. Ejecutar `npm run check`, que incluye `check-live-access.mjs` y el resto de comprobaciones existentes.
+2. Tras desplegar `student-access-state` y publicar el portal, abrir A = profesor y B = alumno de la clase afectada, sin recargar B.
+3. En A cerrar Battlegrafía: en unos cinco segundos B debe mostrar el cierre, desactivar Jugar y retirarlo de «Seguir jugando». Pulsar Jugar justo antes del siguiente sondeo debe consultar acceso y mostrar «Cerrado por tu profesor».
+4. Abrir Battlegrafía, cerrar todos, abrir todos y usar «Solo este»: comprobar en B todos los botones y el contador del taller.
+5. Aplicar un cierre a una clase: un alumno de esa clase debe cambiar; otro de distinta clase debe conservar su acceso. Aplicar una regla individual: solo cambia el alumno elegido.
+6. Publicar, abrir, cerrar y retirar una sesión de taller: comprobar juegos seleccionados, cabecera, misión y horario de casa en B sin recargar.
+7. Dejar B en segundo plano, cambiar reglas en A y volver a B: debe sincronizar inmediatamente. Desconectar Internet durante unos sondeos: debe conservar sesión y último acceso; al reconectar debe actualizarse.
+8. Inspeccionar Network: los sondeos van a `/functions/v1/student-access-state`, no a `student-dashboard` ni a `/auth/v1/user`. El dashboard completo sigue consultándose en sus flujos normales (acceso, progreso y perfil) o si cambia el catálogo.
+9. Entrar en una partida y cerrarla desde A: la partida no debe expulsar al alumno; al volver al portal debe verse el nuevo cierre. Confirmar que el guardado sigue funcionando.
+10. Revisar los logs de la nueva función y comprobar ausencia de respuestas 401/429/5xx inesperadas con varios alumnos simultáneos.
