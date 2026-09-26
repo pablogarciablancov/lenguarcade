@@ -137,6 +137,7 @@ function browser(){
   let homePaints=0;
   let dashboardCalls=0;
   let nextState;
+  let responder=null;
   const listeners={};
   const jobs=new Map();
   let id=0;
@@ -159,7 +160,7 @@ function browser(){
     setTimeout:(fn,ms)=>{const key=++id;jobs.set(key,{fn,due:time+ms});return key;},
     clearTimeout:key=>jobs.delete(key),
     Date:{now:()=>time},Math,Promise,JSON,Array,Number,String,console,
-    callSupabaseFunction:async name=>{assert.equal(name,'student-access-state');calls++;if(offline)throw new Error('network');return structuredClone(nextState);},
+    callSupabaseFunction:async name=>{assert.equal(name,'student-access-state');calls++;if(offline)throw new Error('network');return responder?responder():structuredClone(nextState);},
     loadSupabaseDashboard:async()=>{dashboardCalls++;throw new Error('No se espera dashboard');},
     saveCache:()=>{},renderDashboard:()=>{},openGame:()=>{baseOpens++;},
   };
@@ -184,6 +185,7 @@ function browser(){
   }
   return {context,cards,modal,elements,listeners,advance,settle,
     setState:state=>{nextState=state;},setHidden:value=>{hidden=value;},setOffline:value=>{offline=value;},
+    setResponder:value=>{responder=value;},
     get counts(){return {calls,baseOpens,paints,homePaints,dashboardCalls,jobs:jobs.size};}};
 }
 {
@@ -242,6 +244,31 @@ function browser(){
   await ui.settle();
   assert.equal(ui.cards[0].items['.play'].disabled,false);
   assert.equal(ui.counts.dashboardCalls,0);
+
+  const published={...state('workshop',true),workshopSession:{
+    classroomId:'c1',startedAt:'start1',planId:'p1',title:'Misión',published:true,
+    mode:'closed',active:false,gameIds:['battlegrafia'],targetXp:100
+  }};
+  published.games[0]={...published.games[0],accessSource:'workshop',lockedByTeacher:false,lockedByWorkshop:true,
+    lockedLabel:'Fuera del horario del taller'};
+  ui.setState(published);
+  ui.listeners.focus();
+  await ui.settle();
+  assert.equal(ui.context.currentDashboard.workshopSession.title,'Misión');
+  assert.equal(ui.context.currentDashboard.games[0].buttonLabel,'Fuera del horario del taller');
+  assert.equal(ui.cards[0].items['.play'].disabled,true);
+
+  let release;
+  ui.setResponder(()=>new Promise(resolve=>{release=resolve;}));
+  await ui.advance(5000);
+  const runningCalls=ui.counts.calls;
+  ui.listeners.focus();
+  ui.listeners.online();
+  assert.equal(ui.counts.calls,runningCalls,'Un sondeo en curso se comparte');
+  ui.setResponder(null);
+  release(structuredClone(published));
+  await ui.settle();
+  assert.equal(ui.counts.jobs,1);
 }
 
 console.log('Acceso en vivo correcto: 30 sondeos ligeros, permisos por perfil/clase, taller, DOM estable, visibilidad, red y guard de juego.');
