@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## 2026-09-26 · Identidad anónima reutilizable en el acceso del alumno
+
+- `LenguArcade_Alumno.html` conserva en el navegador la identidad técnica de Supabase después de cerrar la sesión de LenguArcade. Los accesos con PIN, profesor jugador y Google reutilizan esa identidad; se renueva con el refresh token cuando corresponde.
+- El PIN incorrecto y la sesión de alumno caducada no eliminan la identidad. Un refresh token realmente inválido permite crear otra identidad; un error temporal o un 429 no provoca nuevos intentos automáticos.
+- El rival local mantiene su identidad independiente. El cierre espera a que `student-profile` revoque `app_sessions` antes de ocultar el panel; si falla la revocación, se informa del problema y se mantiene la sesión para reintentar.
+- Se añade `scripts/check-student-auth-session.mjs` al chequeo general con respuestas simuladas de Auth y Edge Functions, sin afectar datos reales.
+
 ## 2026-09-03 - Sesiones del taller y acceso supervisado en casa
 
 - Se añadió una capa de `Sesión del taller` por clase sobre el control de acceso existente.

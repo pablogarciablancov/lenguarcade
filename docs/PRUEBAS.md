@@ -1,5 +1,20 @@
 # Plan de pruebas
 
+## Identidad Supabase y sesión de alumno (2026-09-26)
+
+1. Ejecutar `node scripts/check-student-auth-session.mjs` y `npm run check`.
+2. En un navegador sin datos previos, entrar con un alumno válido; comprobar una única llamada a `/auth/v1/signup`.
+3. Salir y volver a entrar con el mismo alumno; comprobar que no aparece otra llamada a `/auth/v1/signup`.
+4. Salir y entrar con otro alumno en el mismo Chromebook; debe cargar su perfil y no el anterior, sin un nuevo signup.
+5. Recargar la página con la sesión abierta: recuperar el panel. Salir y recargar: mostrar el acceso, mantener `LA_SUPABASE_SESSION` y rechazar el dashboard previo.
+6. Probar un PIN incorrecto y comprobar que se conserva `LA_SUPABASE_SESSION`.
+7. Con el access token caducado, comprobar una llamada a `/auth/v1/token?grant_type=refresh_token` y ningún signup. Con refresh token inválido, comprobar una única creación nueva al iniciar sesión.
+8. Probar el acceso con Google y el modo profesor jugador. Añadir un rival en un juego compatible y verificar que su token no sustituye el principal.
+9. Guardar progreso y comprobar que se recupera después de recargar; verificar también la copia de respaldo en Sheets si está habilitada.
+10. Confirmar que un 429 en `/auth/v1/signup` muestra un mensaje comprensible sin bucle de peticiones.
+
+Las pruebas automatizadas simulan las respuestas de Supabase; estos pasos con credenciales de prueba deben hacerse sobre el despliegue tras publicar una versión validada.
+
 ## Sesiones del taller y acceso supervisado en casa
 
 1. Publicar la nueva versión de Apps Script y abrir `/exec?page=profesor` con una cuenta autorizada.

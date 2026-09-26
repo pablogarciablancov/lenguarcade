@@ -726,11 +726,14 @@ const LA_LEGACY_SESSION_KEY='LA_LEGACY_STUDENT_TOKEN';
 let supabaseBackend=false;
 let legacySessionToken=localStorage.getItem(LA_LEGACY_SESSION_KEY)||'';
 const legacyTokenBySupabaseToken=new Map();
+let studentSessionGeneration=0;
+let supabaseIdentityPromise=null;
+let supabaseRefreshPromise=null;
 
 function supabaseErrorMessage(code,status){
+  if(code==='session_expired')return 'La sesión ha caducado. Vuelve a entrar.';
   if(code==='invalid_credentials'||status===401)return 'Credenciales incorrectas.';
   if(code==='temporarily_blocked'||status===429)return 'Demasiados intentos. Espera unos minutos.';
-  if(code==='session_expired')return 'La sesiÃ³n ha caducado. Vuelve a entrar.';
   if(code==='wrong_current_pin')return 'El PIN actual no es correcto.';
   if(code==='invalid_pin_format')return 'El PIN debe tener entre 4 y 8 nÃºmeros.';
   if(code==='invalid_avatar')return 'La configuraciÃ³n del avatar no es vÃ¡lida.';
@@ -752,9 +755,13 @@ async function supabaseRequest(path,options={},accessToken=''){
   }
   const data=await response.json().catch(()=>({}));
   if(!response.ok){
-    const error=new Error(supabaseErrorMessage(data.error||data.code,response.status));
+    const message=response.status===429&&path==='/auth/v1/signup'
+      ?'Hay demasiados accesos simultáneos desde el colegio. Espera unos minutos y vuelve a intentarlo.'
+      :supabaseErrorMessage(data.error||data.code,response.status);
+    const error=new Error(message);
     error.status=response.status;
     error.code=data.error||data.code||'supabase_error';
+    error.path=path;
     throw error;
   }
   return data;
@@ -787,11 +794,40 @@ async function createSupabaseAnonymousSession(){
 }
 
 async function refreshSupabaseSession(session){
-  const auth=await supabaseRequest('/auth/v1/token?grant_type=refresh_token',{
-    method:'POST',
-    body:JSON.stringify({refresh_token:session.refresh_token})
-  });
-  return saveSupabaseSession(auth);
+  if(supabaseRefreshPromise)return supabaseRefreshPromise;
+  const pending=(async()=>{
+    const current=readSupabaseSession();
+    if(current&&current.refresh_token!==session.refresh_token)return current;
+    const auth=await supabaseRequest('/auth/v1/token?grant_type=refresh_token',{
+      method:'POST',
+      body:JSON.stringify({refresh_token:session.refresh_token})
+    });
+    return saveSupabaseSession(auth);
+  })();
+  supabaseRefreshPromise=pending;
+  try{return await pending;}
+  finally{if(supabaseRefreshPromise===pending)supabaseRefreshPromise=null;}
+}
+
+async function getOrCreateSupabaseAnonymousSession(){
+  if(supabaseIdentityPromise)return supabaseIdentityPromise;
+  const pending=(async()=>{
+    let session=readSupabaseSession();
+    if(session){
+      if(Number(session.expires_at||0)*1000>=Date.now()+45000)return session;
+      try{return await refreshSupabaseSession(session);}
+      catch(error){
+        if(error.status!==400&&error.status!==401)throw error;
+        // El refresh token ya no sirve; solo entonces se necesita otra identidad.
+        localStorage.removeItem(LA_SUPABASE_SESSION_KEY);
+      }
+    }
+    const auth=await createSupabaseAnonymousSession();
+    return saveSupabaseSession(auth);
+  })();
+  supabaseIdentityPromise=pending;
+  try{return await pending;}
+  finally{if(supabaseIdentityPromise===pending)supabaseIdentityPromise=null;}
 }
 
 async function ensureSupabaseAccessToken(accessToken){
@@ -820,23 +856,24 @@ async function loadSupabaseDashboard(accessToken){
 }
 
 async function loginSupabaseStudent(email,pinValue,persist){
-  const auth=await createSupabaseAnonymousSession();
+  // El rival necesita una identidad separada de la sesión principal.
+  const auth=persist?await getOrCreateSupabaseAnonymousSession():await createSupabaseAnonymousSession();
   const loginResult=await callSupabaseFunction('pin-login',{email,pin:pinValue},auth.access_token);
   const dashboard=await loadSupabaseDashboard(auth.access_token);
-  if(persist)saveSupabaseSession(auth);
   return {ok:true,source:'supabase',token:auth.access_token,refreshToken:auth.refresh_token,student:loginResult.profile,dashboard};
 }
 
 async function loginSupabaseTeacher(password,persist){
-  const auth=await createSupabaseAnonymousSession();
+  const auth=persist?await getOrCreateSupabaseAnonymousSession():await createSupabaseAnonymousSession();
   const loginResult=await callSupabaseFunction('teacher-login',{password},auth.access_token);
   const dashboard=await loadSupabaseDashboard(auth.access_token);
-  if(persist)saveSupabaseSession(auth);
   return {ok:true,source:'supabase',teacherMode:true,token:auth.access_token,refreshToken:auth.refresh_token,student:loginResult.profile,dashboard};
 }
 
 function connectLegacyStudentInBackground(email,pinValue,accessToken){
+  const generation=studentSessionGeneration;
   studentCallServerBase('loginStudent',[email,pinValue]).then(result=>{
+    if(generation!==studentSessionGeneration||!secureSessionVerified||!supabaseBackend)return;
     legacySessionToken=result.token;
     localStorage.setItem(LA_LEGACY_SESSION_KEY,legacySessionToken);
     legacyTokenBySupabaseToken.set(accessToken,legacySessionToken);
@@ -857,8 +894,15 @@ function copyProgressToSheets(fn,originalPayload,accessToken){
 async function restoreSupabaseStudentSession(){
   let session=readSupabaseSession();
   if(!session)return false;
+  let technicalSessionInvalid=false;
   try{
-    if(Number(session.expires_at||0)*1000<Date.now()+45000)session=await refreshSupabaseSession(session);
+    if(Number(session.expires_at||0)*1000<Date.now()+45000){
+      try{session=await refreshSupabaseSession(session);}
+      catch(error){
+        technicalSessionInvalid=error.status===400||error.status===401;
+        throw error;
+      }
+    }
     token=session.access_token;
     supabaseBackend=true;
     if(legacySessionToken)legacyTokenBySupabaseToken.set(token,legacySessionToken);
@@ -871,11 +915,22 @@ async function restoreSupabaseStudentSession(){
     setStatus('SesiÃ³n recuperada desde Supabase.');
     return true;
   }catch(error){
-    localStorage.removeItem(LA_SUPABASE_SESSION_KEY);
+    if(technicalSessionInvalid||(error.status===401&&error.code==='unauthorized')){
+      localStorage.removeItem(LA_SUPABASE_SESSION_KEY);
+    }
+    localStorage.removeItem('LA_DASHBOARD_CACHE');
+    localStorage.removeItem('LA_STUDENT_TOKEN');
+    localStorage.removeItem(LA_LEGACY_SESSION_KEY);
+    studentSessionGeneration++;
+    legacySessionToken='';
+    legacyTokenBySupabaseToken.clear();
+    currentDashboard=null;
     token='';
     supabaseBackend=false;
     secureSessionVerified=false;
-    setSecureLoginStatus('La sesiÃ³n ha caducado. Introduce de nuevo tu PIN.');
+    setSecureLoginStatus(error.code==='session_expired'
+      ?'Tu sesión ha caducado. Entra de nuevo con tu cuenta o PIN.'
+      :'No se ha podido recuperar la sesión. Entra de nuevo.');
     return false;
   }
 }
@@ -1041,6 +1096,7 @@ async function secureTeacherLogin(){
     secureSessionVerified=true;
     token=result.token;
     supabaseBackend=true;
+    studentSessionGeneration++;
     legacySessionToken='';
     localStorage.removeItem('LA_STUDENT_TOKEN');
     localStorage.removeItem(LA_LEGACY_SESSION_KEY);
@@ -1086,6 +1142,7 @@ async function secureStudentLogin(){
     secureSessionVerified=true;
     token=result.token;
     supabaseBackend=result.source==='supabase';
+    studentSessionGeneration++;
     if(supabaseBackend){
       localStorage.removeItem('LA_STUDENT_TOKEN');
       connectLegacyStudentInBackground(email,pinValue,token);
@@ -1107,26 +1164,46 @@ async function secureStudentLogin(){
   }
 }
 
-function secureStudentLogout(){
-  if(supabaseBackend&&token){
-    callSupabaseFunction('student-profile',{action:'logout'},token).catch(()=>{});
-    supabaseRequest('/auth/v1/logout',{method:'POST'},token).catch(()=>{});
+async function secureStudentLogout(){
+  if(busy)return false;
+  busy=true;
+  const button=$('logoutBtn');
+  button.disabled=true;
+  try{
+    if(supabaseBackend&&token){
+      try{await callSupabaseFunction('student-profile',{action:'logout'},token);}
+      catch(error){
+        const invalidIdentity=(error.status===401&&error.code==='unauthorized')||
+          (error.path==='/auth/v1/token?grant_type=refresh_token'&&(error.status===400||error.status===401));
+        if(error.code!=='session_expired'&&!invalidIdentity)throw error;
+        if(invalidIdentity)localStorage.removeItem(LA_SUPABASE_SESSION_KEY);
+      }
+    }
+    localStorage.removeItem('LA_STUDENT_TOKEN');
+    localStorage.removeItem(LA_LEGACY_SESSION_KEY);
+    localStorage.removeItem('LA_DASHBOARD_CACHE');
+    studentSessionGeneration++;
+    token='';
+    supabaseBackend=false;
+    legacySessionToken='';
+    legacyTokenBySupabaseToken.clear();
+    currentDashboard=null;
+    secureSessionVerified=false;
+    document.body.classList.add('authPending');
+    $('loginCard').classList.remove('hidden');
+    const pinInput=secureLoginElement('[name="studentPin"]');
+    if(pinInput)pinInput.value='';
+    const emailInput=secureLoginElement('[name="studentEmail"]');
+    if(emailInput)emailInput.value='';
+    setSecureLoginStatus('Sesión cerrada correctamente.');
+    return true;
+  }catch(error){
+    setStatus('No se ha podido cerrar la sesión. Comprueba la conexión e inténtalo de nuevo.');
+    return false;
+  }finally{
+    busy=false;
+    button.disabled=false;
   }
-  localStorage.removeItem('LA_STUDENT_TOKEN');
-  localStorage.removeItem(LA_SUPABASE_SESSION_KEY);
-  localStorage.removeItem(LA_LEGACY_SESSION_KEY);
-  localStorage.removeItem('LA_DASHBOARD_CACHE');
-  token='';
-  supabaseBackend=false;
-  legacySessionToken='';
-  legacyTokenBySupabaseToken.clear();
-  currentDashboard=null;
-  secureSessionVerified=false;
-  document.body.classList.add('authPending');
-  $('loginCard').classList.remove('hidden');
-  const pinInput=secureLoginElement('[name="studentPin"]');
-  if(pinInput)pinInput.value='';
-  setSecureLoginStatus('Sesión cerrada correctamente.');
 }
 
 login=secureStudentLogin;
@@ -2084,14 +2161,13 @@ mountGamePairCodePanel();
     }
   }
   async function loginGoogleViaSupabase(kind){
-    if(typeof createSupabaseAnonymousSession!=='function'||typeof loadSupabaseDashboard!=='function'||typeof saveSupabaseSession!=='function')return null;
-    const auth=await createSupabaseAnonymousSession();
+    if(typeof getOrCreateSupabaseAnonymousSession!=='function'||typeof loadSupabaseDashboard!=='function')return null;
+    const auth=await getOrCreateSupabaseAnonymousSession();
     const fn=kind==='teacher'
       ?'loginTeacherPanelWithGoogle'
       :(kind==='test'?'loginTeacherTestStudentWithGoogle':'loginStudentPanelWithGoogle');
     await baseCall(fn,[auth.access_token]);
     const dashboard=await loadSupabaseDashboard(auth.access_token);
-    saveSupabaseSession(auth);
     return {ok:true,source:'supabase',token:auth.access_token,dashboard:dashboard};
   }
   function finishGoogleStudentLogin(result,message){
@@ -2100,6 +2176,7 @@ mountGamePairCodePanel();
     secureSessionVerified=true;
     token=result.token;
     currentDashboard=result.dashboard;
+    studentSessionGeneration++;
     try{supabaseBackend=isSupabase;}catch(error){}
     if(isSupabase){
       try{legacySessionToken='';}catch(error){}
@@ -2109,7 +2186,6 @@ mountGamePairCodePanel();
       try{legacySessionToken=token;}catch(error){}
       localStorage.setItem('LA_STUDENT_TOKEN',token);
       try{localStorage.setItem(LA_LEGACY_SESSION_KEY,token);}catch(error){}
-      try{localStorage.removeItem(LA_SUPABASE_SESSION_KEY);}catch(error){}
     }
     saveCache('LA_DASHBOARD_CACHE',currentDashboard);
     renderDashboard(currentDashboard);
@@ -2860,8 +2936,9 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
 
     var baseLogout=(typeof window.secureStudentLogout==='function')?window.secureStudentLogout:(typeof secureStudentLogout==='function'?secureStudentLogout:null);
     if(baseLogout&&!baseLogout.__laGoogleLogoutPatched){
-      var patchedLogout=function(){
-        var result=baseLogout.apply(this,arguments);
+      var patchedLogout=async function(){
+        var result=await baseLogout.apply(this,arguments);
+        if(!result)return false;
         try{localStorage.setItem('LA_STUDENT_SCREEN','inicio');}catch(error){}
         window.laShowStudentScreen('inicio');
         setTimeout(function(){
@@ -2873,7 +2950,7 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
             }
           }catch(error){console.warn('No se pudo reconstruir el acceso Google tras salir.',error);}
         },0);
-        return result;
+        return true;
       };
       patchedLogout.__laGoogleLogoutPatched=true;
       window.secureStudentLogout=patchedLogout;
