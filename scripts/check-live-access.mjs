@@ -269,6 +269,23 @@ function browser(){
   release(structuredClone(published));
   await ui.settle();
   assert.equal(ui.counts.jobs,1);
+  await ui.advance(0);
+  assert.equal(ui.counts.calls,runningCalls+1,'Al volver al foco se consulta de nuevo tras el sondeo pendiente');
+
+  const race=browser();
+  race.setState(state('open',false));
+  await race.advance(0);
+  await race.advance(3000);
+  let releaseOld;
+  race.setResponder(()=>new Promise(resolve=>{releaseOld=resolve;}));
+  race.listeners.focus();
+  const click=race.context.openGame('battlegrafia');
+  race.setState(state('new-closed',true));
+  race.setResponder(null);
+  releaseOld(state('previous-open',false));
+  await click;
+  assert.equal(race.counts.baseOpens,0,'Un cierre durante el sondeo bloquea el clic');
+  assert.equal(race.counts.calls,3,'Las dos comprobaciones son secuenciales');
 }
 
 console.log('Acceso en vivo correcto: 30 sondeos ligeros, permisos por perfil/clase, taller, DOM estable, visibilidad, red y guard de juego.');

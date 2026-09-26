@@ -3339,6 +3339,7 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
   var failures=0;
   var timer=null;
   var inFlight=null;
+  var pendingImmediate=false;
 
   function active(){
     return supabaseBackend&&secureSessionVerified&&!!token&&!!currentDashboard&&
@@ -3461,7 +3462,8 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
         throw error;
       }finally{
         inFlight=null;
-        armTimer(failures?Math.min(60000,5000*Math.pow(2,failures)):5000);
+        armTimer(pendingImmediate?0:(failures?Math.min(60000,5000*Math.pow(2,failures)):5000));
+        pendingImmediate=false;
       }
     })();
     return inFlight;
@@ -3469,7 +3471,10 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
   function requestNow(){
     clearTimeout(timer);
     timer=null;
-    if(active()&&!document.hidden)syncAccess().catch(function(){});
+    if(active()&&!document.hidden){
+      if(inFlight)pendingImmediate=true;
+      else syncAccess().catch(function(){});
+    }
   }
   function blocked(game,message){
     document.getElementById('gameModalTitle').textContent=game&&game.nombre||'Juego cerrado';
@@ -3481,7 +3486,12 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
     if(!active())return baseOpenGame(gameId);
     resetIfNeeded();
     if(!lastCheckedAt||Date.now()-lastCheckedAt>2000||inFlight){
-      try{await syncAccess();}
+      var alreadyChecking=!!inFlight;
+      try{
+        await syncAccess();
+        // Una consulta iniciada antes del clic puede preceder al cierre del profesor.
+        if(alreadyChecking&&active())await syncAccess();
+      }
       catch(error){
         blocked(null,'No se puede comprobar el acceso ahora. Revisa la conexión e inténtalo de nuevo.');
         return;
