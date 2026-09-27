@@ -24,7 +24,7 @@ Deno.serve(async (request) => {
         .eq("official", true)
         .order("sort_order"),
       admin.from("profile_game_access")
-        .select("game_id,enabled")
+        .select("game_id,enabled,updated_at")
         .eq("profile_id", profileId),
       admin.from("classroom_enrollments")
         .select("classroom_id,classrooms(name,legacy_class_code)")
@@ -47,6 +47,8 @@ Deno.serve(async (request) => {
       ? sessionRow.game_ids.map((id: unknown) => String(id || "")) : []);
     const mode = workshopModeFor(sessionRow);
     const active = mode === "classroom" || mode === "home";
+    const accessRowsByGame = new Map<string, Record<string, unknown>>((accessResult.data || [])
+      .map(row => [String(row.game_id), row as Record<string, unknown>]));
     const accessByGame = new Map<string, boolean>((accessResult.data || [])
       .map(row => [String(row.game_id), row.enabled !== false]));
     const classroomRelation = (enrollmentsResult.data || [])[0]?.classrooms;
@@ -72,6 +74,10 @@ Deno.serve(async (request) => {
 
     const games = (gamesResult.data || []).map(game => {
       const access = studentGameAccess(game, accessByGame, sessionRow, selectedIds, active);
+      const accessRow = accessRowsByGame.get(String(game.id)) || null;
+      const closedAt = access.lockedByWorkshop
+        ? String(sessionRow?.updated_at || "")
+        : (access.lockedByTeacher ? String(accessRow?.updated_at || "") : "");
       return {
         gameId:String(game.id),
         estado:game.status,
@@ -81,6 +87,7 @@ Deno.serve(async (request) => {
         lockedByTeacher:access.lockedByTeacher,
         lockedByWorkshop:access.lockedByWorkshop,
         locked:access.locked,
+        closedAt,
         lockedLabel:studentGameButtonLabel(access, game.status, 0),
       };
     });
