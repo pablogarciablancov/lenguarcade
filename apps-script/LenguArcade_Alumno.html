@@ -2075,13 +2075,13 @@ async function persistGameResult(result){
     runner.pendingResult=null;
     $('gameRunnerStatus').textContent='Progreso guardado.';
     sendToActiveGame('SAVE_CONFIRMED',{resultId:result.resultId});
-    if(runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),250);
+    if(runner.closeRequested&&runner.explicitExitRequested&&!runner.accessFinalizing)setTimeout(()=>destroyGameRunner(true),250);
   }catch(error){
     processedGameResults.delete(result.resultId);
     $('gameRunnerStatus').textContent='No se pudo guardar. Puedes reintentarlo.';
     $('gameRunnerRetry').classList.remove('hidden');
     sendToActiveGame('SAVE_FAILED',{message:error.message||String(error)});
-    if(runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),350);
+    if(runner.closeRequested&&runner.explicitExitRequested&&!runner.accessFinalizing)setTimeout(()=>destroyGameRunner(true),350);
   }finally{
     if(activeGameRunner===runner){
       runner.saving=false;
@@ -2151,12 +2151,12 @@ async function persistGameCheckpoint(checkpoint){
     if(closureCheckpoint&&activeGameRunner===runner&&runner.accessClosing&&runner.accessClosureAt===closureAt)runner.accessFinalCheckpointPending=false;
     $('gameRunnerStatus').textContent=closureCheckpoint?'Último progreso guardado · volviendo a LenguArcade...':'Partida guardada.';
     sendToActiveGame('CHECKPOINT_CONFIRMED',{checkpointId:checkpoint.checkpointId});
-    if(runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),250);
+    if(runner.closeRequested&&runner.explicitExitRequested&&(!runner.accessFinalizing||closureCheckpoint))setTimeout(()=>destroyGameRunner(true),250);
   }catch(error){
     if(closureCheckpoint&&activeGameRunner===runner&&runner.accessClosing&&runner.accessClosureAt===closureAt)runner.accessFinalCheckpointPending=false;
     $('gameRunnerStatus').textContent=closureCheckpoint?'No se pudo completar el último guardado. Volviendo a LenguArcade...':'No se pudo guardar la partida.';
     sendToActiveGame('CHECKPOINT_FAILED',{checkpointId:checkpoint.checkpointId,message:error.message||String(error)});
-    if(runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),350);
+    if(runner.closeRequested&&runner.explicitExitRequested&&(!runner.accessFinalizing||closureCheckpoint))setTimeout(()=>destroyGameRunner(true),350);
   }finally{
     if(activeGameRunner===runner){
       runner.checkpointing=false;
