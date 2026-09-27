@@ -505,3 +505,13 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 - Al llegar a 0:00 el iframe se destruye y el alumno vuelve al portal sin un guardado adicional.
 - Reabrir antes de 0:00 cancela el cierre y reactiva el guardado, incluso si llega tarde el CLOSE_READY del checkpoint técnico.
 - student-access-state sigue siendo ligero y save-progress rechaza cualquier guardado normal cuando el acceso está cerrado.
+
+## Guardado durante el minuto de gracia · 2026-09-27
+
+- Cerrar un juego con un alumno dentro: la cuenta atrás conserva el guardado normal hasta 0:00.
+- Un resultado o autosave dentro de la gracia debe persistir aunque el juego ya figure cerrado para nuevas entradas.
+- Al pulsar Salir ahora o llegar a 0:00 se solicita un último checkpoint y después se cierra el iframe.
+- Si un guardado estaba en curso al llegar a 0:00, debe terminar antes de solicitar el checkpoint final.
+- Tras la gracia, save-progress rechaza guardados normales; solo acepta el checkpoint final asociado al mismo cierre con margen breve de red.
+- Reabrir antes de 0:00 cancela la cuenta atrás y mantiene la partida/guardado normales.
+
