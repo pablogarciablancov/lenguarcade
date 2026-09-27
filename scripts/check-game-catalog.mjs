@@ -106,18 +106,26 @@ for(const expected of [
 }
 const tierras=catalog.games.find(row=>row.id==="tierras_de_tinta");
 if(!tierras ||
-   tierras.entry!=="" ||
-   tierras.externalUrl!=="https://tierras-de-la-tinta.pgarciab.chatgpt.site" ||
+   tierras.entry!=="games/tierras_de_tinta/" ||
    tierras.banner!=="tierras-de-tinta-banner.svg" ||
-   tierras.integration!=="external" ||
+   tierras.integration!=="embedded" ||
    tierras.active!==true ||
    tierras.official!==true){
-  throw new Error("Catálogo: Tierras de Tinta debe apuntar al Site avanzado fuente 30, no al respaldo v21.");
+  throw new Error("Catálogo: Tierras de Tinta debe usar el adaptador embebido de la versión avanzada.");
+}
+const tierrasIndex=fs.readFileSync(path.join(root,"games","tierras_de_tinta","index.html"),"utf8");
+const tierrasProxy=fs.readFileSync(path.join(root,"games","tierras_de_tinta","proxy-bridge.js"),"utf8");
+const tierrasIntegration=fs.readFileSync(path.join(root,"games","tierras_de_tinta","lenguarcade.integration.json"),"utf8");
+for(const source of [tierrasIndex,tierrasProxy,tierrasIntegration]){
+  if(!source.includes("https://tierras-de-la-tinta.pgarciab.chatgpt.site")) throw new Error("Tierras de Tinta: falta la URL del Site avanzado fuente 30.");
+}
+for(const token of ["READY","INITIALIZED","SESSION_STARTED","REQUEST_EXIT","CLOSE_READY"]){
+  if(!tierrasProxy.includes(token)) throw new Error("Tierras de Tinta proxy: falta "+token+".");
 }
 if(!generatedApps.includes('gameId:"tierras_de_tinta"') ||
-   !generatedApps.includes('url:"https://tierras-de-la-tinta.pgarciab.chatgpt.site"') ||
-   !snapshot.includes("'https://tierras-de-la-tinta.pgarciab.chatgpt.site'")){
-  throw new Error("Tierras de Tinta: el catálogo generado no apunta a la versión avanzada publicada.");
+   !generatedApps.includes('url:"https://pablogarciablancov.github.io/lenguarcade/games/tierras_de_tinta/"') ||
+   !snapshot.includes("'https://pablogarciablancov.github.io/lenguarcade/games/tierras_de_tinta/'")){
+  throw new Error("Tierras de Tinta: el catálogo generado no apunta al adaptador embebido.");
 }
 for(const [label,html] of [["alumno",student],["profesor",teacher]]){
   for(const pair of [["versopolis","versopolis-banner.jpg"],["tierras_de_tinta","tierras-de-tinta-banner.svg"],["lexaria","lexaria-banner.svg"]]){

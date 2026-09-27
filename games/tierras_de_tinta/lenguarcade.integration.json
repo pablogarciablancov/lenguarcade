@@ -2,14 +2,20 @@
   "$schema": "lenguarcade-integration-v1",
   "gameId": "tierras_de_tinta",
   "name": "Tierras de Tinta",
-  "status": "respaldo v21",
-  "integration": "none",
+  "status": "en pruebas",
+  "integration": "embedded",
   "entry": "games/tierras_de_tinta/index.html",
   "banner": "tierras-de-tinta-banner.svg",
-  "requires": {
-    "studentRunner": false,
-    "saveProgress": false,
-    "supabaseCatalog": false
+  "source": {
+    "kind": "chatgpt-site-proxy",
+    "liveUrl": "https://tierras-de-la-tinta.pgarciab.chatgpt.site",
+    "sourceVersion": 30,
+    "publishedAt": "2026-09-20"
   },
-  "notes": "Esta carpeta conserva la rama de rescate v21 y NO es la versión oficial actual. El catálogo oficial apunta al Site avanzado publicado el 20/09/2026 (fuente 30): https://tierras-de-la-tinta.pgarciab.chatgpt.site. No volver a sustituir el catálogo por esta carpeta salvo recuperación deliberada."
+  "requires": {
+    "studentRunner": true,
+    "saveProgress": false,
+    "supabaseCatalog": true
+  },
+  "notes": "La versión oficial embebida es el Site avanzado fuente 30. El contenido v21 (game.js/content.js/styles.css/assets) permanece solo como respaldo técnico y no debe volver a usarse como versión oficial. El proxy permite apertura/cierre dentro del runner; el guardado sigue siendo local al Site hasta migrar su fuente nativa."
 }
