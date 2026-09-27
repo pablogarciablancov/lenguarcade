@@ -496,3 +496,12 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 8. Inspeccionar Network: los sondeos van a `/functions/v1/student-access-state`, no a `student-dashboard` ni a `/auth/v1/user`. El dashboard completo sigue consultándose en sus flujos normales (acceso, progreso y perfil) o si cambia el catálogo.
 9. Entrar en una partida y cerrarla desde A: la partida no debe expulsar al alumno; al volver al portal debe verse el nuevo cierre. Confirmar que el guardado sigue funcionando.
 10. Revisar los logs de la nueva función y comprobar ausencia de respuestas 401/429/5xx inesperadas con varios alumnos simultáneos.
+
+## Cierre de juegos en vivo · 2026-09-27
+
+- Profesor cierra un juego con un alumno dentro: aviso en menos de un ciclo de sondeo y cuenta atrás basada en el instante real del cierre.
+- Se intenta un único checkpoint final; los guardados posteriores quedan congelados durante la gracia.
+- Salir ahora funciona aunque el checkpoint falle o quede colgado.
+- Al llegar a 0:00 el iframe se destruye y el alumno vuelve al portal sin un guardado adicional.
+- Reabrir antes de 0:00 cancela el cierre y reactiva el guardado, incluso si llega tarde el CLOSE_READY del checkpoint técnico.
+- student-access-state sigue siendo ligero y save-progress rechaza cualquier guardado normal cuando el acceso está cerrado.
