@@ -87,15 +87,22 @@ Deno.serve(async (request) => {
       const serverClosedMs = Date.parse(accessClosedAt);
       const requestedClosedMs = Date.parse(requestedClosedAt);
       const nowMs = Date.now();
+      const sameClosure =
+        Number.isFinite(serverClosedMs) &&
+        Number.isFinite(requestedClosedMs) &&
+        Math.abs(serverClosedMs - requestedClosedMs) <= 1500;
+      const withinGraceDeliveryWindow =
+        sameClosure &&
+        nowMs >= serverClosedMs - 1000 &&
+        nowMs <= serverClosedMs + 65000;
+      const graceSaveAllowed =
+        body.accessGracePeriod === true &&
+        withinGraceDeliveryWindow;
       const closureCheckpointAllowed =
         body.checkpoint === true &&
         body.accessClosureCheckpoint === true &&
-        Number.isFinite(serverClosedMs) &&
-        Number.isFinite(requestedClosedMs) &&
-        Math.abs(serverClosedMs - requestedClosedMs) <= 1500 &&
-        nowMs >= serverClosedMs - 1000 &&
-        nowMs <= serverClosedMs + 60000;
-      if (!closureCheckpointAllowed) {
+        withinGraceDeliveryWindow;
+      if (!graceSaveAllowed && !closureCheckpointAllowed) {
         return jsonResponse({ ok:false, error:workshopControlsAccess ? "workshop_game_access_closed" : "game_access_closed" }, 403);
       }
     }
