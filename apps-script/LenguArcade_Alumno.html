@@ -1566,7 +1566,7 @@ function prepareEmbeddedGame(game){
   url.searchParams.set('lenguarcade','1');
   url.searchParams.set('channel',channel);
   const iframe=$('gameRunnerFrame');
-  activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,explicitExitRequested:false,lastResultReason:'',pendingResult:null,saving:false,checkpointing:false,opponent:null,opponents:{},pendingOpponentRequest:null,opponentAuthBusy:false,accessClosing:false,accessClosureAt:'',accessClosureDeadline:0,accessCountdownTimer:null,accessFreezeTimer:null,accessExitSafetyTimer:null,accessFinalCheckpointPending:false,accessFrozen:false,initialized:false,visible:false,loading:false,retries:0,initTimer:null,primarySessionCounted:false,opponentSessionCounted:false,sessionCountedByRole:{}};
+  activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,explicitExitRequested:false,lastResultReason:'',pendingResult:null,saving:false,checkpointing:false,opponent:null,opponents:{},pendingOpponentRequest:null,opponentAuthBusy:false,accessClosing:false,accessClosureAt:'',accessClosureDeadline:0,accessCountdownTimer:null,accessFreezeTimer:null,accessExitSafetyTimer:null,accessSystemExitUntil:0,accessFinalCheckpointPending:false,accessFrozen:false,initialized:false,visible:false,loading:false,retries:0,initTimer:null,primarySessionCounted:false,opponentSessionCounted:false,sessionCountedByRole:{}};
   installGameBootstrapContext(activeGameRunner);
   $('gameRunnerTitle').textContent=game.nombre;
   $('gameRunnerStatus').textContent='Conectando con tu perfil...';
@@ -1731,6 +1731,9 @@ function beginGameAccessClosing(gameState){
   runner.accessCountdownTimer=setInterval(()=>renderGameAccessClosing(runner),250);
   // Reutilizamos el protocolo de salida para pedir al juego un checkpoint, pero no
   // cerramos el iframe cuando responda: empieza el minuto de gracia.
+  // Marcamos esta salida como técnica para que un CLOSE_READY tardío no cierre
+  // el juego si el profesor lo reabre mientras se completa el checkpoint.
+  runner.accessSystemExitUntil=Date.now()+10000;
   sendToActiveGame('REQUEST_EXIT');
   runner.accessFreezeTimer=setTimeout(()=>{
     if(activeGameRunner===runner&&runner.accessClosing&&runner.accessFinalCheckpointPending)freezeGameAccessSaves(runner);
@@ -2202,6 +2205,11 @@ window.addEventListener('message',event=>{
     persistGameResult(result);
   }
   if(message.type==='CLOSE_READY'){
+    if(!runner.explicitExitRequested&&runner.accessSystemExitUntil>Date.now()){
+      runner.accessSystemExitUntil=0;
+      if(runner.accessClosing)freezeGameAccessSaves(runner);
+      return;
+    }
     if(runner.accessClosing&&!runner.explicitExitRequested){
       freezeGameAccessSaves(runner);
       return;
