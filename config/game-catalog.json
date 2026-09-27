@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 6,
+  "version": 7,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -250,7 +250,7 @@
       "id": "tierras_de_tinta",
       "official": true,
       "name": "Tierras de Tinta",
-      "subtitle": "Cada palabra es un arma",
+      "subtitle": "Fronteras del Abismo",
       "category": "RPG de acción",
       "competencies": [
         "ortografía",
@@ -264,11 +264,12 @@
       "sortOrder": 12,
       "color": "#e9a23b",
       "icon": "🖋️",
-      "entry": "games/tierras_de_tinta/",
-      "description": "RPG de acción y exploración: supera expediciones, derrota criaturas y mejora tu héroe resolviendo desafíos de Lengua.",
+      "entry": "",
+      "description": "RPG de acción y exploración en su versión avanzada: siete héroes, arsenal ampliado, criaturas y jefes propios, campamento cinematográfico, portal, forja, runas y progresión lingüística.",
       "banner": "tierras-de-tinta-banner.svg",
       "active": true,
-      "integration": "embedded"
+      "integration": "external",
+      "externalUrl": "https://tierras-de-la-tinta.pgarciab.chatgpt.site"
     },
     {
       "id": "lexaria",

@@ -97,13 +97,27 @@ if(catalog.games.some(game=>/rim[oó]polis/i.test(game.id+" "+game.name)) ||
 
 for(const expected of [
   ["versopolis","games/versopolis/","versopolis-banner.jpg"],
-  ["tierras_de_tinta","games/tierras_de_tinta/","tierras-de-tinta-banner.svg"],
   ["lexaria","games/lexaria/","lexaria-banner.svg"]
 ]){
   const game=catalog.games.find(row=>row.id===expected[0]);
   if(!game || game.entry!==expected[1] || game.banner!==expected[2] || game.integration!=="embedded" || game.active!==true || game.official!==true){
     throw new Error("Catálogo: integración incompleta de "+expected[0]+".");
   }
+}
+const tierras=catalog.games.find(row=>row.id==="tierras_de_tinta");
+if(!tierras ||
+   tierras.entry!=="" ||
+   tierras.externalUrl!=="https://tierras-de-la-tinta.pgarciab.chatgpt.site" ||
+   tierras.banner!=="tierras-de-tinta-banner.svg" ||
+   tierras.integration!=="external" ||
+   tierras.active!==true ||
+   tierras.official!==true){
+  throw new Error("Catálogo: Tierras de Tinta debe apuntar al Site avanzado fuente 30, no al respaldo v21.");
+}
+if(!generatedApps.includes('gameId:"tierras_de_tinta"') ||
+   !generatedApps.includes('url:"https://tierras-de-la-tinta.pgarciab.chatgpt.site"') ||
+   !snapshot.includes("'https://tierras-de-la-tinta.pgarciab.chatgpt.site'")){
+  throw new Error("Tierras de Tinta: el catálogo generado no apunta a la versión avanzada publicada.");
 }
 for(const [label,html] of [["alumno",student],["profesor",teacher]]){
   for(const pair of [["versopolis","versopolis-banner.jpg"],["tierras_de_tinta","tierras-de-tinta-banner.svg"],["lexaria","lexaria-banner.svg"]]){

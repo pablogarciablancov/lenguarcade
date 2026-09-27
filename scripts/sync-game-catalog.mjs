@@ -36,6 +36,8 @@ function loadCatalog(){
       if(typeof game[key]!=="string")fail(game.id+": campo "+key+" inválido");
     }
     if(!Array.isArray(game.competencies))fail(game.id+": competencies debe ser array");
+    if(game.externalUrl!==undefined&&typeof game.externalUrl!=="string")fail(game.id+": externalUrl inválida");
+    if(game.externalUrl&&!/^https:\/\//.test(game.externalUrl))fail(game.id+": externalUrl debe ser HTTPS");
     if(!Number.isInteger(game.sortOrder))fail(game.id+": sortOrder inválido");
     if(typeof game.active!=="boolean"||typeof game.official!=="boolean")fail(game.id+": active/official inválido");
     if(!["embedded","external","none"].includes(game.integration))fail(game.id+": integration inválida");
@@ -50,13 +52,14 @@ function loadCatalog(){
       if(!fs.existsSync(path.join(local,"index.html")))fail(game.id+": falta index.html en "+game.entry);
     }
     if(game.integration==="embedded"&&!game.entry)fail(game.id+": embedded necesita entry");
+    if(game.integration==="external"&&!game.externalUrl&&!game.entry)fail(game.id+": external necesita externalUrl o entry");
   }
   const official=catalog.games.filter(game=>game.official);
   if(official.length!==13)fail("debe haber exactamente 13 juegos oficiales; hay "+official.length);
   return catalog;
 }
 function resolvedGame(catalog,game){
-  return {...game,url:game.entry?catalog.hostingBase+game.entry:""};
+  return {...game,url:game.externalUrl||(game.entry?catalog.hostingBase+game.entry:"")};
 }
 function renderApps(catalog){
   const all=catalog.games.map(game=>resolvedGame(catalog,game));

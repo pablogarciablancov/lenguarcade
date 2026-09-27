@@ -2,14 +2,14 @@
   "$schema": "lenguarcade-integration-v1",
   "gameId": "tierras_de_tinta",
   "name": "Tierras de Tinta",
-  "status": "en pruebas",
-  "integration": "embedded",
+  "status": "respaldo v21",
+  "integration": "none",
   "entry": "games/tierras_de_tinta/index.html",
   "banner": "tierras-de-tinta-banner.svg",
   "requires": {
-    "studentRunner": true,
-    "saveProgress": true,
-    "supabaseCatalog": true
+    "studentRunner": false,
+    "saveProgress": false,
+    "supabaseCatalog": false
   },
-  "notes": "Publicado en el catálogo oficial. Mantiene guardado local y añade bridge moderno de LenguArcade para restauración, checkpoints, guardado central y salida segura."
+  "notes": "Esta carpeta conserva la rama de rescate v21 y NO es la versión oficial actual. El catálogo oficial apunta al Site avanzado publicado el 20/09/2026 (fuente 30): https://tierras-de-la-tinta.pgarciab.chatgpt.site. No volver a sustituir el catálogo por esta carpeta salvo recuperación deliberada."
 }
