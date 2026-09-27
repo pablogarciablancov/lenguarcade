@@ -4,10 +4,10 @@
 
 - El acceso del alumno se sincroniza cada 3 s mientras la pestaña está visible y el preflight CORS se cachea durante 10 minutos.
 - student-access-state devuelve el instante exacto en que cada juego queda cerrado por profesor/taller.
-- Si el profesor cierra un juego que ya está abierto, LenguArcade solicita un último checkpoint de seguridad, congela cualquier guardado posterior y muestra una cuenta atrás de 60 s.
-- El alumno puede salir antes; si no lo hace, el runner cierra el iframe automáticamente al llegar a 0:00 y vuelve al portal.
+- Si el profesor cierra un juego que ya está abierto, comienza una cuenta atrás de 60 s y el progreso sigue guardándose durante todo ese minuto.
+- El alumno puede salir antes; al salir o llegar a 0:00 se pide un último checkpoint, se congela el guardado y el runner vuelve al portal con un cierre de seguridad si el juego no responde.
 - Si el profesor reabre el juego durante el minuto, se cancela la cuenta atrás y se reanuda el guardado.
-- save-progress solo admite excepcionalmente el checkpoint marcado del cierre cuando coincide con el updated_at real y llega dentro del minuto.
+- save-progress acepta guardados de gracia solo si corresponden al updated_at real del cierre; tras el minuto solo admite el checkpoint final y un pequeño margen de entrega de red.
 - Se corrige el bloqueo de salida cuando un guardado/checkpoint falla: existe un cierre de seguridad que nunca deja al alumno atrapado dentro del juego.
 - Se añade scripts/check-game-close-grace.mjs a npm run check.
 
