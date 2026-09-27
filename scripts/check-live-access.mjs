@@ -199,11 +199,11 @@ function browser(){
   await ui.advance(0);
   assert.equal(ui.counts.calls,1);
   const initialPaints=ui.counts.paints;
-  await ui.advance(5000);
+  await ui.advance(3000);
   assert.equal(ui.counts.calls,2);
   assert.equal(ui.counts.paints,initialPaints,'Fingerprint idéntico: ningún cambio DOM');
   ui.setState(state('closed',true));
-  await ui.advance(3000);
+  await ui.advance(2500);
   // La tarjeta aún parece abierta: el guard consulta justo antes de entrar.
   assert.equal(ui.cards[0].items['.play'].disabled,false);
   await ui.context.openGame('battlegrafia');
@@ -237,7 +237,7 @@ function browser(){
   assert.equal(ui.cards[0].items['.play'].disabled,true);
   const failedCalls=ui.counts.calls;
   await ui.advance(5000);
-  assert.equal(ui.counts.calls,failedCalls,'Un fallo de red aplica backoff de 10 segundos');
+  assert.equal(ui.counts.calls,failedCalls,'Un fallo de red aplica backoff antes del siguiente sondeo');
   ui.setOffline(false);
   ui.setState(state('online',false));
   ui.listeners.online();
@@ -275,7 +275,7 @@ function browser(){
   const race=browser();
   race.setState(state('open',false));
   await race.advance(0);
-  await race.advance(3000);
+  await race.advance(2000);
   let releaseOld;
   race.setResponder(()=>new Promise(resolve=>{releaseOld=resolve;}));
   race.listeners.focus();
