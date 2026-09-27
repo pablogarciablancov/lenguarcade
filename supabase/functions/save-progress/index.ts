@@ -38,7 +38,7 @@ Deno.serve(async (request) => {
     ] = await Promise.all([
       admin.from("games").select("id").eq("id", gameId).maybeSingle(),
       admin.from("profile_game_access")
-        .select("enabled")
+        .select("enabled,updated_at")
         .eq("profile_id", profileId)
         .eq("game_id", gameId)
         .maybeSingle(),
@@ -56,7 +56,7 @@ Deno.serve(async (request) => {
     let workshopSession: Record<string, unknown> | null = null;
     if (classroomIds.length) {
       const { data:workshopRows, error:workshopError } = await admin.from("workshop_sessions")
-        .select("classroom_id,published,classroom_open,home_enabled,active_from,active_to,game_ids")
+        .select("classroom_id,published,classroom_open,home_enabled,active_from,active_to,game_ids,updated_at")
         .in("classroom_id", classroomIds)
         .eq("published", true)
         .limit(1);
@@ -66,6 +66,7 @@ Deno.serve(async (request) => {
 
     let accessEnabled = gameAccess?.enabled !== false;
     let workshopControlsAccess = false;
+    let accessClosedAt = accessEnabled ? "" : String(gameAccess?.updated_at || "");
     if (workshopSession) {
       workshopControlsAccess = true;
       let workshopActive = workshopSession.classroom_open === true;
@@ -79,9 +80,24 @@ Deno.serve(async (request) => {
         ? workshopSession.game_ids.map(value => String(value || ""))
         : [];
       accessEnabled = workshopActive && gameIds.includes(gameId);
+      accessClosedAt = accessEnabled ? "" : String(workshopSession.updated_at || "");
     }
     if (!accessEnabled) {
-      return jsonResponse({ ok:false, error:workshopControlsAccess ? "workshop_game_access_closed" : "game_access_closed" }, 403);
+      const requestedClosedAt = String(body.accessClosureAt || "");
+      const serverClosedMs = Date.parse(accessClosedAt);
+      const requestedClosedMs = Date.parse(requestedClosedAt);
+      const nowMs = Date.now();
+      const closureCheckpointAllowed =
+        body.checkpoint === true &&
+        body.accessClosureCheckpoint === true &&
+        Number.isFinite(serverClosedMs) &&
+        Number.isFinite(requestedClosedMs) &&
+        Math.abs(serverClosedMs - requestedClosedMs) <= 1500 &&
+        nowMs >= serverClosedMs - 1000 &&
+        nowMs <= serverClosedMs + 60000;
+      if (!closureCheckpointAllowed) {
+        return jsonResponse({ ok:false, error:workshopControlsAccess ? "workshop_game_access_closed" : "game_access_closed" }, 403);
+      }
     }
     if (resultId) {
       const { data:duplicate } = await admin.from("game_events")
