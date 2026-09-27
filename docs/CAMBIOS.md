@@ -1,5 +1,17 @@
 # Registro de cambios
 
+## 2026-09-27 · Cierre de juegos con minuto de gracia
+
+- El acceso del alumno se sincroniza cada 3 s mientras la pestaña está visible y el preflight CORS se cachea durante 10 minutos.
+- student-access-state devuelve el instante exacto en que cada juego queda cerrado por profesor/taller.
+- Si el profesor cierra un juego que ya está abierto, LenguArcade solicita un último checkpoint de seguridad, congela cualquier guardado posterior y muestra una cuenta atrás de 60 s.
+- El alumno puede salir antes; si no lo hace, el runner cierra el iframe automáticamente al llegar a 0:00 y vuelve al portal.
+- Si el profesor reabre el juego durante el minuto, se cancela la cuenta atrás y se reanuda el guardado.
+- save-progress solo admite excepcionalmente el checkpoint marcado del cierre cuando coincide con el updated_at real y llega dentro del minuto.
+- Se corrige el bloqueo de salida cuando un guardado/checkpoint falla: existe un cierre de seguridad que nunca deja al alumno atrapado dentro del juego.
+- Se añade scripts/check-game-close-grace.mjs a npm run check.
+
+
 ## 2026-09-26 · Disponibilidad de juegos en vivo
 
 - La nueva Edge Function `student-access-state` devuelve solo el acceso efectivo de los juegos y la sesión publicada de la clase, con un fingerprint estable. Comparte el cálculo de bloqueos con `student-dashboard`.
