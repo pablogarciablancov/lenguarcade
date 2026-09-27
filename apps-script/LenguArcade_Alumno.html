@@ -1266,7 +1266,7 @@ function mountGameRunner(){
         <button type="button" class="ghost" id="gameRunnerClose">Salir del juego</button>
       </header>
       <div class="gameRunnerAccessClosing hidden" id="gameRunnerAccessClosing" role="alert" aria-live="assertive">
-        <div class="gameRunnerAccessClosingText"><strong>🔒 El profesor ha cerrado este juego</strong><span>Se hará un último guardado de seguridad. Después puedes continuar hasta que termine el minuto, pero ese progreso ya no se guardará.</span></div>
+        <div class="gameRunnerAccessClosingText"><strong>🔒 El profesor ha cerrado este juego</strong><span>Tienes un último minuto para terminar lo que estás haciendo. Tu progreso seguirá guardándose hasta que termine la cuenta atrás.</span></div>
         <strong class="gameRunnerAccessCountdown" id="gameRunnerAccessCountdown">1:00</strong>
         <button type="button" id="gameRunnerAccessExit">Salir ahora</button>
       </div>
@@ -1566,7 +1566,7 @@ function prepareEmbeddedGame(game){
   url.searchParams.set('lenguarcade','1');
   url.searchParams.set('channel',channel);
   const iframe=$('gameRunnerFrame');
-  activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,explicitExitRequested:false,lastResultReason:'',pendingResult:null,saving:false,checkpointing:false,opponent:null,opponents:{},pendingOpponentRequest:null,opponentAuthBusy:false,accessClosing:false,accessClosureAt:'',accessClosureDeadline:0,accessCountdownTimer:null,accessFreezeTimer:null,accessExitSafetyTimer:null,accessSystemExitUntil:0,accessFinalCheckpointPending:false,accessFrozen:false,initialized:false,visible:false,loading:false,retries:0,initTimer:null,primarySessionCounted:false,opponentSessionCounted:false,sessionCountedByRole:{}};
+  activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,explicitExitRequested:false,lastResultReason:'',pendingResult:null,saving:false,checkpointing:false,opponent:null,opponents:{},pendingOpponentRequest:null,opponentAuthBusy:false,accessClosing:false,accessClosureAt:'',accessClosureDeadline:0,accessCountdownTimer:null,accessFreezeTimer:null,accessExitSafetyTimer:null,accessSystemExitUntil:0,accessFinalizing:false,accessFinalCheckpointPending:false,accessFrozen:false,initialized:false,visible:false,loading:false,retries:0,initTimer:null,primarySessionCounted:false,opponentSessionCounted:false,sessionCountedByRole:{}};
   installGameBootstrapContext(activeGameRunner);
   $('gameRunnerTitle').textContent=game.nombre;
   $('gameRunnerStatus').textContent='Conectando con tu perfil...';
@@ -1679,25 +1679,31 @@ function renderGameAccessClosing(runner){
   const remaining=Math.max(0,runner.accessClosureDeadline-Date.now());
   countdown.textContent=formatGameAccessCountdown(remaining);
   banner.classList.remove('hidden');
-  if(remaining<=0){
-    runner.accessFrozen=true;
-    runner.accessFinalCheckpointPending=false;
-    $('gameRunnerStatus').textContent='El profesor ha cerrado el juego. Volviendo a LenguArcade...';
-    destroyGameRunner(true);
-  }
+  if(remaining<=0)startGameAccessFinalClose(runner,true);
 }
 
-function freezeGameAccessSaves(runner){
-  if(!runner||runner!==activeGameRunner||!runner.accessClosing)return;
-  runner.accessFinalCheckpointPending=false;
+function startGameAccessFinalClose(runner,automatic){
+  if(!runner||runner!==activeGameRunner||runner.accessFinalizing)return;
+  runner.accessFinalizing=true;
+  runner.accessFinalCheckpointPending=true;
   runner.accessFrozen=true;
+  runner.explicitExitRequested=true;
+  runner.closeRequested=true;
+  if(runner.accessCountdownTimer){clearInterval(runner.accessCountdownTimer);runner.accessCountdownTimer=null;}
   if(runner.accessFreezeTimer){clearTimeout(runner.accessFreezeTimer);runner.accessFreezeTimer=null;}
-  $('gameRunnerStatus').textContent='Juego cerrado por el profesor · el progreso ya no se guardará.';
+  const countdown=$('gameRunnerAccessCountdown');
+  if(countdown)countdown.textContent='0:00';
+  $('gameRunnerStatus').textContent=automatic
+    ?'Tiempo terminado · guardando por última vez...'
+    :'Guardando por última vez antes de salir...';
+  armGameExitSafety(runner,5000);
+  if(runner.saving||runner.checkpointing)return;
+  sendToActiveGame('REQUEST_EXIT');
 }
 
 function cancelGameAccessClosing(){
   const runner=activeGameRunner;
-  if(!runner||!runner.accessClosing)return;
+  if(!runner||!runner.accessClosing||runner.accessFinalizing)return;
   if(runner.accessCountdownTimer)clearInterval(runner.accessCountdownTimer);
   if(runner.accessFreezeTimer)clearTimeout(runner.accessFreezeTimer);
   runner.accessCountdownTimer=null;
@@ -1705,6 +1711,7 @@ function cancelGameAccessClosing(){
   runner.accessClosing=false;
   runner.accessClosureAt='';
   runner.accessClosureDeadline=0;
+  runner.accessFinalizing=false;
   runner.accessFinalCheckpointPending=false;
   runner.accessFrozen=false;
   const banner=$('gameRunnerAccessClosing');
@@ -1723,21 +1730,13 @@ function beginGameAccessClosing(gameState){
   runner.accessClosing=true;
   runner.accessClosureAt=closedAt;
   runner.accessClosureDeadline=(Number.isFinite(closedMs)?closedMs:Date.now())+60000;
-  runner.accessFinalCheckpointPending=true;
+  runner.accessFinalizing=false;
+  runner.accessFinalCheckpointPending=false;
   runner.accessFrozen=false;
-  $('gameRunnerStatus').textContent='El profesor ha cerrado el juego · guardando un último punto seguro...';
+  $('gameRunnerStatus').textContent='El profesor ha cerrado el juego · tienes un minuto y tu progreso seguirá guardándose.';
   renderGameAccessClosing(runner);
-  if(activeGameRunner!==runner||!runner.accessClosing)return;
+  if(activeGameRunner!==runner||!runner.accessClosing||runner.accessFinalizing)return;
   runner.accessCountdownTimer=setInterval(()=>renderGameAccessClosing(runner),250);
-  // Reutilizamos el protocolo de salida para pedir al juego un checkpoint, pero no
-  // cerramos el iframe cuando responda: empieza el minuto de gracia.
-  // Marcamos esta salida como técnica para que un CLOSE_READY tardío no cierre
-  // el juego si el profesor lo reabre mientras se completa el checkpoint.
-  runner.accessSystemExitUntil=Date.now()+10000;
-  sendToActiveGame('REQUEST_EXIT');
-  runner.accessFreezeTimer=setTimeout(()=>{
-    if(activeGameRunner===runner&&runner.accessClosing&&runner.accessFinalCheckpointPending)freezeGameAccessSaves(runner);
-  },4500);
 }
 
 window.laHandleActiveGameAccessChange=function(gameState){
@@ -1751,12 +1750,7 @@ function requestCloseGameRunner(){
   if(!activeGameRunner)return destroyGameRunner();
   const runner=activeGameRunner;
   if(runner.accessClosing){
-    runner.explicitExitRequested=true;
-    runner.closeRequested=true;
-    if(runner.accessFrozen||!runner.accessFinalCheckpointPending)return destroyGameRunner(true);
-    $('gameRunnerStatus').textContent='Terminando el último guardado y saliendo...';
-    sendToActiveGame('REQUEST_EXIT');
-    armGameExitSafety(runner,3500);
+    startGameAccessFinalClose(runner,false);
     return;
   }
   if(runner.saving||runner.checkpointing){
@@ -2006,6 +2000,8 @@ function buildGameProgressPayload(runner,result,participant,context){
     eventType:runner.game.gameId+'_'+String(participant.outcome||result.outcome||'finished'),
     countSession:!alreadyCounted,
     sessionAlreadyCounted:alreadyCounted,
+    accessGracePeriod:!!(runner.accessClosing&&!runner.accessFinalizing),
+    accessClosureAt:runner.accessClosing?runner.accessClosureAt:'',
     progress:buildCentralProgress(participant,context.game),
     achievements:participant.achievements||[],
     details:{
@@ -2036,10 +2032,9 @@ function buildGameProgressPayload(runner,result,participant,context){
 async function persistGameResult(result){
   const runner=activeGameRunner;
   if(!runner||runner.saving)return;
-  if(runner.accessClosing){
+  if(runner.accessClosing&&runner.accessFrozen){
     runner.pendingResult=null;
-    sendToActiveGame('SAVE_FAILED',{message:'El profesor ha cerrado el juego. Los cambios posteriores al cierre no se guardan.'});
-    if(runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),100);
+    sendToActiveGame('SAVE_FAILED',{message:'El minuto de gracia ha terminado. Este cambio ya no puede guardarse.'});
     return;
   }
   runner.pendingResult=result;
@@ -2088,7 +2083,12 @@ async function persistGameResult(result){
     sendToActiveGame('SAVE_FAILED',{message:error.message||String(error)});
     if(runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),350);
   }finally{
-    if(activeGameRunner===runner)runner.saving=false;
+    if(activeGameRunner===runner){
+      runner.saving=false;
+      if(runner.accessFinalizing&&runner.accessFinalCheckpointPending&&!runner.checkpointing){
+        setTimeout(()=>{if(activeGameRunner===runner&&runner.accessFinalizing&&runner.accessFinalCheckpointPending)sendToActiveGame('REQUEST_EXIT');},0);
+      }
+    }
     $('gameRunnerSaving').classList.add('hidden');
   }
 }
@@ -2096,11 +2096,10 @@ async function persistGameResult(result){
 async function persistGameCheckpoint(checkpoint){
   const runner=activeGameRunner;
   if(!runner)return;
-  const closureCheckpoint=!!(runner.accessClosing&&runner.accessFinalCheckpointPending&&!runner.accessFrozen);
+  const closureCheckpoint=!!(runner.accessClosing&&runner.accessFinalizing&&runner.accessFinalCheckpointPending);
   const closureAt=runner.accessClosureAt;
-  if(runner.accessFrozen){
-    sendToActiveGame('CHECKPOINT_FAILED',{checkpointId:checkpoint&&checkpoint.checkpointId||'',message:'Juego cerrado por el profesor. El progreso posterior al cierre no se guarda.'});
-    if(runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),100);
+  if(runner.accessFrozen&&!closureCheckpoint){
+    sendToActiveGame('CHECKPOINT_FAILED',{checkpointId:checkpoint&&checkpoint.checkpointId||'',message:'El minuto de gracia ha terminado. Este cambio ya no puede guardarse.'});
     return;
   }
   if(runner.checkpointing)return;
@@ -2141,27 +2140,28 @@ async function persistGameCheckpoint(checkpoint){
           role:participant.role||'primary',
           checkpointReason:closureCheckpoint?'access_closed':(checkpoint.reason||'autosave')
         },
+        accessGracePeriod:!!(runner.accessClosing&&!runner.accessFinalizing),
         accessClosureCheckpoint:closureCheckpoint,
-        accessClosureAt:closureCheckpoint?closureAt:''
+        accessClosureAt:runner.accessClosing?closureAt:''
       };
       const response=await callServer('saveGameCheckpoint',[payload]);
       if(payload.countSession)markRunnerSessionCounted(runner,context.isPrimary,context.role);
       if(response?.record)applySavedGameRecordToDashboard(runner,response.record,context.isPrimary,context.role);
     }
-    if(closureCheckpoint&&activeGameRunner===runner&&runner.accessClosing&&runner.accessClosureAt===closureAt)freezeGameAccessSaves(runner);
-    $('gameRunnerStatus').textContent=closureCheckpoint?'Último progreso guardado · el juego se cerrará al terminar el minuto.':'Partida guardada.';
+    if(closureCheckpoint&&activeGameRunner===runner&&runner.accessClosing&&runner.accessClosureAt===closureAt)runner.accessFinalCheckpointPending=false;
+    $('gameRunnerStatus').textContent=closureCheckpoint?'Último progreso guardado · volviendo a LenguArcade...':'Partida guardada.';
     sendToActiveGame('CHECKPOINT_CONFIRMED',{checkpointId:checkpoint.checkpointId});
     if(runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),250);
   }catch(error){
-    if(closureCheckpoint&&activeGameRunner===runner&&runner.accessClosing&&runner.accessClosureAt===closureAt)freezeGameAccessSaves(runner);
-    $('gameRunnerStatus').textContent=closureCheckpoint?'No se pudo completar el último guardado. El juego se cerrará al terminar el minuto.':'No se pudo guardar la partida.';
+    if(closureCheckpoint&&activeGameRunner===runner&&runner.accessClosing&&runner.accessClosureAt===closureAt)runner.accessFinalCheckpointPending=false;
+    $('gameRunnerStatus').textContent=closureCheckpoint?'No se pudo completar el último guardado. Volviendo a LenguArcade...':'No se pudo guardar la partida.';
     sendToActiveGame('CHECKPOINT_FAILED',{checkpointId:checkpoint.checkpointId,message:error.message||String(error)});
     if(runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),350);
   }finally{
     if(activeGameRunner===runner){
       runner.checkpointing=false;
-      if(runner.accessClosing&&runner.accessFinalCheckpointPending&&!closureCheckpoint&&!runner.accessFrozen){
-        setTimeout(()=>{if(activeGameRunner===runner&&runner.accessClosing&&runner.accessFinalCheckpointPending)sendToActiveGame('REQUEST_EXIT');},0);
+      if(runner.accessFinalizing&&runner.accessFinalCheckpointPending&&!closureCheckpoint){
+        setTimeout(()=>{if(activeGameRunner===runner&&runner.accessFinalizing&&runner.accessFinalCheckpointPending)sendToActiveGame('REQUEST_EXIT');},0);
       }
     }
     $('gameRunnerSaving').classList.add('hidden');
@@ -2205,15 +2205,7 @@ window.addEventListener('message',event=>{
     persistGameResult(result);
   }
   if(message.type==='CLOSE_READY'){
-    if(!runner.explicitExitRequested&&runner.accessSystemExitUntil>Date.now()){
-      runner.accessSystemExitUntil=0;
-      if(runner.accessClosing)freezeGameAccessSaves(runner);
-      return;
-    }
-    if(runner.accessClosing&&!runner.explicitExitRequested){
-      freezeGameAccessSaves(runner);
-      return;
-    }
+    if(runner.accessClosing&&!runner.explicitExitRequested)return;
     if(runner.game.gameId!=='conjuga_apuesta')return destroyGameRunner(true);
     const allowClose=runner.explicitExitRequested||runner.lastResultReason==='abandoned';
     if(allowClose)destroyGameRunner(true);
