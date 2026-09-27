@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 8,
+  "version": 9,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -264,11 +264,12 @@
       "sortOrder": 12,
       "color": "#e9a23b",
       "icon": "🖋️",
-      "entry": "games/tierras_de_tinta/",
+      "entry": "",
       "description": "RPG de acción y exploración en su versión avanzada: siete héroes, arsenal ampliado, criaturas y jefes propios, campamento cinematográfico, portal, forja, runas y progresión lingüística.",
       "banner": "tierras-de-tinta-banner.svg",
       "active": true,
-      "integration": "embedded"
+      "integration": "external",
+      "externalUrl": "https://tierras-de-la-tinta.pgarciab.chatgpt.site"
     },
     {
       "id": "lexaria",
