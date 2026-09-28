@@ -8,12 +8,25 @@ var OLD_STORAGE1="lenguarcade.versopolis.v01";
 var $=function(id){return document.getElementById(id);};
 var run=null,career=loadCareer(),toastTimer=null,resumeSave=null,comboTimer=null,deckView={mode:"inspect",from:"game"};
 
-var districts=[
+var legacyDistricts=[
 {name:"Puerta de la Rima",rival:"La Voz del Puente",portrait:"✒",rank:"DUELISTA",rule:"La rima hace más daño.",prestige:1050,hands:5,discards:2,focus:"rhyme",threshold:350,failPenalty:1,taunts:["«Sin contrato no hay poema que cruce mi puente.»","«Busca mejor entre tus pergaminos.»","«El eco correcto estaba en otra carta.»"],blocked:"«Has encontrado la llave de la rima.»"},
 {name:"Plaza del Ritmo",rival:"El Maestro del Pulso",portrait:"♫",rank:"DUELISTA",rule:"La regularidad métrica multiplica el impacto.",prestige:1450,hands:5,discards:2,focus:"meter",threshold:420,failPenalty:1,taunts:["«Tu compás se ha quebrado.»","«La plaza oye cada sílaba.»","«No fuerces un verso que no encaja.»"],blocked:"«Ese pulso sí mantiene en pie la plaza.»"},
 {name:"Jardines de la Imagen",rival:"La Dama de los Espejos",portrait:"✦",rank:"ÉLITE",rule:"Los recursos distintos abren grietas en sus espejos.",prestige:1800,hands:6,discards:2,focus:"devices",threshold:500,failPenalty:1,taunts:["«No veo la imagen que prometía tu contrato.»","«Tus palabras no han atravesado el espejo.»","«Un recurso aislado no basta.»"],blocked:"«Esa imagen no puedo reflejarla.»"},
 {name:"Gran Anfiteatro",rival:"El Cronista Mayor",portrait:"♜",rank:"JEFE · FALLO = −2",rule:"Cambia el contrato en cada ronda y castiga los fallos.",prestige:2350,hands:7,discards:2,focus:"all",threshold:610,failPenalty:2,taunts:["«Versópolis no premia aproximaciones.»","«Contrato incumplido. El anfiteatro sentencia.»","«Aquí cada error cuesta el doble.»"],blocked:"«El anfiteatro reconoce la forma. Continúa.»"}
 ];
+var districts=legacyDistricts;
+var MAPS=[
+ {id:"jardines",name:"Jardines de la Asonancia",focus:"Rima asonante",difficulty:"INICIACIÓN",boss:"La Dama del Eco",scene:"garden",places:["Sendero de luciérnagas","Fuente de las Vocales","Estanque de los Reflejos","Palacio del Eco"],rivals:["El Gorrión Mudo","Las Gemelas del Estanque","El Coleccionista de Ecos","La Dama del Eco"],weights:{asonante:9,asonanteAA:6,asonanteEA:6,asonanteAlterna:6,monorhyme:2,abab:2,abba:2,octo4:2,consonante:1},events:["fuenteVocales","invernadero","estanque","jardinero"]},
+ {id:"fortaleza",name:"Fortaleza de la Consonancia",focus:"Rima consonante",difficulty:"INTERMEDIA",boss:"El Guardián del Sello",scene:"fortress",places:["Puente de Lacre","Sala de los Escribanos","Muralla de Palabras","Torre del Sello"],rivals:["El Falso Heraldo","El Escribano de Hierro","Los Hermanos del Sello","El Guardián del Sello"],weights:{consonante:16,consonanteABBA:8,consonanteABAB:8,monorhyme:4,abab:3,abba:3,aabb:3,octo4:1,hendeca4:1},events:["archivo","copista","mercado"]},
+ {id:"teatro",name:"Teatro de las Estrofas",focus:"Esquemas y estrofas",difficulty:"AVANZADA",boss:"La Arquitecta del Verso",scene:"theater",places:["Vestíbulo de Pareados","Bastidores Cruzados","Escenario del Reverso","Gran Telón"],rivals:["El Tramoyista","La Actriz de los Cuatro Versos","El Director del Desorden","La Arquitecta del Verso"],weights:{aabb:7,abab:8,abba:8,fullform:8,monorhyme:4,consonante:2},events:["archivo","copista","mercado"]},
+ {id:"torre",name:"Torre del Metro",focus:"Medida y ritmo",difficulty:"MAESTRÍA",boss:"El Maestro del Pulso",scene:"tower",places:["Escalera del Péndulo","Taller de Relojes","Sala del Autómata","Cúpula del Pulso"],rivals:["El Aprendiz del Péndulo","La Relojera","El Autómata Métrico","El Maestro del Pulso"],weights:{octo4:10,hendeca4:10,fullform:3,abab:2,abba:2},events:["fuente","copista","mercado"]}
+];
+var SPRITE_ASSETS={scenes:{garden:"./assets/garden.svg",fortress:"./assets/fortress.svg",theater:"./assets/theater.svg",tower:"./assets/tower.svg"},bosses:{garden:"./assets/garden-boss.svg",fortress:"./assets/fortress-boss.svg",theater:"./assets/theater-boss.svg",tower:"./assets/tower-boss.svg"},muses:"./assets/muse-{id}.svg"};
+function museArt(id){return '<img class="museArt" src="./assets/muse-'+id+'.svg" alt="">';}
+function mapById(id){return MAPS.filter(function(m){return m.id===id;})[0]||null;}
+function activeMap(){return run&&mapById(run.mapId);}
+function mapDistricts(map){return map.rivals.map(function(rival,i){var old=legacyDistricts[i];return Object.assign({},old,{name:map.places[i],rival:rival,portrait:map.id.charAt(0).toUpperCase(),rank:i===3?"JEFE · FALLO = −2":i===2?"ÉLITE":"DUELISTA",focus:map.id==="torre"?"meter":map.id==="teatro"?"all":"rhyme",rule:map.focus+" · "+(i===3?"duelo final":"contratos especializados"),taunts:["«Revisa la forma exigida por el contrato.»","«Tu verso puede mejorar antes del próximo ataque.»"],blocked:"«El contrato encaja. Buen trabajo.»"});});}
+function setActiveMap(id){var map=mapById(id);districts=map?mapDistricts(map):legacyDistricts;}
 
 var muses=[
 {id:"eco",icon:"◌",rarity:"RARA",name:"Musa del Eco",desc:"Toda combinación con rima reconocible recibe un 30% extra.",label:"Rima ×1,30"},
@@ -45,7 +58,7 @@ var cards=[
 {id:"aa1",text:"Bajo la lluvia, mi casa",meter:8,rhyme:"a-a",rhymeType:"asonante",theme:"hogar",devices:[],value:39},
 {id:"aa2",text:"Canta el gorrión en la rama",meter:8,rhyme:"a-a",rhymeType:"asonante",theme:"paisaje",devices:["personificación"],value:43},
 {id:"aa3",text:"Guardo la luna de plata",meter:8,rhyme:"a-a",rhymeType:"asonante",theme:"noche",devices:["metáfora"],value:45},
-{id:"aa4",text:"Tiembla la tarde en calma",meter:8,rhyme:"a-a",rhymeType:"asonante",theme:"noche",devices:["personificación"],value:43},
+{id:"aa4",text:"Tiembla la tarde callada",meter:8,rhyme:"a-a",rhymeType:"asonante",theme:"noche",devices:["personificación"],value:43},
 {id:"ea1",text:"Queda mi carta en la mesa",meter:8,rhyme:"e-a",rhymeType:"asonante",theme:"ausencia",devices:[],value:39},
 {id:"ea2",text:"Sigo de noche la senda",meter:8,rhyme:"e-a",rhymeType:"asonante",theme:"viaje",devices:[],value:39},
 {id:"ea3",text:"Canta la fuente tan cerca",meter:8,rhyme:"e-a",rhymeType:"asonante",theme:"paisaje",devices:["personificación"],value:43},
@@ -59,6 +72,18 @@ var cards=[
 {id:"or3",text:"Tiñe la brisa de cobre la flor",meter:11,rhyme:"or",rhymeType:"consonante",theme:"paisaje",devices:["metáfora"],value:52},
 {id:"or4",text:"Trae la noche su claro rumor",meter:11,rhyme:"or",rhymeType:"consonante",theme:"noche",devices:["personificación"],value:50}
 ];
+// Separación métrica revisada para las cartas del banco. El guion separa sílabas;
+// el guion bajo une vocales por sinalefa. Las agudas suman una sílaba final.
+var SCANS={
+ ino1:"Cru-za la no-che_el ca-mi-no",ino2:"Guar-do mi voz en des-ti-no",ino3:"Can-ta des-pa-cio_el mo-li-no",ino4:"Bri-lla la luz del ve-ci-no",
+ ente1:"Mi-ra la to-rre de fren-te",ente2:"Sue-na la fuen-te pre-sen-te",ente3:"Tiem-bla la voz del au-sen-te",ente4:"Ar-de la tar-de pa-cien-te",
+ ado1:"Vuel-ve_el gue-rre-ro can-sa-do",ado2:"Que-da_el jar-dín a-pa-ga-do",ado3:"Co-rre_un ca-ba-llo do-ra-do",ado4:"Sue-ña_el cas-ti-llo_en-can-ta-do",
+ ia1:"Vuel-ve la luz ca-da dí-a",ia2:"Can-ta la vie-ja_a-ba-dí-a",ia3:"Tiem-bla la voz to-da-ví-a",ia4:"Bri-lla la pie-dra som-brí-a",
+ aa1:"Ba-jo la llu-via mi ca-sa",aa2:"Can-ta_el go-rrión en la ra-ma",aa3:"Guar-do la lu-na de pla-ta",aa4:"Tiem-bla la tar-de ca-lla-da",
+ ea1:"Que-da mi car-ta_en la me-sa",ea2:"Si-go de no-che la sen-da",ea3:"Can-ta la fuen-te tan cer-ca",ea4:"Vuel-ve la mú-si-ca len-ta",
+ ana1:"So-bre la pie-dra tiem-bla la ma-ña-na",ana2:"Can-ta la fuen-te jun-to_a la ven-ta-na",ana3:"Guar-da la no-che luz en la ven-ta-na",ana4:"Bus-ca la som-bra paz en la ma-ña-na",
+ or1:"Cru-za la tar-de con len-to ru-mor",or2:"Guar-da la llu-via su_an-ti-guo tem-blor",or3:"Ti-ñe la bri-sa de co-bre la flor",or4:"Tra-e la no-che su cla-ro ru-mor"
+};
 
 var startingBaseIds=["ino1","ino2","ino3","ente1","ente2","ente3","ado1","ado2","ado3","ia1","ia2","ia3","aa1","aa2","aa3","ea1","ea2","ea3","ana1","ana2","ana3","or1","or2","or3"];
 
@@ -94,9 +119,76 @@ var events=[
 {icon:"−",title:"Vender un estorbo",desc:"Elimina definitivamente una carta del mazo.",reward:"Mazo más fino",action:"remove"},
 {icon:"♻",title:"Tinta de búsqueda",desc:"Añade un descarte extra a cada combate restante.",reward:"+1 descarte",action:"discardPlus"}]}
 ];
+challenges.push(
+ {id:"asonanteAA",title:"ECO A-A",desc:"Empareja dos versos con rima asonante A-A.",mult:1.38,min:0,test:function(a){return a.n>=2&&a.sameRhyme&&a.rhymeKind==="asonante"&&a.rhymes[0]==="a-a";},can:function(list){return list.filter(function(c){return c.rhymeType==="asonante"&&c.rhyme==="a-a";}).length>=2;}},
+ {id:"asonanteEA",title:"ECO E-A",desc:"Empareja dos versos con rima asonante E-A.",mult:1.38,min:0,test:function(a){return a.n>=2&&a.sameRhyme&&a.rhymeKind==="asonante"&&a.rhymes[0]==="e-a";},can:function(list){return list.filter(function(c){return c.rhymeType==="asonante"&&c.rhyme==="e-a";}).length>=2;}},
+ {id:"asonanteAlterna",title:"ONDAS ALTERNAS",desc:"Forma ABAB con dos familias asonantes.",mult:1.55,min:1,test:function(a){return a.n===4&&a.pattern==="ABAB"&&a.rhymeKind==="asonante";},can:function(list){return canTwoTypePairs(list,"asonante");}},
+ {id:"consonanteABBA",title:"SELLO CRUZADO",desc:"Forma ABBA con dos terminaciones consonantes exactas.",mult:1.62,min:2,test:function(a){return a.n===4&&a.pattern==="ABBA"&&a.rhymeKind==="consonante";},can:function(list){return canTwoTypePairs(list,"consonante");}},
+ {id:"consonanteABAB",title:"SELLO ALTERNO",desc:"Forma ABAB con dos terminaciones consonantes exactas.",mult:1.58,min:2,test:function(a){return a.n===4&&a.pattern==="ABAB"&&a.rhymeKind==="consonante";},can:function(list){return canTwoTypePairs(list,"consonante");}},
+ {id:"regular",title:"COMPÁS REGULAR",desc:"Juega tres versos de igual medida.",mult:1.4,min:1,test:function(a){return a.n>=3&&a.allMeter;},can:function(list){return Math.max(list.filter(function(c){return c.meter===8;}).length,list.filter(function(c){return c.meter===11;}).length)>=3;}}
+);
+events.push(
+ {id:"fuenteVocales",icon:"A",title:"Fuente de las Vocales",text:"Sus dos corrientes devuelven al poeta la claridad o una nueva voz.",choices:[{icon:"I",title:"Beber del manantial",desc:"Recuperas hasta dos puntos de Inspiración.",reward:"+2 Inspiración",action:"heal2"},{icon:"II",title:"Escuchar el eco",desc:"Añades un verso al mazo.",reward:"Nueva carta",action:"draft"},{icon:"III",title:"Recoger una gota",desc:"Aumenta tu Inspiración máxima.",reward:"+1 máximo",action:"maxInspiration"}]},
+ {id:"invernadero",icon:"V",title:"Invernadero del Eco",text:"Las flores conservan cada terminación que han oído.",choices:[{icon:"I",title:"Sembrar un verso",desc:"Duplica una carta del mazo.",reward:"Copia permanente",action:"duplicate"},{icon:"II",title:"Podar una rama",desc:"Elimina una carta del mazo.",reward:"Mazo más preciso",action:"remove"},{icon:"III",title:"Cultivar el ritmo",desc:"Mejora una carta.",reward:"+25 valor",action:"upgrade"}]},
+ {id:"estanque",icon:"E",title:"Estanque de los Reflejos",text:"El reflejo repite una forma y transforma otra.",choices:[{icon:"I",title:"Reflejar el verso",desc:"Duplica una carta.",reward:"Copia permanente",action:"duplicate"},{icon:"II",title:"Cambiar de corriente",desc:"Obtén un Cambio extra en cada duelo.",reward:"+1 Cambio",action:"discardPlus"},{icon:"III",title:"Mirar más hondo",desc:"Aumenta el tamaño de la mano.",reward:"+1 carta",action:"handPlus"}]},
+ {id:"jardinero",icon:"J",title:"El Jardinero Nocturno",text:"Conoce las palabras que florecen al pronunciarlas dos veces.",choices:[{icon:"I",title:"Aceptar un injerto",desc:"Elige un verso nuevo.",reward:"Nueva carta",action:"draft"},{icon:"II",title:"Afinar la pluma",desc:"Mejora un verso.",reward:"+25 valor",action:"upgrade"},{icon:"III",title:"Descansar junto al agua",desc:"Recuperas Inspiración.",reward:"+2 Inspiración",action:"heal2"}]}
+);
+var ACHIEVEMENTS=[
+ ["primera","Primera tinta","Cumple tu primer contrato","Primeros pasos",function(r){return r.stats.contracts>=1;}],
+ ["maestro","Primer maestro","Vence tu primer duelo","Primeros pasos",function(r){return r.stats.districtsCleared>=1;}],
+ ["sinFallos","Sin titubeos","Gana sin fallar contratos","Primeros pasos",function(r){return r.finished&&r.won&&!r.stats.failedContracts;}],
+ ["ultima","Última gota","Gana con 1 de Inspiración","Primeros pasos",function(r){return r.finished&&r.won&&r.inspiration===1;}],
+ ["eco","Eco en el agua","Construye un pareado asonante","Asonancia",function(r){return !!r.forms.asonante;}],
+ ["jardinero","Jardinero de ecos","Cumple cinco contratos asonantes","Asonancia",function(r){return r.rhymeCounts.asonante>=5;}],
+ ["vocales","Todo son vocales","Construye ABAB asonante","Asonancia",function(r){return !!r.forms.asonanteABAB;}],
+ ["jardines","Señor de los Jardines","Conquista los Jardines","Asonancia",function(r){return r.finished&&r.won&&r.mapId==="jardines";}],
+ ["sello","Sello perfecto","Construye un pareado consonante","Consonancia",function(r){return !!r.forms.consonante;}],
+ ["letra","Ni una letra de más","Cumple cinco contratos consonantes","Consonancia",function(r){return r.rhymeCounts.consonante>=5;}],
+ ["muralla","Muralla de palabras","Construye ABBA consonante","Consonancia",function(r){return !!r.forms.consonanteABBA;}],
+ ["guardian","Guardián caído","Conquista la Fortaleza","Consonancia",function(r){return r.finished&&r.won&&r.mapId==="fortaleza";}],
+ ["dos","Dos a dos","Forma AABB","Estrofas",function(r){return !!r.forms.AABB;}],
+ ["cruce","Cruce perfecto","Forma ABAB","Estrofas",function(r){return !!r.forms.ABAB;}],
+ ["regreso","El regreso","Forma ABBA","Estrofas",function(r){return !!r.forms.ABBA;}],
+ ["redondilla","Redondilla","Compón una redondilla","Estrofas",function(r){return !!r.forms.REDONDILLA;}],
+ ["cuarteta","Cuarteta","Compón una cuarteta","Estrofas",function(r){return !!r.forms.CUARTETA;}],
+ ["arquitecto","Arquitecto del verso","Cumple cinco contratos de esquema","Estrofas",function(r){return r.rhymeCounts.esquema>=5;}],
+ ["telon","Telón dorado","Conquista el Teatro","Estrofas",function(r){return r.finished&&r.won&&r.mapId==="teatro";}],
+ ["ocho","Ocho pulsos","Juega cuatro versos octosílabos","Métrica",function(r){return !!r.forms.octo4;}],
+ ["once","Once pulsos","Juega cuatro versos endecasílabos","Métrica",function(r){return !!r.forms.hendeca4;}],
+ ["compas","A compás","Cumple cinco contratos métricos","Métrica",function(r){return r.rhymeCounts.metro>=5;}],
+ ["oido","A oído","Cumple un contrato en el jefe sin escandir","Métrica",function(r){return !!r.forms.bossMeter;}],
+ ["metronomo","Metrónomo humano","Gana la Torre sin usar Escandir","Métrica",function(r){return r.finished&&r.won&&r.mapId==="torre"&&!r.scans;}],
+ ["torre","La Torre calla","Conquista la Torre","Métrica",function(r){return r.finished&&r.won&&r.mapId==="torre";}],
+ ["poda","Poda necesaria","Elimina una carta","Mazo",function(r){return !!r.eventActions.remove;}],
+ ["favorito","Verso favorito","Duplica una carta","Mazo",function(r){return !!r.eventActions.duplicate;}],
+ ["dorada","Tinta dorada","Mejora una carta hasta nivel III","Mazo",function(r){return r.cardPool.some(function(c){return c.level>=3;});}],
+ ["precision","Mazo de precisión","Reduce tu mazo a 20 cartas","Mazo",function(r){return r.cardPool.length<=20;}],
+ ["improvisador","Improvisador","Gana con al menos tres Musas","Mazo",function(r){return r.finished&&r.won&&r.muses.length>=3;}],
+ ["cuatro","Cuatro caminos","Conquista los cuatro mapas","Maestría",function(){return MAPS.every(function(m){return career.mapWins&&career.mapWins[m.id];});}],
+ ["poeta","Poeta de Versópolis","Desbloquea 25 hazañas","Maestría",function(){return Object.keys(career.achievements||{}).length>=25;}]
+];
+var CODEX=[
+ ["asonante","Rima asonante","Coinciden las vocales desde la última vocal tónica; las consonantes pueden variar."],
+ ["consonante","Rima consonante","Coinciden vocales y consonantes desde la última vocal tónica."],
+ ["pareado","Pareado","Dos versos que riman entre sí."],
+ ["ABAB","Rima alterna","El primer verso rima con el tercero; el segundo, con el cuarto."],
+ ["ABBA","Rima abrazada","El primer verso rima con el cuarto; los dos centrales riman entre sí."],
+ ["AABB","Rima gemela","Dos parejas consecutivas de versos que riman."],
+ ["REDONDILLA","Redondilla","Cuatro versos de arte menor con rima consonante abba."],
+ ["CUARTETA","Cuarteta","Cuatro versos de arte menor con rima consonante abab."],
+ ["CUARTETO","Cuarteto","Cuatro versos de arte mayor con rima consonante ABBA."],
+ ["SERVENTESIO","Serventesio","Cuatro versos de arte mayor con rima consonante ABAB."],
+ ["octo4","Octosílabo","Verso de ocho sílabas métricas. Considera sinalefas y el acento final."],
+ ["hendeca4","Endecasílabo","Verso de once sílabas métricas. Considera sinalefas y el acento final."],
+ ["metáfora","Metáfora","Una realidad se expresa mediante otra por una semejanza de sentido."],
+ ["personificación","Personificación","Se atribuyen acciones o rasgos humanos a seres u objetos no humanos."],
+ ["sinestesia","Sinestesia","Se cruzan sensaciones de sentidos distintos."],
+ ["epíteto","Epíteto","Adjetivo que resalta una cualidad propia o expresiva del nombre."]
+];
+var COSMETIC_REWARDS={jardines:"reverso:ondas de agua",guardian:"lacre:sello de cobre",telon:"marco:telón dorado",torre:"tinta:azul eléctrico",cuatro:"título:poeta de los cuatro caminos"};
 
 function loadCareer(){
- var base={runs:0,wins:0,bestScore:0,bestStreak:0,districtsCleared:0,bestCombo:0};
+ var base={runs:0,wins:0,bestScore:0,bestStreak:0,districtsCleared:0,bestCombo:0,achievements:{},discoveries:{},mapWins:{},mapProgress:{},cosmetics:{}};
  try{
   var newer=JSON.parse(localStorage.getItem(STORAGE)||"null");if(newer)return Object.assign(base,newer);
   var old3=JSON.parse(localStorage.getItem(OLD_STORAGE3)||"null");if(old3)return Object.assign(base,old3);
@@ -106,6 +198,22 @@ function loadCareer(){
  return base;
 }
 function saveCareer(){try{localStorage.setItem(STORAGE,JSON.stringify(career));}catch(err){}}
+function checkAchievements(){if(!run)return;career.achievements=career.achievements||{};career.cosmetics=career.cosmetics||{};var changed=false;ACHIEVEMENTS.forEach(function(a){if(!career.achievements[a[0]]&&a[4](run)){career.achievements[a[0]]=Date.now();if(COSMETIC_REWARDS[a[0]])career.cosmetics[COSMETIC_REWARDS[a[0]]]=true;changed=true;}});if(changed)saveCareer();}
+function recordComposition(a){run.forms=run.forms||{};run.rhymeCounts=run.rhymeCounts||{};career.discoveries=career.discoveries||{};var form=a.name,scheme=a.pattern;
+ [form,scheme].forEach(function(k){if(k)run.forms[k]=career.discoveries[k]=true;});
+ if(a.rhymeKind!=="mixta"&&a.sameRhyme){run.forms[a.rhymeKind]=career.discoveries[a.rhymeKind]=true;}
+ if(a.rhymeKind==="asonante"&&scheme==="ABAB")run.forms.asonanteABAB=true;
+ if(a.rhymeKind==="consonante"&&scheme==="ABBA")run.forms.consonanteABBA=true;
+ if(a.n===4&&a.allMeter){var key=a.meterValue===8?"octo4":a.meterValue===11?"hendeca4":"";if(key)run.forms[key]=career.discoveries[key]=true;}
+ if(activeMap()&&activeMap().id==="torre"&&run.districtIndex===3&&["octo4","hendeca4","regular"].indexOf(run.challengeId)>=0)run.forms.bossMeter=true;
+ a.devices.forEach(function(d){career.discoveries[d]=true;});
+ var cid=run.challengeId;if(cid.indexOf("asonante")>=0)run.rhymeCounts.asonante=(run.rhymeCounts.asonante||0)+1;
+ if(cid.indexOf("consonante")>=0)run.rhymeCounts.consonante=(run.rhymeCounts.consonante||0)+1;
+ if(["abba","abab","aabb","fullform","consonanteABBA","consonanteABAB"].indexOf(cid)>=0)run.rhymeCounts.esquema=(run.rhymeCounts.esquema||0)+1;
+ if(["octo4","hendeca4","regular"].indexOf(cid)>=0)run.rhymeCounts.metro=(run.rhymeCounts.metro||0)+1;
+ saveCareer();}
+function renderAchievements(){var grid=$("achievementGrid");grid.innerHTML="";career.achievements=career.achievements||{};$("achievementCount").textContent=Object.keys(career.achievements).length+" / "+ACHIEVEMENTS.length+" sellos conseguidos";ACHIEVEMENTS.forEach(function(a){var unlocked=!!career.achievements[a[0]],tile=document.createElement("article");tile.className="archiveTile"+(unlocked?" earned":"");tile.innerHTML='<span class="sealArt">'+(unlocked?"V":"?")+'</span><span class="tileGroup">'+a[3]+'</span><h3>'+a[1]+'</h3><p>'+a[2]+'</p>'+(COSMETIC_REWARDS[a[0]]?'<small>DESBLOQUEO · '+COSMETIC_REWARDS[a[0]]+'</small>':"");grid.appendChild(tile);});}
+function renderCodex(){var grid=$("codexGrid");grid.innerHTML="";CODEX.forEach(function(c){var known=career.discoveries&&career.discoveries[c[0]],tile=document.createElement("article");tile.className="archiveTile"+(known?" earned":"");tile.innerHTML='<span class="sealArt">'+(known?"V":"?")+'</span><span class="tileGroup">'+(known?"DESCUBIERTO":"POR DESCUBRIR")+'</span><h3>'+(known?c[1]:"Página sellada")+'</h3><p>'+(known?c[2]:"Construye esta forma durante una expedición.")+'</p>';grid.appendChild(tile);});}
 function baseCard(id){for(var i=0;i<cards.length;i+=1)if(cards[i].id===id)return cards[i];return null;}
 function museById(id){for(var i=0;i<muses.length;i+=1)if(muses[i].id===id)return muses[i];return null;}
 function challengeById(id){for(var i=0;i<challenges.length;i+=1)if(challenges[i].id===id)return challenges[i];return null;}
@@ -123,33 +231,37 @@ function collectionCards(){return(run&&run.cardPool||[]).map(function(x){return 
 function familyOf(c){if(c.level>=3)return"master";if(c.meter===11)return"rhythm";if(c.rhymeType==="asonante")return"echo";if(c.devices.length)return"image";return"rhyme";}
 function familyLabel(f){return{rhyme:"RIMA",echo:"ECO",rhythm:"RITMO",image:"IMAGEN",master:"MAESTRO"}[f]||"VERSO";}
 function stars(level){var s="";for(var i=0;i<level;i+=1)s+="★";return s;}
-function show(name){["homeScreen","museScreen","eventScreen","deckScreen","gameScreen","resultScreen"].forEach(function(id){$(id).classList.toggle("hidden",id!==name);});}
+function show(name){["homeScreen","atlasScreen","achievementsScreen","codexScreen","museScreen","eventScreen","deckScreen","gameScreen","resultScreen"].forEach(function(id){$(id).classList.toggle("hidden",id!==name);});}
 function renderCareer(){
  $("careerLine").textContent=career.runs?"Mejor expedición: "+career.bestScore.toLocaleString("es-ES")+" · "+career.wins+" victorias · mejor impacto "+Number(career.bestCombo||0).toLocaleString("es-ES"):"Tu primera expedición te espera.";
  $("continueBtn").classList.toggle("hidden",!resumeSave);
 }
 
-function newRun(){
- run={version:4,districtIndex:0,runScore:0,rivalPrestige:0,maxPrestige:0,inspiration:4,maxInspiration:4,handsLeft:0,discardsLeft:0,bonusDiscards:0,handSize:7,cardPool:startingBaseIds.map(function(id){return makeInstance(id,0);}),deck:[],discardPile:[],hand:[],selected:[],discardMode:false,discardSelected:[],muses:[],challengeId:null,lastChallengeId:null,awaitingMuse:true,awaitingEvent:false,eventId:null,districtStarted:false,finished:false,won:false,streak:0,bestStreak:0,firstPlay:true,locked:false,lastEventId:null,stats:{compositions:0,structured:0,districtsCleared:0,bestCombo:0,contracts:0,failedContracts:0},startedAt:Date.now()};
- resumeSave=null;showMuseChoice("Elige tu primera Musa","Define la estrategia de tu mazo antes de cruzar la Puerta de la Rima.");bridgeCall("sessionStarted");
+function showAtlas(){renderAtlas();show("atlasScreen");}
+function renderAtlas(){var grid=$("atlasGrid");grid.innerHTML="";MAPS.forEach(function(m,i){var b=document.createElement("button");b.type="button";b.className="atlasCard scene-"+m.scene;b.innerHTML='<span class="atlasOrdinal">RUTA '+String(i+1).padStart(2,"0")+'</span><span class="atlasLandmark"></span><span class="atlasTrail">'+m.places.map(function(place,j){return '<span><b>'+(j+1)+'</b>'+place+'</span>';}).join("")+'</span><span class="atlasInfo"><strong>'+m.name+'</strong><small>'+m.focus+' · '+m.difficulty+'</small><em>JEFE · '+m.boss+'</em><span>'+(career.mapWins&&career.mapWins[m.id]?"CONQUISTADO":"DISPONIBLE")+' · '+Number(career.mapProgress&&career.mapProgress[m.id]||0)+' / 4 duelos superados</span></span>';b.addEventListener("click",function(){newRun(m.id);});grid.appendChild(b);});}
+function newRun(mapId){
+ if(!mapById(mapId)){showAtlas();return;}
+ setActiveMap(mapId);
+ run={version:5,mapId:mapId,districtIndex:0,runScore:0,rivalPrestige:0,maxPrestige:0,inspiration:4,maxInspiration:4,handsLeft:0,discardsLeft:0,bonusDiscards:0,handSize:7,cardPool:startingBaseIds.map(function(id){return makeInstance(id,0);}),deck:[],discardPile:[],hand:[],selected:[],discardMode:false,discardSelected:[],muses:[],challengeId:null,lastChallengeId:null,awaitingMuse:true,awaitingEvent:false,eventId:null,districtStarted:false,finished:false,won:false,streak:0,bestStreak:0,firstPlay:true,locked:false,lastEventId:null,scans:0,usedScanInBoss:false,forms:{},rhymeCounts:{},eventActions:{},stats:{compositions:0,structured:0,districtsCleared:0,bestCombo:0,contracts:0,failedContracts:0},startedAt:Date.now()};
+ resumeSave=null;showMuseChoice("Elige tu primera Musa","Prepara tu mazo para "+activeMap().name+".");bridgeCall("sessionStarted");
 }
 function showMuseChoice(title,subtitle){
  if(!run)return;run.awaitingMuse=true;run.locked=false;show("museScreen");
  $("museTitle").textContent=title||"Elige una Musa";$("museSubtitle").textContent=subtitle||"Añade una sinergia a tu expedición.";
  var available=muses.filter(function(m){return run.muses.indexOf(m.id)<0;}),choices=shuffle(available).slice(0,Math.min(3,available.length));
  $("museChoices").innerHTML="";
- choices.forEach(function(m){var b=document.createElement("button");b.type="button";b.className="museCard";b.innerHTML='<span class="museRarity">'+m.rarity+'</span><span class="museIcon">'+m.icon+'</span><h3>'+m.name+'</h3><p>'+m.desc+'</p><small>'+m.label+'</small>';b.addEventListener("click",function(){chooseMuse(m.id);});$("museChoices").appendChild(b);});
+ choices.forEach(function(m){var b=document.createElement("button");b.type="button";b.className="museCard";b.innerHTML='<span class="museRarity">'+m.rarity+'</span>'+museArt(m.id)+'<h3>'+m.name+'</h3><p>'+m.desc+'</p><small>'+m.label+'</small>';b.addEventListener("click",function(){chooseMuse(m.id);});$("museChoices").appendChild(b);});
  renderOwnedMuses();
 }
 function renderOwnedMuses(){
  if(!run){$("ownedMuses").innerHTML="";return;}
- $("ownedMuses").innerHTML=run.muses.length?'<b>PODERES ACTIVOS</b>'+run.muses.map(function(id){var m=museById(id);return m?'<span>'+m.icon+" "+m.name+"</span>":"";}).join(""):'<span>Aún no tienes Musas activas.</span>';
+ $("ownedMuses").innerHTML=run.muses.length?'<b>PODERES ACTIVOS</b>'+run.muses.map(function(id){var m=museById(id);return m?'<span>'+museArt(id)+m.name+"</span>":"";}).join(""):'<span>Aún no tienes Musas activas.</span>';
 }
 function chooseMuse(id){if(!run||run.muses.indexOf(id)>=0)return;run.muses.push(id);run.awaitingMuse=false;setupDistrict();bridgeCall("checkpoint","muse_choice");}
 
 function setupDistrict(){
  var d=districts[run.districtIndex];
- run.maxPrestige=d.prestige;run.rivalPrestige=d.prestige;run.handsLeft=d.hands;run.discardsLeft=d.discards+Number(run.bonusDiscards||0);run.deck=shuffle(run.cardPool.map(function(x){return x.uid;}));run.discardPile=[];run.hand=[];run.selected=[];run.discardMode=false;run.discardSelected=[];run.districtStarted=true;run.firstPlay=true;run.locked=false;
+ run.maxPrestige=d.prestige;run.rivalPrestige=d.prestige;run.handsLeft=d.hands;run.discardsLeft=d.discards+Number(run.bonusDiscards||0);run.deck=shuffle(run.cardPool.map(function(x){return x.uid;}));run.discardPile=[];run.hand=[];run.selected=[];run.discardMode=false;run.discardSelected=[];run.districtStarted=true;run.firstPlay=true;run.locked=false;run.scanReveal=false;run.lastFeedback="";
  drawToHand();rollChallenge();show("gameScreen");$("rivalSpeech").textContent="«"+d.rival+" acepta el duelo.»";renderGame();
 }
 function drawToHand(){
@@ -164,13 +276,15 @@ function moveSelectedToDiscard(){
 }
 
 function canTwoRhymePairs(list){var counts={};list.forEach(function(c){counts[c.rhyme]=(counts[c.rhyme]||0)+1;});return Object.keys(counts).filter(function(k){return counts[k]>=2;}).length>=2;}
+function canTwoTypePairs(list,type){return canTwoRhymePairs(list.filter(function(c){return c.rhymeType===type;}));}
 function canRhymeType(list,type,count){var groups={};list.filter(function(c){return c.rhymeType===type;}).forEach(function(c){groups[c.rhyme]=(groups[c.rhyme]||0)+1;});return Object.keys(groups).some(function(k){return groups[k]>=count;});}
 function maxGroup(list,key){var counts={},max=0;list.forEach(function(c){counts[c[key]]=(counts[c[key]]||0)+1;max=Math.max(max,counts[c[key]]);});return max;}
 function distinctDevices(list){var d=[];list.forEach(function(c){c.devices.forEach(function(x){if(d.indexOf(x)<0)d.push(x);});});return d.length;}
 function rollChallenge(){
  var pool=collectionCards(),eligible=challenges.filter(function(c){return c.min<=run.districtIndex&&c.can(pool)&&c.id!==run.challengeId;});
  if(!eligible.length)eligible=challenges.filter(function(c){return c.min<=run.districtIndex&&c.can(pool);});
- var ch=pick(eligible.length?eligible:[challenges[0]]);run.lastChallengeId=run.challengeId;run.challengeId=ch.id;
+ var map=activeMap(),weights=map&&map.weights||{},weighted=[];(eligible.length?eligible:[challenges[0]]).forEach(function(c){var w=map?Number(weights[c.id]||1):1;for(var i=0;i<w;i+=1)weighted.push(c);});
+ var ch=pick(weighted);run.lastChallengeId=run.challengeId;run.challengeId=ch.id;
 }
 function currentChallenge(){return challengeById(run&&run.challengeId)||challenges[0];}
 
@@ -222,24 +336,24 @@ function analyze(ids){
  var breakdown=[{label:"Versos",value:base},{label:"Rima y forma",value:rhymeBonus+formBonus},{label:"Ritmo",value:meterBonus},{label:"Recursos",value:deviceBonus+(d.focus==="devices"?devices.length*55:0)+(active.indexOf("imagen")>=0?devices.length*55:0)},{label:"Tema",value:themeBonus}];
  if(multiplier>1)breakdown.push({label:"Sinergias",value:"×"+multiplier.toFixed(2).replace(".",",")});
  var structured=!!(rhymeBonus||meterBonus||devices.length>=2||sameTheme),tier=score>=900?"LEGENDARIA":score>=650?"MAGISTRAL":score>=430?"POTENTE":score>=280?"SÓLIDA":"IMPROVISADA";
- return{name:name,score:score,tags:tags,breakdown:breakdown,structured:structured,pattern:pattern,meters:meters,allMeter:allMeter,meterValue:allMeter?meters[0]:0,sameRhyme:sameRhyme,rhymeKind:rhymeKind,devices:devices,sameTheme:sameTheme,formBonus:formBonus,tier:tier,n:n};
+ return{name:name,score:score,tags:tags,breakdown:breakdown,structured:structured,pattern:pattern,rhymes:rhymes,meters:meters,allMeter:allMeter,meterValue:allMeter?meters[0]:0,sameRhyme:sameRhyme,rhymeKind:rhymeKind,devices:devices,sameTheme:sameTheme,formBonus:formBonus,tier:tier,n:n};
 }
 
 function contractMet(a){return currentChallenge().test(a);}
 function contractDamage(a){return Math.round(a.score*currentChallenge().mult);}
 function renderGame(){
  if(!run)return;
- var d=districts[run.districtIndex],a=analyze(run.selected),ch=currentChallenge(),met=run.selected.length>=2&&contractMet(a),remainingPct=Math.max(0,Math.round(run.rivalPrestige/run.maxPrestige*100));
- $("gameScreen").dataset.theme=d.focus;$("districtStep").textContent="DISTRITO "+(run.districtIndex+1)+" / "+districts.length;$("districtName").textContent=d.name;$("rivalRank").textContent=d.rank;$("rivalName").textContent=d.rival;$("rivalPortrait").textContent=d.portrait;$("rivalRule").textContent=d.rule;
+ var d=districts[run.districtIndex],a=analyze(run.selected),ch=currentChallenge(),met=run.selected.length>=2&&contractMet(a),remainingPct=Math.max(0,Math.round(run.rivalPrestige/run.maxPrestige*100)),map=activeMap(),hiddenHint=map&&run.districtIndex>=2;
+ $("gameScreen").dataset.theme=d.focus;$("gameScreen").dataset.scene=map?map.scene:"legacy";$("gameScreen").dataset.boss=map&&run.districtIndex===3?"yes":"no";$("districtStep").textContent="DUELO "+(run.districtIndex+1)+" / "+districts.length;$("districtName").textContent=d.name;$("rivalRank").textContent=d.rank;$("rivalName").textContent=d.rival;$("rivalPortrait").textContent=map&&run.districtIndex===3?"":d.portrait;$("rivalRule").textContent=d.rule;
  $("handsText").textContent=run.handsLeft;$("discardsText").textContent=run.discardsLeft;$("streakText").textContent="×"+run.streak;$("runScoreText").textContent=run.runScore.toLocaleString("es-ES");
  $("prestigeText").textContent=run.rivalPrestige.toLocaleString("es-ES")+" / "+run.maxPrestige.toLocaleString("es-ES");$("prestigeFill").style.width=remainingPct+"%";
  $("deckCount").textContent=run.cardPool.length;$("discardCount").textContent=run.discardPile.length;$("handSizeText").textContent=run.handSize;$("drawPileCount").textContent=run.deck.length;
- $("comboName").textContent=a.name;$("scorePreview").textContent=(met?contractDamage(a):a.score).toLocaleString("es-ES");$("comboTags").innerHTML=a.tags.map(function(t){return"<span>"+t+"</span>";}).join("");
- $("analysisTitle").textContent=run.selected.length?a.tier+" · "+a.name:"Busca una combinación";$("analysisText").textContent=run.selected.length?describeAnalysis(a):"El contrato manda. Una estrofa potente no sirve si no cumple el reto del turno.";
- $("analysisBreakdown").innerHTML=a.breakdown.map(function(row){return"<div><span>"+row.label+"</span><b>"+(typeof row.value==="number"?"+ "+row.value.toLocaleString("es-ES"):row.value)+"</b></div>";}).join("");
+ $("comboName").textContent=hiddenHint&&run.selected.length?"Tu lectura del poema":a.name;$("scorePreview").textContent=hiddenHint?"?":(met?contractDamage(a):a.score).toLocaleString("es-ES");$("comboTags").innerHTML=hiddenHint?"":a.tags.map(function(t){return"<span>"+t+"</span>";}).join("");
+ $("analysisTitle").textContent=hiddenHint?"Analiza antes de jugar":run.selected.length?a.tier+" · "+a.name:"Busca una combinación";$("analysisText").textContent=run.lastFeedback||(!hiddenHint&&run.selected.length?describeAnalysis(a):"Lee los versos y decide si cumplen el contrato.");
+ $("analysisBreakdown").innerHTML=hiddenHint?"":a.breakdown.map(function(row){return"<div><span>"+row.label+"</span><b>"+(typeof row.value==="number"?"+ "+row.value.toLocaleString("es-ES"):row.value)+"</b></div>";}).join("");
  $("challengeTitle").textContent=ch.title;$("challengeDesc").textContent=ch.desc;$("challengeMultiplier").textContent="×"+String(ch.mult).replace(".",",");
- $("challengeBanner").className="challengeBanner"+(run.selected.length>=2?(met?" met":" fail"):"");$("challengeState").textContent=run.selected.length<2?"PENDIENTE":met?"CUMPLIDO":"BLOQUEADO";
- $("codexTip").textContent=contractTip(a,met,d,ch);renderSlots();renderHand();renderActiveMuses();renderInspiration();renderRoute();renderChangeConsole();
+ $("challengeBanner").className="challengeBanner"+(hiddenHint?"":run.selected.length>=2?(met?" met":" fail"):"");$("challengeState").textContent=hiddenHint?"A TU JUICIO":run.selected.length<2?"PENDIENTE":met?"CUMPLIDO":"BLOQUEADO";
+ $("codexTip").textContent=hiddenHint?"Solo al jugar sabrás si tu análisis fue correcto. Un fallo consume la ronda y la Inspiración.":contractTip(a,met,d,ch);$("scanBtn").classList.toggle("hidden",!map||map.id!=="torre"||run.districtIndex!==1);$("scanBtn").disabled=!!run.scanReveal;renderSlots();renderHand();renderActiveMuses();renderInspiration();renderRoute();renderChangeConsole();
  var play=$("playBtn"),discardBtn=$("discardBtn"),shuffleBtn=$("shuffleHandBtn"),clearBtn=$("clearBtn");
  play.classList.remove("validAttack","invalidAttack");
  if(run.discardMode){
@@ -250,7 +364,7 @@ function renderGame(){
   clearBtn.textContent="✕ CANCELAR";clearBtn.disabled=false;
  }else{
   if(run.selected.length<2){play.textContent="ELIGE VERSOS";play.disabled=true;}
-  else if(met){play.textContent="⚔ ATACAR · "+("×"+String(ch.mult).replace(".",","));play.disabled=run.locked||run.handsLeft<=0;play.classList.add("validAttack");}
+  else if(met||hiddenHint){play.textContent=hiddenHint?"JUGAR VERSOS":"ATACAR · "+("×"+String(ch.mult).replace(".",","));play.disabled=run.locked||run.handsLeft<=0;if(!hiddenHint)play.classList.add("validAttack");}
   else{play.textContent="✖ FORZAR JUGADA";play.disabled=run.locked||run.handsLeft<=0;play.classList.add("invalidAttack");}
   discardBtn.textContent="🗑 DESCARTAR · −1";discardBtn.disabled=run.locked||run.discardsLeft<=0||!run.hand.length;
   shuffleBtn.textContent="⟳ BARAJAR · −1";shuffleBtn.disabled=run.locked||!run.hand.length||run.discardsLeft<=0;
@@ -264,6 +378,7 @@ function contractTip(a,met,d,ch){
  return"CUMPLE Y BLOQUEA: el contrato multiplica tu impacto y la réplica queda anulada.";
 }
 function describeAnalysis(a){var parts=[];if(a.pattern&&a.n===4)parts.push("Esquema "+a.pattern+".");if(a.allMeter)parts.push("Ritmo uniforme de "+a.meterValue+" sílabas.");if(a.devices.length)parts.push("Recursos: "+a.devices.join(", ")+".");if(!parts.length)parts.push("La selección todavía carece de una estructura fuerte.");return parts.join(" ");}
+function scansionFeedback(ids){return ids.map(function(id,i){var c=effectiveCard(id),scan=SCANS[c.id],sinalefa=scan.indexOf("_")>=0?"sinalefa marcada con _":"sin sinalefa",final=c.id.indexOf("or")===0?"aguda +1":"llana +0";return (i+1)+". "+scan+" → "+c.meter+" sílabas ("+sinalefa+", "+final+").";}).join("\n");}
 
 function renderInspiration(){$("inspirationHearts").innerHTML="";for(var i=0;i<run.maxInspiration;i+=1){var heart=document.createElement("i");heart.textContent="✦";if(i>=run.inspiration)heart.className="empty";$("inspirationHearts").appendChild(heart);}}
 function renderChangeConsole(){
@@ -277,7 +392,8 @@ function renderChangeConsole(){
 function renderRoute(){$("routePips").innerHTML="";for(var i=0;i<districts.length;i+=1){var p=document.createElement("i");if(i<run.districtIndex)p.className="done";else if(i===run.districtIndex)p.className="current";$("routePips").appendChild(p);}}
 function renderSlots(){
  $("poemSlots").innerHTML="";
- for(var i=0;i<4;i+=1){var id=run.selected[i],c=id?effectiveCard(id):null,slot=document.createElement("div");slot.className="poemSlot"+(c?" filled":"");
+ var pattern=activeMap()&&activeMap().id==="teatro"?({abba:"ABBA",abab:"ABAB",aabb:"AABB",consonanteABBA:"ABBA",consonanteABAB:"ABAB"}[run.challengeId]||""):"";if(pattern&&run.selected[0]&&effectiveCard(run.selected[0]).meter<=8)pattern=pattern.toLowerCase();
+ for(var i=0;i<4;i+=1){var id=run.selected[i],c=id?effectiveCard(id):null,slot=document.createElement("div");slot.className="poemSlot"+(c?" filled":"");if(pattern){slot.dataset.guide=pattern[i];if(c){var previous=pattern.slice(0,i).indexOf(pattern[i]);if(previous>=0&&run.selected[previous]&&effectiveCard(run.selected[previous]).rhyme===c.rhyme)slot.classList.add("guideMatch");}}if(c&&run.selected.slice(0,i).some(function(other){var o=effectiveCard(other);return o&&o.rhyme===c.rhyme&&o.rhymeType===c.rhymeType;}))slot.classList.add(c.rhymeType==="asonante"?"echoMatch":"sealMatch");
   if(c){var text=document.createElement("span");text.textContent=(i+1)+". "+c.text;slot.appendChild(text);var controls=document.createElement("span");controls.className="slotNumber";
    var up=document.createElement("button");up.type="button";up.textContent="↑";up.disabled=i===0;up.addEventListener("click",function(cardId){return function(e){e.stopPropagation();moveSelected(cardId,-1);};}(id));
    var down=document.createElement("button");down.type="button";down.textContent="↓";down.disabled=i===run.selected.length-1;down.addEventListener("click",function(cardId){return function(e){e.stopPropagation();moveSelected(cardId,1);};}(id));
@@ -286,8 +402,9 @@ function renderSlots(){
   }else slot.textContent="Verso "+(i+1);$("poemSlots").appendChild(slot);
  }
 }
-function cardHTML(c){
+function cardHTML(c,combat){
  var fam=familyOf(c),device=c.devices.length?'<span class="device">'+c.devices[0]+"</span>":"";
+ if(combat&&activeMap()){var phase=run.districtIndex;if(phase===3)return '<span class="verseText">'+c.text+'</span>';if(phase===2)return '<span class="verseText">'+c.text+'</span><span class="cardMeta"><span>'+c.rhymeType+'</span></span>';if(phase===1){return '<span class="cardCorners"><b class="meterBadge">'+(run.scanReveal?c.meter:"?")+'</b><b class="rhymeSeal">-'+c.rhyme+'</b></span><span class="verseText">'+c.text+'</span><span class="cardMeta"><span>'+c.rhymeType+'</span></span>';}}
  return'<span class="cardCorners"><b class="meterBadge">'+c.meter+'</b><b class="rhymeSeal">-'+c.rhyme+'</b></span><span class="verseText">'+c.text+'</span><span class="cardMeta"><span class="cardFamily">'+familyLabel(fam)+'</span>'+device+'<span class="theme">'+c.theme+'</span></span>'+(c.level?'<span class="cardLevel">'+stars(c.level)+'</span>':"");
 }
 function cardHelpsContract(c){
@@ -299,36 +416,38 @@ function renderHand(){
  $("hand").innerHTML="";$("hand").classList.toggle("discardMode",!!run.discardMode);
  run.hand.forEach(function(id){
   var c=effectiveCard(id),b=document.createElement("button"),fam=familyOf(c),discardPick=run.discardMode&&run.discardSelected.indexOf(id)>=0;
-  b.type="button";b.className="verseCard family-"+fam+(run.selected.indexOf(id)>=0&&!run.discardMode?" selected":"")+(cardHelpsContract(c)&&!run.discardMode?" cardSynergy":"")+(discardPick?" discardPick":"");
-  b.innerHTML=cardHTML(c)+(discardPick?'<span class="discardStamp">DESCARTAR</span>':"");
+  b.type="button";b.className="verseCard family-"+fam+(run.selected.indexOf(id)>=0&&!run.discardMode?" selected":"")+(run.districtIndex<2&&cardHelpsContract(c)&&!run.discardMode?" cardSynergy":"")+(discardPick?" discardPick":"");
+  b.innerHTML=cardHTML(c,true)+(discardPick?'<span class="discardStamp">DESCARTAR</span>':"");
   b.addEventListener("click",function(){toggleCard(id);});$("hand").appendChild(b);
  });
 }
-function renderActiveMuses(){$("activeMuses").innerHTML=run.muses.length?'<span class="eyebrow">MUSAS ACTIVAS</span>'+run.muses.map(function(id){var m=museById(id);return m?'<span>'+m.icon+" "+m.name+"</span>":"";}).join(""):"";}
+function renderActiveMuses(){$("activeMuses").innerHTML=run.muses.length?'<span class="eyebrow">MUSAS ACTIVAS</span>'+run.muses.map(function(id){var m=museById(id);return m?'<span class="museUnit">'+museArt(id)+m.name+"</span>":"";}).join(""):"";}
 
 function showBurst(kicker,title,big,tags,hit){
  if(comboTimer)clearTimeout(comboTimer);$("comboBurstKicker").textContent=kicker;$("comboBurstTitle").textContent=title;$("comboBurstDamage").textContent=big;$("comboBurstTags").textContent=tags||"";
  $("comboBurst").classList.remove("show");void $("comboBurst").offsetWidth;$("comboBurst").classList.add("show");
- if(hit){$("gameScreen").classList.remove("impact");void $("gameScreen").offsetWidth;$("gameScreen").classList.add("impact");$("rivalStage").classList.remove("hit");void $("rivalStage").offsetWidth;$("rivalStage").classList.add("hit");}
- comboTimer=setTimeout(function(){$("comboBurst").classList.remove("show");$("gameScreen").classList.remove("impact");$("rivalStage").classList.remove("hit");},1000);
+ if(hit){$("gameScreen").classList.remove("impact");void $("gameScreen").offsetWidth;$("gameScreen").classList.add("impact");$("gameScreen").classList.add("musePulse");$("rivalStage").classList.remove("hit");void $("rivalStage").offsetWidth;$("rivalStage").classList.add("hit");}
+ comboTimer=setTimeout(function(){$("comboBurst").classList.remove("show");$("gameScreen").classList.remove("impact","musePulse");$("rivalStage").classList.remove("hit");},1000);
 }
 function playSelection(){
  if(!run||run.locked||run.selected.length<2||run.handsLeft<=0)return;
  var d=districts[run.districtIndex],a=analyze(run.selected),ch=currentChallenge(),met=contractMet(a);
  run.locked=true;run.handsLeft-=1;run.stats.compositions+=1;
+ run.lastFeedback=(met?"Cumplido. ":"Contrato fallido. ")+describeAnalysis(a)+" Exigía: "+ch.desc+"\n"+scansionFeedback(run.selected);
  if(!met){run.stats.failedContracts+=1;run.streak=0;run.inspiration=Math.max(0,run.inspiration-d.failPenalty);moveSelectedToDiscard();$("rivalSpeech").textContent=pick(d.taunts);$("playerPanel").classList.remove("hurt");void $("playerPanel").offsetWidth;$("playerPanel").classList.add("hurt");showBurst("CONTRATO FALLIDO",ch.title,"SIN ATAQUE","−"+d.failPenalty+" Inspiración",false);renderGame();bridgeCall("checkpoint","contract_failed");setTimeout(afterFailedTurn,900);return;}
  var damage=contractDamage(a);run.stats.contracts+=1;if(a.structured){run.stats.structured+=1;run.streak+=1;}else run.streak=0;run.bestStreak=Math.max(run.bestStreak,run.streak);run.stats.bestCombo=Math.max(run.stats.bestCombo,damage);run.runScore+=damage;run.rivalPrestige=Math.max(0,run.rivalPrestige-damage);run.firstPlay=false;moveSelectedToDiscard();renderGame();
+ recordComposition(a);checkAchievements();
  $("damageFloat").textContent="−"+damage.toLocaleString("es-ES");$("damageFloat").classList.remove("show");void $("damageFloat").offsetWidth;$("damageFloat").classList.add("show");showBurst(a.tier+" · CONTRATO CUMPLIDO",a.name,"−"+damage.toLocaleString("es-ES")+" PRESTIGIO",ch.title+" · "+(a.tags[0]||""),true);bridgeCall("checkpoint","contract_attack");
  setTimeout(function(){if(!run||run.finished)return;if(run.rivalPrestige<=0){run.locked=false;winDistrict();return;}rivalCounter(damage);},900);
 }
 function afterFailedTurn(){
- if(!run||run.finished)return;run.locked=false;if(run.inspiration<=0||run.handsLeft<=0){loseRun();return;}rollChallenge();renderGame();
+ if(!run||run.finished)return;run.locked=false;if(run.inspiration<=0||run.handsLeft<=0){loseRun();return;}run.scanReveal=false;rollChallenge();renderGame();
 }
 function rivalCounter(damage){
  var d=districts[run.districtIndex],weak=damage<d.threshold;
  if(weak){run.inspiration=Math.max(0,run.inspiration-1);$("rivalSpeech").textContent="«Cumpliste el contrato, pero tu golpe dejó hueco para mi réplica.»";$("playerPanel").classList.remove("hurt");void $("playerPanel").offsetWidth;$("playerPanel").classList.add("hurt");showToast("RÉPLICA · El impacto fue insuficiente: −1 Inspiración.","bad");}
  else{$("rivalSpeech").textContent=d.blocked;showToast("RÉPLICA BLOQUEADA · Contrato e impacto superados.","ok");}
- run.locked=false;bridgeCall("checkpoint","rival_reply");if(run.inspiration<=0||run.handsLeft<=0){renderGame();setTimeout(loseRun,500);return;}rollChallenge();renderGame();
+ run.locked=false;bridgeCall("checkpoint","rival_reply");if(run.inspiration<=0||run.handsLeft<=0){renderGame();setTimeout(loseRun,500);return;}run.scanReveal=false;rollChallenge();renderGame();
 }
 function discardSelection(){
  if(!run||run.locked||run.discardsLeft<=0)return;
@@ -358,20 +477,22 @@ function shuffleHand(){
 }
 
 function winDistrict(){
- if(!run||run.finished)return;var d=districts[run.districtIndex];run.stats.districtsCleared+=1;career.districtsCleared+=1;career.bestCombo=Math.max(Number(career.bestCombo||0),run.stats.bestCombo);saveCareer();$("rivalSpeech").textContent="«El distrito reconoce tu victoria.»";showToast("MAESTRO VENCIDO · "+d.rival+" pierde todo su Prestigio.","ok");bridgeCall("checkpoint","district_cleared");
+ if(!run||run.finished)return;var d=districts[run.districtIndex];run.stats.districtsCleared+=1;career.districtsCleared+=1;if(run.mapId){career.mapProgress=career.mapProgress||{};career.mapProgress[run.mapId]=Math.max(Number(career.mapProgress[run.mapId]||0),run.districtIndex+1);}career.bestCombo=Math.max(Number(career.bestCombo||0),run.stats.bestCombo);checkAchievements();saveCareer();$("rivalSpeech").textContent="«El distrito reconoce tu victoria.»";showToast("MAESTRO VENCIDO · "+d.rival+" pierde todo su Prestigio.","ok");bridgeCall("checkpoint","district_cleared");
  if(run.districtIndex>=districts.length-1){run.won=true;setTimeout(finishRun,850);return;}
  run.districtIndex+=1;run.districtStarted=false;run.selected=[];run.awaitingEvent=true;setTimeout(function(){showEvent();},850);
 }
 
 function showEvent(){
  if(!run)return;run.awaitingEvent=true;run.locked=false;
- var choices=events.filter(function(e){return e.id!==run.lastEventId;}),ev=run.eventId?eventById(run.eventId):pick(choices.length?choices:events);run.eventId=ev.id;run.lastEventId=ev.id;show("eventScreen");
+ var map=activeMap(),choices=events.filter(function(e){return e.id!==run.lastEventId&&(!map||map.events.indexOf(e.id)>=0);}),ev=run.eventId?eventById(run.eventId):pick(choices.length?choices:events);run.eventId=ev.id;run.lastEventId=ev.id;show("eventScreen");
  $("eventIcon").textContent=ev.icon;$("eventTitle").textContent=ev.title;$("eventText").textContent=ev.text;$("eventChoices").className="eventChoices";$("eventChoices").innerHTML="";
  ev.choices.forEach(function(c){var b=document.createElement("button");b.type="button";b.className="eventChoice";b.innerHTML='<span class="eventChoiceIcon">'+c.icon+'</span><b>'+c.title+'</b><p>'+c.desc+'</p><small>'+c.reward+'</small>';b.addEventListener("click",function(){resolveEventAction(c.action);});$("eventChoices").appendChild(b);});
  renderEventSummary();
 }
 function renderEventSummary(){$("eventRunSummary").innerHTML='<span>✦ Inspiración '+run.inspiration+"/"+run.maxInspiration+'</span><span>▤ '+run.cardPool.length+' cartas</span><span>♻ +'+run.bonusDiscards+' descartes</span><span>☰ mano '+run.handSize+'</span>';}
+function recordEventAction(action){run.eventActions=run.eventActions||{};run.eventActions[action]=(run.eventActions[action]||0)+1;}
 function resolveEventAction(action){
+ if(["draft","draftRare","upgrade","remove","duplicate"].indexOf(action)<0)recordEventAction(action);
  if(action==="heal2"){run.inspiration=Math.min(run.maxInspiration,run.inspiration+2);finishEvent("La fuente devuelve claridad a tu pluma.");return;}
  if(action==="discardPlus"){run.bonusDiscards+=1;finishEvent("A partir de ahora tendrás un descarte adicional en cada duelo.");return;}
  if(action==="handPlus"){run.handSize=Math.min(9,run.handSize+1);finishEvent("Tu mano permanente aumenta a "+run.handSize+" cartas.");return;}
@@ -382,10 +503,10 @@ function resolveEventAction(action){
 function showDraft(rare){
  var pool=cards.slice();if(rare)pool=cards.filter(function(c){return c.meter===11||c.devices.indexOf("metáfora")>=0||c.devices.indexOf("sinestesia")>=0;});
  var offers=shuffle(pool).slice(0,3);$("eventTitle").textContent=rare?"Pergaminos selectos":"Elige un nuevo verso";$("eventText").textContent="La carta elegida entra permanentemente en tu mazo para el resto de la expedición.";$("eventChoices").className="eventChoices draftMode";$("eventChoices").innerHTML="";
- offers.forEach(function(base){var temp=Object.assign({},base,{uid:"preview",level:rare?1:0}),b=document.createElement("button");b.type="button";b.className="verseCard family-"+familyOf(temp);b.innerHTML=cardHTML(temp);b.addEventListener("click",function(){run.cardPool.push(makeInstance(base.id,rare?1:0));finishEvent("Has añadido «"+base.text+"» al mazo.");});$("eventChoices").appendChild(b);});
+ offers.forEach(function(base){var temp=Object.assign({},base,{uid:"preview",level:rare?1:0}),b=document.createElement("button");b.type="button";b.className="verseCard family-"+familyOf(temp);b.innerHTML=cardHTML(temp);b.addEventListener("click",function(){recordEventAction(rare?"draftRare":"draft");run.cardPool.push(makeInstance(base.id,rare?1:0));finishEvent("Has añadido «"+base.text+"» al mazo.");});$("eventChoices").appendChild(b);});
 }
 function finishEvent(message){
- run.awaitingEvent=false;run.eventId=null;bridgeCall("checkpoint","event_resolved");showToast(message||"Evento resuelto.","ok");setTimeout(function(){showMuseChoice("Elige una Musa","Una nueva inspiración te acompaña antes de "+districts[run.districtIndex].name+".");},350);
+ run.awaitingEvent=false;run.eventId=null;checkAchievements();bridgeCall("checkpoint","event_resolved");showToast(message||"Evento resuelto.","ok");setTimeout(function(){showMuseChoice("Elige una Musa","Una nueva inspiración te acompaña antes de "+districts[run.districtIndex].name+".");},350);
 }
 
 function openDeckAction(mode){
@@ -402,6 +523,7 @@ function renderDeckScreen(){
 }
 function applyDeckAction(mode,id){
  var inst=instanceByUid(id),c=effectiveCard(id);if(!inst||!c)return;
+ recordEventAction(mode);
  if(mode==="upgrade"){inst.level=Math.min(3,inst.level+1);finishEvent("Has mejorado «"+c.text+"» al nivel "+roman(inst.level)+".");return;}
  if(mode==="remove"){run.cardPool=run.cardPool.filter(function(x){return x.uid!==id;});finishEvent("Has eliminado «"+c.text+"». Tu mazo es ahora más preciso.");return;}
  if(mode==="duplicate"){run.cardPool.push(makeInstance(inst.baseId,inst.level));finishEvent("Has duplicado «"+c.text+"».");}
@@ -410,7 +532,7 @@ function roman(n){return["I","II","III"][Math.max(0,n-1)]||"I";}
 function backFromDeck(){if(deckView.from==="event"){showEvent();}else{show("gameScreen");renderGame();}}
 
 function finishRun(){
- if(!run||run.finished)return;run.finished=true;run.locked=false;career.runs+=1;if(run.won)career.wins+=1;career.bestScore=Math.max(career.bestScore,run.runScore);career.bestStreak=Math.max(career.bestStreak,run.bestStreak);career.bestCombo=Math.max(Number(career.bestCombo||0),run.stats.bestCombo);saveCareer();resumeSave=null;
+ if(!run||run.finished)return;run.finished=true;run.locked=false;career.runs+=1;if(run.won){career.wins+=1;if(run.mapId){career.mapWins=career.mapWins||{};career.mapWins[run.mapId]=true;}}career.bestScore=Math.max(career.bestScore,run.runScore);career.bestStreak=Math.max(career.bestStreak,run.bestStreak);career.bestCombo=Math.max(Number(career.bestCombo||0),run.stats.bestCombo);checkAchievements();saveCareer();resumeSave=null;
  $("finalScore").textContent=run.runScore.toLocaleString("es-ES");$("districtsText").textContent=run.stats.districtsCleared+"/"+districts.length;$("compositionsText").textContent=run.stats.compositions;$("bestStreakText").textContent=run.bestStreak;$("bestComboText").textContent=run.stats.bestCombo.toLocaleString("es-ES");
  if(run.won){$("resultKicker").textContent="VERSÓPOLIS CONQUISTADA";$("resultTitle").textContent="La ciudad corea tus versos";$("resultText").textContent="Has sobrevivido a contratos, eventos y cuatro maestros construyendo un mazo capaz de responder a lo inesperado.";}
  else{$("resultKicker").textContent="EXPEDICIÓN PERDIDA";$("resultTitle").textContent=run.inspiration<=0?"Tu inspiración se ha agotado":"El contrato te ha vencido";$("resultText").textContent="No basta con hacer una buena estrofa: el mazo debe poder encontrar la forma exigida antes de que se agoten rondas, descartes e Inspiración.";}
@@ -419,10 +541,10 @@ function finishRun(){
 function loseRun(){if(!run||run.finished)return;run.won=false;finishRun();}
 function showToast(text,kind){if(toastTimer)clearTimeout(toastTimer);$("toast").textContent=text;$("toast").className="toast"+(kind?" "+kind:"");toastTimer=setTimeout(function(){$("toast").classList.add("hidden");},2300);}
 
-function snapshot(){return{version:4,run:run,career:career};}
+function snapshot(){return{version:5,run:run,career:career};}
 function migrateRun(oldRun,version){
  if(!oldRun)return null;
- if(version===4&&oldRun.cardPool){oldRun.locked=false;oldRun.discardMode=false;oldRun.discardSelected=[];if(!oldRun.discardPile)oldRun.discardPile=[];if(!oldRun.stats)oldRun.stats={compositions:0,structured:0,districtsCleared:0,bestCombo:0,contracts:0,failedContracts:0};if(oldRun.stats.failedContracts===undefined)oldRun.stats.failedContracts=0;if(oldRun.stats.contracts===undefined)oldRun.stats.contracts=0;return oldRun;}
+ if((version===4||version===5)&&oldRun.cardPool){oldRun.locked=false;oldRun.discardMode=false;oldRun.discardSelected=[];if(!oldRun.discardPile)oldRun.discardPile=[];if(!oldRun.stats)oldRun.stats={compositions:0,structured:0,districtsCleared:0,bestCombo:0,contracts:0,failedContracts:0};if(oldRun.stats.failedContracts===undefined)oldRun.stats.failedContracts=0;if(oldRun.stats.contracts===undefined)oldRun.stats.contracts=0;oldRun.forms=oldRun.forms||{};oldRun.rhymeCounts=oldRun.rhymeCounts||{};oldRun.eventActions=oldRun.eventActions||{};oldRun.scans=Number(oldRun.scans||0);return oldRun;}
  var r=Object.assign({},oldRun),d=districts[Math.min(Number(r.districtIndex||0),districts.length-1)];
  r.version=4;r.cardPool=startingBaseIds.map(function(id){return makeInstance(id,0);});r.handSize=7;r.bonusDiscards=0;r.deck=[];r.discardPile=[];r.hand=[];r.selected=[];r.discardMode=false;r.discardSelected=[];r.maxInspiration=Number(r.maxInspiration||4);r.inspiration=Math.min(r.maxInspiration,Number(r.inspiration||r.maxInspiration));r.maxPrestige=Number(r.maxPrestige||d.prestige);r.rivalPrestige=Number(r.rivalPrestige===undefined?r.maxPrestige:r.rivalPrestige);r.challengeId=null;r.lastChallengeId=null;r.awaitingEvent=false;r.eventId=null;r.locked=false;
  if(!r.stats)r.stats={compositions:0,structured:0,districtsCleared:0,bestCombo:0};r.stats.contracts=Number(r.stats.contracts||0);r.stats.failedContracts=Number(r.stats.failedContracts||0);
@@ -432,11 +554,11 @@ function restore(raw){
  try{
   var save=raw&&raw.run!==undefined?raw:raw&&raw.save?raw.save:raw;if(!save)return false;
   if(save.career){if(save.version===1||save.career.games!==undefined){career.runs=Math.max(career.runs,Number(save.career.games||0));career.bestScore=Math.max(career.bestScore,Number(save.career.bestScore||0));career.bestStreak=Math.max(career.bestStreak,Number(save.career.bestStreak||0));}else career=Object.assign(career,save.career);saveCareer();}
-  if((save.version===2||save.version===3||save.version===4)&&save.run&&!save.run.finished){resumeSave=migrateRun(save.run,save.version);renderCareer();return true;}renderCareer();return!!save.career;
+  if((save.version===2||save.version===3||save.version===4||save.version===5)&&save.run&&!save.run.finished){resumeSave=migrateRun(save.run,save.version);renderCareer();return true;}renderCareer();return!!save.career;
  }catch(err){return false;}
 }
 function continueRun(){
- if(!resumeSave)return;run=migrateRun(resumeSave,resumeSave.version||4);resumeSave=null;
+ if(!resumeSave)return;run=migrateRun(resumeSave,resumeSave.version||4);resumeSave=null;setActiveMap(run.mapId);
  if(run.awaitingEvent){showEvent();}else if(run.awaitingMuse){showMuseChoice("Elige una Musa","Continúa tu expedición con una nueva inspiración.");}else{if(!run.challengeId)rollChallenge();if(!run.deck.length&&!run.hand.length)setupDistrict();else{show("gameScreen");renderGame();}}
  bridgeCall("sessionStarted");
 }
@@ -448,7 +570,8 @@ function metrics(){
 function bridgeCall(name,arg){try{if(window.VersopolisBridge&&typeof window.VersopolisBridge[name]==="function")return window.VersopolisBridge[name](arg);}catch(err){}return null;}
 function saveAndHome(){if(run&&!run.finished){run.locked=false;resumeSave=run;renderCareer();}if(window.VersopolisBridge&&window.VersopolisBridge.saveAndExit)window.VersopolisBridge.saveAndExit();else{show("homeScreen");renderCareer();}}
 
-$("startBtn").addEventListener("click",newRun);$("continueBtn").addEventListener("click",continueRun);$("againBtn").addEventListener("click",newRun);$("homeBtn").addEventListener("click",function(){run=null;show("homeScreen");renderCareer();});
+$("startBtn").addEventListener("click",showAtlas);$("continueBtn").addEventListener("click",continueRun);$("againBtn").addEventListener("click",showAtlas);$("homeBtn").addEventListener("click",function(){run=null;show("homeScreen");renderCareer();});
+$("atlasBackBtn").addEventListener("click",function(){show("homeScreen");});$("achievementsBtn").addEventListener("click",function(){renderAchievements();show("achievementsScreen");});$("achievementsBackBtn").addEventListener("click",function(){show("homeScreen");});$("codexBtn").addEventListener("click",function(){renderCodex();show("codexScreen");});$("codexBackBtn").addEventListener("click",function(){show("homeScreen");});$("scanBtn").addEventListener("click",function(){if(!run||!activeMap()||activeMap().id!=="torre"||run.districtIndex!==1||run.scanReveal)return;run.scanReveal=true;run.scans+=1;renderGame();bridgeCall("checkpoint","scan_meter");});
 $("playBtn").addEventListener("click",playSelection);$("discardBtn").addEventListener("click",discardSelection);$("shuffleHandBtn").addEventListener("click",shuffleHand);$("clearBtn").addEventListener("click",clearSelection);$("exitBtn").addEventListener("click",saveAndHome);$("museExitBtn").addEventListener("click",saveAndHome);$("eventExitBtn").addEventListener("click",saveAndHome);$("openDeckBtn").addEventListener("click",openDeckInspect);$("deckBackBtn").addEventListener("click",backFromDeck);
 $("helpBtn").addEventListener("click",function(){$("modal").classList.remove("hidden");});$("closeModal").addEventListener("click",function(){$("modal").classList.add("hidden");});$("modal").addEventListener("click",function(e){if(e.target===$("modal"))$("modal").classList.add("hidden");});
 window.VersopolisGame={snapshot:snapshot,restore:restore,metrics:metrics,get run(){return run;},get career(){return career;}};
