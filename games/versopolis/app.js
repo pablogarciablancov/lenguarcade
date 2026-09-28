@@ -21,8 +21,8 @@ var MAPS=[
  {id:"teatro",name:"Teatro de las Estrofas",focus:"Esquemas y estrofas",difficulty:"AVANZADA",boss:"La Arquitecta del Verso",scene:"theater",places:["Vestíbulo de Pareados","Bastidores Cruzados","Escenario del Reverso","Gran Telón"],rivals:["El Tramoyista","La Actriz de los Cuatro Versos","El Director del Desorden","La Arquitecta del Verso"],weights:{aabb:7,abab:8,abba:8,fullform:8,monorhyme:4,consonante:2},events:["archivo","copista","mercado"]},
  {id:"torre",name:"Torre del Metro",focus:"Medida y ritmo",difficulty:"MAESTRÍA",boss:"El Maestro del Pulso",scene:"tower",places:["Escalera del Péndulo","Taller de Relojes","Sala del Autómata","Cúpula del Pulso"],rivals:["El Aprendiz del Péndulo","La Relojera","El Autómata Métrico","El Maestro del Pulso"],weights:{octo4:10,hendeca4:10,fullform:3,abab:2,abba:2},events:["fuente","copista","mercado"]}
 ];
-var SPRITE_ASSETS={scenes:{garden:"./assets/garden.svg",fortress:"./assets/fortress.svg",theater:"./assets/theater.svg",tower:"./assets/tower.svg"},bosses:{garden:"./assets/garden-boss.svg",fortress:"./assets/fortress-boss.svg",theater:"./assets/theater-boss.svg",tower:"./assets/tower-boss.svg"},muses:"./assets/muse-{id}.svg"};
-function museArt(id){return '<img class="museArt" src="./assets/muse-'+id+'.svg" alt="">';}
+var SPRITE_ASSETS={scenes:{garden:"./assets/art/scene-garden.webp",fortress:"./assets/art/scene-fortress.webp",theater:"./assets/art/scene-theater.webp",tower:"./assets/art/scene-tower.webp"},rivals:"./assets/art/enemy-{scene}-{stage}.webp",muses:"./assets/art/muse-{id}.webp"};
+function museArt(id){return '<img class="museArt" src="'+SPRITE_ASSETS.muses.replace("{id}",id)+'" alt="">';}
 function mapById(id){return MAPS.filter(function(m){return m.id===id;})[0]||null;}
 function activeMap(){return run&&mapById(run.mapId);}
 function mapDistricts(map){return map.rivals.map(function(rival,i){var old=legacyDistricts[i];return Object.assign({},old,{name:map.places[i],rival:rival,portrait:map.id.charAt(0).toUpperCase(),rank:i===3?"JEFE · FALLO = −2":i===2?"ÉLITE":"DUELISTA",focus:map.id==="torre"?"meter":map.id==="teatro"?"all":"rhyme",rule:map.focus+" · "+(i===3?"duelo final":"contratos especializados"),taunts:["«Revisa la forma exigida por el contrato.»","«Tu verso puede mejorar antes del próximo ataque.»"],blocked:"«El contrato encaja. Buen trabajo.»"});});}
@@ -344,7 +344,7 @@ function contractDamage(a){return Math.round(a.score*currentChallenge().mult);}
 function renderGame(){
  if(!run)return;
  var d=districts[run.districtIndex],a=analyze(run.selected),ch=currentChallenge(),met=run.selected.length>=2&&contractMet(a),remainingPct=Math.max(0,Math.round(run.rivalPrestige/run.maxPrestige*100)),map=activeMap(),hiddenHint=map&&run.districtIndex>=2;
- $("gameScreen").dataset.theme=d.focus;$("gameScreen").dataset.scene=map?map.scene:"legacy";$("gameScreen").dataset.boss=map&&run.districtIndex===3?"yes":"no";$("districtStep").textContent="DUELO "+(run.districtIndex+1)+" / "+districts.length;$("districtName").textContent=d.name;$("rivalRank").textContent=d.rank;$("rivalName").textContent=d.rival;$("rivalPortrait").textContent=map&&run.districtIndex===3?"":d.portrait;$("rivalRule").textContent=d.rule;
+ $("gameScreen").dataset.theme=d.focus;$("gameScreen").dataset.scene=map?map.scene:"legacy";$("gameScreen").dataset.boss=map&&run.districtIndex===3?"yes":"no";$("districtStep").textContent="DUELO "+(run.districtIndex+1)+" / "+districts.length;$("districtName").textContent=d.name;$("rivalRank").textContent=d.rank;$("rivalName").textContent=d.rival;$("rivalPortrait").textContent=map?"":d.portrait;$("rivalPortrait").style.backgroundImage=map?'url("'+SPRITE_ASSETS.rivals.replace("{scene}",map.scene).replace("{stage}",run.districtIndex)+'")':"";$("rivalRule").textContent=d.rule;
  $("handsText").textContent=run.handsLeft;$("discardsText").textContent=run.discardsLeft;$("streakText").textContent="×"+run.streak;$("runScoreText").textContent=run.runScore.toLocaleString("es-ES");
  $("prestigeText").textContent=run.rivalPrestige.toLocaleString("es-ES")+" / "+run.maxPrestige.toLocaleString("es-ES");$("prestigeFill").style.width=remainingPct+"%";
  $("deckCount").textContent=run.cardPool.length;$("discardCount").textContent=run.discardPile.length;$("handSizeText").textContent=run.handSize;$("drawPileCount").textContent=run.deck.length;
@@ -486,9 +486,10 @@ function showEvent(){
  if(!run)return;run.awaitingEvent=true;run.locked=false;
  var map=activeMap(),choices=events.filter(function(e){return e.id!==run.lastEventId&&(!map||map.events.indexOf(e.id)>=0);}),ev=run.eventId?eventById(run.eventId):pick(choices.length?choices:events);run.eventId=ev.id;run.lastEventId=ev.id;show("eventScreen");
  $("eventIcon").textContent=ev.icon;$("eventTitle").textContent=ev.title;$("eventText").textContent=ev.text;$("eventChoices").className="eventChoices";$("eventChoices").innerHTML="";
- ev.choices.forEach(function(c){var b=document.createElement("button");b.type="button";b.className="eventChoice";b.innerHTML='<span class="eventChoiceIcon">'+c.icon+'</span><b>'+c.title+'</b><p>'+c.desc+'</p><small>'+c.reward+'</small>';b.addEventListener("click",function(){resolveEventAction(c.action);});$("eventChoices").appendChild(b);});
+ ev.choices.forEach(function(c){var b=document.createElement("button");b.type="button";b.className="eventChoice";b.innerHTML='<span class="eventChoiceIcon"><img src="'+eventActionArt(c.action)+'" alt=""></span><b>'+c.title+'</b><p>'+c.desc+'</p><small>'+c.reward+'</small>';b.addEventListener("click",function(){resolveEventAction(c.action);});$("eventChoices").appendChild(b);});
  renderEventSummary();
 }
+function eventActionArt(action){var name={heal2:"inspiration",maxInspiration:"inspiration",discardPlus:"change",draft:"deck",draftRare:"deck",duplicate:"deck",remove:"discard",upgrade:"quill",handPlus:"deck"}[action]||"event";return"./assets/art/hud-"+name+".webp";}
 function renderEventSummary(){$("eventRunSummary").innerHTML='<span>✦ Inspiración '+run.inspiration+"/"+run.maxInspiration+'</span><span>▤ '+run.cardPool.length+' cartas</span><span>♻ +'+run.bonusDiscards+' descartes</span><span>☰ mano '+run.handSize+'</span>';}
 function recordEventAction(action){run.eventActions=run.eventActions||{};run.eventActions[action]=(run.eventActions[action]||0)+1;}
 function resolveEventAction(action){

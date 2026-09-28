@@ -16,10 +16,16 @@ for(const token of ["window.VersopolisGame","var legacyDistricts=[","var MAPS=["
   if(!app.includes(token)) throw new Error("Versópolis V0.5: lógica incompleta ("+token+").");
 }
 for(const scene of ["garden","fortress","theater","tower"]){
-  for(const suffix of [".svg","-boss.svg"]){if(!fs.existsSync(path.join(dir,"assets",scene+suffix)))throw new Error("Versópolis: falta arte "+scene+suffix);}
+  if(!fs.existsSync(path.join(dir,"assets","art","scene-"+scene+".webp")))throw new Error("Versópolis: falta escenario "+scene);
+  for(let stage=0;stage<4;stage++){
+    if(!fs.existsSync(path.join(dir,"assets","art","enemy-"+scene+"-"+stage+".webp")))throw new Error("Versópolis: falta rival "+scene+"/"+stage);
+  }
 }
 for(const muse of ["eco","pulso","imagen","arquitecta","duende","afinacion","coleccionista"]){
-  if(!fs.existsSync(path.join(dir,"assets","muse-"+muse+".svg")))throw new Error("Versópolis: falta Musa "+muse);
+  if(!fs.existsSync(path.join(dir,"assets","art","muse-"+muse+".webp")))throw new Error("Versópolis: falta Musa "+muse);
+}
+for(const item of ["inspiration","change","deck","discard","contract","achievement","event","quill"]){
+  if(!fs.existsSync(path.join(dir,"assets","art","hud-"+item+".webp")))throw new Error("Versópolis: falta recurso HUD "+item);
 }
 const cardMeters=Object.fromEntries([...app.matchAll(/\{id:"([^"]+)",text:"[^"]+",meter:(\d+)/g)].map(([,id,meter])=>[id,Number(meter)]));
 const scansBlock=app.match(/var SCANS=\{([\s\S]*?)\};/);
