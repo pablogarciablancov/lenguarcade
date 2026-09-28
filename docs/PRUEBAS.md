@@ -1,5 +1,15 @@
 # Plan de pruebas
 
+## Versópolis V0.5 (2026-09-28)
+
+1. Ejecutar `node scripts/check-versopolis.mjs` y `npm run check`.
+2. Abrir `https://pablogarciablancov.github.io/lenguarcade/games/versopolis/` y comprobar que la portada indica V0.5 y muestra las cuatro expediciones.
+3. Entrar en cada mapa, elegir una Musa y confirmar que se ven el escenario, el rival animado, el HUD, el contrato y las cartas sin desplazamiento vertical en escritorio.
+4. Usar Barajar y Descartar y verificar que cada acción consume un Cambio sin gastar una ronda; intentar atacar sin cumplir el contrato y comprobar el coste del fallo.
+5. Guardar y salir; reabrir la expedición y comprobar la recuperación. Repetir con un guardado anterior de V0.4.
+6. Abrir Versópolis desde la tarjeta del alumno en LenguArcade cuando el profesor lo tenga disponible. Comprobar que carga en el runner, se conserva el progreso al salir y aparece el cierre de un minuto si el profesor lo bloquea durante la partida.
+7. Revisar el atlas y el duelo también a 1440×900 y 1920×1080, además de la vista de 1366×768.
+
 ## Identidad Supabase y sesión de alumno (2026-09-26)
 
 1. Ejecutar `node scripts/check-student-auth-session.mjs` y `npm run check`.

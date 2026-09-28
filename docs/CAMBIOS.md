@@ -1,5 +1,13 @@
 # Registro de cambios
 
+## 2026-09-28 · Versópolis V0.5 en LenguArcade
+
+- Cuatro expediciones enfocadas en rima asonante, rima consonante, estrofas y métrica; contratos, eventos, 32 logros y Códice.
+- Los escenarios, 16 rivales de estilo animado, siete Musas y recursos del HUD usan ilustraciones WebP. Los retratos tienen una versión de URL nueva para evitar caché antigua.
+- El guardado conserva partidas V0.2, V0.3 y V0.4 y el puente incrustado sigue enviando checkpoints y resultados al runner.
+- El catálogo ya incluía Versópolis como juego incrustado; la fusión de la rama de juego publicó V0.5 en la misma URL de GitHub Pages sin cambiar el núcleo de Apps Script ni Supabase.
+- `npm run check`, el control de ámbito de la PR y el despliegue de GitHub Pages terminaron correctamente. Se verificó en navegador el atlas, las Musas y un duelo con el nuevo arte.
+
 ## 2026-09-27 · Cierre de juegos con minuto de gracia
 
 - El acceso del alumno se sincroniza cada 3 s mientras la pestaña está visible y el preflight CORS se cachea durante 10 minutos.
