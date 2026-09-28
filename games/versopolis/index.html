@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0b0717">
   <title>Versópolis · LenguArcade</title>
-  <link rel="stylesheet" href="./styles.css?v=20260928-v03">
+  <link rel="stylesheet" href="./styles.css?v=20260928-v04">
 </head>
 <body>
 <main id="app" class="app">
@@ -15,24 +15,25 @@
       <div class="brand"><span class="brandMark">V</span><span>LENGUARCADE · VERSÓPOLIS</span></div>
       <button id="helpBtn" class="iconBtn" type="button" aria-label="Cómo jugar">?</button>
     </header>
-
     <div class="homeHero">
-      <span class="kicker">DUELOS DE POESÍA · V0.3</span>
+      <span class="kicker">ROGUELIKE POÉTICO · V0.4</span>
       <h1>VERSÓPOLIS</h1>
-      <p>Entra en la ciudad, construye estrofas y derrota a sus maestros combinando rima, ritmo, forma e imágenes.</p>
+      <p>Construye tu mazo de versos, supera contratos poéticos y derrota a los maestros antes de que se agote tu Inspiración.</p>
       <div class="homeActions">
         <button id="startBtn" class="primary huge" type="button">⚔ INICIAR EXPEDICIÓN</button>
         <button id="continueBtn" class="secondary hidden" type="button">CONTINUAR PARTIDA</button>
       </div>
       <div id="careerLine" class="careerLine"></div>
     </div>
-
-    <div class="routeMap" aria-label="Ruta de Versópolis">
+    <div class="routeMap v04Route" aria-label="Ruta de Versópolis">
       <div class="routeLine"></div>
-      <div class="routeNode"><b>01</b><span>Puerta de la Rima</span><small>La Voz del Puente</small></div>
-      <div class="routeNode"><b>02</b><span>Plaza del Ritmo</span><small>Maestro del Pulso</small></div>
-      <div class="routeNode"><b>03</b><span>Jardines de la Imagen</span><small>Dama de los Espejos</small></div>
-      <div class="routeNode boss"><b>04</b><span>Gran Anfiteatro</span><small>Cronista Mayor</small></div>
+      <div class="routeNode battleNode"><b>01</b><span>Puerta de la Rima</span><small>duelo</small></div>
+      <div class="routeNode eventNode"><b>✦</b><span>Encuentro</span><small>modifica tu mazo</small></div>
+      <div class="routeNode battleNode"><b>02</b><span>Plaza del Ritmo</span><small>duelo</small></div>
+      <div class="routeNode eventNode"><b>✦</b><span>Encuentro</span><small>riesgo y recompensa</small></div>
+      <div class="routeNode battleNode"><b>03</b><span>Jardines</span><small>duelo élite</small></div>
+      <div class="routeNode eventNode"><b>✦</b><span>Encuentro</span><small>prepara el mazo</small></div>
+      <div class="routeNode boss"><b>04</b><span>Gran Anfiteatro</span><small>jefe</small></div>
     </div>
   </section>
 
@@ -43,7 +44,7 @@
     </header>
     <div class="rewardStage">
       <div class="rewardHalo">✦</div>
-      <span class="kicker">RECOMPENSA</span>
+      <span class="kicker">RECOMPENSA DE VICTORIA</span>
       <h2 id="museTitle">Elige una Musa</h2>
       <p id="museSubtitle">Su poder permanecerá activo durante toda la expedición.</p>
       <div id="museChoices" class="museChoices"></div>
@@ -51,38 +52,69 @@
     </div>
   </section>
 
+  <section id="eventScreen" class="screen eventScreen hidden">
+    <header class="topbar compact">
+      <div class="brand"><span class="brandMark">V</span><span>VERSÓPOLIS · ENCUENTRO</span></div>
+      <button id="eventExitBtn" class="ghost" type="button">Guardar y salir</button>
+    </header>
+    <div class="eventStage">
+      <div id="eventIcon" class="eventIcon">⌘</div>
+      <span class="kicker">EVENTO DE RUTA</span>
+      <h2 id="eventTitle">El Archivo de los Márgenes</h2>
+      <p id="eventText"></p>
+      <div id="eventChoices" class="eventChoices"></div>
+      <div id="eventRunSummary" class="eventRunSummary"></div>
+    </div>
+  </section>
+
+  <section id="deckScreen" class="screen deckScreen hidden">
+    <header class="topbar compact">
+      <div class="brand"><span class="brandMark">V</span><span id="deckScreenTitle">TU MAZO</span></div>
+      <button id="deckBackBtn" class="ghost" type="button">Volver</button>
+    </header>
+    <div class="deckStage">
+      <div class="deckStageHead">
+        <div><span class="kicker">ARSENAL DE VERSOS</span><h2 id="deckActionTitle">Tu mazo</h2><p id="deckActionText">Revisa las cartas que pueden aparecer en tus manos.</p></div>
+        <div id="deckStats" class="deckStats"></div>
+      </div>
+      <div id="deckGrid" class="deckGrid"></div>
+    </div>
+  </section>
+
   <section id="gameScreen" class="screen game hidden" data-theme="rhyme">
     <div class="sceneGlow"></div>
-    <header class="battleHud">
+    <header class="battleHud v04Hud">
       <div class="districtBadge">
         <span id="districtStep">DISTRITO 1 / 4</span>
         <strong id="districtName">Puerta de la Rima</strong>
       </div>
-      <div class="routePips" id="routePips" aria-label="Progreso por distritos"></div>
+      <div class="routePips" id="routePips"></div>
       <div class="battleStats">
-        <span><small>RONDA</small><b id="handsText">4</b></span>
+        <span><small>RONDAS</small><b id="handsText">5</b></span>
         <span><small>DESCARTES</small><b id="discardsText">2</b></span>
         <span><small>RACHA</small><b id="streakText">×0</b></span>
         <span><small>TOTAL</small><b id="runScoreText">0</b></span>
       </div>
+      <button id="openDeckBtn" class="ghost compactBtn" type="button">Mazo</button>
       <button id="exitBtn" class="ghost compactBtn" type="button">Salir</button>
     </header>
 
-    <section class="arena">
+    <section class="arena v04Arena">
       <aside id="playerPanel" class="playerPanel">
         <div class="playerCrest">✒</div>
-        <span class="eyebrow">TU INSPIRACIÓN</span>
+        <span class="eyebrow">INSPIRACIÓN</span>
         <div id="inspirationHearts" class="inspirationHearts"></div>
-        <p>Las jugadas sólidas bloquean la réplica del rival. Las débiles desgastan tu inspiración.</p>
+        <p>No se recupera automáticamente entre distritos. Los eventos pueden salvar una expedición.</p>
+        <div class="pileStats"><span>MAZO <b id="deckCount">0</b></span><span>DESCARTE <b id="discardCount">0</b></span><span>MANO <b id="handSizeText">7</b></span></div>
         <div id="activeMuses" class="activeMuses"></div>
       </aside>
 
-      <section class="duelBoard">
+      <section class="duelBoard v04Duel">
         <div id="rivalStage" class="rivalStage">
           <div class="rivalAura"></div>
           <div id="rivalPortrait" class="rivalPortrait">✒</div>
           <div class="rivalIdentity">
-            <span class="eyebrow">MAESTRO DEL DISTRITO</span>
+            <span id="rivalRank" class="eyebrow">MAESTRO DEL DISTRITO</span>
             <h2 id="rivalName">La Voz del Puente</h2>
             <p id="rivalRule">La rima hace más daño.</p>
           </div>
@@ -94,9 +126,14 @@
           <div id="damageFloat" class="damageFloat">−0</div>
         </div>
 
-        <div class="versusRibbon"><span>⚔</span><b id="turnPrompt">CONSTRUYE TU ESTROFA</b><span>⚔</span></div>
+        <div id="challengeBanner" class="challengeBanner">
+          <div class="challengeSigil">◆</div>
+          <div class="challengeCopy"><span>CONTRATO DEL TURNO</span><strong id="challengeTitle">CERROJO ABBA</strong><small id="challengeDesc">Construye cuatro versos con esquema ABBA.</small></div>
+          <div class="challengeReward"><span>IMPACTO</span><b id="challengeMultiplier">×1,5</b></div>
+          <div id="challengeState" class="challengeState">PENDIENTE</div>
+        </div>
 
-        <div class="composer">
+        <div class="composer v04Composer">
           <div class="composerHead">
             <div><span class="eyebrow">ATRIL DE COMPOSICIÓN</span><h3 id="comboName">Elige de 2 a 4 versos</h3></div>
             <div class="previewScore"><span>IMPACTO</span><strong id="scorePreview">0</strong></div>
@@ -105,8 +142,8 @@
           <div id="comboTags" class="comboTags"></div>
           <div class="composerActions">
             <button id="clearBtn" class="ghost small" type="button">Vaciar</button>
-            <button id="discardBtn" class="secondary" type="button">♻ DESCARTAR</button>
-            <button id="playBtn" class="primary attackBtn" type="button">✦ LANZAR ESTROFA</button>
+            <button id="discardBtn" class="secondary" type="button">♻ BUSCAR EN EL MAZO</button>
+            <button id="playBtn" class="primary attackBtn" type="button">ELIGE VERSOS</button>
           </div>
         </div>
       </section>
@@ -115,16 +152,16 @@
         <div class="codexTab">CÓDICE</div>
         <span class="eyebrow">LECTURA POÉTICA</span>
         <h3 id="analysisTitle">Busca una combinación</h3>
-        <p id="analysisText">El orden importa. Combina rima, medida y recursos para aumentar el impacto.</p>
+        <p id="analysisText">El contrato manda. Una estrofa potente no sirve si no cumple el reto del turno.</p>
         <div id="analysisBreakdown" class="analysisBreakdown"></div>
-        <div class="codexTip"><span>TIP</span><p id="codexTip">Las formas reconocibles suelen causar más impacto.</p></div>
+        <div class="codexTip"><span>RIESGO</span><p id="codexTip">Si fallas el contrato, no atacas y pierdes Inspiración.</p></div>
       </aside>
     </section>
 
-    <section class="handZone">
-      <div class="deckBadge"><span>MAZO</span><b id="deckCount">0</b></div>
-      <div id="hand" class="hand"></div>
-      <div class="handHint"><span class="eyebrow">MANO DE VERSOS</span><small>Pulsa cartas para añadirlas. El orden de selección crea el esquema.</small></div>
+    <section class="handZone v04HandZone">
+      <div class="deckBadge"><span>ROBO</span><b id="drawPileCount">0</b></div>
+      <div id="hand" class="hand v04Hand"></div>
+      <div class="handHint"><span class="eyebrow">MANO DE PERGAMINOS</span><small>Color = afinidad. Usa descartes para buscar las piezas que exige el contrato.</small></div>
     </section>
 
     <div id="comboBurst" class="comboBurst" aria-hidden="true">
@@ -145,7 +182,7 @@
       <p id="resultText"></p>
       <div class="resultStats">
         <span><b id="districtsText">0/4</b> distritos</span>
-        <span><b id="compositionsText">0</b> estrofas</span>
+        <span><b id="compositionsText">0</b> jugadas</span>
         <span><b id="bestStreakText">0</b> mejor racha</span>
         <span><b id="bestComboText">0</b> mejor impacto</span>
       </div>
@@ -158,19 +195,19 @@
     <div class="modalCard">
       <button id="closeModal" class="modalClose" type="button">×</button>
       <span class="kicker">CÓMO SE JUEGA</span>
-      <h2>Un duelo que se escribe verso a verso</h2>
-      <p>Elige de dos a cuatro cartas y ordénalas para construir una estrofa. La rima, el ritmo, la forma y los recursos literarios aumentan su impacto.</p>
-      <p>Tu objetivo es reducir a cero el <b>Prestigio</b> del maestro antes de quedarte sin rondas o sin Inspiración. Una combinación débil permite que el rival responda y te quite Inspiración.</p>
+      <h2>Versópolis ya no acepta cualquier estrofa</h2>
+      <p>Cada turno aparece un <b>contrato poético obligatorio</b>: ABBA, ABAB, octosílabos, rima asonante, recursos literarios… Solo una selección que cumpla el contrato puede atacar.</p>
+      <p>Si fuerzas una jugada que no cumple el reto, consumes la ronda, no haces daño y pierdes Inspiración. Usa los descartes para buscar las cartas necesarias y modifica tu mazo en los eventos de ruta.</p>
       <div class="helpGrid">
-        <span><b>RIMA</b> Busca ecos y esquemas como ABAB, ABBA o AABB.</span>
-        <span><b>RITMO</b> Los versos con la misma medida se potencian.</span>
-        <span><b>IMAGEN</b> Metáforas y otros recursos añaden impacto.</span>
-        <span><b>MUSAS</b> Tras cada victoria eliges un poder para el resto de la expedición.</span>
+        <span><b>PERGAMINOS</b> Los colores indican afinidades: rima, eco, ritmo e imagen.</span>
+        <span><b>MAZO</b> Añade, elimina, duplica y mejora cartas durante la expedición.</span>
+        <span><b>CONTRATOS</b> Cumplirlos habilita el ataque y añade multiplicador.</span>
+        <span><b>EVENTOS</b> Cada decisión cambia las probabilidades de tus futuras manos.</span>
       </div>
     </div>
   </div>
 </main>
-<script src="./app.js?v=20260928-v03"></script>
+<script src="./app.js?v=20260928-v04"></script>
 <script src="./bridge.js?v=20260925-v01"></script>
 </body>
 </html>

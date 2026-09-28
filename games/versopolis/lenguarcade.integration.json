@@ -11,5 +11,5 @@
     "saveProgress": true,
     "supabaseCatalog": true
   },
-  "notes": "V0.3: duelo poético con Prestigio del rival, Inspiración del jugador, réplicas, impacto animado, cuatro maestros, cartas de verso, Musas como recompensas, descartes estratégicos y guardado central compatible con V0.2."
+  "notes": "V0.4: roguelike poético con cartas-pergamino por afinidad, contratos obligatorios por turno, ataques bloqueados al incumplir el reto, mazo persistente editable, eventos de ruta, mejoras/duplicados/eliminaciones, Inspiración persistente, Musas y guardado compatible con V0.2/V0.3."
 }
