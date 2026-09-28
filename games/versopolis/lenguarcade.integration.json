@@ -11,5 +11,5 @@
     "saveProgress": true,
     "supabaseCatalog": true
   },
-  "notes": "V0.2: juego de construcción poética. El jugador combina cartas de verso para crear rimas, patrones estróficos, ritmo uniforme y recursos literarios; incluye cuatro distritos, Musas, descartes, puntuación estratégica y guardado central."
+  "notes": "V0.3: duelo poético con Prestigio del rival, Inspiración del jugador, réplicas, impacto animado, cuatro maestros, cartas de verso, Musas como recompensas, descartes estratégicos y guardado central compatible con V0.2."
 }

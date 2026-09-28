@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#100b22">
+  <meta name="theme-color" content="#0b0717">
   <title>Versópolis · LenguArcade</title>
-  <link rel="stylesheet" href="./styles.css?v=20260927-v02">
+  <link rel="stylesheet" href="./styles.css?v=20260928-v03">
 </head>
 <body>
 <main id="app" class="app">
@@ -17,28 +17,33 @@
     </header>
 
     <div class="homeHero">
-      <span class="kicker">CONSTRUYE POESÍA · V0.2</span>
+      <span class="kicker">DUELOS DE POESÍA · V0.3</span>
       <h1>VERSÓPOLIS</h1>
-      <p>Combina versos, descubre estructuras y encadena rima, ritmo e imágenes para conquistar los distritos de la ciudad.</p>
+      <p>Entra en la ciudad, construye estrofas y derrota a sus maestros combinando rima, ritmo, forma e imágenes.</p>
       <div class="homeActions">
-        <button id="startBtn" class="primary huge" type="button">COMENZAR EXPEDICIÓN</button>
+        <button id="startBtn" class="primary huge" type="button">⚔ INICIAR EXPEDICIÓN</button>
         <button id="continueBtn" class="secondary hidden" type="button">CONTINUAR PARTIDA</button>
       </div>
       <div id="careerLine" class="careerLine"></div>
     </div>
 
-    <div class="districtMap" aria-label="Distritos de Versópolis">
-      <div><b>01</b><span>Puerta de la Rima</span><small>ecos y esquemas</small></div>
-      <div><b>02</b><span>Plaza del Ritmo</span><small>métrica y compás</small></div>
-      <div><b>03</b><span>Jardines de la Imagen</span><small>recursos expresivos</small></div>
-      <div><b>04</b><span>Gran Anfiteatro</span><small>duelo total</small></div>
+    <div class="routeMap" aria-label="Ruta de Versópolis">
+      <div class="routeLine"></div>
+      <div class="routeNode"><b>01</b><span>Puerta de la Rima</span><small>La Voz del Puente</small></div>
+      <div class="routeNode"><b>02</b><span>Plaza del Ritmo</span><small>Maestro del Pulso</small></div>
+      <div class="routeNode"><b>03</b><span>Jardines de la Imagen</span><small>Dama de los Espejos</small></div>
+      <div class="routeNode boss"><b>04</b><span>Gran Anfiteatro</span><small>Cronista Mayor</small></div>
     </div>
   </section>
 
-  <section id="museScreen" class="screen museScreen hidden">
-    <header class="topbar compact"><div class="brand"><span class="brandMark">V</span><span>VERSÓPOLIS</span></div><button id="museExitBtn" class="ghost" type="button">Guardar y salir</button></header>
-    <div class="museStage">
-      <span class="kicker">INSPIRACIÓN</span>
+  <section id="museScreen" class="screen rewardScreen hidden">
+    <header class="topbar compact">
+      <div class="brand"><span class="brandMark">V</span><span>VERSÓPOLIS · CÁMARA DE LAS MUSAS</span></div>
+      <button id="museExitBtn" class="ghost" type="button">Guardar y salir</button>
+    </header>
+    <div class="rewardStage">
+      <div class="rewardHalo">✦</div>
+      <span class="kicker">RECOMPENSA</span>
       <h2 id="museTitle">Elige una Musa</h2>
       <p id="museSubtitle">Su poder permanecerá activo durante toda la expedición.</p>
       <div id="museChoices" class="museChoices"></div>
@@ -46,68 +51,103 @@
     </div>
   </section>
 
-  <section id="gameScreen" class="screen game hidden">
-    <header class="hud">
-      <div class="hudDistrict"><span id="districtStep">DISTRITO 1/4</span><strong id="districtName">Puerta de la Rima</strong></div>
-      <div class="hudStat"><span>OBJETIVO</span><strong id="targetText">900</strong></div>
-      <div class="hudStat"><span>PUNTOS</span><strong id="scoreText">0</strong></div>
-      <div class="hudStat"><span>JUGADAS</span><strong id="handsText">4</strong></div>
-      <div class="hudStat"><span>DESCARTES</span><strong id="discardsText">2</strong></div>
-      <button id="exitBtn" class="ghost" type="button">Guardar y salir</button>
+  <section id="gameScreen" class="screen game hidden" data-theme="rhyme">
+    <div class="sceneGlow"></div>
+    <header class="battleHud">
+      <div class="districtBadge">
+        <span id="districtStep">DISTRITO 1 / 4</span>
+        <strong id="districtName">Puerta de la Rima</strong>
+      </div>
+      <div class="routePips" id="routePips" aria-label="Progreso por distritos"></div>
+      <div class="battleStats">
+        <span><small>RONDA</small><b id="handsText">4</b></span>
+        <span><small>DESCARTES</small><b id="discardsText">2</b></span>
+        <span><small>RACHA</small><b id="streakText">×0</b></span>
+        <span><small>TOTAL</small><b id="runScoreText">0</b></span>
+      </div>
+      <button id="exitBtn" class="ghost compactBtn" type="button">Salir</button>
     </header>
 
-    <div class="progressBar"><i id="targetFill"></i><span id="progressText">0 / 900</span></div>
-
-    <section class="battlefield">
-      <aside class="rivalPanel">
-        <div id="rivalPortrait" class="rivalPortrait">✒</div>
-        <span class="eyebrow">RIVAL</span>
-        <h2 id="rivalName">La Voz del Puente</h2>
-        <p id="rivalRule">Las combinaciones de rima reciben una bonificación especial.</p>
+    <section class="arena">
+      <aside id="playerPanel" class="playerPanel">
+        <div class="playerCrest">✒</div>
+        <span class="eyebrow">TU INSPIRACIÓN</span>
+        <div id="inspirationHearts" class="inspirationHearts"></div>
+        <p>Las jugadas sólidas bloquean la réplica del rival. Las débiles desgastan tu inspiración.</p>
         <div id="activeMuses" class="activeMuses"></div>
       </aside>
 
-      <section class="composer">
-        <div class="composerHead">
-          <div><span class="eyebrow">TU ESTROFA</span><h2 id="comboName">Elige de 2 a 4 versos</h2></div>
-          <div class="previewScore"><span>VALOR</span><strong id="scorePreview">0</strong></div>
+      <section class="duelBoard">
+        <div id="rivalStage" class="rivalStage">
+          <div class="rivalAura"></div>
+          <div id="rivalPortrait" class="rivalPortrait">✒</div>
+          <div class="rivalIdentity">
+            <span class="eyebrow">MAESTRO DEL DISTRITO</span>
+            <h2 id="rivalName">La Voz del Puente</h2>
+            <p id="rivalRule">La rima hace más daño.</p>
+          </div>
+          <div class="prestigeBlock">
+            <div class="prestigeLabel"><span>PRESTIGIO</span><strong id="prestigeText">900 / 900</strong></div>
+            <div class="prestigeBar"><i id="prestigeFill"></i></div>
+          </div>
+          <div id="rivalSpeech" class="rivalSpeech">«Veamos qué sabe hacer tu pluma.»</div>
+          <div id="damageFloat" class="damageFloat">−0</div>
         </div>
-        <div id="poemSlots" class="poemSlots" aria-label="Versos elegidos"></div>
-        <div id="comboTags" class="comboTags"></div>
-        <div class="composerActions">
-          <button id="clearBtn" class="ghost small" type="button">Vaciar</button>
-          <button id="discardBtn" class="secondary" type="button">DESCARTAR SELECCIÓN</button>
-          <button id="playBtn" class="primary" type="button">JUGAR COMBINACIÓN</button>
+
+        <div class="versusRibbon"><span>⚔</span><b id="turnPrompt">CONSTRUYE TU ESTROFA</b><span>⚔</span></div>
+
+        <div class="composer">
+          <div class="composerHead">
+            <div><span class="eyebrow">ATRIL DE COMPOSICIÓN</span><h3 id="comboName">Elige de 2 a 4 versos</h3></div>
+            <div class="previewScore"><span>IMPACTO</span><strong id="scorePreview">0</strong></div>
+          </div>
+          <div id="poemSlots" class="poemSlots" aria-label="Versos elegidos"></div>
+          <div id="comboTags" class="comboTags"></div>
+          <div class="composerActions">
+            <button id="clearBtn" class="ghost small" type="button">Vaciar</button>
+            <button id="discardBtn" class="secondary" type="button">♻ DESCARTAR</button>
+            <button id="playBtn" class="primary attackBtn" type="button">✦ LANZAR ESTROFA</button>
+          </div>
         </div>
       </section>
 
-      <aside class="analysisPanel">
+      <aside class="codexPanel">
+        <div class="codexTab">CÓDICE</div>
         <span class="eyebrow">LECTURA POÉTICA</span>
-        <h3 id="analysisTitle">Construye una combinación</h3>
-        <p id="analysisText">El orden importa. Busca rimas, medidas semejantes y recursos que puedan reforzarse entre sí.</p>
+        <h3 id="analysisTitle">Busca una combinación</h3>
+        <p id="analysisText">El orden importa. Combina rima, medida y recursos para aumentar el impacto.</p>
         <div id="analysisBreakdown" class="analysisBreakdown"></div>
-        <div class="runScore"><span>PUNTUACIÓN TOTAL</span><strong id="runScoreText">0</strong></div>
+        <div class="codexTip"><span>TIP</span><p id="codexTip">Las formas reconocibles suelen causar más impacto.</p></div>
       </aside>
     </section>
 
     <section class="handZone">
-      <div class="handHead"><div><span class="eyebrow">MANO DE VERSOS</span><b id="handHint">Pulsa una carta para añadirla a tu estrofa.</b></div><div class="legend"><span><i class="meterDot"></i> medida</span><span><i class="rhymeDot"></i> terminación</span></div></div>
+      <div class="deckBadge"><span>MAZO</span><b id="deckCount">0</b></div>
       <div id="hand" class="hand"></div>
+      <div class="handHint"><span class="eyebrow">MANO DE VERSOS</span><small>Pulsa cartas para añadirlas. El orden de selección crea el esquema.</small></div>
     </section>
 
+    <div id="comboBurst" class="comboBurst" aria-hidden="true">
+      <span id="comboBurstKicker">COMBINACIÓN</span>
+      <strong id="comboBurstTitle">REDONDILLA</strong>
+      <b id="comboBurstDamage">−850</b>
+      <small id="comboBurstTags">ABBA · 8 sílabas</small>
+    </div>
     <div id="toast" class="toast hidden" role="status"></div>
   </section>
 
   <section id="resultScreen" class="screen result hidden">
     <div class="resultPanel">
+      <div class="resultLaurel">✦</div>
       <span id="resultKicker" class="kicker">EXPEDICIÓN TERMINADA</span>
       <h2 id="resultTitle">Versópolis recuerda tu nombre</h2>
-      <div class="scoreSeal"><span>TOTAL</span><strong id="finalScore">0</strong></div>
+      <div class="scoreSeal"><span>PUNTUACIÓN</span><strong id="finalScore">0</strong></div>
       <p id="resultText"></p>
       <div class="resultStats">
         <span><b id="districtsText">0/4</b> distritos</span>
-        <span><b id="compositionsText">0</b> combinaciones</span>
+        <span><b id="compositionsText">0</b> estrofas</span>
         <span><b id="bestStreakText">0</b> mejor racha</span>
+        <span><b id="bestComboText">0</b> mejor impacto</span>
       </div>
       <button id="againBtn" class="primary" type="button">NUEVA EXPEDICIÓN</button>
       <button id="homeBtn" class="ghost" type="button">VOLVER A LA CIUDAD</button>
@@ -118,14 +158,19 @@
     <div class="modalCard">
       <button id="closeModal" class="modalClose" type="button">×</button>
       <span class="kicker">CÓMO SE JUEGA</span>
-      <h2>La poesía es la mecánica</h2>
-      <p>Recibes una mano de versos. Elige entre dos y cuatro y ordénalos para crear combinaciones de rima, ritmo, tema y recursos literarios.</p>
-      <p>Las estructuras potentes multiplican la puntuación. Cada distrito cambia las reglas y las Musas añaden bonificaciones permanentes durante la expedición.</p>
-      <div class="helpGrid"><span><b>RIMA</b> Busca esquemas como ABAB o ABBA.</span><span><b>RITMO</b> Agrupa versos con la misma medida.</span><span><b>IMAGEN</b> Combina recursos expresivos.</span><span><b>ESTRATEGIA</b> Guarda descartes para construir una mano mejor.</span></div>
+      <h2>Un duelo que se escribe verso a verso</h2>
+      <p>Elige de dos a cuatro cartas y ordénalas para construir una estrofa. La rima, el ritmo, la forma y los recursos literarios aumentan su impacto.</p>
+      <p>Tu objetivo es reducir a cero el <b>Prestigio</b> del maestro antes de quedarte sin rondas o sin Inspiración. Una combinación débil permite que el rival responda y te quite Inspiración.</p>
+      <div class="helpGrid">
+        <span><b>RIMA</b> Busca ecos y esquemas como ABAB, ABBA o AABB.</span>
+        <span><b>RITMO</b> Los versos con la misma medida se potencian.</span>
+        <span><b>IMAGEN</b> Metáforas y otros recursos añaden impacto.</span>
+        <span><b>MUSAS</b> Tras cada victoria eliges un poder para el resto de la expedición.</span>
+      </div>
     </div>
   </div>
 </main>
-<script src="./app.js?v=20260927-v02"></script>
+<script src="./app.js?v=20260928-v03"></script>
 <script src="./bridge.js?v=20260925-v01"></script>
 </body>
 </html>
