@@ -21,7 +21,7 @@ var MAPS=[
  {id:"teatro",name:"Teatro de las Estrofas",focus:"Esquemas y estrofas",difficulty:"AVANZADA",boss:"La Arquitecta del Verso",scene:"theater",places:["Vestíbulo de Pareados","Bastidores Cruzados","Escenario del Reverso","Gran Telón"],rivals:["El Tramoyista","La Actriz de los Cuatro Versos","El Director del Desorden","La Arquitecta del Verso"],weights:{aabb:7,abab:8,abba:8,fullform:8,monorhyme:4,consonante:2},events:["archivo","copista","mercado"]},
  {id:"torre",name:"Torre del Metro",focus:"Medida y ritmo",difficulty:"MAESTRÍA",boss:"El Maestro del Pulso",scene:"tower",places:["Escalera del Péndulo","Taller de Relojes","Sala del Autómata","Cúpula del Pulso"],rivals:["El Aprendiz del Péndulo","La Relojera","El Autómata Métrico","El Maestro del Pulso"],weights:{octo4:10,hendeca4:10,fullform:3,abab:2,abba:2},events:["fuente","copista","mercado"]}
 ];
-var SPRITE_ASSETS={scenes:{garden:"./assets/art/scene-garden.webp",fortress:"./assets/art/scene-fortress.webp",theater:"./assets/art/scene-theater.webp",tower:"./assets/art/scene-tower.webp"},rivals:"./assets/art/enemy-{scene}-{stage}.webp",muses:"./assets/art/muse-{id}.webp"};
+var SPRITE_ASSETS={scenes:{garden:"./assets/art/scene-garden.webp",fortress:"./assets/art/scene-fortress.webp",theater:"./assets/art/scene-theater.webp",tower:"./assets/art/scene-tower.webp"},rivals:"./assets/art/enemy-{scene}-{stage}.webp?v=cartoon1",muses:"./assets/art/muse-{id}.webp"};
 function museArt(id){return '<img class="museArt" src="'+SPRITE_ASSETS.muses.replace("{id}",id)+'" alt="">';}
 function mapById(id){return MAPS.filter(function(m){return m.id===id;})[0]||null;}
 function activeMap(){return run&&mapById(run.mapId);}
