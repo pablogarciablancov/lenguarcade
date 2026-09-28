@@ -168,7 +168,7 @@ function canRhymeType(list,type,count){var groups={};list.filter(function(c){ret
 function maxGroup(list,key){var counts={},max=0;list.forEach(function(c){counts[c[key]]=(counts[c[key]]||0)+1;max=Math.max(max,counts[c[key]]);});return max;}
 function distinctDevices(list){var d=[];list.forEach(function(c){c.devices.forEach(function(x){if(d.indexOf(x)<0)d.push(x);});});return d.length;}
 function rollChallenge(){
- var pool=collectionCards(),eligible=challenges.filter(function(c){return c.min<=run.districtIndex&&c.can(pool)&&c.id!==run.lastChallengeId;});
+ var pool=collectionCards(),eligible=challenges.filter(function(c){return c.min<=run.districtIndex&&c.can(pool)&&c.id!==run.challengeId;});
  if(!eligible.length)eligible=challenges.filter(function(c){return c.min<=run.districtIndex&&c.can(pool);});
  var ch=pick(eligible.length?eligible:[challenges[0]]);run.lastChallengeId=run.challengeId;run.challengeId=ch.id;
 }
@@ -312,7 +312,7 @@ function showEvent(){
  ev.choices.forEach(function(c){var b=document.createElement("button");b.type="button";b.className="eventChoice";b.innerHTML='<span class="eventChoiceIcon">'+c.icon+'</span><b>'+c.title+'</b><p>'+c.desc+'</p><small>'+c.reward+'</small>';b.addEventListener("click",function(){resolveEventAction(c.action);});$("eventChoices").appendChild(b);});
  renderEventSummary();
 }
-function renderEventSummary(){$("eventRunSummary").innerHTML='<span>✦ Inspiración '+run.inspiration+"/"+run.maxInspiration+'</span><span>▤ "+run.cardPool.length+" cartas</span><span>♻ +"+run.bonusDiscards+" descartes</span><span>☰ mano "+run.handSize+"</span>";}
+function renderEventSummary(){$("eventRunSummary").innerHTML='<span>✦ Inspiración '+run.inspiration+"/"+run.maxInspiration+'</span><span>▤ '+run.cardPool.length+' cartas</span><span>♻ +'+run.bonusDiscards+' descartes</span><span>☰ mano '+run.handSize+'</span>';}
 function resolveEventAction(action){
  if(action==="heal2"){run.inspiration=Math.min(run.maxInspiration,run.inspiration+2);finishEvent("La fuente devuelve claridad a tu pluma.");return;}
  if(action==="discardPlus"){run.bonusDiscards+=1;finishEvent("A partir de ahora tendrás un descarte adicional en cada duelo.");return;}
@@ -364,7 +364,7 @@ function showToast(text,kind){if(toastTimer)clearTimeout(toastTimer);$("toast").
 function snapshot(){return{version:4,run:run,career:career};}
 function migrateRun(oldRun,version){
  if(!oldRun)return null;
- if(version===4&&oldRun.cardPool){oldRun.locked=false;if(!oldRun.discardPile)oldRun.discardPile=[];if(!oldRun.stats.failedContracts)oldRun.stats.failedContracts=0;return oldRun;}
+ if(version===4&&oldRun.cardPool){oldRun.locked=false;if(!oldRun.discardPile)oldRun.discardPile=[];if(!oldRun.stats)oldRun.stats={compositions:0,structured:0,districtsCleared:0,bestCombo:0,contracts:0,failedContracts:0};if(oldRun.stats.failedContracts===undefined)oldRun.stats.failedContracts=0;if(oldRun.stats.contracts===undefined)oldRun.stats.contracts=0;return oldRun;}
  var r=Object.assign({},oldRun),d=districts[Math.min(Number(r.districtIndex||0),districts.length-1)];
  r.version=4;r.cardPool=startingBaseIds.map(function(id){return makeInstance(id,0);});r.handSize=7;r.bonusDiscards=0;r.deck=[];r.discardPile=[];r.hand=[];r.selected=[];r.maxInspiration=Number(r.maxInspiration||4);r.inspiration=Math.min(r.maxInspiration,Number(r.inspiration||r.maxInspiration));r.maxPrestige=Number(r.maxPrestige||d.prestige);r.rivalPrestige=Number(r.rivalPrestige===undefined?r.maxPrestige:r.rivalPrestige);r.challengeId=null;r.lastChallengeId=null;r.awaitingEvent=false;r.eventId=null;r.locked=false;
  if(!r.stats)r.stats={compositions:0,structured:0,districtsCleared:0,bestCombo:0};r.stats.contracts=Number(r.stats.contracts||0);r.stats.failedContracts=Number(r.stats.failedContracts||0);
