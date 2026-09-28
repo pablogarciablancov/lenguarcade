@@ -49,3 +49,35 @@
 .shuffleHandBtn:not(:disabled){box-shadow:inset 0 0 18px rgba(112,217,239,.06)}
 @media(max-width:1120px){.v042Actions{grid-template-columns:auto 1fr .9fr 1.15fr}.v042Actions button{font-size:8.5px}.changeConsole small{display:none}}
 @media(max-width:850px){.v042Actions{grid-template-columns:1fr 1fr}.v042Actions .attackBtn{grid-column:1/-1}.changeConsole{display:none}}
+
+/* V0.4.2 · pase visual de mesa de juego */
+.game:before{content:"";position:absolute;z-index:-2;inset:0;background:radial-gradient(ellipse at 50% 112%,rgba(139,82,36,.20),transparent 45%),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px);background-size:auto,32px 32px,32px 32px;pointer-events:none}
+.battleHud{filter:drop-shadow(0 7px 16px rgba(0,0,0,.22))}
+.districtBadge{border-color:rgba(255,213,106,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),0 7px 18px rgba(0,0,0,.2)}
+.playerPanel,.codexPanel,.duelBoard{border-color:rgba(222,190,113,.17);box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),0 18px 44px rgba(0,0,0,.3)}
+.playerPanel:before,.codexPanel:before{content:"";position:absolute;inset:6px;border:1px solid rgba(255,213,106,.055);border-radius:12px;pointer-events:none}
+.playerPanel,.codexPanel{position:relative}
+.v04Duel{border:1px solid rgba(231,196,114,.22);background:linear-gradient(180deg,rgba(32,18,55,.94),rgba(12,7,25,.98));box-shadow:inset 0 0 38px rgba(181,156,255,.045),0 20px 48px rgba(0,0,0,.34)}
+.challengeBanner{position:relative;color:#3e2918;border:0;background:linear-gradient(90deg,#caa56c 0,#f0dfb5 5%,#e8d09d 50%,#f0dfb5 95%,#c59b60 100%);box-shadow:0 8px 18px rgba(0,0,0,.3),inset 0 0 0 1px rgba(81,49,24,.28);clip-path:polygon(1% 8%,4% 0,96% 2%,99% 12%,98% 88%,95% 100%,4% 98%,1% 89%)}
+.challengeBanner:before,.challengeBanner:after{content:"";position:absolute;top:7px;bottom:7px;width:6px;background:linear-gradient(#9c6b39,#e4c183,#996532);border-radius:4px;opacity:.65}.challengeBanner:before{left:7px}.challengeBanner:after{right:7px}
+.challengeSigil{background:radial-gradient(circle at 35% 30%,#dc6b75,#8e2637 68%);border:2px solid #6e1f2d;color:#ffe8b6;box-shadow:0 3px 8px rgba(60,25,20,.35),inset 0 1px 1px rgba(255,255,255,.25);transform:rotate(-5deg)}
+.challengeCopy span{color:#83502b}.challengeCopy strong{color:#3a2418;text-shadow:0 1px #fff2ca}.challengeCopy small{color:#6c503b}.challengeReward{border-color:rgba(79,48,25,.18)}.challengeReward span{color:#82603d}.challengeReward b{color:#7a3f20;text-shadow:0 1px rgba(255,255,255,.5)}
+.challengeState{background:rgba(72,48,29,.10);color:#72533b;border:1px solid rgba(74,45,23,.12)}
+.challengeBanner.met{background:linear-gradient(90deg,#b4a46b 0,#ecdfb3 5%,#e3d8a5 50%,#ecdfb3 95%,#afa060 100%);border:0}.challengeBanner.met .challengeSigil{background:radial-gradient(circle at 35% 30%,#79d59f,#2f7d58 68%);border-color:#246044}.challengeBanner.met .challengeState{background:rgba(45,119,83,.15);color:#315f46;border-color:rgba(45,119,83,.18)}
+.challengeBanner.fail{background:linear-gradient(90deg,#c09271 0,#e6c8ad 5%,#dfbea7 50%,#e6c8ad 95%,#bd8c6b 100%);border:0}.challengeBanner.fail .challengeState{background:rgba(157,49,66,.14);color:#8d3042}
+.v04Composer{border-color:rgba(255,213,106,.13);background:radial-gradient(circle at 50% 100%,rgba(138,75,35,.10),transparent 40%),linear-gradient(180deg,rgba(28,16,46,.82),rgba(9,6,19,.78));box-shadow:inset 0 0 28px rgba(0,0,0,.17)}
+.poemSlot{border-color:rgba(219,192,133,.13);background:linear-gradient(90deg,rgba(233,216,174,.035),rgba(255,255,255,.018))}
+.poemSlot.filled{border-color:rgba(239,209,139,.25);background:linear-gradient(90deg,rgba(100,71,140,.20),rgba(81,46,94,.05));box-shadow:inset 4px 0 0 #d5ad58}
+.v04HandZone{position:relative;border-color:rgba(196,130,69,.32);background:linear-gradient(rgba(34,15,11,.44),rgba(34,15,11,.44)),repeating-linear-gradient(92deg,#5a3021 0,#653724 24px,#57301f 25px,#4c291c 50px);box-shadow:inset 0 5px 16px rgba(255,190,105,.035),inset 0 -10px 24px rgba(0,0,0,.34),0 -12px 35px rgba(0,0,0,.2)}
+.v04HandZone:before{content:"";position:absolute;left:7px;right:7px;top:4px;height:3px;border-radius:99px;background:linear-gradient(90deg,transparent,#d6a65c 15%,#f2ce80 50%,#d6a65c 85%,transparent);opacity:.52}
+.deckBadge{background:linear-gradient(145deg,#2e1724,#150d1b);border-color:rgba(255,213,106,.2);box-shadow:inset 0 0 0 2px rgba(255,255,255,.025),0 5px 12px rgba(0,0,0,.28)}
+.deckBadge:before{content:"▤";font-size:17px;color:#d7ad61;margin-bottom:2px}
+.v04Hand .verseCard{box-shadow:0 9px 0 rgba(69,39,22,.38),0 16px 24px rgba(0,0,0,.3)}
+.v04Hand .verseCard:hover{box-shadow:0 7px 0 rgba(69,39,22,.32),0 21px 34px rgba(0,0,0,.4)}
+.primary,.secondary,.ghost{position:relative;text-shadow:0 1px 0 rgba(0,0,0,.14)}
+.primary{border-bottom-width:3px;box-shadow:0 5px 0 #9f5c20,0 10px 22px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.55)}
+.primary:active:not(:disabled){transform:translateY(2px);box-shadow:0 3px 0 #9f5c20,0 6px 15px rgba(0,0,0,.2)}
+.secondary{border-bottom-width:2px;box-shadow:0 3px 0 rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.05)}
+.discardTableBtn:not(:disabled){background:linear-gradient(180deg,#8f4051,#5d2638 58%,#481d2c);border-color:#b85a6c;color:#fff5ed}
+.shuffleHandBtn:not(:disabled){background:linear-gradient(180deg,#396f9a,#234766 58%,#19354d);border-color:#4d8fbe;color:#eff9ff}
+.attackBtn.validAttack{background:linear-gradient(180deg,#ffe58d,#e9aa3f 58%,#d28329);border-color:#ffecad;color:#2b1808}
