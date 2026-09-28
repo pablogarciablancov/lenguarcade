@@ -232,7 +232,9 @@ function renderGame(){
  if(run.selected.length<2){play.textContent="ELIGE VERSOS";play.disabled=true;}
  else if(met){play.textContent="⚔ ATACAR · "+("×"+String(ch.mult).replace(".",","));play.disabled=run.locked||run.handsLeft<=0;play.classList.add("validAttack");}
  else{play.textContent="✖ FORZAR JUGADA";play.disabled=run.locked||run.handsLeft<=0;play.classList.add("invalidAttack");}
- $("discardBtn").disabled=run.locked||!run.selected.length||run.discardsLeft<=0;$("clearBtn").disabled=run.locked||!run.selected.length;
+ $("discardBtn").disabled=run.locked||!run.selected.length||run.discardsLeft<=0;
+ $("shuffleHandBtn").disabled=run.locked||!run.hand.length||run.discardsLeft<=0;
+ $("clearBtn").disabled=run.locked||!run.selected.length;
 }
 function contractTip(a,met,d,ch){
  if(!run.selected.length)return"Contrato: "+ch.desc+" Usa descartes antes de gastar una ronda.";
@@ -296,7 +298,21 @@ function rivalCounter(damage){
 }
 function discardSelection(){
  if(!run||run.locked||!run.selected.length||run.discardsLeft<=0)return;
- var n=run.selected.length;moveSelectedToDiscard();run.discardsLeft-=1;renderGame();showToast("BÚSQUEDA · Cambias "+n+" pergamino"+(n===1?"":"s")+" sin gastar ronda.","");bridgeCall("checkpoint","discard_search");
+ var n=run.selected.length;moveSelectedToDiscard();run.discardsLeft-=1;renderGame();
+ showToast("DESCARTAR MESA · Cambias "+n+" pergamino"+(n===1?"":"s")+" y conservas la ronda.","");
+ bridgeCall("checkpoint","discard_table");
+}
+function shuffleHand(){
+ if(!run||run.locked||!run.hand.length||run.discardsLeft<=0)return;
+ var n=run.hand.length;
+ run.selected=[];
+ run.hand.slice().forEach(function(id){run.discardPile.push(id);});
+ run.hand=[];
+ run.discardsLeft-=1;
+ drawToHand();
+ renderGame();
+ showToast("BARAJAR MANO · Renuevas "+n+" pergamino"+(n===1?"":"s")+" y conservas la ronda.","");
+ bridgeCall("checkpoint","shuffle_hand");
 }
 
 function winDistrict(){
@@ -391,7 +407,7 @@ function bridgeCall(name,arg){try{if(window.VersopolisBridge&&typeof window.Vers
 function saveAndHome(){if(run&&!run.finished){run.locked=false;resumeSave=run;renderCareer();}if(window.VersopolisBridge&&window.VersopolisBridge.saveAndExit)window.VersopolisBridge.saveAndExit();else{show("homeScreen");renderCareer();}}
 
 $("startBtn").addEventListener("click",newRun);$("continueBtn").addEventListener("click",continueRun);$("againBtn").addEventListener("click",newRun);$("homeBtn").addEventListener("click",function(){run=null;show("homeScreen");renderCareer();});
-$("playBtn").addEventListener("click",playSelection);$("discardBtn").addEventListener("click",discardSelection);$("clearBtn").addEventListener("click",clearSelection);$("exitBtn").addEventListener("click",saveAndHome);$("museExitBtn").addEventListener("click",saveAndHome);$("eventExitBtn").addEventListener("click",saveAndHome);$("openDeckBtn").addEventListener("click",openDeckInspect);$("deckBackBtn").addEventListener("click",backFromDeck);
+$("playBtn").addEventListener("click",playSelection);$("discardBtn").addEventListener("click",discardSelection);$("shuffleHandBtn").addEventListener("click",shuffleHand);$("clearBtn").addEventListener("click",clearSelection);$("exitBtn").addEventListener("click",saveAndHome);$("museExitBtn").addEventListener("click",saveAndHome);$("eventExitBtn").addEventListener("click",saveAndHome);$("openDeckBtn").addEventListener("click",openDeckInspect);$("deckBackBtn").addEventListener("click",backFromDeck);
 $("helpBtn").addEventListener("click",function(){$("modal").classList.remove("hidden");});$("closeModal").addEventListener("click",function(){$("modal").classList.add("hidden");});$("modal").addEventListener("click",function(e){if(e.target===$("modal"))$("modal").classList.add("hidden");});
 window.VersopolisGame={snapshot:snapshot,restore:restore,metrics:metrics,get run(){return run;},get career(){return career;}};
 renderCareer();
