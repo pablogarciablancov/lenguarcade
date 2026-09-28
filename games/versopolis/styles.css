@@ -81,3 +81,68 @@
 .discardTableBtn:not(:disabled){background:linear-gradient(180deg,#8f4051,#5d2638 58%,#481d2c);border-color:#b85a6c;color:#fff5ed}
 .shuffleHandBtn:not(:disabled){background:linear-gradient(180deg,#396f9a,#234766 58%,#19354d);border-color:#4d8fbe;color:#eff9ff}
 .attackBtn.validAttack{background:linear-gradient(180deg,#ffe58d,#e9aa3f 58%,#d28329);border-color:#ffecad;color:#2b1808}
+
+/* V0.5 · atlas, archivo y cuatro escenarios */
+.atlasScreen,.archiveScreen{background:radial-gradient(circle at 50% 0,rgba(97,64,149,.42),transparent 45%),linear-gradient(145deg,#10102c,#160c27 65%,#0a1722)}
+.atlasStage,.archiveStage{height:calc(100% - 62px);min-height:0;display:flex;flex-direction:column;align-items:center;padding:clamp(12px,2.4vh,26px) clamp(15px,3vw,40px)}
+.atlasStage h2,.archiveStage h2{font:900 clamp(29px,3vw,44px)/1.1 Georgia,serif;margin:7px 0 4px;text-align:center}
+.atlasStage>p,.archiveStage>p{margin:0 0 14px;color:#ded2e8;font-size:12px;text-align:center}
+.atlasGrid{width:min(1430px,100%);flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(9px,1.3vw,18px);align-items:stretch;padding:4px 2px 12px}
+.atlasCard{position:relative;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;text-align:left;color:#fff4e5;border:2px solid rgba(229,204,139,.42);border-radius:22px;background-color:#172139;background-image:linear-gradient(0deg,rgba(8,7,24,.98),transparent 62%),var(--scene);background-position:center;background-size:cover;box-shadow:inset 0 0 0 5px rgba(9,9,24,.32),0 16px 40px rgba(0,0,0,.35);cursor:pointer;transition:transform .18s,border-color .18s,filter .18s}
+.atlasCard:hover,.atlasCard:focus-visible{transform:translateY(-6px);border-color:#ffe3a2;filter:brightness(1.13);outline:0}
+.atlasCard.scene-garden,.game[data-scene="garden"]{--scene:url('./assets/art/scene-garden.webp');--accent:#8ee2d5}
+.atlasCard.scene-fortress,.game[data-scene="fortress"]{--scene:url('./assets/art/scene-fortress.webp');--accent:#e8a47a}
+.atlasCard.scene-theater,.game[data-scene="theater"]{--scene:url('./assets/art/scene-theater.webp');--accent:#e2a3c8}
+.atlasCard.scene-tower,.game[data-scene="tower"]{--scene:url('./assets/art/scene-tower.webp');--accent:#a9e6f1}
+.atlasOrdinal{position:relative;z-index:1;align-self:start;padding:8px 11px;margin:14px;border:1px solid rgba(255,255,255,.32);border-radius:30px;background:rgba(9,8,25,.65);color:var(--accent);font-size:10px;font-weight:950;letter-spacing:.15em}
+.atlasLandmark{position:absolute;inset:10% 0 40%;background:radial-gradient(ellipse at 50% 80%,color-mix(in srgb,var(--accent) 27%,transparent),transparent 70%);pointer-events:none}
+.atlasInfo{display:grid;position:relative;gap:8px;padding:17px 17px 19px;background:linear-gradient(transparent,rgba(7,7,19,.82) 12%)}
+.atlasInfo strong{font:900 clamp(23px,2vw,34px)/1 Georgia,serif;text-shadow:0 3px 15px #000}.atlasInfo small{font-size:11px;color:var(--accent);font-weight:900}.atlasInfo em{font:italic 12px Georgia,serif;color:#f1d8a2}.atlasInfo>span{font-size:10px;letter-spacing:.12em;color:#e3d9eb;font-weight:900}
+.archiveStage{align-items:stretch;max-width:1350px;margin:auto}.archiveStage>.kicker,.archiveStage>h2,.archiveStage>p{text-align:center}.archiveGrid{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:11px;align-content:start;padding:8px 8px 24px;scrollbar-color:#b99367 #21182b}
+.archiveTile{min-height:143px;position:relative;padding:15px;border:1px solid #534761;border-radius:14px;background:linear-gradient(145deg,#32273c,#171525);box-shadow:inset 0 0 0 3px rgba(255,255,255,.025),0 10px 18px rgba(0,0,0,.2);opacity:.7}
+.archiveTile.earned{opacity:1;border-color:#d5ab69;background:linear-gradient(145deg,#56403d,#221c30)}.sealArt{float:right;width:35px;height:35px;display:grid;place-items:center;border-radius:50%;border:3px double #a5979f;background:#3b3147;font:900 17px Georgia,serif;color:#c8b6bf}.earned .sealArt{background:radial-gradient(circle,#f6d891,#a16a3d);border-color:#fce6a7;color:#553519}.tileGroup{display:block;color:#d4af80;font-size:9px;letter-spacing:.13em;font-weight:900}.archiveTile h3{font:800 18px/1.06 Georgia,serif;margin:11px 0 6px}.archiveTile p{font-size:10px;line-height:1.35;color:#d8cbd8;margin:0}.codexGrid .archiveTile{min-height:150px}
+.game[data-scene]:not([data-scene="legacy"]){background-image:linear-gradient(90deg,rgba(9,6,24,.83),rgba(10,7,27,.54),rgba(8,6,21,.86)),var(--scene);background-size:cover;background-position:center}
+.game[data-scene]:not([data-scene="legacy"]) .duelBoard,.game[data-scene]:not([data-scene="legacy"]) .playerPanel,.game[data-scene]:not([data-scene="legacy"]) .codexPanel{background-color:rgba(13,10,30,.82);backdrop-filter:blur(8px)}
+.game[data-scene]:not([data-scene="legacy"]) .districtBadge{border-color:var(--accent)}
+.game[data-scene]:not([data-scene="legacy"]) .rivalPortrait{background-color:rgba(11,8,28,.55);background-size:contain;background-position:center;background-repeat:no-repeat;color:transparent;border-color:var(--accent);box-shadow:0 0 25px color-mix(in srgb,var(--accent) 30%,transparent)}
+.game[data-scene="garden"] .challengeBanner.met .challengeSigil{box-shadow:0 0 18px #8ee2d5}
+.game[data-scene="fortress"] .challengeBanner.met .challengeSigil{box-shadow:0 0 18px #e8a47a}
+.game[data-scene="theater"] .poemSlot.guideMatch{box-shadow:inset 4px 0 0 #e2a3c8,0 0 12px rgba(226,163,200,.35)}
+.game[data-scene="tower"] .challengeBanner.met .challengeSigil{box-shadow:0 0 18px #a9e6f1}
+.game[data-scene="theater"] .poemSlot[data-guide]:before{content:attr(data-guide);display:grid;place-items:center;flex:none;width:18px;height:18px;margin-right:7px;border-radius:50%;background:#a279ad;color:#fff;font:900 10px Georgia,serif}
+.game[data-scene="theater"] .poemSlot.guideMatch:before{background:#76c799;color:#122d22}
+.v042Actions{grid-template-columns:auto auto 1.05fr .9fr 1.25fr}
+@media(max-width:1100px){.atlasGrid{grid-template-columns:repeat(2,minmax(0,1fr));overflow:auto}.atlasCard{min-height:235px}.v042Actions{grid-template-columns:repeat(2,1fr)}.v042Actions .attackBtn{grid-column:span 2}}
+@media(max-height:700px){.atlasStage{padding-top:8px}.atlasStage>p{margin-bottom:7px}.atlasInfo{gap:4px;padding:12px}.archiveTile{min-height:127px}}
+.museCard .museArt{display:block;width:72px;height:72px;object-fit:contain;margin:3px 0 9px;filter:drop-shadow(0 8px 12px rgba(0,0,0,.4))}.museUnit{display:flex;align-items:center;gap:5px}.museUnit .museArt,.ownedMuses .museArt{width:24px;height:24px;object-fit:contain;vertical-align:middle;margin-right:5px}.ownedMuses span{display:inline-flex;align-items:center}
+.atlasTrail{position:absolute;left:14px;top:23%;display:grid;gap:7px;width:calc(100% - 28px);filter:drop-shadow(0 2px 4px #000)}.atlasTrail span{display:flex;align-items:center;gap:7px;width:max-content;max-width:100%;padding:2px 7px 2px 2px;border-radius:16px;background:rgba(7,8,24,.62);font-size:9px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.atlasTrail b{flex:none;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#122338;font-size:10px}.codexPanel>p{overflow:auto;max-height:92px;scrollbar-width:thin}
+@media(max-width:1100px), (max-height:700px){.atlasTrail{display:none}}
+.archiveTile small{display:block;margin-top:7px;color:#e4c37e;font-size:8px;font-weight:900;letter-spacing:.04em}
+.game[data-scene="garden"] .poemSlot.echoMatch{border-color:#8ee2d5;animation:echoRipple 1.5s ease-in-out infinite}
+.game[data-scene="fortress"] .poemSlot.sealMatch{border-color:#e8a47a;box-shadow:inset 4px 0 0 #d8936e,0 0 12px rgba(232,164,122,.24)}
+@keyframes echoRipple{50%{box-shadow:inset 4px 0 0 #8ee2d5,0 0 22px rgba(142,226,213,.6)}}
+.game.musePulse .activeMuses .museArt{animation:museGlow .9s ease-out}
+@keyframes museGlow{50%{transform:scale(1.25);filter:drop-shadow(0 0 12px #ffe098)}}
+@media(prefers-reduced-motion:reduce){.game[data-scene="garden"] .poemSlot.echoMatch,.game.musePulse .activeMuses .museArt{animation:none}}
+.codexPanel>p{white-space:pre-line;max-height:120px;flex:none}
+.v05Preview{width:min(370px,31vw);gap:10px;padding-left:0}.v05Preview .routeNode{min-height:70px;background-image:linear-gradient(90deg,rgba(10,7,25,.85),rgba(10,7,25,.63)),var(--preview);background-size:cover;background-position:center;border-color:rgba(255,213,106,.24)}.v05Preview .routeNode:before{display:none}.v05Preview .routeNode b{color:#ffdc88}.v05Preview .scene-garden{--preview:url('./assets/art/scene-garden.webp')}.v05Preview .scene-fortress{--preview:url('./assets/art/scene-fortress.webp')}.v05Preview .scene-theater{--preview:url('./assets/art/scene-theater.webp')}.v05Preview .scene-tower{--preview:url('./assets/art/scene-tower.webp')}
+@media(max-width:850px){.v05Preview{display:none}}
+/* Character portraits use the full generated sprite, with readable framing at laptop size. */
+.v04Duel{grid-template-rows:124px 62px minmax(0,1fr)}
+.v04Duel .rivalStage{grid-template-columns:112px minmax(150px,1fr) minmax(150px,.8fr)}
+.v04Duel .rivalPortrait{width:105px;height:105px;border-radius:22px}
+@media(max-width:1120px){.v04Duel .rivalStage{grid-template-columns:94px minmax(140px,1fr) minmax(145px,.8fr)}.v04Duel .rivalPortrait{width:87px;height:87px}}
+@media(max-height:700px){.v04Duel{grid-template-rows:94px 57px minmax(0,1fr)}.v04Duel .rivalStage{grid-template-columns:75px minmax(140px,1fr) minmax(145px,.8fr)}.v04Duel .rivalPortrait{width:72px;height:72px}}
+/* Painted inventory sprites replace glyph placeholders in the HUD. */
+.playerCrest{background:rgba(18,12,38,.55) url('./assets/art/hud-quill.webp') center/84% no-repeat;color:transparent;font-size:0}
+.inspirationHearts i{background:rgba(95,39,62,.45) url('./assets/art/hud-inspiration.webp') center/92% no-repeat;color:transparent;font-size:0}
+.inspirationHearts i.empty{background:rgba(20,16,33,.75) url('./assets/art/hud-inspiration.webp') center/92% no-repeat;opacity:.28}
+.changeTokens i:not(.spent){background:transparent url('./assets/art/hud-change.webp') center/contain no-repeat;border:0;box-shadow:none;color:transparent;font-size:0}
+.deckBadge:before{content:"";display:block;width:38px;height:38px;margin-bottom:2px;background:url('./assets/art/hud-deck.webp') center/contain no-repeat}
+.challengeSigil,.challengeBanner.met .challengeSigil,.challengeBanner.fail .challengeSigil{background:transparent url('./assets/art/hud-contract.webp') center/contain no-repeat;border:0;color:transparent;font-size:0;clip-path:none}
+.eventIcon{background:rgba(17,11,38,.7) url('./assets/art/hud-event.webp') center/88% no-repeat;color:transparent;font-size:0}
+.archiveTile.earned .sealArt{background:transparent url('./assets/art/hud-achievement.webp') center/contain no-repeat;border:0;color:transparent;font-size:0}
+.museCard .museArt{width:96px;height:96px;margin:0 0 8px}
+.eventChoiceIcon img{display:block;width:38px;height:38px;object-fit:contain}
+.pileStats span:nth-child(1):before,.pileStats span:nth-child(2):before{content:"";display:block;width:22px;height:22px;margin:auto auto 2px;background:url('./assets/art/hud-deck.webp') center/contain no-repeat}
+.pileStats span:nth-child(2):before{background-image:url('./assets/art/hud-discard.webp')}

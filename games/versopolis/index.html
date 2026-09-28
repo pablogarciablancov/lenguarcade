@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0b0717">
   <title>Versópolis · LenguArcade</title>
-  <link rel="stylesheet" href="./styles.css?v=20260928-v042">
+  <link rel="stylesheet" href="./styles.css?v=20260928-v05art">
 </head>
 <body>
 <main id="app" class="app">
@@ -16,26 +16,31 @@
       <button id="helpBtn" class="iconBtn" type="button" aria-label="Cómo jugar">?</button>
     </header>
     <div class="homeHero">
-      <span class="kicker">ROGUELIKE POÉTICO · V0.4</span>
+      <span class="kicker">ROGUELIKE POÉTICO · V0.5</span>
       <h1>VERSÓPOLIS</h1>
       <p>Construye tu mazo de versos, supera contratos poéticos y derrota a los maestros antes de que se agote tu Inspiración.</p>
       <div class="homeActions">
-        <button id="startBtn" class="primary huge" type="button">⚔ INICIAR EXPEDICIÓN</button>
+        <button id="startBtn" class="primary huge" type="button">INICIAR EXPEDICIÓN</button>
         <button id="continueBtn" class="secondary hidden" type="button">CONTINUAR PARTIDA</button>
+        <button id="achievementsBtn" class="secondary" type="button">LOGROS</button>
+        <button id="codexBtn" class="secondary" type="button">CÓDICE</button>
       </div>
       <div id="careerLine" class="careerLine"></div>
     </div>
-    <div class="routeMap v04Route" aria-label="Ruta de Versópolis">
-      <div class="routeLine"></div>
-      <div class="routeNode battleNode"><b>01</b><span>Puerta de la Rima</span><small>duelo</small></div>
-      <div class="routeNode eventNode"><b>✦</b><span>Encuentro</span><small>modifica tu mazo</small></div>
-      <div class="routeNode battleNode"><b>02</b><span>Plaza del Ritmo</span><small>duelo</small></div>
-      <div class="routeNode eventNode"><b>✦</b><span>Encuentro</span><small>riesgo y recompensa</small></div>
-      <div class="routeNode battleNode"><b>03</b><span>Jardines</span><small>duelo élite</small></div>
-      <div class="routeNode eventNode"><b>✦</b><span>Encuentro</span><small>prepara el mazo</small></div>
-      <div class="routeNode boss"><b>04</b><span>Gran Anfiteatro</span><small>jefe</small></div>
+    <div class="routeMap v05Preview" aria-label="Cuatro expediciones">
+      <div class="routeNode scene-garden"><b>01</b><span>Jardines de la Asonancia</span><small>Vocales y ecos</small></div>
+      <div class="routeNode scene-fortress"><b>02</b><span>Fortaleza de la Consonancia</span><small>Terminaciones exactas</small></div>
+      <div class="routeNode scene-theater"><b>03</b><span>Teatro de las Estrofas</span><small>Esquemas y formas</small></div>
+      <div class="routeNode scene-tower"><b>04</b><span>Torre del Metro</span><small>Sílabas y compás</small></div>
     </div>
   </section>
+
+  <section id="atlasScreen" class="screen atlasScreen hidden">
+    <header class="topbar compact"><div class="brand"><span class="brandMark">V</span><span>ATLAS DE VERSÓPOLIS</span></div><button id="atlasBackBtn" class="ghost" type="button">Volver</button></header>
+    <div class="atlasStage"><span class="kicker">CUATRO CAMINOS · CUATRO ARTES</span><h2>Elige tu expedición</h2><p>Todos los mapas están abiertos. La ruta sugerida sigue el aprendizaje de la rima al ritmo.</p><div id="atlasGrid" class="atlasGrid"></div></div>
+  </section>
+  <section id="achievementsScreen" class="screen archiveScreen hidden"><header class="topbar compact"><div class="brand"><span class="brandMark">V</span><span>ARCHIVO DE HAZAÑAS</span></div><button id="achievementsBackBtn" class="ghost" type="button">Volver</button></header><div class="archiveStage"><span class="kicker">COLECCIÓN DE SELLOS</span><h2>Hazañas de Versópolis</h2><p id="achievementCount"></p><div id="achievementGrid" class="archiveGrid"></div></div></section>
+  <section id="codexScreen" class="screen archiveScreen hidden"><header class="topbar compact"><div class="brand"><span class="brandMark">V</span><span>CÓDICE DEL POETA</span></div><button id="codexBackBtn" class="ghost" type="button">Volver</button></header><div class="archiveStage"><span class="kicker">DESCUBRE JUGANDO</span><h2>Formas que ya conoces</h2><p>Las páginas se abren al construir cada forma durante una expedición.</p><div id="codexGrid" class="archiveGrid codexGrid"></div></div></section>
 
   <section id="museScreen" class="screen rewardScreen hidden">
     <header class="topbar compact">
@@ -112,7 +117,7 @@
       <section class="duelBoard v04Duel">
         <div id="rivalStage" class="rivalStage">
           <div class="rivalAura"></div>
-          <div id="rivalPortrait" class="rivalPortrait">✒</div>
+          <div id="rivalPortrait" class="rivalPortrait">V</div>
           <div class="rivalIdentity">
             <span id="rivalRank" class="eyebrow">MAESTRO DEL DISTRITO</span>
             <h2 id="rivalName">La Voz del Puente</h2>
@@ -141,7 +146,7 @@
           <div id="poemSlots" class="poemSlots" aria-label="Versos elegidos"></div>
           <div id="comboTags" class="comboTags"></div>
           <div class="composerActions v042Actions">
-            <button id="clearBtn" class="ghost small" type="button">↩ DEVOLVER</button>
+            <button id="scanBtn" class="ghost small" type="button">ESCANDIR</button><button id="clearBtn" class="ghost small" type="button">↩ DEVOLVER</button>
             <button id="discardBtn" class="secondary discardTableBtn" type="button">🗑 DESCARTAR · −1</button>
             <button id="shuffleHandBtn" class="secondary shuffleHandBtn" type="button">⟳ BARAJAR · −1</button>
             <button id="playBtn" class="primary attackBtn" type="button">ELIGE VERSOS</button>
@@ -213,7 +218,7 @@
     </div>
   </div>
 </main>
-<script src="./app.js?v=20260928-v042"></script>
+<script src="./app.js?v=20260928-v05cartoon"></script>
 <script src="./bridge.js?v=20260925-v01"></script>
 </body>
 </html>
