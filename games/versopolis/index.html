@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0b0717">
   <title>Versópolis · LenguArcade</title>
-  <link rel="stylesheet" href="./styles.css?v=20260928-v041">
+  <link rel="stylesheet" href="./styles.css?v=20260928-v042">
 </head>
 <body>
 <main id="app" class="app">
@@ -91,7 +91,7 @@
       <div class="routePips" id="routePips"></div>
       <div class="battleStats">
         <span><small>RONDAS</small><b id="handsText">5</b></span>
-        <span><small>DESCARTES</small><b id="discardsText">2</b></span>
+        <span class="changesHud"><small>CAMBIOS</small><b id="discardsText">2</b></span>
         <span><small>RACHA</small><b id="streakText">×0</b></span>
         <span><small>TOTAL</small><b id="runScoreText">0</b></span>
       </div>
@@ -140,10 +140,10 @@
           </div>
           <div id="poemSlots" class="poemSlots" aria-label="Versos elegidos"></div>
           <div id="comboTags" class="comboTags"></div>
-          <div class="composerActions v041Actions">
+          <div class="composerActions v042Actions">
             <button id="clearBtn" class="ghost small" type="button">↩ DEVOLVER</button>
-            <button id="discardBtn" class="secondary discardTableBtn" type="button">🗑 DESCARTAR MESA</button>
-            <button id="shuffleHandBtn" class="secondary shuffleHandBtn" type="button">⟳ BARAJAR MANO</button>
+            <button id="discardBtn" class="secondary discardTableBtn" type="button">🗑 DESCARTAR · −1</button>
+            <button id="shuffleHandBtn" class="secondary shuffleHandBtn" type="button">⟳ BARAJAR · −1</button>
             <button id="playBtn" class="primary attackBtn" type="button">ELIGE VERSOS</button>
           </div>
         </div>
@@ -162,7 +162,12 @@
     <section class="handZone v04HandZone">
       <div class="deckBadge"><span>ROBO</span><b id="drawPileCount">0</b></div>
       <div id="hand" class="hand v04Hand"></div>
-      <div class="handHint"><span class="eyebrow">MANO DE PERGAMINOS</span><small>Color = afinidad. Usa descartes para buscar las piezas que exige el contrato.</small></div>
+      <div id="changeConsole" class="changeConsole">
+        <span id="handHintTitle" class="eyebrow">CAMBIOS DISPONIBLES</span>
+        <div id="changeTokens" class="changeTokens"></div>
+        <b id="changeCountText">2 cambios</b>
+        <small id="handHintText">Descartar o barajar consume 1. No gasta ronda.</small>
+      </div>
     </section>
 
     <div id="comboBurst" class="comboBurst" aria-hidden="true">
@@ -198,7 +203,7 @@
       <span class="kicker">CÓMO SE JUEGA</span>
       <h2>Versópolis ya no acepta cualquier estrofa</h2>
       <p>Cada turno aparece un <b>contrato poético obligatorio</b>: ABBA, ABAB, octosílabos, rima asonante, recursos literarios… Solo una selección que cumpla el contrato puede atacar.</p>
-      <p>Si fuerzas una jugada que no cumple el reto, consumes la ronda, no haces daño y pierdes Inspiración. Cada descarte puede usarse de dos formas: <b>descartar la mesa</b> para cambiar solo los versos colocados o <b>barajar la mano</b> para renovar todas tus cartas.</p>
+      <p>Si fuerzas una jugada que no cumple el reto, consumes la ronda, no haces daño y pierdes Inspiración. Los <b>Cambios</b> son un recurso limitado: pulsa <b>Descartar</b>, marca hasta cinco cartas de la mano y confirma, o usa <b>Barajar</b> para renovar la mano completa. Ambas acciones cuestan 1 Cambio y no gastan ronda.</p>
       <div class="helpGrid">
         <span><b>PERGAMINOS</b> Los colores indican afinidades: rima, eco, ritmo e imagen.</span>
         <span><b>DESCARTES</b> Cambia la mesa o renueva toda la mano sin gastar ronda.</span>
@@ -208,7 +213,7 @@
     </div>
   </div>
 </main>
-<script src="./app.js?v=20260928-v041"></script>
+<script src="./app.js?v=20260928-v042"></script>
 <script src="./bridge.js?v=20260925-v01"></script>
 </body>
 </html>

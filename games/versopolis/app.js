@@ -130,7 +130,7 @@ function renderCareer(){
 }
 
 function newRun(){
- run={version:4,districtIndex:0,runScore:0,rivalPrestige:0,maxPrestige:0,inspiration:4,maxInspiration:4,handsLeft:0,discardsLeft:0,bonusDiscards:0,handSize:7,cardPool:startingBaseIds.map(function(id){return makeInstance(id,0);}),deck:[],discardPile:[],hand:[],selected:[],muses:[],challengeId:null,lastChallengeId:null,awaitingMuse:true,awaitingEvent:false,eventId:null,districtStarted:false,finished:false,won:false,streak:0,bestStreak:0,firstPlay:true,locked:false,lastEventId:null,stats:{compositions:0,structured:0,districtsCleared:0,bestCombo:0,contracts:0,failedContracts:0},startedAt:Date.now()};
+ run={version:4,districtIndex:0,runScore:0,rivalPrestige:0,maxPrestige:0,inspiration:4,maxInspiration:4,handsLeft:0,discardsLeft:0,bonusDiscards:0,handSize:7,cardPool:startingBaseIds.map(function(id){return makeInstance(id,0);}),deck:[],discardPile:[],hand:[],selected:[],discardMode:false,discardSelected:[],muses:[],challengeId:null,lastChallengeId:null,awaitingMuse:true,awaitingEvent:false,eventId:null,districtStarted:false,finished:false,won:false,streak:0,bestStreak:0,firstPlay:true,locked:false,lastEventId:null,stats:{compositions:0,structured:0,districtsCleared:0,bestCombo:0,contracts:0,failedContracts:0},startedAt:Date.now()};
  resumeSave=null;showMuseChoice("Elige tu primera Musa","Define la estrategia de tu mazo antes de cruzar la Puerta de la Rima.");bridgeCall("sessionStarted");
 }
 function showMuseChoice(title,subtitle){
@@ -149,7 +149,7 @@ function chooseMuse(id){if(!run||run.muses.indexOf(id)>=0)return;run.muses.push(
 
 function setupDistrict(){
  var d=districts[run.districtIndex];
- run.maxPrestige=d.prestige;run.rivalPrestige=d.prestige;run.handsLeft=d.hands;run.discardsLeft=d.discards+Number(run.bonusDiscards||0);run.deck=shuffle(run.cardPool.map(function(x){return x.uid;}));run.discardPile=[];run.hand=[];run.selected=[];run.districtStarted=true;run.firstPlay=true;run.locked=false;
+ run.maxPrestige=d.prestige;run.rivalPrestige=d.prestige;run.handsLeft=d.hands;run.discardsLeft=d.discards+Number(run.bonusDiscards||0);run.deck=shuffle(run.cardPool.map(function(x){return x.uid;}));run.discardPile=[];run.hand=[];run.selected=[];run.discardMode=false;run.discardSelected=[];run.districtStarted=true;run.firstPlay=true;run.locked=false;
  drawToHand();rollChallenge();show("gameScreen");$("rivalSpeech").textContent="«"+d.rival+" acepta el duelo.»";renderGame();
 }
 function drawToHand(){
@@ -175,13 +175,25 @@ function rollChallenge(){
 function currentChallenge(){return challengeById(run&&run.challengeId)||challenges[0];}
 
 function toggleCard(id){
- if(!run||run.locked)return;var idx=run.selected.indexOf(id);
+ if(!run||run.locked)return;
+ if(run.discardMode){
+  var di=run.discardSelected.indexOf(id);
+  if(di>=0)run.discardSelected.splice(di,1);
+  else if(run.discardSelected.length<5)run.discardSelected.push(id);
+  else showToast("Puedes descartar un máximo de cinco cartas por Cambio.","bad");
+  renderGame();return;
+ }
+ var idx=run.selected.indexOf(id);
  if(idx>=0)run.selected.splice(idx,1);else if(run.selected.length<4)run.selected.push(id);else showToast("El atril admite cuatro pergaminos como máximo.","bad");
  renderGame();
 }
 function removeSelected(id){if(!run||run.locked)return;var i=run.selected.indexOf(id);if(i>=0){run.selected.splice(i,1);renderGame();}}
 function moveSelected(id,dir){if(!run||run.locked)return;var i=run.selected.indexOf(id),j=i+dir;if(i<0||j<0||j>=run.selected.length)return;var t=run.selected[i];run.selected[i]=run.selected[j];run.selected[j]=t;renderGame();}
-function clearSelection(){if(!run||run.locked)return;run.selected=[];renderGame();}
+function clearSelection(){
+ if(!run||run.locked)return;
+ if(run.discardMode){run.discardMode=false;run.discardSelected=[];showToast("Descarte cancelado.","");renderGame();return;}
+ run.selected=[];renderGame();
+}
 function canonicalPattern(values){var seen={},next=0,letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ";return values.map(function(v){if(seen[v]===undefined){seen[v]=letters[next]||"X";next+=1;}return seen[v];}).join("");}
 
 function analyze(ids){
@@ -227,14 +239,23 @@ function renderGame(){
  $("analysisBreakdown").innerHTML=a.breakdown.map(function(row){return"<div><span>"+row.label+"</span><b>"+(typeof row.value==="number"?"+ "+row.value.toLocaleString("es-ES"):row.value)+"</b></div>";}).join("");
  $("challengeTitle").textContent=ch.title;$("challengeDesc").textContent=ch.desc;$("challengeMultiplier").textContent="×"+String(ch.mult).replace(".",",");
  $("challengeBanner").className="challengeBanner"+(run.selected.length>=2?(met?" met":" fail"):"");$("challengeState").textContent=run.selected.length<2?"PENDIENTE":met?"CUMPLIDO":"BLOQUEADO";
- $("codexTip").textContent=contractTip(a,met,d,ch);renderSlots();renderHand();renderActiveMuses();renderInspiration();renderRoute();
- var play=$("playBtn");play.classList.remove("validAttack","invalidAttack");
- if(run.selected.length<2){play.textContent="ELIGE VERSOS";play.disabled=true;}
- else if(met){play.textContent="⚔ ATACAR · "+("×"+String(ch.mult).replace(".",","));play.disabled=run.locked||run.handsLeft<=0;play.classList.add("validAttack");}
- else{play.textContent="✖ FORZAR JUGADA";play.disabled=run.locked||run.handsLeft<=0;play.classList.add("invalidAttack");}
- $("discardBtn").disabled=run.locked||!run.selected.length||run.discardsLeft<=0;
- $("shuffleHandBtn").disabled=run.locked||!run.hand.length||run.discardsLeft<=0;
- $("clearBtn").disabled=run.locked||!run.selected.length;
+ $("codexTip").textContent=contractTip(a,met,d,ch);renderSlots();renderHand();renderActiveMuses();renderInspiration();renderRoute();renderChangeConsole();
+ var play=$("playBtn"),discardBtn=$("discardBtn"),shuffleBtn=$("shuffleHandBtn"),clearBtn=$("clearBtn");
+ play.classList.remove("validAttack","invalidAttack");
+ if(run.discardMode){
+  play.textContent="MODO DESCARTE";play.disabled=true;
+  discardBtn.textContent=run.discardSelected.length?"✓ DESCARTAR "+run.discardSelected.length+" · −1":"MARCA HASTA 5 CARTAS";
+  discardBtn.disabled=run.locked||run.discardsLeft<=0||!run.discardSelected.length;
+  shuffleBtn.disabled=true;
+  clearBtn.textContent="✕ CANCELAR";clearBtn.disabled=false;
+ }else{
+  if(run.selected.length<2){play.textContent="ELIGE VERSOS";play.disabled=true;}
+  else if(met){play.textContent="⚔ ATACAR · "+("×"+String(ch.mult).replace(".",","));play.disabled=run.locked||run.handsLeft<=0;play.classList.add("validAttack");}
+  else{play.textContent="✖ FORZAR JUGADA";play.disabled=run.locked||run.handsLeft<=0;play.classList.add("invalidAttack");}
+  discardBtn.textContent="🗑 DESCARTAR · −1";discardBtn.disabled=run.locked||run.discardsLeft<=0||!run.hand.length;
+  shuffleBtn.textContent="⟳ BARAJAR · −1";shuffleBtn.disabled=run.locked||!run.hand.length||run.discardsLeft<=0;
+  clearBtn.textContent="↩ DEVOLVER";clearBtn.disabled=run.locked||!run.selected.length;
+ }
 }
 function contractTip(a,met,d,ch){
  if(!run.selected.length)return"Contrato: "+ch.desc+" Usa descartes antes de gastar una ronda.";
@@ -245,6 +266,14 @@ function contractTip(a,met,d,ch){
 function describeAnalysis(a){var parts=[];if(a.pattern&&a.n===4)parts.push("Esquema "+a.pattern+".");if(a.allMeter)parts.push("Ritmo uniforme de "+a.meterValue+" sílabas.");if(a.devices.length)parts.push("Recursos: "+a.devices.join(", ")+".");if(!parts.length)parts.push("La selección todavía carece de una estructura fuerte.");return parts.join(" ");}
 
 function renderInspiration(){$("inspirationHearts").innerHTML="";for(var i=0;i<run.maxInspiration;i+=1){var heart=document.createElement("i");heart.textContent="✦";if(i>=run.inspiration)heart.className="empty";$("inspirationHearts").appendChild(heart);}}
+function renderChangeConsole(){
+ var tokens="";for(var i=0;i<run.discardsLeft;i+=1)tokens+='<i>◆</i>';
+ $("changeTokens").innerHTML=tokens||'<i class="spent">×</i>';
+ $("changeCountText").textContent=run.discardsLeft+" cambio"+(run.discardsLeft===1?"":"s")+" disponible"+(run.discardsLeft===1?"":"s");
+ if(run.discardMode){$("handHintTitle").textContent="MODO DESCARTE";$("handHintText").textContent="Marca hasta 5 cartas de la mano y confirma. No gastas ronda.";}
+ else{$("handHintTitle").textContent="CAMBIOS DISPONIBLES";$("handHintText").textContent="Descartar o barajar consume 1. No gasta ronda.";}
+ $("changeConsole").classList.toggle("active",!!run.discardMode);
+}
 function renderRoute(){$("routePips").innerHTML="";for(var i=0;i<districts.length;i+=1){var p=document.createElement("i");if(i<run.districtIndex)p.className="done";else if(i===run.districtIndex)p.className="current";$("routePips").appendChild(p);}}
 function renderSlots(){
  $("poemSlots").innerHTML="";
@@ -267,8 +296,13 @@ function cardHelpsContract(c){
  return ch.test(analyze(testIds));
 }
 function renderHand(){
- $("hand").innerHTML="";
- run.hand.forEach(function(id){var c=effectiveCard(id),b=document.createElement("button"),fam=familyOf(c);b.type="button";b.className="verseCard family-"+fam+(run.selected.indexOf(id)>=0?" selected":"")+(cardHelpsContract(c)?" cardSynergy":"");b.innerHTML=cardHTML(c);b.addEventListener("click",function(){toggleCard(id);});$("hand").appendChild(b);});
+ $("hand").innerHTML="";$("hand").classList.toggle("discardMode",!!run.discardMode);
+ run.hand.forEach(function(id){
+  var c=effectiveCard(id),b=document.createElement("button"),fam=familyOf(c),discardPick=run.discardMode&&run.discardSelected.indexOf(id)>=0;
+  b.type="button";b.className="verseCard family-"+fam+(run.selected.indexOf(id)>=0&&!run.discardMode?" selected":"")+(cardHelpsContract(c)&&!run.discardMode?" cardSynergy":"")+(discardPick?" discardPick":"");
+  b.innerHTML=cardHTML(c)+(discardPick?'<span class="discardStamp">DESCARTAR</span>':"");
+  b.addEventListener("click",function(){toggleCard(id);});$("hand").appendChild(b);
+ });
 }
 function renderActiveMuses(){$("activeMuses").innerHTML=run.muses.length?'<span class="eyebrow">MUSAS ACTIVAS</span>'+run.muses.map(function(id){var m=museById(id);return m?'<span>'+m.icon+" "+m.name+"</span>":"";}).join(""):"";}
 
@@ -297,21 +331,29 @@ function rivalCounter(damage){
  run.locked=false;bridgeCall("checkpoint","rival_reply");if(run.inspiration<=0||run.handsLeft<=0){renderGame();setTimeout(loseRun,500);return;}rollChallenge();renderGame();
 }
 function discardSelection(){
- if(!run||run.locked||!run.selected.length||run.discardsLeft<=0)return;
- var n=run.selected.length;moveSelectedToDiscard();run.discardsLeft-=1;renderGame();
- showToast("DESCARTAR MESA · Cambias "+n+" pergamino"+(n===1?"":"s")+" y conservas la ronda.","");
- bridgeCall("checkpoint","discard_table");
+ if(!run||run.locked||run.discardsLeft<=0)return;
+ if(!run.discardMode){
+  run.selected=[];run.discardSelected=[];run.discardMode=true;renderGame();
+  showToast("MODO DESCARTE · Marca hasta 5 cartas de la mano.","");
+  return;
+ }
+ if(!run.discardSelected.length)return;
+ var thrown=run.discardSelected.slice(),n=thrown.length;
+ thrown.forEach(function(id){var i=run.hand.indexOf(id);if(i>=0)run.hand.splice(i,1);run.discardPile.push(id);});
+ run.discardSelected=[];run.discardMode=false;run.discardsLeft-=1;drawToHand();renderGame();
+ showToast("DESCARTE · Cambias "+n+" carta"+(n===1?"":"s")+". Te quedan "+run.discardsLeft+" Cambios.","");
+ bridgeCall("checkpoint","discard_cards");
 }
 function shuffleHand(){
- if(!run||run.locked||!run.hand.length||run.discardsLeft<=0)return;
+ if(!run||run.locked||run.discardMode||!run.hand.length||run.discardsLeft<=0)return;
  var n=run.hand.length;
- run.selected=[];
+ run.selected=[];run.discardSelected=[];
  run.hand.slice().forEach(function(id){run.discardPile.push(id);});
  run.hand=[];
  run.discardsLeft-=1;
  drawToHand();
  renderGame();
- showToast("BARAJAR MANO · Renuevas "+n+" pergamino"+(n===1?"":"s")+" y conservas la ronda.","");
+ showToast("BARAJAR · Renuevas "+n+" cartas. Te quedan "+run.discardsLeft+" Cambios.","");
  bridgeCall("checkpoint","shuffle_hand");
 }
 
@@ -380,9 +422,9 @@ function showToast(text,kind){if(toastTimer)clearTimeout(toastTimer);$("toast").
 function snapshot(){return{version:4,run:run,career:career};}
 function migrateRun(oldRun,version){
  if(!oldRun)return null;
- if(version===4&&oldRun.cardPool){oldRun.locked=false;if(!oldRun.discardPile)oldRun.discardPile=[];if(!oldRun.stats)oldRun.stats={compositions:0,structured:0,districtsCleared:0,bestCombo:0,contracts:0,failedContracts:0};if(oldRun.stats.failedContracts===undefined)oldRun.stats.failedContracts=0;if(oldRun.stats.contracts===undefined)oldRun.stats.contracts=0;return oldRun;}
+ if(version===4&&oldRun.cardPool){oldRun.locked=false;oldRun.discardMode=false;oldRun.discardSelected=[];if(!oldRun.discardPile)oldRun.discardPile=[];if(!oldRun.stats)oldRun.stats={compositions:0,structured:0,districtsCleared:0,bestCombo:0,contracts:0,failedContracts:0};if(oldRun.stats.failedContracts===undefined)oldRun.stats.failedContracts=0;if(oldRun.stats.contracts===undefined)oldRun.stats.contracts=0;return oldRun;}
  var r=Object.assign({},oldRun),d=districts[Math.min(Number(r.districtIndex||0),districts.length-1)];
- r.version=4;r.cardPool=startingBaseIds.map(function(id){return makeInstance(id,0);});r.handSize=7;r.bonusDiscards=0;r.deck=[];r.discardPile=[];r.hand=[];r.selected=[];r.maxInspiration=Number(r.maxInspiration||4);r.inspiration=Math.min(r.maxInspiration,Number(r.inspiration||r.maxInspiration));r.maxPrestige=Number(r.maxPrestige||d.prestige);r.rivalPrestige=Number(r.rivalPrestige===undefined?r.maxPrestige:r.rivalPrestige);r.challengeId=null;r.lastChallengeId=null;r.awaitingEvent=false;r.eventId=null;r.locked=false;
+ r.version=4;r.cardPool=startingBaseIds.map(function(id){return makeInstance(id,0);});r.handSize=7;r.bonusDiscards=0;r.deck=[];r.discardPile=[];r.hand=[];r.selected=[];r.discardMode=false;r.discardSelected=[];r.maxInspiration=Number(r.maxInspiration||4);r.inspiration=Math.min(r.maxInspiration,Number(r.inspiration||r.maxInspiration));r.maxPrestige=Number(r.maxPrestige||d.prestige);r.rivalPrestige=Number(r.rivalPrestige===undefined?r.maxPrestige:r.rivalPrestige);r.challengeId=null;r.lastChallengeId=null;r.awaitingEvent=false;r.eventId=null;r.locked=false;
  if(!r.stats)r.stats={compositions:0,structured:0,districtsCleared:0,bestCombo:0};r.stats.contracts=Number(r.stats.contracts||0);r.stats.failedContracts=Number(r.stats.failedContracts||0);
  return r;
 }

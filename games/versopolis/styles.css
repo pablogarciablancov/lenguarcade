@@ -30,3 +30,22 @@
 .v041Actions .shuffleHandBtn:hover{border-color:rgba(112,217,239,.52)}
 @media(max-width:1120px){.v041Actions{grid-template-columns:auto 1fr 1fr 1.15fr}.v041Actions button{font-size:9px}}
 @media(max-width:850px){.v041Actions{grid-template-columns:1fr 1fr}.v041Actions .attackBtn{grid-column:1/-1}.v041Actions .small{min-height:32px}}
+
+/* V0.4.2 · descarte de mano y HUD de recursos */
+.v042Actions{grid-template-columns:auto 1.18fr 1fr 1.35fr}
+.changesHud{position:relative;overflow:visible!important;border-color:rgba(255,213,106,.22)!important;background:linear-gradient(180deg,rgba(99,66,27,.23),rgba(35,23,43,.76))!important}
+.changesHud:after{content:"◆";position:absolute;right:6px;top:4px;color:#ffd56a;font-size:7px;opacity:.8}
+.changeConsole{padding:7px 6px;display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:center;border:1px solid rgba(255,213,106,.14);border-radius:11px;background:radial-gradient(circle at 50% 28%,rgba(255,213,106,.08),transparent 52%),rgba(8,6,21,.34);transition:.18s}
+.changeConsole.active{border-color:rgba(255,105,119,.48);background:radial-gradient(circle at 50% 28%,rgba(255,105,119,.13),transparent 55%),rgba(42,14,28,.48);box-shadow:0 0 24px rgba(255,83,105,.08)}
+.changeTokens{min-height:22px;display:flex;align-items:center;justify-content:center;gap:3px;margin:4px 0}
+.changeTokens i{width:17px;height:17px;display:grid;place-items:center;border-radius:50%;font-style:normal;font-size:8px;color:#4b2c0b;background:linear-gradient(145deg,#ffe28a,#d69c31);border:1px solid #ffeca9;box-shadow:0 3px 8px rgba(0,0,0,.25),0 0 10px rgba(255,213,106,.12)}
+.changeTokens i.spent{background:#2a2331;border-color:#4b4056;color:#766b80}
+.changeConsole b{font-size:10px;color:#fff3c7}.changeConsole small{margin-top:3px;text-align:center;color:#9f93ae;font-size:7.5px;line-height:1.25}
+.v04Hand.discardMode .verseCard{filter:saturate(.6) brightness(.72);box-shadow:0 8px 18px rgba(0,0,0,.25)}
+.v04Hand.discardMode .verseCard:hover{filter:saturate(.85) brightness(.92);transform:translateY(-7px) scale(1.02);box-shadow:0 0 0 2px rgba(255,107,119,.38),0 16px 28px rgba(0,0,0,.34)}
+.v04Hand .verseCard.discardPick{filter:none!important;transform:translateY(-10px) rotate(-1deg)!important;box-shadow:0 0 0 4px #ef6575,0 0 26px rgba(239,101,117,.38),0 18px 32px rgba(0,0,0,.4)!important}
+.discardStamp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);padding:5px 8px;border:2px solid #b92f45;border-radius:5px;color:#a22639;background:rgba(255,236,218,.82);font:1000 9px/1 system-ui,sans-serif;letter-spacing:.08em;box-shadow:0 2px 8px rgba(0,0,0,.14)}
+.discardTableBtn{position:relative}.discardTableBtn:not(:disabled){box-shadow:inset 0 0 18px rgba(255,99,119,.06)}
+.shuffleHandBtn:not(:disabled){box-shadow:inset 0 0 18px rgba(112,217,239,.06)}
+@media(max-width:1120px){.v042Actions{grid-template-columns:auto 1fr .9fr 1.15fr}.v042Actions button{font-size:8.5px}.changeConsole small{display:none}}
+@media(max-width:850px){.v042Actions{grid-template-columns:1fr 1fr}.v042Actions .attackBtn{grid-column:1/-1}.changeConsole{display:none}}

@@ -11,5 +11,5 @@
     "saveProgress": true,
     "supabaseCatalog": true
   },
-  "notes": "V0.4.1: roguelike poético con cartas-pergamino, contratos obligatorios, mazo persistente y eventos. Añade controles explícitos para descartar solo la mesa o barajar toda la mano, ambos consumiendo un descarte sin gastar ronda. Guardado compatible con V0.2/V0.3/V0.4."
+  "notes": "V0.4.2: roguelike poético con cartas-pergamino, contratos, mazo persistente y eventos. El descarte funciona ahora como modo de selección directa sobre la mano (hasta 5 cartas), separado de Barajar mano. Ambos consumen 1 Cambio, mostrado con fichas visibles y sin gastar ronda. Guardado compatible con V0.2/V0.3/V0.4."
 }
