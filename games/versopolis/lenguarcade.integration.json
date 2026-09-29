@@ -11,5 +11,5 @@
     "saveProgress": true,
     "supabaseCatalog": true
   },
-  "notes": "V0.5: cuatro mapas pedagógicos, contratos, eventos, 32 logros y Códice. Escenarios, rivales de estilo animado, Musas y HUD ilustrados. Bridge incrustado y guardado compatibles con las partidas V0.2/V0.3/V0.4."
+  "notes": "V0.6: cuatro mapas pedagógicos, banco de 52 versos y 2 comodines ilustrados, contratos resolubles desde la mano, eventos, 33 logros y Códice. Bridge incrustado y guardado compatibles con las partidas anteriores."
 }

@@ -146,3 +146,20 @@
 .eventChoiceIcon img{display:block;width:38px;height:38px;object-fit:contain}
 .pileStats span:nth-child(1):before,.pileStats span:nth-child(2):before{content:"";display:block;width:22px;height:22px;margin:auto auto 2px;background:url('./assets/art/hud-deck.webp') center/contain no-repeat}
 .pileStats span:nth-child(2):before{background-image:url('./assets/art/hud-discard.webp')}
+
+/* V0.6 · comodines ilustrados */
+.verseCard.family-wild{--cardInk:#9a4ea9;--cardGlow:#da80ed;background:linear-gradient(165deg,#f6e7ca,#e6c595 75%);border-color:#eecb75}
+.verseCard.family-wild:before{height:5px;background:linear-gradient(90deg,#8941b8,#e780d8,#ffd36e)}
+.verseCard.family-wild.selected{background:linear-gradient(165deg,#ffefcd,#dfbbef 80%);border-color:var(--gold)}
+.family-wild .cardCorners{z-index:1}
+.family-wild .meterBadge,.family-wild .rhymeSeal{color:#fff!important;background:#874baa!important;border-color:#bd78d6!important}
+.jokerBody{min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1px}
+.jokerBody img{width:min(100%,92px);height:min(76px,58%);object-fit:contain;filter:drop-shadow(0 3px 5px rgba(66,30,86,.3))}
+.jokerBody strong{font:900 11px/1.05 Georgia,serif;color:#542a69}
+.jokerBody small{font-size:7px;line-height:1.1;color:#6a456b;font-weight:800;max-width:120px}
+.family-wild .cardMeta{justify-content:center;gap:3px}
+.family-wild .cardMeta span{color:#6c377d!important}
+.deckGrid .family-wild .jokerBody img,.eventChoices .family-wild .jokerBody img{height:105px;width:120px}
+.deckGrid .family-wild .jokerBody strong{font-size:14px}
+.poemSlot.jokerSlot{box-shadow:inset 4px 0 0 #df8ce8;background:linear-gradient(90deg,rgba(165,72,180,.24),rgba(81,46,94,.05))}
+.eventChoice:disabled{opacity:.42;filter:grayscale(.5);cursor:not-allowed}
