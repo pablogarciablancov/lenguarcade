@@ -1674,7 +1674,7 @@
     if(message.namespace!=='lenguarcade-host'||message.channel!==channel)return;
     if(message.type==='INIT'){
       window.__LA_EARLY_PROFILE_INIT__=message.payload||{};
-      setTimeout(stop,1200);
+      stop();
     }
   });
   function readBootstrap(){

@@ -106,18 +106,18 @@ for(const expected of [
 }
 const tierras=catalog.games.find(row=>row.id==="tierras_de_tinta");
 if(!tierras ||
-   tierras.entry!=="" ||
-   tierras.externalUrl!=="https://tierras-de-la-tinta.pgarciab.chatgpt.site" ||
+   tierras.entry!=="games/tierras_de_tinta/" ||
+   !!tierras.externalUrl ||
    tierras.banner!=="tierras-de-tinta-banner.svg" ||
-   tierras.integration!=="external" ||
+   tierras.integration!=="embedded" ||
    tierras.active!==true ||
    tierras.official!==true){
-  throw new Error("Catálogo: Tierras de Tinta debe mantener temporalmente la versión avanzada como enlace externo mientras el Site requiera autenticación.");
+  throw new Error("Catálogo: Tierras de Tinta debe ejecutar su fuente avanzada nativa dentro de LenguArcade.");
 }
 if(!generatedApps.includes('gameId:"tierras_de_tinta"') ||
-   !generatedApps.includes('url:"https://tierras-de-la-tinta.pgarciab.chatgpt.site"') ||
-   !snapshot.includes("'https://tierras-de-la-tinta.pgarciab.chatgpt.site'")){
-  throw new Error("Tierras de Tinta: el catálogo generado no apunta al Site avanzado fuente 30.");
+   !generatedApps.includes('url:"https://pablogarciablancov.github.io/lenguarcade/games/tierras_de_tinta/"') ||
+   !snapshot.includes("'https://pablogarciablancov.github.io/lenguarcade/games/tierras_de_tinta/'")){
+  throw new Error("Tierras de Tinta: el catálogo generado no apunta al juego nativo fuente 30.");
 }
 for(const [label,html] of [["alumno",student],["profesor",teacher]]){
   for(const pair of [["versopolis","versopolis-banner.jpg"],["tierras_de_tinta","tierras-de-tinta-banner.svg"],["lexaria","lexaria-banner.svg"]]){

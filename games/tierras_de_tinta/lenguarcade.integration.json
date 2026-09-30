@@ -7,15 +7,15 @@
   "entry": "games/tierras_de_tinta/index.html",
   "banner": "tierras-de-tinta-banner.svg",
   "source": {
-    "kind": "chatgpt-site-proxy",
+    "kind": "native-source",
     "liveUrl": "https://tierras-de-la-tinta.pgarciab.chatgpt.site",
     "sourceVersion": 30,
     "publishedAt": "2026-09-20"
   },
   "requires": {
     "studentRunner": true,
-    "saveProgress": false,
+    "saveProgress": true,
     "supabaseCatalog": true
   },
-  "notes": "La versión oficial embebida es el Site avanzado fuente 30. El contenido v21 (game.js/content.js/styles.css/assets) permanece solo como respaldo técnico y no debe volver a usarse como versión oficial. El proxy permite apertura/cierre dentro del runner; el guardado sigue siendo local al Site hasta migrar su fuente nativa."
+  "notes": "Fuente 30 nativa alojada en GitHub Pages, arte Tinta v2, perfil y partidas con checkpoint central y almacenamiento local aislado por alumno."
 }

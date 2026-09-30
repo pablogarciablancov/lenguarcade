@@ -171,7 +171,7 @@ html,body{height:100%;overflow:hidden}
 .dock-actions-host button{min-height:28px!important;padding:5px 7px!important}
 /* Inicio visual con la ilustración aprobada */
 .start-screen{padding:8px!important;background:#070e17!important;overflow:auto!important}
-.start-hub{width:min(1180px,96vw);display:grid;gap:8px;margin:auto}
+.start-hub:not(.hidden){width:min(1180px,96vw);display:grid;gap:8px;margin:auto}
 .start-hero-art{width:100%;aspect-ratio:16/9;background-size:cover;background-position:center;border:3px solid #d4aa54;box-shadow:0 24px 70px rgba(0,0,0,.5);image-rendering:auto}
 .start-menu-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.start-menu-btn{display:grid;grid-template-columns:34px 1fr;text-align:left;align-items:center;column-gap:8px;padding:9px 11px!important;border:2px solid rgba(255,255,255,.1)!important;border-radius:4px!important;background:linear-gradient(180deg,#1d3558,#11243e)!important;color:#fff!important;box-shadow:3px 3px 0 rgba(0,0,0,.3)!important}.start-menu-btn>span{font-size:25px;grid-row:1/3}.start-menu-btn b{font-size:13px;color:#ffe1a1}.start-menu-btn small{font-size:9px;color:#b9cbe0}.start-menu-btn:hover{border-color:#e5bc65!important;transform:translateY(-1px)}.start-primary{background:linear-gradient(180deg,#2e6fbc,#17477f)!important;border-color:#e5bc65!important}
 .start-meta{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;color:#aebfd3;font-size:9px}
@@ -1458,7 +1458,7 @@ function setupStartScreen(){
   document.getElementById('startMonstersBtn')?.addEventListener('click',()=>openMonsterGuide());
   document.getElementById('startTowersBtn')?.addEventListener('click',()=>openTowerGuide());
   document.getElementById('startProfileBtn')?.addEventListener('click',()=>{ProfileSystem.refresh();document.getElementById('profileModal')?.classList.remove('hidden')});
-  grid.innerHTML='';for(const p of Object.values(MAP_PRESETS)){const b=document.createElement('button');b.type='button';b.className='start-map-card';b.style.backgroundImage=`url(${EMBEDDED_PIXEL_ASSETS[p.asset]})`;const saved=SaveManager.load();const savedNote=saved&&saved.mapKey===p.key?`<em class="saved-game-pill">💾 Oleada ${(saved.waveIndex||0)+1}</em>`:'';b.innerHTML=`<span><b>${p.name}</b><small>${p.subtitle}</small>${savedNote}</span>`;b.addEventListener('click',()=>{const prev=SaveManager.load();if(prev&&prev.mapKey!==p.key)SaveManager.clear();try{localStorage.setItem(MAP_STORAGE_KEY,p.key)}catch(e){}const base=location.href.split('?')[0].split('#')[0];location.href=base+'?play=1'});grid.appendChild(b)}
+  grid.innerHTML='';for(const p of Object.values(MAP_PRESETS)){const b=document.createElement('button');b.type='button';b.className='start-map-card';b.style.backgroundImage=`url(${EMBEDDED_PIXEL_ASSETS[p.asset]})`;const saved=SaveManager.load();const savedNote=saved&&saved.mapKey===p.key?`<em class="saved-game-pill">💾 Oleada ${(saved.waveIndex||0)+1}</em>`:'';b.innerHTML=`<span><b>${p.name}</b><small>${p.subtitle}</small>${savedNote}</span>`;b.addEventListener('click',()=>{const prev=SaveManager.load();if(prev&&prev.mapKey!==p.key)SaveManager.clear();try{localStorage.setItem(MAP_STORAGE_KEY,p.key)}catch(e){}const nextUrl=new URL(location.href);nextUrl.searchParams.set('play','1');location.href=nextUrl.href});grid.appendChild(b)}
 }
 
 /* v21 overrides: centered map + clean tower preview crops */
@@ -1578,7 +1578,7 @@ function returnToGuardianMainMenu(){
   game.paused=true;game.closeQuestion();
   const screen=document.getElementById('startScreen'),home=document.getElementById('startHomePanel'),maps=document.getElementById('startMapPanel');
   screen?.classList.remove('hidden');home?.classList.remove('hidden');maps?.classList.add('hidden');
-  try{history.replaceState({},'',location.href.split('?')[0].split('#')[0])}catch(e){}
+  try{const menuUrl=new URL(location.href);menuUrl.searchParams.delete('play');history.replaceState({},'',menuUrl.href)}catch(e){}
 }
 document.getElementById('mainMenuBtn')?.addEventListener('click',returnToGuardianMainMenu);
 
@@ -1901,6 +1901,7 @@ const LA_TD_BRIDGE=(function(){
   let context={student:null,save:null,feedback:null};
   let initialized=false;
   let resultCounter=0;
+  let exitCheckpointId=null;
   function parseBootstrap(){
     if(!enabled)return null;
     try{
@@ -1914,6 +1915,7 @@ const LA_TD_BRIDGE=(function(){
     try{hostWindow.postMessage({namespace:GAME_NS,channel,gameId:GAME_ID,type,payload},'*')}catch(e){}
   }
   function applyContext(payload){
+    if(initialized){post('INITIALIZED',{profileId:context.student?.studentId||'',gameId:GAME_ID});return;}
     if(!payload||typeof payload!=='object')return;
     context={student:payload.student||context.student,save:payload.save||context.save,feedback:payload.feedback||context.feedback};
     if(context.save&&typeof context.save==='object'){
@@ -1931,13 +1933,16 @@ const LA_TD_BRIDGE=(function(){
     if(!enabled||m.namespace!==HOST_NS||String(m.channel||'')!==channel)return;
     if(event.source)hostWindow=event.source;
     if(m.type==='INIT')applyContext(m.payload||{});
+    if(m.type==='CHECKPOINT_CONFIRMED'&&exitCheckpointId&&m.payload?.checkpointId===exitCheckpointId){exitCheckpointId=null;post('CLOSE_READY',{saved:true})}
+    if(m.type==='CHECKPOINT_FAILED'&&exitCheckpointId&&m.payload?.checkpointId===exitCheckpointId){exitCheckpointId=null;}
     if(m.type==='REQUEST_EXIT'){
       const save=window.game?.saveCheckpoint?window.game.saveCheckpoint():SaveManager.load();
-      if(save)post('CHECKPOINT',{checkpointId:'td_exit_'+Date.now(),reason:'exit',players:[{role:'primary',save,score:window.game?.score||0,correct:window.game?.stats?.correct||0,errors:window.game?.stats?.wrong||0,accuracy:window.game?.stats?.attempts?Math.round(window.game.stats.correct/window.game.stats.attempts*100):0}]});
-      setTimeout(()=>post('CLOSE_READY',{}),160);
+      exitCheckpointId='td_exit_'+Date.now();
+      if(save)post('CHECKPOINT',{checkpointId:exitCheckpointId,reason:'exit',players:[{role:'primary',save,score:window.game?.score||0,correct:window.game?.stats?.correct||0,errors:window.game?.stats?.wrong||0,accuracy:window.game?.stats?.attempts?Math.round(window.game.stats.correct/window.game.stats.attempts*100):0}]});
+      else post('CLOSE_READY',{saved:true});
     }
   });
-  if(enabled){post('READY',{protocol:3,checkpoint:true});setTimeout(()=>post('READY',{protocol:3,checkpoint:true}),350)}
+  if(enabled&&!initialized){post('READY',{protocol:3,checkpoint:true});setTimeout(()=>{if(!initialized)post('READY',{protocol:3,checkpoint:true})},350)}
   return {
     enabled:()=>enabled,
     player:()=>context.student||null,
@@ -2202,7 +2207,7 @@ body{
   overflow:hidden!important;
   padding:6px!important;
 }
-.start-hub{
+.start-hub:not(.hidden){
   width:min(1180px,calc(100% - 12px))!important;
   height:calc(100% - 12px)!important;
   max-height:calc(100% - 12px)!important;
@@ -2288,7 +2293,7 @@ body{
 
 /* ===== v31.1 · menú de inicio estable dentro del viewport =====
    Evita que CSS Grid estire verticalmente los cuatro botones del menú. */
-#startHomePanel.start-hub{
+#startHomePanel.start-hub:not(.hidden){
   grid-template-columns:minmax(0,1fr)!important;
   grid-template-rows:minmax(0,1fr) auto auto!important;
   grid-auto-rows:max-content!important;

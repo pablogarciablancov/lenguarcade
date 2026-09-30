@@ -17,7 +17,7 @@ function matchId(){return"tierras_de_tinta_"+safeId(profile&&(profile.studentId|
 function checkpoint(reason){
   if(!initialized)return"";
   if(api()&&api().forceSave)api().forceSave(reason||"autosave");
-  var m=metrics(),sig=[m.level,m.xp,m.victories,m.bossesDefeated,m.attempts,m.correct,m.mastery].join("|");
+  var m=metrics(),sig=JSON.stringify(api()&&api().getState?api().getState():m);
   if((reason||"autosave")==="autosave"&&sig===lastSignature)return"";
   lastSignature=sig;
   var id="tierras_checkpoint_"+Date.now()+"_"+Math.random().toString(36).slice(2);
@@ -25,15 +25,15 @@ function checkpoint(reason){
   return id;
 }
 function finishExit(saved){if(!exitRequested)return;if(exitTimer){clearTimeout(exitTimer);exitTimer=null;}post("CLOSE_READY",{saved:saved!==false,checkpointId:exitCheckpointId,localFallback:saved===false});exitRequested=false;exitCheckpointId="";}
-function saveAndExit(){if(exitRequested)return;exitRequested=true;exitCheckpointId=checkpoint("exit");if(!exitCheckpointId){finishExit(true);return;}exitTimer=setTimeout(function(){finishExit(false);},2500);}
+function saveAndExit(){if(exitRequested)return;exitRequested=true;exitCheckpointId=checkpoint("exit");if(!exitCheckpointId){finishExit(true);return;}exitTimer=setTimeout(function(){exitRequested=false;lastSignature="";},15000);}
 function restore(save){try{var raw=save&&save.rawGameData&&save.rawGameData.save?save.rawGameData.save:(save&&save.rawGameData?save.rawGameData:(save&&save.save?save.save:save));return !!(api()&&api().restore&&api().restore(raw));}catch(err){return false;}}
 window.addEventListener("message",function(event){
   var msg=event.data||{};if(msg.namespace!==HOST_NS||msg.channel!==channel)return;
-  if(msg.type==="INIT"){profile=msg.payload&&msg.payload.student||{};var restored=restore(msg.payload&&msg.payload.save||null);initialized=true;post("INITIALIZED",{profileId:profile.studentId||profile.email||"",restored:restored});post("READY",{gameId:GAME_ID,version:1});if(!timer)timer=setInterval(function(){checkpoint("autosave");},15000);}
+  if(msg.type==="INIT"){if(initialized){post("INITIALIZED",{});return;}profile=msg.payload&&msg.payload.student||{};if(api()&&api().setProfile)api().setProfile(profile);var restored=restore(msg.payload&&msg.payload.save||null);initialized=true;post("INITIALIZED",{profileId:profile.studentId||profile.email||"",restored:restored});post("SESSION_STARTED",{});if(!timer)timer=setInterval(function(){checkpoint("autosave");},15000);}
   if(msg.type==="REQUEST_CHECKPOINT")checkpoint("host_request");
   if(msg.type==="REQUEST_EXIT")saveAndExit();
   if(msg.type==="CHECKPOINT_CONFIRMED"&&exitRequested&&(!exitCheckpointId||msg.payload&&msg.payload.checkpointId===exitCheckpointId))finishExit(true);
-  if(msg.type==="CHECKPOINT_FAILED"&&exitRequested&&(!exitCheckpointId||msg.payload&&msg.payload.checkpointId===exitCheckpointId))finishExit(false);
+  if(msg.type==="CHECKPOINT_FAILED"&&exitRequested&&(!exitCheckpointId||msg.payload&&msg.payload.checkpointId===exitCheckpointId))exitRequested=false;
 });
 window.addEventListener("pagehide",function(){if(!exitRequested)checkpoint("pagehide");});
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"&&!exitRequested)checkpoint("visibility_hidden");});
