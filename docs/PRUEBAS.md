@@ -535,3 +535,20 @@ Escenario de aceptación recomendado: Inicio → A/B; A → A1/A2; B → B1/B2; 
 - Tras la gracia, save-progress rechaza guardados normales; solo acepta el checkpoint final asociado al mismo cierre con margen breve de red.
 - Reabrir antes de 0:00 cancela la cuenta atrás y mantiene la partida/guardado normales.
 
+
+## 2026-09-30 · Segunda revisión de alumno
+
+Automáticas: `npm run check` incluye regresiones de la curva de nivel, rúbrica con juegos asignados aún sin actividad, ausencia de recompensa al repetir snapshots, separación por perfil y expedición restaurada antes de Continuar, métrica de versos y rimas, diccionario español real y banco de 50 Lexarios. Tierras comprueba en VM flechas sin movimiento, WASD, recogida de vida, duración de ralentización y aparición periódica de ayudas. Los cinco endpoints modificados deben pasar `node --experimental-strip-types --check`.
+
+Validación manual pendiente en el despliegue estable:
+
+1. Entrar como alumno de prueba; abrir Versópolis, avanzar un distrito, escribir una estrofa, salir y continuar desde otra sesión. Repetir un guardado sin jugar: XP, plumas e intentos no deben crecer. Simular pérdida de conexión y comprobar que la partida no se cierra ni pierde el borrador.
+2. Scrabble: validar CASA, PERROS, CANCION, CAMINAMOS y NIÑO automáticamente; una secuencia inventada debe quedar pendiente de revisión. Comprobar que Ñ no se interpreta como N.
+3. Desplazar Mis juegos hasta las últimas tarjetas. Abrir/cerrar distintos juegos: la tarjeta y la posición de pantalla deben permanecer estables tras actualizar el progreso.
+4. Revisar Batalla verbal con cuatro jugadores a 1366×768 y ancho 390; ficha completa de vida/energía/habilidad. Rayuela: logros desbloqueados y bloqueados legibles. Word Play: muchos modificadores/mejoras y recompensas a 1366×768, 820×700 y 390×700, sin superposición ni scroll horizontal.
+5. Guardianes: monstruos protegidos con cobertura dorada, desaparece al romper la última capa; el círculo de selección conserva su función independiente.
+6. Tierras: banner y título usan el refugio nuevo; atlas sin cortes, terreno variado, Códice completo mediante páginas y pestañas sin scroll, WASD y flechas simultáneos, ayudas durante la expedición y restauración de sus temporizadores al continuar.
+7. Lexaria: compañeros de la misma clase publican formaciones; abrir arena, combatir, guardar, comprobar el ranking y el historial tras recargar. Los duelos de laboratorio no cuentan en ranking. Todos los Lexarios respiran y atacan hacia el oponente; respetar movimiento reducido. Guardar y salir vuelve al título de Lexaria; el botón del runner sí cierra a LenguArcade.
+8. Nota/niveles: XP acumulada conservada, coste sucesivo creciente, una misión en un juego no practicado baja el cumplimiento en lugar de ignorarse; misma rúbrica en alumno y resumen docente. Logros de nivel/XP/nota persisten después de una bajada de nota.
+
+Límites: el contador conserva el total de duelos; la lista guarda los 100 más recientes. La rúbrica de misiones por ventana usa los eventos disponibles (500 por detalle de alumno, 5.000 por resumen de clase). El cómputo de verso no sustituye la revisión de licencias poéticas por el profesor. Las pruebas automáticas verifican ejecución y datos, no validan píxeles ni la sesión autenticada de Apps Script.

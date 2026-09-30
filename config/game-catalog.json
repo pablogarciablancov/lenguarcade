@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 10,
+  "version": 11,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -266,7 +266,7 @@
       "icon": "🖋️",
       "entry": "games/tierras_de_tinta/",
       "description": "RPG de acción y exploración en su versión avanzada: siete héroes, arsenal ampliado, criaturas y jefes propios, campamento cinematográfico, portal, forja, runas y progresión lingüística.",
-      "banner": "tierras-de-tinta-banner.svg",
+      "banner": "tierras-de-tinta-banner-v3.webp",
       "active": true,
       "integration": "embedded"
     },

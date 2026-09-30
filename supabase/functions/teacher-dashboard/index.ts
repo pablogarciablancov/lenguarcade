@@ -1,3 +1,5 @@
+import {assessedMissions} from "../_shared/mission-grade.js";
+import {levelProgress,learningGrade} from "../_shared/progression.js";
 import {
   corsHeaders,
   jsonResponse,
@@ -14,20 +16,7 @@ function randomPin() {
   return String(100000 + (bytes[0] % 900000));
 }
 
-function gradeFor(rows: Array<Record<string, unknown>>) {
-  const attempts = rows.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
-  const successes = rows.reduce((sum, row) => sum + Number(row.successes || 0), 0);
-  const xp = rows.reduce((sum, row) => sum + Number(row.xp || 0), 0);
-  const accuracy = attempts ? (successes / attempts) * 100 : 0;
-  return Math.round((
-    Math.min(10, xp / Math.max(1, rows.length) / 80) * 0.25 +
-    Math.min(10, accuracy / 10) * 0.25 +
-    Math.min(10, average(rows.map(row => Number(row.missions_completed || 0))) * 2.5) * 0.20 +
-    Math.min(10, average(rows.map(row => Number(row.sessions || 0))) * 2) * 0.15 +
-    Math.min(10, rows.filter(row => Number(row.sessions || 0) > 0).length * 1.7) * 0.10 +
-    Math.min(10, average(rows.map(row => Number(row.achievements_count || 0))) * 2.5) * 0.05
-  ) * 10) / 10;
-}
+function gradeFor(rows: Array<Record<string, unknown>>, missions: any[] = []) {return learningGrade(rows,missions).score;}
 
 async function resetPinsForFilter(admin: any, organizationId: string, classCode: string) {
   const classroomsResult = await admin.from("classrooms")
@@ -769,9 +758,9 @@ Deno.serve(async (request) => {
         : Promise.resolve(emptyResult),
       profileIds.length
         ? admin.from("game_events")
-            .select("profile_id,game_id,event_type,occurred_at")
+            .select("profile_id,game_id,event_type,occurred_at,xp_delta,accuracy,details")
             .in("profile_id", profileIds)
-            .gte("occurred_at", today.toISOString())
+            .gte("occurred_at", new Date(Math.min(today.getTime(),...(missionsResult.data||[]).filter(m=>m.active&&m.active_from).map(m=>Date.parse(m.active_from)).filter(Number.isFinite))).toISOString()).limit(5000)
         : Promise.resolve(emptyResult),
       profileIds.length
         ? admin.from("player_achievements")
@@ -853,13 +842,13 @@ Deno.serve(async (request) => {
         xp,
         baseXp,
         manualXp:manual.xp,
-        level:Math.floor(xp / 500) + 1,
+        level:levelProgress(xp).level,
         percentage:Math.round(average(rows.map(row => Number(row.percentage || 0)))),
         accuracy:attempts ? Math.round((successes / attempts) * 100) : 0,
         sessions:rows.reduce((sum, row) => sum + Number(row.sessions || 0), 0),
         gamesPlayed:rows.filter(row => Number(row.sessions || 0) > 0).length,
         lastActivity,
-        grade:gradeFor(rows),
+        grade:gradeFor(rows,assessedMissions(missionsResult.data||[],rows,(eventsResult.data||[]).filter(e=>e.profile_id===profile.id),profile.id,classroomIds).filter(m=>!gameId||!m.gameId||m.gameId===gameId)),
       };
     }).sort((a, b) => b.xp - a.xp);
 
@@ -930,7 +919,7 @@ Deno.serve(async (request) => {
       : [];
 
     const eventCount = (eventsResult.data || []).filter(row =>
-      row.event_type !== "teacher_adjustment" && (!gameId || row.game_id === gameId)
+      row.event_type !== "teacher_adjustment" && Date.parse(row.occurred_at)>=today.getTime() && row.details?.sessionCounted!==false && (!gameId || row.game_id === gameId)
     ).length;
     const achievementCount = (achievementsResult.data || []).filter(row =>
       !gameId || row.game_id === gameId
@@ -952,7 +941,7 @@ Deno.serve(async (request) => {
       xp:teacherXp,
       baseXp:teacherBaseXp,
       manualXp:teacherManual.xp,
-      level:Math.floor(teacherXp / 500) + 1,
+      level:levelProgress(teacherXp).level,
       sessions:teacherRows.reduce((sum, row) => sum + Number(row.sessions || 0), 0),
       gamesPlayed:teacherRows.filter(row => Number(row.sessions || 0) > 0).length,
       accuracy:teacherAttempts ? Math.round((teacherSuccesses / teacherAttempts) * 100) : 0,

@@ -9,7 +9,7 @@ function el(id){if(!elements.has(id)){const classes=new Set();elements.set(id,{i
 const document={querySelector:s=>s.startsWith('#')?el(s.slice(1)):s==='.camp-rest'?el('camp-rest'):null,querySelectorAll:s=>s==='.screen'?['titleScreen','campScreen','gameScreen'].map(el):[],addEventListener(){},documentElement:el('html')};
 const sandbox={document,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k)},innerWidth:1366,innerHeight:704,devicePixelRatio:1,performance:{now:()=>10},addEventListener(){},setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:()=>1,cancelAnimationFrame(){},Image:class{complete=false;naturalWidth=0},confirm:()=>true,console,Math,JSON,Date};sandbox.window=sandbox;
 vm.createContext(sandbox);
-for(const [,script] of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))vm.runInContext(script,sandbox);
+for(const [,script] of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))vm.runInContext(script.includes('window.TierrasDeTinta=')?script.replace(/\}\)\(\);\s*$/, 'window.__TintaQA={update,gather,keys,mouse,get player(){return player;},get run(){return run;},get drops(){return drops;}};})();'):script,sandbox);
 const api=sandbox.TierrasDeTinta;assert(api);
 api.setProfile({studentId:'test-one'});let state=api.getState();state.campaign.level=4;state.campaign.gold=250;state.campaign.stats.asked=10;state.campaign.stats.correct=8;
 assert(api.restore({run:state}));assert.equal(api.metrics().accuracy,80);assert.equal(api.metrics().level,4);
@@ -17,6 +17,8 @@ api.forceSave();api.setProfile({studentId:'test-two'});assert.equal(api.getState
 api.setProfile({studentId:'test-one'});assert.equal(api.getState().campaign.gold,250);
 el('startBtn').onclick();el('expeditionBtn').onclick();state=api.getState();assert.equal(state.expedition.run.zone,'forest');state.expedition.run.kills=7;state.expedition.run.wood=12;state.expedition.player.hp=61;
 assert(api.restore({run:state}));el('startBtn').onclick();const restored=api.getState();assert.equal(restored.expedition.run.kills,7);assert.equal(restored.expedition.run.wood,12);assert.equal(restored.expedition.player.hp,61);
+const qa=sandbox.__TintaQA,px=qa.player.x,my=qa.mouse.x;qa.keys.ArrowRight=true;qa.update(.05);qa.keys.ArrowRight=false;assert.equal(qa.player.x,px,'Arrow keys aim without moving the hero');assert(qa.mouse.x>my);qa.keys.KeyD=true;qa.update(.05);qa.keys.KeyD=false;assert(qa.player.x>px,'WASD keeps movement');
+qa.player.hp=10;qa.drops.push({x:qa.player.x,y:qa.player.y,type:'health',life:10,bob:0});qa.gather();assert(qa.player.hp>10);assert(qa.player.hp<=qa.player.maxHp);qa.drops.push({x:qa.player.x,y:qa.player.y,type:'slow',life:10,bob:0});qa.gather();assert.equal(qa.run.slowTimer,8);qa.run.supportTimer=21.99;qa.update(.05);assert(qa.drops.some(d=>d.type==='health'||d.type==='slow'),'Timed support objects spawn during expeditions');
 assert.equal(api.restore({version:21,heroId:'aldren'}),false,'Do not interpret incompatible old saves as v30');
 for(const [,asset] of html.matchAll(/assets\/([\w.-]+\.(?:webp|png))/g))assert(fs.existsSync('games/tierras_de_tinta/assets/'+asset),'Missing artwork '+asset);
 console.log('Tierras source30: native execution, art, profile isolation, campaign metrics, checkpoint restore and active expedition resume OK.');

@@ -265,7 +265,7 @@ function collectionCards(){return(run&&run.cardPool||[]).map(function(x){return 
 function familyOf(c){if(c.joker)return"wild";if(c.level>=3)return"master";if(c.meter===11)return"rhythm";if(c.rhymeType==="asonante")return"echo";if(c.devices.length)return"image";return"rhyme";}
 function familyLabel(f){return{rhyme:"RIMA",echo:"ECO",rhythm:"RITMO",image:"IMAGEN",master:"MAESTRO",wild:"COMODÍN"}[f]||"VERSO";}
 function stars(level){var s="";for(var i=0;i<level;i+=1)s+="★";return s;}
-function show(name){["homeScreen","atlasScreen","achievementsScreen","codexScreen","museScreen","eventScreen","deckScreen","gameScreen","resultScreen"].forEach(function(id){$(id).classList.toggle("hidden",id!==name);});}
+function show(name){["writingScreen","homeScreen","atlasScreen","achievementsScreen","codexScreen","museScreen","eventScreen","deckScreen","gameScreen","resultScreen"].forEach(function(id){$(id).classList.toggle("hidden",id!==name);});}
 function renderCareer(){
  $("careerLine").textContent=career.runs?"Mejor expedición: "+career.bestScore.toLocaleString("es-ES")+" · "+career.wins+" victorias · mejor impacto "+Number(career.bestCombo||0).toLocaleString("es-ES"):"Tu primera expedición te espera.";
  $("continueBtn").classList.toggle("hidden",!resumeSave);
@@ -555,11 +555,26 @@ function shuffleHand(){
 function winDistrict(){
  if(!run||run.finished)return;var d=districts[run.districtIndex];run.stats.districtsCleared+=1;career.districtsCleared+=1;if(run.mapId){career.mapProgress=career.mapProgress||{};career.mapProgress[run.mapId]=Math.max(Number(career.mapProgress[run.mapId]||0),run.districtIndex+1);}career.bestCombo=Math.max(Number(career.bestCombo||0),run.stats.bestCombo);checkAchievements();saveCareer();$("rivalSpeech").textContent="«El distrito reconoce tu victoria.»";showToast("MAESTRO VENCIDO · "+d.rival+" pierde todo su Prestigio.","ok");bridgeCall("checkpoint","district_cleared");
  if(run.districtIndex>=districts.length-1){run.won=true;setTimeout(finishRun,850);return;}
- run.districtIndex+=1;run.districtStarted=false;run.selected=[];run.awaitingEvent=true;setTimeout(function(){showEvent();},850);
+ run.districtIndex+=1;run.districtStarted=false;run.selected=[];run.awaitingEvent=true;var anchors=[["Brilla la luna en el mar","Guarda mi voz el camino"],["Vuelve la luz cada día","Tiembla la tarde callada"],["Guarda la luna de plata","Brilla la luz del vecino"]][(run.districtIndex-1)%3];run.writingRound={a:anchors[0],b:anchors[1],draftA:"",draftB:"",done:false};setTimeout(function(){showEvent();},850);
 }
 
+function showWriting(){
+ show("writingScreen");var w=run.writingRound;$("writingAnchorA").textContent="1 · "+w.a;$("writingAnchorB").textContent="2 · "+w.b;$("writingA").value=w.draftA||"";$("writingB").value=w.draftB||"";$("writingFeedback").textContent="8 sílabas · ABAB · no repitas las palabras finales";
+}
+function submitWriting(event){
+ event.preventDefault();if(!run||!run.writingRound||run.writingRound.done)return;
+ var w=run.writingRound,first=$("writingA").value.trim(),second=$("writingB").value.trim(),a=window.VersopolisProsody.evaluate(first,w.a),b=window.VersopolisProsody.evaluate(second,w.b);
+ w.draftA=first;w.draftB=second;run.stats.compositions++;var ok=a.meterMatches&&a.rhymeMatches&&b.meterMatches&&b.rhymeMatches;
+ $("writingFeedback").textContent="Verso 3: "+a.syllables+" sílabas · "+(a.rhymeMatches?"rima ✓":"revisa la rima A")+". Verso 4: "+b.syllables+" sílabas · "+(b.rhymeMatches?"rima ✓":"revisa la rima B")+".";
+ if(ok){run.stats.contracts++;run.stats.structured++;run.runScore+=250;run.inspiration=Math.min(run.maxInspiration,run.inspiration+1);w.done=true;w.poem=[w.a,w.b,first,second];career.poems=career.poems||[];career.poems.push({verses:w.poem,date:Date.now()});saveCareer();showToast("ESTROFA SELLADA · +250 prestigio y +1 inspiración","ok");showEvent();}else{run.stats.failedContracts++;showToast("Revisa el cómputo y las palabras finales. Puedes volver a intentarlo.","bad");}
+ bridgeCall("checkpoint","written_stanza");
+}
+$("writingForm").addEventListener("submit",submitWriting);
+["writingA","writingB"].forEach(function(id){$(id).addEventListener("input",function(){if(!run?.writingRound)return;run.writingRound.draftA=$("writingA").value;run.writingRound.draftB=$("writingB").value;persist();});});
+$("writingSkip").onclick=function(){if(run?.writingRound){run.writingRound.done=true;showEvent();bridgeCall("checkpoint","writing_skipped");}};
+$("writingSave").onclick=saveAndHome;
 function showEvent(){
- if(!run)return;run.awaitingEvent=true;run.locked=false;
+ if(!run)return;if(run.writingRound&&!run.writingRound.done){showWriting();return;}run.awaitingEvent=true;run.locked=false;
  var map=activeMap(),choices=events.filter(function(e){return e.id!==run.lastEventId&&(!map||map.events.indexOf(e.id)>=0);}),ev=run.eventId?eventById(run.eventId):pick(choices.length?choices:events);run.eventId=ev.id;run.lastEventId=ev.id;show("eventScreen");
  $("eventIcon").textContent=ev.icon;$("eventTitle").textContent=ev.title;$("eventText").textContent=ev.text;$("eventChoices").className="eventChoices";$("eventChoices").innerHTML="";
  ev.choices.forEach(function(c){var b=document.createElement("button"),full=run.cardPool.length>=MAX_DECK_SIZE&&["draft","draftRare","duplicate"].indexOf(c.action)>=0;b.type="button";b.className="eventChoice";b.disabled=full;b.innerHTML='<span class="eventChoiceIcon"><img src="'+eventActionArt(c.action)+'" alt=""></span><b>'+c.title+'</b><p>'+(full?"Mazo completo: 54 cartas.":c.desc)+'</p><small>'+(full?"LÍMITE ALCANZADO":c.reward)+'</small>';b.addEventListener("click",function(){resolveEventAction(c.action);});$("eventChoices").appendChild(b);});
@@ -621,7 +636,9 @@ function finishRun(){
 function loseRun(){if(!run||run.finished)return;run.won=false;finishRun();}
 function showToast(text,kind){if(toastTimer)clearTimeout(toastTimer);$("toast").textContent=text;$("toast").className="toast"+(kind?" "+kind:"");toastTimer=setTimeout(function(){$("toast").classList.add("hidden");},2300);}
 
-function snapshot(){return{version:6,run:run,career:career};}
+function persist(){try{localStorage.setItem(STORAGE+".run",JSON.stringify(snapshot()));}catch(err){}}
+function setProfile(profile){STORAGE="lenguarcade.versopolis.v06."+String(profile.studentId||profile.id||profile.email||"guest").replace(/[^a-z0-9_-]/gi,"_");career={runs:0,wins:0,bestScore:0,bestStreak:0,districtsCleared:0,bestCombo:0,achievements:{},discoveries:{},mapWins:{},mapProgress:{},cosmetics:{}};run=null;resumeSave=null;try{career=Object.assign(career,JSON.parse(localStorage.getItem(STORAGE)||"{}"));restore(JSON.parse(localStorage.getItem(STORAGE+".run")||"null"));}catch(err){}renderCareer();}
+function snapshot(){return{version:6,run:run||resumeSave,career:career};}
 function migrateRun(oldRun,version){
  if(!oldRun)return null;
  if((version===4||version===5||version===6)&&oldRun.cardPool){oldRun.locked=false;oldRun.discardMode=false;oldRun.discardSelected=[];if(!oldRun.discardPile)oldRun.discardPile=[];if(!oldRun.stats)oldRun.stats={compositions:0,structured:0,districtsCleared:0,bestCombo:0,contracts:0,failedContracts:0};if(oldRun.stats.failedContracts===undefined)oldRun.stats.failedContracts=0;if(oldRun.stats.contracts===undefined)oldRun.stats.contracts=0;oldRun.forms=oldRun.forms||{};oldRun.rhymeCounts=oldRun.rhymeCounts||{};oldRun.eventActions=oldRun.eventActions||{};oldRun.scans=Number(oldRun.scans||0);if(version<6){["joker_eco","joker_pulso"].forEach(function(id){if(oldRun.cardPool.length>=MAX_DECK_SIZE||oldRun.cardPool.some(function(c){return c.baseId===id;}))return;var card=makeInstance(id,0);oldRun.cardPool.push(card);oldRun.deck=oldRun.deck||[];oldRun.deck.push(card.uid);});oldRun.selected=[];oldRun.challengeId=null;}oldRun.version=6;return oldRun;}
@@ -643,17 +660,17 @@ function continueRun(){
  bridgeCall("sessionStarted");
 }
 function metrics(){
- var r=run||{},s=r.stats||{},attempts=Number(s.compositions||0),correct=Number(s.contracts||s.structured||0),accuracy=attempts?Math.round(correct/attempts*100):0,pct=0;
+ var r=run||resumeSave||{},s=r.stats||{},attempts=Number(s.compositions||0),correct=Number(s.contracts!==undefined?s.contracts:s.structured||0),accuracy=attempts?Math.round(correct/attempts*100):0,pct=0;
  if(r.finished&&r.won)pct=100;else if(r.districtIndex!==undefined){var max=Number(r.maxPrestige||districts[Math.min(r.districtIndex,districts.length-1)].prestige),rem=Number(r.rivalPrestige===undefined?max:r.rivalPrestige),part=max?Math.max(0,Math.min(1,1-rem/max)):0;pct=Math.round(((Number(r.districtIndex||0)+part)/districts.length)*100);}
  return{score:Number(r.runScore||0),attempts:attempts,correct:correct,errors:Number(s.failedContracts||0),accuracy:accuracy,percentage:pct,bestStreak:Number(r.bestStreak||0),round:Number(r.districtIndex||0)+1,games:Number(career.runs||0),careerBest:Number(career.bestScore||0),districtsCleared:Number(s.districtsCleared||0),bestCombo:Number(s.bestCombo||0),inspiration:Number(r.inspiration||0),rivalPrestige:Number(r.rivalPrestige||0),deckSize:Number(r.cardPool&&r.cardPool.length||0)};
 }
-function bridgeCall(name,arg){try{if(window.VersopolisBridge&&typeof window.VersopolisBridge[name]==="function")return window.VersopolisBridge[name](arg);}catch(err){}return null;}
+function bridgeCall(name,arg){persist();try{if(window.VersopolisBridge&&typeof window.VersopolisBridge[name]==="function")return window.VersopolisBridge[name](arg);}catch(err){}return null;}
 function saveAndHome(){if(run&&!run.finished){run.locked=false;resumeSave=run;renderCareer();}if(window.VersopolisBridge&&window.VersopolisBridge.saveAndExit)window.VersopolisBridge.saveAndExit();else{show("homeScreen");renderCareer();}}
 
 $("startBtn").addEventListener("click",showAtlas);$("continueBtn").addEventListener("click",continueRun);$("againBtn").addEventListener("click",showAtlas);$("homeBtn").addEventListener("click",function(){run=null;show("homeScreen");renderCareer();});
 $("atlasBackBtn").addEventListener("click",function(){show("homeScreen");});$("achievementsBtn").addEventListener("click",function(){renderAchievements();show("achievementsScreen");});$("achievementsBackBtn").addEventListener("click",function(){show("homeScreen");});$("codexBtn").addEventListener("click",function(){renderCodex();show("codexScreen");});$("codexBackBtn").addEventListener("click",function(){show("homeScreen");});$("scanBtn").addEventListener("click",function(){if(!run||!activeMap()||activeMap().id!=="torre"||run.districtIndex!==1||run.scanReveal)return;run.scanReveal=true;run.scans+=1;renderGame();bridgeCall("checkpoint","scan_meter");});
 $("playBtn").addEventListener("click",playSelection);$("discardBtn").addEventListener("click",discardSelection);$("shuffleHandBtn").addEventListener("click",shuffleHand);$("clearBtn").addEventListener("click",clearSelection);$("exitBtn").addEventListener("click",saveAndHome);$("museExitBtn").addEventListener("click",saveAndHome);$("eventExitBtn").addEventListener("click",saveAndHome);$("openDeckBtn").addEventListener("click",openDeckInspect);$("deckBackBtn").addEventListener("click",backFromDeck);
 $("helpBtn").addEventListener("click",function(){$("modal").classList.remove("hidden");});$("closeModal").addEventListener("click",function(){$("modal").classList.add("hidden");});$("modal").addEventListener("click",function(e){if(e.target===$("modal"))$("modal").classList.add("hidden");});
-window.VersopolisGame={snapshot:snapshot,restore:restore,metrics:metrics,get run(){return run;},get career(){return career;}};
+window.VersopolisGame={persist:persist,setProfile:setProfile,snapshot:snapshot,restore:restore,metrics:metrics,get run(){return run;},get career(){return career;}};
 renderCareer();
 })();

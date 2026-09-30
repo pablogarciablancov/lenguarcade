@@ -390,7 +390,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
     let currentPlayerDetailFocus='';
 
     function esc(value){return String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));}
-    function bannerUrl(id,banner){const direct=String(banner||'');return ASSET_BASE+((/\.(?:png|jpe?g|webp|svg)$/i.test(direct)?direct:'')||BANNERS[id]||'maniacgrafia-banner.jpg');}
+    function bannerUrl(id,banner){const direct=String(banner||'');if(/^https:\/\//i.test(direct))return direct;return ASSET_BASE+((/\.(?:png|jpe?g|webp|svg)$/i.test(direct)?direct:'')||BANNERS[id]||'maniacgrafia-banner.jpg');}
     function showLoader(text){$('loaderText').textContent=text||'Cargando...';$('loader').classList.add('open');}
     function hideLoader(){$('loader').classList.remove('open');}
     function setStatus(text){$('status').textContent=text;$('loginStatus').textContent=text;}
