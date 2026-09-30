@@ -108,7 +108,7 @@ const tierras=catalog.games.find(row=>row.id==="tierras_de_tinta");
 if(!tierras ||
    tierras.entry!=="games/tierras_de_tinta/" ||
    !!tierras.externalUrl ||
-   tierras.banner!=="tierras-de-tinta-banner.svg" ||
+   tierras.banner!=="tierras-de-tinta-banner-v3.webp" ||
    tierras.integration!=="embedded" ||
    tierras.active!==true ||
    tierras.official!==true){

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0b0717">
   <title>Versópolis · LenguArcade</title>
-  <link rel="stylesheet" href="./styles.css?v=20260928-v06joker">
+  <link rel="stylesheet" href="./styles.css?v=20260930-gameplay">
 </head>
 <body>
 <main id="app" class="app">
@@ -218,8 +218,9 @@
       </div>
     </div>
   </div>
-</main>
-<script src="./app.js?v=20260928-v06joker"></script>
-<script src="./bridge.js?v=20260925-v01"></script>
+<section id="writingScreen" class="screen hidden writing-screen"><div class="writing-panel"><span class="eyebrow">TALLER DE CREACIÓN · ESTROFA ABAB</span><h1>Tu voz abre el siguiente distrito</h1><p>Escribe dos versos nuevos: el tercero rima con el primero y el cuarto con el segundo. Todos deben tener ocho sílabas métricas.</p><form id="writingForm"><blockquote id="writingAnchorA"></blockquote><blockquote id="writingAnchorB"></blockquote><label>Verso 3 · rima A<input id="writingA" maxlength="120" autocomplete="off" required></label><label>Verso 4 · rima B<input id="writingB" maxlength="120" autocomplete="off" required></label><p id="writingFeedback" aria-live="polite"></p><small>Cómputo orientativo con sinalefa automática y ajuste por acento final. Puedes separar dos palabras con | para evitar su sinalefa. Las licencias poéticas se revisan con el profesor.</small><div class="writing-actions"><button class="primary" type="submit">Sellar mi estrofa</button><button type="button" id="writingSkip">Continuar sin bonus</button><button type="button" id="writingSave">Guardar y salir</button></div></form></div></section></main>
+<script src="./prosody.js?v=20260930-gameplay"></script>
+<script src="./app.js?v=20260930-gameplay"></script>
+<script src="./bridge.js?v=20260930-gameplay"></script>
 </body>
 </html>

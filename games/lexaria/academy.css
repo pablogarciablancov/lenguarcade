@@ -1093,3 +1093,18 @@ html,body{width:100%;height:100%;margin:0;overscroll-behavior:none}
 .reduce-motion .battle-muzzle-live,
 .reduce-motion .battle-impact-live,
 .reduce-motion .battle-float-live{animation-duration:.45s!important}
+
+/* Living creatures: alternating breath, anticipation and directional attack poses. */
+.battle-sprite{--face:1;transform:scaleX(var(--face))!important;transform-origin:50% 85%;animation:lexariaBreath 2.5s ease-in-out infinite!important;will-change:transform}
+.battle-board.enemy .battle-sprite{--face:-1}.battle-unit:nth-child(2n) .battle-sprite{animation-delay:-1.2s!important}.battle-unit:nth-child(3n) .battle-sprite{animation-delay:-.6s!important}
+.battle-board.enemy .battle-sprite>img,.battle-board.enemy .battle-unit.casting .battle-sprite>img{transform:none!important}
+.battle-unit.casting .battle-sprite,.battle-board.enemy .battle-unit.casting .battle-sprite{animation:lexariaLivingAttack .5s ease!important}
+.battle-unit.hit .battle-sprite{animation:lexariaLivingHit .45s ease!important}
+@keyframes lexariaBreath{0%,100%{transform:scaleX(var(--face)) translateY(0) rotate(-1deg)}50%{transform:scaleX(var(--face)) translateY(-4px) scale(1.035,.98) rotate(1deg)}}
+@keyframes lexariaLivingAttack{0%,100%{transform:scaleX(var(--face))}25%{transform:scaleX(var(--face)) translateX(-6px) rotate(-6deg)}60%{transform:scaleX(var(--face)) translateX(15px) rotate(7deg) scale(1.1,.94)}}
+@keyframes lexariaLivingHit{35%{transform:scaleX(var(--face)) translateX(-7px) rotate(-8deg);filter:brightness(1.5)}}
+.unit-name,.ability-name,.unit-ability,.unit-type,.market-detail p,.inspect-panel p,.battle-inspect-body,.training-target small{font-size:clamp(13px,1vw,16px)!important;line-height:1.4!important}.mini-badge,.battle-formation-summary,.unit-stats,.ability-desc{font-size:12px!important;line-height:1.35!important}
+.arena-record{padding:18px;margin:14px 0;background:#112c40;border:1px solid #54758b;border-radius:16px;font-size:14px;color:#e7f5ff}.arena-record h3,.arena-record h4{color:#ffe197}.arena-record-columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}.arena-record li{padding:4px 0}.arena-record .own{color:#79e8b8;font-weight:800}
+#studentBattleScreen{overflow-y:auto!important}.arena-record-columns ul,.arena-record-columns ol{padding-left:22px}
+@media(max-width:650px){.arena-record-columns{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.battle-sprite{animation:none!important}}

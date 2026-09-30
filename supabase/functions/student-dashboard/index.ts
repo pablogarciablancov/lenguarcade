@@ -1,3 +1,4 @@
+import {levelProgress,learningGrade,platformMilestones} from "../_shared/progression.js";
 import {
   corsHeaders,
   jsonResponse,
@@ -40,7 +41,7 @@ function missionProgressValue(
       if (Number.isFinite(activeTo) && occurredAt > activeTo) return false;
       return true;
     });
-    if (type === "sessions") return events.length;
+    if (type === "sessions") return events.filter(e=>e.details?.sessionCounted!==false).length;
     if (type === "variety") return new Set(events.map(row => String(row.game_id || "")).filter(Boolean)).size;
     if (type === "xp") return events.reduce((sum, row) => sum + Math.max(0, Number(row.xp_delta || 0)), 0);
     if (type === "accuracy") return events.reduce((max, row) => Math.max(max, Number(row.accuracy || 0)), 0);
@@ -125,7 +126,7 @@ Deno.serve(async (request) => {
         .eq("organization_id", organizationId)
         .eq("active", true),
       admin.from("game_events")
-        .select("game_id,event_type,xp_delta,accuracy,occurred_at")
+        .select("game_id,event_type,xp_delta,accuracy,occurred_at,details")
         .eq("profile_id", profileId)
         .order("occurred_at", { ascending:false })
         .limit(500),
@@ -189,7 +190,8 @@ Deno.serve(async (request) => {
     const xp = Math.max(0, baseXp + manualXp);
     const feathers = Math.max(0, baseFeathers + manualFeathers);
     const sessions = progress.reduce((sum, row) => sum + Number(row.sessions || 0), 0);
-    const level = Math.floor(xp / 500) + 1;
+    const leveling = levelProgress(xp);
+    const level = leveling.level;
     const classroomRelation = (enrollmentsResult.data || [])[0]?.classrooms;
     const classroom = Array.isArray(classroomRelation) ? classroomRelation[0] : classroomRelation || null;
     const workshopStartedAt = workshopSessionRow?.started_at || workshopSessionRow?.updated_at || null;
@@ -344,14 +346,14 @@ Deno.serve(async (request) => {
 
     const percentage = Math.round(average(progress.map(row => Number(row.percentage || 0))));
     const accuracy = attempts ? Math.round((successes / attempts) * 100) : 0;
-    const grade = Math.round((
-      Math.min(10, baseXp / Math.max(1, progress.length) / 80) * 0.25 +
-      Math.min(10, accuracy / 10) * 0.25 +
-      Math.min(10, average(progress.map(row => Number(row.missions_completed || 0))) * 2.5) * 0.20 +
-      Math.min(10, average(progress.map(row => Number(row.sessions || 0))) * 2) * 0.15 +
-      Math.min(10, progress.filter(row => Number(row.sessions || 0) > 0).length * 1.7) * 0.10 +
-      Math.min(10, average(progress.map(row => Number(row.achievements_count || 0))) * 2.5) * 0.05
-    ) * 10) / 10;
+    const evaluation = learningGrade(progress,missionProgress);
+    const grade = evaluation.score;
+    const platformAchievements = platformMilestones(xp,grade,attempts);
+    const unlocked=platformAchievements.filter(a=>a.unlocked);
+    if(unlocked.length){const {error}=await admin.from('platform_achievements').upsert(unlocked.map(a=>({profile_id:profileId,achievement_id:a.id})),{onConflict:'profile_id,achievement_id',ignoreDuplicates:true});if(error)throw error;}
+    const {data:milestones,error:milestoneError}=await admin.from('platform_achievements').select('achievement_id,unlocked_at').eq('profile_id',profileId);
+    if(milestoneError)throw milestoneError;
+    platformAchievements.forEach(a=>{const saved=(milestones||[]).find(m=>m.achievement_id===a.id);if(saved){a.unlocked=true;a.unlockedAt=saved.unlocked_at;}});
 
     return jsonResponse({
       ok:true,
@@ -376,8 +378,7 @@ Deno.serve(async (request) => {
         baseXp,
         manualXp,
         level,
-        nextLevelXp:level * 500,
-        levelProgress:Math.round((xp % 500) / 5),
+        ...leveling,
         plumas:feathers,
         basePlumas:baseFeathers,
         manualPlumas:manualFeathers,
@@ -417,7 +418,8 @@ Deno.serve(async (request) => {
         breakdown:row.breakdown || {},
         updatedAt:row.updated_at,
       })),
-      grade:{ score:grade },
+      grade:evaluation,
+      platformAchievements,
     });
   } catch (error) {
     if (error instanceof Response) return error;

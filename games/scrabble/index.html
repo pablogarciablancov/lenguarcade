@@ -254,6 +254,8 @@
 
 <div id="toast-container"></div>
 
+<script src="../word_play/vendor/typo.js"></script>
+<script src="./dictionary.js"></script>
 <script>
 // --- SISTEMA DE AUDIO ---
 let AUDIO_CLACK = null;
@@ -914,7 +916,11 @@ function handleBoardClick(r, c) {
 }
 function recallDraftTiles() { draftTiles = []; selectedRackIdx = null; updateUI(); }
 
-function attemptValidation() {
+async function attemptValidation() {
+    if(window.__scrabbleValidating)return;
+    window.__scrabbleValidating=true;
+    try{await window.ScrabbleDictionary.ready;}finally{window.__scrabbleValidating=false;}
+    if(window.ScrabbleDictionary.error){showToast("Diccionario no disponible","Comprueba la conexión y vuelve a validar.","📚");return;}
     if (draftTiles.length === 0) return;
     if (isFirstTurn && !draftTiles.some(d => d.r === 7 && d.c === 7)) return alert("¡La primera jugada debe cubrir la estrella central (★)!");
 
@@ -986,9 +992,9 @@ function attemptValidation() {
     pendingTileCount = draftTiles.length;
     pendingWord = uniqueWords.map(w => w.text).join(" + ");
 
-    let invalidWords = uniqueWords.map(w => w.text).filter(w => !DICCIONARIO.includes(w));
+    let invalidWords = uniqueWords.map(w => w.text).filter(w => !window.ScrabbleDictionary.check(w));
     if (invalidWords.length > 0) {
-        document.getElementById('juez-msg').innerHTML = `El sistema no reconoce estas palabras:<br><strong style="color:var(--danger)">${invalidWords.join(", ")}</strong><br>¿Son correctas, profe?`;
+        document.getElementById('juez-msg').innerHTML = `El sistema no reconoce estas palabras:<br><strong style="color:var(--danger)">${invalidWords.join(", ")}</strong><br>Solo estas palabras quedan pendientes de revisión.`;
         document.getElementById('juez-modal').classList.remove('hidden');
     } else {
         finalizeValidation();

@@ -34,7 +34,7 @@ function matchId(){return 'lexaria_'+safeId(profile&&(profile.studentId||profile
 function checkpoint(reason){
   if(!initialized)return;
   const m=metrics(),r=window.LexariaGame?.run;
-  const sig=[r?.id,m.day,m.wins,m.lives,m.trainingCorrect,m.discovered,m.xp].join('|');
+  const sig=JSON.stringify(savePackage());
   if((reason||'autosave')==='autosave'&&sig===lastSignature)return;
   lastSignature=sig;
   post('CHECKPOINT',{checkpointId:'lexaria_checkpoint_'+Date.now()+'_'+Math.random().toString(36).slice(2),matchId:matchId(),reason:reason||'autosave',players:[participant('checkpoint')]});
@@ -61,16 +61,21 @@ window.addEventListener('message',event=>{
   const msg=event.data||{};
   if(msg.namespace!==HOST_NS||msg.channel!==channel)return;
   if(msg.type==='INIT'){
+    if(initialized){post('INITIALIZED',{});return;}
     profile=msg.payload?.student||{};
+    window.LexariaGame?.setProfile?.(profile);
     const restored=restoreIncoming(msg.payload?.save||null);
     initialized=true;
     post('INITIALIZED',{profileId:profile.studentId||profile.email||'',restored});
-    post('READY',{gameId:GAME_ID,version:1});
+
     if(!timer)poll();
   }
+  if(msg.type==='CHECKPOINT_CONFIRMED')requestOpponents();
+  if(msg.type==='CHECKPOINT_FAILED')lastSignature='';
+  if(msg.type==='REQUEST_EXIT'){window.LexariaGame?.save?.();checkpoint('exit');}
   if(msg.type==='REQUEST_CHECKPOINT')checkpoint('host_request');
   if(msg.type==='OPPONENTS'){
-    window.LexariaGame?.setStudentOpponents?.(msg.payload?.opponents||[]);
+    window.LexariaGame?.setArena?.(msg.payload||{});
   }
 });
 window.addEventListener('pagehide',()=>checkpoint('pagehide'));

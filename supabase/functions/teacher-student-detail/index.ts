@@ -1,3 +1,5 @@
+import {assessedMissions} from "../_shared/mission-grade.js";
+import {levelProgress,learningGrade} from "../_shared/progression.js";
 import {
   corsHeaders,
   jsonResponse,
@@ -26,6 +28,7 @@ async function resetPlayerProgress(
     "evaluations",
     "game_errors",
     "player_achievements",
+    "platform_achievements",
     "game_saves",
     "game_events",
     "game_progress",
@@ -155,6 +158,7 @@ Deno.serve(async (request) => {
       enrollmentsResult,
       evaluationsResult,
       gameAccessResult,
+      missionsResult,
     ] = await Promise.all([
       admin.from("games")
         .select("id,name,icon,color,status")
@@ -166,7 +170,7 @@ Deno.serve(async (request) => {
         .select("game_id,event_type,xp_delta,feathers_delta,accuracy,details,occurred_at")
         .eq("profile_id", studentId)
         .order("occurred_at", { ascending:false })
-        .limit(20),
+        .limit(500),
       admin.from("game_events")
         .select("xp_delta,feathers_delta,details,occurred_at")
         .eq("profile_id", studentId)
@@ -184,10 +188,9 @@ Deno.serve(async (request) => {
         .order("occurred_at", { ascending:false })
         .limit(20),
       admin.from("classroom_enrollments")
-        .select("classrooms(name,legacy_class_code)")
+        .select("classroom_id,classrooms(name,legacy_class_code)")
         .eq("profile_id", studentId)
-        .eq("active", true)
-        .limit(1),
+        .eq("active", true),
       admin.from("evaluations")
         .select("scope,game_id,score,breakdown,updated_at")
         .eq("profile_id", studentId)
@@ -195,11 +198,12 @@ Deno.serve(async (request) => {
       admin.from("profile_game_access")
         .select("game_id,enabled,updated_at")
         .eq("profile_id", studentId),
+      admin.from("mission_definitions").select("*").eq("organization_id",organizationId).eq("active",true),
     ]);
     const failure = [
       gamesResult.error, progressResult.error, eventsResult.error, adjustmentsResult.error,
       achievementsResult.error, errorsResult.error, enrollmentsResult.error,
-      evaluationsResult.error, gameAccessResult.error,
+      evaluationsResult.error, gameAccessResult.error, missionsResult.error,
     ].find(Boolean);
     if (failure) throw failure;
 
@@ -247,7 +251,7 @@ Deno.serve(async (request) => {
       ...rows.map(row => row.last_activity_at),
       ...(eventsResult.data || []).map(row => row.occurred_at),
     ].filter(Boolean).sort().pop() || "";
-    const computedGrade = attempts ? Math.round((successes / attempts) * 100) / 10 : 0;
+    const computedGrade = learningGrade(rows,assessedMissions(missionsResult.data||[],rows,eventsResult.data||[],studentId,(enrollmentsResult.data||[]).map(e=>e.classroom_id))).score;
     const evaluationRows = evaluationsResult.data || [];
     const generalEvaluation = evaluationRows.find(row => row.scope === "general");
     const isTeacherPlayer = profile.id === teacherProfileId && profile.role !== "student";
@@ -269,7 +273,7 @@ Deno.serve(async (request) => {
         xp,
         baseXp,
         manualXp,
-        level:Math.floor(xp / 500) + 1,
+        level:levelProgress(xp).level,
         plumas:feathers,
         basePlumas:baseFeathers,
         manualPlumas:manualFeathers,
@@ -300,7 +304,7 @@ Deno.serve(async (request) => {
         reason:String(row.details?.reason || ""),
         timestamp:row.occurred_at,
       })),
-      events:(eventsResult.data || []).map(row => ({
+      events:(eventsResult.data || []).slice(0,20).map(row => ({
         gameId:row.game_id,
         eventType:row.event_type,
         xpDelta:Number(row.xp_delta || 0),

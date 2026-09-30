@@ -30,7 +30,7 @@ for (const required of [
   './content.js','./lexicon.js','./vendor/typo.js','./engine.js','./bridge.js','./app.js','./layout.js','./sound.js','./game-feel.js','./styles.css','./responsive.css','./arcade.css'
 ]) if (!index.includes(required)) throw new Error(`Falta ${required} en index.html`);
 
-if(!index.includes('20260920-fast-bridge-v1'))throw new Error('Los assets de Word Play no llevan la versión del bridge rápido');
+if(!index.includes('20260930-gameplay'))throw new Error('Los assets de Word Play no llevan la versión del bridge rápido');
 if(!app.includes('dictionaryReady')||!app.includes('launchButtons'))throw new Error('La partida puede arrancar antes de cargar el diccionario');
 if(app.includes("visibilitychange"))throw new Error('Cambiar de pestaña no debe activar Tinta Viva automáticamente');
 if(!/function applyUpgrade[\s\S]*const upgradeId=activeUpgrade[\s\S]*activeUpgrade=null[\s\S]*render\(\)/.test(app))throw new Error('Aplicar una Mejora debe desarmar el modo de selección tras una sola ficha');

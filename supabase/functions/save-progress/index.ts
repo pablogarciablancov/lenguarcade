@@ -1,3 +1,4 @@
+import {snapshotProgress} from "../_shared/progression.js";
 import {
   boundedNumber,
   corsHeaders,
@@ -281,7 +282,7 @@ Deno.serve(async (request) => {
       : [];
     const shouldCountSession = body.countSession === true ||
       (!body.checkpoint && body.countSession !== false && !body.sessionAlreadyCounted);
-    const shouldWriteEvent = body.writeEvent === false ? false : shouldCountSession;
+    let shouldWriteEvent = body.writeEvent === false ? false : shouldCountSession;
 
     if (achievements.length) {
       await admin.from("achievement_definitions").upsert(
@@ -328,6 +329,9 @@ Deno.serve(async (request) => {
       raw_data:rawGameData,
       last_activity_at:now,
     };
+    const authoritative = snapshotProgress(gameId,rawGameData.save,old?.raw_data?.save,old||{});
+    if(authoritative)Object.assign(record,authoritative);
+    if(body.writeEvent!==false&&(record.xp>oldXp||record.attempts>Number(old?.attempts||0)))shouldWriteEvent=true;
     const { error:progressError } = await admin.from("game_progress")
       .upsert(record, { onConflict:"profile_id,game_id" });
     if (progressError) throw progressError;
@@ -338,10 +342,10 @@ Deno.serve(async (request) => {
         profile_id:profileId,
         game_id:gameId,
         event_type:String(body.eventType || "progress_saved").slice(0, 100),
-        xp_delta:Math.max(0, newXp - oldXp),
-        feathers_delta:Math.max(0, newFeathers - oldFeathers),
+        xp_delta:Math.max(0, record.xp - oldXp),
+        feathers_delta:Math.max(0, record.feathers - oldFeathers),
         accuracy:record.accuracy,
-        details:body.details && typeof body.details === "object" ? body.details : {},
+        details:{...(body.details && typeof body.details === "object" ? body.details : {}),sessionCounted:shouldCountSession},
         occurred_at:now,
       });
       if (eventError) throw eventError;

@@ -284,17 +284,7 @@ function upgradeCatalogV03_() {
   const now = nowIso_();
   LA_OFFICIAL_GAMES.forEach(game => upsertByKeys_(sh, ['gameId'], Object.assign({}, game, {updatedAt:now})));
 }
-function calculateGradeFromRowsV03_(rows, singleGame) {
-  rows = (rows || []).map(normalizeProgressRow_);
-  if (!rows.length) return { score:0, breakdown:{ progreso:0, dominio:0, misiones:0, constancia:0, variedad:0, logros:0 } };
-  const xpScore = clamp_(average_(rows.map(r => Math.min(10, Number(r.xp || 0) / 80))),0,10);
-  const accuracyScore = clamp_((average_(rows.map(r => r.accuracy)) || 0) / 10,0,10);
-  const missionScore = clamp_(average_(rows.map(r => Number(r.missionsCompleted || 0))) * 2.5,0,10);
-  const constancyScore = clamp_(average_(rows.map(r => Number(r.sessions || 0))) * 2,0,10);
-  const varietyScore = singleGame ? 10 : clamp_(rows.filter(r => Number(r.sessions || 0)>0).length * 1.7,0,10);
-  const achievementScore = clamp_(average_(rows.map(r => Number(r.achievementsCount || 0))) * 2.5,0,10);
-  return { score:round1_(xpScore*.25 + accuracyScore*.25 + missionScore*.20 + constancyScore*.15 + varietyScore*.10 + achievementScore*.05), breakdown:{ progreso:round1_(xpScore), dominio:round1_(accuracyScore), misiones:round1_(missionScore), constancia:round1_(constancyScore), variedad:round1_(varietyScore), logros:round1_(achievementScore) } };
-}
+function calculateGradeFromRowsV03_(rows, singleGame) { return learningGrade((rows||[]).map(normalizeProgressRow_)); }
 
 function buildRecommendationsV03_(errorSummary) {
   const rec = [];

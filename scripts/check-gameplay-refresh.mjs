@@ -1,0 +1,28 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
+const read=p=>fs.readFileSync(p,'utf8');
+const progression=await import('data:text/javascript;base64,'+Buffer.from(read('supabase/functions/_shared/progression.js')).toString('base64'));
+const {levelProgress,learningGrade,snapshotProgress,platformMilestones}=progression;
+assert.equal(levelProgress(999).level,1);assert.equal(levelProgress(1000).level,2);assert.equal(levelProgress(2299).level,2);assert.equal(levelProgress(2300).level,3);
+let lastCost=0;for(let xp=0;xp<100000;xp+=500){const p=levelProgress(xp);assert(p.levelCost>=lastCost);lastCost=p.levelCost;assert(p.levelProgress>=0&&p.levelProgress<100);}
+const rows=[{game_id:'a',attempts:10,successes:8,percentage:40,xp:100}];const grade=learningGrade(rows);assert.equal(grade.score,6.6);assert.equal(learningGrade([{...rows[0],xp:999999}]).score,grade.score,'XP cannot inflate the grade');
+assert.equal(learningGrade(rows,[{gameId:'b',target:10,progress:0}]).score,0,'Unplayed assigned games must be included');assert.equal(learningGrade(rows,[{gameId:'a',target:10,progress:10}]).score,8);
+assert(platformMilestones(5000,9,20).find(a=>a.id==='grade_9').unlocked);assert(!platformMilestones(5000,9,0).find(a=>a.id==='grade_9').unlocked);
+const save={run:{startedAt:5,districtIndex:1,maxPrestige:100,rivalPrestige:50,stats:{compositions:3,contracts:2},runScore:400}};
+const first=snapshotProgress('versopolis',save,null,{});assert.equal(first.attempts,3);assert.equal(first.successes,2);assert.equal(first.percentage,37.5);
+const repeated=snapshotProgress('versopolis',save,save,first);assert.equal(repeated.xp,first.xp);assert.equal(repeated.attempts,first.attempts,'Repeated autosave must add neither XP nor attempts');
+const next=structuredClone(save);next.run.stats.compositions++;next.run.stats.contracts++;const after=snapshotProgress('versopolis',next,save,first);assert.equal(after.attempts,4);assert.equal(after.successes,3);
+const newRun=structuredClone(save);newRun.run.startedAt=6;assert.equal(snapshotProgress('versopolis',newRun,save,first).attempts,6,'New expeditions have a separate counter baseline');
+const lex={career:{metrics:{trainingAttempts:4,trainingCorrect:3},careerWins:2,duels:{wins:1,losses:1},discovered:{a:true}}};assert.equal(snapshotProgress('lexaria',lex,lex,{xp:100,attempts:4,successes:3}).xp,100);
+const context={window:{}};vm.runInNewContext(read('games/versopolis/prosody.js'),context);const P=context.window.VersopolisProsody;
+assert.equal(P.scan('Brilla la luna en el mar').syllables,8);assert.equal(P.scan('Guarda mi voz el camino').syllables,8);assert.equal(P.scan('Brilla la luna | en el mar').syllables,9);assert.equal(P.wordScan('día').syllables,2);assert.equal(P.wordScan('rápido').adjustment,-1);assert.equal(P.wordScan('camión').adjustment,1);
+assert(P.evaluate('Canta la tarde al pasar','Brilla la luna en el mar').rhymeMatches);assert(P.evaluate('Cruza la noche el molino','Guarda mi voz el camino').meterMatches);assert(!P.evaluate('Brilla la luna en el mar','Brilla la luna en el mar').rhymeMatches,'Repeating the final word is not a new rhyme');
+// Restored runs remain visible to both snapshots and metrics before pressing Continue.
+const elements=new Map(),storage=new Map();const el=id=>{if(!elements.has(id))elements.set(id,{value:'',style:{},dataset:{},classList:{toggle(){},add(){},remove(){}},appendChild(){},addEventListener(){},innerHTML:'',textContent:''});return elements.get(id);};
+const box={window:{},document:{getElementById:el,createElement:()=>el(Math.random())},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},setTimeout(){return 1;},clearTimeout(){},console,Date,Math};
+vm.runInNewContext(read('games/versopolis/app.js'),box);const api=box.window.VersopolisGame;api.setProfile({studentId:'one'});assert(api.restore({version:6,career:{runs:2},run:{version:6,startedAt:8,districtIndex:0,cardPool:[],stats:{compositions:1,contracts:0,structured:1},maxPrestige:100,rivalPrestige:90}}));assert.equal(api.snapshot().run.startedAt,8);assert.equal(api.metrics().correct,0);api.persist();api.setProfile({studentId:'two'});assert.equal(api.snapshot().run,null);api.setProfile({studentId:'one'});assert.equal(api.snapshot().run.startedAt,8);
+// Exercise the real Hunspell rules and the Scrabble adapter with bundled resources.
+const dictBox={window:{},console,fetch:async url=>({ok:true,text:async()=>read('games/scrabble/'+url)}),Promise,Set};vm.createContext(dictBox);vm.runInContext(read('games/word_play/vendor/typo.js'),dictBox);vm.runInContext(read('games/scrabble/dictionary.js'),dictBox);await dictBox.window.ScrabbleDictionary.ready;const dic=dictBox.window.ScrabbleDictionary;assert(!dic.error);for(const word of ['CASA','PERROS','CANCION','CAMINAMOS','NIÑO'])assert(dic.check(word),word);assert(!dic.check('ZXQWZX'));assert.notEqual(dic.normalize('NIÑO'),dic.normalize('NINO'));
+for(const game of ['lexaria','versopolis'])new vm.Script(read('games/'+game+'/bridge.js'));
+const missionModule=await import('data:text/javascript;base64,'+Buffer.from(read('supabase/functions/_shared/mission-grade.js')).toString('base64'));
+const assigned=missionModule.assessedMissions([{active:true,target_profile_id:'one',game_id:'a',mission_type:'sessions',target:2,active_from:'2026-09-01'}],rows,[{game_id:'a',occurred_at:'2026-09-02',details:{sessionCounted:true}},{game_id:'a',occurred_at:'2026-09-02',details:{sessionCounted:false}}],'one',[],Date.parse('2026-09-30'));assert.equal(assigned[0].progress,1,'Checkpoint events are not additional sessions');
+console.log('Gameplay refresh: XP curve, mission rubric, idempotent saves, profile/resume isolation, written poetry and Spanish dictionary OK.');

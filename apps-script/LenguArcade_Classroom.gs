@@ -435,3 +435,8 @@ function listAllClassroomSubmissions_(courseId, courseWorkId) {
   } while (pageToken);
   return submissions;
 }
+
+function getLexariaArena(accessToken){
+ const response=UrlFetchApp.fetch(LA_SUPABASE_URL_+'/functions/v1/lexaria-arena',{method:'post',contentType:'application/json',headers:{apikey:LA_SUPABASE_PUBLIC_KEY_,Authorization:'Bearer '+String(accessToken||'')},payload:'{}',muteHttpExceptions:true});
+ const data=JSON.parse(response.getContentText()||'{}');if(response.getResponseCode()!==200||!data.ok)throw new Error('La arena no está disponible.');return data;
+}

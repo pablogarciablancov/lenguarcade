@@ -13,7 +13,7 @@ vm.createContext(sandbox);
 vm.runInContext(source,sandbox);
 const D=sandbox.window.LexariaData;
 
-assert.equal(D.creatures.length,30,'Debe haber 30 Lexarios en el prototipo');
+assert.equal(D.creatures.length,50,'El catálogo actual debe conservar los 50 Lexarios');
 assert.ok(D.trainers.length>=8,'Debe haber al menos 8 entrenadores');
 assert.ok(D.relics.length>=15,'Debe haber al menos 15 reliquias');
 assert.ok(D.resources.length>=10,'Debe haber al menos 10 recursos');
@@ -62,4 +62,4 @@ assert.equal((game.match(/esc\(c\.emoji\)/g)||[]).length,0,'No deben quedar plac
 new vm.Script(game,{filename:'game.js'});
 new vm.Script(bridge,{filename:'bridge.js'});
 
-console.log('Lexaria smoke test: OK · 30 criaturas con sprites · 3000 preguntas · niveles 1/1.7/3 · entrenamiento 5% · combate visual · arena asíncrona');
+console.log('Lexaria smoke test: OK · 50 criaturas con sprites · 3000 preguntas · niveles 1/1.7/3 · entrenamiento 5% · combate visual · arena asíncrona');

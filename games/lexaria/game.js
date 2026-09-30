@@ -2,8 +2,8 @@ window.LexariaGame = (() => {
 'use strict';
 
 const D=window.LexariaData;
-const RUN_KEY='lexaria_run_v1';
-const CAREER_KEY='lexaria_career_v1';
+let RUN_KEY='lexaria_run_v1';
+let CAREER_KEY='lexaria_career_v1';
 const SETTINGS_KEY='lexaria_settings_v1';
 const TEAM_SIZE=6;
 const BENCH_SIZE=4;
@@ -90,7 +90,7 @@ let battlePaused=false;
 let battleInspectRef=null;
 let pendingRelicRewards=0;
 let dragSource=null;
-let studentOpponents=[];
+let studentOpponents=[],studentRanking=[];
 let battleContext='adventure';
 let duelRunContext=null;
 
@@ -350,6 +350,7 @@ function renderTitleMeta(){
 function saveAndExit(){
   if(run)saveRun('save_exit');
   saveCareer();
+  window.LexariaBridge?.checkpoint?.('return_title');
   clearInterval(battleTimer);
   battle=null;battleInspectRef=null;setBattlePaused(false,true);
   selected=null;currentQuestion=null;battleContext='adventure';duelRunContext=null;
@@ -963,7 +964,7 @@ function renderStudentBattle(){
     statsHost.innerHTML='';
   }
   $('publishSquadBtn').disabled=!run?.team?.some(Boolean);
-  renderOpponents();
+  renderOpponents();renderArenaRecord();
 }
 function publishCurrentSquad(){
   const snap=makeDuelSquad();
@@ -989,6 +990,12 @@ function mockStudentOpponents(){
     return{id:'mock_'+k,name,trainerId:D.pick(D.trainers,rng).id,relics:[],team,practice:true};
   });
 }
+function renderArenaRecord(){
+ let host=$('arenaRecord');if(!host){host=document.createElement('section');host.id='arenaRecord';host.className='arena-record';$('studentBattleScreen').appendChild(host);}
+ const d=career.duels||{wins:0,losses:0},total=Number(d.wins||0)+Number(d.losses||0);
+ host.innerHTML='<h3>Tu historial · '+total+' enfrentamientos</h3><p>'+Number(d.wins||0)+' victorias · '+Number(d.losses||0)+' derrotas</p><div class="arena-record-columns"><div><h4>Ranking de clase</h4>'+(studentRanking.length?'<ol>'+studentRanking.map(p=>'<li'+(p.own?' class="own"':'')+'>'+esc(p.name)+' · '+p.wins+' V / '+p.losses+' D</li>').join('')+'</ol>':'<p>El ranking se abre con el primer duelo de clase.</p>')+'</div><div><h4>Últimos duelos</h4>'+(d.history?.length?'<ul>'+d.history.slice(0,10).map(h=>'<li>'+esc(h.opponentName)+' · '+(h.won?'Victoria':'Derrota')+' · '+esc(new Date(h.date).toLocaleDateString('es-ES'))+'</li>').join('')+'</ul>':'<p>Todavía no has disputado duelos de clase.</p>')+'</div></div>';
+}
+function setArena(data){studentRanking=Array.isArray(data.ranking)?data.ranking:[];setStudentOpponents(data.opponents||[]);renderArenaRecord();}
 function setStudentOpponents(list){
   studentOpponents=Array.isArray(list)?list.filter(o=>o&&Array.isArray(o.team)):[];
   const status=$('studentSyncStatus');
@@ -1473,9 +1480,12 @@ function finishBattle(){
 
   if(battleContext==='student'){
     career.duels=career.duels||{wins:0,losses:0};
-    if(won)career.duels.wins++;else career.duels.losses++;
+    if(!battle.opponentSnapshot?.practice){if(won)career.duels.wins++;else career.duels.losses++;}
     career.xp+=won?12:4;
+    const op=battle.opponentSnapshot||{};
+    if(!op.practice){career.duels.history=career.duels.history||[];career.duels.history.unshift({id:Date.now()+'_'+Math.random().toString(36).slice(2),opponentId:op.id||'',opponentName:battle.opponentName||'Rival',won,date:nowIso()});career.duels.history=career.duels.history.slice(0,100);}
     saveCareer();
+    window.LexariaBridge?.checkpoint?.('duel_result');
     showBattleResult(won);
     return;
   }
@@ -1774,6 +1784,8 @@ return {
     };
   },
   achievements(){return Object.keys(career.achievements||{}).map(id=>{const a=D.achievements.find(x=>x.id===id)||{};return{id,title:a.name||id,description:a.desc||'',xpReward:25};});},
+  setProfile(profile){RUN_KEY='lexaria_run_v1.'+String(profile.studentId||profile.id||'guest');CAREER_KEY='lexaria_career_v1.'+String(profile.studentId||profile.id||'guest');run=loadRun();career=loadCareer();studentOpponents=[];studentRanking=[];renderTitleMeta();},
+  setArena,
   setStudentOpponents(list){setStudentOpponents(list);},
   getDuelSquad(){return career.duelSquad||null;},
   save(){saveRun('manual');saveCareer();}
