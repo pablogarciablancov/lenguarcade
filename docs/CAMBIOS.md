@@ -1,5 +1,14 @@
 # Registro de cambios
 
+## 2026-09-30 · Conexión, guardado y Tierras de Tinta nativa
+
+- READY repetido ya no devuelve el runner al estado de carga. Los bridges de rescate se detienen al recibir INIT.
+- Checkpoints en cola, confirmación antes de salir y botón de reintento tras fallos; se mantiene el minuto de gracia.
+- Guardianes: menú principal ocultable, parámetros de conexión preservados al elegir mapa, salida con confirmación e INIT idempotente.
+- Tierras: migración exacta de fuente 30 a Pages, siete héroes y ocho criaturas con arte nuevo, refugio y menús renovados. Guardado central de campaña/expedición y caché local por perfil.
+- Catálogo canónico embebido y comprobaciones actualizadas.
+- Apps Script requiere publicar el despliegue estable desde el equipo autorizado después de sincronizar main.
+
 ## 2026-09-28 · Versópolis V0.5 en LenguArcade
 
 - Cuatro expediciones enfocadas en rima asonante, rima consonante, estrofas y métrica; contratos, eventos, 32 logros y Códice.

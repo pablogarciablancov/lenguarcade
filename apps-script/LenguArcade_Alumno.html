@@ -1290,6 +1290,7 @@ function mountGameRunner(){
   $('gameRunnerAccessExit').onclick=requestCloseGameRunner;
   $('gameRunnerRetry').onclick=()=>{
     if(activeGameRunner?.pendingResult)persistGameResult(activeGameRunner.pendingResult);
+    else if(activeGameRunner?.failedCheckpoint)persistGameCheckpoint(activeGameRunner.failedCheckpoint);
   };
   $('gameOpponentCancel').onclick=closeGameOpponentLogin;
   $('gameOpponentLogin').onclick=authenticateGameOpponent;
@@ -1667,7 +1668,10 @@ function armGameExitSafety(runner,delay){
   if(!runner)return;
   if(runner.accessExitSafetyTimer)clearTimeout(runner.accessExitSafetyTimer);
   runner.accessExitSafetyTimer=setTimeout(()=>{
-    if(activeGameRunner===runner&&runner.explicitExitRequested)destroyGameRunner(true);
+    if(activeGameRunner!==runner||!runner.explicitExitRequested)return;
+    if(!runner.accessFinalizing&&(runner.saving||runner.checkpointing||runner.checkpointQueue?.length)){armGameExitSafety(runner,15000);return;}
+    if(!runner.accessFinalizing&&(runner.failedCheckpoint||runner.pendingResult)){$('gameRunnerStatus').textContent='No se pudo guardar. Reintenta antes de salir.';return;}
+    destroyGameRunner(true);
   },Math.max(1000,Number(delay||5000)));
 }
 
@@ -1757,15 +1761,16 @@ function requestCloseGameRunner(){
     runner.explicitExitRequested=true;
     runner.closeRequested=true;
     $('gameRunnerStatus').textContent='Terminando de guardar antes de salir...';
-    armGameExitSafety(runner,5000);
+    sendToActiveGame('REQUEST_EXIT');
+    armGameExitSafety(runner,15000);
     return;
   }
-  if(runner.sessionActive){
+  if(runner.sessionActive||runner.initialized){
     runner.explicitExitRequested=true;
     runner.closeRequested=true;
     $('gameRunnerStatus').textContent='Cerrando la partida y guardando...';
     sendToActiveGame('REQUEST_EXIT');
-    armGameExitSafety(runner,5000);
+    armGameExitSafety(runner,15000);
     return;
   }
   runner.explicitExitRequested=true;
@@ -2052,7 +2057,7 @@ async function persistGameResult(result){
       const payload=buildGameProgressPayload(runner,result,participant,context);
       const response=await callServer('saveProgress',[payload]);
       if(payload.countSession)markRunnerSessionCounted(runner,context.isPrimary,context.role);
-      if(response?.record)applySavedGameRecordToDashboard(runner,response.record,context.isPrimary,context.role);
+      if(response?.record){applySavedGameRecordToDashboard(runner,response.record,context.isPrimary,context.role);if(context.isPrimary)installGameBootstrapContext(runner);}
       if(context.isPrimary)primaryResponse=response;
       else{
         const secondary=getRunnerOpponent(runner,context.role);
@@ -2081,7 +2086,7 @@ async function persistGameResult(result){
     $('gameRunnerStatus').textContent='No se pudo guardar. Puedes reintentarlo.';
     $('gameRunnerRetry').classList.remove('hidden');
     sendToActiveGame('SAVE_FAILED',{message:error.message||String(error)});
-    if(runner.closeRequested&&runner.explicitExitRequested&&!runner.accessFinalizing)setTimeout(()=>destroyGameRunner(true),350);
+    // Keep the game open on failed save so the pending result can be retried.
   }finally{
     if(activeGameRunner===runner){
       runner.saving=false;
@@ -2102,7 +2107,11 @@ async function persistGameCheckpoint(checkpoint){
     sendToActiveGame('CHECKPOINT_FAILED',{checkpointId:checkpoint&&checkpoint.checkpointId||'',message:'El minuto de gracia ha terminado. Este cambio ya no puede guardarse.'});
     return;
   }
-  if(runner.checkpointing)return;
+  if(runner.checkpointing){
+    runner.checkpointQueue=runner.checkpointQueue||[];
+    if(!runner.checkpointQueue.some(item=>item.checkpointId===checkpoint.checkpointId))runner.checkpointQueue.push(checkpoint);
+    return;
+  }
   const participants=Array.isArray(checkpoint.players)?checkpoint.players:[];
   if(!participants.length)return;
   runner.checkpointing=true;
@@ -2146,21 +2155,27 @@ async function persistGameCheckpoint(checkpoint){
       };
       const response=await callServer('saveGameCheckpoint',[payload]);
       if(payload.countSession)markRunnerSessionCounted(runner,context.isPrimary,context.role);
-      if(response?.record)applySavedGameRecordToDashboard(runner,response.record,context.isPrimary,context.role);
+      if(response?.record){applySavedGameRecordToDashboard(runner,response.record,context.isPrimary,context.role);if(context.isPrimary)installGameBootstrapContext(runner);}
     }
+    runner.failedCheckpoint=null;
+    $('gameRunnerRetry').classList.add('hidden');
     if(closureCheckpoint&&activeGameRunner===runner&&runner.accessClosing&&runner.accessClosureAt===closureAt)runner.accessFinalCheckpointPending=false;
     $('gameRunnerStatus').textContent=closureCheckpoint?'Último progreso guardado · volviendo a LenguArcade...':'Partida guardada.';
     sendToActiveGame('CHECKPOINT_CONFIRMED',{checkpointId:checkpoint.checkpointId});
-    if(runner.closeRequested&&runner.explicitExitRequested&&(!runner.accessFinalizing||closureCheckpoint))setTimeout(()=>destroyGameRunner(true),250);
+    if(runner.closeRequested&&runner.explicitExitRequested&&!runner.checkpointQueue?.length&&(!runner.accessFinalizing||closureCheckpoint))setTimeout(()=>{if(activeGameRunner===runner&&!runner.checkpointing&&!runner.checkpointQueue?.length&&!runner.failedCheckpoint)destroyGameRunner(true);},250);
   }catch(error){
+    runner.failedCheckpoint=checkpoint;
+    $('gameRunnerRetry').classList.remove('hidden');
     if(closureCheckpoint&&activeGameRunner===runner&&runner.accessClosing&&runner.accessClosureAt===closureAt)runner.accessFinalCheckpointPending=false;
     $('gameRunnerStatus').textContent=closureCheckpoint?'No se pudo completar el último guardado. Volviendo a LenguArcade...':'No se pudo guardar la partida.';
     sendToActiveGame('CHECKPOINT_FAILED',{checkpointId:checkpoint.checkpointId,message:error.message||String(error)});
-    if(runner.closeRequested&&runner.explicitExitRequested&&(!runner.accessFinalizing||closureCheckpoint))setTimeout(()=>destroyGameRunner(true),350);
+    if(closureCheckpoint&&runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),350);
   }finally{
     if(activeGameRunner===runner){
       runner.checkpointing=false;
-      if(runner.accessFinalizing&&runner.accessFinalCheckpointPending&&!closureCheckpoint){
+      const nextCheckpoint=runner.checkpointQueue?.shift();
+      if(nextCheckpoint)setTimeout(()=>{if(activeGameRunner===runner)persistGameCheckpoint(nextCheckpoint);},0);
+      if(!nextCheckpoint&&runner.accessFinalizing&&runner.accessFinalCheckpointPending&&!closureCheckpoint){
         setTimeout(()=>{if(activeGameRunner===runner&&runner.accessFinalizing&&runner.accessFinalCheckpointPending)sendToActiveGame('REQUEST_EXIT');},0);
       }
     }
@@ -2175,6 +2190,8 @@ window.addEventListener('message',event=>{
   if(message.namespace!==GAME_BRIDGE_NAMESPACE||message.channel!==runner.channel||message.gameId!==runner.game.gameId)return;
   if(runner.gameWindow&&event.source!==runner.gameWindow&&message.type!=='READY')return;
   if(message.type==='READY'){
+    // Some games announce READY again after INITIALIZED. Keep the connected state.
+    if(runner.initialized){postToGameWindow(runner,event.source,'INIT',buildGameInitPayload(runner));return;}
     runner.gameWindow=event.source;
     $('gameRunnerStatus').textContent='Cargando tu progreso...';
     pulseGameInitHandshake(runner);
@@ -2205,6 +2222,7 @@ window.addEventListener('message',event=>{
     persistGameResult(result);
   }
   if(message.type==='CLOSE_READY'){
+    if(!runner.accessFinalizing&&(runner.checkpointing||runner.saving||runner.checkpointQueue?.length||runner.failedCheckpoint||runner.pendingResult))return;
     if(runner.accessClosing&&!runner.explicitExitRequested)return;
     if(runner.game.gameId!=='conjuga_apuesta')return destroyGameRunner(true);
     const allowClose=runner.explicitExitRequested||runner.lastResultReason==='abandoned';

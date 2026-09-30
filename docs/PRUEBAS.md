@@ -1,5 +1,15 @@
 # Plan de pruebas
 
+## Conexión y Tierras de Tinta (2026-09-30)
+
+1. Ejecutar `npm run check`; incluye campaña, aislamiento de perfiles y reanudación de expedición.
+2. Alumno de prueba: abrir los siete juegos afectados y comprobar que tras conectar no vuelve «Cargando tu progreso».
+3. Guardianes: Jugar oculta el menú inicial; elegir mapa conserva `lenguarcade` y `channel`; salir espera CHECKPOINT_CONFIRMED.
+4. Tierras: abrir dentro del runner, cambiar héroe/equipo, iniciar expedición, salir y reabrir. Comprobar vida, bajas y recursos de la expedición, además del campamento.
+5. Interrumpir red durante un guardado: no mostrar confirmación falsa; reintentar antes de salir.
+6. Verificar visualmente a 1366×768, 1440×900 y 1920×1080 con la cabecera del host. La ejecución local del navegador no estuvo disponible en este entorno.
+7. Publicar Apps Script en el despliegue estable y validar /exec con alumno y profesor.
+
 ## Versópolis V0.5 (2026-09-28)
 
 1. Ejecutar `node scripts/check-versopolis.mjs` y `npm run check`.
