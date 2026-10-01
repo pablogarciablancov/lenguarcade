@@ -264,7 +264,10 @@
     if (!PERSISTENT_MODES.includes(mode)) return null;
     clearMode(mode);
     localStorage.setItem('bg_modeId', mode);
-    const id = slotId(1);
+    const embeddedSlotId = isEmbedded() && window.__LENGUARCADE_SLOT_ID
+      ? String(window.__LENGUARCADE_SLOT_ID)
+      : null;
+    const id = embeddedSlotId || slotId(1);
     localStorage.setItem(activeKey(mode), id);
     pendingNewSlotId = id;
     pendingNewMode = mode;
@@ -289,7 +292,9 @@
     window.makeSlotId = function(){
       const selectedMode = localStorage.getItem('bg_modeId') || 'adventure';
       if (pendingNewSlotId && (!pendingNewMode || pendingNewMode === selectedMode)) {
-        const id = pendingNewSlotId;
+        const id = (isEmbedded() && window.__LENGUARCADE_SLOT_ID)
+          ? String(window.__LENGUARCADE_SLOT_ID)
+          : pendingNewSlotId;
         pendingNewSlotId = null;
         pendingNewMode = null;
         return id;
