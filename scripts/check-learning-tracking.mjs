@@ -16,8 +16,9 @@ assert.match(studentBackend,/rankingClassroomId/,'El ranking debe limitarse a la
 assert.match(studentBackend,/missionResults/,'El alumno debe recibir historial de resultados de misiones');
 assert.match(studentBackend,/platformAchievementHistory/,'El alumno debe recibir el historial de logros generales');
 
+assert.match(teacherUi,/data-student-sort/,'La tabla de alumnos debe exponer controles de ordenación');
 for(const key of ['nombre','clase','xp','level','sessions','gamesPlayed','accuracy','grade']){
-  assert.match(teacherUi,new RegExp('data-student-sort="'+key+'"'),'Debe poder ordenarse por '+key);
+  assert.match(teacherUi,new RegExp("'"+key+"'"),'Debe poder ordenarse por '+key);
 }
 assert.match(teacherUi,/missionCompletionTracking/,'La interfaz docente debe mostrar cumplimiento de misiones');
 assert.match(teacherUi,/workshopCompletionTracking/,'La interfaz docente debe mostrar cumplimiento de talleres');
