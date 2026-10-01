@@ -17,13 +17,53 @@ export function learningGrade(progress,missions=[]){
   const score=(validMissions.length?objectives*.4+mastery*.4+advancement*.2:mastery*.65+advancement*.35)/10;
   return{score:Math.round(score*10)/10,breakdown:{misiones:Math.round(objectives)/10,dominio:Math.round(mastery)/10,progreso:Math.round(advancement)/10},weights:validMissions.length?{misiones:40,dominio:40,progreso:20}:{dominio:65,progreso:35},assessedGames:rows.length};
 }
-export function platformMilestones(xp,grade,attempts){
+export function platformMilestones(xp,grade,attempts,stats={}){
  const level=levelProgress(xp).level;
- return [
-  ...[3,5,10,20].map(n=>({id:'level_'+n,title:'Nivel '+n,description:'Alcanza el nivel '+n,value:level,target:n})),
-  ...[5000,15000,50000].map(n=>({id:'xp_'+n,title:n.toLocaleString('es-ES')+' XP',description:'Acumula experiencia en LenguArcade',value:xp,target:n})),
-  ...[7,9].map(n=>({id:'grade_'+n,title:'Nota '+n,description:'Alcanza una nota de '+n+' con al menos 20 respuestas',value:attempts>=20?grade:0,target:n}))
- ].map(m=>({...m,unlocked:m.value>=m.target,progress:Math.min(m.target,m.value)}));
+ const value=(key)=>Math.max(0,Number(stats&&stats[key])||0);
+ const sessions=value('sessions');
+ const gamesPlayed=value('gamesPlayed');
+ const accuracy=value('accuracy');
+ const missionsCompleted=value('missionsCompleted');
+ const feathers=value('feathers');
+ const bestStreak=value('bestStreak');
+ const milestones=[
+  ...[3,5,10,20].map(n=>({id:'level_'+n,icon:'🧭',category:'Trayectoria',title:'Nivel '+n,description:'Alcanza el nivel '+n+' de LenguArcade',value:level,target:n})),
+  ...[5000,15000,50000].map(n=>({id:'xp_'+n,icon:'⚡',category:'Trayectoria',title:n.toLocaleString('es-ES')+' XP',description:'Acumula experiencia en LenguArcade',value:xp,target:n})),
+  ...[7,9].map(n=>({id:'grade_'+n,icon:'🎓',category:'Dominio',title:'Nota '+n,description:'Alcanza una nota de '+n+' con al menos 20 respuestas',value:attempts>=20?grade:0,target:n})),
+
+  {id:'sessions_1',icon:'🕹️',category:'Partidas',title:'Insert coin',description:'Completa tu primera partida',value:sessions,target:1},
+  {id:'sessions_10',icon:'🔥',category:'Partidas',title:'Calentando motores',description:'Completa 10 partidas',value:sessions,target:10},
+  {id:'sessions_25',icon:'🎮',category:'Partidas',title:'Habitual del arcade',description:'Completa 25 partidas',value:sessions,target:25},
+  {id:'sessions_50',icon:'🏅',category:'Partidas',title:'Veterano de sala',description:'Completa 50 partidas',value:sessions,target:50},
+  {id:'sessions_100',icon:'👑',category:'Partidas',title:'Leyenda del recreativo',description:'Completa 100 partidas',value:sessions,target:100},
+
+  {id:'games_3',icon:'🗺️',category:'Exploración',title:'Explorador',description:'Juega a 3 juegos distintos',value:gamesPlayed,target:3},
+  {id:'games_6',icon:'🧳',category:'Exploración',title:'Trotaarcades',description:'Juega a 6 juegos distintos',value:gamesPlayed,target:6},
+  {id:'games_10',icon:'🌍',category:'Exploración',title:'Maestro del mapa',description:'Juega a 10 juegos distintos',value:gamesPlayed,target:10},
+
+  {id:'attempts_25',icon:'✍️',category:'Dominio',title:'Manos a la obra',description:'Resuelve 25 desafíos',value:attempts,target:25},
+  {id:'attempts_100',icon:'💯',category:'Dominio',title:'Cien desafíos',description:'Resuelve 100 desafíos',value:attempts,target:100},
+  {id:'attempts_500',icon:'🧠',category:'Dominio',title:'Mente incansable',description:'Resuelve 500 desafíos',value:attempts,target:500},
+  {id:'attempts_1000',icon:'📚',category:'Dominio',title:'Mil respuestas',description:'Resuelve 1.000 desafíos',value:attempts,target:1000},
+
+  {id:'accuracy_80',icon:'🎯',category:'Precisión',title:'Pulso firme',description:'Mantén al menos un 80 % de aciertos tras 50 respuestas',value:attempts>=50?accuracy:0,target:80},
+  {id:'accuracy_90',icon:'🦅',category:'Precisión',title:'Ojo de halcón',description:'Mantén al menos un 90 % de aciertos tras 150 respuestas',value:attempts>=150?accuracy:0,target:90},
+  {id:'accuracy_95',icon:'💎',category:'Precisión',title:'Cirujano de palabras',description:'Mantén al menos un 95 % de aciertos tras 300 respuestas',value:attempts>=300?accuracy:0,target:95},
+
+  {id:'missions_1',icon:'✅',category:'Misiones',title:'Misión cumplida',description:'Completa tu primera misión',value:missionsCompleted,target:1},
+  {id:'missions_5',icon:'🧩',category:'Misiones',title:'Cazamisiones',description:'Completa 5 misiones',value:missionsCompleted,target:5},
+  {id:'missions_10',icon:'🛡️',category:'Misiones',title:'Agente LenguArcade',description:'Completa 10 misiones',value:missionsCompleted,target:10},
+  {id:'missions_20',icon:'🏆',category:'Misiones',title:'Héroe del tablón',description:'Completa 20 misiones',value:missionsCompleted,target:20},
+
+  {id:'feathers_25',icon:'🪶',category:'Colección',title:'Coleccionista de plumas',description:'Reúne 25 plumas',value:feathers,target:25},
+  {id:'feathers_100',icon:'🪺',category:'Colección',title:'Nido dorado',description:'Reúne 100 plumas',value:feathers,target:100},
+  {id:'feathers_250',icon:'✨',category:'Colección',title:'Plumaje legendario',description:'Reúne 250 plumas',value:feathers,target:250},
+
+  {id:'streak_5',icon:'⚔️',category:'Racha',title:'En racha',description:'Alcanza una racha de 5 aciertos',value:bestStreak,target:5},
+  {id:'streak_10',icon:'🚀',category:'Racha',title:'Imparable',description:'Alcanza una racha de 10 aciertos',value:bestStreak,target:10},
+  {id:'streak_20',icon:'🌟',category:'Racha',title:'Modo leyenda',description:'Alcanza una racha de 20 aciertos',value:bestStreak,target:20}
+ ];
+ return milestones.map(m=>({...m,unlocked:m.value>=m.target,progress:Math.min(m.target,m.value)}));
 }
 
 const n=value=>Math.max(0,Number(value)||0);
