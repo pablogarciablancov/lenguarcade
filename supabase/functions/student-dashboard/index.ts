@@ -385,6 +385,39 @@ Deno.serve(async (request) => {
     if(milestoneError)throw milestoneError;
     platformAchievements.forEach(a=>{const saved=(milestones||[]).find(m=>m.achievement_id===a.id);if(saved){a.unlocked=true;a.unlockedAt=saved.unlocked_at;}});
 
+    let ranking:any[]=[];
+    const rankingClassroomId=profile.role==="student"?String((enrollmentsResult.data||[])[0]?.classroom_id||""):"";
+    if(rankingClassroomId){
+      const enrollmentResult=await admin.from("classroom_enrollments")
+        .select("profile_id").eq("classroom_id",rankingClassroomId).eq("active",true);
+      if(enrollmentResult.error)throw enrollmentResult.error;
+      const ids=[...new Set((enrollmentResult.data||[]).map(row=>String(row.profile_id||"")).filter(Boolean))];
+      if(ids.length){
+        const [profilesRank,progressRank,adjustRank]=await Promise.all([
+          admin.from("profiles").select("id,first_name,last_name,source").in("id",ids).eq("role","student").eq("active",true),
+          admin.from("game_progress").select("profile_id,xp").in("profile_id",ids),
+          admin.from("game_events").select("profile_id,xp_delta").in("profile_id",ids).eq("event_type","teacher_adjustment").limit(5000),
+        ]);
+        const rankFailure=[profilesRank.error,progressRank.error,adjustRank.error].find(Boolean);
+        if(rankFailure)throw rankFailure;
+        const xpById=new Map<string,number>();
+        for(const row of progressRank.data||[]){
+          const id=String(row.profile_id||"");xpById.set(id,(xpById.get(id)||0)+Number(row.xp||0));
+        }
+        for(const row of adjustRank.data||[]){
+          const id=String(row.profile_id||"");xpById.set(id,(xpById.get(id)||0)+Number(row.xp_delta||0));
+        }
+        ranking=(profilesRank.data||[]).filter(row=>String(row.source||"").toLowerCase()!=="test").map(row=>{
+          const totalXp=Math.max(0,xpById.get(String(row.id))||0);
+          return {studentId:String(row.id),nombre:`${row.first_name||""} ${row.last_name||""}`.trim(),xp:totalXp,level:levelProgress(totalXp).level,isCurrent:String(row.id)===String(profileId)};
+        }).sort((a,b)=>Number(b.xp)-Number(a.xp)||String(a.nombre).localeCompare(String(b.nombre),"es"))
+          .map((row,index)=>({...row,position:index+1}));
+      }
+    }
+    const platformAchievementHistory=platformAchievements.filter(item=>item.unlocked).sort((a,b)=>
+      Date.parse(String(b.unlockedAt||""))-Date.parse(String(a.unlockedAt||""))
+    );
+
     return jsonResponse({
       ok:true,
       source:"supabase",
@@ -439,8 +472,9 @@ Deno.serve(async (request) => {
         hidden:Boolean(row.achievement_definitions?.hidden),
         unlockedAt:row.unlocked_at,
       })),
-      ranking:[],
+      ranking,
       missions:missionProgress,
+      missionResults,
       evaluations:(evaluationsResult.data || []).map(row => ({
         scope:row.scope,
         gameId:row.game_id,
@@ -450,6 +484,7 @@ Deno.serve(async (request) => {
       })),
       grade:evaluation,
       platformAchievements,
+      platformAchievementHistory,
     });
   } catch (error) {
     if (error instanceof Response) return error;
