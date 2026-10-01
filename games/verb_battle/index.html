@@ -81,7 +81,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
   .setupShell{grid-template-columns:.68fr 1.32fr}.setupIntro{padding:18px}.rulesMini{display:none}.arena{grid-template-columns:minmax(0,1fr) 180px}.roster{grid-template-columns:1fr}.playerSlot{grid-template-columns:34px minmax(0,1fr) 104px}
 }
 </style>
-<link rel="stylesheet" href="./arcade.css?v=20260930">
+<link rel="stylesheet" href="./arcade.css?v=20261001a">
 </head>
 <body>
 <div id="app">
@@ -123,24 +123,52 @@ button:disabled{cursor:not-allowed;opacity:.45}
     </div>
   </section>
 
-  <section class="screen hidden" id="gameScreen">
-    <div class="gameShell">
-      <div class="playersBar" id="playersBar"></div>
-      <div class="arena">
-        <div class="card boardCard"><div class="board" id="board"></div></div>
-        <aside class="side">
-          <div class="sideCard" id="targetCard"><h3>Objetivo</h3><select class="targetSelect" id="targetSelect"></select><div class="eventNext" id="eventNext">Evento en 5 casillas</div></div>
-          <div class="sideCard"><h3>Últimos movimientos</h3><div class="log" id="battleLog"></div></div>
-          <div class="sideCard"><h3>Equilibrio ataque/defensa</h3><div class="difficultyLegend">
-            <div><b>100</b><span>defensa nivel 5 · bloquea 65%</span></div>
-            <div><b>200</b><span>defensa nivel 4 · bloquea 60%</span></div>
-            <div><b>300</b><span>defensa nivel 3 · bloquea 55%</span></div>
-            <div><b>400</b><span>defensa nivel 2 · bloquea 50%</span></div>
-            <div><b>500</b><span>defensa nivel 1 · bloquea 45%</span></div>
-          </div></div>
-        </aside>
+  <section class="screen battleScreen hidden" id="gameScreen">
+    <div class="battleShell">
+      <div class="battleHud">
+        <div class="turnInfo">
+          <span class="turnMode" id="modeLine">BATALLA</span>
+          <strong id="turnLine">Prepara tu ataque.</strong>
+        </div>
+        <div class="progressWrap">
+          <span class="progressText" id="battleProgressText">0 / 25</span>
+          <div class="progressTrack"><div class="progressFill" id="battleProgressFill"></div></div>
+          <span class="eventNext" id="eventNext">Evento en 5 acciones</span>
+        </div>
+        <div class="buffBadge" id="arenaBuffBadge">Arena estable</div>
       </div>
-      <div class="footerLine"><span id="turnLine">Elige una casilla.</span><span id="modeLine"></span></div>
+
+      <div class="battleStage" id="battleStage">
+        <div class="stageOrnament" aria-hidden="true"></div>
+        <div class="fighter fighterLeft" id="attackerFighter"></div>
+        <div class="vsMark">VS<small>VERBAL</small></div>
+        <div class="fighter fighterRight" id="targetFighter"></div>
+        <div class="damageBurst" id="damageBurst">−0</div>
+        <div class="playersBar" id="playersBar"></div>
+      </div>
+
+      <div class="commandDeck">
+        <aside class="commandSide">
+          <div class="targetCard" id="targetCard">
+            <h3>Rival seleccionado</h3>
+            <select class="targetSelect" id="targetSelect"></select>
+          </div>
+          <div class="battleLogWrap">
+            <h3>Crónica de combate</h3>
+            <div class="log" id="battleLog"></div>
+          </div>
+          <div class="commandHint">Cada acción abre un reto escrito. Más dificultad = más daño, puntos y XP, pero también una defensa rival más accesible.</div>
+        </aside>
+        <div class="movesPanel">
+          <div class="movesHeader">
+            <div>
+              <div class="movesTitle">Elige tu acción</div>
+              <div class="movesSub">Cuatro opciones nuevas en cada turno · la lengua decide el golpe</div>
+            </div>
+          </div>
+          <div class="moveGrid" id="board"></div>
+        </div>
+      </div>
     </div>
   </section>
 </div>
@@ -198,7 +226,7 @@ let primaryProfile=null;
 let connectedProfiles={};
 let teams=[];
 let currentTeam=0,currentTarget=1,currentCard=null,pendingAttack=null;
-let boardCards=[],resolvedCells=0,matchActive=false,matchEnded=false,matchId="",maxHp=120;
+let boardCards=[],moveOffer=[],resolvedCells=0,matchActive=false,matchEnded=false,matchId="",maxHp=120;
 let usedIds=new Set(),usedAnswers=new Set(),recentVerbs=[];
 let timerSeconds=0,timerId=null,timeLeft=0;
 let pendingExit=false,effectCallback=null,achievementPage=0;
@@ -389,7 +417,7 @@ const ACHIEVEMENTS=[
   {id:"ult5",icon:"🔮",title:"Veterano arcano",desc:"Usa 5 habilidades.",xp:50,check:s=>s.ultimates>=5},
   {id:"rune",icon:"✦",title:"Cazarrunas",desc:"Consigue una runa.",xp:20,check:s=>s.runes>=1},
   {id:"rune10",icon:"💎",title:"Coleccionista",desc:"Consigue 10 runas.",xp:50,check:s=>s.runes>=10},
-  {id:"board",icon:"🧠",title:"Tablero completo",desc:"Completa 25 casillas.",xp:60,check:s=>s.fullBoards>=1},
+  {id:"board",icon:"🧠",title:"Dominio total",desc:"Completa 25 retos en una partida.",xp:60,check:s=>s.fullBoards>=1},
   {id:"match1",icon:"🎟️",title:"Debut",desc:"Termina una partida.",xp:20,check:s=>s.matches>=1},
   {id:"match5",icon:"🏟️",title:"Habitual",desc:"Termina 5 partidas.",xp:45,check:s=>s.matches>=5},
   {id:"match20",icon:"🏛️",title:"Leyenda",desc:"Termina 20 partidas.",xp:90,check:s=>s.matches>=20},
@@ -490,7 +518,7 @@ function startGame(){
     }
   }
   teams=profiles.map(teamFromProfile);currentTeam=0;currentTarget=teams.length>1?1:0;resolvedCells=0;matchActive=true;matchEnded=false;matchId="vb_"+uid();arenaBuff={damage:1,score:1,label:""};usedIds=new Set();usedAnswers=new Set();recentVerbs=[];pendingAttack=null;currentCard=null;
-  boardCards=createBoard();$("setupScreen").classList.add("hidden");$("gameScreen").classList.remove("hidden");$("exitBtn").classList.remove("hidden");$("modeLine").textContent=setupMode==="practice"?"PRÁCTICA INDIVIDUAL":"BATALLA · "+teams.length+" JUGADORES";renderAll();addLog("<b>Comienza "+(setupMode==="practice"?"la práctica":"la batalla")+".</b>");post("SESSION_STARTED",{mode:setupMode,matchId})
+  boardCards=createBoard();moveOffer=[];$("setupScreen").classList.add("hidden");$("gameScreen").classList.remove("hidden");$("exitBtn").classList.remove("hidden");$("modeLine").textContent=setupMode==="practice"?"PRÁCTICA INDIVIDUAL":"BATALLA · "+teams.length+" JUGADORES";renderAll();addLog("<b>Comienza "+(setupMode==="practice"?"la práctica":"la batalla")+".</b>");post("SESSION_STARTED",{mode:setupMode,matchId})
 }
 function randomQuestion(cat,level){
   const base=pools[cat][level-1],filtered=base.filter(q=>!usedIds.has(q.id)&&!usedAnswers.has(strictNorm(q.answer))&&!recentVerbs.includes(q.verb));
@@ -504,24 +532,104 @@ function createBoard(){
   return cards
 }
 function renderBoard(){
-  const b=$("board");b.innerHTML="";CATEGORIES.forEach(cat=>{const d=document.createElement("div");d.className="cat";d.innerHTML="<span>"+cat.icon+"</span><b>"+cat.name+"</b><small>"+cat.sub+"</small>";b.appendChild(d)});
-  boardCards.forEach(card=>{const btn=document.createElement("button");btn.className="cell"+(card.rune?" rune":"");btn.disabled=card.used||matchEnded;btn.innerHTML="<small>NV "+card.row+"</small>"+(card.used?"·":card.value);btn.onclick=()=>openQuestion(card);b.appendChild(btn)})
+  const host=$("board");host.innerHTML="";
+  const available=boardCards.filter(card=>!card.used);
+  if(!moveOffer.length||moveOffer.every(card=>card.used)){
+    moveOffer=available.slice().sort(()=>Math.random()-.5).slice(0,Math.min(4,available.length));
+  }else{
+    moveOffer=moveOffer.filter(card=>!card.used);
+    const missing=4-moveOffer.length;
+    if(missing>0){
+      const existing=new Set(moveOffer.map(card=>card.index));
+      const extras=available.filter(card=>!existing.has(card.index)).sort(()=>Math.random()-.5).slice(0,missing);
+      moveOffer.push(...extras)
+    }
+  }
+  const tones={indicative:"#66c8ff",compound:"#8f83ff",subjunctive:"#bd70f2",imperative:"#ffb85d",mastery:"#61e0b2"};
+  const verbs={indicative:"Golpe directo",compound:"Cadena temporal",subjunctive:"Hechizo lunar",imperative:"Orden de choque",mastery:"Ataque maestro"};
+  moveOffer.forEach(card=>{
+    const cat=CATEGORIES[card.col],btn=document.createElement("button");
+    btn.className="moveCard"+(card.rune?" rune":"");btn.disabled=card.used||matchEnded;
+    btn.style.setProperty("--move",tones[cat.id]||"#6ec8ff");
+    const pips=Array.from({length:5},(_,i)=>'<i class="'+(i<card.row?"on":"")+'"></i>').join("");
+    btn.innerHTML=
+      '<div class="moveTop"><span class="moveIcon">'+cat.icon+'</span><span class="moveDamage">'+(setupMode==="practice"?card.value+" pts":card.damage+" daño")+'</span></div>'+
+      '<span class="moveName">'+verbs[cat.id]+'</span>'+
+      '<span class="moveSkill">'+escapeHtml(cat.name)+' · '+escapeHtml(card.question.skill||cat.sub)+'</span>'+
+      '<div class="moveBottom"><span class="difficultyPips">'+pips+'</span><span class="moveScore">dificultad '+card.row+'/5</span></div>'+
+      (card.rune?'<span class="runeMark">✦</span>':'');
+    btn.onclick=()=>openQuestion(card);host.appendChild(btn)
+  });
+  if(!moveOffer.length){
+    host.innerHTML='<div class="commandHint">No quedan acciones disponibles.</div>'
+  }
+}
+function fighterMarkup(t,isTarget){
+  if(!t)return"";
+  const r=roleDef(t),hpPct=clamp(t.hp/maxHp*100,0,100),energyPct=clamp(t.energy,0,100);
+  return '<div class="fighterLabel">'+(isTarget?"OBJETIVO":"EN TURNO")+'</div>'+
+    '<div class="fighterSprite"><span class="fighterGlyph">'+r.icon+'</span></div>'+
+    '<div class="fighterName">'+escapeHtml(t.name)+'</div>'+
+    '<div class="fighterRole">'+escapeHtml(r.name)+' · '+escapeHtml(r.passive)+'</div>'+
+    '<div class="fighterMeters">'+
+      '<div class="fighterMeterLabel"><span>PV '+t.hp+(t.shield?" · 🛡 "+t.shield:"")+'</span><span>combo ×'+t.combo+'</span></div>'+
+      '<div class="fighterMeter"><div class="fighterHp" style="width:'+hpPct+'%"></div></div>'+
+      '<div class="fighterEnergy"><span style="width:'+energyPct+'%"></span></div>'+
+      '<div class="fighterStatus">'+(t.energy>=100?"✨ PODER LISTO":"⚡ "+t.energy+"% de poder")+'</div>'+
+    '</div>'
+}
+function renderFighters(){
+  const a=current(),left=$("attackerFighter"),right=$("targetFighter");
+  if(a){left.style.setProperty("--fighter",roleDef(a).color);left.innerHTML=fighterMarkup(a,false)}
+  if(setupMode==="practice"){
+    right.style.setProperty("--fighter","#7c91b9");
+    right.innerHTML='<div class="fighterLabel">ENTRENAMIENTO</div><div class="fighterSprite"><span class="fighterGlyph">🎯</span></div><div class="fighterName">Maniquí verbal</div><div class="fighterRole">25 retos · precisión y combo</div><div class="fighterMeters"><div class="fighterMeterLabel"><span>Progreso</span><span>'+resolvedCells+'/25</span></div><div class="fighterMeter"><div class="fighterHp" style="width:'+clamp(resolvedCells/25*100,0,100)+'%"></div></div></div>'
+  }else{
+    const d=target();if(d){right.style.setProperty("--fighter",roleDef(d).color);right.innerHTML=fighterMarkup(d,true)}
+  }
 }
 function renderPlayers(){
-  const bar=$("playersBar");bar.innerHTML="";bar.style.gridTemplateColumns="repeat("+Math.max(1,teams.length)+",minmax(0,1fr))";
-  teams.forEach((t,i)=>{const r=roleDef(t),d=document.createElement("div");d.className="playerCard"+(i===currentTeam?" active":"")+(setupMode==="battle"&&i===currentTarget&&i!==currentTeam?" targeted":"")+(!t.alive?" dead":"");d.style.setProperty("--p",r.color);d.innerHTML='<div class="pcTop"><div style="min-width:0"><div class="pcName">'+escapeHtml(t.name)+'</div><div class="pcRole">'+r.icon+" "+r.name+'</div></div><div class="score">'+t.score+' pts</div></div><div class="meterLabel"><span>PV '+t.hp+(t.shield?" · 🛡"+t.shield:"")+'</span><span>combo ×'+t.combo+'</span></div><div class="meter"><div class="hp" style="width:'+clamp(t.hp/maxHp*100,0,100)+'%"></div></div><div class="meter" style="margin-top:3px"><div class="en" style="width:'+clamp(t.energy,0,100)+'%"></div></div><div class="pcBottom"><span>⚡ '+t.energy+' · ✓ '+t.correct+'</span>'+(setupMode==="battle"?'<button class="ability '+(t.energy>=100?"ready":"")+'" '+(i!==currentTeam||t.energy<100||!t.alive?"disabled":"")+' data-ability="'+i+'">'+(t.energy>=100?r.ultimate:"habilidad")+"</button>":"<span>Nv. "+levelForXp(t.save.xp)+"</span>")+"</div>";bar.appendChild(d)});
-  bar.querySelectorAll("[data-ability]").forEach(btn=>btn.onclick=()=>useAbility(Number(btn.dataset.ability)))
+  const bar=$("playersBar");bar.innerHTML="";
+  teams.forEach((t,i)=>{
+    const r=roleDef(t),d=document.createElement("div");
+    d.className="playerCard"+(i===currentTeam?" active":"")+(setupMode==="battle"&&i===currentTarget&&i!==currentTeam?" targeted":"")+(!t.alive?" dead":"");
+    d.style.setProperty("--p",r.color);
+    d.innerHTML='<div class="pcTop"><div style="min-width:0"><div class="pcName">'+r.icon+' '+escapeHtml(t.name)+'</div><div class="pcRole">'+r.name+'</div></div><div class="score">'+t.score+' pts</div></div>'+
+      '<div class="meterLabel"><span>PV '+t.hp+(t.shield?" · 🛡"+t.shield:"")+'</span><span>×'+t.combo+'</span></div>'+
+      '<div class="meter"><div class="hp" style="width:'+clamp(t.hp/maxHp*100,0,100)+'%"></div></div>'+
+      '<div class="meter" style="margin-top:2px"><div class="en" style="width:'+clamp(t.energy,0,100)+'%"></div></div>'+
+      '<div class="pcBottom"><span>⚡ '+t.energy+' · ✓ '+t.correct+'</span>'+(setupMode==="battle"?'<button class="ability '+(t.energy>=100?"ready":"")+'" '+(i!==currentTeam||t.energy<100||!t.alive?"disabled":"")+' data-ability="'+i+'">'+(t.energy>=100?"✨ "+r.ultimate:"Poder")+'</button>':"<span>Nv. "+levelForXp(t.save.xp)+"</span>")+'</div>';
+    bar.appendChild(d)
+  });
+  bar.querySelectorAll("[data-ability]").forEach(btn=>btn.onclick=()=>useAbility(Number(btn.dataset.ability)));
+  renderFighters()
 }
 function renderTarget(){
   $("targetCard").classList.toggle("hidden",setupMode==="practice");if(setupMode==="practice")return;
-  const choices=teams.filter((t,i)=>i!==currentTeam&&t.alive);if(choices.length&&!choices.some(t=>t.id===currentTarget))currentTarget=choices[0].id;
-  $("targetSelect").innerHTML=choices.map(t=>'<option value="'+t.id+'" '+(t.id===currentTarget?"selected":"")+'>'+escapeHtml(t.name)+" · "+t.hp+" PV</option>").join("");$("targetSelect").value=String(currentTarget)
+  const choices=teams.filter((t,i)=>i!==currentTeam&&t.alive);
+  if(choices.length&&!choices.some(t=>t.id===currentTarget))currentTarget=choices[0].id;
+  $("targetSelect").innerHTML=choices.map(t=>'<option value="'+t.id+'" '+(t.id===currentTarget?"selected":"")+'>'+escapeHtml(t.name)+" · "+t.hp+" PV</option>").join("");
+  $("targetSelect").value=String(currentTarget)
 }
 function renderCareer(){
   const owner=teams.length?current():primaryProfile?{save:primaryProfile.save||defaultSave()}: {save:localPrimarySave};
   $("careerChip").textContent="Nv. "+levelForXp(owner.save.xp)+" · "+owner.save.xp+" XP"
 }
-function renderAll(){renderPlayers();renderTarget();renderBoard();renderCareer();$("eventNext").textContent="Evento en "+(5-(resolvedCells%5))+" casilla"+((5-(resolvedCells%5))===1?"":"s");$("turnLine").textContent=setupMode==="practice"?"Elige un reto para practicar.":"Turno de "+current().name+" · elige una casilla."}
+function renderAll(){
+  renderTarget();renderPlayers();renderBoard();renderCareer();
+  const until=5-(resolvedCells%5);
+  $("eventNext").textContent="Evento en "+until+" acción"+(until===1?"":"es");
+  $("turnLine").textContent=setupMode==="practice"?"Elige una acción y supera el reto.":"Turno de "+current().name+" · elige cómo atacar.";
+  $("modeLine").textContent=setupMode==="practice"?"PRÁCTICA INDIVIDUAL":"ARENA · "+teams.length+" JUGADORES";
+  if($("battleProgressText"))$("battleProgressText").textContent=resolvedCells+" / 25";
+  if($("battleProgressFill"))$("battleProgressFill").style.width=clamp(resolvedCells/25*100,0,100)+"%";
+  if($("arenaBuffBadge")){
+    let buff="Arena estable";
+    if(arenaBuff.damage>1)buff="🔥 Frenesí: próximo daño +25%";
+    else if(arenaBuff.score>1)buff="💰 Bote: próxima puntuación ×2";
+    $("arenaBuffBadge").textContent=buff
+  }
+}
 function startTimer(){
   clearTimer();if(!timerSeconds){$("questionTimer").classList.add("hidden");return}$("questionTimer").classList.remove("hidden");timeLeft=timerSeconds;updateTimer();timerId=setInterval(()=>{timeLeft--;updateTimer();if(timeLeft<=0){clearTimer();$("questionFeedback").className="feedback bad";$("questionFeedback").textContent="Tiempo agotado. Respuesta: "+currentCard.question.answer;setTimeout(()=>resolveAttack(false,true),900)}},1000)
 }
@@ -590,7 +698,17 @@ function resolveDefense(ok){
 function applyDamage(team,amount,pierce){
   amount=Math.max(0,Math.round(amount));let dealt=amount;if(!pierce&&team.shield>0){const absorb=Math.min(team.shield,amount);team.shield-=absorb;amount-=absorb}team.hp=Math.max(0,team.hp-amount);dealt=amount;if(team.hp<=15&&team.hp>0)team.save.stats.closeCalls++;if(team.hp<=0&&team.alive){team.alive=false;addLog("☠️ <b>"+escapeHtml(team.name)+"</b> queda fuera.")}return dealt
 }
-function dealAttack(a,d,damage,pierce){const dealt=applyDamage(d,damage,pierce);a.save.stats.damage+=dealt;a.save.stats.biggestHit=Math.max(a.save.stats.biggestHit,dealt);addLog("⚔️ <b>"+escapeHtml(a.name)+"</b> hace "+dealt+" a "+escapeHtml(d.name)+".");evaluateAchievements(a)}
+function playStageHit(amount){
+  const stage=$("battleStage"),burst=$("damageBurst");if(!stage||!burst)return;
+  burst.textContent="−"+Math.max(0,Math.round(amount));
+  stage.classList.remove("stage-hit");burst.classList.remove("show");void stage.offsetWidth;
+  stage.classList.add("stage-hit");burst.classList.add("show");
+  setTimeout(()=>{stage.classList.remove("stage-hit");burst.classList.remove("show")},650)
+}
+function dealAttack(a,d,damage,pierce){
+  const dealt=applyDamage(d,damage,pierce);a.save.stats.damage+=dealt;a.save.stats.biggestHit=Math.max(a.save.stats.biggestHit,dealt);
+  addLog("⚔️ <b>"+escapeHtml(a.name)+"</b> hace "+dealt+" a "+escapeHtml(d.name)+".");playStageHit(dealt);evaluateAchievements(a)
+}
 function applySplash(a,primary,damage){const others=teams.filter(t=>t.alive&&t.id!==a.id&&t.id!==primary.id);if(!others.length)return;const v=others[Math.floor(Math.random()*others.length)],s=Math.round(damage*.4),dealt=applyDamage(v,s,false);a.save.stats.damage+=dealt;addLog("🔮 Eco arcano: "+dealt+" a <b>"+escapeHtml(v.name)+"</b>.")}
 function useAbility(index){
   const t=teams[index];if(setupMode!=="battle"||!t||index!==currentTeam||t.energy<100||!t.alive)return;const r=roleDef(t);t.energy=0;t.save.stats.ultimates++;
@@ -599,6 +717,7 @@ function useAbility(index){
   evaluateAchievements(t)
 }
 function finalizeTurn(){
+  moveOffer=[];
   evaluateAchievements(current());renderAll();
   if(setupMode==="battle"&&alive().length<=1)return finishMatch("elimination");
   if(resolvedCells>=25){current().save.stats.fullBoards++;return finishMatch("board")}
@@ -619,7 +738,7 @@ function showEffect(icon,who,title,text,onClose){effectCallback=onClose||null;$(
 function determineWinner(){if(setupMode==="practice")return teams[0];const live=alive();if(live.length===1)return live[0];return teams.slice().sort((a,b)=>b.score-a.score||b.hp-a.hp||b.correct-a.correct)[0]}
 function finishMatch(reason){
   if(matchEnded)return;matchEnded=true;matchActive=false;clearTimer();const winner=determineWinner();teams.forEach(t=>{t.save.stats.matches++;gainXp(t,setupMode==="practice"?35:25,"Partida completada")});if(setupMode==="battle")gainXp(winner,60,"Victoria en la arena");const totalCorrect=teams.reduce((s,t)=>s+t.correct,0),totalWrong=teams.reduce((s,t)=>s+t.wrong,0),bestCombo=Math.max(...teams.map(t=>t.maxCombo));
-  $("endIcon").textContent=setupMode==="practice"?"🧠":"🏆";$("endKicker").textContent=setupMode==="practice"?"Práctica completada":"Fin de la batalla";$("endTitle").textContent=setupMode==="practice"?"25 retos superados":winner.name+" gana";$("endText").textContent=setupMode==="practice"?"Has completado un tablero completo de práctica.":"La clasificación combina supervivencia, puntuación y precisión.";$("endStats").innerHTML='<div class="endStat"><b>'+winner.score+'</b><span>Puntos</span></div><div class="endStat"><b>'+totalCorrect+'</b><span>Aciertos</span></div><div class="endStat"><b>'+bestCombo+'</b><span>Mejor combo</span></div><div class="endStat"><b>'+resolvedCells+'</b><span>Casillas</span></div>';$("endModal").classList.add("open");sendResult(winner,reason,totalCorrect,totalWrong,bestCombo)
+  $("endIcon").textContent=setupMode==="practice"?"🧠":"🏆";$("endKicker").textContent=setupMode==="practice"?"Práctica completada":"Fin de la batalla";$("endTitle").textContent=setupMode==="practice"?"25 retos superados":winner.name+" gana";$("endText").textContent=setupMode==="practice"?"Has completado un tablero completo de práctica.":"La clasificación combina supervivencia, puntuación y precisión.";$("endStats").innerHTML='<div class="endStat"><b>'+winner.score+'</b><span>Puntos</span></div><div class="endStat"><b>'+totalCorrect+'</b><span>Aciertos</span></div><div class="endStat"><b>'+bestCombo+'</b><span>Mejor combo</span></div><div class="endStat"><b>'+resolvedCells+'</b><span>Retos</span></div>';$("endModal").classList.add("open");sendResult(winner,reason,totalCorrect,totalWrong,bestCombo)
 }
 function achievementPayload(team){return team.newUnlocks.map(a=>({id:a.id,title:a.title,description:a.desc,xpReward:a.xp}))}
 function sendResult(winner,reason,correct,wrong,bestCombo){
