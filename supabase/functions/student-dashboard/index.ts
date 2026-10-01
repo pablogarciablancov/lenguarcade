@@ -358,7 +358,7 @@ Deno.serve(async (request) => {
     const missionProgress = relevantMissions.filter(mission =>
       mission.publicationStatus === "published" && mission.started && !mission.ended
     ).sort((a,b)=>{
-      if(a.completed!==b.completed)return a.completed?1:-1;
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
       const ad=a.dueAt?Date.parse(String(a.dueAt)):Infinity;
       const bd=b.dueAt?Date.parse(String(b.dueAt)):Infinity;
       if(ad!==bd)return ad-bd;
