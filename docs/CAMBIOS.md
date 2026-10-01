@@ -575,3 +575,13 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Un checkpoint idéntico otorga 0 XP y 0 plumas. Los logros reportados por cliente se conservan como metadatos, pero no acuñan XP de plataforma.
 - Añadidos límites de integridad globales de 180 XP/minuto y 900 XP/10 minutos, además de 15/60 plumas, para bloquear ráfagas manipuladas o bucles de guardado. Los eventos guardan si la protección ha limitado una recompensa.
 - Añadida la comprobación automática scripts/check-xp-integrity.mjs al conjunto de CI.
+
+
+## 2026-10-01 · Seguimiento de misiones, ranking y ordenación
+
+- El panel del profesor muestra cuántos alumnos han completado cada misión y quiénes son, con progreso individual y porcentaje de cumplimiento.
+- Los talleres publicados muestran el cumplimiento del objetivo de XP por alumno y quiénes ya lo han alcanzado.
+- La tabla de Alumnos puede ordenarse por nombre, clase, XP, nivel, sesiones, juegos, precisión o nota, en ambos sentidos.
+- La web del alumno carga el ranking real de su clase y destaca su posición.
+- El alumno dispone de historial de resultados de misiones y de los logros generales de LenguArcade con fecha de desbloqueo.
+- Ranking y misiones se refrescan al volver a sus pantallas sin exigir una recarga manual completa.
