@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {platformMilestones} from '../supabase/functions/_shared/progression.js';
 
 const teacherBackend=readFileSync('supabase/functions/teacher-dashboard/index.ts','utf8');
 const studentBackend=readFileSync('supabase/functions/student-dashboard/index.ts','utf8');
@@ -27,5 +28,16 @@ assert.match(studentUi,/rankCard/,'La interfaz del alumno debe renderizar el ran
 assert.match(studentUi,/missionHistoryStudent/,'La interfaz del alumno debe mostrar historial de misiones');
 assert.match(studentUi,/generalAchievementsStudent/,'La interfaz del alumno debe mostrar logros generales');
 assert.match(studentUi,/refreshSocialProgress/,'Ranking y misiones deben poder refrescarse sin recargar toda la web');
+assert.match(studentUi,/platform-achievement-viewport/,'La colección de logros debe tener scroll interno y no cortar el perfil');
+assert.match(studentUi,/Ver colección completa/,'El ranking debe enlazar a la colección completa sin duplicar todos los logros');
+
+const achievements=platformMilestones(50000,9,600,{
+  sessions:100,gamesPlayed:10,accuracy:95,missionsCompleted:20,feathers:250,bestStreak:20
+});
+assert.ok(achievements.length>=30,'Debe haber una colección amplia de logros generales');
+for(const id of ['sessions_1','games_6','accuracy_90','missions_10','feathers_100','streak_10']){
+  assert.ok(achievements.some(item=>item.id===id),`Falta el logro general ${id}`);
+}
+assert.ok(achievements.filter(item=>item.unlocked).length>=20,'Los nuevos logros deben poder desbloquearse con métricas reales');
 
 console.log('Learning tracking checks: OK');
