@@ -16,7 +16,8 @@ function cleanAchievement(value: unknown) {
     id,
     title:String(item.title || item.name || id || "Logro").slice(0, 180),
     description:String(item.description || "").slice(0, 500),
-    xpReward:Math.round(boundedNumber(item.xpReward, 0, 10000)),
+    // Achievement metadata is client-reported. It must never mint platform XP.
+    xpReward:0,
     hidden:Boolean(item.hidden),
   };
 }
@@ -260,22 +261,10 @@ Deno.serve(async (request) => {
       };
     }
 
-    const xpDelta = Math.round(boundedNumber(progress.xpDelta, 0, 5000));
-    const feathersDelta = gameId === "rayuela"
-      ? rayuelaSubmissionFeathers
-      : gameId === "entre_lineas"
-        ? entreLineasSolvedFeathers
-        : Math.round(boundedNumber(progress.plumasDelta ?? progress.feathersDelta, 0, 500));
-    const newXp = authoritativeEntreLineasXp != null
-      ? Math.max(oldXp, authoritativeEntreLineasXp)
-      : authoritativeRayuelaXp == null
-        ? (progress.xp == null
-            ? oldXp + xpDelta
-            : Math.max(oldXp, Math.round(boundedNumber(progress.xp, 0, 100000000))))
-        : Math.max(oldXp, authoritativeRayuelaXp);
-    const newFeathers = progress.plumas == null && progress.feathers == null
-      ? oldFeathers + feathersDelta
-      : Math.max(oldFeathers, Math.round(boundedNumber(progress.plumas ?? progress.feathers, 0, 10000000)));
+    // Platform economy is server-authoritative. Client XP/pluma totals and deltas
+    // are intentionally ignored; snapshotProgress derives rewards from persisted gameplay deltas.
+    const newXp = oldXp;
+    const newFeathers = oldFeathers;
     const now = new Date().toISOString();
     const achievements = Array.isArray(body.achievements)
       ? body.achievements.map(cleanAchievement).filter(item => item.id)
@@ -329,8 +318,62 @@ Deno.serve(async (request) => {
       raw_data:rawGameData,
       last_activity_at:now,
     };
-    const authoritative = snapshotProgress(gameId,rawGameData.save,old?.raw_data?.save,old||{});
-    if(authoritative)Object.assign(record,authoritative);
+    const authoritative = snapshotProgress(
+      gameId,
+      save,
+      old?.raw_data?.save,
+      old || {},
+      rawGameData,
+      old?.raw_data || {},
+      { checkpoint:body.checkpoint === true, eventType:String(body.eventType || "") },
+    );
+    Object.assign(record, authoritative);
+
+    // Anti-spam guard: even plausible-looking forged snapshots cannot mint rewards
+    // faster than a human can reasonably progress across the whole platform.
+    const nowMs = Date.now();
+    const tenMinutesAgo = new Date(nowMs - 10 * 60 * 1000).toISOString();
+    const { data:recentEvents, error:recentEventsError } = await admin.from("game_events")
+      .select("xp_delta,feathers_delta,occurred_at")
+      .eq("profile_id", profileId)
+      .gte("occurred_at", tenMinutesAgo)
+      .order("occurred_at", { ascending:false })
+      .limit(500);
+    if (recentEventsError) throw recentEventsError;
+    const oneMinuteAgoMs = nowMs - 60 * 1000;
+    let minuteXp = 0;
+    let minuteFeathers = 0;
+    let tenMinuteXp = 0;
+    let tenMinuteFeathers = 0;
+    for (const event of recentEvents || []) {
+      const eventXp = Math.max(0, Number(event.xp_delta || 0));
+      const eventFeathers = Math.max(0, Number(event.feathers_delta || 0));
+      tenMinuteXp += eventXp;
+      tenMinuteFeathers += eventFeathers;
+      const eventMs = Date.parse(String(event.occurred_at || ""));
+      if (Number.isFinite(eventMs) && eventMs >= oneMinuteAgoMs) {
+        minuteXp += eventXp;
+        minuteFeathers += eventFeathers;
+      }
+    }
+    const requestedXpDelta = Math.max(0, Number(record.xp || 0) - oldXp);
+    const requestedFeathersDelta = Math.max(0, Number(record.feathers || 0) - oldFeathers);
+    const allowedXpDelta = Math.max(0, Math.min(
+      requestedXpDelta,
+      180 - minuteXp,
+      900 - tenMinuteXp,
+    ));
+    const allowedFeathersDelta = Math.max(0, Math.min(
+      requestedFeathersDelta,
+      15 - minuteFeathers,
+      60 - tenMinuteFeathers,
+    ));
+    const integrityLimited =
+      allowedXpDelta < requestedXpDelta ||
+      allowedFeathersDelta < requestedFeathersDelta;
+    record.xp = oldXp + Math.round(allowedXpDelta);
+    record.feathers = oldFeathers + Math.round(allowedFeathersDelta);
+
     if(body.writeEvent!==false&&(record.xp>oldXp||record.attempts>Number(old?.attempts||0)))shouldWriteEvent=true;
     const { error:progressError } = await admin.from("game_progress")
       .upsert(record, { onConflict:"profile_id,game_id" });
@@ -345,7 +388,18 @@ Deno.serve(async (request) => {
         xp_delta:Math.max(0, record.xp - oldXp),
         feathers_delta:Math.max(0, record.feathers - oldFeathers),
         accuracy:record.accuracy,
-        details:{...(body.details && typeof body.details === "object" ? body.details : {}),sessionCounted:shouldCountSession},
+        details:{
+          ...(body.details && typeof body.details === "object" ? body.details : {}),
+          sessionCounted:shouldCountSession,
+          integrity:{
+            serverAuthoritative:true,
+            rateLimited:integrityLimited,
+            requestedXpDelta,
+            awardedXpDelta:Math.max(0, record.xp - oldXp),
+            requestedFeathersDelta,
+            awardedFeathersDelta:Math.max(0, record.feathers - oldFeathers),
+          },
+        },
         occurred_at:now,
       });
       if (eventError) throw eventError;
