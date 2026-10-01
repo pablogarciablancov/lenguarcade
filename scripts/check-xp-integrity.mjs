@@ -75,4 +75,10 @@ assert.match(edge,/900 - tenMinuteXp/,'Debe existir un límite de XP por diez mi
 assert.match(edge,/serverAuthoritative:true/,'Los eventos deben registrar la protección de integridad');
 assert.doesNotMatch(edge,/oldXp \+ xpDelta/,'No debe quedar la ruta genérica antigua que sumaba XP del cliente');
 
+const legacy=readFileSync('apps-script/LenguArcade_Code.gs','utf8');
+const legacyProgression=readFileSync('apps-script/LenguArcade_Progression.gs','utf8');
+assert.match(legacy,/calculateAuthoritativeProgress_\\(game\\.gameId, payload, old\\)/,'La copia legacy también debe recalcular recompensas');
+assert.doesNotMatch(legacy,/old\\.xp \\+ Number\\(progress\\.xpDelta/,'Apps Script no debe sumar XP enviado por el cliente');
+assert.match(legacyProgression,/function calculateAuthoritativeProgress_/,'Debe existir el cálculo autoritativo de respaldo');
+
 console.log('XP integrity checks: OK');
