@@ -11422,6 +11422,11 @@ function setPlayerRef(p){ player = p; try{ window.BG = window.BG || {}; window.B
       // Asegura ranuras y ranura activa
       migrateLegacySaveIfNeeded();
       let slotId = getActiveSlotId();
+      const requiredSlotId = window.__LENGUARCADE_SLOT_ID || "";
+      if(requiredSlotId && slotId !== requiredSlotId){
+        slotId = requiredSlotId;
+        setActiveSlotId(slotId);
+      }
       if(!slotId){
         slotId = makeSlotId();
         setActiveSlotId(slotId);
