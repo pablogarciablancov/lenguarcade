@@ -122,14 +122,15 @@ Deno.serve(async (request) => {
         .eq("profile_id", profileId)
         .eq("active", true),
       admin.from("mission_definitions")
-        .select("id,title,description,game_id,mission_type,target,reward_xp,reward_feathers,active_from,active_to,classroom_id,target_profile_id,featured,priority,organization_id")
+        .select("id,title,description,game_id,mission_type,target,reward_xp,reward_feathers,active_from,active_to,classroom_id,target_profile_id,featured,priority,organization_id,active,publication_status,created_at,updated_at")
         .eq("organization_id", organizationId)
-        .eq("active", true),
+        .order("updated_at", { ascending:false })
+        .limit(250),
       admin.from("game_events")
         .select("game_id,event_type,xp_delta,accuracy,occurred_at,details")
         .eq("profile_id", profileId)
         .order("occurred_at", { ascending:false })
-        .limit(500),
+        .limit(5000),
       admin.from("game_events")
         .select("xp_delta,feathers_delta,occurred_at")
         .eq("profile_id", profileId)
