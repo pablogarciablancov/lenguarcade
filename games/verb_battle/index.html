@@ -91,34 +91,114 @@ button:disabled{cursor:not-allowed;opacity:.45}
     <div class="topActions"><span class="topChip" id="careerChip">Nv. 1 · 0 XP</span><button class="iconBtn" id="achievementsBtn">🏅</button><button class="iconBtn hidden" id="exitBtn">Salir</button></div>
   </header>
 
-  <section class="screen" id="setupScreen">
-    <div class="card setupShell">
-      <div class="setupIntro">
-        <div>
-          <div class="kicker">LenguArcade · Verbos</div>
-          <h1>Piensa.<br><span>Escribe.</span><br>Ataca.</h1>
-          <p>Las respuestas ya no se validan “a ojo”: cada ataque y cada defensa exige escribir correctamente la forma verbal.</p>
-          <div class="modeCards">
-            <button class="modeCard active" data-mode="battle"><b>⚔️ Batalla</b><span>De 2 a 4 jugadores identificados con su código de LenguArcade.</span></button>
-            <button class="modeCard" data-mode="practice"><b>🧠 Práctica individual</b><span>Un jugador, 25 retos y progresión sin combate.</span></button>
+  <section class="screen menuScreen" id="setupScreen">
+    <div class="legacy-contract hidden" aria-hidden="true"><button class="modeCard" data-mode="battle">Batalla</button><button class="modeCard" data-mode="practice">Práctica</button><span>Piensa.<br><span>Escribe.</span><br>Ataca.</span></div>
+    <div class="mainMenuScene">
+      <div class="skyGlow" aria-hidden="true"></div>
+      <div class="arenaSpire spireA" aria-hidden="true"></div>
+      <div class="arenaSpire spireB" aria-hidden="true"></div>
+      <div class="arenaSpire spireC" aria-hidden="true"></div>
+      <div class="arenaCrowd" aria-hidden="true"></div>
+      <div class="banner bannerLeft" aria-hidden="true"><span>✦</span><b>VERBA</b></div>
+      <div class="banner bannerRight" aria-hidden="true"><span>✦</span><b>VINCUNT</b></div>
+
+      <aside class="menuColumn">
+        <div class="gameLogo" aria-label="Batalla Verbal · Arena de conjugación">
+          <div class="logoCrest">
+            <span class="logoBlade left"></span>
+            <span class="logoBook">📖</span>
+            <span class="logoCrystal">◆</span>
+            <span class="logoBlade right"></span>
           </div>
-          <div class="rulesMini">
-            <div class="ruleMini"><b>100 → accesible</b>Formas frecuentes y regulares.</div>
-            <div class="ruleMini"><b>300 → exigente</b>Tiempos menos mecánicos.</div>
-            <div class="ruleMini"><b>500 → experto</b>Irregularidad y formas complejas.</div>
-          </div>
+          <div class="logoWord logoBattle">BATALLA</div>
+          <div class="logoWord logoVerbal">VERBAL</div>
+          <div class="logoRibbon">Arena de conjugación</div>
         </div>
+
+        <nav class="gameMenuButtons" aria-label="Menú principal">
+          <button class="gameMenuBtn primary" id="menuBattleBtn"><span class="menuIco">⚔</span><span>JUGAR</span><small>Entrar en la arena</small></button>
+          <button class="gameMenuBtn" id="menuPracticeBtn"><span class="menuIco">📖</span><span>PRÁCTICA</span><small>Entrena sin rival</small></button>
+          <button class="gameMenuBtn" id="menuAchievementsBtn"><span class="menuIco">🏆</span><span>LOGROS</span><small>Tu progreso</small></button>
+          <button class="gameMenuBtn" id="menuProfileBtn"><span class="menuIco">👤</span><span>PERFIL</span><small>Nivel y estadísticas</small></button>
+          <button class="gameMenuBtn" id="menuHelpBtn"><span class="menuIco">?</span><span>CÓMO SE JUEGA</span><small>Reglas rápidas</small></button>
+          <button class="gameMenuBtn quit" id="menuExitBtn"><span class="menuIco">↪</span><span>SALIR</span><small>Volver a LenguArcade</small></button>
+        </nav>
+      </aside>
+
+      <div class="menuProfileHud">
+        <div class="profilePortrait" id="menuProfilePortrait">⚔️</div>
+        <div class="profileIdentity">
+          <strong id="menuPlayerName">Jugador</strong>
+          <span id="menuPlayerLevel">Nivel 1</span>
+          <div class="menuXpTrack"><span id="menuXpFill"></span></div>
+          <small id="menuXpText">0 / 300 XP</small>
+        </div>
+        <div class="profileStat"><span>🔥</span><b id="menuStreak">0</b><small>Racha</small></div>
+        <div class="profileStat"><span>🏅</span><b id="menuMedals">0</b><small>Logros</small></div>
       </div>
 
-      <div class="setupMain">
-        <div class="setupHead"><div><h2 id="setupTitle">Preparar batalla</h2><p id="setupSubtitle">El jugador principal ya viene identificado desde LenguArcade.</p></div><span class="topChip" id="questionCountChip">5.000+ retos</span></div>
+      <main class="menuShowcase">
+        <div class="duelPreview">
+          <div class="previewTop">
+            <div class="previewSide you"><span class="previewAvatar" id="previewHeroAvatar">⚔️</span><b>Tú</b><div class="previewHp"><span></span></div></div>
+            <div class="previewVs">VS</div>
+            <div class="previewSide rival"><div class="previewHp"><span></span></div><b>Rival</b><span class="previewAvatar">🔮</span></div>
+          </div>
+          <div class="previewScene">
+            <div class="previewFighter hero" id="previewHero">
+              <div class="fighterAura"></div>
+              <div class="previewCharacter" id="previewHeroGlyph">⚔️</div>
+              <span id="previewHeroRole">Guerrero</span>
+            </div>
+            <div class="previewImpact">✦</div>
+            <div class="previewFighter enemy">
+              <div class="fighterAura"></div>
+              <div class="previewCharacter">🔮</div>
+              <span>Rival arcano</span>
+            </div>
+          </div>
+          <div class="previewSlogan">Escribe bien. <strong>Ataca mejor.</strong></div>
+        </div>
+
+        <section class="classDeck">
+          <div class="classDeckTitle"><span></span><b>ELIGE TU CLASE</b><span></span></div>
+          <div class="menuClasses">
+            <button class="menuClassCard warrior" data-menu-class="warrior">
+              <span class="classPortrait">🗡️</span><b>Guerrero</b><small>Fuerza en cada palabra</small><em>+10% daño</em>
+            </button>
+            <button class="menuClassCard mage" data-menu-class="mage">
+              <span class="classPortrait">🔮</span><b>Mago</b><small>Conjuga el conocimiento</small><em>Más energía</em>
+            </button>
+            <button class="menuClassCard archer" data-menu-class="archer">
+              <span class="classPortrait">🏹</span><b>Arquero</b><small>Precisión gramatical</small><em>+10% puntos</em>
+            </button>
+            <button class="menuClassCard cleric" data-menu-class="cleric">
+              <span class="classPortrait">✨</span><b>Clérigo</b><small>Corrige y protege</small><em>Cura al defender</em>
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <div class="setupDrawer hidden" id="setupDrawer">
+        <div class="drawerGlow" aria-hidden="true"></div>
+        <div class="setupHead">
+          <div>
+            <div class="drawerEyebrow" id="setupEyebrow">CONFIGURAR COMBATE</div>
+            <h2 id="setupTitle">Preparar batalla</h2>
+            <p id="setupSubtitle">Conecta a los jugadores que entrarán en la arena.</p>
+          </div>
+          <button class="drawerClose" id="setupCloseBtn" type="button" aria-label="Cerrar">×</button>
+        </div>
         <div class="settingsRow">
           <div class="field" id="playerCountField"><label>Jugadores</label><select id="playerCount"><option value="2" selected>2 jugadores</option><option value="3">3 jugadores</option><option value="4">4 jugadores</option></select></div>
           <div class="field"><label>Duración</label><select id="battleMode"><option value="quick">Relámpago · 90 PV</option><option value="classic" selected>Clásica · 120 PV</option><option value="epic">Épica · 160 PV</option></select></div>
           <div class="field"><label>Tiempo</label><select id="turnTimer"><option value="0" selected>Sin límite</option><option value="30">30 s</option><option value="45">45 s</option><option value="60">60 s</option></select></div>
         </div>
         <div class="roster" id="roster"></div>
-        <div class="startBar"><div class="startHint" id="startHint">Cada jugador adicional debe generar en su perfil un código general de LenguArcade y dictárselo al jugador que abre la partida.</div><button class="primaryBtn" id="startBtn">Entrar en la arena</button></div>
+        <div class="startBar">
+          <div class="startHint" id="startHint">Cada jugador adicional genera un código general desde su perfil.</div>
+          <button class="primaryBtn startArenaBtn" id="startBtn">⚔ Entrar en la arena</button>
+        </div>
       </div>
     </div>
   </section>
@@ -207,6 +287,25 @@ button:disabled{cursor:not-allowed;opacity:.45}
   <div class="achievementPage" id="achievementGrid"></div>
   <div class="modalActions"><button class="ghostBtn" id="achievementPrev">←</button><button class="ghostBtn" id="closeAchievements">Cerrar</button><button class="ghostBtn" id="achievementNext">→</button></div>
 </div></div>
+<div class="overlay" id="profileModal"><div class="modal menuInfoModal">
+  <div class="modalHead"><div><div class="modalTag">Perfil de combatiente</div><h2 id="profileModalName">Jugador</h2></div><button class="drawerClose" id="closeProfileModal">×</button></div>
+  <div class="profileHero">
+    <div class="profileHeroIcon" id="profileModalIcon">⚔️</div>
+    <div><b id="profileModalLevel">Nivel 1</b><span id="profileModalXp">0 XP</span></div>
+  </div>
+  <div class="profileStatsGrid" id="profileStatsGrid"></div>
+</div></div>
+
+<div class="overlay" id="helpModal"><div class="modal menuInfoModal">
+  <div class="modalHead"><div><div class="modalTag">Manual de arena</div><h2>Cómo se juega</h2></div><button class="drawerClose" id="closeHelpModal">×</button></div>
+  <div class="howToGrid">
+    <div><span>1</span><b>Elige una acción</b><p>Cada turno aparecen cuatro ataques verbales con distinta dificultad.</p></div>
+    <div><span>2</span><b>Escribe la forma correcta</b><p>Las respuestas se escriben: tildes, persona y tiempo importan.</p></div>
+    <div><span>3</span><b>Ataca o defiende</b><p>Un acierto causa daño. El rival puede reducirlo superando su defensa.</p></div>
+    <div><span>4</span><b>Carga tu poder</b><p>Encadena aciertos, reúne energía y desata la habilidad de tu clase.</p></div>
+  </div>
+  <div class="howToMotto">Las palabras también luchan.</div>
+</div></div>
 <div class="toastStack" id="toastStack"></div>
 
 <script>
@@ -222,6 +321,7 @@ const channel=query.get("channel")||"";
 const $=id=>document.getElementById(id);
 
 let setupMode="battle";
+let menuClassKey="warrior";
 let primaryProfile=null;
 let connectedProfiles={};
 let teams=[];
@@ -467,7 +567,27 @@ function target(){return teams[currentTarget]}
 function post(type,payload={}){if(bridgeEnabled&&window.parent)window.parent.postMessage({namespace:BRIDGE_NAMESPACE,channel,gameId:GAME_ID,type,payload},"*")}
 function toast(title,text){const d=document.createElement("div");d.className="toast";d.innerHTML="<b>"+escapeHtml(title)+"</b><span>"+escapeHtml(text||"")+"</span>";$("toastStack").appendChild(d);setTimeout(()=>d.remove(),3200)}
 function addLog(text){const log=$("battleLog"),d=document.createElement("div");d.className="logItem";d.innerHTML=text;log.prepend(d);while(log.children.length>4)log.lastElementChild.remove()}
-function setMode(mode){setupMode=mode;document.querySelectorAll(".modeCard").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));$("playerCountField").classList.toggle("hidden",mode==="practice");$("battleMode").disabled=mode==="practice";$("setupTitle").textContent=mode==="practice"?"Práctica individual":"Preparar batalla";$("setupSubtitle").textContent=mode==="practice"?"Tu perfil, 25 retos y respuesta escrita.":"Conecta los perfiles que participarán en la arena.";renderRoster()}
+function setMode(mode){
+  setupMode=mode;
+  document.querySelectorAll(".modeCard").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
+  $("menuBattleBtn")?.classList.toggle("selected",mode==="battle");
+  $("menuPracticeBtn")?.classList.toggle("selected",mode==="practice");
+  $("playerCountField").classList.toggle("hidden",mode==="practice");
+  $("battleMode").disabled=mode==="practice";
+  $("setupEyebrow").textContent=mode==="practice"?"ENTRENAMIENTO PERSONAL":"CONFIGURAR COMBATE";
+  $("setupTitle").textContent=mode==="practice"?"Práctica individual":"Preparar batalla";
+  $("setupSubtitle").textContent=mode==="practice"?"25 retos, respuesta escrita y progresión sin rival.":"Conecta a los jugadores que entrarán en la arena.";
+  renderRoster()
+}
+function openSetupDrawer(mode){
+  setMode(mode);
+  $("setupDrawer").classList.remove("hidden")
+}
+function closeSetupDrawer(){
+  $("setupDrawer").classList.add("hidden");
+  $("menuBattleBtn")?.classList.remove("selected");
+  $("menuPracticeBtn")?.classList.remove("selected")
+}
 function classOptions(selected){return Object.entries(ROLES).map(([k,r])=>'<option value="'+k+'" '+(k===selected?"selected":"")+'>'+r.icon+" "+r.name+"</option>").join("")}
 function requestPlayer(role){post("REQUEST_OPPONENT_AUTH",{role,requestId:"vb_"+role+"_"+uid()})}
 function renderRoster(){
@@ -487,8 +607,16 @@ function renderRoster(){
     host.appendChild(slot)
   }
   host.querySelectorAll("[data-connect]").forEach(btn=>btn.onclick=()=>requestPlayer(btn.dataset.connect));
-  host.querySelectorAll(".classSelect").forEach(sel=>sel.onchange=()=>{const role=sel.dataset.role;if(role==="primary"&&primaryProfile)primaryProfile.classKey=sel.value;else if(connectedProfiles[role])connectedProfiles[role].classKey=sel.value;renderRoster()});
-  updateStartState()
+  host.querySelectorAll(".classSelect").forEach(sel=>sel.onchange=()=>{
+    const role=sel.dataset.role;
+    if(role==="primary"){
+      menuClassKey=sel.value;
+      if(primaryProfile)primaryProfile.classKey=sel.value
+    }else if(connectedProfiles[role])connectedProfiles[role].classKey=sel.value;
+    renderRoster()
+  });
+  updateStartState();
+  renderMenuPresentation()
 }
 function updateStartState(){
   const count=setupMode==="practice"?1:Number($("playerCount").value||2);
@@ -611,9 +739,51 @@ function renderTarget(){
   $("targetSelect").innerHTML=choices.map(t=>'<option value="'+t.id+'" '+(t.id===currentTarget?"selected":"")+'>'+escapeHtml(t.name)+" · "+t.hp+" PV</option>").join("");
   $("targetSelect").value=String(currentTarget)
 }
+function menuOwner(){
+  if(teams.length)return{name:current().name,classKey:current().classKey,save:current().save};
+  if(primaryProfile)return{name:primaryProfile.name,classKey:primaryProfile.classKey||menuClassKey,save:primaryProfile.save||defaultSave()};
+  return{name:"Jugador",classKey:menuClassKey,save:localPrimarySave}
+}
+function renderMenuPresentation(){
+  const owner=menuOwner(),save=normalizeSave(owner.save),role=ROLES[owner.classKey]||ROLES.warrior;
+  menuClassKey=owner.classKey||menuClassKey;
+  document.querySelectorAll("[data-menu-class]").forEach(btn=>btn.classList.toggle("selected",btn.dataset.menuClass===menuClassKey));
+  if($("menuPlayerName"))$("menuPlayerName").textContent=owner.name||"Jugador";
+  if($("menuPlayerLevel"))$("menuPlayerLevel").textContent="Nivel "+levelForXp(save.xp);
+  if($("menuXpFill"))$("menuXpFill").style.width=levelPct(save.xp)+"%";
+  if($("menuXpText"))$("menuXpText").textContent=(save.xp%300)+" / 300 XP";
+  if($("menuStreak"))$("menuStreak").textContent=save.stats.maxCombo||0;
+  if($("menuMedals"))$("menuMedals").textContent=Object.keys(save.unlocked||{}).length;
+  if($("menuProfilePortrait"))$("menuProfilePortrait").textContent=role.icon;
+  if($("previewHeroAvatar"))$("previewHeroAvatar").textContent=role.icon;
+  if($("previewHeroGlyph"))$("previewHeroGlyph").textContent=role.icon;
+  if($("previewHeroRole"))$("previewHeroRole").textContent=role.name;
+  if($("previewHero"))$("previewHero").style.setProperty("--preview-role",role.color)
+}
+function selectMenuClass(classKey){
+  if(!ROLES[classKey])return;
+  menuClassKey=classKey;
+  if(primaryProfile)primaryProfile.classKey=classKey;
+  renderMenuPresentation();
+  renderRoster()
+}
 function renderCareer(){
-  const owner=teams.length?current():primaryProfile?{save:primaryProfile.save||defaultSave()}: {save:localPrimarySave};
-  $("careerChip").textContent="Nv. "+levelForXp(owner.save.xp)+" · "+owner.save.xp+" XP"
+  const owner=menuOwner();
+  $("careerChip").textContent="Nv. "+levelForXp(owner.save.xp)+" · "+owner.save.xp+" XP";
+  renderMenuPresentation()
+}
+function renderProfileMenu(){
+  const owner=menuOwner(),save=normalizeSave(owner.save),r=ROLES[owner.classKey]||ROLES.warrior,s=save.stats;
+  $("profileModalName").textContent=owner.name||"Jugador";
+  $("profileModalIcon").textContent=r.icon;
+  $("profileModalLevel").textContent="Nivel "+levelForXp(save.xp)+" · "+r.name;
+  $("profileModalXp").textContent=save.xp+" XP · "+(save.xp%300)+"/300 para el siguiente nivel";
+  const stats=[
+    ["Partidas",s.matches||0],["Aciertos",s.correct||0],["Mejor combo",s.maxCombo||0],
+    ["Defensas",s.defenses||0],["Daño total",s.damage||0],["Logros",Object.keys(save.unlocked||{}).length]
+  ];
+  $("profileStatsGrid").innerHTML=stats.map(([label,value])=>'<div><b>'+value+'</b><span>'+label+'</span></div>').join("");
+  $("profileModal").classList.add("open")
 }
 function renderAll(){
   renderTarget();renderPlayers();renderBoard();renderCareer();
@@ -744,7 +914,7 @@ function achievementPayload(team){return team.newUnlocks.map(a=>({id:a.id,title:
 function sendResult(winner,reason,correct,wrong,bestCombo){
   if(!bridgeEnabled)return;post("RESULT",{resultId:matchId+"_"+Date.now(),matchId,outcome:setupMode==="practice"?"practice":"finished",reason,score:winner.score,correct,errors:wrong,maxCombo:bestCombo,xpGain:teams[0].matchXp,players:teams.map(t=>({role:t.profileRole,studentId:t.studentId,outcome:setupMode==="practice"?"practice":t.id===winner.id?"victory":"defeat",score:t.score,correct:t.correct,errors:t.wrong,maxCombo:t.maxCombo,xpGain:t.matchXp,save:t.save,achievements:achievementPayload(t)}))})
 }
-function returnSetup(){$("endModal").classList.remove("open");$("gameScreen").classList.add("hidden");$("setupScreen").classList.remove("hidden");$("exitBtn").classList.add("hidden");matchActive=false;matchEnded=false;teams=[];renderRoster();renderCareer()}
+function returnSetup(){$("endModal").classList.remove("open");$("gameScreen").classList.add("hidden");$("setupScreen").classList.remove("hidden");$("exitBtn").classList.add("hidden");$("setupDrawer").classList.add("hidden");matchActive=false;matchEnded=false;teams=[];renderRoster();renderCareer()}
 function requestExit(){
   if(!matchActive){post("CLOSE_READY");return}if(!confirm("¿Salir? Se guardará lo realizado, pero la batalla quedará abandonada."))return;pendingExit=true;matchActive=false;matchEnded=true;clearTimer();if(!bridgeEnabled)return returnSetup();
   post("RESULT",{resultId:matchId+"_exit_"+Date.now(),matchId,outcome:"abandoned",reason:"abandoned",score:teams.reduce((m,t)=>Math.max(m,t.score),0),correct:teams.reduce((s,t)=>s+t.correct,0),errors:teams.reduce((s,t)=>s+t.wrong,0),players:teams.map(t=>({role:t.profileRole,studentId:t.studentId,outcome:"abandoned",score:t.score,correct:t.correct,errors:t.wrong,maxCombo:t.maxCombo,xpGain:t.matchXp,save:t.save,achievements:achievementPayload(t)}))})
@@ -756,7 +926,7 @@ function renderAchievements(){
 window.addEventListener("message",event=>{
   const m=event.data||{};if(m.namespace!==HOST_NAMESPACE||m.channel!==channel)return;
   if(m.type==="INIT"){
-    const s=m.payload?.student||{};primaryProfile={role:"primary",studentId:String(s.studentId||""),name:profileName(s),classGroup:s.clase||"",classKey:"warrior",save:normalizeSave(m.payload?.save)};renderRoster();renderCareer();post("INITIALIZED",{profileId:primaryProfile.studentId,multiplayer:true,practice:true,version:2})
+    const s=m.payload?.student||{};primaryProfile={role:"primary",studentId:String(s.studentId||""),name:profileName(s),classGroup:s.clase||"",classKey:menuClassKey,save:normalizeSave(m.payload?.save)};renderRoster();renderCareer();post("INITIALIZED",{profileId:primaryProfile.studentId,multiplayer:true,practice:true,version:2})
   }
   if(m.type==="OPPONENT_AUTHENTICATED"){
     const role=String(m.payload?.role||"opponent_1"),s=m.payload?.student||{};connectedProfiles[role]={role,studentId:String(s.studentId||""),name:profileName(s),classGroup:s.clase||"",classKey:Object.keys(ROLES)[Math.min(3,Object.keys(connectedProfiles).length+1)],save:normalizeSave(m.payload?.save)};toast("Jugador conectado",profileName(s));renderRoster()
@@ -768,6 +938,16 @@ window.addEventListener("message",event=>{
 });
 
 document.querySelectorAll(".modeCard").forEach(btn=>btn.onclick=()=>setMode(btn.dataset.mode));
+document.querySelectorAll("[data-menu-class]").forEach(btn=>btn.onclick=()=>selectMenuClass(btn.dataset.menuClass));
+$("menuBattleBtn").onclick=()=>openSetupDrawer("battle");
+$("menuPracticeBtn").onclick=()=>openSetupDrawer("practice");
+$("menuAchievementsBtn").onclick=()=>{achievementPage=0;renderAchievements()};
+$("menuProfileBtn").onclick=renderProfileMenu;
+$("menuHelpBtn").onclick=()=>$("helpModal").classList.add("open");
+$("menuExitBtn").onclick=requestExit;
+$("setupCloseBtn").onclick=closeSetupDrawer;
+$("closeProfileModal").onclick=()=>$("profileModal").classList.remove("open");
+$("closeHelpModal").onclick=()=>$("helpModal").classList.remove("open");
 $("playerCount").onchange=renderRoster;
 $("startBtn").onclick=startGame;
 $("targetSelect").onchange=()=>{currentTarget=Number($("targetSelect").value);renderPlayers()};
@@ -778,7 +958,7 @@ $("effectContinue").onclick=()=>{const cb=effectCallback;effectCallback=null;$("
 $("rematchBtn").onclick=returnSetup;$("homeBtn").onclick=returnSetup;$("exitBtn").onclick=requestExit;
 $("achievementsBtn").onclick=()=>{achievementPage=0;renderAchievements()};$("closeAchievements").onclick=()=>$("achievementsModal").classList.remove("open");$("achievementPrev").onclick=()=>{achievementPage=Math.max(0,achievementPage-1);renderAchievements()};$("achievementNext").onclick=()=>{achievementPage=Math.min(1,achievementPage+1);renderAchievements()};
 
-if(!bridgeEnabled){primaryProfile={role:"primary",studentId:"local_primary",name:"Jugador 1",classGroup:"Local",classKey:"warrior",save:localPrimarySave}}
+if(!bridgeEnabled){primaryProfile={role:"primary",studentId:"local_primary",name:"Jugador 1",classGroup:"Local",classKey:menuClassKey,save:localPrimarySave}}
 renderRoster();renderCareer();post("READY",{protocol:3,multiplayer:true,maxPlayers:4,practice:true,version:2});
 })();
 </script>
