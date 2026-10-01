@@ -1197,7 +1197,7 @@ class PixelRenderer{
     this.sprites.draw(ctx,SPRITE_DEFINITIONS.enemies[e.type],e.pixelAnimator,e.x,e.y+10,flip,scale);
     const boxR=Math.max(9,Math.round(e.size+5));
     if(e.shieldActive){ctx.save();ctx.globalAlpha=.24+.08*Math.sin(performance.now()/350);ctx.filter='sepia(1) saturate(3) brightness(1.4)';this.sprites.draw(ctx,SPRITE_DEFINITIONS.enemies[e.type],e.pixelAnimator,e.x,e.y+10,flip,scale);ctx.restore();}
-    if(this.game.hoveredEnemy===e&&!this.game.questionActive){ctx.save();ctx.strokeStyle='#fff29a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(Math.round(e.x),Math.round(e.y+1),boxR+6,0,Math.PI*2);ctx.stroke();ctx.restore()}
+    /* Hover sin aro adicional: el escudo dorado ya indica selección. */
   }
   drawEntityOverlay(ctx,e){
     // Interfaz mínima: vida + escudo. Sin texto ni insignias de categoría.
