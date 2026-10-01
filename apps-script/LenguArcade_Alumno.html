@@ -3713,5 +3713,109 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
  const base=renderDashboard;
  renderDashboard=function(d){const result=base.apply(this,arguments);const profile=document.getElementById('perfil');if(!profile)return result;let host=document.getElementById('platformAchievements');if(!host){host=document.createElement('section');host.id='platformAchievements';host.className='platform-achievements';profile.appendChild(host);}const items=d.platformAchievements||[];host.innerHTML='<h3>Logros de LenguArcade</h3><div class="platform-achievement-grid">'+items.map(a=>'<article class="platform-achievement '+(a.unlocked?'':'locked')+'"><strong>'+(a.unlocked?'🏆 ':'🔒 ')+esc(a.title)+'</strong>'+esc(a.description)+'<small>'+Number(a.progress||0)+' / '+Number(a.target||0)+'</small></article>').join('')+'</div><p class="grade-explanation">'+(d.grade?.weights?.misiones?'Tu nota: 40 % objetivos de misiones, 40 % aciertos y 20 % avance en los juegos asignados.':'Tu nota: 65 % aciertos y 35 % avance en los juegos que practicas.')+' La experiencia mide tu recorrido y no aumenta la nota por sí sola.</p>';return result;};
 })();
-</script></body>
+</script>
+<style id="la-student-social-progress-v1">
+#rankingRows{display:grid;gap:8px;margin-top:12px}
+.rankCard{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.035)}
+.rankCard.current{border-color:rgba(0,212,255,.55);background:linear-gradient(135deg,rgba(0,212,255,.12),rgba(124,77,255,.08));box-shadow:inset 3px 0 0 var(--accent)}
+.rankPos{font-size:18px;font-weight:950;text-align:center}.rankCard strong{display:block}.rankMeta{font-size:11px;color:var(--muted);margin-top:2px}.rankXp{text-align:right;font-weight:900}.rankXp small{display:block;color:var(--muted);font-weight:700}
+.studentHistoryBlock{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}.studentHistoryHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.studentHistoryHead h3{margin:0}.studentHistoryCount{font-size:10px;font-weight:900;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 8px}
+.studentHistoryList{display:grid;gap:8px}.studentHistoryItem{padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.03)}.studentHistoryItem.done{box-shadow:inset 3px 0 0 #55d69b}.studentHistoryItem.failed{box-shadow:inset 3px 0 0 #ff9c9c}.studentHistoryTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.studentHistoryTop strong{font-size:14px}.studentHistoryStatus{font-size:10px;font-weight:900;white-space:nowrap}.studentHistoryStatus.done{color:#70dda9}.studentHistoryStatus.failed{color:#ffb0b0}.studentHistoryMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.studentHistoryMeta span{font-size:10px;color:var(--muted);padding:4px 7px;border:1px solid var(--line);border-radius:999px}
+#generalAchievementsStudent{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}.generalAchievementGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px}.generalAchievementCard{padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.035)}.generalAchievementCard.unlocked{border-color:rgba(255,196,59,.45);background:linear-gradient(135deg,rgba(255,196,59,.1),rgba(124,77,255,.06))}.generalAchievementCard strong{display:block;font-size:13px}.generalAchievementCard small{display:block;margin-top:5px;color:var(--muted);line-height:1.35}
+body.light .rankCard,body.light .studentHistoryItem,body.light .generalAchievementCard{background:#fff}
+@media(max-width:620px){.rankCard{grid-template-columns:34px minmax(0,1fr) auto}.studentHistoryTop{flex-direction:column}.studentHistoryStatus{align-self:flex-start}}
+</style>
+<script>
+(function(){
+  if(window.__LA_STUDENT_SOCIAL_PROGRESS_V1__)return;
+  window.__LA_STUDENT_SOCIAL_PROGRESS_V1__=true;
+  var lastSocialRefresh=0,socialRefreshBusy=false;
+
+  function h(value){return typeof esc==='function'?esc(value):String(value==null?'':value);}
+  function fmtDate(value){
+    if(!value)return 'Sin fecha';
+    var date=new Date(value);if(Number.isNaN(date.getTime()))return 'Sin fecha';
+    return new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(date);
+  }
+  function missionUnit(m,value){
+    if(m.missionType==='accuracy')return Math.round(Number(value||0))+'%';
+    if(m.missionType==='xp')return Math.round(Number(value||0))+' XP';
+    return Math.round(Number(value||0));
+  }
+  function renderClassRanking(dashboard){
+    var host=document.getElementById('rankingRows');if(!host)return;
+    var rows=Array.isArray(dashboard&&dashboard.ranking)?dashboard.ranking:[];
+    if(!rows.length){host.innerHTML='<div class="sub">Todavía no hay clasificación disponible para tu clase.</div>';return;}
+    host.innerHTML=rows.map(function(row){
+      var pos=Number(row.position||0),medal=pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':String(pos||'—');
+      return '<article class="rankCard '+(row.isCurrent?'current':'')+'"><div class="rankPos">'+h(medal)+'</div><div><strong>'+h(row.nombre||'Alumno')+(row.isCurrent?' · Tú':'')+'</strong><div class="rankMeta">Nivel '+h(row.level||1)+'</div></div><div class="rankXp">'+h(row.xp||0)+' XP<small>#'+h(pos||'—')+'</small></div></article>';
+    }).join('');
+  }
+  function ensureMissionHistoryHost(){
+    var section=document.getElementById('misiones');if(!section)return null;
+    var host=document.getElementById('missionHistoryStudent');
+    if(!host){host=document.createElement('section');host.id='missionHistoryStudent';host.className='studentHistoryBlock';section.appendChild(host);}
+    return host;
+  }
+  function renderMissionHistory(dashboard){
+    var host=ensureMissionHistoryHost();if(!host)return;
+    var rows=Array.isArray(dashboard&&dashboard.missionResults)?dashboard.missionResults:[];
+    host.innerHTML='<div class="studentHistoryHead"><h3>Historial de misiones</h3><span class="studentHistoryCount">'+rows.length+' resultados</span></div>'+
+      (rows.length?'<div class="studentHistoryList">'+rows.map(function(m){
+        var done=!!m.completed;
+        var when=done?(m.completedAt||m.updatedAt):(m.dueAt||m.updatedAt);
+        var status=done?'✓ Superada':'No completada';
+        return '<article class="studentHistoryItem '+(done?'done':'failed')+'"><div class="studentHistoryTop"><div><strong>'+h(m.title||'Misión')+'</strong><div class="sub">'+h(m.description||'')+'</div></div><span class="studentHistoryStatus '+(done?'done':'failed')+'">'+status+'</span></div><div class="studentHistoryMeta"><span>🎯 '+h(m.typeLabel||'Objetivo')+'</span>'+(m.gameName?'<span>🎮 '+h(m.gameName)+'</span>':'')+'<span>'+h(missionUnit(m,m.rawProgress))+' / '+h(missionUnit(m,m.target))+'</span><span>🕒 '+h(fmtDate(when))+'</span></div></article>';
+      }).join('')+'</div>':'<div class="sub">Aún no hay misiones terminadas. Cuando completes una o finalice su plazo aparecerá aquí.</div>');
+  }
+  function ensureAchievementHost(){
+    var section=document.getElementById('ranking');if(!section)return null;
+    var host=document.getElementById('generalAchievementsStudent');
+    if(!host){host=document.createElement('section');host.id='generalAchievementsStudent';section.appendChild(host);}
+    return host;
+  }
+  function renderGeneralAchievements(dashboard){
+    var host=ensureAchievementHost();if(!host)return;
+    var rows=Array.isArray(dashboard&&dashboard.platformAchievements)?dashboard.platformAchievements:[];
+    var unlocked=rows.filter(function(item){return item.unlocked;}).length;
+    host.innerHTML='<div class="studentHistoryHead"><h3>Logros generales de LenguArcade</h3><span class="studentHistoryCount">'+unlocked+' / '+rows.length+'</span></div>'+
+      '<div class="generalAchievementGrid">'+rows.map(function(a){
+        return '<article class="generalAchievementCard '+(a.unlocked?'unlocked':'')+'"><strong>'+(a.unlocked?'🏆 ':'🔒 ')+h(a.title||'Logro')+'</strong><small>'+h(a.description||'')+'</small>'+(a.unlockedAt?'<small>Conseguido: '+h(fmtDate(a.unlockedAt))+'</small>':'')+'</article>';
+      }).join('')+'</div>';
+  }
+  function renderSocialProgress(dashboard){
+    renderClassRanking(dashboard||{});
+    renderMissionHistory(dashboard||{});
+    renderGeneralAchievements(dashboard||{});
+  }
+  async function refreshSocialProgress(){
+    if(socialRefreshBusy||Date.now()-lastSocialRefresh<15000)return;
+    if(typeof activeGameRunner!=='undefined'&&activeGameRunner)return;
+    if(typeof token==='undefined'||!token||typeof callServer!=='function')return;
+    socialRefreshBusy=true;lastSocialRefresh=Date.now();
+    try{
+      var dashboard=await callServer('getStudentDashboardByToken',[token]);
+      if(dashboard){currentDashboard=dashboard;if(typeof saveCache==='function')saveCache('LA_DASHBOARD_CACHE',dashboard);renderDashboard(dashboard);}
+    }catch(error){console.warn('No se pudo refrescar ranking/misiones.',error);}
+    finally{socialRefreshBusy=false;}
+  }
+  function install(){
+    if(typeof renderDashboard!=='function'){setTimeout(install,120);return;}
+    var base=renderDashboard;
+    renderDashboard=function(dashboard){var result=base.apply(this,arguments);setTimeout(function(){renderSocialProgress(dashboard||{});},0);return result;};
+    document.addEventListener('click',function(event){
+      var button=event.target&&event.target.closest?event.target.closest('.nav button[data-target]'):null;
+      if(button&&(button.dataset.target==='ranking'||button.dataset.target==='misiones'))setTimeout(refreshSocialProgress,50);
+    },true);
+    window.addEventListener('focus',function(){
+      var screen=document.body.getAttribute('data-la-screen');
+      if(screen==='ranking'||screen==='misiones')refreshSocialProgress();
+    });
+    if(typeof currentDashboard!=='undefined'&&currentDashboard)renderSocialProgress(currentDashboard);
+  }
+  install();
+})();
+</script>
+
+</body>
 </html>

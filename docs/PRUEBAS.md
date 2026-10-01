@@ -563,3 +563,12 @@ Límites: el contador conserva el total de duelos; la lista guarda los 100 más 
 5. Enviar un salto artificial grande de métricas en un checkpoint de prueba: la recompensa por checkpoint debe quedar acotada y, si se encadenan peticiones, deben actuar los límites globales de 1 y 10 minutos.
 6. Confirmar en game_events.details.integrity que serverAuthoritative es true y que rateLimited refleja los casos limitados.
 7. Verificar que el guardado de partida sigue actualizando game_saves aunque un checkpoint no otorgue XP.
+
+
+## Seguimiento, ranking y misiones (2026-10-01)
+
+- Ejecutar `node scripts/check-learning-tracking.mjs` y `npm run check`.
+- Comprobar ordenación de todas las columnas de la tabla de alumnos.
+- Comprobar nombres y porcentajes de cumplimiento en misiones y talleres.
+- Comprobar ranking de clase, historial de misiones y logros generales en la vista de alumno.
+- Confirmar que Ranking y Misiones se refrescan al volver a esas pantallas.

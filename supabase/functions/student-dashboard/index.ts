@@ -75,6 +75,30 @@ function missionTypeLabel(type: unknown) {
   } as Record<string, string>)[String(type || "")] || "Objetivo";
 }
 
+
+function missionFinishedAt(mission: any, events: any[]) {
+  const target = Math.max(0, Number(mission.target || 0));
+  if (!target) return null;
+  const gameId = String(mission.game_id || "") === "general" ? "" : String(mission.game_id || "");
+  const from = mission.active_from ? Date.parse(String(mission.active_from)) : -Infinity;
+  const to = mission.active_to ? Date.parse(String(mission.active_to)) : Infinity;
+  const rows = (events || []).filter(event => {
+    const at = Date.parse(String(event.occurred_at || ""));
+    return event.event_type !== "teacher_adjustment" &&
+      (!gameId || String(event.game_id) === gameId) &&
+      Number.isFinite(at) && at >= from && at <= to;
+  }).sort((a,b)=>Date.parse(a.occurred_at)-Date.parse(b.occurred_at));
+  let value=0; const games=new Set();
+  for(const event of rows){
+    if(mission.mission_type==="sessions" && event.details?.sessionCounted!==false)value++;
+    if(mission.mission_type==="xp")value+=Math.max(0,Number(event.xp_delta||0));
+    if(mission.mission_type==="accuracy")value=Math.max(value,Math.max(0,Number(event.accuracy||0)));
+    if(mission.mission_type==="variety"){games.add(String(event.game_id||""));value=games.size;}
+    if(value>=target)return event.occurred_at||null;
+  }
+  return null;
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers:corsHeaders });
   if (request.method !== "POST") return jsonResponse({ ok:false, error:"method_not_allowed" }, 405);
@@ -122,14 +146,15 @@ Deno.serve(async (request) => {
         .eq("profile_id", profileId)
         .eq("active", true),
       admin.from("mission_definitions")
-        .select("id,title,description,game_id,mission_type,target,reward_xp,reward_feathers,active_from,active_to,classroom_id,target_profile_id,featured,priority,organization_id")
+        .select("id,title,description,game_id,mission_type,target,reward_xp,reward_feathers,active_from,active_to,classroom_id,target_profile_id,featured,priority,organization_id,active,publication_status,created_at,updated_at")
         .eq("organization_id", organizationId)
-        .eq("active", true),
+        .order("updated_at", { ascending:false })
+        .limit(250),
       admin.from("game_events")
         .select("game_id,event_type,xp_delta,accuracy,occurred_at,details")
         .eq("profile_id", profileId)
         .order("occurred_at", { ascending:false })
-        .limit(500),
+        .limit(5000),
       admin.from("game_events")
         .select("xp_delta,feathers_delta,occurred_at")
         .eq("profile_id", profileId)
@@ -299,50 +324,55 @@ Deno.serve(async (request) => {
     const nowMs = Date.now();
     const missionClassroomIds = new Set((enrollmentsResult.data || []).map(row => String(row.classroom_id || "")));
     const gameNameById = new Map((gamesResult.data || []).map(game => [String(game.id), String(game.name || game.id)]));
-    const missionProgress = (missionsResult.data || [])
-      .filter(mission => {
-        if (mission.target_profile_id && String(mission.target_profile_id) !== String(profileId)) return false;
-        if (mission.classroom_id && !missionClassroomIds.has(String(mission.classroom_id))) return false;
-        const from = mission.active_from ? Date.parse(String(mission.active_from)) : Number.NaN;
-        const to = mission.active_to ? Date.parse(String(mission.active_to)) : Number.NaN;
-        if (Number.isFinite(from) && from > nowMs) return false;
-        if (Number.isFinite(to) && to <= nowMs) return false;
-        return true;
-      })
-      .map(mission => {
-        const current = missionProgressValue(mission, progress, missionEventsResult.data || []);
-        const target = Math.max(0, Number(mission.target || 0));
-        const completed = target > 0 && current >= target;
-        const storedGameId = String(mission.game_id || "");
-        const gameId = storedGameId === "general" ? "" : storedGameId;
-        return {
-          id:mission.id,
-          title:mission.title,
-          description:mission.description,
-          missionType:String(mission.mission_type || ""),
-          typeLabel:missionTypeLabel(mission.mission_type),
-          gameId,
-          gameName:gameId ? (gameNameById.get(gameId) || gameId) : "",
-          progress:Math.min(current, target),
-          rawProgress:current,
-          target,
-          completed,
-          featured:Boolean(mission.featured),
-          priority:Number(mission.priority || 0),
-          dueAt:mission.active_to || null,
-          scope:mission.target_profile_id ? "student" : (mission.classroom_id ? "classroom" : "global"),
-          rewardXp:Number(mission.reward_xp || 0),
-          rewardPlumas:Number(mission.reward_feathers || 0),
-        };
-      })
-      .sort((a, b) => {
-        if (a.completed !== b.completed) return a.completed ? 1 : -1;
-        const aDue = a.dueAt ? Date.parse(String(a.dueAt)) : Number.POSITIVE_INFINITY;
-        const bDue = b.dueAt ? Date.parse(String(b.dueAt)) : Number.POSITIVE_INFINITY;
-        if (aDue !== bDue) return aDue - bDue;
-        if (a.featured !== b.featured) return a.featured ? -1 : 1;
-        return b.priority - a.priority;
-      });
+    const relevantMissions = (missionsResult.data || []).filter(mission => {
+      if (mission.target_profile_id && String(mission.target_profile_id) !== String(profileId)) return false;
+      if (mission.classroom_id && !missionClassroomIds.has(String(mission.classroom_id))) return false;
+      if (String(mission.publication_status || "") === "draft") return false;
+      return true;
+    }).map(mission => {
+      const current = missionProgressValue(mission, progress, missionEventsResult.data || []);
+      const target = Math.max(0, Number(mission.target || 0));
+      const completed = target > 0 && current >= target;
+      const storedGameId = String(mission.game_id || "");
+      const gameId = storedGameId === "general" ? "" : storedGameId;
+      const fromMs = mission.active_from ? Date.parse(String(mission.active_from)) : Number.NaN;
+      const toMs = mission.active_to ? Date.parse(String(mission.active_to)) : Number.NaN;
+      const publicationStatus = String(mission.publication_status || (mission.active ? "published" : "closed"));
+      const started = !Number.isFinite(fromMs) || fromMs <= nowMs;
+      const ended = publicationStatus === "closed" || (Number.isFinite(toMs) && toMs <= nowMs);
+      return {
+        id:mission.id,title:mission.title,description:mission.description,
+        missionType:String(mission.mission_type || ""),typeLabel:missionTypeLabel(mission.mission_type),
+        gameId,gameName:gameId ? (gameNameById.get(gameId) || gameId) : "",
+        progress:Math.min(current,target),rawProgress:current,target,completed,
+        completedAt:completed ? missionFinishedAt(mission, missionEventsResult.data || []) : null,
+        featured:Boolean(mission.featured),priority:Number(mission.priority || 0),
+        activeFrom:mission.active_from || null,dueAt:mission.active_to || null,
+        publicationStatus,started,ended,
+        scope:mission.target_profile_id ? "student" : (mission.classroom_id ? "classroom" : "global"),
+        rewardXp:Number(mission.reward_xp || 0),rewardPlumas:Number(mission.reward_feathers || 0),
+        createdAt:mission.created_at || null,updatedAt:mission.updated_at || null,
+      };
+    });
+
+    const missionProgress = relevantMissions.filter(mission =>
+      mission.publicationStatus === "published" && mission.started && !mission.ended
+    ).sort((a,b)=>{
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      const ad=a.dueAt?Date.parse(String(a.dueAt)):Infinity;
+      const bd=b.dueAt?Date.parse(String(b.dueAt)):Infinity;
+      if(ad!==bd)return ad-bd;
+      if(a.featured!==b.featured)return a.featured?-1:1;
+      return b.priority-a.priority;
+    });
+
+    const missionResults = relevantMissions.filter(mission =>
+      mission.started && (mission.completed || mission.ended)
+    ).sort((a,b)=>{
+      const ad=Date.parse(String(a.completedAt || a.dueAt || a.updatedAt || a.createdAt || ""));
+      const bd=Date.parse(String(b.completedAt || b.dueAt || b.updatedAt || b.createdAt || ""));
+      return (Number.isFinite(bd)?bd:0)-(Number.isFinite(ad)?ad:0);
+    }).slice(0,100);
 
     const percentage = Math.round(average(progress.map(row => Number(row.percentage || 0))));
     const accuracy = attempts ? Math.round((successes / attempts) * 100) : 0;
@@ -354,6 +384,39 @@ Deno.serve(async (request) => {
     const {data:milestones,error:milestoneError}=await admin.from('platform_achievements').select('achievement_id,unlocked_at').eq('profile_id',profileId);
     if(milestoneError)throw milestoneError;
     platformAchievements.forEach(a=>{const saved=(milestones||[]).find(m=>m.achievement_id===a.id);if(saved){a.unlocked=true;a.unlockedAt=saved.unlocked_at;}});
+
+    let ranking:any[]=[];
+    const rankingClassroomId=profile.role==="student"?String((enrollmentsResult.data||[])[0]?.classroom_id||""):"";
+    if(rankingClassroomId){
+      const enrollmentResult=await admin.from("classroom_enrollments")
+        .select("profile_id").eq("classroom_id",rankingClassroomId).eq("active",true);
+      if(enrollmentResult.error)throw enrollmentResult.error;
+      const ids=[...new Set((enrollmentResult.data||[]).map(row=>String(row.profile_id||"")).filter(Boolean))];
+      if(ids.length){
+        const [profilesRank,progressRank,adjustRank]=await Promise.all([
+          admin.from("profiles").select("id,first_name,last_name,source").in("id",ids).eq("role","student").eq("active",true),
+          admin.from("game_progress").select("profile_id,xp").in("profile_id",ids),
+          admin.from("game_events").select("profile_id,xp_delta").in("profile_id",ids).eq("event_type","teacher_adjustment").limit(5000),
+        ]);
+        const rankFailure=[profilesRank.error,progressRank.error,adjustRank.error].find(Boolean);
+        if(rankFailure)throw rankFailure;
+        const xpById=new Map<string,number>();
+        for(const row of progressRank.data||[]){
+          const id=String(row.profile_id||"");xpById.set(id,(xpById.get(id)||0)+Number(row.xp||0));
+        }
+        for(const row of adjustRank.data||[]){
+          const id=String(row.profile_id||"");xpById.set(id,(xpById.get(id)||0)+Number(row.xp_delta||0));
+        }
+        ranking=(profilesRank.data||[]).filter(row=>String(row.source||"").toLowerCase()!=="test").map(row=>{
+          const totalXp=Math.max(0,xpById.get(String(row.id))||0);
+          return {studentId:String(row.id),nombre:`${row.first_name||""} ${row.last_name||""}`.trim(),xp:totalXp,level:levelProgress(totalXp).level,isCurrent:String(row.id)===String(profileId)};
+        }).sort((a,b)=>Number(b.xp)-Number(a.xp)||String(a.nombre).localeCompare(String(b.nombre),"es"))
+          .map((row,index)=>({...row,position:index+1}));
+      }
+    }
+    const platformAchievementHistory=platformAchievements.filter(item=>item.unlocked).sort((a,b)=>
+      Date.parse(String(b.unlockedAt||""))-Date.parse(String(a.unlockedAt||""))
+    );
 
     return jsonResponse({
       ok:true,
@@ -409,8 +472,9 @@ Deno.serve(async (request) => {
         hidden:Boolean(row.achievement_definitions?.hidden),
         unlockedAt:row.unlocked_at,
       })),
-      ranking:[],
+      ranking,
       missions:missionProgress,
+      missionResults,
       evaluations:(evaluationsResult.data || []).map(row => ({
         scope:row.scope,
         gameId:row.game_id,
@@ -420,6 +484,7 @@ Deno.serve(async (request) => {
       })),
       grade:evaluation,
       platformAchievements,
+      platformAchievementHistory,
     });
   } catch (error) {
     if (error instanceof Response) return error;
