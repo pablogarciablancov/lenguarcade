@@ -790,3 +790,98 @@ button:disabled{cursor:not-allowed;opacity:.42}
   .setupDrawer{width:94vw}.setupDrawer .settingsRow{grid-template-columns:1fr 1fr}.setupDrawer .settingsRow .field:last-child{grid-column:1/3}
   .howToGrid{grid-template-columns:1fr}.profileStatsGrid{grid-template-columns:1fr 1fr}
 }
+
+
+/* ---------- HÉROES ILUSTRADOS V5 ---------- */
+.avatar,
+.profilePortrait,
+.previewAvatar,
+.profileHeroIcon,
+.pcHeroThumb{overflow:hidden}
+
+.rosterHeroSprite,
+.profilePortrait img,
+.previewAvatar img,
+.profileHeroIcon img,
+.pcHeroThumb img{
+  display:block;width:auto;max-width:none;object-fit:contain;
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.28))
+}
+.rosterHeroSprite{height:152%;transform:translateY(15%)}
+.profilePortrait img{height:154%;transform:translateY(15%)}
+.previewAvatar img{height:155%;transform:translateY(16%)}
+.profileHeroIcon img{height:160%;transform:translateY(17%)}
+
+.classPortrait{
+  position:relative;width:100%;height:74px;margin:0 0 3px;
+  border:0;border-radius:0;background:none;box-shadow:none;
+  display:grid;place-items:end center;overflow:visible
+}
+.classPortrait img{
+  display:block;width:auto;height:108px;max-width:118%;object-fit:contain;object-position:center bottom;
+  filter:drop-shadow(0 9px 10px rgba(0,0,0,.38));
+  transform:translateY(10px);transition:transform .16s ease,filter .16s ease
+}
+.menuClassCard{overflow:visible}
+.menuClassCard:hover .classPortrait img,
+.menuClassCard.selected .classPortrait img{
+  transform:translateY(5px) scale(1.06);
+  filter:drop-shadow(0 11px 13px rgba(0,0,0,.42)) drop-shadow(0 0 10px color-mix(in srgb,var(--class) 35%,transparent))
+}
+
+.previewCharacter{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  overflow:visible
+}
+.previewCharacter img{
+  position:relative;z-index:2;display:block;width:auto;height:158%;max-width:176%;
+  object-fit:contain;object-position:center bottom;
+  filter:drop-shadow(0 16px 14px rgba(0,0,0,.42))
+}
+.previewFighter.hero .previewCharacter img{
+  filter:drop-shadow(0 16px 14px rgba(0,0,0,.42)) drop-shadow(0 0 12px color-mix(in srgb,var(--preview-role,#ff8e4e) 28%,transparent))
+}
+.previewFighter.enemy .previewCharacter img{
+  filter:drop-shadow(0 16px 14px rgba(0,0,0,.42)) drop-shadow(0 0 12px rgba(157,90,255,.25))
+}
+
+.fighterSprite{
+  overflow:visible;border-color:transparent;
+  background:radial-gradient(circle at 50% 58%,color-mix(in srgb,var(--fighter) 18%,transparent),transparent 62%);
+  box-shadow:none
+}
+.fighterSpriteImg{
+  position:relative;z-index:2;display:block;width:auto;height:154%;max-width:162%;
+  object-fit:contain;object-position:center bottom;
+  filter:drop-shadow(0 16px 15px rgba(0,0,0,.45)) drop-shadow(0 0 13px color-mix(in srgb,var(--fighter) 24%,transparent))
+}
+.fighterRight .fighterSpriteImg{transform:scaleX(1)}
+.battleStage.stage-hit .fighterRight .fighterSpriteImg{filter:brightness(1.22) drop-shadow(0 16px 15px rgba(0,0,0,.45))}
+
+.pcIdentity{display:flex;align-items:center;gap:6px;min-width:0}
+.pcHeroThumb{
+  flex:0 0 27px;width:27px;height:27px;border-radius:8px;
+  display:grid;place-items:center;background:color-mix(in srgb,var(--p) 15%,#0b1529);
+  border:1px solid color-mix(in srgb,var(--p) 28%,transparent)
+}
+.pcHeroThumb img{height:155%;transform:translateY(16%)}
+
+.profileHeroIcon{
+  position:relative;background:radial-gradient(circle at 50% 35%,#31557c,#15243c 68%);
+  box-shadow:0 0 18px rgba(91,172,255,.15)
+}
+
+@media(max-height:820px){
+  .classPortrait{height:57px}
+  .classPortrait img{height:87px;transform:translateY(9px)}
+  .menuClassCard:hover .classPortrait img,
+  .menuClassCard.selected .classPortrait img{transform:translateY(5px) scale(1.05)}
+  .profilePortrait img{height:150%}
+  .fighterSpriteImg{height:145%}
+}
+@media(max-width:760px){
+  .classPortrait{height:52px}
+  .classPortrait img{height:80px}
+  .fighterSpriteImg{height:137%}
+  .pcHeroThumb{width:22px;height:22px;flex-basis:22px}
+}

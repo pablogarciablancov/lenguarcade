@@ -81,7 +81,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
   .setupShell{grid-template-columns:.68fr 1.32fr}.setupIntro{padding:18px}.rulesMini{display:none}.arena{grid-template-columns:minmax(0,1fr) 180px}.roster{grid-template-columns:1fr}.playerSlot{grid-template-columns:34px minmax(0,1fr) 104px}
 }
 </style>
-<link rel="stylesheet" href="./arcade.css?v=20261001a">
+<link rel="stylesheet" href="./arcade.css?v=20261001c">
 </head>
 <body>
 <div id="app">
@@ -126,7 +126,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
       </aside>
 
       <div class="menuProfileHud">
-        <div class="profilePortrait" id="menuProfilePortrait">⚔️</div>
+        <div class="profilePortrait" id="menuProfilePortrait"><img id="menuProfilePortraitImg" src="./assets/heroes/warrior.png" alt="Guerrero"></div>
         <div class="profileIdentity">
           <strong id="menuPlayerName">Jugador</strong>
           <span id="menuPlayerLevel">Nivel 1</span>
@@ -140,20 +140,20 @@ button:disabled{cursor:not-allowed;opacity:.45}
       <main class="menuShowcase">
         <div class="duelPreview">
           <div class="previewTop">
-            <div class="previewSide you"><span class="previewAvatar" id="previewHeroAvatar">⚔️</span><b>Tú</b><div class="previewHp"><span></span></div></div>
+            <div class="previewSide you"><span class="previewAvatar" id="previewHeroAvatar"><img id="previewHeroAvatarImg" src="./assets/heroes/warrior.png" alt="Guerrero"></span><b>Tú</b><div class="previewHp"><span></span></div></div>
             <div class="previewVs">VS</div>
-            <div class="previewSide rival"><div class="previewHp"><span></span></div><b>Rival</b><span class="previewAvatar">🔮</span></div>
+            <div class="previewSide rival"><div class="previewHp"><span></span></div><b>Rival</b><span class="previewAvatar"><img id="previewRivalAvatarImg" src="./assets/heroes/mage.png" alt="Mago rival"></span></div>
           </div>
           <div class="previewScene">
             <div class="previewFighter hero" id="previewHero">
               <div class="fighterAura"></div>
-              <div class="previewCharacter" id="previewHeroGlyph">⚔️</div>
+              <div class="previewCharacter" id="previewHeroGlyph"><img id="previewHeroSprite" src="./assets/heroes/warrior.png" alt="Guerrero"></div>
               <span id="previewHeroRole">Guerrero</span>
             </div>
             <div class="previewImpact">✦</div>
             <div class="previewFighter enemy">
               <div class="fighterAura"></div>
-              <div class="previewCharacter">🔮</div>
+              <div class="previewCharacter"><img id="previewRivalSprite" src="./assets/heroes/mage.png" alt="Mago rival"></div>
               <span>Rival arcano</span>
             </div>
           </div>
@@ -164,16 +164,16 @@ button:disabled{cursor:not-allowed;opacity:.45}
           <div class="classDeckTitle"><span></span><b>ELIGE TU CLASE</b><span></span></div>
           <div class="menuClasses">
             <button class="menuClassCard warrior" data-menu-class="warrior">
-              <span class="classPortrait">🗡️</span><b>Guerrero</b><small>Fuerza en cada palabra</small><em>+10% daño</em>
+              <span class="classPortrait"><img src="./assets/heroes/warrior.png" alt="" aria-hidden="true"></span><b>Guerrero</b><small>Fuerza en cada palabra</small><em>+10% daño</em>
             </button>
             <button class="menuClassCard mage" data-menu-class="mage">
-              <span class="classPortrait">🔮</span><b>Mago</b><small>Conjuga el conocimiento</small><em>Más energía</em>
+              <span class="classPortrait"><img src="./assets/heroes/mage.png" alt="" aria-hidden="true"></span><b>Mago</b><small>Conjuga el conocimiento</small><em>Más energía</em>
             </button>
             <button class="menuClassCard archer" data-menu-class="archer">
-              <span class="classPortrait">🏹</span><b>Arquero</b><small>Precisión gramatical</small><em>+10% puntos</em>
+              <span class="classPortrait"><img src="./assets/heroes/archer.png" alt="" aria-hidden="true"></span><b>Arquero</b><small>Precisión gramatical</small><em>+10% puntos</em>
             </button>
             <button class="menuClassCard cleric" data-menu-class="cleric">
-              <span class="classPortrait">✨</span><b>Clérigo</b><small>Corrige y protege</small><em>Cura al defender</em>
+              <span class="classPortrait"><img src="./assets/heroes/cleric.png" alt="" aria-hidden="true"></span><b>Clérigo</b><small>Corrige y protege</small><em>Cura al defender</em>
             </button>
           </div>
         </section>
@@ -290,7 +290,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
 <div class="overlay" id="profileModal"><div class="modal menuInfoModal">
   <div class="modalHead"><div><div class="modalTag">Perfil de combatiente</div><h2 id="profileModalName">Jugador</h2></div><button class="drawerClose" id="closeProfileModal">×</button></div>
   <div class="profileHero">
-    <div class="profileHeroIcon" id="profileModalIcon">⚔️</div>
+    <div class="profileHeroIcon" id="profileModalIcon"><img id="profileModalSprite" src="./assets/heroes/warrior.png" alt="Guerrero"></div>
     <div><b id="profileModalLevel">Nivel 1</b><span id="profileModalXp">0 XP</span></div>
   </div>
   <div class="profileStatsGrid" id="profileStatsGrid"></div>
@@ -334,10 +334,10 @@ let arenaBuff={damage:1,score:1,label:""};
 let localPrimarySave=loadLocalSave();
 
 const ROLES={
-  warrior:{name:"Guerrero",icon:"🗡️",color:"#de6a55",passive:"+10% daño",ultimate:"Furia verbal",type:"nextDamage",text:"El siguiente ataque correcto hace +60% de daño."},
-  mage:{name:"Mago",icon:"🔮",color:"#785dd7",passive:"+5 energía",ultimate:"Eco arcano",type:"splash",text:"El siguiente ataque salpica un 40% a otro rival."},
-  archer:{name:"Arquero",icon:"🏹",color:"#2e9c91",passive:"+10% puntos",ultimate:"Flecha rúnica",type:"pierce",text:"El siguiente ataque ignora la defensa y el escudo."},
-  cleric:{name:"Clérigo",icon:"✨",color:"#d7a238",passive:"+5 PV al defender",ultimate:"Concordancia vital",type:"heal",text:"Recupera 30 PV y obtiene 15 de escudo."}
+  warrior:{name:"Guerrero",icon:"🗡️",sprite:"./assets/heroes/warrior.png",color:"#de6a55",passive:"+10% daño",ultimate:"Furia verbal",type:"nextDamage",text:"El siguiente ataque correcto hace +60% de daño."},
+  mage:{name:"Mago",icon:"🔮",sprite:"./assets/heroes/mage.png",color:"#785dd7",passive:"+5 energía",ultimate:"Eco arcano",type:"splash",text:"El siguiente ataque salpica un 40% a otro rival."},
+  archer:{name:"Arquero",icon:"🏹",sprite:"./assets/heroes/archer.png",color:"#2e9c91",passive:"+10% puntos",ultimate:"Flecha rúnica",type:"pierce",text:"El siguiente ataque ignora la defensa y el escudo."},
+  cleric:{name:"Clérigo",icon:"✨",sprite:"./assets/heroes/cleric.png",color:"#d7a238",passive:"+5 PV al defender",ultimate:"Concordancia vital",type:"heal",text:"Recupera 30 PV y obtiene 15 de escudo."}
 };
 
 const CATEGORIES=[
@@ -588,7 +588,7 @@ function closeSetupDrawer(){
   $("menuBattleBtn")?.classList.remove("selected");
   $("menuPracticeBtn")?.classList.remove("selected")
 }
-function classOptions(selected){return Object.entries(ROLES).map(([k,r])=>'<option value="'+k+'" '+(k===selected?"selected":"")+'>'+r.icon+" "+r.name+"</option>").join("")}
+function classOptions(selected){return Object.entries(ROLES).map(([k,r])=>'<option value="'+k+'" '+(k===selected?"selected":"")+'>'+r.name+"</option>").join("")}
 function requestPlayer(role){post("REQUEST_OPPONENT_AUTH",{role,requestId:"vb_"+role+"_"+uid()})}
 function renderRoster(){
   const host=$("roster"),count=setupMode==="practice"?1:Number($("playerCount").value||2);host.innerHTML="";
@@ -598,11 +598,11 @@ function renderRoster(){
     const cls=profile?.classKey||Object.keys(ROLES)[i%4];
     const slot=document.createElement("div");slot.className="playerSlot"+(profile?"":" empty");
     if(profile){
-      slot.innerHTML='<div class="avatar">'+ROLES[cls].icon+'</div><div class="playerMeta"><b>'+escapeHtml(profile.name)+'</b><span>'+escapeHtml(profile.classGroup||"Perfil LenguArcade")+'</span></div><div class="slotAction"><select class="classSelect" data-role="'+role+'">'+classOptions(cls)+'</select>'+(i?'<button class="connectBtn" data-connect="'+role+'">Cambiar jugador</button>':"")+'</div>'
+      slot.innerHTML='<div class="avatar"><img class="rosterHeroSprite" src="'+ROLES[cls].sprite+'" alt=""></div><div class="playerMeta"><b>'+escapeHtml(profile.name)+'</b><span>'+escapeHtml(profile.classGroup||"Perfil LenguArcade")+'</span></div><div class="slotAction"><select class="classSelect" data-role="'+role+'">'+classOptions(cls)+'</select>'+(i?'<button class="connectBtn" data-connect="'+role+'">Cambiar jugador</button>':"")+'</div>'
     }else if(bridgeEnabled){
       slot.innerHTML='<div class="avatar">＋</div><div class="playerMeta"><b>Jugador '+(i+1)+'</b><span>Introduce su código general de LenguArcade.</span></div><div class="slotAction"><button class="connectBtn" data-connect="'+role+'">Conectar código</button></div>'
     }else{
-      slot.innerHTML='<div class="avatar">'+ROLES[cls].icon+'</div><div class="playerMeta"><input class="localName field" data-local="'+role+'" value="Jugador '+(i+1)+'"></div><div class="slotAction"><select class="classSelect" data-role="'+role+'">'+classOptions(cls)+'</select></div>'
+      slot.innerHTML='<div class="avatar"><img class="rosterHeroSprite" src="'+ROLES[cls].sprite+'" alt=""></div><div class="playerMeta"><input class="localName field" data-local="'+role+'" value="Jugador '+(i+1)+'"></div><div class="slotAction"><select class="classSelect" data-role="'+role+'">'+classOptions(cls)+'</select></div>'
     }
     host.appendChild(slot)
   }
@@ -696,7 +696,7 @@ function fighterMarkup(t,isTarget){
   if(!t)return"";
   const r=roleDef(t),hpPct=clamp(t.hp/maxHp*100,0,100),energyPct=clamp(t.energy,0,100);
   return '<div class="fighterLabel">'+(isTarget?"OBJETIVO":"EN TURNO")+'</div>'+
-    '<div class="fighterSprite"><span class="fighterGlyph">'+r.icon+'</span></div>'+
+    '<div class="fighterSprite"><img class="fighterSpriteImg" src="'+r.sprite+'" alt="'+escapeHtml(r.name)+'"></div>'+
     '<div class="fighterName">'+escapeHtml(t.name)+'</div>'+
     '<div class="fighterRole">'+escapeHtml(r.name)+' · '+escapeHtml(r.passive)+'</div>'+
     '<div class="fighterMeters">'+
@@ -722,7 +722,7 @@ function renderPlayers(){
     const r=roleDef(t),d=document.createElement("div");
     d.className="playerCard"+(i===currentTeam?" active":"")+(setupMode==="battle"&&i===currentTarget&&i!==currentTeam?" targeted":"")+(!t.alive?" dead":"");
     d.style.setProperty("--p",r.color);
-    d.innerHTML='<div class="pcTop"><div style="min-width:0"><div class="pcName">'+r.icon+' '+escapeHtml(t.name)+'</div><div class="pcRole">'+r.name+'</div></div><div class="score">'+t.score+' pts</div></div>'+
+    d.innerHTML='<div class="pcTop"><div class="pcIdentity"><span class="pcHeroThumb"><img src="'+r.sprite+'" alt=""></span><div style="min-width:0"><div class="pcName">'+escapeHtml(t.name)+'</div><div class="pcRole">'+r.name+'</div></div></div><div class="score">'+t.score+' pts</div></div>'+
       '<div class="meterLabel"><span>PV '+t.hp+(t.shield?" · 🛡"+t.shield:"")+'</span><span>×'+t.combo+'</span></div>'+
       '<div class="meter"><div class="hp" style="width:'+clamp(t.hp/maxHp*100,0,100)+'%"></div></div>'+
       '<div class="meter" style="margin-top:2px"><div class="en" style="width:'+clamp(t.energy,0,100)+'%"></div></div>'+
@@ -754,9 +754,12 @@ function renderMenuPresentation(){
   if($("menuXpText"))$("menuXpText").textContent=(save.xp%300)+" / 300 XP";
   if($("menuStreak"))$("menuStreak").textContent=save.stats.maxCombo||0;
   if($("menuMedals"))$("menuMedals").textContent=Object.keys(save.unlocked||{}).length;
-  if($("menuProfilePortrait"))$("menuProfilePortrait").textContent=role.icon;
-  if($("previewHeroAvatar"))$("previewHeroAvatar").textContent=role.icon;
-  if($("previewHeroGlyph"))$("previewHeroGlyph").textContent=role.icon;
+  const rivalKeys=Object.keys(ROLES),rivalKey=rivalKeys[(rivalKeys.indexOf(menuClassKey)+1)%rivalKeys.length],rival=ROLES[rivalKey];
+  if($("menuProfilePortraitImg")){$("menuProfilePortraitImg").src=role.sprite;$("menuProfilePortraitImg").alt=role.name}
+  if($("previewHeroAvatarImg")){$("previewHeroAvatarImg").src=role.sprite;$("previewHeroAvatarImg").alt=role.name}
+  if($("previewHeroSprite")){$("previewHeroSprite").src=role.sprite;$("previewHeroSprite").alt=role.name}
+  if($("previewRivalAvatarImg")){$("previewRivalAvatarImg").src=rival.sprite;$("previewRivalAvatarImg").alt=rival.name+" rival"}
+  if($("previewRivalSprite")){$("previewRivalSprite").src=rival.sprite;$("previewRivalSprite").alt=rival.name+" rival"}
   if($("previewHeroRole"))$("previewHeroRole").textContent=role.name;
   if($("previewHero"))$("previewHero").style.setProperty("--preview-role",role.color)
 }
@@ -775,7 +778,7 @@ function renderCareer(){
 function renderProfileMenu(){
   const owner=menuOwner(),save=normalizeSave(owner.save),r=ROLES[owner.classKey]||ROLES.warrior,s=save.stats;
   $("profileModalName").textContent=owner.name||"Jugador";
-  $("profileModalIcon").textContent=r.icon;
+  if($("profileModalSprite")){$("profileModalSprite").src=r.sprite;$("profileModalSprite").alt=r.name}
   $("profileModalLevel").textContent="Nivel "+levelForXp(save.xp)+" · "+r.name;
   $("profileModalXp").textContent=save.xp+" XP · "+(save.xp%300)+"/300 para el siguiente nivel";
   const stats=[
