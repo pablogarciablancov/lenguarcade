@@ -75,6 +75,30 @@ function missionTypeLabel(type: unknown) {
   } as Record<string, string>)[String(type || "")] || "Objetivo";
 }
 
+
+function missionFinishedAt(mission: any, events: any[]) {
+  const target = Math.max(0, Number(mission.target || 0));
+  if (!target) return null;
+  const gameId = String(mission.game_id || "") === "general" ? "" : String(mission.game_id || "");
+  const from = mission.active_from ? Date.parse(String(mission.active_from)) : -Infinity;
+  const to = mission.active_to ? Date.parse(String(mission.active_to)) : Infinity;
+  const rows = (events || []).filter(event => {
+    const at = Date.parse(String(event.occurred_at || ""));
+    return event.event_type !== "teacher_adjustment" &&
+      (!gameId || String(event.game_id) === gameId) &&
+      Number.isFinite(at) && at >= from && at <= to;
+  }).sort((a,b)=>Date.parse(a.occurred_at)-Date.parse(b.occurred_at));
+  let value=0; const games=new Set();
+  for(const event of rows){
+    if(mission.mission_type==="sessions" && event.details?.sessionCounted!==false)value++;
+    if(mission.mission_type==="xp")value+=Math.max(0,Number(event.xp_delta||0));
+    if(mission.mission_type==="accuracy")value=Math.max(value,Math.max(0,Number(event.accuracy||0)));
+    if(mission.mission_type==="variety"){games.add(String(event.game_id||""));value=games.size;}
+    if(value>=target)return event.occurred_at||null;
+  }
+  return null;
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers:corsHeaders });
   if (request.method !== "POST") return jsonResponse({ ok:false, error:"method_not_allowed" }, 405);
