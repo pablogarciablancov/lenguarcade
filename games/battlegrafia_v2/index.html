@@ -7814,10 +7814,47 @@ document.addEventListener("DOMContentLoaded", () => {
         const activeKey = 'battlegrafia_v2_active_slot_v1_' + modeId;
         const legacyKey = 'battlegrafia_v2_player_pixel_historia_v6_' + modeId;
         const slots = readJson(localStorage.getItem(slotsKey), []);
-        const ownSlots = Array.isArray(slots) ? slots.filter(slot => slot && slot.id === slotId && slot.data) : [];
+        let ownSlots = Array.isArray(slots) ? slots.filter(slot => slot && slot.id === slotId && slot.data) : [];
+
+        // Recuperación de partidas creadas por la build anterior de Battlegrafía:
+        // en LenguArcade podían quedar guardadas como rpg_slot_1 en vez de usar
+        // la ranura estable del alumno (lenguarcade_<perfil>). Si todavía no hay
+        // ranura propia, promovemos la partida genérica más reciente que no esté
+        // explícitamente asociada a otro perfil.
+        if(!ownSlots.length && Array.isArray(slots)){
+          const recoverable = slots
+            .filter(slot => {
+              if(!slot || !slot.data || !/^rpg_slot_[123]$/.test(String(slot.id || ''))) return false;
+              const savedProfile = slot.data.__lenguarcadeProfileKey;
+              const savedEmail = slot.data.__lenguarcadeProfileEmail;
+              if(savedProfile && savedProfile !== profileKey()) return false;
+              if(savedEmail && profile && profile.email &&
+                  String(savedEmail).toLowerCase() !== String(profile.email).toLowerCase()) return false;
+              return true;
+            })
+            .sort((a,b)=>(Number(b.updatedAt)||0)-(Number(a.updatedAt)||0));
+
+          if(recoverable.length){
+            const recovered = copy(recoverable[0]);
+            recovered.id = slotId;
+            recovered.name = recovered.name || recovered.data?.name || profileDisplayName();
+            recovered.updatedAt = Date.now();
+            recovered.data = copy(recovered.data || {});
+            recovered.data.__lenguarcadeProfileKey = profileKey();
+            recovered.data.__lenguarcadeProfileSlot = slotId;
+            recovered.data.__lenguarcadeProfileEmail = profile && profile.email || '';
+            recovered.data.__lenguarcadeRecoveredAt = new Date().toISOString();
+            ownSlots = [recovered];
+          }
+        }
+
         localStorage.setItem(activeKey, slotId);
         localStorage.setItem(slotsKey, JSON.stringify(ownSlots));
-        if(!ownSlots.length) localStorage.removeItem(legacyKey);
+        if(ownSlots.length){
+          try{ localStorage.setItem(legacyKey, JSON.stringify(ownSlots[0].data)); }catch(error){}
+        }else{
+          localStorage.removeItem(legacyKey);
+        }
       }catch(error){}
     });
   }
