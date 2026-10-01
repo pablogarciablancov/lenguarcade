@@ -616,7 +616,7 @@ function renderCareer(){
   $("careerChip").textContent="Nv. "+levelForXp(owner.save.xp)+" · "+owner.save.xp+" XP"
 }
 function renderAll(){
-  renderPlayers();renderTarget();renderBoard();renderCareer();
+  renderTarget();renderPlayers();renderBoard();renderCareer();
   const until=5-(resolvedCells%5);
   $("eventNext").textContent="Evento en "+until+" acción"+(until===1?"":"es");
   $("turnLine").textContent=setupMode==="practice"?"Elige una acción y supera el reto.":"Turno de "+current().name+" · elige cómo atacar.";
