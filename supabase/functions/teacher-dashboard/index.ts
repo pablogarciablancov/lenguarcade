@@ -139,7 +139,12 @@ function missionProgressValue(
       if (Number.isFinite(activeTo) && occurredAt > activeTo) return false;
       return true;
     });
-    if (type === "sessions") return recent.filter(event => event.details?.sessionCounted !== false).length;
+    if (type === "sessions") return recent.filter(event => {
+      const details = event.details && typeof event.details === "object"
+        ? event.details as Record<string, unknown>
+        : {};
+      return details.sessionCounted !== false;
+    }).length;
     if (type === "variety") return new Set(recent.map(event => String(event.game_id || "")).filter(Boolean)).size;
     if (type === "xp") return recent.reduce((sum, event) => sum + num(event.xp_delta), 0);
     if (type === "accuracy") return recent.reduce((max, event) => Math.max(max, num(event.accuracy)), 0);
@@ -195,7 +200,10 @@ function missionCompletionAt(
   const games = new Set<string>();
   for (const event of recent) {
     if (type === "sessions") {
-      if (event.details?.sessionCounted !== false) value += 1;
+      const details = event.details && typeof event.details === "object"
+        ? event.details as Record<string, unknown>
+        : {};
+      if (details.sessionCounted !== false) value += 1;
     } else if (type === "xp") {
       value += Math.max(0, Number(event.xp_delta || 0));
     } else if (type === "accuracy") {
@@ -1088,6 +1096,7 @@ Deno.serve(async (request) => {
     const eventRows = eventsResult.data || [];
     const missionCompletionById = new Map<string, Record<string, unknown>>();
     for (const mission of missionsResult.data || []) {
+      if (String(mission.publication_status || "") === "draft") continue;
       const target = Math.max(0, Number(mission.target || 0));
       const eligibleProfiles = profiles.filter(profile => {
         if (mission.target_profile_id && String(mission.target_profile_id) !== String(profile.id)) return false;
