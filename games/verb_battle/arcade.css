@@ -439,3 +439,354 @@ button:disabled{cursor:not-allowed;opacity:.42}
   .battleStage{border-radius:16px}.fighter{top:12%;width:42%}.fighterLeft{left:1%}.fighterRight{right:1%}.fighterSprite{width:90px;height:90px}.fighterGlyph{font-size:42px}.fighterName{font-size:12px}.fighterRole{display:none}.fighterMeters{width:95%}.vsMark{width:54px;height:54px;font-size:16px}.playersBar{left:5px;right:5px;bottom:5px;gap:3px}.playerCard{padding:4px 5px;width:25%}.pcRole,.pcBottom{display:none}
   .commandDeck{grid-template-columns:1fr}.commandSide{display:none}.movesPanel{padding:7px}.moveGrid{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}.moveCard{padding:7px}.moveIcon{width:25px;height:25px}.moveSkill{font-size:6px}.moveBottom{margin-top:3px}
 }
+
+
+/* ==========================================================
+   BATALLA VERBAL · MENÚ PRINCIPAL V4
+   Inspirado en el concept art: interfaz diegética de videojuego
+   ========================================================== */
+#app:has(#setupScreen:not(.hidden)){grid-template-rows:minmax(0,1fr)}
+#app:has(#setupScreen:not(.hidden))>.topbar{display:none}
+.menuScreen{padding:0;overflow:hidden;background:#071020}
+.mainMenuScene{
+  position:relative;width:100%;height:100%;overflow:hidden;
+  background:
+    radial-gradient(circle at 72% 12%,rgba(119,175,255,.22),transparent 25%),
+    radial-gradient(circle at 48% 34%,rgba(58,158,255,.16),transparent 24%),
+    radial-gradient(circle at 76% 72%,rgba(130,73,255,.15),transparent 27%),
+    linear-gradient(180deg,#17345f 0%,#112444 27%,#101a31 56%,#090f1e 100%);
+  isolation:isolate
+}
+.mainMenuScene:before{
+  content:"";position:absolute;z-index:-3;inset:0;
+  background:
+    linear-gradient(90deg,rgba(5,10,20,.18),transparent 26%,transparent 75%,rgba(5,8,18,.2)),
+    repeating-linear-gradient(90deg,transparent 0 128px,rgba(153,188,255,.018) 129px 130px);
+  pointer-events:none
+}
+.mainMenuScene:after{
+  content:"";position:absolute;z-index:15;left:0;right:0;bottom:-11%;height:32%;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(79,142,208,.18),transparent 52%),
+    repeating-radial-gradient(ellipse at 50% 120%,rgba(91,129,178,.08) 0 1px,transparent 2px 42px),
+    linear-gradient(180deg,rgba(11,20,34,.18),rgba(3,7,14,.74));
+  border-top:1px solid rgba(154,193,255,.08);
+  transform:perspective(500px) rotateX(62deg);transform-origin:bottom;
+  pointer-events:none
+}
+
+/* arquitectura del coliseo */
+.skyGlow{
+  position:absolute;z-index:-2;left:28%;right:2%;top:-10%;height:50%;
+  background:
+    radial-gradient(ellipse at 58% 20%,rgba(151,206,255,.38),transparent 28%),
+    radial-gradient(ellipse at 40% 28%,rgba(101,136,255,.19),transparent 32%);
+  filter:blur(4px)
+}
+.arenaSpire{
+  position:absolute;z-index:-1;bottom:17%;width:9%;min-width:72px;height:66%;
+  background:
+    linear-gradient(90deg,rgba(7,16,32,.9),rgba(28,53,88,.84) 50%,rgba(8,18,34,.94));
+  border:1px solid rgba(118,163,219,.18);
+  box-shadow:0 0 0 1px rgba(0,0,0,.3),inset 0 0 40px rgba(0,0,0,.3)
+}
+.arenaSpire:before{
+  content:"";position:absolute;left:50%;top:-68px;width:0;height:0;transform:translateX(-50%);
+  border-left:42px solid transparent;border-right:42px solid transparent;border-bottom:70px solid #172b4c;
+  filter:drop-shadow(0 -4px 8px rgba(77,157,255,.13))
+}
+.arenaSpire:after{
+  content:"✦";position:absolute;left:50%;top:17%;transform:translateX(-50%);
+  color:#67cfff;font-size:22px;text-shadow:0 0 22px #54baff
+}
+.spireA{left:33%;height:52%;width:7%;bottom:21%}
+.spireB{left:56%;height:75%;width:8%;bottom:18%}
+.spireC{right:8%;height:58%;width:8%;bottom:20%}
+.arenaCrowd{
+  position:absolute;z-index:0;left:27%;right:0;bottom:12%;height:32%;
+  background:
+    radial-gradient(circle at 2px 2px,rgba(164,195,240,.17) 1px,transparent 1.5px) 0 0/18px 15px,
+    linear-gradient(180deg,rgba(14,28,50,.08),rgba(6,12,24,.7));
+  clip-path:polygon(0 30%,100% 0,100% 100%,0 100%);
+  opacity:.7
+}
+.banner{
+  position:absolute;z-index:0;top:7%;width:74px;height:240px;
+  display:grid;justify-items:center;align-content:start;gap:10px;padding-top:28px;
+  color:#e8c777;background:linear-gradient(180deg,#273a8b,#271b63 74%,transparent);
+  border-left:3px solid rgba(240,189,69,.36);border-right:3px solid rgba(240,189,69,.36);
+  clip-path:polygon(0 0,100% 0,100% 86%,50% 100%,0 86%);
+  box-shadow:0 14px 30px rgba(0,0,0,.24)
+}
+.banner span{font-size:26px;text-shadow:0 0 18px #66b9ff}.banner b{writing-mode:vertical-rl;font-size:8px;letter-spacing:.22em}
+.bannerLeft{left:43%}.bannerRight{right:14%;top:10%}
+
+/* columna de título y navegación */
+.menuColumn{
+  position:absolute;z-index:20;left:clamp(20px,4vw,64px);top:50%;transform:translateY(-50%);
+  width:clamp(275px,26vw,385px);display:grid;gap:14px
+}
+.gameLogo{position:relative;text-align:center;padding-top:47px;filter:drop-shadow(0 16px 18px rgba(0,0,0,.38))}
+.logoCrest{
+  position:absolute;left:50%;top:0;transform:translateX(-50%);
+  width:150px;height:80px;display:grid;place-items:center
+}
+.logoBook{position:absolute;z-index:3;font-size:48px;filter:drop-shadow(0 0 15px #4dbeff)}
+.logoCrystal{
+  position:absolute;z-index:2;top:-7px;color:#64d5ff;font-size:45px;
+  text-shadow:0 0 8px #79dfff,0 0 28px #3e8cff
+}
+.logoBlade{position:absolute;width:12px;height:66px;top:4px;border-radius:10px 10px 2px 2px;background:linear-gradient(#cbd8e9,#435b81 45%,#16263e);border:1px solid #86a1c6}
+.logoBlade.left{left:24px;transform:rotate(-39deg)}.logoBlade.right{right:24px;transform:rotate(39deg)}
+.logoWord{
+  position:relative;z-index:3;font-family:Georgia,"Times New Roman",serif;font-weight:1000;line-height:.82;
+  letter-spacing:-.055em;-webkit-text-stroke:1px rgba(0,0,0,.45)
+}
+.logoBattle{
+  font-size:clamp(45px,5.1vw,75px);
+  background:linear-gradient(180deg,#fff0a3 0,#ffcf55 25%,#e8891e 66%,#8f3d12 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 4px 0 #5c260e,0 8px 16px rgba(0,0,0,.45)
+}
+.logoVerbal{
+  margin-top:5px;font-size:clamp(50px,5.4vw,82px);
+  background:linear-gradient(180deg,#eefaff 0,#6fe5ff 28%,#268ee7 68%,#163f9e 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 4px 0 #173b7f,0 0 26px rgba(58,176,255,.38)
+}
+.logoRibbon{
+  width:78%;margin:-2px auto 0;padding:7px 14px 6px;
+  font-family:Georgia,"Times New Roman",serif;font-size:clamp(10px,1vw,14px);font-weight:900;
+  text-transform:uppercase;letter-spacing:.09em;color:#ffe29c;
+  background:linear-gradient(180deg,#302009,#151424);border:1px solid #dba743;
+  clip-path:polygon(6% 0,94% 0,100% 50%,94% 100%,6% 100%,0 50%);
+  box-shadow:0 5px 16px rgba(0,0,0,.35)
+}
+.gameMenuButtons{display:grid;gap:7px}
+.gameMenuBtn{
+  position:relative;min-height:52px;padding:8px 16px 8px 58px;
+  display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-items:center;text-align:left;
+  border:1px solid #345c92;color:#ecf5ff;
+  background:
+    linear-gradient(180deg,rgba(28,75,124,.95),rgba(12,35,69,.98));
+  clip-path:polygon(4% 0,96% 0,100% 50%,96% 100%,4% 100%,0 50%);
+  box-shadow:inset 0 1px rgba(255,255,255,.11),inset 0 -8px 20px rgba(0,0,0,.14),0 7px 15px rgba(0,0,0,.24);
+  transition:.14s
+}
+.gameMenuBtn:before{
+  content:"";position:absolute;inset:3px;
+  clip-path:inherit;border:1px solid rgba(117,183,245,.2);pointer-events:none
+}
+.gameMenuBtn:hover{transform:translateX(5px);filter:brightness(1.14);border-color:#67b6f3}
+.gameMenuBtn>span:not(.menuIco){font-family:Georgia,"Times New Roman",serif;font-size:17px;font-weight:950;letter-spacing:.02em}
+.gameMenuBtn small{grid-column:1;color:#9fbfe3;font-size:7px;text-transform:uppercase;letter-spacing:.1em}
+.menuIco{
+  position:absolute;left:19px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;
+  display:grid;place-items:center;font-size:17px;color:#cfeeff;
+  background:rgba(5,21,43,.6);border:1px solid rgba(110,190,255,.24)
+}
+.gameMenuBtn.primary{
+  min-height:65px;padding-left:66px;border-color:#ffe19a;color:#3c2105;
+  background:linear-gradient(180deg,#fff0a2 0,#ffc94c 40%,#ee9d1b 100%);
+  box-shadow:inset 0 2px rgba(255,255,255,.65),inset 0 -7px 12px rgba(142,75,0,.2),0 0 24px rgba(255,177,47,.27),0 9px 17px rgba(0,0,0,.28)
+}
+.gameMenuBtn.primary>span:not(.menuIco){font-size:23px;text-shadow:0 1px rgba(255,255,255,.4)}
+.gameMenuBtn.primary small{color:#7d4a14}
+.gameMenuBtn.primary .menuIco{width:37px;height:37px;color:#47270a;background:rgba(111,52,0,.09);border-color:rgba(108,55,3,.2);font-size:23px}
+.gameMenuBtn.quit{opacity:.86}
+
+/* HUD superior */
+.menuProfileHud{
+  position:absolute;z-index:22;right:clamp(18px,3.8vw,58px);top:clamp(18px,3vh,32px);
+  width:min(620px,52vw);height:78px;padding:8px 14px 8px 82px;
+  display:grid;grid-template-columns:minmax(190px,1fr) 80px 88px;gap:8px;align-items:center;
+  background:linear-gradient(180deg,rgba(8,24,45,.96),rgba(6,17,34,.98));
+  border:2px solid #b58a3c;border-radius:6px;
+  box-shadow:inset 0 0 0 2px rgba(255,211,111,.08),0 14px 30px rgba(0,0,0,.28)
+}
+.menuProfileHud:before,.menuProfileHud:after{content:"";position:absolute;width:17px;height:17px;border:2px solid #e0b858;transform:rotate(45deg)}
+.menuProfileHud:before{left:-7px;top:29px;background:#101d35}.menuProfileHud:after{right:-7px;top:29px;background:#101d35}
+.profilePortrait{
+  position:absolute;left:-12px;top:50%;transform:translateY(-50%);
+  width:82px;height:82px;border-radius:50%;display:grid;place-items:center;font-size:38px;
+  background:radial-gradient(circle at 50% 40%,#355f90,#101c32 72%);
+  border:4px solid #d7aa4d;box-shadow:0 0 0 2px #5f3c0f,0 0 24px rgba(92,180,255,.2)
+}
+.profileIdentity{min-width:0;display:grid;grid-template-columns:1fr auto;column-gap:8px;align-items:center}
+.profileIdentity strong{font-family:Georgia,"Times New Roman",serif;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profileIdentity>span{font-size:9px;color:#bbcae1}
+.menuXpTrack{grid-column:1/3;height:8px;margin-top:4px;border-radius:99px;background:#030912;border:1px solid #385679;overflow:hidden}
+.menuXpTrack span{display:block;height:100%;width:0;background:linear-gradient(90deg,#18b9e8,#5fdbff 70%,#b2f5ff);box-shadow:0 0 10px rgba(78,213,255,.6)}
+.profileIdentity small{grid-column:1/3;margin-top:3px;font-size:7px;color:#98aac2;text-align:right}
+.profileStat{
+  height:52px;border-left:1px solid rgba(212,172,89,.28);display:grid;grid-template-columns:29px 1fr;grid-template-rows:1fr 1fr;align-items:center;padding-left:10px
+}
+.profileStat>span{grid-row:1/3;font-size:25px}.profileStat b{font-size:17px;line-height:1}.profileStat small{font-size:7px;text-transform:uppercase;color:#d9c69a}
+
+/* escaparate de combate + clases */
+.menuShowcase{
+  position:absolute;z-index:10;right:clamp(18px,4vw,60px);top:clamp(112px,15vh,145px);bottom:clamp(18px,3vh,32px);
+  left:clamp(395px,31vw,500px);display:grid;grid-template-rows:minmax(250px,1.35fr) auto;gap:15px;align-content:end
+}
+.duelPreview{
+  position:relative;min-height:0;border:2px solid #bf9140;border-radius:7px;overflow:hidden;
+  background:
+    radial-gradient(circle at 73% 47%,rgba(157,81,255,.24),transparent 22%),
+    radial-gradient(circle at 29% 48%,rgba(255,135,50,.2),transparent 23%),
+    linear-gradient(180deg,#1d3c64 0,#172c4f 48%,#0c172a 100%);
+  box-shadow:inset 0 0 0 2px rgba(255,224,143,.08),0 18px 36px rgba(0,0,0,.34)
+}
+.duelPreview:before{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(90deg,rgba(3,7,15,.35),transparent 20%,transparent 80%,rgba(3,7,15,.35)),
+    repeating-linear-gradient(90deg,transparent 0 78px,rgba(124,172,230,.035) 79px 80px);
+  pointer-events:none
+}
+.duelPreview:after{
+  content:"";position:absolute;left:-5%;right:-5%;bottom:-33%;height:62%;
+  border-radius:50%;border-top:1px solid rgba(171,205,255,.16);
+  background:radial-gradient(ellipse at 50% 0%,rgba(70,114,167,.28),transparent 55%),#091422;
+  transform:perspective(500px) rotateX(62deg)
+}
+.previewTop{
+  position:absolute;z-index:5;left:14px;right:14px;top:10px;display:grid;grid-template-columns:1fr 70px 1fr;align-items:center;gap:10px
+}
+.previewSide{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;align-items:center;gap:3px 7px;font-size:10px}
+.previewSide.rival{grid-template-columns:1fr auto;text-align:right}.previewSide.rival .previewHp{grid-column:1}.previewSide.rival b{grid-column:1}.previewSide.rival .previewAvatar{grid-column:2;grid-row:1/3}
+.previewAvatar{
+  grid-row:1/3;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:19px;
+  background:#182b49;border:2px solid #d6a84d
+}
+.previewHp{height:7px;border-radius:99px;background:#07101c;border:1px solid rgba(225,231,240,.2);overflow:hidden}
+.previewHp span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#44d56f,#83ee92)}
+.previewSide.rival .previewHp span{background:linear-gradient(90deg,#ff626c,#d8374a)}
+.previewVs{
+  font-family:Georgia,"Times New Roman",serif;font-size:24px;font-style:italic;font-weight:1000;text-align:center;
+  color:#ffcf55;text-shadow:0 0 18px rgba(255,159,34,.55)
+}
+.previewScene{position:absolute;z-index:3;left:5%;right:5%;top:19%;bottom:17%;display:flex;align-items:center;justify-content:space-between}
+.previewFighter{position:relative;width:40%;display:grid;justify-items:center;text-align:center}
+.previewFighter.enemy{transform:scaleX(-1)}.previewFighter.enemy>*{transform:scaleX(-1)}
+.previewCharacter{
+  position:relative;z-index:2;width:clamp(112px,12vw,175px);height:clamp(112px,12vw,175px);
+  display:grid;place-items:center;border-radius:45% 45% 38% 38%;font-size:clamp(54px,6vw,82px);
+  background:linear-gradient(150deg,#53311d,#17213a 66%);border:2px solid #e19a42;
+  box-shadow:0 18px 28px rgba(0,0,0,.34),0 0 28px rgba(255,137,48,.15)
+}
+.previewFighter.enemy .previewCharacter{background:linear-gradient(150deg,#523088,#141a34 68%);border-color:#ac77ff;box-shadow:0 18px 28px rgba(0,0,0,.34),0 0 30px rgba(153,87,255,.24)}
+.fighterAura{position:absolute;width:150px;height:150px;top:10%;border-radius:50%;background:radial-gradient(circle,rgba(255,135,44,.26),transparent 65%);filter:blur(8px)}
+.previewFighter.enemy .fighterAura{background:radial-gradient(circle,rgba(142,75,255,.3),transparent 65%)}
+.previewFighter>span{position:relative;z-index:3;margin-top:5px;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#f3ddb5}
+.previewImpact{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:68px;height:68px;border-radius:50%;display:grid;place-items:center;font-size:29px;color:#fff4a8;
+  background:radial-gradient(circle,#ffbf39 0,#ff8130 18%,rgba(255,129,48,.12) 38%,transparent 68%);
+  text-shadow:0 0 15px #fff;animation:previewPulse 2.4s ease-in-out infinite
+}
+@keyframes previewPulse{0%,100%{scale:.9;opacity:.82}50%{scale:1.12;opacity:1}}
+.previewSlogan{
+  position:absolute;z-index:7;left:16%;right:16%;bottom:0;transform:translateY(34%);
+  padding:8px 16px;text-align:center;font-family:Georgia,"Times New Roman",serif;font-size:clamp(13px,1.4vw,19px);
+  color:#eef7ff;background:linear-gradient(180deg,#102542,#07182d);border:1px solid #c5923f;
+  clip-path:polygon(5% 0,95% 0,100% 50%,95% 100%,5% 100%,0 50%);
+  box-shadow:0 7px 18px rgba(0,0,0,.34)
+}
+.previewSlogan strong{color:#ffd674}
+.classDeck{min-height:0}
+.classDeckTitle{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-bottom:8px;color:#f5d987}
+.classDeckTitle span{height:1px;background:linear-gradient(90deg,transparent,#d7a844)}
+.classDeckTitle span:last-child{background:linear-gradient(90deg,#d7a844,transparent)}
+.classDeckTitle b{font-family:Georgia,"Times New Roman",serif;font-size:11px;letter-spacing:.16em}
+.menuClasses{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.menuClassCard{
+  --class:#db6c5e;position:relative;min-height:132px;padding:10px 7px 8px;display:grid;justify-items:center;align-content:end;
+  color:#fff;border:1px solid color-mix(in srgb,var(--class) 72%,#fff 10%);border-radius:8px;
+  background:
+    radial-gradient(circle at 50% 18%,color-mix(in srgb,var(--class) 32%,transparent),transparent 38%),
+    linear-gradient(160deg,color-mix(in srgb,var(--class) 32%,#101a2c),#0a1324 72%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),0 10px 24px rgba(0,0,0,.28);transition:.15s
+}
+.menuClassCard:hover{transform:translateY(-4px);box-shadow:0 13px 28px rgba(0,0,0,.32),0 0 22px color-mix(in srgb,var(--class) 23%,transparent)}
+.menuClassCard.selected{transform:translateY(-5px);box-shadow:0 0 0 2px #ffe79b,0 15px 30px rgba(0,0,0,.34),0 0 28px color-mix(in srgb,var(--class) 36%,transparent)}
+.menuClassCard:after{
+  content:"";position:absolute;left:8px;right:8px;top:8px;height:1px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--class) 70%,#fff),transparent)
+}
+.menuClassCard.warrior{--class:#ff664e}.menuClassCard.mage{--class:#9d5df5}.menuClassCard.archer{--class:#46cf7b}.menuClassCard.cleric{--class:#f0bd4c}
+.classPortrait{
+  width:60px;height:60px;margin-bottom:5px;border-radius:50%;display:grid;place-items:center;font-size:34px;
+  background:radial-gradient(circle at 50% 34%,color-mix(in srgb,var(--class) 45%,#fff 6%),#111b31 72%);
+  border:2px solid color-mix(in srgb,var(--class) 72%,#fff 8%);box-shadow:0 0 18px color-mix(in srgb,var(--class) 27%,transparent)
+}
+.menuClassCard b{font-family:Georgia,"Times New Roman",serif;font-size:13px}.menuClassCard small{font-size:7px;color:#c3d0e2;margin-top:2px;text-align:center}.menuClassCard em{font-style:normal;font-size:6px;color:color-mix(in srgb,var(--class) 75%,#fff);margin-top:4px;text-transform:uppercase;letter-spacing:.08em}
+
+/* setup modal de partida */
+.setupDrawer{
+  position:absolute;z-index:60;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(820px,92vw);max-height:min(620px,90vh);padding:18px;
+  display:grid;grid-template-rows:auto auto minmax(150px,1fr) auto;gap:12px;
+  border:2px solid #c89a47;border-radius:12px;
+  background:
+    radial-gradient(circle at 80% 0%,rgba(102,103,239,.16),transparent 28%),
+    linear-gradient(155deg,rgba(19,36,64,.99),rgba(7,17,33,.99));
+  box-shadow:0 0 0 9999px rgba(1,5,12,.68),0 30px 90px rgba(0,0,0,.64),inset 0 0 0 2px rgba(255,219,139,.06);
+  overflow:hidden
+}
+.drawerGlow{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(80,166,255,.05),transparent)}
+.drawerEyebrow{font-size:7px;color:#e5bf70;font-weight:950;letter-spacing:.18em;text-transform:uppercase}
+.setupDrawer .setupHead h2{font-family:Georgia,"Times New Roman",serif;font-size:25px;margin-top:2px;color:#fff3cb}
+.setupDrawer .setupHead p{font-size:9px;color:#9fb2ce}
+.drawerClose{
+  width:32px;height:32px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(215,177,102,.38);
+  background:#14233d;color:#efd39b;font-size:21px;line-height:1
+}
+.setupDrawer .settingsRow{gap:9px}.setupDrawer .field label{color:#e2ba6b}
+.setupDrawer .field select{background:#0b172c;border-color:#425c80}
+.setupDrawer .roster{overflow:auto;padding-right:2px}.setupDrawer .playerSlot{border-color:#314b72;background:linear-gradient(145deg,#152844,#0c172c)}
+.setupDrawer .primaryBtn.startArenaBtn{
+  min-width:180px;font-family:Georgia,"Times New Roman",serif;font-size:13px;color:#392006;
+  background:linear-gradient(180deg,#ffe995,#ffc24b 48%,#e49418);border:1px solid #fff0b2;
+  box-shadow:0 0 22px rgba(255,177,43,.2),inset 0 1px rgba(255,255,255,.6)
+}
+
+/* modales del menú */
+.menuInfoModal{border-top:3px solid #d5a44d}
+.profileHero{display:flex;align-items:center;gap:13px;margin:14px 0;padding:12px;border-radius:13px;background:#11213b;border:1px solid rgba(205,163,80,.2)}
+.profileHeroIcon{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;font-size:31px;background:#1d3153;border:2px solid #c99c4b}
+.profileHero>div:last-child{display:grid;gap:4px}.profileHero b{font-size:18px}.profileHero span{font-size:9px;color:#a8bad4}
+.profileStatsGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.profileStatsGrid div{padding:10px;border-radius:11px;background:#12223c;border:1px solid rgba(103,143,205,.18);text-align:center}
+.profileStatsGrid b{display:block;font-size:18px;color:#ffe09a}.profileStatsGrid span{display:block;margin-top:2px;font-size:7px;color:#9fb1cb;text-transform:uppercase}
+.howToGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.howToGrid>div{position:relative;padding:12px 12px 12px 45px;border-radius:12px;background:#11213b;border:1px solid rgba(106,146,208,.18)}
+.howToGrid>div>span{position:absolute;left:10px;top:10px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#d4a044;color:#1d1305;font-weight:950}
+.howToGrid b{font-size:11px}.howToGrid p{font-size:8px;color:#a9bad3;line-height:1.45;margin:4px 0 0}
+.howToMotto{text-align:center;font-family:Georgia,"Times New Roman",serif;font-size:18px;color:#ffdc85;letter-spacing:.04em}
+
+/* Responsive del menú: prioriza 1366×768 y embeds */
+@media(max-height:820px){
+  .menuColumn{gap:9px;left:26px;width:315px}.gameLogo{padding-top:35px}.logoCrest{transform:translateX(-50%) scale(.82);transform-origin:center bottom}.logoBattle{font-size:50px}.logoVerbal{font-size:56px}.logoRibbon{padding:5px 10px;font-size:9px}
+  .gameMenuButtons{gap:5px}.gameMenuBtn{min-height:42px;padding-top:5px;padding-bottom:5px}.gameMenuBtn.primary{min-height:50px}.gameMenuBtn>span:not(.menuIco){font-size:14px}.gameMenuBtn.primary>span:not(.menuIco){font-size:19px}.gameMenuBtn small{display:none}.menuIco{width:27px;height:27px;font-size:15px}
+  .menuProfileHud{height:67px;top:12px;padding-left:72px;width:min(570px,54vw)}.profilePortrait{width:70px;height:70px;font-size:32px}.profileIdentity strong{font-size:15px}.profileStat{height:46px}
+  .menuShowcase{left:360px;top:92px;bottom:13px;right:18px;grid-template-rows:minmax(220px,1fr) auto;gap:10px}
+  .previewCharacter{width:100px;height:100px;font-size:48px}.classDeckTitle{margin-bottom:5px}.menuClassCard{min-height:112px;padding:7px 5px 6px}.classPortrait{width:49px;height:49px;font-size:27px}.menuClassCard b{font-size:11px}
+  .setupDrawer{max-height:92vh;padding:13px;gap:8px}
+}
+@media(max-width:1050px){
+  .menuColumn{left:20px;width:300px}.menuShowcase{left:335px;right:16px}.menuProfileHud{right:18px;width:58vw}
+}
+@media(max-width:820px){
+  .mainMenuScene{overflow:auto}
+  .menuColumn{position:relative;left:auto;top:auto;transform:none;width:auto;padding:16px;gap:10px}.gameLogo{max-width:330px;margin:auto}
+  .gameMenuButtons{grid-template-columns:1fr 1fr}.gameMenuBtn.primary{grid-column:1/3}
+  .menuProfileHud{position:relative;right:auto;top:auto;margin:0 16px;width:auto}
+  .menuShowcase{position:relative;left:auto;right:auto;top:auto;bottom:auto;padding:14px 16px 20px;grid-template-rows:280px auto}
+  .banner,.arenaSpire{display:none}
+}
+@media(max-width:560px){
+  .gameMenuButtons{grid-template-columns:1fr}.gameMenuBtn.primary{grid-column:auto}
+  .menuProfileHud{grid-template-columns:minmax(120px,1fr) 54px;padding-right:7px}.profileStat:last-child{display:none}
+  .menuClasses{grid-template-columns:1fr 1fr}.menuShowcase{grid-template-rows:250px auto}.previewCharacter{width:85px;height:85px;font-size:40px}
+  .setupDrawer{width:94vw}.setupDrawer .settingsRow{grid-template-columns:1fr 1fr}.setupDrawer .settingsRow .field:last-child{grid-column:1/3}
+  .howToGrid{grid-template-columns:1fr}.profileStatsGrid{grid-template-columns:1fr 1fr}
+}
