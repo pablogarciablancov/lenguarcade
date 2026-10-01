@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 11,
+  "version": 12,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -219,7 +219,7 @@
       "icon": "🛡️",
       "entry": "games/tower_defense/",
       "description": "Tower defense lingüístico: rompe escudos resolviendo retos de Ortografía, Verbos y Semántica y deja que tus torres derroten a los monstruos.",
-      "banner": "tower_defense",
+      "banner": "tower-defense-banner-v2.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -289,7 +289,7 @@
       "icon": "✦",
       "entry": "games/lexaria/",
       "description": "Auto-battler educativo: colecciona Lexarios, entrena con retos de Lengua, crea sinergias y combate en la Academia.",
-      "banner": "lexaria-banner.svg",
+      "banner": "lexaria-banner-v2.webp",
       "active": true,
       "integration": "embedded"
     }
