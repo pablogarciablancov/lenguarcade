@@ -2451,5 +2451,485 @@ body{
 })();
 </script>
 
+<style id="v32-genesis-pass">
+/* ===== v32 · Guardianes: premium illustrated tower-defense pass ===== */
+:root{
+  --g-blue:#1357a2;
+  --g-blue2:#0d3569;
+  --g-gold:#f5ca67;
+  --g-gold2:#98601d;
+  --g-parchment:#f3dfad;
+  --g-ink:#17253a;
+}
+html,body,#app{overflow:hidden!important}
+body{background:#07111c!important}
+#gameCanvas{image-rendering:auto!important}
+
+/* HUD superior: medallones de recurso, no barra web. */
+.topbar{
+  height:58px!important;min-height:58px!important;
+  padding:5px 10px!important;
+  background:
+    linear-gradient(180deg,rgba(16,39,68,.98),rgba(7,22,41,.98))!important;
+  border-bottom:2px solid #8e672d!important;
+  box-shadow:0 5px 16px rgba(0,0,0,.34),inset 0 -1px 0 rgba(255,224,150,.16)!important;
+}
+.brand{gap:8px!important}
+.brand-badge{
+  width:38px!important;height:38px!important;border-radius:50%!important;
+  background:radial-gradient(circle at 35% 30%,#3b89dc,#153b70 66%,#0c2549)!important;
+  border:2px solid var(--g-gold)!important;
+  box-shadow:0 2px 0 #684418,0 4px 11px rgba(0,0,0,.35)!important;
+}
+.brand h1{font-family:Georgia,'Times New Roman',serif!important;font-size:16px!important;color:#fff0c1!important;text-shadow:0 2px 0 #35200b!important}
+.brand p{font-size:8px!important;color:#bdd3eb!important}
+.logo-plaque{
+  padding:7px 18px!important;border-radius:8px!important;
+  background:linear-gradient(180deg,#216bc3,#123e7c)!important;
+  border:2px solid var(--g-gold)!important;
+  box-shadow:0 3px 0 #6b4318,0 6px 13px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.22)!important;
+  font-family:Georgia,'Times New Roman',serif!important;
+}
+.hud{gap:6px!important;align-items:center!important;flex-wrap:nowrap!important}
+.hud-chip,.profile-chip{
+  min-width:86px!important;height:43px!important;padding:4px 9px!important;border-radius:8px!important;
+  background:linear-gradient(180deg,#233b58,#101f33)!important;
+  border:2px solid #a87c38!important;
+  box-shadow:0 3px 0 #533716,0 5px 12px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,245,211,.13)!important;
+}
+.hud-chip .icon{font-size:20px!important}.hud-chip small,.profile-chip small{font-size:7px!important;color:#e7d3a2!important}.hud-chip b,.profile-chip b{font-size:14px!important;color:#fff6d7!important}
+.hud-chip.genesis-secondary{min-width:62px!important;opacity:.86!important}
+
+/* El mapa domina toda la pantalla. */
+.stage-wrap{background:radial-gradient(circle at 50% 0,#17365b 0,#081522 62%,#050c14 100%)!important}
+.map-shell{
+  border:3px solid #b9873e!important;border-radius:11px!important;
+  box-shadow:0 0 0 2px #4b2e11,0 18px 52px rgba(0,0,0,.46),inset 0 0 0 1px rgba(255,231,174,.25)!important;
+  background:#1c3e56!important;
+}
+.map-shell:after{
+  content:'';position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:8px;
+  box-shadow:inset 0 0 34px rgba(4,12,21,.28),inset 0 0 0 1px rgba(255,236,189,.14);
+}
+.overlay-top{left:10px!important;right:10px!important;top:9px!important;z-index:12!important}
+.overlay-buttons{gap:5px!important;align-items:center!important}
+.overlay-buttons button{
+  height:34px!important;padding:5px 9px!important;border-radius:7px!important;
+  border:2px solid #9d7335!important;
+  background:linear-gradient(180deg,#284c75,#142d4e)!important;
+  color:#fff4cf!important;box-shadow:0 2px 0 #493016,0 4px 10px rgba(0,0,0,.27)!important;
+  font-size:10px!important;text-shadow:0 1px 0 rgba(0,0,0,.55)!important;
+}
+#startWaveBtn{
+  min-width:132px!important;
+  background:linear-gradient(180deg,#2e7ed2,#17549c)!important;
+  border-color:#ffd477!important;color:white!important;
+  font-size:11px!important;
+  box-shadow:0 2px 0 #714713,0 5px 14px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.2)!important;
+}
+#startWaveBtn:not(:disabled){animation:genesisWavePulse 2.2s ease-in-out infinite}
+@keyframes genesisWavePulse{50%{filter:brightness(1.13);transform:translateY(-1px)}}
+.enemy-select-hint{
+  top:51px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;
+  background:rgba(10,27,46,.82)!important;border:1px solid rgba(255,213,119,.46)!important;
+  color:#fff2c7!important;border-radius:999px!important;padding:4px 10px!important;font-size:9px!important;
+  box-shadow:0 4px 12px rgba(0,0,0,.25)!important;
+}
+
+/* Panel de torre: solo aparece cuando hay una torre seleccionada. */
+#gameBottomDock{
+  left:auto!important;right:12px!important;bottom:12px!important;
+  width:min(430px,48%)!important;min-width:330px!important;
+  display:grid!important;grid-template-columns:minmax(0,1fr) 108px!important;gap:7px!important;
+  padding:7px!important;border-radius:11px!important;
+  background:linear-gradient(180deg,rgba(246,224,173,.98),rgba(218,184,117,.98))!important;
+  border:3px solid #75501e!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.42),inset 0 0 0 1px rgba(255,255,255,.5)!important;
+  opacity:0!important;transform:translateY(12px) scale(.98);pointer-events:none!important;
+  transition:opacity .16s ease,transform .16s ease!important;z-index:13!important;
+}
+#gameBottomDock.tower-selected{opacity:1!important;transform:none!important;pointer-events:auto!important}
+#dockTowerHost{display:none!important}
+.dock-info-host{
+  display:flex!important;min-height:76px!important;padding:7px 8px!important;border-radius:6px!important;
+  background:rgba(255,248,224,.48)!important;border:1px solid rgba(94,57,14,.28)!important;
+}
+.dock-info-host #towerInfo{color:#33230e!important;font-size:9px!important;line-height:1.28!important}
+.tower-info-title b{font-size:11px!important;color:#3a250d!important}.tower-info-title span,.tower-info-specialty,.tower-info-stats{color:#5a3e18!important}
+.tower-info-thumb{width:58px!important;height:58px!important;border-radius:7px!important;background:rgba(35,77,116,.13)!important;border-color:rgba(91,60,20,.25)!important}
+.dock-actions-host{gap:5px!important}
+.dock-actions-host button{
+  min-height:32px!important;border-radius:6px!important;border:2px solid #705022!important;
+  box-shadow:0 2px 0 #4e3517!important;font-size:9px!important;
+}
+#upgradeBtn{background:linear-gradient(180deg,#3b9b57,#237442)!important}
+#sellBtn{background:linear-gradient(180deg,#b45450,#843736)!important}
+
+/* Construcción radial sobre la propia peana. */
+.guardian-build-radial{
+  position:absolute;width:304px;height:226px;z-index:18;transform:translate(-50%,-50%);
+  pointer-events:none;filter:drop-shadow(0 12px 20px rgba(0,0,0,.36));
+}
+.guardian-build-radial.hidden{display:none!important}
+.guardian-build-radial:before{
+  content:'';position:absolute;left:50%;top:50%;width:92px;height:92px;transform:translate(-50%,-50%);
+  border-radius:50%;background:radial-gradient(circle,rgba(73,174,255,.26),rgba(33,92,148,.12) 52%,transparent 70%);
+  border:1px solid rgba(139,216,255,.45);animation:guardianRune 1.8s ease-in-out infinite;
+}
+@keyframes guardianRune{50%{transform:translate(-50%,-50%) scale(1.08);opacity:.72}}
+.guardian-radial-core{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:58px;height:58px;border-radius:50%;
+  display:grid;place-items:center;text-align:center;pointer-events:auto;
+  background:radial-gradient(circle at 35% 28%,#3a8ee1,#174c8c 65%,#102e58);
+  border:3px solid #f1c763;color:#fff6d7;box-shadow:0 3px 0 #6b4517,0 0 18px rgba(69,177,255,.45);
+  font:900 9px/1.05 Georgia,serif;
+}
+.guardian-radial-option{
+  position:absolute;width:138px;height:69px;pointer-events:auto;display:grid;
+  grid-template-columns:54px 1fr;grid-template-rows:1fr auto;gap:1px 6px;align-items:center;
+  padding:6px!important;border-radius:9px!important;
+  background:linear-gradient(180deg,#f6e6bc,#d9ba79)!important;color:#33220b!important;
+  border:3px solid #7b5622!important;box-shadow:0 3px 0 #4b3216,0 6px 15px rgba(0,0,0,.3)!important;
+  text-align:left!important;overflow:hidden;
+}
+.guardian-radial-option:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.05)}
+.guardian-radial-option:disabled{filter:grayscale(.75);opacity:.58}
+.guardian-radial-option img{grid-row:1/3;width:52px;height:55px;object-fit:contain;filter:drop-shadow(0 4px 3px rgba(0,0,0,.25))}
+.guardian-radial-option b{font:900 10px/1.05 Georgia,serif;color:#35220b}
+.guardian-radial-option small{font-size:8px;font-weight:900;color:#735018}
+.guardian-radial-option:nth-of-type(1){left:7px;top:0}
+.guardian-radial-option:nth-of-type(2){right:7px;top:0}
+.guardian-radial-option:nth-of-type(3){left:7px;bottom:0}
+.guardian-radial-option:nth-of-type(4){right:7px;bottom:0}
+
+/* Habilidades tácticas, integradas como poderes de héroe. */
+.guardian-ability-dock{
+  position:absolute;left:12px;bottom:12px;z-index:14;display:flex;align-items:flex-end;gap:6px;
+  padding:6px 7px;border-radius:12px;background:linear-gradient(180deg,rgba(16,37,61,.92),rgba(7,21,37,.95));
+  border:2px solid #a77a37;box-shadow:0 6px 18px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,240,197,.12);
+}
+.guardian-portrait{
+  width:56px;height:56px;border-radius:50%;display:grid;place-items:center;position:relative;
+  background:radial-gradient(circle at 35% 30%,#4fa4ea,#19548e 55%,#0b2b51);
+  border:3px solid #f1c968;box-shadow:0 2px 0 #634019,0 0 12px rgba(61,166,255,.35);
+  color:#fff0b3;font:900 22px/1 Georgia,serif;
+}
+.guardian-portrait:after{content:'GUARDIÁN';position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);font:800 6px/1 system-ui;letter-spacing:.08em;color:#fff2c5;background:#102a48;padding:2px 4px;border-radius:4px}
+.guardian-spell{
+  width:49px;height:49px;position:relative;border-radius:50%!important;padding:0!important;
+  border:3px solid #dfb75e!important;background:radial-gradient(circle at 35% 28%,#367fc1,#173f72 70%)!important;
+  color:#fff4ca!important;box-shadow:0 2px 0 #644118,0 4px 9px rgba(0,0,0,.28)!important;
+  display:grid!important;place-items:center!important;font-weight:900!important;
+}
+.guardian-spell .spell-glyph{font:900 19px/1 Georgia,serif;text-shadow:0 2px 0 rgba(0,0,0,.45)}
+.guardian-spell .spell-cost{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);white-space:nowrap;font-size:7px;background:#0c2745;border:1px solid #b98b42;border-radius:6px;padding:1px 4px;color:#cfe9ff}
+.guardian-spell .spell-cd{position:absolute;inset:0;border-radius:50%;display:none;place-items:center;background:rgba(5,13,24,.74);font-size:12px}
+.guardian-spell.cooling .spell-cd{display:grid}.guardian-spell:disabled{filter:grayscale(.65) brightness(.72)}
+.guardian-toast{
+  position:absolute;left:50%;top:18%;z-index:24;transform:translateX(-50%);
+  padding:7px 13px;border-radius:8px;background:linear-gradient(180deg,#263c56,#12243a);
+  color:#fff0bd;border:2px solid #d4a94f;box-shadow:0 7px 18px rgba(0,0,0,.34);
+  font-size:10px;font-weight:900;pointer-events:none;animation:guardianToast 1.45s ease both;
+}
+@keyframes guardianToast{0%{opacity:0;transform:translate(-50%,-8px)}12%,78%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-5px)}}
+
+/* Preguntas como cartas de combate, no formularios. */
+.question-card{
+  border-radius:12px!important;border:3px solid #d7aa52!important;
+  background:linear-gradient(180deg,#173a64,#0d2748)!important;
+  box-shadow:0 18px 55px rgba(0,0,0,.58),inset 0 0 0 1px rgba(255,236,183,.12)!important;
+}
+.question-header{border-radius:8px 8px 0 0!important;background:linear-gradient(90deg,#2269b3,#43317e)!important}
+.enemy-word{border-radius:7px!important;background:linear-gradient(180deg,#f0dca7,#d2b36f)!important;color:#3d290e!important;border:2px solid #845c24!important}
+.answer-btn{border-radius:7px!important;border:2px solid #7097c8!important;box-shadow:0 2px 0 #446289!important}
+
+/* Inicio/campaña con más aspecto de juego. */
+.start-screen{background:radial-gradient(circle at 50% 20%,#1e4772,#081523 65%,#040a11)!important}
+.start-hero-art{border-radius:12px!important;border:3px solid #c28e3d!important;box-shadow:0 14px 48px rgba(0,0,0,.48),0 0 0 1px #4c3014!important}
+.start-menu-btn,.start-map-card{border-radius:9px!important;border:2px solid #a77a39!important;box-shadow:0 3px 0 #4c3217,0 6px 15px rgba(0,0,0,.28)!important}
+.start-menu-btn b,.start-map-card b{font-family:Georgia,'Times New Roman',serif!important}
+.start-map-panel{border-radius:13px!important;border-color:#b9873f!important;background:linear-gradient(180deg,#17365a,#0b1d33)!important}
+.start-map-card{min-height:148px!important}
+.start-map-card:after{background:linear-gradient(180deg,rgba(3,12,23,.02),rgba(5,16,29,.22) 44%,rgba(5,13,22,.88))!important}
+.saved-game-pill{border-radius:5px!important}
+
+/* Hover sobre peana: la información aparece sin llenar el mapa de círculos. */
+.map-shell.build-radial-open{cursor:default}
+@media(max-width:980px){
+  .hud-chip.genesis-secondary{display:none!important}
+  #gameBottomDock{width:min(390px,52%)!important;min-width:300px!important}
+  .guardian-ability-dock{transform:scale(.9);transform-origin:left bottom}
+}
+@media(max-width:720px){
+  .brand p,.logo-plaque{display:none!important}
+  .hud-chip{min-width:64px!important;padding:3px 6px!important}
+  .hud-chip .icon{font-size:16px!important}.hud-chip b{font-size:11px!important}
+  .profile-chip{display:none!important}
+  .guardian-build-radial{transform:translate(-50%,-50%) scale(.82)}
+  .guardian-ability-dock{left:6px;bottom:6px;transform:scale(.76)}
+  #gameBottomDock{right:6px!important;bottom:6px!important;width:54%!important;min-width:250px!important;transform:translateY(10px) scale(.9)!important;transform-origin:right bottom!important}
+  #gameBottomDock.tower-selected{transform:scale(.9)!important}
+  .tower-info-thumb{display:none!important}.tower-info-shell{grid-template-columns:1fr!important}
+}
+</style>
+<script id="v32-genesis-script">
+(function(){
+  if(document.body.dataset.genesisPass==='1')return;
+  document.body.dataset.genesisPass='1';
+  var game=window.game;
+  if(!game)return;
+
+  /* Identidad: mismos tipos internos para no romper guardados. */
+  Object.assign(TOWER_TYPES.corrector,{name:'Archivo Arcano',icon:'✦',specialty:'Proyectiles de tinta rápidos. Mantiene a raya a los enemigos mientras rompes sus escudos.'});
+  Object.assign(TOWER_TYPES.tildador,{name:'Scriptorium',icon:'➶',specialty:'Ataques precisos de gran alcance. Especialista en rematar enemigos vulnerables.'});
+  Object.assign(TOWER_TYPES.gramatico,{name:'Imprenta Rúnica',icon:'◈',specialty:'Descargas de área para castigar grupos y ralentizar su avance.'});
+  Object.assign(TOWER_TYPES.sintactico,{name:'Orden de Guardianes',icon:'◆',specialty:'Control y debilitamiento: abre ventanas para que el resto de torres haga más daño.'});
+
+  var mapNames={
+    bosque:['Bosque de Pergaminos','Raíces, ruinas y manuscritos encantados'],
+    ciudad:['Ciudad del Scriptorium','Murallas, archivos y plazas del saber'],
+    trigal:['Campos de Trigo y Tinta','Molinos, acequias y tinta desbordada'],
+    bahia:['Acantilados del Archivo','Puentes, cascadas y bibliotecas sobre el mar']
+  };
+  Object.keys(mapNames).forEach(function(k){if(MAP_PRESETS[k]){MAP_PRESETS[k].name=mapNames[k][0];MAP_PRESETS[k].subtitle=mapNames[k][1];}});
+
+  /* Actualiza las etiquetas que ya fueron pintadas al cargar. */
+  var startCards=Array.prototype.slice.call(document.querySelectorAll('#startMapGrid .start-map-card'));
+  Object.values(MAP_PRESETS).forEach(function(p,i){
+    var b=startCards[i];if(!b)return;
+    var saved=SaveManager.load();
+    var savedNote=saved&&saved.mapKey===p.key?'<em class="saved-game-pill">💾 Oleada '+((saved.waveIndex||0)+1)+'</em>':'';
+    b.innerHTML='<span><b>'+p.name+'</b><small>'+p.subtitle+'</small>'+savedNote+'</span>';
+  });
+  game.renderMapChooser();
+  game.ui.renderTowerButtons();game.ui.renderTowerStrip();
+
+  /* HUD principal. */
+  var livesSmall=document.getElementById('hudLives')?.previousElementSibling;if(livesSmall)livesSmall.textContent='Vidas';
+  var streakChip=document.getElementById('hudStreak')?.closest('.hud-chip');if(streakChip)streakChip.classList.add('genesis-secondary');
+  var towersChip=document.getElementById('hudTowers')?.closest('.hud-chip');if(towersChip)towersChip.classList.add('genesis-secondary');
+
+  var shell=document.getElementById('mapShell');
+  var canvas=document.getElementById('gameCanvas');
+  if(!shell||!canvas)return;
+
+  /* Construcción radial contextual. */
+  var radial=document.createElement('div');
+  radial.id='guardianBuildRadial';radial.className='guardian-build-radial hidden';
+  shell.appendChild(radial);
+  var radialSite=-1;
+
+  function towerArt(type){
+    return (typeof TOWER_ART_DATA!=='undefined'&&TOWER_ART_DATA[type]&&(TOWER_ART_DATA[type].thumb||TOWER_ART_DATA[type].panel)) ||
+      EMBEDDED_PIXEL_ASSETS['tower_full_'+type+'_l1'] || UI_GUIDE_ASSETS[type+'_l1'] || '';
+  }
+  function hideRadial(){
+    radial.classList.add('hidden');shell.classList.remove('build-radial-open');radialSite=-1;game.genesisBuildSite=-1;
+  }
+  function placeRadial(siteIndex){
+    var s=BUILD_SITES[siteIndex];if(!s)return;
+    var r=shell.getBoundingClientRect();
+    var x=s.x/PIXEL_ENGINE.width*r.width,y=s.y/PIXEL_ENGINE.height*r.height;
+    x=Math.max(157,Math.min(r.width-157,x));
+    y=Math.max(118,Math.min(r.height-118,y));
+    radial.style.left=x+'px';radial.style.top=y+'px';
+  }
+  function openRadial(siteIndex){
+    if(game.towers.some(function(t){return t.siteIndex===siteIndex;}))return;
+    radialSite=siteIndex;game.genesisBuildSite=siteIndex;game.selectedTower=null;game.buildType=null;
+    var html='<button class="guardian-radial-core" type="button" aria-label="Cerrar construcción">CONSTRUIR</button>';
+    Object.entries(TOWER_TYPES).forEach(function(entry){
+      var type=entry[0],cfg=entry[1],unlocked=game.unlockedTowers.has(type),afford=game.ink>=cfg.cost;
+      html+='<button class="guardian-radial-option" type="button" data-type="'+type+'" '+(!unlocked?'disabled':'')+'>'+
+        '<img src="'+towerArt(type)+'" alt="">'+
+        '<b>'+cfg.name+'</b><small>'+(unlocked?(cfg.cost+' tinta'+(!afford?' · falta tinta':'')):('Se abre en oleada '+cfg.unlockWave))+'</small></button>';
+    });
+    radial.innerHTML=html;placeRadial(siteIndex);radial.classList.remove('hidden');shell.classList.add('build-radial-open');
+    radial.querySelector('.guardian-radial-core').addEventListener('click',hideRadial);
+    radial.querySelectorAll('.guardian-radial-option').forEach(function(btn){
+      btn.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        var type=btn.dataset.type,cfg=TOWER_TYPES[type];
+        if(!game.unlockedTowers.has(type))return;
+        if(game.ink<cfg.cost){showGuardianToast('Necesitas '+cfg.cost+' de tinta para '+cfg.name+'.');return;}
+        var site=radialSite;game.buildType=type;hideRadial();game.handleBuildSite(site);
+        game.ui.renderTowerInfo();
+      });
+    });
+  }
+
+  /* Captura antes del listener clásico: una peana vacía abre el menú radial. */
+  canvas.addEventListener('click',function(e){
+    if(!game.running||game.questionActive)return;
+    var p=game.canvasPoint(e);
+    var nearest=BUILD_SITES.map(function(s,i){return {i:i,d:dist(p,s)};}).sort(function(a,b){return a.d-b.d;})[0];
+    if(!nearest||nearest.d>16){hideRadial();return;}
+    var occupied=game.towers.some(function(t){return t.siteIndex===nearest.i;});
+    if(!occupied){
+      e.preventDefault();e.stopImmediatePropagation();
+      openRadial(nearest.i);
+    }else hideRadial();
+  },true);
+
+  canvas.addEventListener('pointermove',function(e){
+    if(game.questionActive){game.genesisHoveredSite=-1;return;}
+    var p=game.canvasPoint(e);
+    var nearest=BUILD_SITES.map(function(s,i){return {i:i,d:dist(p,s)};}).sort(function(a,b){return a.d-b.d;})[0];
+    game.genesisHoveredSite=nearest&&nearest.d<=16&&!game.towers.some(function(t){return t.siteIndex===nearest.i;})?nearest.i:-1;
+  },true);
+  canvas.addEventListener('pointerleave',function(){game.genesisHoveredSite=-1;},true);
+  window.addEventListener('resize',function(){if(radialSite>=0)placeRadial(radialSite);},{passive:true});
+
+  /* Panel contextual de mejora. */
+  var dock=document.getElementById('gameBottomDock');
+  var baseInfo=UIManager.prototype.renderTowerInfo;
+  UIManager.prototype.renderTowerInfo=function(){
+    baseInfo.call(this);
+    if(dock)dock.classList.toggle('tower-selected',!!this.game.selectedTower);
+  };
+  game.ui.renderTowerInfo();
+
+  /* Habilidades de Guardián: usan Tinta ganada jugando, nunca rompen escudos lingüísticos. */
+  var abilityDock=document.createElement('div');
+  abilityDock.id='guardianAbilityDock';abilityDock.className='guardian-ability-dock';
+  abilityDock.innerHTML=
+    '<div class="guardian-portrait" title="Guardián de la Biblioteca">G</div>'+
+    '<button class="guardian-spell" data-spell="storm" title="Tormenta de Tinta: daña solo enemigos cuyo escudo ya has roto."><span class="spell-glyph">✦</span><span class="spell-cost">80</span><span class="spell-cd"></span></button>'+
+    '<button class="guardian-spell" data-spell="bind" title="Palabra Encadenada: ralentiza durante 5 s a los enemigos en pantalla."><span class="spell-glyph">≈</span><span class="spell-cost">65</span><span class="spell-cd"></span></button>'+
+    '<button class="guardian-spell" data-spell="ward" title="Página Protectora: recupera 2 vidas de la Biblioteca."><span class="spell-glyph">+</span><span class="spell-cost">95</span><span class="spell-cd"></span></button>';
+  shell.appendChild(abilityDock);
+  game.guardianCooldowns={storm:0,bind:0,ward:0};
+  var spellCfg={storm:{cost:80,cd:18000},bind:{cost:65,cd:22000},ward:{cost:95,cd:30000}};
+
+  function showGuardianToast(text){
+    var old=shell.querySelector('.guardian-toast');if(old)old.remove();
+    var el=document.createElement('div');el.className='guardian-toast';el.textContent=text;shell.appendChild(el);
+    setTimeout(function(){el.remove();},1500);
+  }
+  function castSpell(id){
+    var cfg=spellCfg[id],now=performance.now();
+    if(!cfg||now<(game.guardianCooldowns[id]||0))return;
+    if(game.ink<cfg.cost){showGuardianToast('No tienes suficiente tinta.');return;}
+    if(id==='storm'){
+      var targets=game.enemies.filter(function(e){return e.alive&&!e.shieldActive;});
+      if(!targets.length){showGuardianToast('Rompe primero algún escudo lingüístico.');return;}
+      game.ink-=cfg.cost;
+      targets.forEach(function(e){e.takeDamage(34,null);if(game.particles)game.particles.spawn('hit',e.x,e.y,'#6bc8ff');});
+      showGuardianToast('Tormenta de Tinta · '+targets.length+' objetivos');
+      game.log('✦ Tormenta de Tinta: daño sobre enemigos vulnerables.');
+    }else if(id==='bind'){
+      var enemies=game.enemies.filter(function(e){return e.alive;});
+      if(!enemies.length){showGuardianToast('No hay enemigos en el camino.');return;}
+      game.ink-=cfg.cost;
+      enemies.forEach(function(e){e.slowFactor=Math.min(e.slowFactor,.52);e.slowUntil=Math.max(e.slowUntil,now+5000);if(game.particles)game.particles.spawn('shield',e.x,e.y,'#84b9ff');});
+      showGuardianToast('Palabra Encadenada · 5 s');
+      game.log('≈ Palabra Encadenada: la oleada se ralentiza.');
+    }else if(id==='ward'){
+      if(game.lives>=GAME_CONFIG.maxLives){showGuardianToast('La Biblioteca ya está a salvo.');return;}
+      game.ink-=cfg.cost;game.lives=Math.min(GAME_CONFIG.maxLives,game.lives+2);
+      showGuardianToast('Página Protectora · +2 vidas');
+      game.log('+ Página Protectora: la Biblioteca recupera 2 vidas.');
+    }
+    game.guardianCooldowns[id]=now+cfg.cd;game.ui.updateHUD();updateSpellButtons();
+  }
+  abilityDock.querySelectorAll('.guardian-spell').forEach(function(btn){btn.addEventListener('click',function(){castSpell(btn.dataset.spell);});});
+
+  function updateSpellButtons(){
+    var now=performance.now();
+    abilityDock.querySelectorAll('.guardian-spell').forEach(function(btn){
+      var id=btn.dataset.spell,cfg=spellCfg[id],left=Math.max(0,(game.guardianCooldowns[id]||0)-now);
+      var contextual=(id==='ward'&&game.lives>=GAME_CONFIG.maxLives);
+      btn.disabled=game.ink<cfg.cost||left>0||!game.running||contextual;
+      btn.classList.toggle('cooling',left>0);
+      var cd=btn.querySelector('.spell-cd');if(cd)cd.textContent=left>0?Math.ceil(left/1000):'';
+    });
+  }
+  setInterval(updateSpellButtons,250);updateSpellButtons();
+
+  var baseHud=UIManager.prototype.updateHUD;
+  UIManager.prototype.updateHUD=function(){baseHud.call(this);updateSpellButtons();};
+
+  /* Cierra interfaces contextuales al arrancar una oleada o abrir pregunta. */
+  var baseStart=Game.prototype.startNextWave;
+  Game.prototype.startNextWave=function(){hideRadial();return baseStart.apply(this,arguments);};
+  var baseQuestion=Game.prototype.openQuestion;
+  Game.prototype.openQuestion=function(enemy){hideRadial();return baseQuestion.call(this,enemy);};
+
+  /* Render: peanas limpias, rango funcional y feedback solo al pasar el ratón. */
+  PixelRenderer.prototype.drawBuildSites=function(ctx){
+    var now=performance.now()/1000;
+    for(var i=0;i<BUILD_SITES.length;i++){
+      if(this.game.towers.some(function(t){return t.siteIndex===i;}))continue;
+      if(this.game.genesisHoveredSite!==i&&this.game.genesisBuildSite!==i)continue;
+      var s=BUILD_SITES[i],active=this.game.genesisBuildSite===i,pulse=.7+.3*Math.sin(now*5);
+      ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));
+      ctx.strokeStyle=active?'rgba(117,215,255,'+(.72+.2*pulse)+')':'rgba(255,220,132,'+(.62+.22*pulse)+')';
+      ctx.lineWidth=1.5;ctx.beginPath();
+      ctx.moveTo(-9,-5);ctx.lineTo(-4,-9);ctx.moveTo(9,-5);ctx.lineTo(4,-9);
+      ctx.moveTo(-9,5);ctx.lineTo(-4,9);ctx.moveTo(9,5);ctx.lineTo(4,9);ctx.stroke();
+      ctx.fillStyle=active?'rgba(107,200,255,.18)':'rgba(255,220,132,.14)';ctx.beginPath();ctx.ellipse(0,3,13,5,0,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    }
+    if(this.game.selectedTower){
+      var p=this.game.selectedTower.getPos(),r=Math.round(this.game.selectedTower.stats.range);
+      ctx.save();ctx.fillStyle='rgba(71,166,235,.055)';ctx.strokeStyle='rgba(116,205,255,.55)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+      ctx.beginPath();ctx.arc(Math.round(p.x),Math.round(p.y),r,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.setLineDash([]);ctx.restore();
+    }
+  };
+
+  /* Torres algo más presentes y enemigos un punto mayores. */
+  var previousEnemyScale=PixelRenderer.prototype.enemyScale;
+  PixelRenderer.prototype.enemyScale=function(e){return previousEnemyScale.call(this,e)*1.08;};
+  PixelRenderer.prototype.drawTower=function(ctx,t){
+    var p=t.getPos(),level=Math.max(1,Math.min(3,t.level||1)),img=TOWER_ART_IMAGES[t.type];
+    var anchor=V26_TOWER_ANCHOR[t.type]||V26_TOWER_ANCHOR.corrector;
+    ctx.save();
+    ctx.fillStyle='rgba(0,0,0,.30)';ctx.beginPath();ctx.ellipse(Math.round(p.x),Math.round(p.y+anchor.shadowY),anchor.shadowW+level*2.6,6+level*.55,0,0,Math.PI*2);ctx.fill();
+    if(img&&img.complete&&img.naturalWidth){
+      var half=img.width/2,topUse=Math.max(1,img.height-8);
+      var fit=Math.min((p.x-3)/half,(PIXEL_ENGINE.width-p.x-3)/half,(p.y-3)/topUse);
+      var desired=[.78,.87,.96][level-1]||.78,sc=Math.max(.43,Math.min(desired,fit));
+      var w=img.width*sc,h=img.height*sc;
+      ctx.imageSmoothingEnabled=true;ctx.drawImage(img,Math.round(p.x-w/2),Math.round(p.y-h+anchor.bottom),w,h);
+    }else{
+      this.ensureTower(t);var def=this.towerDef(t);this.sprites.draw(ctx,def,t.pixelAnimator,p.x,p.y+10,false,.60);
+    }
+    ctx.translate(Math.round(p.x+18),Math.round(p.y-5));
+    ctx.fillStyle=level===1?'#74bfff':level===2?'#ffd86f':'#ff9f55';ctx.strokeStyle='#172438';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(7,-3);ctx.lineTo(5,6);ctx.lineTo(0,9);ctx.lineTo(-5,6);ctx.lineTo(-7,-3);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.fillStyle='#142237';ctx.font='bold 7px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(level),0,1);
+    ctx.restore();
+  };
+
+  /* Proyectiles con trayectoria y brillo legible. */
+  PixelRenderer.prototype.drawProjectiles=function(ctx){
+    for(var i=0;i<this.game.projectiles.length;i++){
+      var p=this.game.projectiles[i],total=p.control?.20:.16,t=clamp(1-p.life/total,0,1);
+      var x=lerp(p.x,p.tx,t),y=lerp(p.y,p.ty,t),t0=Math.max(0,t-.22),x0=lerp(p.x,p.tx,t0),y0=lerp(p.y,p.ty,t0);
+      ctx.save();ctx.globalAlpha=.72;ctx.strokeStyle=p.color;ctx.lineWidth=p.control?1.3:1.7;ctx.shadowColor=p.color;ctx.shadowBlur=5;
+      ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x,y);ctx.stroke();
+      ctx.globalAlpha=1;ctx.fillStyle='#fff8d7';ctx.beginPath();ctx.arc(Math.round(x),Math.round(y),p.control?1.7:2.2,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle=p.color;ctx.lineWidth=1;ctx.beginPath();ctx.arc(Math.round(x),Math.round(y),p.control?3.8:3.1,0,Math.PI*2);ctx.stroke();ctx.restore();
+    }
+  };
+
+  /* Un poco más de vida visual en las escenas sin tocar la colisión ni la ruta. */
+  var baseRender=PixelRenderer.prototype.render;
+  PixelRenderer.prototype.render=function(ctx){
+    baseRender.call(this,ctx);
+    var tm=performance.now()/1000;
+    ctx.save();ctx.globalAlpha=.45;
+    for(var i=0;i<7;i++){
+      var x=(37+i*83+(tm*(3+i%2)))%PIXEL_ENGINE.width,y=28+((i*47)%270)+Math.sin(tm*1.3+i)*3;
+      ctx.fillStyle=i%2?'#fff0a3':'#9ddcff';ctx.fillRect(Math.round(x),Math.round(y),1,1);
+    }
+    ctx.restore();
+  };
+
+  /* Estado inicial coherente tras instalar la capa. */
+  hideRadial();game.ui.renderTowerInfo();game.ui.updateHUD();
+})();
+</script>
+
 </body>
 </html>
