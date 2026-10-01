@@ -2481,5 +2481,105 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
   install();
 })();
 </script>
+
+<style id="la-teacher-tracking-sort-v1">
+.studentSortBtn{display:inline-flex!important;align-items:center;gap:5px;width:auto!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;color:inherit!important;font:inherit!important;text-align:left}.studentSortBtn::after{content:'↕';font-size:9px;opacity:.45}.studentSortBtn.active::after{content:attr(data-arrow);opacity:1;color:var(--accent)}
+.completionTracking{margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,rgba(0,212,255,.055),rgba(124,77,255,.05))}.completionTrackingHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}.completionTrackingHead h3{margin:0}.completionTrackingGrid{display:grid;gap:9px}.completionCard{padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(0,0,0,.08)}body.light .completionCard{background:#fff}.completionTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.completionTop strong{font-size:14px}.completionPill{font-size:10px;font-weight:900;border:1px solid var(--line);border-radius:999px;padding:5px 8px;white-space:nowrap;color:#70dda9}.completionBar{height:7px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:9px 0}.completionBar span{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:999px}.completionNames{display:flex;flex-wrap:wrap;gap:5px}.completionName{font-size:10px;padding:4px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}.completionName.done{color:#70dda9;border-color:rgba(85,214,155,.3)}.completionEmpty{font-size:11px;color:var(--muted)}
+@media(max-width:700px){.completionTop,.completionTrackingHead{flex-direction:column}.completionPill{align-self:flex-start}}
+</style>
+<script>
+(function(){
+  if(window.__LA_TEACHER_TRACKING_SORT_V1__)return;
+  window.__LA_TEACHER_TRACKING_SORT_V1__=true;
+  var sortKey='xp',sortDir='desc';
+
+  function tEsc(value){return typeof esc==='function'?esc(value):String(value==null?'':value);}
+  function sortValue(student,key){
+    if(key==='nombre'||key==='clase')return String(student[key]||'').toLocaleLowerCase('es');
+    return Number(student[key]||0);
+  }
+  function sortedStudents(data){
+    return (data&&Array.isArray(data.students)?data.students:[]).slice().sort(function(a,b){
+      var av=sortValue(a,sortKey),bv=sortValue(b,sortKey),cmp=0;
+      if(typeof av==='string')cmp=av.localeCompare(bv,'es',{sensitivity:'base'});
+      else cmp=av-bv;
+      return sortDir==='asc'?cmp:-cmp;
+    });
+  }
+  function ensureSortHeader(){
+    var table=document.getElementById('studentsBody')&&document.getElementById('studentsBody').closest('table');if(!table)return;
+    var head=table.querySelector('thead tr');if(!head||head.dataset.sortable==='1')return;
+    var columns=[['nombre','Alumno'],['clase','Clase'],['xp','XP'],['level','Nivel'],['sessions','Sesiones'],['gamesPlayed','Juegos'],['accuracy','Precisión'],['grade','Nota']];
+    head.innerHTML=columns.map(function(col){return '<th><button type="button" class="studentSortBtn" data-student-sort="'+col[0]+'">'+col[1]+'</button></th>';}).join('');
+    head.dataset.sortable='1';
+    head.addEventListener('click',function(event){
+      var button=event.target.closest('[data-student-sort]');if(!button)return;
+      var key=button.dataset.studentSort;
+      if(sortKey===key)sortDir=sortDir==='asc'?'desc':'asc';
+      else{sortKey=key;sortDir=(key==='nombre'||key==='clase')?'asc':'desc';}
+      renderSortedStudentRows(typeof currentTeacher!=='undefined'?currentTeacher:null);
+    });
+  }
+  function renderSortedStudentRows(data){
+    var body=document.getElementById('studentsBody');if(!body)return;
+    ensureSortHeader();
+    var rows=sortedStudents(data||{});
+    body.innerHTML=rows.map(function(student){
+      return '<tr class="studentRow" data-student="'+tEsc(student.studentId)+'"><td><div class="studentIdentity"><div class="studentIdentityText"><strong>'+tEsc(student.nombre)+'</strong><br><span class="sub">'+tEsc(student.email)+'</span></div><button type="button" class="ghost studentAccessBtn" data-player-access="'+tEsc(student.studentId)+'">🎮 Accesos</button></div></td><td>'+tEsc(student.clase)+'</td><td>'+tEsc(student.xp)+'</td><td>'+tEsc(student.level)+'</td><td>'+tEsc(student.sessions)+'</td><td>'+tEsc(student.gamesPlayed)+'</td><td>'+tEsc(student.accuracy)+'%</td><td><strong>'+tEsc(student.grade)+'</strong></td></tr>';
+    }).join('');
+    body.querySelectorAll('.studentRow').forEach(function(row){row.onclick=function(){openStudentDetail(row.dataset.student);};});
+    body.querySelectorAll('[data-player-access]').forEach(function(button){button.onclick=function(event){event.stopPropagation();openStudentDetail(button.dataset.playerAccess,'access');};});
+    var head=body.closest('table').querySelector('thead');
+    head.querySelectorAll('[data-student-sort]').forEach(function(button){
+      var active=button.dataset.studentSort===sortKey;button.classList.toggle('active',active);button.dataset.arrow=active?(sortDir==='asc'?'↑':'↓'):'↕';
+      button.closest('th').setAttribute('aria-sort',active?(sortDir==='asc'?'ascending':'descending'):'none');
+    });
+  }
+  function namesHtml(rows,mode){
+    rows=Array.isArray(rows)?rows:[];
+    if(!rows.length)return '<div class="completionEmpty">Aún nadie ha alcanzado el objetivo.</div>';
+    return '<div class="completionNames">'+rows.map(function(row){return '<span class="completionName '+(mode||'done')+'">'+tEsc(row.nombre||'Alumno')+'</span>';}).join('')+'</div>';
+  }
+  function ensureTrackingHost(parent,id,title,subtitle){
+    if(!parent)return null;var host=document.getElementById(id);
+    if(!host){host=document.createElement('section');host.id=id;host.className='completionTracking';parent.appendChild(host);}
+    host.dataset.title=title;host.dataset.subtitle=subtitle;return host;
+  }
+  function renderMissionTracking(data){
+    var parent=document.getElementById('misiones');if(!parent)return;
+    var host=ensureTrackingHost(parent,'missionCompletionTracking','Seguimiento de misiones','Quién ha alcanzado cada objetivo en el ámbito seleccionado.');
+    var missions=(data.missions||[]).filter(function(m){return m.publicationStatus!=='draft'&&m.completion&&Number(m.completion.eligibleCount||0)>0;}).slice(0,20);
+    host.innerHTML='<div class="completionTrackingHead"><div><h3>✅ Cumplimiento de misiones</h3><div class="sub">Quién ha alcanzado cada objetivo en el filtro actual.</div></div><span class="rosterPill">'+missions.length+' misiones</span></div>'+
+      (missions.length?'<div class="completionTrackingGrid">'+missions.map(function(m){
+        var c=m.completion||{},pct=Number(c.completionPercent||0),done=Array.isArray(c.completedStudents)?c.completedStudents:[];
+        return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(m.title||'Misión')+'</strong><div class="sub">'+tEsc(m.className||'Todas las clases')+(m.studentName?' · '+tEsc(m.studentName):'')+'</div></div><span class="completionPill">'+tEsc(c.completedCount||0)+' / '+tEsc(c.eligibleCount||0)+' completada</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'+namesHtml(done,'done')+'</article>';
+      }).join('')+'</div>':'<div class="completionEmpty">No hay misiones publicadas con alumnos en este filtro.</div>');
+  }
+  function renderWorkshopTracking(data){
+    var parent=document.getElementById('taller');if(!parent)return;
+    var host=ensureTrackingHost(parent,'workshopCompletionTracking','Objetivos de taller','Seguimiento del objetivo XP de la sesión publicada.');
+    var rows=Array.isArray(data.workshopOutcomes)?data.workshopOutcomes:[];
+    host.innerHTML='<div class="completionTrackingHead"><div><h3>🎯 Objetivos de los talleres</h3><div class="sub">Progreso individual de las sesiones publicadas.</div></div><span class="rosterPill">'+rows.length+' sesiones</span></div>'+
+      (rows.length?'<div class="completionTrackingGrid">'+rows.map(function(w){
+        var pct=Number(w.completionPercent||0),done=Array.isArray(w.completedStudents)?w.completedStudents:[];
+        var progress=(w.students||[]).slice(0,8).map(function(row){return '<span class="completionName '+(row.completed?'done':'')+'">'+tEsc(row.nombre)+' · '+tEsc(row.xp)+'/'+tEsc(w.targetXp)+' XP</span>';});
+        return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(w.title||'Taller')+'</strong><div class="sub">'+tEsc(w.className||w.classCode||'Clase')+'</div></div><span class="completionPill">'+tEsc(w.completedCount||0)+' / '+tEsc(w.eligibleCount||0)+' objetivo</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'+(done.length?namesHtml(done,'done'):'<div class="completionEmpty">Todavía nadie ha completado el objetivo.</div>')+(progress.length?'<div class="completionNames" style="margin-top:7px">'+progress.join('')+'</div>':'')+'</article>';
+      }).join('')+'</div>':'<div class="completionEmpty">No hay ningún taller publicado en el ámbito actual.</div>');
+  }
+  function renderTracking(data){renderSortedStudentRows(data||{});renderMissionTracking(data||{});renderWorkshopTracking(data||{});}
+  function install(){
+    if(typeof renderTeacher!=='function'){setTimeout(install,120);return;}
+    ensureSortHeader();
+    var base=renderTeacher;
+    renderTeacher=function(data){var result=base.apply(this,arguments);setTimeout(function(){renderTracking(data||{});},0);return result;};
+    if(typeof currentTeacher!=='undefined'&&currentTeacher)setTimeout(function(){renderTracking(currentTeacher);},0);
+    if(typeof MutationObserver!=='undefined'){
+      var app=document.getElementById('appContent');if(app)new MutationObserver(function(){if(typeof currentTeacher!=='undefined'&&currentTeacher)renderWorkshopTracking(currentTeacher);}).observe(app,{childList:true,subtree:false});
+    }
+  }
+  install();
+})();
+</script>
+
 </body>
 </html>
