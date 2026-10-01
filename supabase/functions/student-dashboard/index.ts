@@ -378,7 +378,14 @@ Deno.serve(async (request) => {
     const accuracy = attempts ? Math.round((successes / attempts) * 100) : 0;
     const evaluation = learningGrade(progress,missionProgress);
     const grade = evaluation.score;
-    const platformAchievements = platformMilestones(xp,grade,attempts);
+    const platformAchievements = platformMilestones(xp, grade, attempts, {
+      sessions,
+      gamesPlayed:progress.filter(row => Number(row.sessions || 0) > 0).length,
+      accuracy,
+      missionsCompleted:relevantMissions.filter(mission => mission.completed).length,
+      feathers,
+      bestStreak:progress.reduce((max, row) => Math.max(max, Number(row.streak || 0)), 0),
+    });
     const unlocked=platformAchievements.filter(a=>a.unlocked);
     if(unlocked.length){const {error}=await admin.from('platform_achievements').upsert(unlocked.map(a=>({profile_id:profileId,achievement_id:a.id})),{onConflict:'profile_id,achievement_id',ignoreDuplicates:true});if(error)throw error;}
     const {data:milestones,error:milestoneError}=await admin.from('platform_achievements').select('achievement_id,unlocked_at').eq('profile_id',profileId);
