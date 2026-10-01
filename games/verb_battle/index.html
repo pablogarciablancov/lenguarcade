@@ -320,6 +320,7 @@ const channel=query.get("channel")||"";
 const $=id=>document.getElementById(id);
 
 let setupMode="battle";
+let menuClassKey="warrior";
 let primaryProfile=null;
 let connectedProfiles={};
 let teams=[];
@@ -565,7 +566,27 @@ function target(){return teams[currentTarget]}
 function post(type,payload={}){if(bridgeEnabled&&window.parent)window.parent.postMessage({namespace:BRIDGE_NAMESPACE,channel,gameId:GAME_ID,type,payload},"*")}
 function toast(title,text){const d=document.createElement("div");d.className="toast";d.innerHTML="<b>"+escapeHtml(title)+"</b><span>"+escapeHtml(text||"")+"</span>";$("toastStack").appendChild(d);setTimeout(()=>d.remove(),3200)}
 function addLog(text){const log=$("battleLog"),d=document.createElement("div");d.className="logItem";d.innerHTML=text;log.prepend(d);while(log.children.length>4)log.lastElementChild.remove()}
-function setMode(mode){setupMode=mode;document.querySelectorAll(".modeCard").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));$("playerCountField").classList.toggle("hidden",mode==="practice");$("battleMode").disabled=mode==="practice";$("setupTitle").textContent=mode==="practice"?"Práctica individual":"Preparar batalla";$("setupSubtitle").textContent=mode==="practice"?"Tu perfil, 25 retos y respuesta escrita.":"Conecta los perfiles que participarán en la arena.";renderRoster()}
+function setMode(mode){
+  setupMode=mode;
+  document.querySelectorAll(".modeCard").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
+  $("menuBattleBtn")?.classList.toggle("selected",mode==="battle");
+  $("menuPracticeBtn")?.classList.toggle("selected",mode==="practice");
+  $("playerCountField").classList.toggle("hidden",mode==="practice");
+  $("battleMode").disabled=mode==="practice";
+  $("setupEyebrow").textContent=mode==="practice"?"ENTRENAMIENTO PERSONAL":"CONFIGURAR COMBATE";
+  $("setupTitle").textContent=mode==="practice"?"Práctica individual":"Preparar batalla";
+  $("setupSubtitle").textContent=mode==="practice"?"25 retos, respuesta escrita y progresión sin rival.":"Conecta a los jugadores que entrarán en la arena.";
+  renderRoster()
+}
+function openSetupDrawer(mode){
+  setMode(mode);
+  $("setupDrawer").classList.remove("hidden")
+}
+function closeSetupDrawer(){
+  $("setupDrawer").classList.add("hidden");
+  $("menuBattleBtn")?.classList.remove("selected");
+  $("menuPracticeBtn")?.classList.remove("selected")
+}
 function classOptions(selected){return Object.entries(ROLES).map(([k,r])=>'<option value="'+k+'" '+(k===selected?"selected":"")+'>'+r.icon+" "+r.name+"</option>").join("")}
 function requestPlayer(role){post("REQUEST_OPPONENT_AUTH",{role,requestId:"vb_"+role+"_"+uid()})}
 function renderRoster(){
@@ -585,8 +606,16 @@ function renderRoster(){
     host.appendChild(slot)
   }
   host.querySelectorAll("[data-connect]").forEach(btn=>btn.onclick=()=>requestPlayer(btn.dataset.connect));
-  host.querySelectorAll(".classSelect").forEach(sel=>sel.onchange=()=>{const role=sel.dataset.role;if(role==="primary"&&primaryProfile)primaryProfile.classKey=sel.value;else if(connectedProfiles[role])connectedProfiles[role].classKey=sel.value;renderRoster()});
-  updateStartState()
+  host.querySelectorAll(".classSelect").forEach(sel=>sel.onchange=()=>{
+    const role=sel.dataset.role;
+    if(role==="primary"){
+      menuClassKey=sel.value;
+      if(primaryProfile)primaryProfile.classKey=sel.value
+    }else if(connectedProfiles[role])connectedProfiles[role].classKey=sel.value;
+    renderRoster()
+  });
+  updateStartState();
+  renderMenuPresentation()
 }
 function updateStartState(){
   const count=setupMode==="practice"?1:Number($("playerCount").value||2);
@@ -709,9 +738,51 @@ function renderTarget(){
   $("targetSelect").innerHTML=choices.map(t=>'<option value="'+t.id+'" '+(t.id===currentTarget?"selected":"")+'>'+escapeHtml(t.name)+" · "+t.hp+" PV</option>").join("");
   $("targetSelect").value=String(currentTarget)
 }
+function menuOwner(){
+  if(teams.length)return{name:current().name,classKey:current().classKey,save:current().save};
+  if(primaryProfile)return{name:primaryProfile.name,classKey:primaryProfile.classKey||menuClassKey,save:primaryProfile.save||defaultSave()};
+  return{name:"Jugador",classKey:menuClassKey,save:localPrimarySave}
+}
+function renderMenuPresentation(){
+  const owner=menuOwner(),save=normalizeSave(owner.save),role=ROLES[owner.classKey]||ROLES.warrior;
+  menuClassKey=owner.classKey||menuClassKey;
+  document.querySelectorAll("[data-menu-class]").forEach(btn=>btn.classList.toggle("selected",btn.dataset.menuClass===menuClassKey));
+  if($("menuPlayerName"))$("menuPlayerName").textContent=owner.name||"Jugador";
+  if($("menuPlayerLevel"))$("menuPlayerLevel").textContent="Nivel "+levelForXp(save.xp);
+  if($("menuXpFill"))$("menuXpFill").style.width=levelPct(save.xp)+"%";
+  if($("menuXpText"))$("menuXpText").textContent=(save.xp%300)+" / 300 XP";
+  if($("menuStreak"))$("menuStreak").textContent=save.stats.maxCombo||0;
+  if($("menuMedals"))$("menuMedals").textContent=Object.keys(save.unlocked||{}).length;
+  if($("menuProfilePortrait"))$("menuProfilePortrait").textContent=role.icon;
+  if($("previewHeroAvatar"))$("previewHeroAvatar").textContent=role.icon;
+  if($("previewHeroGlyph"))$("previewHeroGlyph").textContent=role.icon;
+  if($("previewHeroRole"))$("previewHeroRole").textContent=role.name;
+  if($("previewHero"))$("previewHero").style.setProperty("--preview-role",role.color)
+}
+function selectMenuClass(classKey){
+  if(!ROLES[classKey])return;
+  menuClassKey=classKey;
+  if(primaryProfile)primaryProfile.classKey=classKey;
+  renderMenuPresentation();
+  renderRoster()
+}
 function renderCareer(){
-  const owner=teams.length?current():primaryProfile?{save:primaryProfile.save||defaultSave()}: {save:localPrimarySave};
-  $("careerChip").textContent="Nv. "+levelForXp(owner.save.xp)+" · "+owner.save.xp+" XP"
+  const owner=menuOwner();
+  $("careerChip").textContent="Nv. "+levelForXp(owner.save.xp)+" · "+owner.save.xp+" XP";
+  renderMenuPresentation()
+}
+function renderProfileMenu(){
+  const owner=menuOwner(),save=normalizeSave(owner.save),r=ROLES[owner.classKey]||ROLES.warrior,s=save.stats;
+  $("profileModalName").textContent=owner.name||"Jugador";
+  $("profileModalIcon").textContent=r.icon;
+  $("profileModalLevel").textContent="Nivel "+levelForXp(save.xp)+" · "+r.name;
+  $("profileModalXp").textContent=save.xp+" XP · "+(save.xp%300)+"/300 para el siguiente nivel";
+  const stats=[
+    ["Partidas",s.matches||0],["Aciertos",s.correct||0],["Mejor combo",s.maxCombo||0],
+    ["Defensas",s.defenses||0],["Daño total",s.damage||0],["Logros",Object.keys(save.unlocked||{}).length]
+  ];
+  $("profileStatsGrid").innerHTML=stats.map(([label,value])=>'<div><b>'+value+'</b><span>'+label+'</span></div>').join("");
+  $("profileModal").classList.add("open")
 }
 function renderAll(){
   renderTarget();renderPlayers();renderBoard();renderCareer();
@@ -842,7 +913,7 @@ function achievementPayload(team){return team.newUnlocks.map(a=>({id:a.id,title:
 function sendResult(winner,reason,correct,wrong,bestCombo){
   if(!bridgeEnabled)return;post("RESULT",{resultId:matchId+"_"+Date.now(),matchId,outcome:setupMode==="practice"?"practice":"finished",reason,score:winner.score,correct,errors:wrong,maxCombo:bestCombo,xpGain:teams[0].matchXp,players:teams.map(t=>({role:t.profileRole,studentId:t.studentId,outcome:setupMode==="practice"?"practice":t.id===winner.id?"victory":"defeat",score:t.score,correct:t.correct,errors:t.wrong,maxCombo:t.maxCombo,xpGain:t.matchXp,save:t.save,achievements:achievementPayload(t)}))})
 }
-function returnSetup(){$("endModal").classList.remove("open");$("gameScreen").classList.add("hidden");$("setupScreen").classList.remove("hidden");$("exitBtn").classList.add("hidden");matchActive=false;matchEnded=false;teams=[];renderRoster();renderCareer()}
+function returnSetup(){$("endModal").classList.remove("open");$("gameScreen").classList.add("hidden");$("setupScreen").classList.remove("hidden");$("exitBtn").classList.add("hidden");$("setupDrawer").classList.add("hidden");matchActive=false;matchEnded=false;teams=[];renderRoster();renderCareer()}
 function requestExit(){
   if(!matchActive){post("CLOSE_READY");return}if(!confirm("¿Salir? Se guardará lo realizado, pero la batalla quedará abandonada."))return;pendingExit=true;matchActive=false;matchEnded=true;clearTimer();if(!bridgeEnabled)return returnSetup();
   post("RESULT",{resultId:matchId+"_exit_"+Date.now(),matchId,outcome:"abandoned",reason:"abandoned",score:teams.reduce((m,t)=>Math.max(m,t.score),0),correct:teams.reduce((s,t)=>s+t.correct,0),errors:teams.reduce((s,t)=>s+t.wrong,0),players:teams.map(t=>({role:t.profileRole,studentId:t.studentId,outcome:"abandoned",score:t.score,correct:t.correct,errors:t.wrong,maxCombo:t.maxCombo,xpGain:t.matchXp,save:t.save,achievements:achievementPayload(t)}))})
@@ -854,7 +925,7 @@ function renderAchievements(){
 window.addEventListener("message",event=>{
   const m=event.data||{};if(m.namespace!==HOST_NAMESPACE||m.channel!==channel)return;
   if(m.type==="INIT"){
-    const s=m.payload?.student||{};primaryProfile={role:"primary",studentId:String(s.studentId||""),name:profileName(s),classGroup:s.clase||"",classKey:"warrior",save:normalizeSave(m.payload?.save)};renderRoster();renderCareer();post("INITIALIZED",{profileId:primaryProfile.studentId,multiplayer:true,practice:true,version:2})
+    const s=m.payload?.student||{};primaryProfile={role:"primary",studentId:String(s.studentId||""),name:profileName(s),classGroup:s.clase||"",classKey:menuClassKey,save:normalizeSave(m.payload?.save)};renderRoster();renderCareer();post("INITIALIZED",{profileId:primaryProfile.studentId,multiplayer:true,practice:true,version:2})
   }
   if(m.type==="OPPONENT_AUTHENTICATED"){
     const role=String(m.payload?.role||"opponent_1"),s=m.payload?.student||{};connectedProfiles[role]={role,studentId:String(s.studentId||""),name:profileName(s),classGroup:s.clase||"",classKey:Object.keys(ROLES)[Math.min(3,Object.keys(connectedProfiles).length+1)],save:normalizeSave(m.payload?.save)};toast("Jugador conectado",profileName(s));renderRoster()
@@ -866,6 +937,16 @@ window.addEventListener("message",event=>{
 });
 
 document.querySelectorAll(".modeCard").forEach(btn=>btn.onclick=()=>setMode(btn.dataset.mode));
+document.querySelectorAll("[data-menu-class]").forEach(btn=>btn.onclick=()=>selectMenuClass(btn.dataset.menuClass));
+$("menuBattleBtn").onclick=()=>openSetupDrawer("battle");
+$("menuPracticeBtn").onclick=()=>openSetupDrawer("practice");
+$("menuAchievementsBtn").onclick=()=>{achievementPage=0;renderAchievements()};
+$("menuProfileBtn").onclick=renderProfileMenu;
+$("menuHelpBtn").onclick=()=>$("helpModal").classList.add("open");
+$("menuExitBtn").onclick=requestExit;
+$("setupCloseBtn").onclick=closeSetupDrawer;
+$("closeProfileModal").onclick=()=>$("profileModal").classList.remove("open");
+$("closeHelpModal").onclick=()=>$("helpModal").classList.remove("open");
 $("playerCount").onchange=renderRoster;
 $("startBtn").onclick=startGame;
 $("targetSelect").onchange=()=>{currentTarget=Number($("targetSelect").value);renderPlayers()};
@@ -876,7 +957,7 @@ $("effectContinue").onclick=()=>{const cb=effectCallback;effectCallback=null;$("
 $("rematchBtn").onclick=returnSetup;$("homeBtn").onclick=returnSetup;$("exitBtn").onclick=requestExit;
 $("achievementsBtn").onclick=()=>{achievementPage=0;renderAchievements()};$("closeAchievements").onclick=()=>$("achievementsModal").classList.remove("open");$("achievementPrev").onclick=()=>{achievementPage=Math.max(0,achievementPage-1);renderAchievements()};$("achievementNext").onclick=()=>{achievementPage=Math.min(1,achievementPage+1);renderAchievements()};
 
-if(!bridgeEnabled){primaryProfile={role:"primary",studentId:"local_primary",name:"Jugador 1",classGroup:"Local",classKey:"warrior",save:localPrimarySave}}
+if(!bridgeEnabled){primaryProfile={role:"primary",studentId:"local_primary",name:"Jugador 1",classGroup:"Local",classKey:menuClassKey,save:localPrimarySave}}
 renderRoster();renderCareer();post("READY",{protocol:3,multiplayer:true,maxPlayers:4,practice:true,version:2});
 })();
 </script>
