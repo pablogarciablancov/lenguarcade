@@ -552,3 +552,14 @@ Validación manual pendiente en el despliegue estable:
 8. Nota/niveles: XP acumulada conservada, coste sucesivo creciente, una misión en un juego no practicado baja el cumplimiento en lugar de ignorarse; misma rúbrica en alumno y resumen docente. Logros de nivel/XP/nota persisten después de una bajada de nota.
 
 Límites: el contador conserva el total de duelos; la lista guarda los 100 más recientes. La rúbrica de misiones por ventana usa los eventos disponibles (500 por detalle de alumno, 5.000 por resumen de clase). El cómputo de verso no sustituye la revisión de licencias poéticas por el profesor. Las pruebas automáticas verifican ejecución y datos, no validan píxeles ni la sesión autenticada de Apps Script.
+
+
+## Integridad de progreso (2026-10-01)
+
+1. Ejecutar node scripts/check-xp-integrity.mjs y después npm run check.
+2. Battlegrafía: responder correctamente una vez y guardar; debe sumar solo el XP correspondiente al nuevo acierto. Forzar otro checkpoint sin jugar: debe sumar 0 XP y 0 plumas.
+3. Derrotar una criatura y comprobar que solo se premian los aciertos y derrotas nuevos, no el total histórico de logros.
+4. Repetir el mismo snapshot en cualquier juego integrado: no debe aumentar XP, plumas, intentos ni aciertos.
+5. Enviar un salto artificial grande de métricas en un checkpoint de prueba: la recompensa por checkpoint debe quedar acotada y, si se encadenan peticiones, deben actuar los límites globales de 1 y 10 minutos.
+6. Confirmar en game_events.details.integrity que serverAuthoritative es true y que rateLimited refleja los casos limitados.
+7. Verificar que el guardado de partida sigue actualizando game_saves aunque un checkpoint no otorgue XP.

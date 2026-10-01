@@ -312,9 +312,10 @@ function saveProgress(payload) {
     const rows = rowsToObjects_(sheet);
     const idx = rows.findIndex(r => String(r.studentId) === String(student.studentId) && String(r.gameId) === String(game.gameId));
     const old = idx >= 0 ? normalizeProgressRow_(rows[idx]) : emptyProgressForGame_(student, game);
-    const newXp = Number(progress.xp != null ? progress.xp : old.xp + Number(progress.xpDelta || 0));
+    const authoritativeProgress = calculateAuthoritativeProgress_(game.gameId, payload, old);
+    const newXp = Number(authoritativeProgress.xp || old.xp || 0);
     const xpDelta = Math.max(0, newXp - Number(old.xp || 0));
-    const newPlumas = Number(progress.plumas != null ? progress.plumas : old.plumas + Number(progress.plumasDelta || 0));
+    const newPlumas = Number(authoritativeProgress.plumas || old.plumas || 0);
     const plumasDelta = Math.max(0, newPlumas - Number(old.plumas || 0));
     const achievementSheet = getSheet_(LA_CONFIG.SHEETS.LOGROS);
     const existingAchievementIds = {};
@@ -335,10 +336,10 @@ function saveProgress(payload) {
     const record = {
       studentId:student.studentId, email:student.email, nombre:student.nombre + ' ' + student.apellidos, clase:student.clase,
       gameId:game.gameId, gameName:game.nombre, xp:newXp,
-      nivel:Number(progress.level || progress.nivel || Math.floor(newXp / 250) + 1),
-      percentage:clamp_(Number(progress.percentage || progress.percent || old.percentage || 0), 0, 100),
-      accuracy:clamp_(Number(progress.accuracy || old.accuracy || 0), 0, 100),
-      attempts:Number(progress.attempts || old.attempts || 0), successes:Number(progress.successes || old.successes || 0), errors:Number(progress.errors || old.errors || 0),
+      nivel:Math.max(Number(old.nivel || 1), Math.floor(newXp / 250) + 1),
+      percentage:clamp_(Number(authoritativeProgress.percentage || old.percentage || 0), 0, 100),
+      accuracy:clamp_(Number(authoritativeProgress.accuracy || old.accuracy || 0), 0, 100),
+      attempts:Number(authoritativeProgress.attempts || old.attempts || 0), successes:Number(authoritativeProgress.successes || old.successes || 0), errors:Number(authoritativeProgress.errors || old.errors || 0),
       streak:Number(progress.streak || old.streak || 0), sessions:Number(old.sessions || 0) + (shouldCountSession ? 1 : 0),
       achievementsCount:Object.keys(existingAchievementIds).length, missionsCompleted:Number(progress.missionsCompleted || old.missionsCompleted || 0),
       plumas:newPlumas, lastActivity:now, rawJson:JSON.stringify(payload.rawGameData || payload), updatedAt:now
@@ -348,7 +349,7 @@ function saveProgress(payload) {
       appendObject_(getSheet_(LA_CONFIG.SHEETS.EVENTOS), { eventId:resultId || Utilities.getUuid(), timestamp:now, studentId:student.studentId, email:student.email, nombre:record.nombre, clase:student.clase, gameId:game.gameId, eventType:payload.eventType || 'progress_saved', xpDelta:xpDelta, plumasDelta:plumasDelta, accuracy:record.accuracy, detailsJson:JSON.stringify(payload.details || {}) });
     }
     appendObject_(getSheet_(LA_CONFIG.SHEETS.RAW), { timestamp:now, studentId:student.studentId, email:student.email, gameId:game.gameId, payloadJson:JSON.stringify(payload) });
-    newAchievements.forEach(a => appendObject_(achievementSheet, { achievementId:typeof a === 'string' ? a : (a.id || a.achievementId || Utilities.getUuid()), studentId:student.studentId, email:student.email, gameId:game.gameId, title:typeof a === 'string' ? a : (a.title || a.name || 'Logro'), description:typeof a === 'string' ? '' : (a.description || ''), xpReward:typeof a === 'string' ? 0 : Number(a.xpReward || 0), unlockedAt:now }));
+    newAchievements.forEach(a => appendObject_(achievementSheet, { achievementId:typeof a === 'string' ? a : (a.id || a.achievementId || Utilities.getUuid()), studentId:student.studentId, email:student.email, gameId:game.gameId, title:typeof a === 'string' ? a : (a.title || a.name || 'Logro'), description:typeof a === 'string' ? '' : (a.description || ''), xpReward:0, unlockedAt:now }));
     if (payload.errors && payload.errors.length) payload.errors.forEach(er => appendObject_(getSheet_(LA_CONFIG.SHEETS.ERRORES), { timestamp:now, studentId:student.studentId, email:student.email, gameId:game.gameId, skill:er.skill || '', errorType:er.type || er.errorType || '', count:Number(er.count || 1), detailsJson:JSON.stringify(er) }));
     recalculateStudentGeneral_(student.studentId);
     return { ok:true, message:'Progreso guardado', record:record, dashboard:getStudentDashboardCore_(student.studentId) };
@@ -391,15 +392,16 @@ function saveGameCheckpoint(payload) {
       gameId:game.gameId,
       title:typeof achievement === 'string' ? achievement : (achievement.title || achievement.name || 'Logro'),
       description:typeof achievement === 'string' ? '' : (achievement.description || ''),
-      xpReward:typeof achievement === 'string' ? 0 : Number(achievement.xpReward || 0),
+      xpReward:0,
       unlockedAt:now
     });
   });
   const progress = payload.progress || {};
   const shouldCountSession = payload.countSession === true;
-  const newXp = Number(progress.xp != null ? progress.xp : old.xp + Number(progress.xpDelta || 0));
+  const authoritativeProgress = calculateAuthoritativeProgress_(game.gameId, payload, old);
+  const newXp = Number(authoritativeProgress.xp || old.xp || 0);
   const xpDelta = Math.max(0, newXp - Number(old.xp || 0));
-  const newPlumas = Number(progress.plumas != null ? progress.plumas : old.plumas + Number(progress.plumasDelta || 0));
+  const newPlumas = Number(authoritativeProgress.plumas || old.plumas || 0);
   const plumasDelta = Math.max(0, newPlumas - Number(old.plumas || 0));
   const record = Object.assign({}, old, {
     studentId:student.studentId,
@@ -409,12 +411,12 @@ function saveGameCheckpoint(payload) {
     gameId:game.gameId,
     gameName:game.nombre,
     xp:newXp,
-    nivel:Number(progress.level || progress.nivel || old.nivel || Math.floor(newXp / 250) + 1),
-    percentage:clamp_(Number(progress.percentage || progress.percent || old.percentage || 0), 0, 100),
-    accuracy:clamp_(Number(progress.accuracy || old.accuracy || 0), 0, 100),
-    attempts:Number(progress.attempts || old.attempts || 0),
-    successes:Number(progress.successes || old.successes || 0),
-    errors:Number(progress.errors || old.errors || 0),
+    nivel:Math.max(Number(old.nivel || 1), Math.floor(newXp / 250) + 1),
+    percentage:clamp_(Number(authoritativeProgress.percentage || old.percentage || 0), 0, 100),
+    accuracy:clamp_(Number(authoritativeProgress.accuracy || old.accuracy || 0), 0, 100),
+    attempts:Number(authoritativeProgress.attempts || old.attempts || 0),
+    successes:Number(authoritativeProgress.successes || old.successes || 0),
+    errors:Number(authoritativeProgress.errors || old.errors || 0),
     streak:Number(progress.streak || old.streak || 0),
     sessions:Number(old.sessions || 0) + (shouldCountSession ? 1 : 0),
     missionsCompleted:Number(progress.missionsCompleted || old.missionsCompleted || 0),

@@ -565,3 +565,13 @@ Cada cambio debe indicar:
 Arte: herramientas integradas de generación de imágenes; atlas con alfa y WebP en `games/tierras_de_tinta/assets/{heroes,enemies,environment,refuge}-cartoon-v3.webp`. Prompts y especificaciones en `docs/game-notes/tierras-de-tinta-art-v3.md`. Se conserva el arte anterior para reversión.
 
 Publicación del núcleo: código preparado para el despliegue estable de Apps Script. Este entorno no tiene credenciales de clasp; los cambios del runner, las tarjetas y el perfil necesitan `apps:publish` desde una sesión autenticada. La comprobación visual en alumno/profesor reales queda pendiente y no se sustituye por las pruebas de VM.
+
+
+## 2026-10-01 · Integridad de XP y plumas
+
+- Corregido un fallo de Battlegrafía que podía volver a premiar todos los logros ya desbloqueados en cada checkpoint y generar saltos repetidos de hasta +450 XP sin avance real.
+- La economía de LenguArcade pasa a ser autoritativa en servidor: save-progress ignora XP/plumas enviados por el navegador y calcula recompensas a partir de la diferencia entre el snapshot persistido anterior y el nuevo.
+- Battlegrafía, Rayuela y Entre Líneas tienen cálculo específico por avance real; Versópolis, Lexaria y Tierras conservan sus snapshots específicos; el resto de juegos usa métricas normalizadas de aciertos/intentos.
+- Un checkpoint idéntico otorga 0 XP y 0 plumas. Los logros reportados por cliente se conservan como metadatos, pero no acuñan XP de plataforma.
+- Añadidos límites de integridad globales de 180 XP/minuto y 900 XP/10 minutos, además de 15/60 plumas, para bloquear ráfagas manipuladas o bucles de guardado. Los eventos guardan si la protección ha limitado una recompensa.
+- Añadida la comprobación automática scripts/check-xp-integrity.mjs al conjunto de CI.
