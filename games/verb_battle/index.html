@@ -673,20 +673,47 @@ function renderBoard(){
       moveOffer.push(...extras)
     }
   }
-  const tones={indicative:"#66c8ff",compound:"#8f83ff",subjunctive:"#bd70f2",imperative:"#ffb85d",mastery:"#61e0b2"};
-  const verbs={indicative:"Golpe directo",compound:"Cadena temporal",subjunctive:"Hechizo lunar",imperative:"Orden de choque",mastery:"Ataque maestro"};
+
+  const meta={
+    indicative:{tone:"#ef5a3e",title:"Tajo verbal",sigil:"⚔",sprite:"./assets/heroes/warrior.png",family:"Conjugación",detail:"Formas simples"},
+    compound:{tone:"#8458e8",title:"Eco del tiempo",sigil:"◌",sprite:"./assets/heroes/mage.png",family:"Tiempos compuestos",detail:"Haber + participio"},
+    subjunctive:{tone:"#c64ed9",title:"Hechizo preciso",sigil:"✦",sprite:"./assets/heroes/mage.png",family:"Subjuntivo",detail:"Duda y posibilidad"},
+    imperative:{tone:"#e69a35",title:"Orden real",sigil:"➤",sprite:"./assets/heroes/archer.png",family:"Imperativo",detail:"Órdenes y mandato"},
+    mastery:{tone:"#35bda5",title:"Desafío supremo",sigil:"◆",sprite:"./assets/heroes/cleric.png",family:"Maestría",detail:"Irregularidades"}
+  };
+  const runeLabels={heal:"Runa vital",shield:"Runa de guardia",energy:"Runa de energía",critical:"Runa crítica"};
+
   moveOffer.forEach(card=>{
-    const cat=CATEGORIES[card.col],btn=document.createElement("button");
-    btn.className="moveCard"+(card.rune?" rune":"");btn.disabled=card.used||matchEnded;
-    btn.style.setProperty("--move",tones[cat.id]||"#6ec8ff");
+    const cat=CATEGORIES[card.col],m=meta[cat.id]||meta.indicative,btn=document.createElement("button");
+    btn.className="moveCard moveCard--"+cat.id+(card.rune?" rune":"");
+    btn.disabled=card.used||matchEnded;
+    btn.style.setProperty("--move",m.tone);
+    btn.setAttribute("aria-label",m.title+". "+card.question.prompt);
     const pips=Array.from({length:5},(_,i)=>'<i class="'+(i<card.row?"on":"")+'"></i>').join("");
+    const reward=setupMode==="practice"?card.value+" pts":card.damage+" daño";
+    const rune=card.rune?'<div class="moveRune"><span>✦</span>'+escapeHtml(runeLabels[card.rune]||"Runa")+'</div>':"";
     btn.innerHTML=
-      '<div class="moveTop"><span class="moveIcon">'+cat.icon+'</span><span class="moveDamage">'+(setupMode==="practice"?card.value+" pts":card.damage+" daño")+'</span></div>'+
-      '<span class="moveName">'+verbs[cat.id]+'</span>'+
-      '<span class="moveSkill">'+escapeHtml(cat.name)+' · '+escapeHtml(card.question.skill||cat.sub)+'</span>'+
-      '<div class="moveBottom"><span class="difficultyPips">'+pips+'</span><span class="moveScore">dificultad '+card.row+'/5</span></div>'+
-      (card.rune?'<span class="runeMark">✦</span>':'');
-    btn.onclick=()=>openQuestion(card);host.appendChild(btn)
+      '<div class="moveCardFrame" aria-hidden="true"></div>'+
+      '<div class="moveCardHeader">'+
+        '<span class="moveSigil">'+m.sigil+'</span>'+
+        '<span class="moveName">'+escapeHtml(m.title)+'</span>'+
+        '<span class="moveDamage"><b>'+escapeHtml(String(setupMode==="practice"?card.value:card.damage))+'</b><small>'+(setupMode==="practice"?"PTS":"DAÑO")+'</small></span>'+
+      '</div>'+
+      '<div class="moveCardArt">'+
+        '<span class="moveArtBurst" aria-hidden="true"></span>'+
+        '<img src="'+m.sprite+'" alt="" loading="eager">'+
+        '<span class="moveCategory">'+escapeHtml(cat.name)+'</span>'+
+      '</div>'+
+      '<div class="moveDifficulty"><span>Dificultad</span><span class="difficultyPips">'+pips+'</span><b>'+card.row+'/5</b></div>'+
+      '<div class="movePrompt"><span>'+escapeHtml(card.question.prompt)+'</span></div>'+
+      '<div class="moveCardFooter">'+
+        '<span class="moveFooterSigil">'+m.sigil+'</span>'+
+        '<span class="moveFooterText"><b>'+escapeHtml(m.family)+'</b><small>'+escapeHtml(card.question.skill||m.detail)+'</small></span>'+
+        '<span class="moveReward">'+escapeHtml(reward)+'</span>'+
+      '</div>'+
+      rune;
+    btn.onclick=()=>openQuestion(card);
+    host.appendChild(btn)
   });
   if(!moveOffer.length){
     host.innerHTML='<div class="commandHint">No quedan acciones disponibles.</div>'
