@@ -1039,3 +1039,69 @@ button:disabled{cursor:not-allowed;opacity:.42}
   .fighterSpriteImg{height:137%}
   .pcHeroThumb{width:22px;height:22px;flex-basis:22px}
 }
+
+
+/* Ajustes responsive finales de las cartas de acción */
+@media(max-height:760px){
+  .battleShell{grid-template-rows:46px minmax(0,1fr) 220px;gap:6px}
+  .commandDeck{grid-template-columns:176px minmax(0,1fr);gap:6px}
+  .commandSide,.movesPanel{padding:7px}
+  .movesPanel{gap:5px}
+  .moveGrid{gap:6px}
+  .moveCard{
+    padding:0;
+    grid-template-rows:30px 45px 18px minmax(48px,1fr) 30px;
+    border-radius:8px
+  }
+  .moveCardHeader{grid-template-columns:26px minmax(0,1fr) 36px}
+  .moveSigil{font-size:14px}
+  .moveName{font-size:8px;padding:0 4px}
+  .moveDamage b{font-size:12px}.moveDamage small{font-size:4.5px}
+  .moveCardArt img{width:78px;height:105px;bottom:-24px}
+  .moveCategory{left:6px;bottom:5px;padding:3px 5px;font-size:5.5px}
+  .moveDifficulty{padding:0 5px;gap:4px;font-size:5px}
+  .difficultyPips{gap:3px}.difficultyPips i{width:6px;height:6px}
+  .moveDifficulty b{font-size:5px}
+  .movePrompt{padding:5px 6px}
+  .movePrompt span{font-size:7.5px;line-height:1.12;-webkit-line-clamp:3}
+  .moveCardFooter{grid-template-columns:25px minmax(0,1fr) auto;padding-right:4px}
+  .moveFooterSigil{font-size:12px}.moveFooterText{padding-left:4px}
+  .moveFooterText b{font-size:5.8px}.moveFooterText small{font-size:4.8px}
+  .moveReward{font-size:5px;padding:2px 3px}
+  .moveRune{top:32px;font-size:4.8px;padding:2px 4px}
+}
+
+@media(max-width:980px){
+  .moveCard{padding:0}
+  .moveGrid{gap:6px}
+  .moveName{font-size:8.5px}
+  .movePrompt span{font-size:8px}
+  .moveFooterText b{font-size:6.2px}
+}
+
+@media(max-width:760px){
+  .battleShell{grid-template-rows:44px minmax(0,1fr) 246px}
+  .movesPanel{padding:6px}
+  .moveGrid{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:5px}
+  .moveCard{
+    padding:0;
+    grid-template-rows:26px 17px minmax(36px,1fr) 25px;
+    border-radius:7px
+  }
+  .moveCardArt{display:none}
+  .moveCardHeader{grid-template-columns:24px minmax(0,1fr) 34px}
+  .moveSigil{font-size:12px}
+  .moveName{font-size:7px}
+  .moveDamage b{font-size:10px}
+  .moveDamage small{font-size:4px}
+  .moveDifficulty{font-size:4.8px}
+  .difficultyPips i{width:5px;height:5px}
+  .movePrompt{padding:4px 5px}
+  .movePrompt span{font-size:7px;line-height:1.08;-webkit-line-clamp:3}
+  .moveCardFooter{grid-template-columns:22px minmax(0,1fr) auto}
+  .moveFooterSigil{font-size:10px}
+  .moveFooterText b{font-size:5.2px}.moveFooterText small{display:none}
+  .moveReward{font-size:4.7px}
+  .moveRune{top:27px;right:3px;font-size:4px;padding:1px 3px}
+  .moveRune span{font-size:6px}
+}
