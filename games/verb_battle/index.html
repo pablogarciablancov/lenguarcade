@@ -142,7 +142,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
           <div class="previewTop">
             <div class="previewSide you"><span class="previewAvatar" id="previewHeroAvatar"><img id="previewHeroAvatarImg" src="./assets/heroes/warrior.png" alt="Guerrero"></span><b>Tú</b><div class="previewHp"><span></span></div></div>
             <div class="previewVs">VS</div>
-            <div class="previewSide rival"><div class="previewHp"><span></span></div><b>Rival</b><span class="previewAvatar"><img id="previewRivalAvatarImg" src="./assets/heroes/mage.png" alt="Mago rival"></span></div>
+            <div class="previewSide rival"><div class="previewHp"><span></span></div><b>Rival</b><span class="previewAvatar enemyAvatar"><span class="enemySprite enemySprite--shadow" aria-hidden="true"></span></span></div>
           </div>
           <div class="previewScene">
             <div class="previewFighter hero" id="previewHero">
@@ -153,8 +153,8 @@ button:disabled{cursor:not-allowed;opacity:.45}
             <div class="previewImpact">✦</div>
             <div class="previewFighter enemy">
               <div class="fighterAura"></div>
-              <div class="previewCharacter"><img id="previewRivalSprite" src="./assets/heroes/mage.png" alt="Mago rival"></div>
-              <span>Rival arcano</span>
+              <div class="previewCharacter previewEnemyCharacter"><span class="enemySprite enemySprite--shadow" aria-hidden="true"></span></div>
+              <span>Sombra del error</span>
             </div>
           </div>
           <div class="previewSlogan">Escribe bien. <strong>Ataca mejor.</strong></div>
@@ -339,6 +339,17 @@ const ROLES={
   archer:{name:"Arquero",icon:"🏹",sprite:"./assets/heroes/archer.png",color:"#2e9c91",passive:"+10% puntos",ultimate:"Flecha rúnica",type:"pierce",text:"El siguiente ataque ignora la defensa y el escudo."},
   cleric:{name:"Clérigo",icon:"✨",sprite:"./assets/heroes/cleric.png",color:"#d7a238",passive:"+5 PV al defender",ultimate:"Concordancia vital",type:"heal",text:"Recupera 30 PV y obtiene 15 de escudo."}
 };
+
+const PRACTICE_RIVALS=[
+  {name:"Moco léxico",sprite:"slime",color:"#42d2d1"},
+  {name:"Fuego verbal",sprite:"wisp",color:"#a45ef2"},
+  {name:"Escarabajo sintáctico",sprite:"beetle",color:"#5bb875"},
+  {name:"Trol de la concordancia",sprite:"troll",color:"#ef7c49"},
+  {name:"Sombra del error",sprite:"shadow",color:"#559fe8"},
+  {name:"Chamán irregular",sprite:"shaman",color:"#cf5a62"},
+  {name:"Gólem de las palabras",sprite:"golem",color:"#d8ad50"},
+  {name:"Búho arcano",sprite:"owl",color:"#b879f0"}
+];
 
 const CATEGORIES=[
   {id:"indicative",name:"Indicativo",icon:"⚡",sub:"formas simples"},
@@ -737,8 +748,16 @@ function renderFighters(){
   const a=current(),left=$("attackerFighter"),right=$("targetFighter");
   if(a){left.style.setProperty("--fighter",roleDef(a).color);left.innerHTML=fighterMarkup(a,false)}
   if(setupMode==="practice"){
-    right.style.setProperty("--fighter","#7c91b9");
-    right.innerHTML='<div class="fighterLabel">ENTRENAMIENTO</div><div class="fighterSprite"><span class="fighterGlyph">🎯</span></div><div class="fighterName">Maniquí verbal</div><div class="fighterRole">25 retos · precisión y combo</div><div class="fighterMeters"><div class="fighterMeterLabel"><span>Progreso</span><span>'+resolvedCells+'/25</span></div><div class="fighterMeter"><div class="fighterHp" style="width:'+clamp(resolvedCells/25*100,0,100)+'%"></div></div></div>'
+    const rivalIndex=Math.min(PRACTICE_RIVALS.length-1,Math.floor(resolvedCells/4)),rival=PRACTICE_RIVALS[rivalIndex];
+    const resistance=clamp((25-resolvedCells)/25*100,0,100);
+    right.style.setProperty("--fighter",rival.color);
+    right.innerHTML='<div class="fighterLabel">RIVAL DE ENTRENAMIENTO</div>'+
+      '<div class="fighterSprite fighterEnemyFrame"><span class="enemySprite enemySprite--'+rival.sprite+'" aria-hidden="true"></span></div>'+
+      '<div class="fighterName">'+escapeHtml(rival.name)+'</div>'+
+      '<div class="fighterRole">Rival '+(rivalIndex+1)+'/'+PRACTICE_RIVALS.length+' · cada 4 retos aparece uno nuevo</div>'+
+      '<div class="fighterMeters"><div class="fighterMeterLabel"><span>Resistencia</span><span>'+(25-resolvedCells)+'/25</span></div>'+
+      '<div class="fighterMeter"><div class="fighterHp enemyHp" style="width:'+resistance+'%"></div></div>'+
+      '<div class="fighterStatus">Supera los retos para derrotar a la cadena de rivales</div></div>'
   }else{
     const d=target();if(d){right.style.setProperty("--fighter",roleDef(d).color);right.innerHTML=fighterMarkup(d,true)}
   }
@@ -781,12 +800,9 @@ function renderMenuPresentation(){
   if($("menuXpText"))$("menuXpText").textContent=(save.xp%300)+" / 300 XP";
   if($("menuStreak"))$("menuStreak").textContent=save.stats.maxCombo||0;
   if($("menuMedals"))$("menuMedals").textContent=Object.keys(save.unlocked||{}).length;
-  const rivalKeys=Object.keys(ROLES),rivalKey=rivalKeys[(rivalKeys.indexOf(menuClassKey)+1)%rivalKeys.length],rival=ROLES[rivalKey];
   if($("menuProfilePortraitImg")){$("menuProfilePortraitImg").src=role.sprite;$("menuProfilePortraitImg").alt=role.name}
   if($("previewHeroAvatarImg")){$("previewHeroAvatarImg").src=role.sprite;$("previewHeroAvatarImg").alt=role.name}
   if($("previewHeroSprite")){$("previewHeroSprite").src=role.sprite;$("previewHeroSprite").alt=role.name}
-  if($("previewRivalAvatarImg")){$("previewRivalAvatarImg").src=rival.sprite;$("previewRivalAvatarImg").alt=rival.name+" rival"}
-  if($("previewRivalSprite")){$("previewRivalSprite").src=rival.sprite;$("previewRivalSprite").alt=rival.name+" rival"}
   if($("previewHeroRole"))$("previewHeroRole").textContent=role.name;
   if($("previewHero"))$("previewHero").style.setProperty("--preview-role",role.color)
 }
