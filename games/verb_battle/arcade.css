@@ -1105,3 +1105,206 @@ button:disabled{cursor:not-allowed;opacity:.42}
   .moveRune{top:27px;right:3px;font-size:4px;padding:1px 3px}
   .moveRune span{font-size:6px}
 }
+
+
+/* ==========================================================
+   AJUSTES TRAS CAPTURA REAL · V7
+   Menú más compacto, retratos visibles, rivales con sprite y
+   cartas integradas en la arena en lugar de panel web.
+   ========================================================== */
+
+/* Sprites enemigos: hoja 4x2 autocontenida en assets/enemies/enemies.webp */
+.enemySprite{
+  display:block;width:100%;height:100%;
+  background-image:url("./assets/enemies/enemies.webp");
+  background-repeat:no-repeat;background-size:400% 200%;
+  filter:drop-shadow(0 12px 13px rgba(0,0,0,.42));
+}
+.enemySprite--slime{background-position:0% 0%}
+.enemySprite--wisp{background-position:33.333% 0%}
+.enemySprite--beetle{background-position:66.666% 0%}
+.enemySprite--troll{background-position:100% 0%}
+.enemySprite--shadow{background-position:0% 100%}
+.enemySprite--shaman{background-position:33.333% 100%}
+.enemySprite--golem{background-position:66.666% 100%}
+.enemySprite--owl{background-position:100% 100%}
+
+/* El slogan ya no invade la selección de clase. */
+.previewSlogan{bottom:10px;transform:none;left:18%;right:18%}
+
+/* Menú: más peso visual a héroes y clases, menos vacío central. */
+.menuShowcase{
+  grid-template-rows:minmax(300px,1fr) 210px;
+  gap:12px
+}
+.previewScene{top:11%;bottom:42px;left:3%;right:3%}
+.previewFighter{width:44%}
+.previewCharacter{
+  width:clamp(160px,14vw,225px)!important;
+  height:clamp(160px,14vw,225px)!important
+}
+.previewCharacter img{
+  height:138%!important;max-width:150%!important
+}
+.previewEnemyCharacter{
+  display:grid!important;place-items:center;
+  width:clamp(170px,15vw,235px)!important;
+  height:clamp(170px,15vw,235px)!important
+}
+.previewEnemyCharacter .enemySprite{
+  width:100%;height:100%;
+  filter:drop-shadow(0 17px 14px rgba(0,0,0,.44)) drop-shadow(0 0 17px rgba(97,132,255,.28))
+}
+.previewFighter.enemy{transform:none}
+.previewFighter.enemy>*{transform:none}
+
+.menuClasses{height:calc(100% - 22px)}
+.menuClassCard{
+  min-height:0;height:100%;
+  display:grid;grid-template-rows:minmax(82px,1fr) auto auto auto;
+  align-content:stretch;overflow:hidden;padding:7px 7px 9px
+}
+.classPortrait{
+  width:100%!important;height:auto!important;min-height:82px!important;
+  margin:0!important;overflow:hidden!important;place-items:end center!important
+}
+.classPortrait img{
+  height:128px!important;max-width:125%!important;
+  transform:translateY(18px)!important
+}
+.menuClassCard:hover .classPortrait img,
+.menuClassCard.selected .classPortrait img{
+  transform:translateY(11px) scale(1.05)!important
+}
+.menuClassCard b{position:relative;z-index:3;font-size:13px!important}
+.menuClassCard small{position:relative;z-index:3;font-size:7px}
+.menuClassCard em{position:relative;z-index:3;font-size:6px}
+
+/* Retratos: la captura mostró círculos vacíos por el encuadre anterior. */
+.profilePortrait,.previewAvatar{position:relative}
+.profilePortrait img,
+.previewAvatar:not(.enemyAvatar) img{
+  position:absolute;z-index:2;left:50%;bottom:-17%;
+  width:auto!important;height:152%!important;max-width:none!important;
+  transform:translateX(-50%)!important;object-fit:contain
+}
+.enemyAvatar{overflow:hidden}
+.enemyAvatar .enemySprite{
+  position:absolute;inset:-23%;
+  width:146%;height:146%;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.35))
+}
+
+/* Combate: más espacio útil para cartas y menos sensación de panel web. */
+.battleShell{grid-template-rows:54px minmax(0,1fr) 310px}
+.commandDeck{grid-template-columns:185px minmax(0,1fr);gap:10px}
+.movesPanel{
+  padding:0 2px 2px;
+  background:transparent;border:0;box-shadow:none;
+  gap:6px
+}
+.movesHeader{padding:0 6px 2px}
+.movesTitle{color:#8fe2ff;text-shadow:0 1px 6px rgba(0,0,0,.55)}
+.commandSide{
+  border-color:rgba(216,168,72,.3);
+  background:
+    radial-gradient(circle at 50% 0%,rgba(68,119,179,.12),transparent 38%),
+    linear-gradient(160deg,rgba(15,29,52,.96),rgba(7,15,29,.97));
+  box-shadow:inset 0 0 0 1px rgba(255,218,137,.035),0 10px 28px rgba(0,0,0,.22)
+}
+
+/* En práctica, el HUD del jugador vive con su héroe, no debajo del VS. */
+.practiceStage .playersBar{
+  left:7%;right:auto;width:min(250px,28%);justify-content:flex-start
+}
+.practiceStage .playerCard{width:100%}
+
+/* Combatientes algo mayores y rival NPC consistente. */
+.fighterSprite{
+  width:clamp(135px,14vw,190px);
+  height:clamp(135px,14vw,190px)
+}
+.fighterEnemyFrame{
+  display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 58%,color-mix(in srgb,var(--fighter) 21%,transparent),transparent 64%)
+}
+.fighterEnemyFrame .enemySprite{
+  width:114%;height:114%;
+  filter:drop-shadow(0 17px 16px rgba(0,0,0,.46)) drop-shadow(0 0 15px color-mix(in srgb,var(--fighter) 25%,transparent))
+}
+.enemyHp{background:linear-gradient(90deg,#e06157,#f2b65e)!important}
+
+/* Cartas: mayor legibilidad y proporción más cercana al concept art. */
+.moveCard{
+  grid-template-rows:36px 80px 23px minmax(76px,1fr) 42px
+}
+.moveCardHeader{grid-template-columns:32px minmax(0,1fr) 47px}
+.moveSigil{font-size:18px}
+.moveName{font-size:11px;padding:0 7px}
+.moveDamage b{font-size:16px}.moveDamage small{font-size:5px}
+.moveCardArt img{width:116px;height:154px;bottom:-37px}
+.moveCategory{font-size:6.6px;padding:4px 7px}
+.moveDifficulty{font-size:6.7px;padding:0 8px}
+.moveDifficulty b{font-size:6px}
+.difficultyPips i{width:8px;height:8px}
+.movePrompt{padding:8px 10px}
+.movePrompt span{
+  font-size:10.5px;line-height:1.18;-webkit-line-clamp:4
+}
+.moveCardFooter{grid-template-columns:32px minmax(0,1fr) auto;padding-right:7px}
+.moveFooterSigil{font-size:16px}
+.moveFooterText{padding-left:7px}
+.moveFooterText b{font-size:7.5px}
+.moveFooterText small{font-size:6px}
+.moveReward{font-size:6.2px;padding:3px 5px}
+
+/* Alturas habituales de Chromebook / embed de Sites. */
+@media(max-height:840px) and (min-width:821px){
+  .menuShowcase{
+    left:355px;top:84px;bottom:10px;right:16px;
+    grid-template-rows:minmax(285px,1fr) 205px
+  }
+  .previewCharacter{
+    width:168px!important;height:168px!important
+  }
+  .previewEnemyCharacter{
+    width:178px!important;height:178px!important
+  }
+  .menuClassCard{
+    grid-template-rows:minmax(78px,1fr) auto auto auto
+  }
+  .classPortrait{min-height:78px!important}
+  .classPortrait img{height:118px!important}
+  .profilePortrait img{height:146%!important}
+
+  .battleShell{grid-template-rows:46px minmax(0,1fr) 280px;gap:6px}
+  .commandDeck{grid-template-columns:170px minmax(0,1fr);gap:7px}
+  .moveCard{grid-template-rows:31px 62px 20px minmax(65px,1fr) 34px}
+  .moveName{font-size:9px}
+  .moveDamage b{font-size:13px}
+  .moveCardArt img{width:90px;height:122px;bottom:-29px}
+  .movePrompt span{font-size:8.8px;line-height:1.14}
+  .moveFooterText b{font-size:6.4px}.moveFooterText small{font-size:5.2px}
+  .fighterSprite{width:135px;height:135px}
+  .fighterEnemyFrame .enemySprite{width:116%;height:116%}
+}
+
+/* Mantener la versión compacta existente en alturas realmente bajas. */
+@media(max-height:760px){
+  .menuShowcase{grid-template-rows:minmax(255px,1fr) 176px}
+  .previewCharacter{width:145px!important;height:145px!important}
+  .previewEnemyCharacter{width:150px!important;height:150px!important}
+  .menuClassCard{grid-template-rows:minmax(64px,1fr) auto auto auto}
+  .classPortrait{min-height:64px!important}
+  .classPortrait img{height:98px!important}
+  .battleShell{grid-template-rows:46px minmax(0,1fr) 225px}
+  .moveCard{grid-template-rows:29px 45px 18px minmax(48px,1fr) 30px}
+  .movePrompt span{font-size:7.6px}
+  .fighterEnemyFrame{width:116px;height:116px}
+}
+
+@media(max-width:760px){
+  .previewSlogan{left:12%;right:12%;bottom:6px}
+  .practiceStage .playersBar{left:5px;right:5px;width:auto;justify-content:center}
+  .practiceStage .playerCard{width:25%}
+}
