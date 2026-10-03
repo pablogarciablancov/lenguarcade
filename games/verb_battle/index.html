@@ -81,7 +81,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
   .setupShell{grid-template-columns:.68fr 1.32fr}.setupIntro{padding:18px}.rulesMini{display:none}.arena{grid-template-columns:minmax(0,1fr) 180px}.roster{grid-template-columns:1fr}.playerSlot{grid-template-columns:34px minmax(0,1fr) 104px}
 }
 </style>
-<link rel="stylesheet" href="./arcade.css?v=20261001c">
+<link rel="stylesheet" href="./arcade.css?v=20261003v8">
 </head>
 <body>
 <div id="app">
@@ -148,13 +148,13 @@ button:disabled{cursor:not-allowed;opacity:.45}
             <div class="previewFighter hero" id="previewHero">
               <div class="fighterAura"></div>
               <div class="previewCharacter" id="previewHeroGlyph"><img id="previewHeroSprite" src="./assets/heroes/warrior.png" alt="Guerrero"></div>
-              <span id="previewHeroRole">Guerrero</span>
+              <div class="previewNameplate heroPlate"><small>TU HÉROE</small><b id="previewHeroRole">Guerrero</b></div>
             </div>
-            <div class="previewImpact">✦</div>
+            <div class="previewImpact"><span>VS</span></div>
             <div class="previewFighter enemy">
               <div class="fighterAura"></div>
               <div class="previewCharacter previewEnemyCharacter"><span class="enemySprite enemySprite--shadow" aria-hidden="true"></span></div>
-              <span>Sombra del error</span>
+              <div class="previewNameplate enemyPlate"><small>RIVAL</small><b>Sombra del error</b></div>
             </div>
           </div>
           <div class="previewSlogan">Escribe bien. <strong>Ataca mejor.</strong></div>
@@ -221,7 +221,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
       <div class="battleStage" id="battleStage">
         <div class="stageOrnament" aria-hidden="true"></div>
         <div class="fighter fighterLeft" id="attackerFighter"></div>
-        <div class="vsMark">VS<small>VERBAL</small></div>
+        <div class="vsMark"><span>VS</span><small>VERBAL</small></div>
         <div class="fighter fighterRight" id="targetFighter"></div>
         <div class="damageBurst" id="damageBurst">−0</div>
         <div class="playersBar" id="playersBar"></div>
@@ -735,13 +735,12 @@ function fighterMarkup(t,isTarget){
   const r=roleDef(t),hpPct=clamp(t.hp/maxHp*100,0,100),energyPct=clamp(t.energy,0,100);
   return '<div class="fighterLabel">'+(isTarget?"OBJETIVO":"EN TURNO")+'</div>'+
     '<div class="fighterSprite"><img class="fighterSpriteImg" src="'+r.sprite+'" alt="'+escapeHtml(r.name)+'"></div>'+
-    '<div class="fighterName">'+escapeHtml(t.name)+'</div>'+
-    '<div class="fighterRole">'+escapeHtml(r.name)+' · '+escapeHtml(r.passive)+'</div>'+
-    '<div class="fighterMeters">'+
-      '<div class="fighterMeterLabel"><span>PV '+t.hp+(t.shield?" · 🛡 "+t.shield:"")+'</span><span>combo ×'+t.combo+'</span></div>'+
+    '<div class="fighterHud">'+
+      '<div class="fighterHudHead"><div><small>'+(isTarget?"RIVAL":"TU HÉROE")+'</small><b>'+escapeHtml(t.name)+'</b><span>'+escapeHtml(r.name)+'</span></div><strong>'+t.score+' pts</strong></div>'+
+      '<div class="fighterMeterLabel"><span>PV '+t.hp+(t.shield?" · 🛡 "+t.shield:"")+'</span><span>Combo ×'+t.combo+'</span></div>'+
       '<div class="fighterMeter"><div class="fighterHp" style="width:'+hpPct+'%"></div></div>'+
       '<div class="fighterEnergy"><span style="width:'+energyPct+'%"></span></div>'+
-      '<div class="fighterStatus">'+(t.energy>=100?"✨ PODER LISTO":"⚡ "+t.energy+"% de poder")+'</div>'+
+      '<div class="fighterStatus">'+(t.energy>=100?"✦ PODER LISTO":"⚡ "+t.energy+"% de poder")+'</div>'+
     '</div>'
 }
 function renderFighters(){
@@ -751,13 +750,14 @@ function renderFighters(){
     const rivalIndex=Math.min(PRACTICE_RIVALS.length-1,Math.floor(resolvedCells/4)),rival=PRACTICE_RIVALS[rivalIndex];
     const resistance=clamp((25-resolvedCells)/25*100,0,100);
     right.style.setProperty("--fighter",rival.color);
-    right.innerHTML='<div class="fighterLabel">RIVAL DE ENTRENAMIENTO</div>'+
+    right.innerHTML='<div class="fighterLabel">RIVAL '+(rivalIndex+1)+'/'+PRACTICE_RIVALS.length+'</div>'+
       '<div class="fighterSprite fighterEnemyFrame"><span class="enemySprite enemySprite--'+rival.sprite+'" aria-hidden="true"></span></div>'+
-      '<div class="fighterName">'+escapeHtml(rival.name)+'</div>'+
-      '<div class="fighterRole">Rival '+(rivalIndex+1)+'/'+PRACTICE_RIVALS.length+' · cada 4 retos aparece uno nuevo</div>'+
-      '<div class="fighterMeters"><div class="fighterMeterLabel"><span>Resistencia</span><span>'+(25-resolvedCells)+'/25</span></div>'+
-      '<div class="fighterMeter"><div class="fighterHp enemyHp" style="width:'+resistance+'%"></div></div>'+
-      '<div class="fighterStatus">Supera los retos para derrotar a la cadena de rivales</div></div>'
+      '<div class="fighterHud enemyFighterHud">'+
+        '<div class="fighterHudHead"><div><small>RIVAL DE ENTRENAMIENTO</small><b>'+escapeHtml(rival.name)+'</b><span>Cada 4 retos aparece uno nuevo</span></div><strong>'+(25-resolvedCells)+'/25</strong></div>'+
+        '<div class="fighterMeterLabel"><span>Resistencia</span><span>'+Math.round(resistance)+'%</span></div>'+
+        '<div class="fighterMeter"><div class="fighterHp enemyHp" style="width:'+resistance+'%"></div></div>'+
+        '<div class="fighterStatus">Supera los retos para derrotarlo</div>'+
+      '</div>'
   }else{
     const d=target();if(d){right.style.setProperty("--fighter",roleDef(d).color);right.innerHTML=fighterMarkup(d,true)}
   }
