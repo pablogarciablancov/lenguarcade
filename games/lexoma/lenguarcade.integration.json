@@ -16,18 +16,24 @@
     "id": "lexoma",
     "official": true,
     "name": "FORJA",
-    "subtitle": "Roguelite de palabras",
+    "subtitle": "Roguelite de palabras y builds",
     "category": "Vocabulario y estrategia",
-    "competencies": ["vocabulario", "ortografía", "morfología", "estrategia"],
+    "competencies": [
+      "vocabulario",
+      "ortografía",
+      "morfología",
+      "estrategia",
+      "toma de decisiones"
+    ],
     "status": "en pruebas",
     "color": "#9dd8e7",
     "icon": "F",
     "entry": "games/lexoma/",
-    "description": "Forma palabras con una mano limitada, combina PUNTOS y MULTIS, administra energía y rerolls y construye una build de bonus distinta en cada run.",
+    "description": "Forma palabras, gana monedas, compra y mejora Cartas de Forja, depura tu bolsa y afronta eventos para construir una run distinta cada vez.",
     "banner": "https://pablogarciablancov.github.io/lenguarcade/games/lexoma/assets/banner.svg",
     "active": true,
     "integration": "embedded"
   },
   "progressAdapter": "games/lexoma/central-progress.adapter.js",
-  "notes": "Forja v2: loop de 10 rondas con PUNTOS × MULTIS, energía, rerolls de hasta 3 letras, 54 bonus, letras mejoradas/especiales, diccionario español ampliado y modo infinito. Mantiene READY/INIT/CHECKPOINT/RESULT/CLOSE_READY y guardado por alumno."
+  "notes": "Forja v2: PUNTOS × MULTIS, energía por ronda, economía con monedero e interés, tienda inicial y entre rondas, cartas comprables con niveles I-III, máximo 5 activas, taller de letras/fichas, eventos, diccionario español ampliado, guardado por alumno y protocolo READY/INIT/CHECKPOINT/RESULT/CLOSE_READY."
 }

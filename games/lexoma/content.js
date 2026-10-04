@@ -58,11 +58,20 @@ const bonuses=[
 ].map(([id,name,description,type,effect])=>({id,name,description,type,effect}));
 
 const modes={
- easy:{id:'easy',name:'Fácil',rounds:7,energy:6,rerolls:4,targets:[80,140,220,330,470,650,880]},
- normal:{id:'normal',name:'Normal',rounds:10,energy:5,rerolls:3,targets:[100,180,290,430,610,850,1160,1540,2020,2640]},
- hard:{id:'hard',name:'Difícil',rounds:12,energy:4,rerolls:2,targets:[120,220,360,540,780,1080,1450,1920,2510,3260,4210,5400]},
- daily:{id:'daily',name:'Reto diario',rounds:10,energy:5,rerolls:3,targets:[110,190,300,450,640,890,1210,1600,2100,2750]}
+ easy:{id:'easy',name:'Fácil',rounds:7,energy:6,rerolls:4,wallet:10,targets:[80,140,220,330,470,650,880]},
+ normal:{id:'normal',name:'Normal',rounds:10,energy:5,rerolls:3,wallet:8,targets:[100,180,290,430,610,850,1160,1540,2020,2640]},
+ hard:{id:'hard',name:'Difícil',rounds:12,energy:4,rerolls:2,wallet:7,targets:[120,220,360,540,780,1080,1450,1920,2510,3260,4210,5400]},
+ daily:{id:'daily',name:'Reto diario',rounds:10,energy:5,rerolls:3,wallet:8,targets:[110,190,300,450,640,890,1210,1600,2100,2750]}
 };
+
+const events=[
+ {id:'mercader',name:'Mercader de recortes',icon:'↻',text:'Un mercader ofrece tinta de descarte para rehacer tu mano.',choices:[{id:'buy',label:'2 rerolls',cost:3,note:'Paga 3 monedas y gana 2 rerolls.'},{id:'leave',label:'Pasar',cost:0,note:'No ocurre nada.'}]},
+ {id:'apuesta',name:'El escriba apuesta',icon:'⚔',text:'«La próxima ronda no la sacas ni de broma». Puedes subir la dificultad a cambio de una bolsa de monedas.',choices:[{id:'accept',label:'Aceptar apuesta',cost:0,note:'Próximo objetivo +25%. Si lo superas: +8 monedas.'},{id:'leave',label:'No apostar',cost:0,note:'Mantén el objetivo normal.'}]},
+ {id:'bibliotecario',name:'Bibliotecario clandestino',icon:'✦',text:'Conoce una técnica prohibida para reforzar una de tus Cartas de Forja al azar.',choices:[{id:'accept',label:'Mejorar carta',cost:3,note:'Paga 3 monedas. Una carta activa mejorable sube 1 nivel.'},{id:'leave',label:'Pasar',cost:0,note:'Guarda tus monedas.'}]},
+ {id:'caja',name:'Caja sin remitente',icon:'★',text:'Dentro vibra una ficha imposible de clasificar.',choices:[{id:'open',label:'Comprar comodín',cost:4,note:'Añade un comodín permanente a tu bolsa.'},{id:'leave',label:'No abrir',cost:0,note:'Probablemente sea lo sensato.'}]},
+ {id:'musa',name:'Visita de la Musa',icon:'ϟ',text:'Te ofrece una chispa extra para la próxima ronda.',choices:[{id:'accept',label:'+1 Energía',cost:2,note:'Paga 2 monedas. La próxima ronda empieza con +1 Energía.'},{id:'leave',label:'Pasar',cost:0,note:'Conserva el monedero.'}]},
+ {id:'fundicion',name:'Fundición de descarte',icon:'◌',text:'La fundición compra una letra de tu bolsa y la destruye para siempre.',choices:[{id:'sell',label:'Fundir letra',cost:0,note:'Se elimina una letra común al azar y recibes +4 monedas.'},{id:'leave',label:'Conservar bolsa',cost:0,note:'No alteres la distribución.'}]}
+];
 const achievements=[
  ['first','Primera chispa','Juega tu primera palabra.'],
  ['round5','A mitad de camino','Supera la ronda 5.'],
@@ -76,5 +85,5 @@ const achievements=[
  ['special','Alquimista','Juega una palabra con una ficha especial.']
 ].map(([id,title,description])=>({id:'lexoma_'+id,title,description,xpReward:25}));
 
-window.LexomaContent={bonuses,modes,achievements};
+window.LexomaContent={bonuses,modes,events,achievements};
 })();
