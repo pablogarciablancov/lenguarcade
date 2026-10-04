@@ -17,3 +17,15 @@
 @media(max-width:800px){.home{background:#111a2ca6;border-radius:14px}.intro h1{font-size:52px}.home-actions .launch{font-size:17px}.links{gap:6px}.mission-bar{padding:10px}.glossary-cards{grid-template-columns:1fr}.glossary-tools{flex-wrap:wrap;gap:8px}.glossary-tools label{min-width:0;flex:1}.glossary-tools>span{width:100%;padding:0}.glossary-card{padding:16px}.glossary .page-title h2{font-size:23px}.glossary .page-title button{font-size:11px;padding:8px}.floating-tiles{display:none}.book-spine{width:32px}.book-spine svg{width:24px}}
 
 @media(max-height:650px) and (min-width:801px){.intro p{display:none}.intro h1{font-size:43px;margin:10px 0}.title-rule{margin-bottom:15px}.home-actions .launch{padding:9px}.home-actions .launch small{display:none}.home-actions button{padding:8px}.links{margin-top:12px}.scene-tag{font-size:13px}.floating-tiles i{width:43px;height:48px;font-size:24px}}
+
+.adventure-help{font-size:13px;margin-top:5px;color:var(--muted)}
+.adventure-page .districts{grid-auto-rows:max-content;align-items:start;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.adventure-page .district{display:flex;flex-direction:column;gap:15px;min-width:0;overflow:visible}
+.district-heading{display:flex;align-items:center;gap:12px;min-height:58px}
+.district-heading svg{color:var(--district);width:42px;height:42px}
+.district-heading h3{margin:3px 0 0;font-size:19px;line-height:1.2}
+.district-play{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;font-size:14px;text-align:left;flex-shrink:0}
+.district-play span{font-size:25px;line-height:1}
+.adventure-page .stages{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.adventure-page .stages button{min-height:52px;min-width:0;white-space:normal;line-height:1.3}
+@media(max-width:600px){.adventure-page{padding:8px;gap:12px}.adventure-page .districts{grid-template-columns:1fr}.adventure-page .district{padding:16px}.adventure-page .page-title h2{font-size:22px}.adventure-page .page-title>button{flex-shrink:0}}

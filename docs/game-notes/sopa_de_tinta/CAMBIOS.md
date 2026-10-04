@@ -27,3 +27,7 @@ Arte creado con imagegen: cafetería literaria de fantasía nocturna, lámparas 
 ## Acceso permanente a Aventura
 
 El botón principal mantiene siempre «Jugar Aventura», incluso con un pedido pendiente. «Continuar pedido» dispone de un botón separado. Entrar en un distrito conserva la confirmación antes de sustituir una partida activa.
+
+## Botones explícitos dentro de los distritos
+
+Cada tarjeta muestra antes de los niveles un botón grande «Jugar · Pedido N» para el siguiente pedido pendiente (o Pedido 1 si ya se completó el distrito). Los cuatro pedidos individuales siguen disponibles según la progresión. La estructura evita recortes de controles y utiliza una columna en pantallas estrechas, con scroll interno del mapa. No cambia guardados, banco ni recompensas.
