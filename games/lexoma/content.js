@@ -1,36 +1,80 @@
 (() => {
 'use strict';
-const relics=[
- ['quevedo','Pluma de Quevedo','+30 por cada adjetivo.',70,'quill'],
- ['cervantes','Tintero de Cervantes','Las palabras de 7+ letras valen ×1,5.',80,'ink'],
- ['corona','Corona del Sintagma','Sintagmas nominales completos: ×1,5.',100,'crown'],
- ['cronista','Reloj del Cronista','+60 por cada verbo en pasado.',65,'clock'],
- ['brujula','Brújula del Adverbio','Cada adverbio eleva el combo en 0,2.',75,'compass'],
- ['martillo','Martillo Verbal','Duplica el valor del primer verbo.',80,'hammer'],
- ['concordia','Piedra de Concordia','Concordancia sin errores: +100.',100,'gem'],
- ['fantasma','Letra Fantasma','Añade dos comodines a la bolsa al comprarla.',60,'star'],
- ['enie','Ñ Primordial','Duplica el valor de las palabras con Ñ.',65,'rune'],
- ['tildes','Acuñador de Tildes','Una ficha de tilde extra cada dos frases.',60,'accent'],
- ['lexicografo','Ojo del Lexicógrafo','+12 por cada letra de las palabras forjadas.',70,'rune'],
- ['trinidad','Regla de Tres','Frases de exactamente 3 palabras: +150.',65,'crown'],
- ['arquitecto','Plano del Arquitecto','Frases de 4+ palabras: ×1,35.',90,'compass'],
- ['vocalista','Coro de Vocales','+45 por cada palabra con 3 vocales o más.',70,'quill'],
- ['raras','Caja de Letras Raras','+90 por cada palabra con J, Ñ, Q, X o Z.',75,'star'],
- ['verbal','Yunque Verbal','Dos verbos o más: ×1,45.',90,'hammer'],
- ['nominal','Sello Nominal','Dos sustantivos o más: +120.',75,'gem'],
- ['perfecta','Gramática Perfecta','Oración válida con concordancia: ×1,25.',100,'ink'],
- ['larga','Pergamino Extenso','Palabras de 8+ letras: +100 cada una.',80,'clock'],
- ['diversidad','Prisma Gramatical','4 categorías distintas: ×1,4.',105,'rune'],
- ['minimalista','Golpe Breve','Frase válida de 2 palabras: ×1,5.',85,'hammer'],
- ['acentos','Tinta Acentuada','+80 por cada palabra con tilde.',70,'accent']
-].map(([id,name,description,price,icon])=>({id,name,description,price,icon}));
-const enemies=[
- {id:'devorador',name:'Devorador de Letras',title:'EL UMBRAL',hp:500,rounds:4,damage:18,reward:65,rule:'Solo dos descartes por ronda.',art:'devorador'},
- {id:'duende',name:'Duende de la Discordia',title:'BOSQUE DE CONCORDIA',hp:1000,rounds:4,damage:22,reward:85,rule:'Cada concordancia correcta añade 40 puntos.',art:'duende'},
- {id:'escriba',name:'Escriba Corrupto',title:'LA BIBLIOTECA',hp:1400,rounds:5,damage:25,reward:100,rule:'Cada ronda exige 40 puntos más para atacar.',art:'escriba'},
- {id:'elite',name:'Custodio del Tintero',title:'ENCUENTRO ÉLITE',hp:1700,rounds:5,damage:28,reward:115,rule:'Las frases con cuatro categorías reciben ×1,3.',art:'custodio'},
- {id:'morfax',name:'Morfax, el Devorador',title:'JEFE · LA FORJA PROHIBIDA',hp:2600,rounds:7,damage:32,reward:160,rule:'Tres fases: forja libre, categoría potenciada y diversidad.',art:'morfax'}
-];
-const achievements=[['first','Herrero aprendiz','Forja tu primera palabra.'],['agree','Eso concuerda','Activa diez concordancias.'],['phrases','Forjador','Construye veinte frases.'],['combo','Combo lingüístico','Alcanza combo ×5.'],['enie','Maestro de la Ñ','Usa cinco palabras distintas con Ñ.'],['5000','5.000','Obtén 5.000 puntos en una frase.'],['boss','Morfax derrotado','Completa la run.']].map(([id,title,description])=>({id:'lexoma_'+id,title,description,xpReward:25}));
-window.LexomaContent={relics,enemies,achievements,route:['devorador','duende','shop','escriba','elite','morfax']};
+const bonuses=[
+['vocalista','Vocalista','Cada vocal activada añade +2 PUNTOS.','points','vowel'],
+['consonante','Consonante','Cada consonante activada añade +2 PUNTOS.','points','consonant'],
+['palabra_larga','Palabra larga','Las palabras de 5+ letras ganan +15 PUNTOS.','points','long'],
+['palabra_corta','Palabra corta','Las palabras de 5 letras o menos duplican MULTIS.','multi','short'],
+['cuatro','Cuatro','Con exactamente 4 letras: +4 MULTIS.','multi','four'],
+['seis','Sexta marcha','Con 6 letras: +6 MULTIS.','multi','six'],
+['ocho','Ocho','Con 8 letras: PUNTOS ×1,5.','points','eight'],
+['variedad','Variedad','Cada letra distinta añade +1 MULTI.','multi','unique'],
+['repeticion','Repetición','Cada letra repetida añade +4 PUNTOS.','points','repeat'],
+['raras','Letras raras','J, Ñ, Q, X y Z añaden +8 PUNTOS cada una.','points','rare'],
+['enie','Ñ primordial','Cada Ñ añade +10 PUNTOS y +2 MULTIS.','hybrid','enie'],
+['acentos','Tinta acentuada','Cada vocal acentuada añade +10 PUNTOS.','points','accent'],
+['mult','M.U.L.T.','Cada M, U, L o T añade +4 MULTIS.','multi','multLetters'],
+['punto','P.U.N.T.O.','Cada P, U, N, T u O añade +7 PUNTOS.','points','pointLetters'],
+['eco','Eco inicial','Si empiezas igual que la palabra anterior: +12 PUNTOS.','points','firstEcho'],
+['gemelos','Gemelos','Si repites longitud: +6 MULTIS.','multi','twins'],
+['yoyo','Yo-yo','Ganas MULTIS igual a la diferencia de longitud con la palabra anterior.','multi','yoyo'],
+['ahorro','Ahorro','Añade a MULTIS el número de rerolls que conservas.','multi','saving'],
+['stock','Stock','Añade a MULTIS el valor de la letra más barata que queda en tu mano.','multi','stock'],
+['coccion','Cocción','Cada letra que dejas en la mano añade +2 PUNTOS.','points','cooking'],
+['contra_cuerdas','Contra las cuerdas','Con 1 ENERGÍA: PUNTOS ×2 y MULTIS ×2.','hybrid','backwall'],
+['bateria','Batería','Al superar una ronda recibes +1 ENERGÍA adicional.','utility','battery'],
+['papelera','Papelera','Al superar una ronda recibes +2 REROLLS adicionales.','utility','trashcan'],
+['mas_eleccion','Más elección','Tu mano aumenta en +1 letra.','utility','hand'],
+['modo_facil','Objetivo flexible','Los objetivos de ronda se reducen un 12%.','utility','targetDown'],
+['impulso','Impulso','+5 MULTIS permanentes.','multi','boost'],
+['base_fuerte','Base fuerte','+12 PUNTOS permanentes.','points','rawPoints'],
+['objetivo','Objetivo','Cada ronda elige una longitud; acertarla duplica MULTIS.','multi','targetLength'],
+['negrita','Negrita','Aumenta mucho la probabilidad de letras mejoradas de PUNTOS.','utility','boldDraw'],
+['cursiva','Cursiva','Aumenta mucho la probabilidad de letras mejoradas de MULTIS.','utility','italicDraw'],
+['subrayado','Subrayado','Aumenta la probabilidad de letras subrayadas: ×1,5 MULTIS por ficha.','utility','underlineDraw'],
+['legendarias','Letras especiales','Aumenta la probabilidad de letras especiales al robar.','utility','specialDraw'],
+['comodines','Comodines','Añade 3 comodines * a la bolsa.','utility','wildcards'],
+['exclamacion','¡Sorpresa!','Añade 2 fichas ! especiales a la bolsa.','utility','bangs'],
+['afortunada','Ficha afortunada','Cada ficha tiene un 12% de repetirse al puntuar.','hybrid','lucky'],
+['triple','Triple','Cada tercera letra añade +3 PUNTOS y +1 MULTI.','hybrid','triple'],
+['equilibrio_vocal','A ≥ B','Si hay tantas vocales como consonantes: +1 REROLL tras jugar.','utility','vowelBalance'],
+['equilibrio_consonante','B ≥ A','Si hay tantas consonantes como vocales: +1 MULTI.','multi','consonantBalance'],
+['cinco_vocales','Pentavocal','Usar 4 vocales distintas: PUNTOS ×2.','points','manyVowels'],
+['muro_consonante','Muro consonante','4 consonantes o más: +10 MULTIS.','multi','manyConsonants'],
+['sustantivo','Sustantivos','Si el léxico reconoce un sustantivo: +8 MULTIS.','multi','noun'],
+['verbo','Verbos','Si el léxico reconoce un verbo: PUNTOS ×1,5.','points','verb'],
+['adjetivo','Adjetivos','Si el léxico reconoce un adjetivo: +25 PUNTOS.','points','adj'],
+['adverbio','Adverbios','Si el léxico reconoce un adverbio: +12 MULTIS.','multi','adv'],
+['morfologia','Prisma morfológico','Cada categoría gramatical distinta usada en la ronda añade +3 MULTIS.','multi','categoryMix'],
+['palindromo','Espejo','Los palíndromos triplican MULTIS.','multi','palindrome'],
+['sin_repetir','Letras limpias','Sin letras repetidas: +12 PUNTOS.','points','noRepeat'],
+['puerta_vocal','Puerta vocálica','Si empieza por vocal: +7 MULTIS.','multi','startsVowel'],
+['final_s','Final en S','Si termina en S: +30 PUNTOS.','points','endsS'],
+['cinco','Cinco exactas','Con 5 letras: +25 PUNTOS.','points','five'],
+['siete','Siete exactas','Con 7 letras: +12 MULTIS.','multi','seven'],
+['nueve','Nueve exactas','Con 9+ letras: PUNTOS ×2 y +10 MULTIS.','hybrid','nine'],
+['tormenta','Tormenta de tinta','Cada ficha especial usada añade +8 PUNTOS y +2 MULTIS.','hybrid','specialUse'],
+['ultima_chispa','Última chispa','La última ENERGÍA de una ronda gana +15 PUNTOS y +8 MULTIS.','hybrid','lastEnergy']
+].map(([id,name,description,type,effect])=>({id,name,description,type,effect}));
+
+const modes={
+ easy:{id:'easy',name:'Fácil',rounds:7,energy:6,rerolls:4,targets:[80,140,220,330,470,650,880]},
+ normal:{id:'normal',name:'Normal',rounds:10,energy:5,rerolls:3,targets:[100,180,290,430,610,850,1160,1540,2020,2640]},
+ hard:{id:'hard',name:'Difícil',rounds:12,energy:5,rerolls:2,targets:[120,220,360,540,780,1080,1450,1920,2510,3260,4210,5400]},
+ daily:{id:'daily',name:'Reto diario',rounds:10,energy:5,rerolls:3,targets:[110,190,300,450,640,890,1210,1600,2100,2750]}
+};
+const achievements=[
+ ['first','Primera chispa','Juega tu primera palabra.'],
+ ['round5','A mitad de camino','Supera la ronda 5.'],
+ ['win','Forja completa','Completa una run.'],
+ ['long','Palabra mayor','Juega una palabra de 9+ letras.'],
+ ['multi50','Multiplicador salvaje','Alcanza 50 MULTIS en una palabra.'],
+ ['points100','Golpe pesado','Alcanza 100 PUNTOS antes de multiplicar.'],
+ ['score5000','Fuera de escala','Haz 5.000 puntos en una palabra.'],
+ ['reroll10','Reciclador','Usa 10 rerolls entre partidas.'],
+ ['bonus10','Constructor','Descubre 10 bonus distintos.'],
+ ['special','Alquimista','Juega una palabra con una ficha especial.']
+].map(([id,title,description])=>({id:'lexoma_'+id,title,description,xpReward:25}));
+
+window.LexomaContent={bonuses,modes,achievements};
 })();
