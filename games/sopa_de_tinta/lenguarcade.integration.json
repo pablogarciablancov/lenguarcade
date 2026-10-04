@@ -1,0 +1,13 @@
+{
+  "$schema": "lenguarcade-integration-v1",
+  "gameId": "sopa_de_tinta",
+  "name": "Sopa de Tinta",
+  "subtitle": "El café de los conceptos",
+  "status": "laboratorio",
+  "integration": "embedded",
+  "entry": "games/sopa_de_tinta/index.html",
+  "banner": "https://pablogarciablancov.github.io/lenguarcade/games/sopa_de_tinta/banner.svg",
+  "requires": {"studentRunner": true, "saveProgress": true, "supabaseCatalog": true},
+  "catalogRequest": {"category": "Conceptos de Lengua", "competencies": ["morfología", "sintaxis", "literatura", "semántica", "ortografía", "verbos"], "color": "#90e8d7", "description": "Deduce conceptos a partir de pistas y encuéntralos en un café de letras con siete distritos, Hora Punta, combos y logros."},
+  "notes": "Bridge genérico READY/INIT/INITIALIZED, CHECKPOINT, RESULT y REQUEST_EXIT/CLOSE_READY. Checkpoints guardan sin conceder XP por respuestas; métricas reales en players[].metrics. Los resultados llevan resultId estable por tablero. Añadir adaptador de progreso central para porcentaje de los 28 pedidos de aventura y XP delta idempotente; no usar adventureWorld genérico. Añadir catálogo canónico y sincronizar derivados en rama integration. Publicar Pages y despliegue estable Apps Script de forma coordinada. El desafío diario usa fecha Europe/Madrid y semilla fija sin adaptación individual; almacena registros personales. Un ranking común requerirá un endpoint autorizado de lectura/agregación, aún no disponible para este juego. No se inventan mensajes de ranking."
+}
