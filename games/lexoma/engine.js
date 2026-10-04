@@ -222,7 +222,7 @@ function earnRoundIncome(){
 function roundWon(){
  const efficient=run.energy>=2?1:0,trash=has('papelera')?1+cardLevel('papelera'):0;
  run.efficiencyReward=efficient;run.rerolls+=1+trash+efficient;earnRoundIncome();
- if(run.round>=totalRounds()){end(true);return;}
+ if(!run.endless&&run.round>=totalRounds()){end(true);return;}
  generateShop('round');
 }
 function play(){
@@ -328,7 +328,8 @@ function advanceRound(){
 }
 function end(won){run.status=won?'victory':'defeat';run.finished=true;run.shop=null;run.resultId=run.id+'_result';if(won)career.wins++;career.bestScore=Math.max(career.bestScore,run.totalScore);unlock();save();}
 function continueEndless(){
- if(!run?.finished||run.status!=='victory')return false;run.finished=false;run.status='play';run.round++;run.roundScore=0;run.target=Math.round((run.target||mode().targets.at(-1))*1.35);run.energy=roundEnergy();run.rerolls+=1;run.categorySeenRound=[];run.resultId=null;replenish();save();return true;
+ if(!run?.finished||run.status!=='victory')return false;
+ run.endless=true;run.finished=false;run.status='play';run.round++;run.roundScore=0;run.target=Math.round((run.target||mode().targets.at(-1))*1.35);run.energy=roundEnergy();run.rerolls+=1;run.categorySeenRound=[];run.resultId=null;run.shop=null;replenish();save();return true;
 }
 function unlock(){
  const log=run?.wordLog||[],cond=[career.words>=1,(run?.round||0)>=5,career.wins>=1,log.some(x=>String(x.word).replace(/!/g,'').length>=9),career.bestMulti>=50,career.bestPoints>=100,career.bestPlay>=5000,career.rerollsUsed>=10,(career.bonusesSeen||[]).length>=10,log.some(x=>x.effects?.some(e=>/Tormenta|afortunada/.test(e))||false)];
@@ -338,7 +339,7 @@ function normalizeRun(){
  if(!run)return;
  run.maxHand=Number.isFinite(run.maxHand)?run.maxHand:7;run.bonuses=Array.isArray(run.bonuses)?run.bonuses.slice(0,MAX_BONUSES):[];run.cardLevels=run.cardLevels&&typeof run.cardLevels==='object'?run.cardLevels:{};for(const id of run.bonuses)run.cardLevels[id]=cardLevel(id);
  run.bonusChoices=Array.isArray(run.bonusChoices)?run.bonusChoices:[];run.rerollSelection=Array.isArray(run.rerollSelection)?run.rerollSelection:[];run.categorySeenRound=Array.isArray(run.categorySeenRound)?run.categorySeenRound:[];run.efficiencyReward=Number(run.efficiencyReward||0);
- run.coins=Number.isFinite(run.coins)?run.coins:(mode().wallet??8);run.nextTargetFactor=Number(run.nextTargetFactor||1);run.nextBounty=Number(run.nextBounty||0);run.nextEnergyBonus=Number(run.nextEnergyBonus||0);run.activeBounty=Number(run.activeBounty||0);run.lastIncome=run.lastIncome||null;
+ run.coins=Number.isFinite(run.coins)?run.coins:(mode().wallet??8);run.endless=!!run.endless;run.nextTargetFactor=Number(run.nextTargetFactor||1);run.nextBounty=Number(run.nextBounty||0);run.nextEnergyBonus=Number(run.nextEnergyBonus||0);run.activeBounty=Number(run.activeBounty||0);run.lastIncome=run.lastIncome||null;
  if(run.status==='starter'||run.status==='reward'){
   const origin=run.status==='starter'?'starter':'round',ids=run.bonusChoices.length?run.bonusChoices:offerIds(origin==='starter');
   run.status='shop';run.shop={origin,cards:ids.map(id=>({id,price:cardPrice(id,origin==='starter')})),refreshCost:2,refreshes:0,eventId:null,eventResolved:false,eventResult:''};
