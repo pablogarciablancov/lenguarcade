@@ -64,6 +64,21 @@ for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1366,640]]){
  await page.setViewportSize({width,height});const q=await page.evaluate(()=>({scrollH:document.documentElement.scrollHeight,clientH:document.documentElement.clientHeight,scrollW:document.documentElement.scrollWidth,clientW:document.documentElement.clientWidth,hand:document.getElementById('hand').getBoundingClientRect(),wallet:document.getElementById('walletValue').getBoundingClientRect(),play:document.getElementById('playBtn').getBoundingClientRect()}));
  assert.equal(q.scrollH,q.clientH,`scroll vertical ${width}x${height}`);assert.equal(q.scrollW,q.clientW,`scroll horizontal ${width}x${height}`);for(const k of ['hand','wallet','play'])assert.ok(q[k].top>=0&&q[k].bottom<=height,`${k} visible ${width}x${height}`);
 }
+// Botones del final: Menú debe retirar el overlay e Infinito debe reabrir la partida.
+await page.evaluate(()=>{const r=LexomaEngine.run;r.status='victory';r.finished=true;r.round=LexomaEngine.totalRounds();r.resultId='test-final';window.dispatchEvent(new Event('lexoma:change'));});
+await page.waitForSelector('#endPanel:not([hidden])');
+assert.equal(await page.locator('#endlessBtn').isVisible(),true);
+await page.locator('#endMenuBtn').click();
+assert.equal(await page.locator('#titleScreen').isVisible(),true);
+assert.equal(await page.locator('#overlay').isVisible(),false);
+await page.locator('#continueBtn').click().catch(()=>{});
+await page.evaluate(()=>{const r=LexomaEngine.run;r.status='victory';r.finished=true;r.round=LexomaEngine.totalRounds();r.resultId='test-final-2';window.dispatchEvent(new Event('lexoma:change'));});
+await page.waitForSelector('#endPanel:not([hidden])');
+await page.locator('#endlessBtn').click();
+assert.equal(await page.evaluate(()=>LexomaEngine.run.endless),true);
+assert.equal(await page.evaluate(()=>LexomaEngine.run.status),'play');
+assert.equal(await page.locator('#overlay').isVisible(),false);
+
 const snap=await page.evaluate(()=>LexomaEngine.snapshot());await page.reload();await page.waitForFunction(()=>LexomaEngine.dictionaryReady);await page.locator('#continueBtn').click();assert.equal(await page.evaluate(()=>LexomaEngine.run.id),snap.run.id);
 assert.deepEqual(errors,[]);console.log('UI OK: monedero, pasar sin comprar, compra, taller, evento y responsive.');
 
