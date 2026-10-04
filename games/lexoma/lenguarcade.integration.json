@@ -1,0 +1,33 @@
+{
+  "$schema": "lenguarcade-integration-v1",
+  "gameId": "lexoma",
+  "name": "LEXOMA — Forja de Frases",
+  "status": "en pruebas",
+  "integration": "embedded",
+  "entry": "games/lexoma/index.html",
+  "banner": "https://pablogarciablancov.github.io/lenguarcade/games/lexoma/assets/banner.svg",
+  "requires": {
+    "studentRunner": true,
+    "saveProgress": true,
+    "supabaseCatalog": true,
+    "cumulativeProgressAdapter": true
+  },
+  "catalogEntry": {
+    "id": "lexoma",
+    "official": true,
+    "name": "LEXOMA",
+    "subtitle": "Forja de Frases",
+    "category": "Roguelite gramatical",
+    "competencies": ["morfología", "concordancia", "sintaxis", "vocabulario", "acentuación", "estrategia"],
+    "status": "en pruebas",
+    "color": "#e6be6e",
+    "icon": "✧",
+    "entry": "games/lexoma/",
+    "description": "Forja palabras, construye frases y domina la gramática para derrotar criaturas mediante combos lingüísticos.",
+    "banner": "https://pablogarciablancov.github.io/lenguarcade/games/lexoma/assets/banner.svg",
+    "active": true,
+    "integration": "embedded"
+  },
+  "progressAdapter": "games/lexoma/central-progress.adapter.js",
+  "notes": "Añadir catalogEntry a config/game-catalog.json con sortOrder libre y aumentar version; ejecutar catalog:sync y check. Incorporar buildLexomaCentralProgress en el runner y despachar antes de la fórmula genérica. No publicar con XP genérica: repetidos checkpoints no deben sumar otra vez todos los puntos. Protocolo READY/INIT, bootstrap, CHECKPOINT, RESULT y CLOSE_READY existente; ningún cambio de autenticación, migración de datos de alumnos ni infraestructura de cierre. Publicación central coordinada desde integration/* después de fusionar la PR del juego."
+}
