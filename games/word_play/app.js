@@ -4,7 +4,6 @@ const E=window.WordPlayEngine,C=E.C,$=id=>document.getElementById(id);
 const ui={menu:$('menuScreen'),game:$('gameScreen'),dict:$('dictionaryStatus'),level:$('profileLevel'),best:$('bestScore'),bestWord:$('bestWord'),games:$('gamesPlayed'),unique:$('uniqueWords'),xp:$('careerXpLabel'),xpBar:$('careerXpBar'),cont:$('continueBtn'),contSummary:$('continueSummary'),round:$('roundLabel'),challenge:$('challengeLabel'),mode:$('modeLabel'),roundScore:$('roundScore'),target:$('targetScore'),progress:$('roundProgress'),boss:$('bossBadge'),plays:$('playsLeft'),shuffles:$('shufflesLeft'),rerolls:$('rerollsLeft'),mods:$('modifierList'),modCount:$('modifierCount'),upgrades:$('upgradeList'),upgradeCount:$('upgradeCount'),chTitle:$('challengeTitle'),chDesc:$('challengeDescription'),missionChip:$('missionChip'),hint:$('wordHint'),preview:$('previewScore'),wordScore:$('wordScorePreview'),bonusScore:$('bonusScorePreview'),finalScore:$('finalScorePreview'),builder:$('wordBuilder'),combo:$('comboPreview'),board:$('board'),feedback:$('feedback'),total:$('totalScore'),words:$('wordsPlayed'),streak:$('streakValue'),runBest:$('runBestWord'),bestCombo:$('bestCombo'),reserve:$('reserveCount'),last:$('lastPlayCard'),goals:$('runGoalList'),backdrop:$('modalBackdrop'),reward:$('rewardModal'),rewardChoices:$('rewardChoices'),rewardRound:$('rewardRoundLabel'),rerollBtn:$('rerollRewardBtn'),skipReward:$('skipRewardBtn'),difficulty:$('difficultyModal'),info:$('infoModal'),infoTitle:$('infoTitle'),infoBody:$('infoBody'),pause:$('pauseModal'),collection:$('collectionModal'),collectionBody:$('collectionBody'),wordlog:$('wordLogModal'),wordlogList:$('wordLogList'),end:$('endModal'),endEye:$('endEyebrow'),endTitle:$('endTitle'),endStats:$('endStats'),buildSummary:$('buildSummary'),newAchievements:$('newAchievements'),motion:$('reduceMotionToggle'),sound:$('soundToggle'),classroom:$('classroomModeToggle'),coinWallet:$('coinWallet'),coinValue:$('coinValue'),shopBtn:$('shopBtn'),shop:$('shopModal'),shopCoins:$('shopCoins'),shopGrid:$('shopGrid'),shopMessage:$('shopMessage'),letterPicker:$('letterPicker'),letterGrid:$('letterGrid'),cancelLetter:$('cancelLetterBtn'),inkWallet:$('inkWallet'),inkValue:$('inkValue'),tintaBtn:$('tintaVivaBtn'),tintaCharges:$('tintaCharges')};
 let rewardOptions=[],dictionaryReady=false,activeUpgrade=null;
 const fmt=n=>new Intl.NumberFormat('es-ES').format(Math.round(Number(n)||0));
-const multFmt=n=>{const v=Number(n)||1;return '×'+v.toFixed(Number.isInteger(v)?0:2).replace('.',',');};
 const escAttr=v=>String(v??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function specialKind(item){
   const effectMap={makeGold:'gold',makeEmerald:'emerald',makeDot:'dot',makeDiamond:'diamond',makeWild:'wild'};
@@ -153,7 +152,7 @@ function render(){
   ui.plays.textContent=Math.max(0,s.playsLeft);ui.shuffles.textContent=s.shufflesLeft;ui.rerolls.textContent=s.rerollsLeft;
   ui.total.textContent=fmt(s.totalScore);ui.words.textContent=s.words.length;ui.streak.textContent=s.validStreak;
   ui.runBest.textContent=s.bestPlay?s.bestPlay.word.toUpperCase():'—';
-  ui.bestCombo.textContent=multFmt(s.bestCombo||1);ui.reserve.textContent=s.reserveTiles?.length||0;
+  ui.bestCombo.textContent='×'+Number(s.bestCombo||1).toFixed(s.bestCombo%1?2:0);ui.reserve.textContent=s.reserveTiles?.length||0;
   ui.coinValue.textContent=Number(s.coins||0);ui.inkValue.textContent=Number(s.ink||0);
   ui.tintaCharges.textContent='×'+Number(s.tintaCharges||0);
   const canBuy=Number(s.tintaCharges||0)<=0&&Number(s.ink||0)>=3;
@@ -162,7 +161,7 @@ function render(){
   ui.tintaBtn.title=Number(s.tintaCharges||0)>0?'Muta 6 fichas sin gastar recursos':canBuy?'Compra 1 carga por 3 Tintas':'Necesitas 3 Tintas para comprar otra carga';ui.tintaBtn.dataset.tip=ui.tintaBtn.title;
   renderMods();renderUpgrades();renderBoard();renderWord();
   ui.goals.innerHTML=s.goals.map(g=>'<div class="goal-item '+(g.done?'done':'')+'"><span>'+(g.done?'✓':'○')+'</span><span>'+g.label+'</span></div>').join('');
-  const auto=E.specialEffect()==='autoRefresh';$('shuffleBtn').disabled=auto?s.playsLeft<=0:s.shufflesLeft<=0;$('shuffleBtn').textContent=auto?'↻ Cambiar letras · 1 jugada':'↻ Cambiar letras';
+  const auto=E.specialEffect()==='autoRefresh';$('shuffleBtn').disabled=auto?s.playsLeft<=0:s.shufflesLeft<=0;$('shuffleBtn').textContent=auto?'↻ Renovar · 1 jugada':'↻ Renovar';
 }
 function renderMods(){
   const s=state();ui.modCount.textContent=s.modifiers.length+'/6';
@@ -226,9 +225,9 @@ function renderWord(){
     }else{el.className='word-slot empty '+(bonus?'bonus':'');el.innerHTML='<span class="slot-bonus">'+(bonus?'+'+bonus:'')+'</span><strong>'+(i+1)+'</strong>';}
     ui.builder.appendChild(el);
   }
-  if(!w){ui.hint.textContent='Selecciona fichas para formar una palabra';ui.preview.textContent='0 pts';ui.wordScore.textContent='0';ui.bonusScore.textContent='×1';ui.finalScore.textContent='0';ui.combo.innerHTML='';return;}
+  if(!w){ui.hint.textContent='Selecciona fichas para formar una palabra';ui.preview.textContent='0 pts';ui.wordScore.textContent='0';ui.bonusScore.textContent='0';ui.finalScore.textContent='0';ui.combo.innerHTML='';return;}
   ui.hint.textContent='4 letras mínimo · pulsa vocal para tilde · ★ para cambiar comodín';
-  const tiles=s.selected.map(x=>s.board.find(t=>t.id===x.id)).filter(Boolean),sc=E.score(w,tiles,true);ui.preview.textContent=fmt(sc.total)+' pts';ui.wordScore.textContent=fmt(sc.subtotal);ui.bonusScore.textContent=multFmt(sc.finalMultiplier);ui.finalScore.textContent=fmt(sc.total);
+  const tiles=s.selected.map(x=>s.board.find(t=>t.id===x.id)).filter(Boolean),sc=E.score(w,tiles,true);ui.preview.textContent=fmt(sc.total)+' pts';ui.wordScore.textContent=fmt(sc.wordScore);ui.bonusScore.textContent=fmt(sc.bonusPoints);ui.finalScore.textContent=fmt(sc.total);
   ui.combo.innerHTML=sc.effects.slice(0,6).map(e=>'<span class="combo-chip">'+e+'</span>').join('');
 }
 function play(){
@@ -242,7 +241,7 @@ function play(){
   window.WordPlayGameFeel?.activations?.({modifiers:result.score.triggeredModifiers||[],specialEvents:result.score.specialEvents||[],mission:result.missionCompleted});
   if(Number(s.coins||0)>=3)setTimeout(()=>showCoach('shop','Ya puedes comprar','Las Monedas se gastan en la Tienda. El stock cambia cada ronda y siempre hay una oferta.'),450);
   ui.last.className='last-play-card';
-  ui.last.innerHTML='<div class="played-word">'+result.word.toUpperCase()+' <small>+'+result.coinGain+' moneda'+(result.coinGain===1?'':'s')+'</small></div><div class="score-mini"><span>PUNTOS <b>'+fmt(result.score.subtotal)+'</b></span><span>MULTI <b>'+multFmt(result.score.finalMultiplier)+'</b></span><span>TOTAL <b>'+fmt(result.score.total)+'</b></span></div><div class="effect-list">'+(result.score.effects.length?result.score.effects.map(e=>'<span>• '+e+'</span>').join(''):'<span>Sin efectos adicionales</span>')+'</div>';
+  ui.last.innerHTML='<div class="played-word">'+result.word.toUpperCase()+' <small>+'+result.coinGain+' moneda'+(result.coinGain===1?'':'s')+'</small></div><div class="score-mini"><span>WORD <b>'+fmt(result.score.wordScore)+'</b></span><span>BONUS <b>+'+fmt(result.score.bonusPoints)+'</b></span><span>FINAL <b>'+fmt(result.score.total)+'</b></span></div><div class="effect-list">'+(result.score.effects.length?result.score.effects.map(e=>'<span>• '+e+'</span>').join(''):'<span>Sin efectos adicionales</span>')+'</div>';
   E.achievements();render();
   if(s.mode==='quick'&&s.playsLeft<=0)return setTimeout(()=>finish(true),220);
   if(s.mode!=='quick'&&s.roundScore>=s.target)return setTimeout(openReward,220);
