@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#9acfe0">
 <title>FORJA · LenguArcade</title>
-<link rel="stylesheet" href="styles.css?v=20261004-wordatro-rebuild">
+<link rel="stylesheet" href="styles.css?v=20261004-build-pass">
 </head>
 <body>
 <main id="app">
@@ -47,7 +47,7 @@
 
   <div id="playfield" class="playfield">
     <aside class="left-rail">
-      <button id="bonusDeckBtn" class="rail-card bonus-deck" type="button"><span>BONUS</span><strong id="bonusCount">0</strong><small>tu build</small></button>
+      <button id="bonusDeckBtn" class="rail-card bonus-deck" type="button"><span>CARTAS</span><strong id="bonusCount">0/5</strong><small>tu build</small></button>
       <div id="bonusStack" class="bonus-stack"></div>
       <button id="rerollModeBtn" class="reroll-card" type="button"><span>REROLL</span><strong id="rerollCount">3 ↻</strong><small>Cambia hasta 3 letras</small></button>
       <div class="reroll-tray"><span id="rerollTray">0 / 3</span><button id="doRerollBtn" disabled>↻</button></div>
@@ -97,16 +97,16 @@
   <section id="rewardPanel" class="overlay-card reward-panel" hidden>
     <div class="reward-side">
       <span class="kicker">TU BUILD</span>
-      <h2>Bonus activos</h2>
+      <h2>Cartas activas</h2>
       <div id="rewardOwned" class="reward-owned"></div>
       <div class="reward-resource"><span>Rerolls</span><strong id="rewardRerolls">0 ↻</strong></div>
     </div>
     <div class="reward-main">
       <span class="kicker">RONDA SUPERADA</span>
-      <h2>Elige un bonus</h2>
-      <p>Uno se queda contigo durante toda la run. Combínalos para disparar PUNTOS y MULTIS.</p>
+      <h2>Elige una carta</h2>
+      <p>Combina hasta cinco cartas para disparar PUNTOS y MULTIS.</p>
       <div id="rewardChoices" class="reward-choices"></div>
-      <button id="rerollBonusesBtn" class="reroll-bonuses-btn">↻ Cambiar los 3 bonus</button>
+      <button id="rerollBonusesBtn" class="reroll-bonuses-btn">↻ Cambiar las 3 cartas</button>
     </div>
   </section>
 
@@ -126,10 +126,10 @@
 
 <dialog id="choiceDialog"><div id="choiceBody"></div><button id="cancelChoice">Cancelar</button></dialog>
 </main>
-<script src="linguistics.js?v=20261004-wordatro-rebuild"></script>
-<script src="content.js?v=20261004-wordatro-rebuild"></script>
-<script src="engine.js?v=20261004-wordatro-rebuild"></script>
-<script src="bridge.js?v=20261004-wordatro-rebuild"></script>
-<script src="app.js?v=20261004-wordatro-rebuild"></script>
+<script src="linguistics.js?v=20261004-build-pass"></script>
+<script src="content.js?v=20261004-build-pass"></script>
+<script src="engine.js?v=20261004-build-pass"></script>
+<script src="bridge.js?v=20261004-build-pass"></script>
+<script src="app.js?v=20261004-build-pass"></script>
 </body>
 </html>
