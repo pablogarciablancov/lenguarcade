@@ -6,6 +6,8 @@ const ACCENTS={A:'Á',E:'É',I:'Í',O:'Ó',U:'Ú',Á:'A',É:'E',Í:'I',Ó:'O',Ú
 const VOWELS='AEIOUÁÉÍÓÚÜ';
 const RARE='JÑQXZ';
 const LETTER_VALUES={A:1,E:1,I:1,L:1,N:1,O:1,R:1,S:1,T:1,U:1,D:2,G:2,B:3,C:3,M:3,P:3,F:4,H:4,V:4,Y:4,Q:5,J:8,Ñ:8,X:8,Z:10,Ü:2};
+const MAX_BONUSES=5;
+const STARTER_POOL=['vocalista','consonante','palabra_larga','variedad','raras','mult','punto','cinco','sin_repetir','puerta_vocal','final_s','sustantivo','verbo'];
 let run=null,career=freshCareer(),storageKey='lexoma.v2.guest',dictionary=new Set(),dictionaryReady=false;
 
 function freshCareer(){return{games:0,wins:0,bestScore:0,bestPlay:0,bestPoints:0,bestMulti:1,words:0,phrases:0,concordances:0,errors:0,rerollsUsed:0,bonusesSeen:[],achievements:[]};}
@@ -20,6 +22,7 @@ function letterValue(c){const u=strip(c).toUpperCase();return LETTER_VALUES[u]||
 function tile(char,style='normal'){return{id:++run.tileId,char,style,bonusPoints:0,bonusMulti:0};}
 function bonus(id){return C.bonuses.find(x=>x.id===id);}
 function totalRounds(){return mode().rounds;}
+function roundEnergy(){return mode().energy+(has('bateria')?1:0);}
 function targetForRound(round=run.round){
  const cfg=mode();let target=cfg.targets[Math.min(round-1,cfg.targets.length-1)]||Math.round(cfg.targets.at(-1)*Math.pow(1.32,round-cfg.targets.length));
  if(has('modo_facil'))target=Math.round(target*.88);
@@ -31,21 +34,60 @@ function drawStyle(char){
  if(random()<specialChance)return random()<.55?'gold':'wild';
  const improvedChance=.06+(has('negrita')?.12:0)+(has('cursiva')?.12:0)+(has('subrayado')?.10:0);
  if(random()<improvedChance){
-  const pool=[];pool.push(has('negrita')?'bold':'bold');pool.push(has('cursiva')?'italic':'italic');pool.push(has('subrayado')?'underline':'underline');
+  const pool=['bold','italic','underline'];
+  if(has('negrita'))pool.push('bold','bold');
+  if(has('cursiva'))pool.push('italic','italic');
+  if(has('subrayado'))pool.push('underline','underline');
   return pool[Math.floor(random()*pool.length)];
  }
  return 'normal';
 }
-function drawOne(){
+function itemChar(item){return typeof item==='string'?item:item?.char||'';}
+function pullBagItem(predicate){
  if(!run.bag.length){if(!run.discard.length)return null;run.bag=shuffle(run.discard.splice(0));}
- const item=run.bag.pop();const char=typeof item==='string'?item:item.char;const style=typeof item==='string'?drawStyle(char):(item.style||'normal');return tile(char,style);
+ let idx=-1;
+ if(predicate){for(let i=run.bag.length-1;i>=0;i--){if(predicate(itemChar(run.bag[i]))){idx=i;break;}}}
+ if(idx<0)idx=run.bag.length-1;
+ return run.bag.splice(idx,1)[0];
 }
-function replenish(){while(run.hand.length<run.maxHand){const t=drawOne();if(!t)break;run.hand.push(t);}}
+function drawOne(preferVowel=false,avoid=new Set()){
+ const predicate=c=>{
+  if(!c)return false;
+  const upper=String(c).toUpperCase();
+  if(avoid.has(strip(upper)))return false;
+  if(preferVowel)return VOWELS.includes(upper)||upper==='*';
+  return true;
+ };
+ let item=pullBagItem(predicate);
+ if(item==null)return null;
+ const char=itemChar(item),style=typeof item==='string'?drawStyle(char):(item.style||'normal');
+ return tile(char,style);
+}
+function replenish(){
+ while(run.hand.length<run.maxHand){
+  const counts={};for(const t of run.hand){const c=strip(String(t.char).toUpperCase());counts[c]=(counts[c]||0)+1;}
+  const avoid=new Set(Object.entries(counts).filter(([,n])=>n>=2).map(([c])=>c));
+  const vowelCount=run.hand.filter(t=>VOWELS.includes(String(t.char).toUpperCase())||t.style==='wild'||t.char==='*').length;
+  const needVowel=vowelCount<2;
+  let t=drawOne(needVowel,avoid);
+  if(!t&&avoid.size)t=drawOne(needVowel,new Set());
+  if(!t&&needVowel)t=drawOne(false,avoid);
+  if(!t)t=drawOne(false,new Set());
+  if(!t)break;
+  run.hand.push(t);
+ }
+}
 function daySeed(){const d=new Date();return Number(String(d.getFullYear())+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'))>>>0;}
+function starterOptions(){
+ const pool=STARTER_POOL.filter(id=>!run.bonuses.includes(id));return shuffle(pool).slice(0,3);
+}
+function rewardOptions(){
+ const pool=C.bonuses.filter(b=>!run.bonuses.includes(b.id)).map(b=>b.id);return shuffle(pool).slice(0,3);
+}
 function newRun(modeId='normal',seed=null){
  const cfg=C.modes[modeId]||C.modes.normal;const seedValue=seed==null?(modeId==='daily'?daySeed():Date.now()):seed;
- run={version:2,id:'forja_'+Date.now()+'_'+seedValue,mode:modeId,rng:Number(seedValue)>>>0,tileId:0,status:'play',round:1,roundScore:0,totalScore:0,target:cfg.targets[0],energy:cfg.energy,rerolls:cfg.rerolls,maxHand:7,bag:[],discard:[],hand:[],selected:[],rerollSelection:[],bonuses:[],bonusChoices:[],previousWord:'',previousLength:0,targetLength:4,words:[],wordLog:[],errors:0,categorySeenRound:[],finished:false,resultId:null,updatedAt:Date.now()};
- run.bag=shuffle(baseBag());run.targetLength=4+Math.floor(random()*5);replenish();career.games++;save();return run;
+ run={version:2,id:'forja_'+Date.now()+'_'+seedValue,mode:modeId,rng:Number(seedValue)>>>0,tileId:0,status:'starter',round:1,roundScore:0,totalScore:0,target:cfg.targets[0],energy:cfg.energy,rerolls:cfg.rerolls,maxHand:7,bag:[],discard:[],hand:[],selected:[],rerollSelection:[],bonuses:[],bonusChoices:[],previousWord:'',previousLength:0,targetLength:4,words:[],wordLog:[],errors:0,categorySeenRound:[],efficiencyReward:0,finished:false,resultId:null,updatedAt:Date.now()};
+ run.bag=shuffle(baseBag());run.targetLength=4+Math.floor(random()*5);replenish();run.bonusChoices=starterOptions();career.games++;save();return run;
 }
 function allowed(){return run&&run.status==='play'&&!run.finished;}
 function tileChar(sel){const t=run.hand.find(x=>x.id===sel.id);return sel.char||t?.char||'';}
@@ -93,7 +135,7 @@ function validate(raw){
  const w=key(lexical),plain=strip(w);
  const exact=dictionary.has(w)||L.lookup(w).length>0;
  if(!exact){
-   if(dictionary.has(plain))return{ok:true,word:plain,display:display,analysis:L.lookup(plain)[0]||null};
+   if(dictionary.has(plain))return{ok:true,word:plain,display,analysis:L.lookup(plain)[0]||null};
    return{ok:false,message:'«'+lexical+'» no está en el diccionario de Forja.'};
  }
  return{ok:true,word:w,display,analysis:L.lookup(w)[0]||null};
@@ -110,7 +152,9 @@ function tileContribution(t,char){
 function score(raw,preview=true){
  const val=validate(raw);if(!val.ok)return{valid:false,points:0,multis:1,total:0,effects:[],analysis:null};
  const tiles=selectedTiles(),letters=val.word.toUpperCase(),chars=[...letters],effects=[];
- let points=0,multis=1,pointsFactor=1,multiFactor=1;
+ let points=chars.length*2,multis=1+Math.floor(chars.length/3),pointsFactor=1,multiFactor=1;
+ effects.push('Longitud +'+(chars.length*2)+' P');
+ if(Math.floor(chars.length/3)>0)effects.push('Longitud +'+Math.floor(chars.length/3)+' M');
  tiles.forEach((t,i)=>{const c=t.style==='bang'?'!':chars[Math.min(i,chars.length-1)]||t.char;const q=tileContribution(t,c);points+=q.points;multis+=q.multi;});
  const vowels=chars.filter(c=>VOWELS.includes(c)).length,consonants=chars.length-vowels;
  const unique=new Set(chars.map(strip)).size,repeats=chars.length-unique,rare=chars.filter(c=>RARE.includes(c.toUpperCase())||c.toUpperCase()==='Ñ').length;
@@ -123,16 +167,16 @@ function score(raw,preview=true){
  const mulM=(label,n)=>{if(n!==1){multiFactor*=n;effects.push(label+' ×'+n+' M');}};
  for(const id of run.bonuses){
   const e=bonus(id)?.effect;
-  if(e==='vowel')addP('Vocalista',vowels*2);
+  if(e==='vowel')addP('Vocalista',vowels*3);
   if(e==='consonant')addP('Consonante',consonants*2);
-  if(e==='long'&&chars.length>=5)addP('Palabra larga',15);
+  if(e==='long'&&chars.length>=5)addP('Palabra larga',18);
   if(e==='short'&&chars.length<=5)mulM('Palabra corta',2);
   if(e==='four'&&chars.length===4)addM('Cuatro',4);
   if(e==='six'&&chars.length===6)addM('Sexta marcha',6);
   if(e==='eight'&&chars.length===8)mulP('Ocho',1.5);
   if(e==='unique')addM('Variedad',unique);
   if(e==='repeat')addP('Repetición',repeats*4);
-  if(e==='rare')addP('Raras',rare*8);
+  if(e==='rare')addP('Raras',rare*10);
   if(e==='enie'){const n=chars.filter(c=>c.toUpperCase()==='Ñ').length;addP('Ñ primordial',n*10);addM('Ñ primordial',n*2);}
   if(e==='accent')addP('Tinta acentuada',accents*10);
   if(e==='multLetters')addM('M.U.L.T.',chars.filter(c=>'MULT'.includes(strip(c))).length*4);
@@ -172,12 +216,9 @@ function score(raw,preview=true){
  points=Math.max(0,Math.round(points*pointsFactor));multis=Math.max(1,Math.round(multis*multiFactor*10)/10);
  return{valid:true,word:val.word,display:val.display,points,multis,total:Math.round(points*multis),effects,analysis,tileDetails:tiles.map((t,i)=>({...t,playedChar:chars[i]||t.char,...tileContribution(t,chars[i]||t.char)}))};
 }
-function rewardOptions(){
- const pool=C.bonuses.filter(b=>!run.bonuses.includes(b.id)).map(b=>b.id);return shuffle(pool).slice(0,3);
-}
 function roundWon(){
- const battery=has('bateria')?1:0,trash=has('papelera')?2:0;
- run.energy+=1+battery;run.rerolls+=1+trash;
+ const efficient=run.energy>=2?1:0,trash=has('papelera')?2:0;
+ run.efficiencyReward=efficient;run.rerolls+=1+trash+efficient;
  if(run.round>=totalRounds()){end(true);return;}
  run.status='reward';run.bonusChoices=rewardOptions();if(!run.bonusChoices.length)advanceRound();
 }
@@ -194,39 +235,60 @@ function play(){
  if(run.roundScore>=run.target)roundWon();else if(run.energy<=0)end(false);
  save();return{ok:true,score:sc,roundWon:run.status==='reward'||run.status==='victory'};
 }
+function removeBonusImmediate(id){
+ if(id==='mas_eleccion'){run.maxHand=Math.max(7,run.maxHand-1);while(run.hand.length>run.maxHand){const t=run.hand.pop();run.discard.push({char:t.char,style:t.style});}}
+}
 function applyBonusImmediate(id){
  if(id==='mas_eleccion'){run.maxHand++;replenish();}
  if(id==='comodines')run.bag.push('*','*','*');
  if(id==='exclamacion')run.bag.push('!','!');
 }
-function chooseBonus(id){
- if(run?.status!=='reward'||!run.bonusChoices.includes(id))return{ok:false};
- run.bonuses.push(id);career.bonusesSeen=[...new Set([...(career.bonusesSeen||[]),id])];applyBonusImmediate(id);advanceRound();unlock();save();return{ok:true};
+function chooseBonus(id,replaceId=null){
+ if(!run||!['starter','reward'].includes(run.status)||!run.bonusChoices.includes(id))return{ok:false};
+ if(run.bonuses.length>=MAX_BONUSES&&!replaceId)return{ok:false,needsReplace:true};
+ if(replaceId){
+  const idx=run.bonuses.indexOf(replaceId);if(idx<0)return{ok:false,message:'La carta a sustituir ya no está activa.'};
+  removeBonusImmediate(replaceId);run.bonuses.splice(idx,1);
+ }
+ run.bonuses.push(id);career.bonusesSeen=[...new Set([...(career.bonusesSeen||[]),id])];applyBonusImmediate(id);
+ const wasStarter=run.status==='starter';run.bonusChoices=[];
+ if(wasStarter){run.status='play';run.energy=roundEnergy();run.target=targetForRound(1);}
+ else advanceRound();
+ unlock();save();return{ok:true,replaced:replaceId||null};
 }
 function rerollBonuses(){
  if(run?.status!=='reward'||run.rerolls<=0)return{ok:false,message:'No quedan rerolls.'};
  run.rerolls--;career.rerollsUsed++;run.bonusChoices=rewardOptions();unlock();save();return{ok:true};
 }
 function advanceRound(){
- run.round++;run.roundScore=0;run.target=targetForRound(run.round);run.status='play';run.categorySeenRound=[];run.targetLength=4+Math.floor(random()*5);run.selected=[];run.rerollSelection=[];replenish();
+ run.round++;run.roundScore=0;run.target=targetForRound(run.round);run.status='play';run.energy=roundEnergy();run.categorySeenRound=[];run.targetLength=4+Math.floor(random()*5);run.selected=[];run.rerollSelection=[];run.efficiencyReward=0;replenish();
 }
 function end(won){run.status=won?'victory':'defeat';run.finished=true;run.resultId=run.id+'_result';if(won)career.wins++;career.bestScore=Math.max(career.bestScore,run.totalScore);unlock();save();}
 function continueEndless(){
- if(!run?.finished||run.status!=='victory')return false;run.finished=false;run.status='play';run.round++;run.roundScore=0;run.target=Math.round((run.target||mode().targets.at(-1))*1.35);run.energy+=2;run.rerolls+=1;run.categorySeenRound=[];run.resultId=null;replenish();save();return true;
+ if(!run?.finished||run.status!=='victory')return false;run.finished=false;run.status='play';run.round++;run.roundScore=0;run.target=Math.round((run.target||mode().targets.at(-1))*1.35);run.energy=roundEnergy();run.rerolls+=1;run.categorySeenRound=[];run.resultId=null;replenish();save();return true;
 }
 function unlock(){
- const log=run?.wordLog||[],last=log.at(-1)||{};
+ const log=run?.wordLog||[];
  const cond=[career.words>=1,(run?.round||0)>=5,career.wins>=1,log.some(x=>String(x.word).replace(/!/g,'').length>=9),career.bestMulti>=50,career.bestPoints>=100,career.bestPlay>=5000,career.rerollsUsed>=10,(career.bonusesSeen||[]).length>=10,log.some(x=>x.effects?.some(e=>/Tormenta|afortunada/.test(e))||false)];
  C.achievements.forEach((a,i)=>{if(cond[i]&&!career.achievements.includes(a.id))career.achievements.push(a.id);});
+}
+function normalizeRun(){
+ if(!run)return;
+ run.maxHand=Number.isFinite(run.maxHand)?run.maxHand:7;
+ run.bonuses=Array.isArray(run.bonuses)?run.bonuses.slice(0,MAX_BONUSES):[];
+ run.bonusChoices=Array.isArray(run.bonusChoices)?run.bonusChoices:[];
+ run.rerollSelection=Array.isArray(run.rerollSelection)?run.rerollSelection:[];
+ run.categorySeenRound=Array.isArray(run.categorySeenRound)?run.categorySeenRound:[];
+ run.efficiencyReward=Number(run.efficiencyReward||0);
 }
 function snapshot(){return{version:2,gameId:'lexoma',run:clone(run),career:clone(career)};}
 function save(){if(run)run.updatedAt=Date.now();try{localStorage.setItem(storageKey,JSON.stringify(snapshot()));window.LexomaEngine.storageOK=true;}catch{window.LexomaEngine.storageOK=false;}window.dispatchEvent(new Event('lexoma:change'));}
 function validSave(raw){return raw?.gameId==='lexoma'&&raw.version===2&&(!raw.run||(raw.run.version===2&&Array.isArray(raw.run.hand)&&Array.isArray(raw.run.bag)&&Array.isArray(raw.run.bonuses)));}
-function restore(raw){if(!validSave(raw))return false;run=clone(raw.run);career={...freshCareer(),...clone(raw.career||{})};career.bonusesSeen=Array.isArray(career.bonusesSeen)?career.bonusesSeen:[];career.achievements=Array.isArray(career.achievements)?career.achievements:[];unlock();save();return true;}
-function load(){run=null;career=freshCareer();try{const raw=JSON.parse(localStorage.getItem(storageKey)||'null');if(validSave(raw)){run=raw.run;career={...freshCareer(),...raw.career};}}catch{}window.dispatchEvent(new Event('lexoma:change'));}
+function restore(raw){if(!validSave(raw))return false;run=clone(raw.run);normalizeRun();career={...freshCareer(),...clone(raw.career||{})};career.bonusesSeen=Array.isArray(career.bonusesSeen)?career.bonusesSeen:[];career.achievements=Array.isArray(career.achievements)?career.achievements:[];unlock();save();return true;}
+function load(){run=null;career=freshCareer();try{const raw=JSON.parse(localStorage.getItem(storageKey)||'null');if(validSave(raw)){run=raw.run;normalizeRun();career={...freshCareer(),...raw.career};}}catch{}window.dispatchEvent(new Event('lexoma:change'));}
 function setProfile(profile){storageKey='lexoma.v2.'+encodeURIComponent(String(profile.studentId||profile.id||profile.email||'guest'));load();}
 function metrics(){const correct=run?.words?.length||0,errors=run?.errors||0;return{score:run?.totalScore||0,correct,errors,attempts:correct+errors,accuracy:correct+errors?Math.round(correct/(correct+errors)*100):0,percentage:run?.status==='victory'?100:Math.min(99,Math.round(((run?.round||1)-1)/Math.max(1,totalRounds())*100)),maxCombo:career.bestMulti||1,words:correct,concordances:0};}
 
-window.LexomaEngine={newRun,start:newRun,select,cycleAccent,clear,toggleReroll,rerollLetters,draft,score,play,chooseBonus,rerollBonuses,continueEndless,loadDictionary,validate,letterValue,snapshot,restore,setProfile,save,metrics,totalRounds,targetForRound,storageOK:true,get dictionaryReady(){return dictionaryReady;},get run(){return run;},get career(){return career;},get achievements(){return C.achievements.filter(a=>career.achievements.includes(a.id));}};
+window.LexomaEngine={newRun,start:newRun,select,cycleAccent,clear,toggleReroll,rerollLetters,draft,score,play,chooseBonus,rerollBonuses,continueEndless,loadDictionary,validate,letterValue,snapshot,restore,setProfile,save,metrics,totalRounds,targetForRound,roundEnergy,maxBonuses:MAX_BONUSES,storageOK:true,get dictionaryReady(){return dictionaryReady;},get run(){return run;},get career(){return career;},get achievements(){return C.achievements.filter(a=>career.achievements.includes(a.id));}};
 load();
 })();
