@@ -108,8 +108,8 @@ function openReplacement(newId){
 }
 function openUpgrade(){
  const ids=E.run.bonuses.filter(id=>E.cardLevel(id)<3);
- const html=ids.length?ids.map(id=>{const b=C.bonuses.find(x=>x.id===id),cost=E.upgradePrice(id);return'<button data-upgrade="'+id+'" '+(E.run.coins<cost?'disabled':'')+'>'+cardLevelBadge(id)+'<strong>'+esc(b?.name||id)+' → nivel '+['','I','II','III'][E.cardLevel(id)+1]+'</strong><small>'+cost+' ◉ · aumenta un 35% su efecto por nivel.</small></button>';}).join(''):'<p>Todas tus cartas están al máximo o todavía no tienes ninguna.</p>';
- openDialog('<h2>Templar carta</h2><p class="replace-copy">Cada nivel refuerza el efecto de la carta. Máximo nivel III.</p><div class="replace-grid">'+html+'</div>',{type:'upgrade'});
+ const html=ids.length?ids.map(id=>{const b=C.bonuses.find(x=>x.id===id),cost=E.upgradePrice(id);return'<button data-upgrade="'+id+'" '+(E.run.coins<cost?'disabled':'')+'>'+cardLevelBadge(id)+'<strong>'+esc(b?.name||id)+' → nivel '+['','I','II','III'][E.cardLevel(id)+1]+'</strong><small>'+cost+' ◉ · mejora su efecto.</small></button>';}).join(''):'<p>Todas tus cartas están al máximo o todavía no tienes ninguna.</p>';
+ openDialog('<h2>Templar carta</h2><p class="replace-copy">Cada nivel refuerza el efecto de la carta. Las cartas de puntuación ganan potencia; las de utilidad mejoran su recurso. Máximo nivel III.</p><div class="replace-grid">'+html+'</div>',{type:'upgrade'});
 }
 function openRemoveLetter(){
  const inv=E.inventory();openDialog('<h2>Depurar bolsa · 4 ◉</h2><p class="replace-copy">Elige una copia de una letra para eliminarla permanentemente de esta run.</p><div class="letter-inventory">'+inv.map(x=>'<button data-remove-letter="'+x.char+'" '+(E.run.coins<E.serviceCosts.remove?'disabled':'')+'><strong>'+esc(x.char)+'</strong><small>'+x.count+' copias · valor '+x.value+'</small></button>').join('')+'</div>',{type:'remove'});
