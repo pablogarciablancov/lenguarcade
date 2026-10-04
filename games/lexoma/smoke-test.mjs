@@ -87,3 +87,17 @@ assert.ok(E.resolveEvent('accept').ok);assert.equal(E.run.nextEnergyBonus,1);E.l
 const snap=JSON.parse(JSON.stringify(E.snapshot()));assert.equal(snap.version,2);const coins=snap.run.coins;E.setProfile({studentId:'economy'});assert.equal(E.run,null);assert.ok(E.restore(snap));assert.equal(E.run.coins,coins);assert.ok(E.run.cardLevels);
 
 console.log('Forja OK: monedero, compra/paso, tienda, interés, cartas nivel III, eliminación/grabado de letras, eventos y guardado.');
+
+
+// Panel final: modo infinito debe sobrevivir a rondas posteriores al límite normal.
+E.start('normal',999);
+E.leaveShop();
+E.run.status='victory';E.run.finished=true;E.run.round=C.modes.normal.rounds;E.run.target=100;E.run.roundScore=100;
+assert.equal(E.continueEndless(),true);
+assert.equal(E.run.endless,true);
+assert.equal(E.run.status,'play');
+assert.equal(E.run.finished,false);
+assert.equal(E.run.round,C.modes.normal.rounds+1);
+E.run.target=1;setHand('EL');E.select(100);E.select(101);assert.ok(E.play().ok);
+assert.equal(E.run.status,'shop','En infinito, superar una ronda posterior al límite debe ir a tienda, no terminar otra vez.');
+console.log('Cierre OK: modo infinito continúa más allá del límite normal.');
