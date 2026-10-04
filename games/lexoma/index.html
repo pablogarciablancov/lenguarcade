@@ -1,17 +1,135 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FORJA — Roguelite gramatical</title><link rel="stylesheet" href="styles.css"></head>
-<body><main id="app">
-<header class="top"><a class="brand" href="#" id="brand"><span class="crest">L</span><span>FORJA<small>LEXOMA · ROGUELITE GRAMATICAL</small></span></a><div class="top-actions"><span id="save-status">Taller local</span><button id="sound" aria-label="Activar sonido">Sonido: no</button><button id="menu">Menú</button><button id="exit" hidden>Guardar y salir</button></div></header>
-<section id="title" class="title-scene"><div class="title-copy"><span class="eyebrow">ROGUELITE DE PALABRAS Y GRAMÁTICA</span><h1>Forja palabras.<br><em>Rompe el marcador.</em></h1><p>Construye frases, multiplica su valor y crea una build distinta en cada partida.</p><div class="title-buttons"><button id="continue" class="gold" hidden>Continuar partida</button><button id="new" class="gold">Entrar en la forja</button><button id="codex">Tus logros</button></div><div id="career" class="career"></div><small class="scope">Taller inicial · morfología y estructuras sencillas</small></div><img class="title-boss" src="assets/morfax.svg" alt="Morfax, criatura acorazada de tinta y pergaminos"><div class="title-caption">MORFAX<small>EL DEVORADOR</small></div></section>
-<section id="battle" hidden>
-<div id="hud" class="hud"></div><nav id="route" class="route" aria-label="Ruta de encuentros"></nav>
-<div class="arena">
-<aside class="enemy-panel panel"><span id="enemy-title" class="eyebrow"></span><h2 id="enemy-name"></h2><div class="enemy-stage"><img id="enemy-art" src="assets/devorador.svg" alt=""><div id="damage" class="damage" aria-live="polite"></div></div><div id="enemy-health"></div><p id="enemy-rule"></p></aside>
-<section class="workshop panel"><div class="panel-heading"><div><span class="eyebrow">TU LENGUAJE, TU ESTRATEGIA</span><h2>La frase de ataque</h2></div><div class="forge-score" aria-label="Puntuación de la frase"><span class="score-points"><small>PUNTOS</small><strong id="score-points">0</strong></span><b>×</b><span class="score-multi"><small>MULTI</small><strong id="score-multi">×1</strong></span><b>=</b><span class="score-total"><small>TOTAL</small><strong id="preview-score">0</strong></span></div></div><div id="phrase" class="phrase" aria-label="Cartas de la frase"></div><div id="analysis" class="analysis"></div><div id="score-steps" class="score-steps" aria-label="Desglose de puntuación"></div><div id="message" class="message" role="status"></div></section>
-<aside class="relic-panel panel"><span class="eyebrow">TU BUILD</span><h2>Reliquias</h2><div id="relics" class="relics"></div><div class="combo-box"><small>COMBO ACTUAL</small><strong id="combo">×1</strong><span>Estructuras nuevas → más poder</span></div></aside>
-</div>
-<section class="rack panel"><div class="rack-meta"><strong>BOLSA DE LETRAS</strong><span id="bag-info"></span><button id="ideas">Ver ideas</button></div><div id="suggestions" class="suggestions" hidden></div><div class="forge-row"><div id="draft" class="draft" aria-live="polite">Selecciona tus letras</div><button id="clear">Deshacer selección</button><button id="forge" class="gold">Forjar palabra</button></div><div id="hand" class="hand" aria-label="Mano de letras"></div><div class="actions"><button id="discard">Descartar</button><button id="pass">Cerrar ronda</button><span id="tutorial"></span><button id="finish" class="attack">Finalizar frase <span>ϟ</span></button></div></section>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#9acfe0">
+<title>FORJA · LenguArcade</title>
+<link rel="stylesheet" href="styles.css?v=20261004-wordatro-rebuild">
+</head>
+<body>
+<main id="app">
+<section id="titleScreen" class="title-screen">
+  <div class="title-pattern"></div>
+  <header class="title-top">
+    <div class="brand-lockup"><span class="brand-mark">F</span><div><strong>FORJA</strong><small>ROGUELITE DE PALABRAS</small></div></div>
+    <div class="title-actions"><span id="dictionaryStatus">Preparando diccionario…</span><button id="soundBtn">♫ No</button><button id="exitBtn" hidden>Guardar y salir</button></div>
+  </header>
+  <div class="title-content">
+    <div class="title-copy">
+      <span class="kicker">LENGUARCADE · VOCABULARIO + ESTRATEGIA</span>
+      <h1>PALABRAS.<br><em>PUNTOS.</em><br>MULTIS.</h1>
+      <p>Crea palabras con una mano limitada, supera el objetivo antes de quedarte sin energía y construye una combinación de bonus capaz de romper el marcador.</p>
+      <div class="mode-buttons">
+        <button class="mode-btn easy" data-mode="easy"><span>7 RONDAS</span><strong>Fácil</strong><small>Más energía · objetivos suaves</small></button>
+        <button class="mode-btn normal recommended" data-mode="normal"><span>10 RONDAS</span><strong>Normal</strong><small>La experiencia completa</small></button>
+        <button class="mode-btn hard" data-mode="hard"><span>12 RONDAS</span><strong>Difícil</strong><small>Menos rerolls · objetivos altos</small></button>
+        <button class="mode-btn daily" data-mode="daily"><span>HOY</span><strong>Reto diario</strong><small>Misma semilla durante todo el día</small></button>
+      </div>
+      <button id="continueBtn" class="continue-btn" hidden>Continuar partida</button>
+    </div>
+    <aside class="career-card">
+      <span class="kicker">TU FORJA</span>
+      <h2>Historial</h2>
+      <div id="careerStats" class="career-stats"></div>
+      <button id="achievementsBtn" class="subtle-btn">Logros y bonus</button>
+    </aside>
+  </div>
 </section>
-<div id="overlay" class="overlay" hidden><section id="overlay-content" class="overlay-card"></section></div>
-<dialog id="choice"><div id="choice-content"></div><button id="cancel-choice">Cancelar</button></dialog>
-</main><script src="linguistics.js"></script><script src="content.js"></script><script src="engine.js"></script><script src="bridge.js"></script><script src="app.js"></script></body></html>
+
+<section id="gameScreen" class="game-screen" hidden>
+  <header class="game-top">
+    <div class="brand-mini"><span>F</span><strong>FORJA</strong></div>
+    <div class="round-label"><small>RONDA</small><strong id="roundLabel">1 / 10</strong><span id="modeLabel">NORMAL</span></div>
+    <div class="run-total"><small>TOTAL RUN</small><strong id="runTotal">0</strong></div>
+    <div class="game-actions"><span id="saveStatus">Guardado local</span><button id="menuBtn">Menú</button><button id="gameExitBtn" hidden>Salir</button></div>
+  </header>
+
+  <div id="playfield" class="playfield">
+    <aside class="left-rail">
+      <button id="bonusDeckBtn" class="rail-card bonus-deck" type="button"><span>BONUS</span><strong id="bonusCount">0</strong><small>tu build</small></button>
+      <div id="bonusStack" class="bonus-stack"></div>
+      <button id="rerollModeBtn" class="reroll-card" type="button"><span>REROLL</span><strong id="rerollCount">3 ↻</strong><small>Cambia hasta 3 letras</small></button>
+      <div class="reroll-tray"><span id="rerollTray">0 / 3</span><button id="doRerollBtn" disabled>↻</button></div>
+    </aside>
+
+    <section class="wordatro-board">
+      <div class="score-row">
+        <article class="score-card points-card"><span>Puntos</span><strong id="pointsValue">0</strong><i>●</i></article>
+        <b class="math-sign">×</b>
+        <article class="score-card multis-card"><span>Multis</span><strong id="multisValue">1</strong><i>◆</i></article>
+        <b class="math-sign">=</b>
+        <article class="score-card target-card"><span>Puntuación</span><strong id="scoreValue">0</strong><small>/ <b id="targetValue">100</b></small><div class="score-progress"><i id="scoreProgress"></i></div></article>
+        <article class="score-card energy-card"><span>Energía</span><strong id="energyValue">5</strong><i>ϟ</i></article>
+      </div>
+
+      <div class="target-hint"><span id="targetHint">OBJETIVO BONUS · 4 LETRAS</span><strong id="categoryHint">Forma una palabra</strong></div>
+
+      <div id="wordRow" class="word-row" aria-label="Palabra actual"></div>
+      <div id="effectFloat" class="effect-float" aria-live="polite"></div>
+
+      <div class="word-actions">
+        <button id="clearBtn" class="action-hex">↶<small>DESHACER</small></button>
+        <button id="playBtn" class="play-word-btn">JUGAR PALABRA</button>
+      </div>
+
+      <div id="feedback" class="feedback">Selecciona letras de tu mano.</div>
+    </section>
+
+    <aside class="right-rail">
+      <div class="round-card">
+        <small>OBJETIVO</small><strong id="goalBig">100</strong><span>puntos esta ronda</span>
+      </div>
+      <div class="bag-card">
+        <small>BOLSA</small><strong id="bagCount">0</strong><span>letras restantes</span>
+      </div>
+      <button id="historyBtn" class="rail-action">Historial</button>
+    </aside>
+
+    <section class="hand-zone">
+      <div class="hand-title"><span>Mano</span><small id="handInfo">7 letras</small></div>
+      <div id="hand" class="hand" aria-label="Mano de letras"></div>
+    </section>
+  </div>
+</section>
+
+<div id="overlay" class="overlay" hidden>
+  <section id="rewardPanel" class="overlay-card reward-panel" hidden>
+    <div class="reward-side">
+      <span class="kicker">TU BUILD</span>
+      <h2>Bonus activos</h2>
+      <div id="rewardOwned" class="reward-owned"></div>
+      <div class="reward-resource"><span>Rerolls</span><strong id="rewardRerolls">0 ↻</strong></div>
+    </div>
+    <div class="reward-main">
+      <span class="kicker">RONDA SUPERADA</span>
+      <h2>Elige un bonus</h2>
+      <p>Uno se queda contigo durante toda la run. Combínalos para disparar PUNTOS y MULTIS.</p>
+      <div id="rewardChoices" class="reward-choices"></div>
+      <button id="rerollBonusesBtn" class="reroll-bonuses-btn">↻ Cambiar los 3 bonus</button>
+    </div>
+  </section>
+
+  <section id="endPanel" class="overlay-card end-panel" hidden>
+    <span id="endKicker" class="kicker">FIN DE LA RUN</span>
+    <h2 id="endTitle">La forja se apagó</h2>
+    <div id="endScore" class="end-score">0</div>
+    <div id="endStats" class="end-stats"></div>
+    <div class="end-buttons"><button id="againBtn" class="primary">Nueva partida</button><button id="endlessBtn" hidden>Continuar infinito</button><button id="endMenuBtn">Menú</button></div>
+  </section>
+
+  <section id="collectionPanel" class="overlay-card collection-panel" hidden>
+    <div class="modal-head"><div><span class="kicker">CÓDICE</span><h2 id="collectionTitle">Tu build</h2></div><button id="closeCollectionBtn">×</button></div>
+    <div id="collectionBody" class="collection-body"></div>
+  </section>
+</div>
+
+<dialog id="choiceDialog"><div id="choiceBody"></div><button id="cancelChoice">Cancelar</button></dialog>
+</main>
+<script src="linguistics.js?v=20261004-wordatro-rebuild"></script>
+<script src="content.js?v=20261004-wordatro-rebuild"></script>
+<script src="engine.js?v=20261004-wordatro-rebuild"></script>
+<script src="bridge.js?v=20261004-wordatro-rebuild"></script>
+<script src="app.js?v=20261004-wordatro-rebuild"></script>
+</body>
+</html>
