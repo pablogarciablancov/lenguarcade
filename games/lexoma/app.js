@@ -1,92 +1,207 @@
 (() => {
 'use strict';
 const E=window.LexomaEngine,L=window.LexomaLanguage,C=window.LexomaContent,B=window.LexomaBridge,$=id=>document.getElementById(id);
-let title=true,showIdeas=false,message='',sound=false,audio=null,chooser=null,codexOpen=false;
-const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const number=n=>Number(n||0).toLocaleString('es-ES');
-function tone(kind){if(!sound)return;try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.connect(g);g.connect(audio.destination);o.type='sine';o.frequency.setValueAtTime({click:320,forge:550,hit:150,win:750}[kind]||300,audio.currentTime);o.frequency.exponentialRampToValueAtTime(kind==='win'?1100:100,audio.currentTime+.16);g.gain.setValueAtTime(.05,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.2);o.start();o.stop(audio.currentTime+.21);}catch{}}
-function tell(text){message=text;render();}
-function choose(heading,options,callback){chooser=callback;$('choice-content').innerHTML=`<h2>${escape(heading)}</h2><div class="choice-grid">${options.map((o,i)=>`<button data-choice="${i}">${escape(o.label)}${o.detail?`<small>${escape(o.detail)}</small>`:''}</button>`).join('')}</div>`;$('choice').showModal();}
-function plan(word){const available=[...E.run.hand],chosen=[];for(const char of word.toUpperCase()){
- const raw=char.normalize('NFD').replace(/[\u0300-\u0301]/g,'').normalize('NFC');
- let i=available.findIndex(t=>t.char===char);
- if(i>=0){chosen.push({id:available.splice(i,1)[0].id});continue;}
- if(/[ÁÉÍÓÚ]/.test(char)){const vowel=available.findIndex(t=>t.char===raw),accent=available.findIndex(t=>t.char==='´');if(vowel>=0&&accent>=0){const a=available[vowel],b=available[accent];chosen.push({id:a.id},{id:b.id});available.splice(Math.max(vowel,accent),1);available.splice(Math.min(vowel,accent),1);continue;}}
- i=available.findIndex(t=>t.char==='*');if(i<0)return null;chosen.push({id:available.splice(i,1)[0].id,char});
- }return chosen;}
-function render(){
- const r=E.run,c=E.career,ready=B.initialized;
- $('title').hidden=!title;$('battle').hidden=title||!r;$('menu').hidden=title;$('exit').hidden=!B.embedded;
- $('new').disabled=!ready;$('continue').hidden=!r||r.finished;$('continue').disabled=!ready;
- $('save-status').textContent=!E.storageOK?'No se pudo guardar en este navegador':!ready?'Conectando con LenguArcade…':B.embedded?'Guardado LenguArcade activo':'Partida guardada en este navegador';
- $('career').innerHTML=`<span><b>${number(c.bestScore)}</b>Récord</span><span><b>${c.games}</b>Partidas</span><span><b>${c.wins}</b>Victorias</span><span><b>${c.achievements.length}/7</b>Logros</span>`;
- if(title||!r){if(!codexOpen)$('overlay').hidden=true;return;}
- const e=E.enemy(),calc=E.calculate(),combat=r.status==='combat';
- $('hud').innerHTML=`<div><small>INTEGRIDAD</small><strong class="integrity">♥ ${r.integrity}<small>/ 100</small></strong></div><div><small>TINTA</small><strong class="ink">◈ ${r.ink}</strong></div><div><small>ENCUENTRO</small><strong>${Math.min(r.node+1,C.route.length)} / ${C.route.length}</strong></div><div><small>INTENTOS</small><strong>${e?Math.max(0,e.rounds-r.round+1):'—'}</strong></div><div><small>REROLLS</small><strong>↻ ${Number(r.rerolls||0)}</strong></div><div><small>PUNTOS DE LA RUN</small><strong>${number(r.score)}</strong></div>`;
- $('route').innerHTML=C.route.map((id,i)=>`<span class="${i===r.node?'active':i<r.node?'done':''}">${id==='shop'?'◇ Tienda':id==='morfax'?'♛ Morfax':id==='elite'?'✦ Élite':'◆ '+(i+1)}</span>`).join('<b>›</b>');
- $('enemy-title').textContent=e?.title||'EL MERCADER';$('enemy-name').textContent=e?.name||'Tienda de Tinta';
- $('enemy-art').src=`assets/${e?.art||'escriba'}.svg`;$('enemy-art').alt=e?.name||'Mercader';
- $('enemy-health').innerHTML=e?`<div class="health"><i style="width:${r.enemyHp/e.hp*100}%"></i></div><div class="health-label"><span>Resistencia</span><b>${number(r.enemyHp)} / ${number(e.hp)}</b></div>`:'';
- $('enemy-rule').textContent=e?.id==='morfax'?`Fase ${E.phase()}: ${E.phase()===1?'forja libre':E.phase()===2?L.categories[r.bossCategory][0]+' +100 por carta':'tres categorías distintas → ×1,5'}`:e?.rule||'Refuerza tu bolsa y elige tu estrategia.';
- $('phrase').innerHTML=r.phrase.length?r.phrase.map((w,i)=>`<article class="word-card ${calc.spans?.some(([a,b])=>i>=a&&i<b)?'connected':''}" style="--category:${L.categories[w.category][2]}"><b>${escape(w.word)}</b><small>${L.categories[w.category][1]} ${L.categories[w.category][0]}</small><div class="word-controls"><button data-edit="left" data-index="${i}" aria-label="Mover ${escape(w.word)} a la izquierda" ${i===0?'disabled':''}>‹</button><button data-edit="remove" data-index="${i}" aria-label="Retirar ${escape(w.word)}">×</button><button data-edit="right" data-index="${i}" aria-label="Mover ${escape(w.word)} a la derecha" ${i===r.phrase.length-1?'disabled':''}>›</button></div></article>`).join(''):'<div class="empty">Cada palabra es una pieza.<br>Cada frase, un ataque.</div>';
- $('analysis').innerHTML=r.phrase.length?(calc.valid?calc.structures.map(s=>`<span class="tag">${escape(s)}</span>`).join(''):calc.errors.map(s=>`<span class="tag error">${escape(s)}</span>`).join('')):'<span class="tag">Construye un SN o una oración sencilla</span>';
- $('score-points').textContent=number(calc.points||0);$('score-multi').textContent='×'+Number(calc.multiplier||1).toLocaleString('es-ES',{maximumFractionDigits:2});$('preview-score').textContent=number(calc.total);
- const scored=r.phrase.length?calc:r.last;
- $('score-steps').innerHTML=(scored?.steps||[]).map((s,i)=>`<div class="score-step ${s.kind==='mult'?'mult-step':'points-step'} ${r.phrase.length?'':'reveal'}" style="--i:${i}"><span>${escape(s.label)}</span><b>${s.op}${Number(s.value).toLocaleString('es-ES',{maximumFractionDigits:2})}</b></div>`).join('');
- $('message').textContent=message||(!r.words?'Prueba EL → MAGO → CORRE. Forja cada palabra por separado.':r.last?.text?`Último ataque: «${r.last.text}» · ${number(r.last.total)} puntos.`:'Añade un verbo para crear una oración. Los colores muestran las categorías.');
- $('relics').innerHTML=r.relics.map(id=>{const q=C.relics.find(x=>x.id===id);return`<div class="relic bonus-relic"><img src="assets/${q.icon}.svg" alt=""><div><b>${q.name}</b><small>${q.description}</small></div></div>`;}).join('');
- $('combo').textContent='×'+number(r.combo);
- $('bag-info').textContent=`Bolsa ${r.bag.length} · Reciclaje ${r.discard.length} · Descartes ${r.discards}`;
- const d=E.draft();$('draft').textContent=d|| (d===null?'Tilde mal colocada':'Selecciona tus letras');
- $('hand').innerHTML=r.hand.map(t=>`<button class="tile ${r.selection.some(x=>x.id===t.id)?'selected':''} ${['*','´'].includes(t.char)?'special':''}" data-tile="${t.id}" aria-label="${t.char==='*'?'Comodín':t.char==='´'?'Tilde':t.char}" aria-pressed="${r.selection.some(x=>x.id===t.id)}" ${combat?'':'disabled'}>${t.char}<small>${['*','´'].includes(t.char)?'✧':L.value(t.char.toLowerCase())}</small></button>`).join('');
- $('tutorial').textContent=!r.words?'1. Forma EL y pulsa Forjar.':r.phrase.length===1?'2. Añade un sustantivo: MAGO.':r.phrase.length===2?'3. Añade CORRE y finaliza la frase.':'Varía las estructuras para aumentar tu combo.';
- $('discard').textContent=`Descartar (${r.discards})`;
- for(const id of ['forge','finish','discard','pass','clear','ideas'])$(id).disabled=!combat||!ready;
- $('forge').disabled=!combat||!r.selection.length;$('finish').disabled=!combat||!r.phrase.length;
- $('suggestions').hidden=!showIdeas;if(showIdeas&&combat){const list=[...L.lexicon.keys()].filter(w=>w.length>=2&&w.length<=10&&plan(w)).sort((a,b)=>a.length-b.length).slice(0,8);$('suggestions').innerHTML=list.map(w=>`<button data-suggestion="${escape(w)}">${escape(w.toUpperCase())}</button>`).join('')||'<small>Prueba un descarte o cierra la ronda para renovar la mano.</small>';}
- renderOverlay();
+let title=true,rerollMode=false,sound=false,audio=null,lastMessage='',collectionMode='bonuses';
+const fmt=n=>Number(n||0).toLocaleString('es-ES',{maximumFractionDigits:1});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function tone(kind='click'){if(!sound)return;try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.connect(g);g.connect(audio.destination);o.type=kind==='score'?'triangle':'sine';o.frequency.value={click:300,select:430,score:720,error:130,reward:880}[kind]||320;g.gain.setValueAtTime(.045,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.16);o.start();o.stop(audio.currentTime+.17);}catch{}}
+function ready(){return B.initialized&&E.dictionaryReady;}
+function setMessage(t){lastMessage=t||'';render();}
+function tileStyleLabel(t){
+ if(t.style==='bold')return'<span class="tile-mod point-mod">+2●</span>';
+ if(t.style==='italic')return'<span class="tile-mod multi-mod">+1◆</span>';
+ if(t.style==='underline')return'<span class="tile-mod multi-mod">×1,5◆</span>';
+ if(t.style==='gold')return'<span class="tile-mod point-mod">+5●</span><span class="tile-mod multi-mod">+2◆</span>';
+ if(t.style==='wild')return'<span class="tile-mod special-mod">COMODÍN</span>';
+ if(t.style==='bang')return'<span class="tile-mod special-mod">+10● +3◆</span>';
+ return'';
 }
-function renderOverlay(){const r=E.run;if(codexOpen)return;
- $('overlay').hidden=r.status==='combat';if(r.status==='combat')return;
- if(r.status==='shop'){
- $('overlay-content').innerHTML=`<span class="eyebrow">EL MERCADER DE LETRAS</span><h2>Una buena build se escribe aquí.</h2><p>Tienes <strong>${r.ink} Tinta</strong>. Las fichas compradas quedan arriba de la bolsa para el próximo robo.</p><div class="shop-grid">${r.shopStock.map(id=>{const q=C.relics.find(x=>x.id===id),owned=r.relics.includes(id);return`<div class="shop-item"><img src="assets/${q.icon}.svg" alt=""><div><b>${q.name}</b><small>${q.description}</small></div><button data-buy="relic" data-value="${id}" ${owned||r.ink<q.price?'disabled':''}>${owned?'Tuya':q.price+' ◈'}</button></div>`;}).join('')}</div><div class="shop-tools"><label>Letra <select id="shop-letter">${[...'AEIOULMNRSTBCDFGHJPQVXYZÑ'].map(c=>`<option>${c}</option>`).join('')}</select></label><button data-buy="letter" ${r.ink<20?'disabled':''}>Comprar · 20</button><button data-buy="wild" ${r.ink<40?'disabled':''}>Comodín · 40</button><button data-buy="accent" ${r.ink<25?'disabled':''}>Tilde · 25</button></div><div class="shop-tools"><label>Eliminar de la bolsa <select id="shop-remove">${[...new Set(r.bag)].sort().map(c=>`<option>${escape(c)}</option>`).join('')}</select></label><button data-buy="remove" ${r.ink<25||!r.bag.length?'disabled':''}>Eliminar · 25</button></div><p class="modal-note" id="shop-note">${escape(message||'Las reliquias cambian cómo puntúan tus construcciones.')}</p><button class="gold next" data-next>Volver al camino</button>`;
- }else if(r.status==='reward'){
-  const defeated=E.enemy(),choices=(r.rewardChoices||[]).map(id=>C.relics.find(x=>x.id===id)).filter(Boolean);
-  if(!r.rewardClaimed){
-   $('overlay-content').innerHTML=`<span class="eyebrow">ENCUENTRO SUPERADO · ELIGE TU BUILD</span><h2>${escape(defeated.name)} ha caído.</h2><div class="reward-head"><div class="win-score">${number(r.last?.total)} <small>puntos</small></div><p>+${defeated.reward} Tinta · +1 reroll · elige 1 bonus gratis</p></div><div class="bonus-choice-grid">${choices.map(q=>`<button class="bonus-card" data-reward="${q.id}"><img src="assets/${q.icon}.svg" alt=""><span class="bonus-type">BONUS DE RUN</span><b>${escape(q.name)}</b><small>${escape(q.description)}</small><em>ELEGIR</em></button>`).join('')}</div><div class="reward-actions"><button data-reroll-reward ${Number(r.rerolls||0)<=0?'disabled':''}>↻ Cambiar 3 bonus (${Number(r.rerolls||0)})</button><button data-skip-reward>Pasar · +25 Tinta</button></div><p class="reward-last">Último ataque: «${escape(r.last?.text||'')}»</p>`;
+function tileLetter(t,sel){return sel?.char||t.char;}
+function categoryText(analysis){
+ if(!analysis)return'PALABRA VÁLIDA';
+ const c=L.categories[analysis.category];return c?c[0].toUpperCase():'PALABRA VÁLIDA';
+}
+function renderCareer(){
+ const c=E.career;
+ $('careerStats').innerHTML=[
+  ['Récord',fmt(c.bestScore)],
+  ['Mejor palabra',fmt(c.bestPlay)],
+  ['Mejor MULTI','×'+fmt(c.bestMulti)],
+  ['Victorias',fmt(c.wins)],
+  ['Bonus vistos',(c.bonusesSeen||[]).length+'/54'],
+  ['Palabras',fmt(c.words)]
+ ].map(([a,b])=>'<div><small>'+a+'</small><strong>'+b+'</strong></div>').join('');
+ $('continueBtn').hidden=!E.run||E.run.finished;
+}
+function renderTitle(){
+ $('titleScreen').hidden=!title;$('gameScreen').hidden=title||!E.run;
+ renderCareer();
+ document.querySelectorAll('[data-mode]').forEach(b=>b.disabled=!ready());
+ $('continueBtn').disabled=!ready();
+ $('dictionaryStatus').classList.toggle('ready',E.dictionaryReady);
+}
+function renderBonusStack(r){
+ $('bonusCount').textContent=r.bonuses.length;
+ const items=r.bonuses.slice(-5).reverse().map(id=>C.bonuses.find(b=>b.id===id)).filter(Boolean);
+ $('bonusStack').innerHTML=items.map((b,i)=>'<button class="mini-bonus type-'+b.type+'" data-bonus-view="'+b.id+'" style="--i:'+i+'"><strong>'+esc(b.name)+'</strong><small>'+esc(b.description)+'</small></button>').join('');
+}
+function renderWord(r,preview){
+ const byId=new Map(r.hand.map(t=>[t.id,t]));
+ $('wordRow').innerHTML='';
+ for(let i=0;i<9;i++){
+  const sel=r.selected[i],t=sel?byId.get(sel.id):null;
+  const el=document.createElement(sel?'button':'div');
+  if(sel&&t){
+   el.type='button';el.className='word-tile '+t.style;
+   const letter=tileLetter(t,sel);
+   el.innerHTML=tileStyleLabel(t)+'<strong>'+esc(letter)+'</strong><small>'+E.letterValue(letter)+'</small>';
+   el.title=/^[AEIOUÁÉÍÓÚ]$/i.test(letter)?'Pulsa para poner o quitar tilde':'Pulsa para devolver a la mano';
+   el.addEventListener('click',()=>{
+    if(/^[AEIOUÁÉÍÓÚ]$/i.test(letter))E.cycleAccent(t.id);else E.select(t.id);
+   });
   }else{
-   $('overlay-content').innerHTML=`<span class="eyebrow">BUILD ACTUALIZADA</span><h2>La forja se hace más fuerte.</h2><div class="win-score">${number(r.last?.total)} <small>puntos</small></div><p>${r.relics.length} bonus activos · ${r.rerolls} rerolls disponibles · ${r.ink} Tinta</p><button class="gold next" data-next>${C.route[r.node+1]==='shop'?'Visitar al mercader':'Siguiente encuentro'}</button>`;
+   el.className='word-tile empty';el.innerHTML='<span>'+(i+1)+'</span>';
   }
- }else{
- $('overlay-content').innerHTML=`<span class="eyebrow">${r.status==='victory'?'LA FORJA ES TUYA':'VOLVERÁS MÁS FUERTE'}</span><h2>${r.status==='victory'?'¡Morfax derrotado!':'La tinta se ha apagado.'}</h2><div class="win-score">${number(r.score)}</div><p>${r.words} palabras · ${r.phrases} frases · Combo máximo ×${number(r.bestCombo)}</p><p>Récord: ${number(E.career.bestScore)} · ${E.achievements.length} logros descubiertos.</p><button class="gold next" data-title>Volver al menú</button>`;
+  $('wordRow').appendChild(el);
  }
 }
-function doForge(index){const result=E.forge(index);if(result.ok){message=`${result.word.toUpperCase()} forjada. ${L.categories[E.run.phrase.at(-1).category][0]} · +${L.value(result.word)} base.`;tone('forge');}else message=result.message;render();}
-function forge(){const analyses=L.lookup(E.draft()||'');if(analyses.length>1){choose('Elige el uso de tu palabra',analyses.map(a=>({label:L.categories[a.category][0],detail:[a.lemma,a.gender==='m'?'masculino':a.gender==='f'?'femenino':'',a.number==='s'?'singular':a.number==='p'?'plural':'',a.tense,a.person?`${a.person}.ª persona`:null].filter(Boolean).join(' · ')})),doForge);}else doForge(0);}
-$('new').addEventListener('click',()=>{function begin(){title=false;message='';E.start();B.start();render();}if(E.run&&!E.run.finished)choose('¿Empezar una partida nueva?',[{label:'Continuar la actual'},{label:'Empezar otra',detail:'Sustituye la partida en curso; conserva tus logros.'}],i=>{if(i===1)begin();else{title=false;render();}});else begin();});
-$('continue').addEventListener('click',()=>{title=false;message='';B.start();render();});
-function menu(){title=true;codexOpen=false;E.save();B.checkpoint('menu');render();}
-$('menu').addEventListener('click',menu);$('brand').addEventListener('click',e=>{e.preventDefault();menu();});$('exit').addEventListener('click',()=>B.saveAndExit());
-$('sound').addEventListener('click',()=>{sound=!sound;$('sound').textContent='Sonido: '+(sound?'sí':'no');tone('click');});
-$('clear').addEventListener('click',()=>{message='';E.clear();});$('forge').addEventListener('click',forge);
-$('discard').addEventListener('click',()=>{const q=E.discard();tell(q.ok?'Mano renovada. Las fichas vuelven al ciclo de bolsa.':q.message);});
-$('pass').addEventListener('click',()=>choose('Cerrar esta ronda',[{label:'Seguir construyendo'},{label:'Renovar la mano',detail:'Pierdes las cartas actuales y una ronda. Agotar las rondas resta Integridad.'}],i=>{if(i===1){message='Nueva mano. Busca una combinación distinta.';E.pass();B.result();render();}}));
-$('finish').addEventListener('click',()=>{const q=E.finish();if(q.ok){message=`${number(q.result.total)} puntos · ${q.result.structures.join(' · ')}`;tone(E.run.status==='combat'?'hit':'win');$('damage').textContent='−'+number(q.result.total);$('damage').classList.remove('burst');void $('damage').offsetWidth;$('damage').classList.add('burst');$('enemy-art').classList.add('hit');setTimeout(()=>$('enemy-art').classList.remove('hit'),300);B.checkpoint('phrase');B.result();}else message=q.message;render();});
-$('ideas').addEventListener('click',()=>{showIdeas=!showIdeas;$('ideas').textContent=showIdeas?'Ocultar ideas':'Ver ideas';render();});
-$('hand').addEventListener('click',e=>{const b=e.target.closest('[data-tile]');if(!b)return;const id=Number(b.dataset.tile),t=E.run.hand.find(x=>x.id===id);tone('click');if(t.char==='*'&&!E.run.selection.some(x=>x.id===id)){choose('Tu comodín puede ser…',[...'ABCDEFGHIJKLMNÑOPQRSTUVWXYZÁÉÍÓÚÜ'].map(c=>({label:c})),i=>E.select(id,[...'ABCDEFGHIJKLMNÑOPQRSTUVWXYZÁÉÍÓÚÜ'][i]));}else E.select(id);});
-$('phrase').addEventListener('click',e=>{const b=e.target.closest('[data-edit]');if(b)E.edit(Number(b.dataset.index),b.dataset.edit);});
-$('suggestions').addEventListener('click',e=>{const b=e.target.closest('[data-suggestion]');if(!b)return;const tiles=plan(b.dataset.suggestion);if(!tiles)return;E.clear();for(const t of tiles)E.select(t.id,t.char);});
-$('overlay-content').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
- if(b.dataset.reward){const q=E.chooseReward(b.dataset.reward);if(q.ok){message='Bonus añadido a tu build.';tone('win');render();}return;}
- if(b.hasAttribute('data-reroll-reward')){const q=E.rerollReward();if(q.ok){message='Tres bonus nuevos.';tone('click');render();}return;}
- if(b.hasAttribute('data-skip-reward')){const q=E.skipReward();if(q.ok){message='+25 Tinta. Has renunciado al bonus.';tone('click');render();}return;}
- if(b.hasAttribute('data-next')){message='';E.next();tone('click');}
- if(b.hasAttribute('data-title'))menu();
- if(b.dataset.buy){const kind=b.dataset.buy,value=kind==='letter'?$('shop-letter').value:kind==='remove'?$('shop-remove').value:b.dataset.value;const q=E.purchase(kind,value);tell(q.ok?'Compra realizada. Tu build está preparada.':q.message);}
+function renderHand(r){
+ const selected=new Set(r.selected.map(s=>s.id));
+ $('hand').innerHTML=r.hand.filter(t=>!selected.has(t.id)).map(t=>{
+   const reroll=r.rerollSelection.includes(t.id);
+   return '<button class="hand-tile '+t.style+' '+(reroll?'reroll-selected':'')+'" data-tile="'+t.id+'">'+tileStyleLabel(t)+'<strong>'+esc(t.char)+'</strong><small>'+E.letterValue(t.char)+'</small></button>';
+ }).join('');
+ $('handInfo').textContent=r.maxHand+' letras · '+r.hand.length+' en mano';
+}
+function renderGame(){
+ const r=E.run;if(!r)return;
+ const draft=E.draft(),validation=draft?E.validate(draft):null,preview=draft?E.score(draft,true):{points:0,multis:1,total:0,effects:[]};
+ $('roundLabel').textContent=r.round+' / '+(r.mode==='hard'?12:r.mode==='easy'?7:10);
+ $('modeLabel').textContent=(C.modes[r.mode]?.name||r.mode).toUpperCase();
+ $('runTotal').textContent=fmt(r.totalScore);
+ $('pointsValue').textContent=fmt(preview.points||0);
+ $('multisValue').textContent=fmt(preview.multis||1);
+ $('scoreValue').textContent=fmt(r.roundScore);
+ $('targetValue').textContent=fmt(r.target);
+ $('goalBig').textContent=fmt(r.target);
+ $('energyValue').textContent=Math.max(0,r.energy);
+ $('rerollCount').textContent=r.rerolls+' ↻';
+ $('bagCount').textContent=r.bag.length;
+ $('scoreProgress').style.width=Math.min(100,r.roundScore/Math.max(1,r.target)*100)+'%';
+ $('targetHint').textContent='BONUS OBJETIVO · '+r.targetLength+' LETRAS';
+ $('categoryHint').textContent=validation?.ok?categoryText(validation.analysis):draft?'PALABRA NO VÁLIDA':'FORMA UNA PALABRA';
+ $('categoryHint').classList.toggle('valid',!!validation?.ok);
+ $('categoryHint').classList.toggle('invalid',!!draft&&!validation?.ok);
+ $('rerollModeBtn').classList.toggle('active',rerollMode);
+ $('rerollTray').textContent=r.rerollSelection.length+' / 3';
+ $('doRerollBtn').disabled=!rerollMode||!r.rerollSelection.length||r.rerolls<=0;
+ $('playBtn').disabled=!validation?.ok;
+ $('clearBtn').disabled=!r.selected.length;
+ renderBonusStack(r);renderWord(r,preview);renderHand(r);
+ $('effectFloat').innerHTML=(preview.effects||[]).slice(-5).map(e=>'<span>'+esc(e)+'</span>').join('');
+ if(lastMessage)$('feedback').textContent=lastMessage;
+ else if(validation?.ok)$('feedback').textContent='✓ '+draft.toUpperCase()+' · '+categoryText(validation.analysis)+' · '+fmt(preview.points)+' × '+fmt(preview.multis)+' = '+fmt(preview.total);
+ else if(draft)$('feedback').textContent=validation?.message||'Esta combinación no forma una palabra válida.';
+ else $('feedback').textContent=rerollMode?'Selecciona hasta 3 letras de la mano y pulsa ↻.':'Selecciona letras de tu mano. Pulsa una vocal colocada para acentuarla.';
+ $('saveStatus').textContent=!E.storageOK?'Error de guardado':B.embedded?'LenguArcade · guardado activo':'Guardado local';
+ $('gameExitBtn').hidden=!B.embedded;
+ renderOverlay();
+}
+function rewardCard(b){
+ const icon=b.type==='points'?'●':b.type==='multi'?'◆':b.type==='hybrid'?'✦':'↻';
+ return '<button class="reward-choice type-'+b.type+'" data-reward="'+b.id+'"><span class="reward-icon">'+icon+'</span><small>'+b.type.toUpperCase()+'</small><strong>'+esc(b.name)+'</strong><p>'+esc(b.description)+'</p><em>ELEGIR</em></button>';
+}
+function renderOverlay(){
+ const r=E.run;
+ $('overlay').hidden=true;$('rewardPanel').hidden=true;$('endPanel').hidden=true;$('collectionPanel').hidden=true;
+ if(!r)return;
+ if(collectionMode&&document.body.dataset.collectionOpen==='1'){
+  $('overlay').hidden=false;$('collectionPanel').hidden=false;renderCollection();return;
+ }
+ if(r.status==='reward'){
+  $('overlay').hidden=false;$('rewardPanel').hidden=false;
+  $('rewardChoices').innerHTML=r.bonusChoices.map(id=>C.bonuses.find(b=>b.id===id)).filter(Boolean).map(rewardCard).join('');
+  $('rewardRerolls').textContent=r.rerolls+' ↻';
+  $('rerollBonusesBtn').disabled=r.rerolls<=0;
+  $('rerollBonusesBtn').textContent='↻ Cambiar los 3 bonus · '+r.rerolls+' disponibles';
+  $('rewardOwned').innerHTML=r.bonuses.length?r.bonuses.slice().reverse().map(id=>{const b=C.bonuses.find(x=>x.id===id);return b?'<div><span>'+esc(b.name)+'</span><small>'+esc(b.description)+'</small></div>':'';}).join(''):'<p>Aún no tienes bonus.</p>';
+  return;
+ }
+ if(r.finished){
+  $('overlay').hidden=false;$('endPanel').hidden=false;
+  const won=r.status==='victory';$('endKicker').textContent=won?'RUN COMPLETADA':'FIN DE LA RUN';$('endTitle').textContent=won?'¡La Forja arde!':'La energía se agotó';
+  $('endScore').textContent=fmt(r.totalScore);
+  $('endStats').innerHTML=[
+   ['Ronda',r.round+'/'+(C.modes[r.mode]?.rounds||10)],
+   ['Palabras',r.words.length],
+   ['Bonus',r.bonuses.length],
+   ['Mejor jugada',fmt(Math.max(0,...r.wordLog.map(x=>x.total||0)))],
+   ['Rerolls',r.rerolls],
+   ['Energía',r.energy]
+  ].map(([a,b])=>'<div><small>'+a+'</small><strong>'+b+'</strong></div>').join('');
+  $('endlessBtn').hidden=!won;
+ }
+}
+function renderCollection(){
+ const c=E.career,r=E.run;
+ if(collectionMode==='history'){
+  $('collectionTitle').textContent='Palabras de la run';
+  $('collectionBody').innerHTML=r?.wordLog?.length?'<div class="history-list">'+r.wordLog.slice().reverse().map(x=>'<div><strong>'+esc(x.word)+'</strong><span>'+fmt(x.points)+' × '+fmt(x.multis)+' = <b>'+fmt(x.total)+'</b></span><small>Ronda '+x.round+'</small></div>').join('')+'</div>':'<p>No hay palabras jugadas todavía.</p>';
+ }else if(collectionMode==='achievements'){
+  $('collectionTitle').textContent='Logros y bonus';
+  $('collectionBody').innerHTML='<h3>Logros</h3><div class="achievement-grid">'+C.achievements.map(a=>'<div class="'+(c.achievements.includes(a.id)?'done':'')+'"><span>'+(c.achievements.includes(a.id)?'✦':'◇')+'</span><strong>'+esc(a.title)+'</strong><small>'+esc(a.description)+'</small></div>').join('')+'</div><h3>Bonus descubiertos · '+(c.bonusesSeen||[]).length+'/54</h3><div class="bonus-codex">'+C.bonuses.map(b=>'<div class="'+((c.bonusesSeen||[]).includes(b.id)?'seen':'')+'"><strong>'+esc((c.bonusesSeen||[]).includes(b.id)?b.name:'???')+'</strong><small>'+esc((c.bonusesSeen||[]).includes(b.id)?b.description:'Descúbrelo durante una run.')+'</small></div>').join('')+'</div>';
+ }else{
+  $('collectionTitle').textContent='Tu build';
+  $('collectionBody').innerHTML=r?.bonuses?.length?'<div class="build-grid">'+r.bonuses.map(id=>{const b=C.bonuses.find(x=>x.id===id);return b?'<div class="type-'+b.type+'"><strong>'+esc(b.name)+'</strong><small>'+esc(b.description)+'</small></div>':'';}).join('')+'</div>':'<p>Aún no tienes bonus en esta run.</p>';
+ }
+}
+function render(){
+ renderTitle();
+ if(!title&&E.run)renderGame();
+}
+function openCollection(mode){collectionMode=mode;document.body.dataset.collectionOpen='1';render();}
+function closeCollection(){document.body.dataset.collectionOpen='0';render();}
+function chooseWild(id){
+ const letters=[...'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'];$('choiceBody').innerHTML='<h2>Elige la letra del comodín</h2><div class="letter-choice">'+letters.map(c=>'<button data-letter="'+c+'">'+c+'</button>').join('')+'</div>';$('choiceDialog').showModal();
+ const handler=e=>{const b=e.target.closest('[data-letter]');if(!b)return;$('choiceBody').removeEventListener('click',handler);$('choiceDialog').close();E.select(id,b.dataset.letter);};
+ $('choiceBody').addEventListener('click',handler);
+}
+function start(mode){title=false;rerollMode=false;lastMessage='';closeCollection();E.newRun(mode);B.start();tone('reward');render();}
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>start(b.dataset.mode)));
+$('continueBtn').addEventListener('click',()=>{title=false;lastMessage='';B.start();render();});
+$('menuBtn').addEventListener('click',()=>{title=true;rerollMode=false;E.save();B.checkpoint('menu');render();});
+$('exitBtn').addEventListener('click',()=>B.saveAndExit());$('gameExitBtn').addEventListener('click',()=>B.saveAndExit());
+$('soundBtn').addEventListener('click',()=>{sound=!sound;$('soundBtn').textContent='♫ '+(sound?'Sí':'No');tone();});
+$('hand').addEventListener('click',e=>{
+ const b=e.target.closest('[data-tile]');if(!b||!E.run)return;const id=Number(b.dataset.tile),t=E.run.hand.find(x=>x.id===id);tone('select');
+ if(rerollMode){E.toggleReroll(id);return;}
+ if(t?.style==='wild'||t?.char==='*')chooseWild(id);else E.select(id);
 });
-$('choice-content').addEventListener('click',e=>{const b=e.target.closest('[data-choice]');if(!b)return;const cb=chooser;chooser=null;$('choice').close();cb?.(Number(b.dataset.choice));});$('cancel-choice').addEventListener('click',()=>$('choice').close());
-$('codex').addEventListener('click',()=>{codexOpen=true;$('overlay').hidden=false;$('overlay-content').innerHTML=`<span class="eyebrow">TU CÓDICE</span><h2>Logros de la forja</h2><div class="shop-grid">${C.achievements.map(a=>`<div class="shop-item"><span>${E.career.achievements.includes(a.id)?'✦':'◇'}</span><div><b>${a.title}</b><small>${a.description}</small></div></div>`).join('')}</div><button class="next" data-title>Volver</button>`;});
+$('clearBtn').addEventListener('click',()=>{lastMessage='';E.clear();});
+$('playBtn').addEventListener('click',()=>{
+ const q=E.play();if(!q.ok){lastMessage=q.message;tone('error');render();return;}
+ lastMessage=q.score.display.toUpperCase()+' · '+fmt(q.score.points)+' × '+fmt(q.score.multis)+' = '+fmt(q.score.total);tone('score');B.checkpoint('word');B.result();render();
+});
+$('rerollModeBtn').addEventListener('click',()=>{rerollMode=!rerollMode;if(!rerollMode&&E.run?.rerollSelection?.length){for(const id of [...E.run.rerollSelection])E.toggleReroll(id);}lastMessage=rerollMode?'Modo reroll: selecciona hasta 3 letras.':'';render();});
+$('doRerollBtn').addEventListener('click',()=>{const q=E.rerollLetters();lastMessage=q.ok?'Letras renovadas.':q.message;if(q.ok)rerollMode=false;tone(q.ok?'select':'error');render();});
+$('rewardChoices').addEventListener('click',e=>{const b=e.target.closest('[data-reward]');if(!b)return;const q=E.chooseBonus(b.dataset.reward);if(q.ok){lastMessage='Bonus adquirido: '+C.bonuses.find(x=>x.id===b.dataset.reward)?.name;tone('reward');B.checkpoint('bonus');render();}});
+$('rerollBonusesBtn').addEventListener('click',()=>{const q=E.rerollBonuses();lastMessage=q.ok?'Tres bonus nuevos.':q.message;tone(q.ok?'select':'error');render();});
+$('bonusDeckBtn').addEventListener('click',()=>openCollection('bonuses'));
+$('bonusStack').addEventListener('click',()=>openCollection('bonuses'));
+$('historyBtn').addEventListener('click',()=>openCollection('history'));
+$('achievementsBtn').addEventListener('click',()=>openCollection('achievements'));
+$('closeCollectionBtn').addEventListener('click',closeCollection);
+$('againBtn').addEventListener('click',()=>start(E.run?.mode||'normal'));
+$('endMenuBtn').addEventListener('click',()=>{title=true;render();});
+$('endlessBtn').addEventListener('click',()=>{if(E.continueEndless()){lastMessage='Modo infinito: el objetivo seguirá creciendo.';render();}});
+$('cancelChoice').addEventListener('click',()=>$('choiceDialog').close());
 window.addEventListener('lexoma:change',render);
-window.addEventListener('keydown',e=>{if(title||$('choice').open||E.run?.status!=='combat'||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)||e.ctrlKey||e.metaKey||e.altKey)return;if(e.key==='Escape'){E.clear();e.preventDefault();return;}if(e.key==='Enter'&&e.target===document.body){forge();e.preventDefault();return;}if(/^[a-zñáéíóúü]$/iu.test(e.key)){const t=E.run.hand.find(t=>t.char===e.key.toUpperCase()&&!E.run.selection.some(x=>x.id===t.id));if(t){E.select(t.id);e.preventDefault();}}});
+window.addEventListener('keydown',e=>{
+ if(title||!E.run||E.run.status!=='play'||$('choiceDialog').open||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)||e.ctrlKey||e.metaKey||e.altKey)return;
+ if(e.key==='Escape'){E.clear();e.preventDefault();return;}
+ if(e.key==='Enter'){if(!E.validate(E.draft()).ok)return;const q=E.play();if(q.ok){lastMessage=q.score.display.toUpperCase()+' · '+fmt(q.score.total);tone('score');B.checkpoint('word');B.result();render();}e.preventDefault();return;}
+ if(/^[a-zñ]$/iu.test(e.key)){const c=e.key.toUpperCase(),t=E.run.hand.find(t=>!E.run.selected.some(s=>s.id===t.id)&&!E.run.rerollSelection.includes(t.id)&&(t.char===c||t.char==='*'));if(t){if(t.char==='*')chooseWild(t.id);else E.select(t.id);e.preventDefault();}}
+});
+E.loadDictionary(t=>{$('dictionaryStatus').textContent=t;render();}).finally(render);
 render();
 })();
