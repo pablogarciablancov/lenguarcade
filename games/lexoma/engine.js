@@ -38,7 +38,7 @@ function drawStyle(char){
 }
 function drawOne(){
  if(!run.bag.length){if(!run.discard.length)return null;run.bag=shuffle(run.discard.splice(0));}
- const char=run.bag.pop();return tile(char,drawStyle(char));
+ const item=run.bag.pop();const char=typeof item==='string'?item:item.char;const style=typeof item==='string'?drawStyle(char):(item.style||'normal');return tile(char,style);
 }
 function replenish(){while(run.hand.length<run.maxHand){const t=drawOne();if(!t)break;run.hand.push(t);}}
 function daySeed(){const d=new Date();return Number(String(d.getFullYear())+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'))>>>0;}
@@ -74,7 +74,7 @@ function toggleReroll(id){
 function rerollLetters(){
  if(!allowed()||run.rerolls<=0||!run.rerollSelection.length)return{ok:false,message:'Selecciona entre 1 y 3 letras para cambiar.'};
  const ids=new Set(run.rerollSelection),removed=run.hand.filter(t=>ids.has(t.id));run.hand=run.hand.filter(t=>!ids.has(t.id));
- run.discard.push(...removed.map(t=>t.char));run.rerolls--;career.rerollsUsed++;run.rerollSelection=[];replenish();unlock();save();return{ok:true,count:removed.length};
+ run.discard.push(...removed.map(t=>({char:t.char,style:t.style})));run.rerolls--;career.rerollsUsed++;run.rerollSelection=[];replenish();unlock();save();return{ok:true,count:removed.length};
 }
 async function loadDictionary(onStatus){
  try{
@@ -92,7 +92,6 @@ function validate(raw){
  if(display.includes('!')&&!display.endsWith('!'))return{ok:false,message:'La exclamación especial solo puede cerrar la palabra.'};
  const w=key(lexical),plain=strip(w);
  const exact=dictionary.has(w)||L.lookup(w).length>0;
- const normalized=!exact&&[...dictionary].some?false:false;
  if(!exact){
    if(dictionary.has(plain))return{ok:true,word:plain,display:display,analysis:L.lookup(plain)[0]||null};
    return{ok:false,message:'«'+lexical+'» no está en el diccionario de Forja.'};
@@ -114,7 +113,7 @@ function score(raw,preview=true){
  let points=0,multis=1,pointsFactor=1,multiFactor=1;
  tiles.forEach((t,i)=>{const c=t.style==='bang'?'!':chars[Math.min(i,chars.length-1)]||t.char;const q=tileContribution(t,c);points+=q.points;multis+=q.multi;});
  const vowels=chars.filter(c=>VOWELS.includes(c)).length,consonants=chars.length-vowels;
- const unique=new Set(chars.map(strip)).size,repeats=chars.length-unique,rare=chars.filter(c=>RARE.includes(strip(c))).length;
+ const unique=new Set(chars.map(strip)).size,repeats=chars.length-unique,rare=chars.filter(c=>RARE.includes(c.toUpperCase())||c.toUpperCase()==='Ñ').length;
  const accents=chars.filter(c=>/[ÁÉÍÓÚ]/.test(c)).length,specials=tiles.filter(t=>['gold','wild','bang'].includes(t.style)).length;
  const analysis=val.analysis,category=analysis?.category||null;
  const left=run.hand.filter(t=>!run.selected.some(s=>s.id===t.id));
@@ -134,7 +133,7 @@ function score(raw,preview=true){
   if(e==='unique')addM('Variedad',unique);
   if(e==='repeat')addP('Repetición',repeats*4);
   if(e==='rare')addP('Raras',rare*8);
-  if(e==='enie'){const n=chars.filter(c=>strip(c)==='Ñ').length;addP('Ñ primordial',n*10);addM('Ñ primordial',n*2);}
+  if(e==='enie'){const n=chars.filter(c=>c.toUpperCase()==='Ñ').length;addP('Ñ primordial',n*10);addM('Ñ primordial',n*2);}
   if(e==='accent')addP('Tinta acentuada',accents*10);
   if(e==='multLetters')addM('M.U.L.T.',chars.filter(c=>'MULT'.includes(strip(c))).length*4);
   if(e==='pointLetters')addP('P.U.N.T.O.',chars.filter(c=>'PUNTO'.includes(strip(c))).length*7);
@@ -185,7 +184,7 @@ function roundWon(){
 function play(){
  if(!allowed())return{ok:false,message:'La ronda no está activa.'};const raw=draft(),valid=validate(raw);if(!valid.ok){run.errors++;career.errors++;save();return valid;}
  const sc=score(raw,false),used=new Set(run.selected.map(s=>s.id)),usedTiles=run.hand.filter(t=>used.has(t.id));
- run.hand=run.hand.filter(t=>!used.has(t.id));run.discard.push(...usedTiles.map(t=>t.char));
+ run.hand=run.hand.filter(t=>!used.has(t.id));run.discard.push(...usedTiles.map(t=>({char:t.char,style:t.style})));
  run.energy--;run.roundScore+=sc.total;run.totalScore+=sc.total;run.previousWord=sc.word;run.previousLength=sc.word.length;
  run.words.push(sc.word);run.wordLog.push({word:sc.display,points:sc.points,multis:sc.multis,total:sc.total,effects:sc.effects,round:run.round});
  if(sc.analysis?.category&&!run.categorySeenRound.includes(sc.analysis.category))run.categorySeenRound.push(sc.analysis.category);
