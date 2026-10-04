@@ -23,3 +23,7 @@ Cafetería ilustrada original integrada como fondo WebP ligero (~240 KB), títul
 Glosario desbloqueado únicamente al encontrar conceptos: término, definición, pista original, distrito y contador de encuentros. Búsqueda sin dependencia de tildes y filtro por distrito. Se guarda en `profile.discovered` con el mismo esquema y clave de guardado existentes. Los perfiles previos recuperan los aciertos sin ayuda y los conceptos encontrados de la partida conservada; el contador antiguo de ayudas también incluía palabras pendientes, por lo que no se usa para desbloquear falsos descubrimientos.
 
 Arte creado con imagegen: cafetería literaria de fantasía nocturna, lámparas ámbar, libros, tinta turquesa, ciudad violeta y taza con vapor mágico; sin personas ni interfaz en la ilustración. Recurso: `games/sopa_de_tinta/cafe.webp`.
+
+## Acceso permanente a Aventura
+
+El botón principal mantiene siempre «Jugar Aventura», incluso con un pedido pendiente. «Continuar pedido» dispone de un botón separado. Entrar en un distrito conserva la confirmación antes de sustituir una partida activa.

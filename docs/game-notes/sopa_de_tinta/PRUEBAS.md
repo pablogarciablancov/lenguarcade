@@ -32,3 +32,5 @@ Las pruebas del host de laboratorio no certifican por sí solas la autenticació
 ## Revisión visual y glosario
 
 Comprobado en Chromium: 1366×768, 1440×900, 1920×1080, 1366×600 y 390×844; tablero cuadrado, menú accesible y sin scroll general. HTML autónomo con imagen, estilos y scripts integrados: carga, arrastre real, acierto y persistencia después de recargar. Glosario vacío sin respuestas reveladas; un acierto desbloquea exactamente un término, con su definición. Buscar ignorando tildes, filtrar por distrito y recargar conservan los datos. Sin errores JavaScript. Vuelven a pasar las pruebas de 640 tableros.
+
+Acceso a Aventura comprobado con clics reales desde perfil nuevo y pedido pendiente: siete distritos jugables, continuar partida, sustituir pedido con confirmación y desbloquear Pedido 2 tras completar Pedido 1. Aventura y Continuar accesibles en los cinco tamaños anteriores, sin errores JavaScript.
