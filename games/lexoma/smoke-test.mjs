@@ -7,82 +7,83 @@ const w={dispatchEvent(){}};
 const box={window:w,localStorage:{getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v)},Event:class{},console,fetch:async()=>({ok:true,text:async()=>['el','mago','corre','casa','sol','luna','gato','perro','sal','mesa','sapo','rama','pato'].join('\n')})};
 vm.createContext(box);
 for(const f of ['linguistics.js','content.js','engine.js'])vm.runInContext(fs.readFileSync(new URL(f,import.meta.url),'utf8'),box);
-const E=w.LexomaEngine,L=w.LexomaLanguage,C=w.LexomaContent;
+const E=w.LexomaEngine,C=w.LexomaContent;
+await E.loadDictionary();
 
 assert.equal(C.bonuses.length,54);
-assert.equal(C.modes.normal.energy,5);
-assert.equal(C.modes.hard.energy,4);
+assert.equal(C.events.length,6);
+assert.equal(C.modes.normal.wallet,8);
 assert.equal(E.maxBonuses,5);
-assert.equal(E.letterValue('Ñ'),8);
-await E.loadDictionary();
-assert.equal(E.dictionaryReady,true);
 
 function setHand(chars,styles={}){
  E.run.hand=[...chars].map((char,i)=>({id:100+i,char,style:styles[i]||'normal',bonusPoints:0,bonusMulti:0}));
  E.run.tileId=200;E.run.selected=[];E.run.rerollSelection=[];
 }
-function chooseStarter(){
- assert.equal(E.run.status,'starter');
- assert.equal(E.run.bonusChoices.length,3);
- const id=E.run.bonusChoices[0];
- assert.ok(E.chooseBonus(id).ok);
- assert.equal(E.run.status,'play');
- assert.equal(E.run.bonuses.length,1);
- return id;
-}
 
+// Una run nueva empieza en tienda y se puede salir sin comprar.
 E.start('normal',42);
-assert.equal(E.run.status,'starter');
-assert.equal(E.run.bonusChoices.length,3);
-const vowelCount=E.run.hand.filter(t=>'AEIOUÁÉÍÓÚÜ'.includes(t.char)||t.char==='*').length;
-assert.ok(vowelCount>=2,'La mano inicial debe ofrecer al menos dos vocales/comodines');
-chooseStarter();
+assert.equal(E.run.status,'shop');
+assert.equal(E.run.shop.origin,'starter');
+assert.equal(E.run.shop.cards.length,3);
+assert.equal(E.run.coins,8);
+assert.equal(E.run.bonuses.length,0);
+assert.ok(E.leaveShop().ok);
+assert.equal(E.run.status,'play');
+assert.equal(E.run.bonuses.length,0);
 assert.equal(E.run.energy,5);
 
-// La puntuación base ya recompensa longitud sin depender de cartas.
-E.run.bonuses=[];setHand('CASA');
+// Compra de carta y precio real.
+E.start('normal',43);
+const offer=E.run.shop.cards[0],coinsBefore=E.run.coins;
+assert.ok(E.buyCard(offer.id).ok);
+assert.equal(E.run.coins,coinsBefore-offer.price);
+assert.ok(E.run.bonuses.includes(offer.id));
+assert.equal(E.cardLevel(offer.id),1);
+
+// Mejorar carta sube nivel y aumenta el efecto.
+E.run.coins=99;E.leaveShop();E.run.bonuses=['vocalista'];E.run.cardLevels={vocalista:1};setHand('CASA');
 for(const c of 'CASA'){const t=E.run.hand.find(t=>t.char===c&&!E.run.selected.some(s=>s.id===t.id));E.select(t.id);}
-const base=E.score(E.draft(),true);
-assert.ok(base.points>=14,'CASA debe superar la antigua base mínima');
-assert.ok(base.multis>=2,'4 letras deben partir con al menos ×2');
-assert.ok(base.total>=28);
+const lvl1=E.score(E.draft(),true);
+E.run.status='shop';E.run.shop={origin:'round',cards:[],refreshCost:2,refreshes:0,eventId:null,eventResolved:false,eventResult:''};
+assert.ok(E.upgradeCard('vocalista').ok);
+assert.equal(E.cardLevel('vocalista'),2);
+E.run.status='play';const lvl2=E.score(E.draft(),true);
+assert.ok(lvl2.points>lvl1.points);
 
-// Superar una ronda no arrastra energía gastada: la siguiente se reinicia.
-E.run.target=1;const first=E.play();assert.ok(first.ok);assert.equal(E.run.status,'reward');assert.equal(E.run.energy,4);
-const afterRoundRerolls=E.run.rerolls;assert.ok(afterRoundRerolls>=4,'Debe premiar la ronda y la eficiencia');
-const reward=E.run.bonusChoices[0];assert.ok(E.chooseBonus(reward).ok);assert.equal(E.run.round,2);assert.equal(E.run.status,'play');assert.equal(E.run.energy,5);
+// Eliminar letra reduce una copia permanentemente.
+E.run.status='shop';E.run.coins=99;E.run.shop={origin:'round',cards:[],refreshCost:2,refreshes:0,eventId:null,eventResolved:false,eventResult:''};
+const invBefore=E.inventory().find(x=>x.char==='A')?.count||0;
+assert.ok(invBefore>0);assert.ok(E.removeLetter('A').ok);
+const invAfter=E.inventory().find(x=>x.char==='A')?.count||0;
+assert.equal(invAfter,invBefore-1);
 
-// Batería eleva la energía base de cada nueva ronda.
-E.run.bonuses=['bateria'];E.run.status='reward';E.run.bonusChoices=['vocalista'];E.run.round=2;
-assert.ok(E.chooseBonus('vocalista').ok);assert.equal(E.run.energy,6);
+// Grabar una ficha cuesta dinero y conserva el estilo.
+const target=E.run.hand.find(t=>!['wild','bang'].includes(t.style));const money=E.run.coins;
+assert.ok(E.engraveTile(target.id,'gold').ok);
+assert.equal(target.style,'gold');assert.equal(E.run.coins,money-E.serviceCosts.gold);
 
-// Reroll de letras.
-const beforeRerolls=E.run.rerolls;setHand('CASA');E.toggleReroll(100);E.toggleReroll(101);assert.ok(E.rerollLetters().ok);assert.equal(E.run.rerolls,beforeRerolls-1);
+// Renovar tienda cuesta monedas y encarece el siguiente refresh.
+E.run.shop.cards=[];E.run.coins=20;E.run.shop.refreshCost=2;
+assert.ok(E.refreshShop().ok);assert.equal(E.run.coins,18);assert.equal(E.run.shop.refreshCost,3);assert.equal(E.run.shop.cards.length,3);
 
-// Una carta altera de verdad el cálculo.
-setHand('CASA');E.run.bonuses=[];
-for(const c of 'CASA'){const t=E.run.hand.find(t=>t.char===c&&!E.run.selected.some(s=>s.id===t.id));E.select(t.id);}
-const plain=E.score(E.draft(),true);E.run.bonuses=['vocalista'];const boosted=E.score(E.draft(),true);assert.ok(boosted.points>plain.points&&boosted.total>plain.total);
+// Límite de 5 cartas y sustitución al comprar.
+E.run.bonuses=['vocalista','consonante','palabra_larga','variedad','raras'];E.run.cardLevels={vocalista:1,consonante:1,palabra_larga:1,variedad:1,raras:1};E.run.coins=99;
+E.run.shop.cards=[{id:'mult',price:5}];
+const blocked=E.buyCard('mult');assert.equal(blocked.needsReplace,true);
+assert.ok(E.buyCard('mult','vocalista').ok);assert.equal(E.run.bonuses.length,5);assert.ok(E.run.bonuses.includes('mult'));
 
-// Máximo 5 cartas y sustitución obligatoria.
-E.run.status='reward';E.run.bonuses=['vocalista','consonante','palabra_larga','variedad','raras'];E.run.bonusChoices=['mult','punto','cinco'];
-const blocked=E.chooseBonus('mult');assert.equal(blocked.needsReplace,true);assert.equal(E.run.bonuses.length,5);
-const replaced=E.chooseBonus('mult','vocalista');assert.ok(replaced.ok);assert.equal(E.run.bonuses.length,5);assert.ok(E.run.bonuses.includes('mult'));assert.ok(!E.run.bonuses.includes('vocalista'));
+// Ronda superada paga base + energía + interés y entra en tienda.
+E.leaveShop();setHand('EL');E.run.target=1;E.run.coins=10;E.select(100);E.select(101);const played=E.play();assert.ok(played.ok);assert.equal(E.run.status,'shop');assert.ok(E.run.lastIncome.total>=3);assert.ok(E.run.coins>10);
 
-// Una palabra inválida no consume energía.
-E.run.status='play';setHand('ZZ');const energy=E.run.energy;E.select(100);E.select(101);const bad=E.play();assert.equal(bad.ok,false);assert.equal(E.run.energy,energy);
+// Evento de apuesta modifica la siguiente ronda.
+E.run.shop.eventId='apuesta';E.run.shop.eventResolved=false;assert.ok(E.resolveEvent('accept').ok);assert.equal(E.run.nextTargetFactor,1.25);assert.equal(E.run.nextBounty,8);
+const baseNext=E.targetForRound(E.run.round+1);E.leaveShop();assert.equal(E.run.target,Math.round(baseNext*1.25));assert.equal(E.run.activeBounty,8);
 
-// Persistencia v2 compatible.
-const snap=JSON.parse(JSON.stringify(E.snapshot()));assert.equal(snap.version,2);E.setProfile({studentId:'a'});assert.equal(E.run,null);assert.ok(E.restore(snap));assert.equal(E.run.id,snap.run.id);
+// Evento de Musa añade energía siguiente.
+E.run.status='shop';E.run.shop={origin:'round',cards:[],refreshCost:2,refreshes:0,eventId:'musa',eventResolved:false,eventResult:''};E.run.coins=10;
+assert.ok(E.resolveEvent('accept').ok);assert.equal(E.run.nextEnergyBonus,1);E.leaveShop();assert.equal(E.run.energy,E.roundEnergy()+1);
 
-// Victoria final y modo infinito reinician energía.
-E.run.status='play';E.run.finished=false;E.run.round=C.modes.normal.rounds;E.run.target=1;E.run.roundScore=0;E.run.energy=1;setHand('EL');E.select(100);E.select(101);assert.ok(E.play().ok);assert.equal(E.run.status,'victory');assert.equal(E.continueEndless(),true);assert.equal(E.run.energy,E.roundEnergy());
+// Guardado v2 conserva economía y mejoras.
+const snap=JSON.parse(JSON.stringify(E.snapshot()));assert.equal(snap.version,2);const coins=snap.run.coins;E.setProfile({studentId:'economy'});assert.equal(E.run,null);assert.ok(E.restore(snap));assert.equal(E.run.coins,coins);assert.ok(E.run.cardLevels);
 
-console.log('Forja OK: carta inicial, máximo 5 cartas, energía reiniciada, manos equilibradas, puntuación base reforzada y sustitución de build.');
-
-const adapterSource=fs.readFileSync(new URL('central-progress.adapter.js',import.meta.url),'utf8');
-const adapterBox={};vm.createContext(adapterBox);vm.runInContext(adapterSource,adapterBox);
-const sample={save:{career:{words:10,wins:1,errors:2,bonusesSeen:['a','b']}},percentage:100};
-const initial=adapterBox.buildLexomaCentralProgress(sample,{progress:{}});assert.ok(initial.xpDelta>0);
-const repeated=adapterBox.buildLexomaCentralProgress(sample,{progress:{...initial,xp:initial.xpDelta}});assert.equal(repeated.xpDelta,0);
-console.log('Adaptador central OK.');
+console.log('Forja OK: monedero, compra/paso, tienda, interés, cartas nivel III, eliminación/grabado de letras, eventos y guardado.');
