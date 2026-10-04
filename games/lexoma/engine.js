@@ -11,7 +11,7 @@ const STARTER_POOL=['vocalista','consonante','palabra_larga','variedad','raras',
 let run=null,career=freshCareer(),storageKey='lexoma.v2.guest',dictionary=new Set(),dictionaryReady=false;
 
 function freshCareer(){return{games:0,wins:0,bestScore:0,bestPlay:0,bestPoints:0,bestMulti:1,words:0,phrases:0,concordances:0,errors:0,rerollsUsed:0,bonusesSeen:[],achievements:[]};}
-function strip(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').normalize('NFC');}
+function strip(s){return String(s||'').normalize('NFD').replace(/[\u0300\u0301]/g,'').normalize('NFC');}
 function key(s){return String(s||'').toLowerCase().normalize('NFC');}
 function random(){run.rng=(Math.imul(run.rng,1664525)+1013904223)>>>0;return run.rng/4294967296;}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -47,6 +47,7 @@ function pullBagItem(predicate){
  if(!run.bag.length){if(!run.discard.length)return null;run.bag=shuffle(run.discard.splice(0));}
  let idx=-1;
  if(predicate){for(let i=run.bag.length-1;i>=0;i--){if(predicate(itemChar(run.bag[i]))){idx=i;break;}}}
+ if(predicate&&idx<0)return null;
  if(idx<0)idx=run.bag.length-1;
  return run.bag.splice(idx,1)[0];
 }
