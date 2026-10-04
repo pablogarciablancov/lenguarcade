@@ -1,16 +1,16 @@
 (() => {
 'use strict';
 const bonuses=[
-['vocalista','Vocalista','Cada vocal activada añade +2 PUNTOS.','points','vowel'],
+['vocalista','Vocalista','Cada vocal activada añade +3 PUNTOS.','points','vowel'],
 ['consonante','Consonante','Cada consonante activada añade +2 PUNTOS.','points','consonant'],
-['palabra_larga','Palabra larga','Las palabras de 5+ letras ganan +15 PUNTOS.','points','long'],
+['palabra_larga','Palabra larga','Las palabras de 5+ letras ganan +18 PUNTOS.','points','long'],
 ['palabra_corta','Palabra corta','Las palabras de 5 letras o menos duplican MULTIS.','multi','short'],
 ['cuatro','Cuatro','Con exactamente 4 letras: +4 MULTIS.','multi','four'],
 ['seis','Sexta marcha','Con 6 letras: +6 MULTIS.','multi','six'],
 ['ocho','Ocho','Con 8 letras: PUNTOS ×1,5.','points','eight'],
 ['variedad','Variedad','Cada letra distinta añade +1 MULTI.','multi','unique'],
 ['repeticion','Repetición','Cada letra repetida añade +4 PUNTOS.','points','repeat'],
-['raras','Letras raras','J, Ñ, Q, X y Z añaden +8 PUNTOS cada una.','points','rare'],
+['raras','Letras raras','J, Ñ, Q, X y Z añaden +10 PUNTOS cada una.','points','rare'],
 ['enie','Ñ primordial','Cada Ñ añade +10 PUNTOS y +2 MULTIS.','hybrid','enie'],
 ['acentos','Tinta acentuada','Cada vocal acentuada añade +10 PUNTOS.','points','accent'],
 ['mult','M.U.L.T.','Cada M, U, L o T añade +4 MULTIS.','multi','multLetters'],
@@ -22,7 +22,7 @@ const bonuses=[
 ['stock','Stock','Añade a MULTIS el valor de la letra más barata que queda en tu mano.','multi','stock'],
 ['coccion','Cocción','Cada letra que dejas en la mano añade +2 PUNTOS.','points','cooking'],
 ['contra_cuerdas','Contra las cuerdas','Con 1 ENERGÍA: PUNTOS ×2 y MULTIS ×2.','hybrid','backwall'],
-['bateria','Batería','Al superar una ronda recibes +1 ENERGÍA adicional.','utility','battery'],
+['bateria','Batería','Empiezas cada ronda con +1 ENERGÍA.','utility','battery'],
 ['papelera','Papelera','Al superar una ronda recibes +2 REROLLS adicionales.','utility','trashcan'],
 ['mas_eleccion','Más elección','Tu mano aumenta en +1 letra.','utility','hand'],
 ['modo_facil','Objetivo flexible','Los objetivos de ronda se reducen un 12%.','utility','targetDown'],
@@ -60,7 +60,7 @@ const bonuses=[
 const modes={
  easy:{id:'easy',name:'Fácil',rounds:7,energy:6,rerolls:4,targets:[80,140,220,330,470,650,880]},
  normal:{id:'normal',name:'Normal',rounds:10,energy:5,rerolls:3,targets:[100,180,290,430,610,850,1160,1540,2020,2640]},
- hard:{id:'hard',name:'Difícil',rounds:12,energy:5,rerolls:2,targets:[120,220,360,540,780,1080,1450,1920,2510,3260,4210,5400]},
+ hard:{id:'hard',name:'Difícil',rounds:12,energy:4,rerolls:2,targets:[120,220,360,540,780,1080,1450,1920,2510,3260,4210,5400]},
  daily:{id:'daily',name:'Reto diario',rounds:10,energy:5,rerolls:3,targets:[110,190,300,450,640,890,1210,1600,2100,2750]}
 };
 const achievements=[

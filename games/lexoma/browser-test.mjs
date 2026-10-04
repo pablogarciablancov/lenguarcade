@@ -15,7 +15,7 @@ addEventListener('message',e=>{const m=e.data;if(m?.namespace!=='lenguarcade-gam
 const server=http.createServer((q,r)=>{
  const u=new URL(q.url,'http://localhost');
  if(u.pathname==='/host-test.html'){r.setHeader('content-type','text/html');r.end(hostHTML);return;}
- if(u.pathname==='/word_play/dictionary-es-50k.txt'){r.setHeader('content-type','text/plain');r.end('el\nmago\ncorre\ncasa\nsol\nluna\ngato\nperro\n');return;}
+ if(u.pathname==='/word_play/dictionary-es-50k.txt'){r.setHeader('content-type','text/plain');r.end('el\nmago\ncorre\ncasa\nsol\nluna\ngato\nperro\nsal\nmesa\nsapo\nrama\npato\n');return;}
  let file=path.resolve(root,'.'+decodeURIComponent(u.pathname));if(u.pathname.endsWith('/'))file=path.join(file,'index.html');
  if(!file.startsWith(root)){r.writeHead(403).end();return;}
  try{r.setHeader('content-type',({'.html':'text/html','.js':'application/javascript','.css':'text/css','.svg':'image/svg+xml'})[path.extname(file)]||'application/octet-stream');r.end(fs.readFileSync(file));}catch{r.writeHead(404).end();}
@@ -24,29 +24,48 @@ await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
 const origin='http://127.0.0.1:'+server.address().port;
 const browser=await chromium.launch({headless:true,...(process.env.LEXOMA_CHROMIUM?{executablePath:process.env.LEXOMA_CHROMIUM}:{}),args:['--no-sandbox','--no-proxy-server']});
 const page=await browser.newPage({viewport:{width:1366,height:768}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+
 await page.goto(origin+'/');await page.waitForFunction(()=>LexomaEngine.dictionaryReady);
 await page.locator('[data-mode="normal"]').click();
+await page.waitForSelector('#rewardPanel:not([hidden])');
+assert.equal(await page.locator('.reward-choice').count(),3);
+assert.equal(await page.evaluate(()=>LexomaEngine.run.status),'starter');
+await page.locator('.reward-choice').first().click();
+assert.equal(await page.evaluate(()=>LexomaEngine.run.status),'play');
+assert.equal(await page.evaluate(()=>LexomaEngine.run.bonuses.length),1);
+
 await page.evaluate(()=>{const r=LexomaEngine.run;r.hand=[{id:101,char:'E',style:'normal'},{id:102,char:'L',style:'normal'},{id:103,char:'M',style:'normal'},{id:104,char:'A',style:'normal'},{id:105,char:'G',style:'normal'},{id:106,char:'O',style:'normal'},{id:107,char:'R',style:'normal'}];r.target=1;window.dispatchEvent(new Event('lexoma:change'));});
-await page.locator('[data-tile="101"]').click();await page.locator('[data-tile="102"]').click();await page.locator('#playBtn').click();
-await page.waitForSelector('#rewardPanel:not([hidden])');assert.equal(await page.locator('.reward-choice').count(),3);
-await page.locator('.reward-choice').first().click();assert.equal(await page.evaluate(()=>LexomaEngine.run.round),2);assert.equal(await page.evaluate(()=>LexomaEngine.run.bonuses.length),1);
-await page.evaluate(()=>{const r=LexomaEngine.run;r.hand=[{id:201,char:'C',style:'normal'},{id:202,char:'A',style:'normal'},{id:203,char:'S',style:'normal'},{id:204,char:'A',style:'normal'}];window.dispatchEvent(new Event('lexoma:change'));});
+await page.locator('[data-tile="101"]').click();assert.ok(await page.locator('.word-tile.entering').count()>=1);
+await page.locator('[data-tile="102"]').click();await page.locator('#playBtn').click();
+assert.ok(await page.locator('.score-resolving .scoring-tile').count()>=2);
+await page.waitForSelector('#rewardPanel:not([hidden])',{timeout:3000});
+assert.equal(await page.evaluate(()=>LexomaEngine.run.energy),4);
+await page.locator('.reward-choice').first().click();
+assert.equal(await page.evaluate(()=>LexomaEngine.run.round),2);
+assert.equal(await page.evaluate(()=>LexomaEngine.run.energy),5);
+
+// Con 5 cartas, una nueva obliga a sustituir una.
+await page.evaluate(()=>{const r=LexomaEngine.run;r.status='reward';r.bonuses=['vocalista','consonante','palabra_larga','variedad','raras'];r.bonusChoices=['mult','punto','cinco'];window.dispatchEvent(new Event('lexoma:change'));});
+await page.locator('.reward-choice').first().click();await page.waitForSelector('#choiceDialog[open]');assert.equal(await page.locator('[data-replace]').count(),5);
+await page.locator('[data-replace]').first().click();assert.equal(await page.evaluate(()=>LexomaEngine.run.bonuses.length),5);assert.equal(await page.evaluate(()=>LexomaEngine.run.round),3);
+
+// Reroll de letras sigue funcionando.
+await page.evaluate(()=>{const r=LexomaEngine.run;r.hand=[{id:201,char:'C',style:'normal'},{id:202,char:'A',style:'normal'},{id:203,char:'S',style:'normal'},{id:204,char:'A',style:'normal'},{id:205,char:'L',style:'normal'}];window.dispatchEvent(new Event('lexoma:change'));});
 await page.locator('#rerollModeBtn').click();await page.locator('[data-tile="201"]').click();await page.locator('[data-tile="202"]').click();const rr=await page.evaluate(()=>LexomaEngine.run.rerolls);await page.locator('#doRerollBtn').click();assert.equal(await page.evaluate(()=>LexomaEngine.run.rerolls),rr-1);
+
 for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1366,640]]){
- await page.setViewportSize({width,height});
- const q=await page.evaluate(()=>({scrollH:document.documentElement.scrollHeight,clientH:document.documentElement.clientHeight,scrollW:document.documentElement.scrollWidth,clientW:document.documentElement.clientWidth,hand:document.getElementById('hand').getBoundingClientRect(),score:document.querySelector('.score-row').getBoundingClientRect(),play:document.getElementById('playBtn').getBoundingClientRect()}));
- assert.equal(q.scrollH,q.clientH,`scroll vertical ${width}x${height}`);assert.equal(q.scrollW,q.clientW,`scroll horizontal ${width}x${height}`);
- for(const k of ['hand','score','play'])assert.ok(q[k].top>=0&&q[k].bottom<=height,`${k} visible ${width}x${height}`);
+ await page.setViewportSize({width,height});const q=await page.evaluate(()=>({scrollH:document.documentElement.scrollHeight,clientH:document.documentElement.clientHeight,scrollW:document.documentElement.scrollWidth,clientW:document.documentElement.clientWidth,hand:document.getElementById('hand').getBoundingClientRect(),score:document.querySelector('.score-row').getBoundingClientRect(),play:document.getElementById('playBtn').getBoundingClientRect()}));
+ assert.equal(q.scrollH,q.clientH,`scroll vertical ${width}x${height}`);assert.equal(q.scrollW,q.clientW,`scroll horizontal ${width}x${height}`);for(const k of ['hand','score','play'])assert.ok(q[k].top>=0&&q[k].bottom<=height,`${k} visible ${width}x${height}`);
 }
 const snap=await page.evaluate(()=>LexomaEngine.snapshot());await page.reload();await page.waitForFunction(()=>LexomaEngine.dictionaryReady);await page.locator('#continueBtn').click();assert.equal(await page.evaluate(()=>LexomaEngine.run.id),snap.run.id);
 await page.locator('#bonusDeckBtn').click();await page.waitForSelector('#collectionPanel:not([hidden])');await page.locator('#closeCollectionBtn').click();
-assert.deepEqual(errors,[]);console.log('UI OK: palabra, score, recompensa, reroll, recuperación y responsive sin scroll.');
+assert.deepEqual(errors,[]);console.log('UI OK: carta inicial, animación de score, sustitución 5/5, reroll, recuperación y responsive.');
 
 const host=await browser.newPage({viewport:{width:1366,height:768}});const hostErrors=[];host.on('pageerror',e=>hostErrors.push(e.message));
 await host.goto(origin+'/host-test.html');const frame=host.frames().find(f=>f.parentFrame());await frame.waitForFunction(()=>LexomaBridge.initialized&&LexomaEngine.dictionaryReady);
-await frame.locator('[data-mode="normal"]').click();await frame.locator('#hand .hand-tile').first().click();await host.evaluate(()=>post('REQUEST_CHECKPOINT'));await host.waitForFunction(()=>saved?.rawGameData?.save?.run?.selected?.length===1);
+await frame.locator('[data-mode="normal"]').click();await frame.waitForSelector('#rewardPanel:not([hidden])');await frame.locator('.reward-choice').first().click();
+await frame.locator('#hand .hand-tile').first().click();await host.evaluate(()=>post('REQUEST_CHECKPOINT'));await host.waitForFunction(()=>saved?.rawGameData?.save?.run?.selected?.length===1);
 const id=await frame.evaluate(()=>LexomaEngine.run.id);await frame.goto(frame.url());await frame.waitForFunction(()=>LexomaBridge.initialized&&LexomaEngine.dictionaryReady);assert.equal(await frame.evaluate(()=>LexomaEngine.run.id),id);assert.equal(await frame.evaluate(()=>LexomaEngine.run.selected.length),1);
 await host.evaluate(()=>post('REQUEST_EXIT'));await host.waitForFunction(()=>closeReady);assert.equal(await host.evaluate(()=>closeReady.saved),true);
 assert.deepEqual(hostErrors,[]);console.log('Bridge OK: INIT, checkpoint, restauración y salida.');
-
 await browser.close();server.close();
