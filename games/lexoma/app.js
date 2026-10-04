@@ -54,7 +54,7 @@ function renderWord(r,preview){
   if(sel&&t){
    el.type='button';el.className='word-tile '+t.style;
    const letter=tileLetter(t,sel);
-   el.innerHTML=tileStyleLabel(t)+'<strong>'+esc(letter)+'</strong><small>'+E.letterValue(letter)+'</small>';
+   el.innerHTML=tileStyleLabel(t)+'<strong>'+esc(letter)+'</strong><small>'+(t.style==='wild'?0:E.letterValue(letter))+'</small>';
    el.title=/^[AEIOUÁÉÍÓÚ]$/i.test(letter)?'Pulsa para poner o quitar tilde':'Pulsa para devolver a la mano';
    el.addEventListener('click',()=>{
     if(/^[AEIOUÁÉÍÓÚ]$/i.test(letter))E.cycleAccent(t.id);else E.select(t.id);
