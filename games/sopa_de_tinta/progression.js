@@ -13,7 +13,7 @@ const achievements=[
 ...C.districts.map((d,i)=>['distrito_'+d.id,['Maestro narrador','Taller completo','Verbo vivo','Vías sintácticas','Galería abierta','Sentido completo','Escritura impecable'][i],'Supera los cuatro niveles de '+d.name+'.','district_'+d.id,4])
 ].map(([id,name,desc,stat,target],i)=>({id,name,desc,stat,target,icon:i%6}));
 const cosmetics=[{id:'cafe',name:'Café de medianoche',cost:0,kind:'theme'},{id:'aurora',name:'Salón aurora',cost:100,kind:'theme'},{id:'biblioteca',name:'Biblioteca dorada',cost:180,kind:'theme'},{id:'menta',name:'Tinta de menta',cost:80,kind:'trace'},{id:'rosa',name:'Tinta de frambuesa',cost:80,kind:'trace'},{id:'oro',name:'Marco del lexicógrafo',cost:220,kind:'frame'},{id:'taza',name:'Taza de porcelana',cost:120,kind:'cup'}];
-function fresh(){return {version:1,updatedAt:0,xp:0,ink:0,hintTokens:8,achievements:{},adventure:{},mastery:{},records:{},daily:{},owned:['cafe'],equipped:{theme:'cafe'},stats:{},settings:{sound:true,music:false,reduced:false,contrast:false},streak:0,lastDay:'',missions:null};}
+function fresh(){return {version:1,updatedAt:0,xp:0,ink:0,hintTokens:8,achievements:{},adventure:{},mastery:{},discovered:{},records:{},daily:{},owned:['cafe'],equipped:{theme:'cafe'},stats:{},settings:{sound:true,music:false,reduced:false,contrast:false},streak:0,lastDay:'',missions:null};}
 function level(p){return 1+Math.floor(Math.sqrt(p.xp/100));}
 function add(p,key,n=1){p.stats[key]=(p.stats[key]||0)+n;}
 function day(){return new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Madrid'});}

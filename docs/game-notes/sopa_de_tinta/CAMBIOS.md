@@ -15,3 +15,11 @@ La petición está en `lenguarcade.integration.json`: incorporar catálogo, calc
 ## Límites de esta versión
 
 Arte original vectorial ligero. Siete tintes de distrito; tres fondos y cosméticos de trazo, marco y taza. Las fichas de ayuda no se compran con Tintas. No hay compras reales. No hay multijugador. El reloj se pausa al volver al café, por lo que cualquier futuro ranking competitivo deberá definir y validar su política de pausas. Las misiones se renuevan a diario; los desafíos semanales quedan para la integración posterior.
+
+## Revisión visual y glosario
+
+Cafetería ilustrada original integrada como fondo WebP ligero (~240 KB), título con volumen, botones de juego, HUD enmarcado, tablero con fichas y madera, pedidos numerados, distritos con emblemas y puntos flotantes al acertar. Se mantiene el motor, las recompensas y el protocolo del visor.
+
+Glosario desbloqueado únicamente al encontrar conceptos: término, definición, pista original, distrito y contador de encuentros. Búsqueda sin dependencia de tildes y filtro por distrito. Se guarda en `profile.discovered` con el mismo esquema y clave de guardado existentes. Los perfiles previos recuperan los aciertos sin ayuda y los conceptos encontrados de la partida conservada; el contador antiguo de ayudas también incluía palabras pendientes, por lo que no se usa para desbloquear falsos descubrimientos.
+
+Arte creado con imagegen: cafetería literaria de fantasía nocturna, lámparas ámbar, libros, tinta turquesa, ciudad violeta y taza con vapor mágico; sin personas ni interfaz en la ilustración. Recurso: `games/sopa_de_tinta/cafe.webp`.
