@@ -1,18 +1,31 @@
-# LEXOMA — Forja de Frases
+# FORJA
 
-Abre `index.html` en Chrome/Chromium para probar el taller independiente. Todos los recursos son locales; no requiere cuenta, instalación ni llamadas a una IA. La partida queda guardada en ese navegador. Para probar el bridge utiliza un servidor estático y el host de LenguArcade con los parámetros habituales `?lenguarcade=1&channel=…`.
+Roguelite de palabras de LenguArcade, servido desde `games/lexoma/` por compatibilidad con el `gameId` ya creado.
 
-La primera mano permite EL → MAGO → CORRE. Selecciona las fichas de cada palabra y pulsa **Forjar palabra**. **Finalizar frase** transforma la construcción en daño. Las flechas de las cartas permiten reordenar; × retira la carta. **Ver ideas** descubre formas que pueden construirse con tu mano. Los comodines abren un selector de letra; la ficha de tilde se coloca justo después de la vocal. Las palabras ambiguas permiten elegir análisis.
+## Bucle de juego
 
-**Cerrar ronda** renueva una mano bloqueada: pierdes las cartas actuales y gastas una ronda. Agotar las rondas del enemigo resta Integridad. La bolsa recicla fichas consumidas y descartadas. La tienda aparece tras el segundo encuentro; Morfax tiene tres fases.
+- Forma una palabra con las letras de la **Mano**.
+- Cada letra aporta valor y algunas fichas mejoradas añaden PUNTOS o MULTIS.
+- La jugada calcula **PUNTOS × MULTIS = TOTAL**.
+- Cada palabra consume 1 **Energía**.
+- Hay que alcanzar el objetivo antes de quedarse sin Energía.
+- Los **rerolls** sirven para cambiar hasta 3 letras o para renovar los 3 bonus ofrecidos entre rondas.
+- Al superar una ronda se elige 1 de 3 bonus permanentes para la run.
+- Normal tiene 10 rondas; hay Fácil, Difícil, Reto diario y continuación infinita.
 
-El léxico inicial tiene 1.300 formas. Una palabra desconocida puede existir en español: el taller informa que todavía no está en su banco. El análisis usa patrones sencillos y concordancia, no un analizador universal ni un juicio de coherencia semántica.
+## Contenido
+
+- 54 bonus.
+- Letras normales, mejoradas y especiales.
+- Comodines y exclamaciones especiales.
+- Diccionario español ampliado cargado desde el banco común de Word Play, con el léxico morfológico local como respaldo.
+- Cuando una palabra pertenece al léxico morfológico local, se muestra su categoría gramatical.
+
+## Integración
+
+Mantiene el protocolo común de LenguArcade: READY / INIT / CHECKPOINT / RESULT / CLOSE_READY, guardado por alumno y adaptador acumulativo de progreso.
 
 ## Verificación
 
-- `node games/lexoma/smoke-test.mjs` desde la raíz del repositorio.
-- `node games/lexoma/browser-test.mjs` con Playwright instalado. Puedes indicar un Chromium existente mediante `LEXOMA_CHROMIUM`.
-
-## Estado de integración
-
-MVP probado, preparado en rama `game/lexoma/mvp-forja`. Manifest y adaptador de progreso listos para la integración central. Todavía no se ha añadido al catálogo vivo ni publicado Apps Script/Supabase. Aplicar `lenguarcade.integration.json` desde la rama `integration/*`, siguiendo `docs/TRABAJO_CONCURRENTE_JUEGOS.md`. El adaptador evita sumar otra vez la XP de un checkpoint repetido y no premia forjar/retirar indefinidamente palabras sin finalizar construcciones.
+- `node games/lexoma/smoke-test.mjs`
+- `node games/lexoma/browser-test.mjs` con Playwright disponible.
