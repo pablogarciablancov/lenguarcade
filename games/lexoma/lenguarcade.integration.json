@@ -1,7 +1,7 @@
 {
   "$schema": "lenguarcade-integration-v1",
   "gameId": "lexoma",
-  "name": "LEXOMA — Forja de Frases",
+  "name": "FORJA",
   "status": "en pruebas",
   "integration": "embedded",
   "entry": "games/lexoma/index.html",
@@ -15,19 +15,19 @@
   "catalogEntry": {
     "id": "lexoma",
     "official": true,
-    "name": "LEXOMA",
-    "subtitle": "Forja de Frases",
-    "category": "Roguelite gramatical",
-    "competencies": ["morfología", "concordancia", "sintaxis", "vocabulario", "acentuación", "estrategia"],
+    "name": "FORJA",
+    "subtitle": "Roguelite de palabras",
+    "category": "Vocabulario y estrategia",
+    "competencies": ["vocabulario", "ortografía", "morfología", "estrategia"],
     "status": "en pruebas",
-    "color": "#e6be6e",
-    "icon": "✧",
+    "color": "#9dd8e7",
+    "icon": "F",
     "entry": "games/lexoma/",
-    "description": "Forja palabras, construye frases y domina la gramática para derrotar criaturas mediante combos lingüísticos.",
+    "description": "Forma palabras con una mano limitada, combina PUNTOS y MULTIS, administra energía y rerolls y construye una build de bonus distinta en cada run.",
     "banner": "https://pablogarciablancov.github.io/lenguarcade/games/lexoma/assets/banner.svg",
     "active": true,
     "integration": "embedded"
   },
   "progressAdapter": "games/lexoma/central-progress.adapter.js",
-  "notes": "Añadir catalogEntry a config/game-catalog.json con sortOrder libre y aumentar version; ejecutar catalog:sync y check. Incorporar buildLexomaCentralProgress en el runner y despachar antes de la fórmula genérica. No publicar con XP genérica: repetidos checkpoints no deben sumar otra vez todos los puntos. Protocolo READY/INIT, bootstrap, CHECKPOINT, RESULT y CLOSE_READY existente; ningún cambio de autenticación, migración de datos de alumnos ni infraestructura de cierre. Publicación central coordinada desde integration/* después de fusionar la PR del juego."
+  "notes": "Forja v2: loop de 10 rondas con PUNTOS × MULTIS, energía, rerolls de hasta 3 letras, 54 bonus, letras mejoradas/especiales, diccionario español ampliado y modo infinito. Mantiene READY/INIT/CHECKPOINT/RESULT/CLOSE_READY y guardado por alumno."
 }
