@@ -214,3 +214,119 @@ dialog h2{margin:0 0 12px;font-size:23px;font-weight:1000}
  .hand-zone{padding:8px 10px}.title-content{grid-template-columns:1fr}.career-card{display:none}.mode-buttons{grid-template-columns:1fr 1fr}
  .reward-panel{grid-template-columns:1fr}.reward-side{display:none}.reward-choices{grid-template-columns:1fr 1fr 1fr}
 }
+
+
+/* ===== FORJA · GAME FEEL PASS · 2026-10-04 ===== */
+.hand-tile{
+  transform-origin:50% 82%;
+}
+.word-tile.entering{
+  animation:forja-letter-enter .24s cubic-bezier(.2,1.55,.45,1) both;
+}
+.score-resolving .scoring-tile{
+  animation:forja-score-tile .62s cubic-bezier(.2,1.5,.35,1) both;
+  animation-delay:calc(var(--i) * 72ms);
+}
+.score-resolving .scoring-empty{opacity:.32}
+.score-resolving .effect-float span{
+  animation:forja-effect-pop .38s cubic-bezier(.2,1.5,.4,1) both;
+  animation-delay:calc(260ms + var(--i) * 70ms);
+}
+.score-resolving .points-card{
+  animation:forja-score-card .34s ease-out .28s both;
+}
+.score-resolving .multis-card{
+  animation:forja-score-card .34s ease-out .52s both;
+}
+.score-resolving .target-card{
+  animation:forja-total-card .44s cubic-bezier(.2,1.45,.35,1) .76s both;
+}
+.score-resolving .energy-card{
+  animation:forja-energy-tick .3s ease-out .16s both;
+}
+.mini-bonus.card-trigger{
+  animation:forja-card-trigger .46s cubic-bezier(.2,1.45,.3,1) both;
+  animation-delay:calc(430ms + var(--score-i) * 65ms);
+}
+.reward-choice{
+  transform-origin:50% 100%;
+  animation:forja-card-deal .38s cubic-bezier(.2,1.35,.35,1) both;
+}
+.reward-choice:nth-child(2){animation-delay:70ms}
+.reward-choice:nth-child(3){animation-delay:140ms}
+.reroll-card.active{
+  animation:forja-reroll-ready .8s ease-in-out infinite alternate;
+}
+.hand-tile.reroll-selected{
+  animation:forja-reroll-select .5s ease-in-out infinite alternate;
+}
+.replace-copy{font-size:12px;line-height:1.45;font-weight:800;color:#68556a}
+.replace-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
+.replace-grid button{
+  min-height:82px;text-align:left;border:3px solid var(--line);border-radius:8px;background:#f4d7e4;padding:9px;box-shadow:0 4px 0 #5d4b6225;
+}
+.replace-grid button:hover{transform:translateY(-2px)}
+.replace-grid strong{display:block;font-size:12px;font-weight:1000}
+.replace-grid small{display:block;font-size:8px;line-height:1.35;margin-top:4px;font-weight:800}
+
+@media (prefers-reduced-motion:no-preference){
+  .hand-tile:not(.reroll-selected){
+    animation:forja-idle-letter 3.1s ease-in-out infinite;
+    animation-delay:calc(var(--hand-i) * -190ms);
+  }
+}
+@keyframes forja-idle-letter{
+  0%,100%{translate:0 0;rotate:0deg}
+  50%{translate:0 -2px;rotate:.35deg}
+}
+@keyframes forja-letter-enter{
+  0%{opacity:.35;transform:translateY(34px) scale(.78) rotate(-7deg)}
+  72%{opacity:1;transform:translateY(-5px) scale(1.06) rotate(2deg)}
+  100%{transform:translateY(0) scale(1) rotate(0)}
+}
+@keyframes forja-score-tile{
+  0%{transform:translateY(0) scale(1);filter:brightness(1)}
+  38%{transform:translateY(-15px) scale(1.14) rotate(-2deg);filter:brightness(1.22)}
+  62%{transform:translateY(2px) scale(.98) rotate(1deg)}
+  100%{transform:none;filter:none}
+}
+@keyframes forja-effect-pop{
+  0%{opacity:0;transform:translateY(10px) scale(.72)}
+  65%{opacity:1;transform:translateY(-2px) scale(1.08)}
+  100%{opacity:1;transform:none}
+}
+@keyframes forja-score-card{
+  0%{transform:scale(1)}
+  45%{transform:scale(1.09) rotate(-1deg);filter:brightness(1.1)}
+  100%{transform:scale(1);filter:none}
+}
+@keyframes forja-total-card{
+  0%{transform:scale(.96)}
+  50%{transform:scale(1.1);filter:brightness(1.16)}
+  100%{transform:scale(1);filter:none}
+}
+@keyframes forja-energy-tick{
+  0%,100%{transform:none}
+  45%{transform:translateX(-4px) rotate(-2deg)}
+  70%{transform:translateX(3px) rotate(1deg)}
+}
+@keyframes forja-card-trigger{
+  0%{transform:scale(1)}
+  45%{transform:translateX(5px) scale(1.04);filter:brightness(1.16)}
+  100%{transform:none;filter:none}
+}
+@keyframes forja-card-deal{
+  from{opacity:0;transform:translateY(18px) rotate(-1deg) scale(.95)}
+  to{opacity:1;transform:none}
+}
+@keyframes forja-reroll-ready{
+  from{filter:brightness(1);transform:translateY(-2px)}
+  to{filter:brightness(1.08);transform:translateY(-4px)}
+}
+@keyframes forja-reroll-select{
+  from{transform:translateY(-9px) rotate(-2deg)}
+  to{transform:translateY(-12px) rotate(2deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  .hand-tile,.word-tile.entering,.scoring-tile,.effect-float span,.score-card,.mini-bonus,.reward-choice,.reroll-card,.reroll-selected{animation:none!important}
+}
