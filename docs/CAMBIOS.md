@@ -620,3 +620,9 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Portadas versionadas en lenguarcade-assets, conservando todas las rutas antiguas.
 - Catálogo canónico y paneles alumno/profesor apuntan a la misma colección; las vistas con caché antigua también usan las nuevas portadas.
 - Títulos en HTML para conservar legibilidad y accesibilidad; sin cambios de mecánicas, permisos ni guardados.
+
+## 2026-10-05 · Portadas diversas y sello LenguArcade
+- Mezcla de atmósfera y títulos legibles, con escenarios, paletas y composiciones diferentes para los dieciséis juegos.
+- Colección v3 versionada; v1 y v2 se conservan.
+- Distintivo común en tarjetas alumno/profesor usando el logo real, separado de la ilustración para mantenerlo idéntico y legible.
+- Sin cambios de partidas, permisos, progreso ni mecánicas.

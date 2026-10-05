@@ -83,11 +83,11 @@ if(!wordPlay ||
    wordPlay.status!=="listo" ||
    wordPlay.entry!=="games/word_play/" ||
    wordPlay.integration!=="embedded" ||
-   wordPlay.banner!=="word-play-collection-v1.webp"){
+   wordPlay.banner!=="word-play-collection-v3.webp"){
   throw new Error("Word Play debe estar integrado como juego oficial de producción con su portada versionada.");
 }
 for(const [label,html] of [["alumno",student],["profesor",teacher]]){
-  if(!html.includes("word_play:'word-play-collection-v1.webp'")){
+  if(!html.includes("word_play:'word-play-collection-v3.webp'")){
     throw new Error("Word Play debe usar su portada propia en el panel de "+label+".");
   }
 }
@@ -97,10 +97,10 @@ if(catalog.games.some(game=>/rim[oó]polis/i.test(game.id+" "+game.name)) ||
 }
 
 for(const expected of [
-  ["lexitrama","games/lexitrama/","lexitrama-collection-v1.webp"],
-  ["versopolis","games/versopolis/","versopolis-collection-v1.webp"],
-  ["lexaria","games/lexaria/","lexaria-collection-v1.webp"],
-  ["tower_defense","games/tower_defense/","tower-defense-collection-v1.webp"]
+  ["lexitrama","games/lexitrama/","lexitrama-collection-v3.webp"],
+  ["versopolis","games/versopolis/","versopolis-collection-v3.webp"],
+  ["lexaria","games/lexaria/","lexaria-collection-v3.webp"],
+  ["tower_defense","games/tower_defense/","tower-defense-collection-v3.webp"]
 ]){
   const game=catalog.games.find(row=>row.id===expected[0]);
   if(!game || game.entry!==expected[1] || game.banner!==expected[2] || game.integration!=="embedded" || game.active!==true || game.official!==true){
@@ -111,7 +111,7 @@ const tierras=catalog.games.find(row=>row.id==="tierras_de_tinta");
 if(!tierras ||
    tierras.entry!=="games/tierras_de_tinta/" ||
    !!tierras.externalUrl ||
-   tierras.banner!=="tierras-de-tinta-collection-v1.webp" ||
+   tierras.banner!=="tierras-de-tinta-collection-v3.webp" ||
    tierras.integration!=="embedded" ||
    tierras.active!==true ||
    tierras.official!==true){
@@ -123,13 +123,13 @@ if(!generatedApps.includes('gameId:"tierras_de_tinta"') ||
   throw new Error("Tierras de Tinta: el catálogo generado no apunta al juego nativo fuente 30.");
 }
 for(const [label,html] of [["alumno",student],["profesor",teacher]]){
-  for(const pair of [["versopolis","versopolis-collection-v1.webp"],["tierras_de_tinta","tierras-de-tinta-collection-v1.webp"],["lexaria","lexaria-collection-v1.webp"],["tower_defense","tower-defense-collection-v1.webp"]]){
+  for(const pair of [["versopolis","versopolis-collection-v3.webp"],["tierras_de_tinta","tierras-de-tinta-collection-v3.webp"],["lexaria","lexaria-collection-v3.webp"],["tower_defense","tower-defense-collection-v3.webp"]]){
     if(!html.includes(pair[0]+":'"+pair[1]+"'")) throw new Error("Falta portada de "+pair[0]+" en el panel de "+label+".");
   }
 }
 const covers=new Set();
 for(const game of official){
-  if(!game.banner.endsWith("-collection-v1.webp") || covers.has(game.banner)) throw new Error("Portada ausente o repetida: "+game.id);
+  if(!game.banner.endsWith("-collection-v3.webp") || covers.has(game.banner)) throw new Error("Portada ausente o repetida: "+game.id);
   covers.add(game.banner);
 }
 for(const [label,html] of [["alumno",student],["profesor",teacher]]){

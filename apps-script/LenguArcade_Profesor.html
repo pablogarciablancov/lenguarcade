@@ -177,6 +177,14 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
 @media(max-width:1300px){.gameControlRow{grid-template-columns:minmax(0,1fr) auto}.gameControlState{grid-column:1}.gameControlActions{grid-column:2;grid-row:1 / 3}}
 @media(max-width:980px){.gameControlActions{grid-column:auto;grid-row:auto}.gameControlHead{align-items:stretch;flex-direction:column}.gameControlScope{width:100%;flex-basis:auto}.gameControlRow{grid-template-columns:1fr}.gameControlActions{justify-content:flex-start}}
 </style>
+<style id="la-cover-brand-style">
+.laCoverBrand{display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border:1px solid rgba(115,185,255,.5);border-radius:7px;background:#091329;color:#edf6ff;font:800 10px/1.2 Roboto,Inter,system-ui,sans-serif;white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.laCoverBrand>img{position:static;inset:auto;width:17px;height:17px;object-fit:contain;border-radius:4px}
+.gameCoverHeader{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;position:relative;z-index:1}
+.gameCoverHeader>.chip{align-self:auto}
+.gameControlArt>.laCoverBrand{position:absolute;top:3px;left:3px;z-index:2;font-size:0;gap:0;padding:2px;border-radius:5px}
+.gameControlArt>.laCoverBrand>img{position:static;inset:auto;width:12px;height:12px;object-fit:contain}
+</style>
 </head>
 <body>
   <div class="app">
@@ -379,7 +387,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
     const SUPABASE_KEY='sb_publishable_zScSYh0tbpXLcY_5iyzsqQ_wepkdqKe';
     const SESSION_KEY='LA_TEACHER_SUPABASE_SESSION';
     const ASSET_BASE='https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/games/';
-    const BANNERS={battlegrafia:'battlegrafia-collection-v1.webp',maniacgrafia:'maniacgrafia-collection-v1.webp',narratoria:'narratoria-collection-v1.webp',versopolis:'versopolis-collection-v1.webp',scrabble:'scrabble-collection-v1.webp',conjuga_apuesta:'conjuga-apuesta-collection-v1.webp',verb_battle:'verb-battle-collection-v1.webp',rayuela:'rayuela-collection-v1.webp',entre_lineas:'entre-lineas-collection-v1.webp',tower_defense:'tower-defense-collection-v1.webp',word_play:'word-play-collection-v1.webp',tierras_de_tinta:'tierras-de-tinta-collection-v1.webp',lexaria:'lexaria-collection-v1.webp',lexitrama:'lexitrama-collection-v1.webp',lexoma:'lexoma-collection-v1.webp',sopa_de_tinta:'sopa-de-tinta-collection-v1.webp'};
+    const BANNERS={battlegrafia:'battlegrafia-collection-v3.webp',maniacgrafia:'maniacgrafia-collection-v3.webp',narratoria:'narratoria-collection-v3.webp',versopolis:'versopolis-collection-v3.webp',scrabble:'scrabble-collection-v3.webp',conjuga_apuesta:'conjuga-apuesta-collection-v3.webp',verb_battle:'verb-battle-collection-v3.webp',rayuela:'rayuela-collection-v3.webp',entre_lineas:'entre-lineas-collection-v3.webp',tower_defense:'tower-defense-collection-v3.webp',word_play:'word-play-collection-v3.webp',tierras_de_tinta:'tierras-de-tinta-collection-v3.webp',lexaria:'lexaria-collection-v3.webp',lexitrama:'lexitrama-collection-v3.webp',lexoma:'lexoma-collection-v3.webp',sopa_de_tinta:'sopa-de-tinta-collection-v3.webp'};
     const $=id=>document.getElementById(id);
     let session=null,currentTeacher=null,busy=false;
     let rosterState={classes:[],students:[],summary:{}};
@@ -388,7 +396,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
 
     function esc(value){return String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));}
     function teacherGameIcon(id,icon){return id==='lexitrama'?'🧭':(icon||'🎮');}
-    function bannerUrl(id,banner){if(BANNERS[id])return ASSET_BASE+BANNERS[id];const direct=String(banner||'');if(/^https:\/\//i.test(direct))return direct;return ASSET_BASE+((/\.(?:png|jpe?g|webp|svg)$/i.test(direct)?direct:'')||'maniacgrafia-collection-v1.webp');}
+    function bannerUrl(id,banner){if(BANNERS[id])return ASSET_BASE+BANNERS[id];const direct=String(banner||'');if(/^https:\/\//i.test(direct))return direct;return ASSET_BASE+((/\.(?:png|jpe?g|webp|svg)$/i.test(direct)?direct:'')||'maniacgrafia-collection-v3.webp');}
     function showLoader(text){$('loaderText').textContent=text||'Cargando...';$('loader').classList.add('open');}
     function hideLoader(){$('loader').classList.remove('open');}
     function setStatus(text){$('status').textContent=text;$('loginStatus').textContent=text;}
@@ -493,7 +501,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
         const icon=teacherGameIcon(game.gameId,game.icono);
         const image=/^https:\/\//i.test(metadata.banner||'')||/\.(?:png|jpe?g|webp|svg)$/i.test(metadata.banner||'')?metadata.banner:BANNERS[game.gameId];
         const art=image?`<img src="${esc(bannerUrl(game.gameId,image))}" alt="" loading="lazy">`:'';
-        return `<div class="gameControlRow"><div class="gameControlInfo"><span class="gameControlArt"><span aria-hidden="true">${esc(icon)}</span>${art}</span><div><strong><span class="gameIcon" aria-hidden="true">${esc(icon)}</span> ${esc(game.nombre)}</strong><small>${game.open} abiertos · ${game.closed} cerrados</small><small>${Number(usage.sessions||0)} sesiones registradas</small></div></div><div class="gameControlState"><div class="gameControlMeter"><span style="width:${percentage}%"></span></div><span class="gameControlPill ${esc(game.state)}">${esc(gameAccessStateLabel(game.state))}</span></div><div class="gameControlActions"><button type="button" class="ghost" data-bulk-game-open="${esc(game.gameId)}">Abrir</button><button type="button" class="dangerAction" data-bulk-game-close="${esc(game.gameId)}">Cerrar</button><button type="button" data-bulk-game-only="${esc(game.gameId)}" data-game-name="${esc(game.nombre)}">Solo este</button></div></div>`;
+        return `<div class="gameControlRow"><div class="gameControlInfo"><span class="gameControlArt"><span aria-hidden="true">${esc(icon)}</span>${art}<span class="laCoverBrand" aria-hidden="true"><img src="https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-logo.png" alt="" loading="lazy">LenguArcade</span></span><div><strong><span class="gameIcon" aria-hidden="true">${esc(icon)}</span> ${esc(game.nombre)}</strong><small>${game.open} abiertos · ${game.closed} cerrados</small><small>${Number(usage.sessions||0)} sesiones registradas</small></div></div><div class="gameControlState"><div class="gameControlMeter"><span style="width:${percentage}%"></span></div><span class="gameControlPill ${esc(game.state)}">${esc(gameAccessStateLabel(game.state))}</span></div><div class="gameControlActions"><button type="button" class="ghost" data-bulk-game-open="${esc(game.gameId)}">Abrir</button><button type="button" class="dangerAction" data-bulk-game-close="${esc(game.gameId)}">Cerrar</button><button type="button" data-bulk-game-only="${esc(game.gameId)}" data-game-name="${esc(game.nombre)}">Solo este</button></div></div>`;
       }).join('')||'<div class="sub">No hay juegos disponibles.</div>';
       $('gameAccessControlList').querySelectorAll('img').forEach(img=>{img.addEventListener('error',()=>{img.style.visibility='hidden';});img.addEventListener('load',()=>{img.style.visibility='visible';});});
       document.querySelectorAll('[data-bulk-game-open]').forEach(button=>button.onclick=()=>changeBulkGameAccess({gameId:button.dataset.bulkGameOpen,enabled:true}));
@@ -2856,7 +2864,7 @@ body.light .teacherMonitorTable th{background:#fff}
 
 <style>
 .gameControlArt{position:relative;flex:0 0 96px;height:60px;display:grid;place-items:center;overflow:hidden;border-radius:10px;background:radial-gradient(circle at 20% 10%,rgba(0,212,255,.4),transparent 65%),linear-gradient(135deg,#26234d,#121a33);border:1px solid var(--line)}
-.gameControlArt>span{font-size:30px;color:#fff}.gameControlArt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.gameControlInfo>div{min-width:0}.gameControlInfo .gameIcon{font-size:16px}
+.gameControlArt>span{font-size:30px;color:#fff}.gameControlArt>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.gameControlInfo>div{min-width:0}.gameControlInfo .gameIcon{font-size:16px}
 .teacherPickerNative{display:none}.teacherPicker{position:relative;min-width:0;width:100%}.teacherPickerButton{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin:0;text-align:left;padding:12px 13px;background:var(--surface);color:var(--text);border:1px solid var(--line);box-shadow:none;font-weight:600}.teacherPickerButton span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.teacherPickerButton:focus-visible,.teacherPickerOption:focus-visible{outline:2px solid var(--secondary);outline-offset:2px}
 .teacherPickerMenu{position:fixed;z-index:70;overflow:auto;padding:6px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}.teacherPickerOption{display:block;width:100%;margin:0;padding:10px 12px;background:transparent;box-shadow:none;color:var(--text);font-weight:500;text-align:left;border-radius:9px;overflow-wrap:anywhere}.teacherPickerOption:hover,.teacherPickerOption[aria-selected="true"]{background:rgba(124,77,255,.22)}
 @media(max-width:600px){.gameControlArt{flex-basis:72px;height:54px}.gameControlInfo strong{font-size:14px}}
