@@ -990,6 +990,8 @@ Deno.serve(async (request) => {
       ].filter(item => item.at && Number.isFinite(Date.parse(item.at)))
         .sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
       const latestActivity = activityCandidates.pop() || { at:"", gameId:"", eventType:"" };
+      const latestGameActivity = activityCandidates.slice().reverse().find(item => item.gameId) ||
+        (latestActivity.gameId ? latestActivity : { at:"", gameId:"", eventType:"" });
       const lastActivity = latestActivity.at;
       return {
         studentId:profile.id,
@@ -1006,8 +1008,8 @@ Deno.serve(async (request) => {
         sessions:rows.reduce((sum, row) => sum + Number(row.sessions || 0), 0),
         gamesPlayed:rows.filter(row => Number(row.sessions || 0) > 0).length,
         lastActivity,
-        lastGameId:latestActivity.gameId,
-        lastGameName:latestActivity.gameId ? (gameNameById.get(latestActivity.gameId) || latestActivity.gameId) : "",
+        lastGameId:latestGameActivity.gameId,
+        lastGameName:latestGameActivity.gameId ? (gameNameById.get(latestGameActivity.gameId) || latestGameActivity.gameId) : "",
         lastEventType:latestActivity.eventType,
         grade:gradeFor(rows,assessedMissions(missionsResult.data||[],rows,(eventsResult.data||[]).filter(e=>e.profile_id===profile.id),profile.id,classroomIds).filter(m=>!gameId||!m.gameId||m.gameId===gameId)),
       };
