@@ -41,6 +41,10 @@ Mantiene el protocolo común de LenguArcade: READY / INIT / CHECKPOINT / RESULT 
 
 ## Diccionario y portada (2026-10-05)
 
-Forja combina el diccionario compartido de frecuencia con `dictionary-es-extra.txt`: 54,492 entradas minúsculas de RLA-ES/Hunspell ya incluido en el repositorio (sin nombres propios ni expansión de sufijos). Licencia en `assets/RLA_ES_LICENSE.md`; regeneración: extraer la entrada antes de `/` de `../word_play/hunspell/es_ES.dic`, conservar solo letras españolas y minúsculas, ordenar y quitar duplicados. No convertir flags Hunspell en palabras ni generar conjugaciones indiscriminadamente. `talar` también tiene análisis verbal local y conjugaciones documentadas.
+Forja combina el diccionario compartido de frecuencia con `dictionary-es-extra.txt`: 659.202 formas de RLA-ES/Hunspell, incluidas conjugaciones regulares e irregulares, género, número y derivaciones autorizadas por sus flags. Se excluyen entradas con mayúsculas, siglas y puntuación; no se acepta cualquier unión de raíz y sufijo. Licencia en `assets/RLA_ES_LICENSE.md`.
+
+Regeneración reproducible: `python games/lexoma/build-dictionary.py`. Lee exclusivamente los archivos `../word_play/hunspell/es_ES.dic` y `.aff`; aplica condiciones, eliminación/adición, prefijos cruzados y continuaciones de sufijos. No modifica Word Play. Verificación independiente opcional con libhunspell: añadir `--verify-native`. Las formas ya están expandidas para que cada jugada conserve lookup O(1), sin un conjugador en tiempo de ejecución. La caché del banco y los scripts está versionada.
+
+Pruebas: `node games/lexoma/dictionary-test.mjs`, `node games/lexoma/smoke-test.mjs` y `node games/lexoma/integration-browser-test.cjs` (Playwright). Incluyen familias de ceñir, construir, hacer, tener, decir e ir, derivados/plurales, tildes y Ñ, rechazo de formas inventadas, y jugar CIÑO/guardar/restaurar en el runner. El análisis local de ceñir distingue ciño (presente) y ciñó (pretérito). La ampliación de aceptación no pretende etiquetar morfológicamente todas las formas ni elimina las ambigüedades al jugar sin tildes.
 
 Los alias sin acento preservan Ñ y Ü; las cartas reciben el análisis de la forma canónica. La portada del catálogo y del manifest es `assets/forja-cover-v1.webp`.

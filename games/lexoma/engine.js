@@ -138,7 +138,7 @@ function rerollLetters(){
 async function loadDictionary(onStatus){
  dictionaryReady=false;onStatus?.('Cargando diccionario…');
  // Carga independiente: un fallo de la lista compartida no anula el banco de Forja.
- const sources=await Promise.allSettled(['../word_play/dictionary-es-50k.txt','dictionary-es-extra.txt?v=20261005'].map(async url=>{
+ const sources=await Promise.allSettled(['../word_play/dictionary-es-50k.txt','dictionary-es-extra.txt?v=20261005-inflections'].map(async url=>{
   const res=await fetch(url,{cache:'force-cache'});if(!res.ok)throw new Error('HTTP '+res.status);return res.text();
  }));
  dictionary=new Set([...L.lexicon.keys()].map(key));

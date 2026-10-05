@@ -34,10 +34,10 @@ const server=http.createServer((req,res)=>{if(req.url==='/fixture'){res.setHeade
  if(process.env.LEXOMA_QA_DIR)await page.screenshot({path:process.env.LEXOMA_QA_DIR+'/forja-catalog.png'});
  async function open(){await page.click('#play');const f=page.frameLocator('#gameRunnerFrame');await f.locator('#dictionaryStatus.ready').waitFor();return f;}
  let f=await open();await f.locator('[data-mode=normal]').click();await f.locator('#leaveShopBtn').click();
- await f.locator('body').evaluate(()=>{const E=LexomaEngine;E.run.hand=[...'TALAR'].map((char,i)=>({id:100+i,char,style:'normal'}));E.run.tileId=200;E.run.target=999;window.dispatchEvent(new Event('lexoma:change'));});
- for(let i=0;i<5;i++)await f.locator(`[data-tile="${100+i}"]`).click();
+ await f.locator('body').evaluate(()=>{const E=LexomaEngine;E.run.hand=[...'CIÑO'].map((char,i)=>({id:100+i,char,style:'normal'}));E.run.tileId=200;E.run.target=999;window.dispatchEvent(new Event('lexoma:change'));});
+ for(let i=0;i<4;i++)await f.locator(`[data-tile="${100+i}"]`).click();
  assert(await f.locator('#playBtn').isEnabled());await f.locator('#playBtn').click();await f.locator('body').evaluate(()=>LexomaBridge.checkpoint('test'));
- await page.waitForFunction(()=>saved?.run?.words?.includes('talar'));
+ await page.waitForFunction(()=>saved?.run?.words?.includes('ciño'));
  const xp=await page.evaluate(()=>currentDashboard.games[0].progress.xp);assert(xp>0);
  await f.locator('body').evaluate(()=>LexomaBridge.checkpoint('repeat'));await page.waitForTimeout(150);assert.equal(await page.evaluate(()=>currentDashboard.games[0].progress.xp),xp);
  for(const [width,height] of [[1366,768],[1440,900],[1920,1080]]){
@@ -46,8 +46,8 @@ const server=http.createServer((req,res)=>{if(req.url==='/fixture'){res.setHeade
  await page.setViewportSize({width:1366,height:768});
  if(process.env.LEXOMA_QA_DIR)await page.screenshot({path:process.env.LEXOMA_QA_DIR+'/forja-embedded.png'});
  await page.click('#gameRunnerClose');await page.waitForFunction(()=>activeGameRunner===null);
- await page.evaluate(()=>localStorage.clear());f=await open();await f.locator('#continueBtn').click();assert.equal(await f.locator('body').evaluate(()=>LexomaEngine.run.words.at(-1)),'talar');
+ await page.evaluate(()=>localStorage.clear());f=await open();await f.locator('#continueBtn').click();assert.equal(await f.locator('body').evaluate(()=>LexomaEngine.run.words.at(-1)),'ciño');
  await page.click('#gameRunnerClose');await page.waitForFunction(()=>activeGameRunner===null);
- assert.deepEqual(errors,[]);console.log('Integración OK: portada real, runner, TALAR, XP idempotente, salida y restauración central sin caché, responsive.');
+ assert.deepEqual(errors,[]);console.log('Integración OK: portada real, runner, CIÑO, XP idempotente, salida y restauración central sin caché, responsive.');
  await browser.close();server.close();
 })().catch(e=>{console.error(e);server.close();process.exit(1)});

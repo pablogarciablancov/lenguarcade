@@ -37,6 +37,11 @@ for(const lemma of regular.split(' ')){
  ['é','ás','á','emos','éis','án'].forEach((suffix,i)=>add(lemma+suffix,'verb',{lemma,finite:true,tense:'futuro',person:i%3+1,number:i<3?'s':'p'}));
 }
 for(const [lemma,tenses] of Object.entries({ser:{presente:'soy eres es somos sois son',imperfecto:'era eras era éramos erais eran',pretérito:'fui fuiste fue fuimos fuisteis fueron'},estar:{presente:'estoy estás está estamos estáis están',imperfecto:'estaba estabas estaba estábamos estabais estaban'},tener:{presente:'tengo tienes tiene tenemos tenéis tienen'},ir:{presente:'voy vas va vamos vais van',pretérito:'fui fuiste fue fuimos fuisteis fueron'},hacer:{presente:'hago haces hace hacemos hacéis hacen'}}))for(const [tense,words] of Object.entries(tenses))words.split(' ').forEach((w,i)=>add(w,'verb',{lemma,finite:true,tense,person:i%3+1,number:i<3?'s':'p',copular:['ser','estar'].includes(lemma)}));
+// Formas documentadas de ceñir: no deducir irregularidades a partir del infinitivo.
+add('ceñir','verb',{lemma:'ceñir',finite:false});
+for(const [tense,words] of Object.entries({presente:'ciño ciñes ciñe ceñimos ceñís ciñen',imperfecto:'ceñía ceñías ceñía ceñíamos ceñíais ceñían',pretérito:'ceñí ceñiste ciñó ceñimos ceñisteis ciñeron'}))words.split(' ').forEach((w,i)=>add(w,'verb',{lemma:'ceñir',finite:true,tense,person:i%3+1,number:i<3?'s':'p'}));
+add('ciñendo','verb',{lemma:'ceñir',finite:false,form:'gerundio'});
+add('ceñido','verb',{lemma:'ceñir',finite:false,form:'participio'});
 const lookup=word=>lexicon.get(String(word).trim().toLowerCase().normalize('NFC'))||[];
 function compatible(a,b){if(a.category==='det'&&b.stressedA&&b.number==='s'){if(['el','un'].includes(a.word))return a.number===b.number;if(['la','una'].includes(a.word))return false;}return ['gender','number'].every(k=>!a[k]||!b[k]||a[k]==='any'||b[k]==='any'||a[k]===b[k]);}
 function analyze(words){

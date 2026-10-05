@@ -15,6 +15,14 @@ async function engine(failed=[]){
 }
 const {E,status}=await engine();
 for(const w of ['talar','TALAR','saltar','cantar','mesa','perro','casa','jardín','jardin','rápido','rapido','jardi\u0301n','talaba','talaremos','abedul','remolacha','destornillador','brújula'])assert.ok(E.validate(w).ok,w);
+for(const word of ['ciño','CIÑO','ciñes','ciñe','ceñimos','ciñó','ciñeron','ciñendo','ceñido','ceñiré','ceñiríamos','ciñáis','construyo','construyes','construyó','construyeron','construyendo','construido','hice','hicieron','haríamos','tuve','tuvieron','tendré','dije','dijeron','voy','fui','fueron','panadero','panaderas','librería','librerías','inútil','inútiles','rápidas','árboles'])assert.ok(E.validate(word).ok,word);
+assert.equal(E.validate('ciño').analysis.lemma,'ceñir');
+assert.equal(E.validate('ciño').analysis.person,1);
+assert.equal(E.validate('ciño').analysis.tense,'presente');
+assert.equal(E.validate('ciñó').analysis.tense,'pretérito');
+assert.equal(E.validate('cino').ok,false,'No confundir Ñ y N');
+assert.equal(E.validate('ciñeran').ok,true);
+assert.equal(E.validate('hacieron').ok,false,'No inventar pretéritos regulares');
 assert.equal(E.validate('talar').analysis.category,'verb');
 assert.equal(E.validate('jardin').word,'jardín');
 assert.equal(E.validate('rapido').analysis.category,'adj');
@@ -24,4 +32,4 @@ E.start('normal',42);E.leaveShop();E.run.hand=[...'TALAR'].map((char,i)=>({id:10
 assert.ok(E.play().ok,'TALAR se juega y puntúa');assert.equal(E.run.words.at(-1),'talar');assert.ok(E.restore(E.snapshot()));
 const fallback=await engine(['base']);assert.ok(fallback.E.validate('talar').ok);assert.ok(fallback.E.validate('abedul').ok);
 const local=await engine(['base','extra']);assert.ok(local.E.validate('talar').ok);assert.equal(local.E.validate('talar').analysis.category,'verb');
-console.log('Diccionario OK:',status,'· palabras, tildes, Ñ, juego, guardado y fallbacks.');
+console.log('Diccionario flexionado OK:',status,'· palabras, tildes, Ñ, juego, guardado y fallbacks.');
