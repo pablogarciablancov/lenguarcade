@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 14,
+  "version": 15,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -338,6 +338,30 @@
       "active": true,
       "integration": "embedded",
       "sortOrder": 15
+    },
+    {
+      "id": "sopa_de_tinta",
+      "official": true,
+      "name": "Sopa de Tinta",
+      "subtitle": "El café de los conceptos",
+      "category": "Conceptos de Lengua",
+      "competencies": [
+        "morfología",
+        "sintaxis",
+        "literatura",
+        "semántica",
+        "ortografía",
+        "verbos"
+      ],
+      "color": "#90e8d7",
+      "description": "Deduce conceptos a partir de pistas y encuéntralos en un café de letras con siete distritos, Hora Punta, combos y logros.",
+      "status": "en pruebas",
+      "sortOrder": 16,
+      "icon": "☕",
+      "entry": "games/sopa_de_tinta/",
+      "banner": "https://pablogarciablancov.github.io/lenguarcade/games/sopa_de_tinta/cafe.webp",
+      "active": true,
+      "integration": "embedded"
     }
   ]
 }

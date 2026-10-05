@@ -36,3 +36,12 @@ Comprobado en Chromium: 1366×768, 1440×900, 1920×1080, 1366×600 y 390×844; 
 Acceso a Aventura comprobado con clics reales desde perfil nuevo y pedido pendiente: siete distritos jugables, continuar partida, sustituir pedido con confirmación y desbloquear Pedido 2 tras completar Pedido 1. Aventura y Continuar accesibles en los cinco tamaños anteriores, sin errores JavaScript.
 
 Regresión específica: `node games/sopa_de_tinta/adventure-ui-test.cjs` con Playwright instalado; opcional `TINTA_CHROMIUM_PATH` para un Chromium local. Comprueba 42 entradas reales, los siete distritos en 1366×768, 1440×900, 1920×1080, 1366×600, 390×844 y 375×667. Verifica tamaño táctil, botón dentro de su tarjeta y hit-test sin elementos que intercepten el clic, sustitución confirmada de pedido pendiente e inicio de partida. Captura móvil inspeccionada; sin errores JS. El HTML autónomo pasa la misma comprobación usando `TINTA_TEST_URL=file:///ruta/Sopa_de_Tinta_Prueba.html`.
+
+## Integración · 5 de octubre de 2026
+
+- `npm run check`: pasa el catálogo de 16 juegos y las comprobaciones del núcleo.
+- `node games/sopa_de_tinta/smoke-test.mjs`: 640 tableros; determinismo y recompensas internas idempotentes.
+- `TINTA_CHROMIUM_PATH=/ruta/chromium node games/sopa_de_tinta/adventure-ui-test.cjs`: 42 clics reales en siete distritos y seis tamaños, incluidos móviles.
+- `TINTA_CHROMIUM_PATH=/ruta/chromium node games/sopa_de_tinta/integration-browser-test.cjs`: tarjeta con portada decodificada, runner real, logros y glosario en checkpoints, cierre confirmado, restauración central sin caché local y progreso de aventura 1/28.
+- `scripts/check-xp-integrity.mjs`: resultado tras checkpoint sin doble XP, reinicio de totales sin recompensa, relax sin completar campaña, límites de 28 etapas y paridad Supabase/Apps Script.
+- La prueba de runner usa un servidor simulado de persistencia; no sustituye la comprobación final de `/exec` tras publicar Apps Script.

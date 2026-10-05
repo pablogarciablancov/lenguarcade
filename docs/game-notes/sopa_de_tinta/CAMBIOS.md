@@ -31,3 +31,12 @@ El botón principal mantiene siempre «Jugar Aventura», incluso con un pedido p
 ## Botones explícitos dentro de los distritos
 
 Cada tarjeta muestra antes de los niveles un botón grande «Jugar · Pedido N» para el siguiente pedido pendiente (o Pedido 1 si ya se completó el distrito). Los cuatro pedidos individuales siguen disponibles según la progresión. La estructura evita recortes de controles y utiliza una columna en pantallas estrechas, con scroll interno del mapa. No cambia guardados, banco ni recompensas.
+
+## Integración en LenguArcade · 5 de octubre de 2026
+
+- Alta como juego oficial número 16; derivados Apps Script y SQL generados desde el catálogo canónico.
+- Portada con la ilustración del café, título y colores del juego.
+- Aventura, glosario, pedido en curso y logros guardados por alumno mediante el bridge existente.
+- Progreso central basado en los 28 niveles de aventura. Las partidas rápidas no completan la campaña.
+- XP de plataforma calculados desde nuevos conceptos: 6 XP por acierto; una pluma por cada 8 aciertos acumulados, con los límites existentes. La XP interna del café conserva su propia economía.
+- Checkpoints y resultados repetidos no duplican recompensas; cálculo equivalente en Supabase y Apps Script.

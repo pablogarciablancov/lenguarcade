@@ -71,6 +71,16 @@ function calculateAuthoritativeProgress_(gameId, payload, old) {
     };
   };
 
+  if (gameId === 'sopa_de_tinta') {
+    const stats=save.profile && save.profile.stats || {}, prior=previousSave.profile && previousSave.profile.stats || {};
+    const dc=Math.min(checkpoint?24:60,Math.max(0,n(stats.words)-n(prior.words)));
+    const de=Math.min(checkpoint?24:60,Math.max(0,n(stats.errors)-n(prior.errors)));
+    const adventure=save.profile && save.profile.adventure || {};
+    const levels=['narrativa','morfologia','verbos','sintaxis','literatura','semantica','ortografia'].reduce((total,id)=>total+[0,1,2,3].filter(stage=>n((adventure[id]||{})[stage])>0).length,0);
+    const feathers=Math.min(checkpoint?8:16,Math.max(0,Math.floor((n(old.successes)+dc)/8)-Math.floor(n(old.successes)/8)));
+    return finish(dc+de,dc,de,levels/28*100,Math.min(checkpoint?150:320,dc*6),feathers);
+  }
+
   if (gameId === 'battlegrafia') {
     const diary = Array.isArray(save.diary) ? save.diary : [];
     const previousDiary = Array.isArray(previousSave.diary) ? previousSave.diary : [];
