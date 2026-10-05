@@ -1,3 +1,11 @@
+## 2026-10-05 · Panel del profesor · Fase 1
+
+- La pantalla inicial pasa a ser «Hoy»: selector de clase, KPIs de clase, taller activo, control rápido de juegos y monitor de actividad reciente.
+- El control rápido reutiliza el sistema existente de accesos por clase («solo este», abrir todos, cerrar todos); no crea una capa paralela ni modifica progreso.
+- El monitor se refresca automáticamente cada 12 s solo mientras el profesor está en «Hoy» y la pestaña está visible. «Activo ahora» significa actividad registrada en los últimos 5 minutos; no es un rastreo de presencia exacta.
+- teacher-dashboard expone último juego/actividad del alumno y los juegos de cada taller publicado para poder presentar el estado de clase sin consultas adicionales desde el navegador.
+- Se conservan autenticación, Classroom, misiones, gestión de alumnado, Talleres, guardado, catálogo y juegos existentes.
+
 ## 2026-10-05 · FORJA: diccionario y catálogo
 
 - Banco propio `games/lexoma/dictionary-es-extra.txt` (54.492 entradas RLA-ES) y análisis de talar, sin modificar Word Play. Diccionario combinado: 90.903 palabras, carga independiente de las dos fuentes y alias de tildes conservando Ñ/Ü.

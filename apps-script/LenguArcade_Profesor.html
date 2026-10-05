@@ -2581,5 +2581,273 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
 })();
 </script>
 
+
+<style id="la-teacher-command-center-style">
+/* Fase 1 · Centro de mando del profesor */
+#resumen{padding:22px}
+#resumen>h2,#resumen>.kpis{display:none}
+#resumen>.filters{margin:0 0 16px;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025);align-items:flex-end}
+#resumen>.filters .field:nth-of-type(2){display:none}
+#resumen>.filters .field:first-child{min-width:min(320px,100%)}
+#resumen>.filters label{font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+#resumen>#teacherCommandCenter{margin-top:0}
+.teacherCommandCenter{display:grid;gap:14px}
+.teacherCommandHead{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:2px 2px 4px}
+.teacherCommandHead h2{font-size:clamp(25px,3vw,38px);margin:2px 0 4px;letter-spacing:-.035em}
+.teacherCommandEyebrow{font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.teacherCommandLive{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;padding:8px 11px;border-radius:999px;border:1px solid rgba(55,214,155,.28);background:rgba(55,214,155,.08);font-size:12px;font-weight:800}
+.teacherCommandLive:before{content:"";width:8px;height:8px;border-radius:50%;background:#37d69b;box-shadow:0 0 0 5px rgba(55,214,155,.10)}
+.teacherTodayKpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.teacherTodayKpi{padding:14px 15px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018))}
+.teacherTodayKpi span{display:block;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.teacherTodayKpi strong{display:block;margin-top:4px;font-size:26px;line-height:1}
+.teacherTodayKpi small{display:block;margin-top:6px;color:var(--muted);font-size:11px}
+.teacherCommandGrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:12px}
+.teacherCommandPanel{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025);padding:16px}
+.teacherCommandPanel h3{margin:0 0 4px;font-size:17px}
+.teacherCommandPanelHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.teacherSessionBadge{padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900;background:rgba(55,214,155,.10);border:1px solid rgba(55,214,155,.24)}
+.teacherSessionBadge.off{background:rgba(255,255,255,.04);border-color:var(--line);color:var(--muted)}
+.teacherSessionTitle{font-size:20px;font-weight:900;margin:3px 0 8px}
+.teacherSessionGames{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 12px}
+.teacherSessionGame{font-size:11px;font-weight:800;padding:6px 8px;border-radius:999px;border:1px solid var(--line);background:rgba(124,77,255,.08)}
+.teacherSessionProgress{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin:10px 0}
+.teacherSessionProgressBar{height:9px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+.teacherSessionProgressBar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#00d4ff,#7c4dff);width:0}
+.teacherCommandActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.teacherQuickControl{display:grid;gap:9px}
+.teacherQuickControl label{font-size:12px;font-weight:800;color:var(--muted)}
+.teacherQuickControl select{width:100%}
+.teacherQuickDanger{border-color:rgba(255,92,138,.35)!important;color:#ff8bac!important}
+.teacherMonitorPanel{padding:0;overflow:hidden}
+.teacherMonitorHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:16px;border-bottom:1px solid var(--line)}
+.teacherMonitorLegend{font-size:11px;color:var(--muted);text-align:right}
+.teacherMonitorWrap{overflow:auto;max-height:430px}
+.teacherMonitorTable{width:100%;border-collapse:collapse}
+.teacherMonitorTable th{position:sticky;top:0;z-index:2;background:var(--panel,#111629);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.teacherMonitorTable th,.teacherMonitorTable td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.teacherMonitorTable tbody tr{cursor:pointer;transition:background .15s ease}
+.teacherMonitorTable tbody tr:hover{background:rgba(124,77,255,.07)}
+.teacherPresence{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:900;white-space:nowrap}
+.teacherPresence:before{content:"";width:8px;height:8px;border-radius:50%;background:#6d7489}
+.teacherPresence.live:before{background:#37d69b;box-shadow:0 0 0 4px rgba(55,214,155,.10)}
+.teacherPresence.recent:before{background:#f7bd48}
+.teacherStudentName{font-weight:850}
+.teacherStudentMeta{font-size:11px;color:var(--muted);margin-top:2px}
+.teacherMonitorGame{font-weight:750}
+.teacherMonitorMetric{font-variant-numeric:tabular-nums;font-weight:800}
+.teacherAttention{display:inline-flex;padding:4px 7px;border-radius:999px;background:rgba(247,189,72,.10);border:1px solid rgba(247,189,72,.24);font-size:10px;font-weight:900}
+.teacherMonitorEmpty{padding:28px;text-align:center;color:var(--muted)}
+body.light .teacherMonitorTable th{background:#fff}
+@media(max-width:980px){
+  .teacherTodayKpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .teacherCommandGrid{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  #resumen{padding:15px}
+  .teacherCommandHead{flex-direction:column}
+  .teacherTodayKpis{grid-template-columns:1fr 1fr}
+  .teacherTodayKpi strong{font-size:22px}
+  .teacherMonitorTable th:nth-child(4),.teacherMonitorTable td:nth-child(4),
+  .teacherMonitorTable th:nth-child(5),.teacherMonitorTable td:nth-child(5){display:none}
+}
+</style>
+<script>
+(function(){
+  var REFRESH_MS=12000;
+  var refreshing=false;
+  var installed=false;
+
+  function q(id){return document.getElementById(id);}
+  function safe(value){return String(value==null?'':value).replace(/[&<>"]/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char];});}
+  function selectedClass(){var el=q('classSelect');return el?String(el.value||''):'';}
+  function classLabel(data){
+    var code=selectedClass();
+    if(!code)return 'Todas las clases';
+    var row=(data.classes||[]).find(function(item){return String(item.classCode||'')===code;});
+    return row?String(row.nombreVisible||code):code;
+  }
+  function minutesSince(value){
+    var time=Date.parse(String(value||''));
+    if(!Number.isFinite(time))return Infinity;
+    return Math.max(0,Math.floor((Date.now()-time)/60000));
+  }
+  function relativeTime(value){
+    var mins=minutesSince(value);
+    if(!Number.isFinite(mins))return 'Sin actividad';
+    if(mins<1)return 'Ahora mismo';
+    if(mins<60)return 'Hace '+mins+' min';
+    var hours=Math.floor(mins/60);
+    if(hours<24)return 'Hace '+hours+' h';
+    return typeof formatDate==='function'?formatDate(value):String(value||'');
+  }
+  function presence(student){
+    var mins=minutesSince(student.lastActivity);
+    if(mins<=5)return {key:'live',label:'Ahora'};
+    if(mins<=15)return {key:'recent',label:'Reciente'};
+    return {key:'idle',label:'Sin actividad'};
+  }
+  function latestWorkshop(data){
+    var code=selectedClass();
+    var rows=(data.workshopOutcomes||[]).filter(function(row){
+      return row.classroomOpen===true && (!code || String(row.classCode||'')===code);
+    });
+    rows.sort(function(a,b){return Date.parse(String(b.startedAt||b.updatedAt||''))-Date.parse(String(a.startedAt||a.updatedAt||''));});
+    return rows[0]||null;
+  }
+  function ensureMount(){
+    var resumen=q('resumen');if(!resumen)return null;
+    var mount=q('teacherCommandCenter');
+    if(!mount){
+      mount=document.createElement('div');
+      mount.id='teacherCommandCenter';
+      mount.className='teacherCommandCenter';
+      mount.setAttribute('aria-live','polite');
+      var filters=resumen.querySelector('.filters');
+      if(filters&&filters.nextSibling)resumen.insertBefore(mount,filters.nextSibling);
+      else resumen.appendChild(mount);
+    }
+    return mount;
+  }
+  function syncAccessScope(){
+    var scope=q('gameAccessClassSelect'),source=q('classSelect');
+    if(scope&&source)scope.value=source.value;
+  }
+  function goToWorkshop(){
+    var code=selectedClass();
+    if(typeof window.laShowTeacherScreen==='function')window.laShowTeacherScreen('taller');
+    setTimeout(function(){
+      var select=q('workshopClassSelect');
+      if(select&&code&&select.value!==code){select.value=code;select.dispatchEvent(new Event('change',{bubbles:true}));}
+    },120);
+  }
+  function runQuick(mode,gameId){
+    syncAccessScope();
+    var scope=classLabel(typeof currentTeacher!=='undefined'&&currentTeacher?currentTeacher:{});
+    if(mode==='only'){
+      if(!gameId)return;
+      var game=((currentTeacher&&currentTeacher.games)||[]).find(function(row){return String(row.id||'')===gameId;});
+      var name=game?String(game.name||gameId):gameId;
+      if(!window.confirm('¿Dejar solo '+name+' abierto para '+scope+'?\\n\\nLos demás juegos quedarán cerrados y conservarán todo su progreso.'))return;
+      changeBulkGameAccess({gameId:gameId,mode:'only'});
+      return;
+    }
+    if(mode==='closeAll'&&!window.confirm('¿Cerrar todos los juegos para '+scope+'?\\n\\nPodrás volver a abrirlos en cualquier momento.'))return;
+    changeBulkGameAccess({enabled:mode==='openAll'});
+  }
+  function renderSession(data){
+    var session=latestWorkshop(data);
+    if(!session){
+      return '<div class="teacherCommandPanel"><div class="teacherCommandPanelHead"><div><div class="teacherCommandEyebrow">ACTIVIDAD ABIERTA</div><h3>Sesión de clase</h3></div><span class="teacherSessionBadge off">Sin taller activo</span></div>'+
+        '<div class="sub">No hay ningún taller abierto ahora para '+safe(classLabel(data))+'. Puedes abrir uno preparado o crear una sesión nueva.</div>'+
+        '<div class="teacherCommandActions"><button type="button" id="todayGoWorkshop">🧩 Abrir Talleres</button></div></div>';
+    }
+    var games=(session.gameNames||[]).map(function(name){return '<span class="teacherSessionGame">'+safe(name)+'</span>';}).join('');
+    var pct=Math.max(0,Math.min(100,Number(session.completionPercent||0)));
+    return '<div class="teacherCommandPanel"><div class="teacherCommandPanelHead"><div><div class="teacherCommandEyebrow">ACTIVIDAD ABIERTA</div><h3>Sesión de clase</h3></div><span class="teacherSessionBadge">● EN CLASE</span></div>'+
+      '<div class="teacherSessionTitle">'+safe(session.title||'Taller LenguArcade')+'</div>'+
+      '<div class="sub">'+safe(session.className||session.classCode||classLabel(data))+' · objetivo '+safe(session.targetXp||0)+' XP</div>'+
+      '<div class="teacherSessionGames">'+(games||'<span class="teacherSessionGame">Juegos seleccionados</span>')+'</div>'+
+      '<div class="teacherSessionProgress"><div class="teacherSessionProgressBar"><span style="width:'+pct+'%"></span></div><strong>'+safe(session.completedCount||0)+'/'+safe(session.eligibleCount||0)+'</strong></div>'+
+      '<div class="sub">'+pct+'% ha alcanzado el objetivo del taller.</div>'+
+      '<div class="teacherCommandActions"><button type="button" id="todayGoWorkshop">Gestionar / cerrar sesión</button></div></div>';
+  }
+  function renderQuick(data){
+    var games=(data.games||[]).filter(function(game){return !String(game.status||'').toLowerCase().includes('coming');});
+    var previous=q('todayQuickGame')?q('todayQuickGame').value:'';
+    var options=games.map(function(game){return '<option value="'+safe(game.id)+'">'+safe((game.icon||'🎮')+' '+(game.name||game.id))+'</option>';}).join('');
+    var openCount=(data.gameAccessOverview||[]).filter(function(row){return row.state==='open';}).length;
+    var total=(data.gameAccessOverview||[]).length;
+    return '<div class="teacherCommandPanel"><div class="teacherCommandPanelHead"><div><div class="teacherCommandEyebrow">CONTROL RÁPIDO</div><h3>Qué pueden jugar</h3></div><span class="teacherSessionBadge '+(openCount?'':'off')+'">'+openCount+'/'+total+' abiertos</span></div>'+
+      '<div class="teacherQuickControl"><label for="todayQuickGame">Juego para '+safe(classLabel(data))+'</label><select id="todayQuickGame">'+options+'</select></div>'+
+      '<div class="teacherCommandActions"><button type="button" id="todayOnlyGame">▶ Abrir solo este</button><button type="button" class="ghost" id="todayOpenAll">🔓 Todos</button><button type="button" class="ghost teacherQuickDanger" id="todayCloseAll">🔒 Cerrar todos</button></div>'+
+      '<div class="sub" style="margin-top:9px">Estos botones usan el mismo control de acceso que la sección Juegos; no crean permisos paralelos.</div></div>';
+  }
+  function renderMonitor(data){
+    var students=(data.students||[]).slice();
+    students.sort(function(a,b){
+      var pa=presence(a),pb=presence(b),rank={live:0,recent:1,idle:2};
+      if(rank[pa.key]!==rank[pb.key])return rank[pa.key]-rank[pb.key];
+      return String(a.nombre||'').localeCompare(String(b.nombre||''),'es');
+    });
+    var rows=students.map(function(student){
+      var p=presence(student);
+      var attention=Number(student.sessions||0)>0&&Number(student.accuracy||0)<60;
+      return '<tr data-today-student="'+safe(student.studentId)+'">'+
+        '<td><span class="teacherPresence '+p.key+'">'+safe(p.label)+'</span></td>'+
+        '<td><div class="teacherStudentName">'+safe(student.nombre||'Alumno')+'</div><div class="teacherStudentMeta">'+safe(student.clase||'')+'</div></td>'+
+        '<td><div class="teacherMonitorGame">'+safe(student.lastGameName||'—')+'</div><div class="teacherStudentMeta">'+safe(relativeTime(student.lastActivity))+'</div></td>'+
+        '<td><span class="teacherMonitorMetric">'+safe(student.accuracy||0)+'%</span></td>'+
+        '<td><span class="teacherMonitorMetric">'+safe(student.grade||0)+'</span></td>'+
+        '<td>'+(attention?'<span class="teacherAttention">Revisar</span>':'')+'</td>'+
+      '</tr>';
+    }).join('');
+    return '<div class="teacherCommandPanel teacherMonitorPanel"><div class="teacherMonitorHead"><div><div class="teacherCommandEyebrow">ACTIVIDAD RECIENTE</div><h3 style="margin:3px 0 3px">Monitor de alumnos</h3><div class="sub">Ordenado por actividad. Pulsa un alumno para abrir su ficha.</div></div><div class="teacherMonitorLegend">🟢 actividad ≤ 5 min<br>🟡 actividad ≤ 15 min</div></div>'+
+      '<div class="teacherMonitorWrap">'+(rows?'<table class="teacherMonitorTable"><thead><tr><th>Estado</th><th>Alumno</th><th>Último juego</th><th>Precisión</th><th>Nota</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>':'<div class="teacherMonitorEmpty">No hay alumnos en este ámbito.</div>')+'</div></div>';
+  }
+  function renderCommandCenter(data){
+    var mount=ensureMount();if(!mount)return;
+    var students=data.students||[];
+    var nowCount=students.filter(function(student){return minutesSince(student.lastActivity)<=5;}).length;
+    var attention=students.filter(function(student){return Number(student.sessions||0)>0&&Number(student.accuracy||0)<60;}).length;
+    var summary=data.summary||{};
+    mount.innerHTML=
+      '<div class="teacherCommandHead"><div><div class="teacherCommandEyebrow">CENTRO DE MANDO</div><h2>Hoy en clase</h2><div class="sub">'+safe(classLabel(data))+' · controla la sesión sin saltar entre menús.</div></div><div class="teacherCommandLive">Actualización automática · 12 s</div></div>'+
+      '<div class="teacherTodayKpis">'+
+        '<div class="teacherTodayKpi"><span>Alumnos</span><strong>'+safe(students.length)+'</strong><small>en el filtro actual</small></div>'+
+        '<div class="teacherTodayKpi"><span>Activos ahora</span><strong>'+safe(nowCount)+'</strong><small>actividad registrada &lt; 5 min</small></div>'+
+        '<div class="teacherTodayKpi"><span>Sesiones hoy</span><strong>'+safe(summary.sessionsToday||0)+'</strong><small>partidas registradas</small></div>'+
+        '<div class="teacherTodayKpi"><span>Necesitan mirada</span><strong>'+safe(attention)+'</strong><small>precisión global &lt; 60%</small></div>'+
+      '</div>'+
+      '<div class="teacherCommandGrid">'+renderSession(data)+renderQuick(data)+'</div>'+
+      renderMonitor(data)+
+      '<div class="sub" id="teacherCommandUpdated" style="text-align:right;padding:0 3px">Actualizado ahora.</div>';
+
+    var select=q('todayQuickGame');
+    if(select&&previousQuickGame&&[].slice.call(select.options).some(function(option){return option.value===previousQuickGame;}))select.value=previousQuickGame;
+    if(select)select.onchange=function(){previousQuickGame=select.value;};
+    var go=q('todayGoWorkshop');if(go)go.onclick=goToWorkshop;
+    var only=q('todayOnlyGame');if(only)only.onclick=function(){runQuick('only',q('todayQuickGame')?q('todayQuickGame').value:'');};
+    var all=q('todayOpenAll');if(all)all.onclick=function(){runQuick('openAll','');};
+    var close=q('todayCloseAll');if(close)close.onclick=function(){runQuick('closeAll','');};
+    mount.querySelectorAll('[data-today-student]').forEach(function(row){row.onclick=function(){if(typeof openStudentDetail==='function')openStudentDetail(row.dataset.todayStudent);};});
+  }
+
+  var previousQuickGame='';
+  async function silentRefresh(){
+    if(refreshing||document.visibilityState==='hidden')return;
+    var app=q('appContent');
+    if(!app||app.classList.contains('hidden'))return;
+    if(document.body.getAttribute('data-la-screen')!=='resumen')return;
+    if(typeof busy!=='undefined'&&busy)return;
+    if(typeof loadTeacher!=='function')return;
+    refreshing=true;
+    try{
+      await loadTeacher(true);
+      var stamp=q('teacherCommandUpdated');
+      if(stamp)stamp.textContent='Actualizado '+new Intl.DateTimeFormat('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date())+'.';
+    }catch(error){
+      var stamp=q('teacherCommandUpdated');
+      if(stamp)stamp.textContent='No se pudo actualizar automáticamente. Usa “Actualizar”.';
+    }finally{refreshing=false;}
+  }
+  function install(){
+    if(installed||typeof renderTeacher!=='function'){setTimeout(install,120);return;}
+    installed=true;
+    var nav=document.querySelector('.nav [data-target="resumen"]');if(nav)nav.textContent='⌂ Hoy';
+    var resumen=q('resumen');
+    if(resumen){
+      var firstField=resumen.querySelector('.filters .field:first-child label');if(firstField)firstField.textContent='Clase de hoy';
+      var refresh=q('refreshBtn');if(refresh)refresh.textContent='↻ Actualizar';
+    }
+    var base=renderTeacher;
+    renderTeacher=function(data){var result=base.apply(this,arguments);setTimeout(function(){renderCommandCenter(data||{});},0);return result;};
+    if(typeof currentTeacher!=='undefined'&&currentTeacher)setTimeout(function(){renderCommandCenter(currentTeacher);},0);
+    setInterval(silentRefresh,REFRESH_MS);
+  }
+  install();
+})();
+</script>
+
 </body>
 </html>

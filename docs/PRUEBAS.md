@@ -1,3 +1,14 @@
+## 2026-10-05 · Panel del profesor · Fase 1
+
+1. Abrir `/exec?page=profesor`, iniciar sesión y comprobar que «Resumen» aparece como «Hoy» sin alterar el resto de navegación.
+2. Seleccionar una clase y confirmar que Alumnos, Activos ahora, Sesiones hoy y Necesitan mirada cambian con el filtro.
+3. Con dos alumnos de prueba, generar actividad reciente y verificar el estado verde (≤5 min), amarillo (≤15 min), último juego y apertura de ficha al pulsar la fila.
+4. Desde Control rápido, probar «Abrir solo este», «Todos» y «Cerrar todos»; comprobar en alumno que el acceso cambia y que no se pierde progreso.
+5. Abrir un Taller para la clase y verificar que «Hoy» muestra título, juegos, objetivo XP y cumplimiento; «Gestionar / cerrar sesión» debe llevar a Talleres con la clase seleccionada.
+6. Permanecer en «Hoy» al menos 30 s y confirmar refresco silencioso cada 12 s sin loader ni salto de pantalla; cambiar a otra sección y comprobar que deja de refrescar.
+7. Revisar 1366×768, 1440×900 y 1920×1080, además de anchura móvil: sin scroll horizontal general, solapamientos ni tabla ilegible.
+8. Ejecutar `npm run check` antes de fusionar y publicar Apps Script mediante el despliegue estable; si cambia teacher-dashboard, desplegar también esa Edge Function.
+
 ## 2026-10-05 · FORJA
 
 - `node games/lexoma/dictionary-test.mjs`: talar/TALAR, saltar, cantar, mesa, perro, casa, jardín/jardin, rápido/rapido, Unicode descompuesto, Ñ, palabras inválidas, puntuación, guardado y fallos independientes de las fuentes.

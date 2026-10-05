@@ -943,6 +943,18 @@ Deno.serve(async (request) => {
       progressByProfile.set(row.profile_id, values);
     }
 
+    const gameNameById = new Map(
+      (gamesResult.data || []).map(game => [String(game.id), String(game.name || game.id)])
+    );
+    const latestEventByProfile = new Map<string, Record<string, unknown>>();
+    for (const event of eventsResult.data || []) {
+      if (String(event.event_type || "") === "teacher_adjustment") continue;
+      const profileId = String(event.profile_id || "");
+      if (!profileIdSet.has(profileId)) continue;
+      if (gameId && String(event.game_id || "") !== gameId) continue;
+      latestEventByProfile.set(profileId, event);
+    }
+
     const students = profiles.map(profile => {
       const rows = progressByProfile.get(profile.id) || [];
       const attempts = rows.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
@@ -954,11 +966,34 @@ Deno.serve(async (request) => {
       const classroom = classCode
         ? classroomById.get(classroomIds.find(id => selectedClassroomIds.has(id)) || "")
         : classroomById.get(classroomIds[0] || "");
-      const lastActivity = rows
-        .map(row => String(row.last_activity_at || ""))
-        .filter(Boolean)
-        .sort()
-        .pop() || profile.last_login_at || "";
+      const latestProgress = rows
+        .filter(row => String(row.last_activity_at || ""))
+        .sort((a, b) => Date.parse(String(a.last_activity_at || "")) - Date.parse(String(b.last_activity_at || "")))
+        .pop();
+      const latestEvent = latestEventByProfile.get(String(profile.id));
+      const activityCandidates = [
+        {
+          at:String(profile.last_login_at || ""),
+          gameId:"",
+          eventType:"login",
+        },
+        {
+          at:String(latestProgress?.last_activity_at || ""),
+          gameId:String(latestProgress?.game_id || ""),
+          eventType:"progress",
+        },
+        {
+          at:String(latestEvent?.occurred_at || ""),
+          gameId:String(latestEvent?.game_id || ""),
+          eventType:String(latestEvent?.event_type || ""),
+        },
+      ].filter(item => item.at && Number.isFinite(Date.parse(item.at)))
+        .sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
+      const latestActivity = activityCandidates.pop() || { at:"", gameId:"", eventType:"" };
+      const latestGameActivity = latestActivity.gameId
+        ? latestActivity
+        : (activityCandidates.slice().reverse().find(item => item.gameId) || { at:"", gameId:"", eventType:"" });
+      const lastActivity = latestActivity.at;
       return {
         studentId:profile.id,
         nombre:`${profile.first_name} ${profile.last_name}`.trim(),
@@ -974,6 +1009,9 @@ Deno.serve(async (request) => {
         sessions:rows.reduce((sum, row) => sum + Number(row.sessions || 0), 0),
         gamesPlayed:rows.filter(row => Number(row.sessions || 0) > 0).length,
         lastActivity,
+        lastGameId:latestGameActivity.gameId,
+        lastGameName:latestGameActivity.gameId ? (gameNameById.get(latestGameActivity.gameId) || latestGameActivity.gameId) : "",
+        lastEventType:latestActivity.eventType,
         grade:gradeFor(rows,assessedMissions(missionsResult.data||[],rows,(eventsResult.data||[]).filter(e=>e.profile_id===profile.id),profile.id,classroomIds).filter(m=>!gameId||!m.gameId||m.gameId===gameId)),
       };
     }).sort((a, b) => b.xp - a.xp);
@@ -1187,6 +1225,8 @@ Deno.serve(async (request) => {
           updatedAt:session.updated_at || null,
           classroomOpen:session.classroom_open === true,
           homeEnabled:session.home_enabled === true,
+          gameIds:[...selectedGames],
+          gameNames:[...selectedGames].map(id => gameNameById.get(id) || id),
           eligibleCount:studentsProgress.length,
           completedCount:completedStudents.length,
           pendingCount:Math.max(0, studentsProgress.length - completedStudents.length),
