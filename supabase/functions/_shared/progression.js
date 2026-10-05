@@ -106,6 +106,17 @@ const baseResult=(old,attemptDelta,correctDelta,errorDelta,percentage,xpGain,fea
   };
 };
 
+function sopaDeTintaSnapshot(save,prior,old,context){
+  const stats=save?.profile?.stats||{},previous=prior?.profile?.stats||{};
+  const checkpoint=context?.checkpoint===true;
+  // Profile totals survive board changes. Resetting them must not mint rewards.
+  const dc=Math.min(checkpoint?24:60,Math.max(0,n(stats.words)-n(previous.words)));
+  const de=Math.min(checkpoint?24:60,Math.max(0,n(stats.errors)-n(previous.errors)));
+  const levels=['narrativa','morfologia','verbos','sintaxis','literatura','semantica','ortografia'].reduce((total,id)=>total+[0,1,2,3].filter(stage=>n(save?.profile?.adventure?.[id]?.[stage])>0).length,0);
+  const feathers=Math.min(checkpoint?8:16,Math.max(0,Math.floor((n(old.successes)+dc)/8)-Math.floor(n(old.successes)/8)));
+  return baseResult(old,dc+de,dc,de,levels/28*100,Math.min(checkpoint?150:320,dc*6),feathers);
+}
+
 function battlegrafiaSnapshot(save,prior,old,context){
   const checkpoint=context?.checkpoint===true;
   const answerCap=checkpoint?24:60;
@@ -199,6 +210,7 @@ export function snapshotProgress(gameId,save,previous,old={},raw={},previousRaw=
   raw=raw&&typeof raw==='object'?raw:{};
   previousRaw=previousRaw&&typeof previousRaw==='object'?previousRaw:{};
 
+  if(gameId==='sopa_de_tinta')return sopaDeTintaSnapshot(save,previous,old,context);
   if(gameId==='battlegrafia')return battlegrafiaSnapshot(save,previous,old,context);
   if(gameId==='rayuela')return rayuelaSnapshot(save,previous,old,context);
   if(gameId==='entre_lineas')return entreLineasSnapshot(save,previous,old,raw,previousRaw,context);

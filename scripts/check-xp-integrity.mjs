@@ -81,4 +81,24 @@ assert.equal(legacy.includes('calculateAuthoritativeProgress_(game.gameId, paylo
 assert.equal(legacy.includes('old.xp + Number(progress.xpDelta'),false,'Apps Script no debe sumar XP enviado por el cliente');
 assert.match(legacyProgression,/function calculateAuthoritativeProgress_/,'Debe existir el cálculo autoritativo de respaldo');
 
+const {runInNewContext}=await import('node:vm');
+const legacyContext={};runInNewContext(legacyProgression,legacyContext);
+const sopaPrior={profile:{stats:{words:8,errors:2},adventure:{}}};
+const sopaNext={profile:{xp:1000000,stats:{words:10,errors:3},adventure:{narrativa:{0:3}}}};
+const sopa=snapshotProgress('sopa_de_tinta',sopaNext,sopaPrior,old,{metrics:{percentage:100}}, {},{checkpoint:true});
+assert.equal(sopa.xp,112);assert.equal(sopa.attempts,13);assert.equal(sopa.successes,10);
+assert.equal(sopa.percentage,5,'La primera aventura no debe dar un 100 %, ni reducir el porcentaje anterior');
+const first=snapshotProgress('sopa_de_tinta',sopaNext,sopaPrior,{...old,percentage:0}, {}, {},{checkpoint:true});
+assert.ok(Math.abs(first.percentage-100/28)<1e-10);
+const replay=snapshotProgress('sopa_de_tinta',sopaNext,sopaNext,sopa,{}, {},{checkpoint:false});
+assert.deepEqual(replay,sopa,'El resultado posterior al checkpoint no duplica progreso ni XP');
+const reset=snapshotProgress('sopa_de_tinta',{profile:{stats:{words:1,errors:0}}},sopaNext,sopa,{}, {},{checkpoint:true});
+assert.equal(reset.xp,sopa.xp,'Reiniciar totales no concede XP');
+const relax=snapshotProgress('sopa_de_tinta',{profile:{stats:{words:8},adventure:{}}},{},{},{metrics:{percentage:100}}, {},{checkpoint:false});
+assert.equal(relax.percentage,0,'Una sopa relax no completa la aventura');
+const all={};for(const id of ['narrativa','morfologia','verbos','sintaxis','literatura','semantica','ortografia'])all[id]={0:1,1:1,2:1,3:1,999:1};
+assert.equal(snapshotProgress('sopa_de_tinta',{profile:{adventure:all}},{},{},{},{},{}).percentage,100);
+const fallback=legacyContext.calculateAuthoritativeProgress_('sopa_de_tinta',{checkpoint:true,rawGameData:{save:sopaNext}},{...old,plumas:old.feathers,rawJson:JSON.stringify({save:sopaPrior})});
+for(const field of ['xp','attempts','successes','errors','percentage','accuracy'])assert.equal(fallback[field],sopa[field],'Paridad Apps Script/Supabase: '+field);
+assert.equal(fallback.plumas,sopa.feathers);
 console.log('XP integrity checks: OK');
