@@ -1,0 +1,4 @@
+(() => {
+let ctx,timer;function tone(hz,length=.1){if(!window.TintaGame?.profile.settings.sound)return;try{ctx||=new(window.AudioContext||window.webkitAudioContext)();ctx.resume().catch(()=>{});const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=hz;g.gain.setValueAtTime(.045,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+length);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+length);}catch{}}
+window.TintaAudio={play(type){tone({letter:420,correct:740,error:160,achievement:980,level:1150,finish:880}[type]||500,type==='letter'?.025:.14);},music(){clearInterval(timer);if(!window.TintaGame.profile.settings.music)return;let i=0;timer=setInterval(()=>{if(document.hidden)return;const enabled=window.TintaGame.profile.settings.sound;window.TintaGame.profile.settings.sound=true;tone([196,246.94,293.66,246.94][i++%4],.6);window.TintaGame.profile.settings.sound=enabled;},1800);}};
+})();
