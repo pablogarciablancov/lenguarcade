@@ -613,3 +613,9 @@ Límites: el contador conserva el total de duelos; la lista guarda los 100 más 
 - Comprobar las dieciséis rutas públicas y dimensiones 16:9 de los recursos WebP.
 - Verificar que ambos paneles resuelven la misma portada con datos actuales, sin banner y con banner antiguo en caché.
 - Abrir Juegos y Taller en profesor y catálogo de alumno: títulos legibles, sin imágenes repetidas ni fallidas.
+
+## Portadas diversas y marca (2026-10-05)
+- catalog:sync y npm run check.
+- Verificar dieciséis WebP distintos a 1280×720 y rutas públicas.
+- Comprobar el logo oficial en el encabezado de cada tarjeta alumno y en la esquina de cada miniatura docente.
+- Revisar título, sello y estado sin solapamientos en 1366×768, 1440×900 y 1920×1080 tras publicar Apps Script.

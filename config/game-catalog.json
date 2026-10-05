@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 16,
+  "version": 17,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -20,7 +20,7 @@
       "icon": "⚔️",
       "entry": "games/battlegrafia_v2/",
       "description": "RPG de Lengua con combates, cinco mundos, criaturas, modos de juego y progresión.",
-      "banner": "battlegrafia-collection-v1.webp",
+      "banner": "battlegrafia-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -41,7 +41,7 @@
       "icon": "⚡",
       "entry": "games/maniacgrafia/",
       "description": "Atrapa y corrige palabras trampa mientras mejoras rapidez y precisión.",
-      "banner": "maniacgrafia-collection-v1.webp",
+      "banner": "maniacgrafia-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -62,7 +62,7 @@
       "icon": "📚",
       "entry": "games/narratoria/",
       "description": "Construye relatos por fases con objetivos, decisiones y creatividad.",
-      "banner": "narratoria-collection-v1.webp",
+      "banner": "narratoria-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -84,7 +84,7 @@
       "icon": "✒️",
       "entry": "games/versopolis/",
       "description": "Duelo poético por rondas: reconoce rimas, métrica y recursos expresivos para conquistar Versópolis.",
-      "banner": "versopolis-collection-v1.webp",
+      "banner": "versopolis-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -105,7 +105,7 @@
       "icon": "🔤",
       "entry": "games/scrabble/",
       "description": "Forma palabras, amplía vocabulario y compite usando estrategia verbal.",
-      "banner": "scrabble-collection-v1.webp",
+      "banner": "scrabble-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -127,7 +127,7 @@
       "icon": "🎲",
       "entry": "games/conjuga_apuesta/",
       "description": "Duelo de conjugación con fichas, niveles de riesgo, rachas, ayudas tácticas, XP y logros.",
-      "banner": "conjuga-apuesta-collection-v1.webp",
+      "banner": "conjuga-apuesta-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -150,7 +150,7 @@
       "icon": "⚔️",
       "entry": "games/verb_battle/",
       "description": "Combate por equipos con tablero variable, clases, energía, defensas, runas, eventos, XP y logros.",
-      "banner": "verb-battle-collection-v1.webp",
+      "banner": "verb-battle-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -173,7 +173,7 @@
       "icon": "⌗",
       "entry": "games/rayuela/",
       "description": "Crea y gestiona varias aventuras interactivas con decisiones, objetos, caminos alternativos, pruebas y múltiples finales.",
-      "banner": "rayuela-collection-v1.webp",
+      "banner": "rayuela-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -197,7 +197,7 @@
       "icon": "🔎",
       "entry": "games/entre_lineas/",
       "description": "Investiga documentos, conecta pistas y demuestra tus hipótesis con evidencias.",
-      "banner": "entre-lineas-collection-v1.webp",
+      "banner": "entre-lineas-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -219,7 +219,7 @@
       "icon": "🛡️",
       "entry": "games/tower_defense/",
       "description": "Tower defense lingüístico: rompe escudos resolviendo retos de Ortografía, Verbos y Semántica y deja que tus torres derroten a los monstruos.",
-      "banner": "tower-defense-collection-v1.webp",
+      "banner": "tower-defense-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -242,7 +242,7 @@
       "icon": "🔠",
       "entry": "games/word_play/",
       "description": "Roguelike de palabras con cartas, tienda, mejoras, misiones lingüísticas, fichas especiales, combos y progresión léxica.",
-      "banner": "word-play-collection-v1.webp",
+      "banner": "word-play-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -266,7 +266,7 @@
       "icon": "🖋️",
       "entry": "games/tierras_de_tinta/",
       "description": "RPG de acción y exploración en su versión avanzada: siete héroes, arsenal ampliado, criaturas y jefes propios, campamento cinematográfico, portal, forja, runas y progresión lingüística.",
-      "banner": "tierras-de-tinta-collection-v1.webp",
+      "banner": "tierras-de-tinta-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -289,7 +289,7 @@
       "icon": "✦",
       "entry": "games/lexaria/",
       "description": "Auto-battler educativo: colecciona Lexarios, entrena con retos de Lengua, crea sinergias y combate en la Academia.",
-      "banner": "lexaria-collection-v1.webp",
+      "banner": "lexaria-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     },
@@ -311,7 +311,7 @@
       "icon": "✦",
       "entry": "games/lexitrama/",
       "description": "Conecta letras vecinas, cumple misiones de Lengua y explora cinco mundos con gravedad, combos, jefes y progresión.",
-      "banner": "lexitrama-collection-v1.webp",
+      "banner": "lexitrama-collection-v3.webp",
       "active": true,
       "integration": "embedded",
       "sortOrder": 14
@@ -334,7 +334,7 @@
       "icon": "F",
       "entry": "games/lexoma/",
       "description": "Forma palabras, gana monedas, compra y mejora Cartas de Forja, depura tu bolsa y afronta eventos para construir una run distinta cada vez.",
-      "banner": "lexoma-collection-v1.webp",
+      "banner": "lexoma-collection-v3.webp",
       "active": true,
       "integration": "embedded",
       "sortOrder": 15
@@ -359,7 +359,7 @@
       "sortOrder": 16,
       "icon": "☕",
       "entry": "games/sopa_de_tinta/",
-      "banner": "sopa-de-tinta-collection-v1.webp",
+      "banner": "sopa-de-tinta-collection-v3.webp",
       "active": true,
       "integration": "embedded"
     }
