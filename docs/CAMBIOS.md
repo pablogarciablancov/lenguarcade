@@ -614,3 +614,9 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Selectores de clase y juego en Hoy, filtros y Juegos con menú propio y navegación por teclado.
 - Lexitrama utiliza una brújula en el panel docente, diferenciándose de Lexaria.
 - Sin cambios de backend, permisos, catálogo, autenticación ni juegos.
+
+## 2026-10-05 · Colección unificada de portadas
+- Dieciséis ilustraciones horizontales nuevas: fantasía pintada, luz cinematográfica y color propio por juego.
+- Portadas versionadas en lenguarcade-assets, conservando todas las rutas antiguas.
+- Catálogo canónico y paneles alumno/profesor apuntan a la misma colección; las vistas con caché antigua también usan las nuevas portadas.
+- Títulos en HTML para conservar legibilidad y accesibilidad; sin cambios de mecánicas, permisos ni guardados.

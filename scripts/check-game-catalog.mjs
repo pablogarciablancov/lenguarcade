@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import vm from "node:vm";
 
 const root=process.cwd();
 const catalog=JSON.parse(fs.readFileSync(path.join(root,"config","game-catalog.json"),"utf8"));
@@ -82,11 +83,11 @@ if(!wordPlay ||
    wordPlay.status!=="listo" ||
    wordPlay.entry!=="games/word_play/" ||
    wordPlay.integration!=="embedded" ||
-   wordPlay.banner!=="word-play-banner-v2.webp"){
+   wordPlay.banner!=="word-play-collection-v1.webp"){
   throw new Error("Word Play debe estar integrado como juego oficial de producción con su portada versionada.");
 }
 for(const [label,html] of [["alumno",student],["profesor",teacher]]){
-  if(!html.includes("word_play:'word-play-banner-v2.webp'")){
+  if(!html.includes("word_play:'word-play-collection-v1.webp'")){
     throw new Error("Word Play debe usar su portada propia en el panel de "+label+".");
   }
 }
@@ -96,10 +97,10 @@ if(catalog.games.some(game=>/rim[oó]polis/i.test(game.id+" "+game.name)) ||
 }
 
 for(const expected of [
-  ["lexitrama","games/lexitrama/","lexitrama-banner-v1.svg"],
-  ["versopolis","games/versopolis/","versopolis-banner.jpg"],
-  ["lexaria","games/lexaria/","lexaria-banner-v2.webp"],
-  ["tower_defense","games/tower_defense/","tower-defense-banner-v2.webp"]
+  ["lexitrama","games/lexitrama/","lexitrama-collection-v1.webp"],
+  ["versopolis","games/versopolis/","versopolis-collection-v1.webp"],
+  ["lexaria","games/lexaria/","lexaria-collection-v1.webp"],
+  ["tower_defense","games/tower_defense/","tower-defense-collection-v1.webp"]
 ]){
   const game=catalog.games.find(row=>row.id===expected[0]);
   if(!game || game.entry!==expected[1] || game.banner!==expected[2] || game.integration!=="embedded" || game.active!==true || game.official!==true){
@@ -110,7 +111,7 @@ const tierras=catalog.games.find(row=>row.id==="tierras_de_tinta");
 if(!tierras ||
    tierras.entry!=="games/tierras_de_tinta/" ||
    !!tierras.externalUrl ||
-   tierras.banner!=="tierras-de-tinta-banner-v3.webp" ||
+   tierras.banner!=="tierras-de-tinta-collection-v1.webp" ||
    tierras.integration!=="embedded" ||
    tierras.active!==true ||
    tierras.official!==true){
@@ -122,8 +123,25 @@ if(!generatedApps.includes('gameId:"tierras_de_tinta"') ||
   throw new Error("Tierras de Tinta: el catálogo generado no apunta al juego nativo fuente 30.");
 }
 for(const [label,html] of [["alumno",student],["profesor",teacher]]){
-  for(const pair of [["versopolis","versopolis-banner.jpg"],["tierras_de_tinta","tierras-de-tinta-banner.svg"],["lexaria","lexaria-banner-v2.webp"],["tower_defense","tower-defense-banner-v2.webp"]]){
+  for(const pair of [["versopolis","versopolis-collection-v1.webp"],["tierras_de_tinta","tierras-de-tinta-collection-v1.webp"],["lexaria","lexaria-collection-v1.webp"],["tower_defense","tower-defense-collection-v1.webp"]]){
     if(!html.includes(pair[0]+":'"+pair[1]+"'")) throw new Error("Falta portada de "+pair[0]+" en el panel de "+label+".");
   }
+}
+const covers=new Set();
+for(const game of official){
+  if(!game.banner.endsWith("-collection-v1.webp") || covers.has(game.banner)) throw new Error("Portada ausente o repetida: "+game.id);
+  covers.add(game.banner);
+}
+for(const [label,html] of [["alumno",student],["profesor",teacher]]){
+  const map=html.match(/const BANNERS=\{[^}]+\};/)[0];
+  const resolver=html.match(/function bannerUrl\(id,banner\)\{[^}]+\}/)[0];
+  const context={};
+  vm.runInNewContext("const ASSET_BASE='https://assets.example/';"+map+resolver+";this.resolveCover=bannerUrl;",context);
+  for(const game of official){
+    for(const oldBanner of [undefined,game.banner,"dragon","https://old.example/cover.webp"]){
+      if(context.resolveCover(game.id,oldBanner)!=="https://assets.example/"+game.banner) throw new Error("Portada obsoleta en "+label+": "+game.id);
+    }
+  }
+  if(context.resolveCover("custom","https://custom.example/art.webp")!=="https://custom.example/art.webp") throw new Error("Portada externa desconocida alterada.");
 }
 console.log("Catálogo canónico LenguArcade: 16 juegos oficiales; catálogo e integraciones principales sincronizados.");

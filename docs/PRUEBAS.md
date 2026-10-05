@@ -607,3 +607,9 @@ Límites: el contador conserva el total de duelos; la lista guarda los 100 más 
 - Cambiar clase y comprobar abrir/cerrar/solo este y acciones globales con el mismo ámbito.
 - Probar selectores con clic, flechas, Inicio/Fin, Escape, Tab y cierre exterior.
 - Comprobar 1366×768, 1440×900 y 1920×1080: sin solapamientos ni scroll horizontal.
+
+## Colección unificada de portadas (2026-10-05)
+- Ejecutar catalog:sync y npm run check.
+- Comprobar las dieciséis rutas públicas y dimensiones 16:9 de los recursos WebP.
+- Verificar que ambos paneles resuelven la misma portada con datos actuales, sin banner y con banner antiguo en caché.
+- Abrir Juegos y Taller en profesor y catálogo de alumno: títulos legibles, sin imágenes repetidas ni fallidas.
