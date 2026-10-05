@@ -9,7 +9,7 @@ function el(id){if(!elements.has(id)){const classes=new Set();elements.set(id,{i
 const document={querySelector:s=>s.startsWith('#')?el(s.slice(1)):s==='.camp-rest'?el('camp-rest'):null,querySelectorAll:s=>s==='.screen'?['titleScreen','campScreen','gameScreen'].map(el):[],addEventListener(){},documentElement:el('html')};
 const sandbox={document,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k)},innerWidth:1366,innerHeight:704,devicePixelRatio:1,performance:{now:()=>10},addEventListener(){},setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:()=>1,cancelAnimationFrame(){},Image:class{complete=false;naturalWidth=0},confirm:()=>true,console,Math,JSON,Date};sandbox.window=sandbox;
 vm.createContext(sandbox);
-for(const [,script] of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))vm.runInContext(script.includes('window.TierrasDeTinta=')?script.replace(/\}\)\(\);\s*$/, 'window.__TintaQA={update,gather,keys,mouse,get player(){return player;},get run(){return run;},get drops(){return drops;}};})();'):script,sandbox);
+for(const [,script] of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))vm.runInContext(script.includes('window.TierrasDeTinta=')?script.replace(/\}\)\(\);\s*$/, 'window.__TintaQA={update,gather,attack,attackTarget,keys,mouse,get enemies(){return enemies;},get cool(){return cool;},get projectiles(){return projectiles;},setPaused(v){paused=v;},setWeapon(k){save.weapon=k;},get player(){return player;},get run(){return run;},get drops(){return drops;}};})();'):script,sandbox);
 const api=sandbox.TierrasDeTinta;assert(api);
 api.setProfile({studentId:'test-one'});let state=api.getState();state.campaign.level=4;state.campaign.gold=250;state.campaign.stats.asked=10;state.campaign.stats.correct=8;
 assert(api.restore({run:state}));assert.equal(api.metrics().accuracy,80);assert.equal(api.metrics().level,4);
@@ -17,7 +17,20 @@ api.forceSave();api.setProfile({studentId:'test-two'});assert.equal(api.getState
 api.setProfile({studentId:'test-one'});assert.equal(api.getState().campaign.gold,250);
 el('startBtn').onclick();el('expeditionBtn').onclick();state=api.getState();assert.equal(state.expedition.run.zone,'forest');state.expedition.run.kills=7;state.expedition.run.wood=12;state.expedition.player.hp=61;
 assert(api.restore({run:state}));el('startBtn').onclick();const restored=api.getState();assert.equal(restored.expedition.run.kills,7);assert.equal(restored.expedition.run.wood,12);assert.equal(restored.expedition.player.hp,61);
-const qa=sandbox.__TintaQA,px=qa.player.x,my=qa.mouse.x;qa.keys.ArrowRight=true;qa.update(.05);qa.keys.ArrowRight=false;assert.equal(qa.player.x,px,'Arrow keys aim without moving the hero');assert(qa.mouse.x>my);qa.keys.KeyD=true;qa.update(.05);qa.keys.KeyD=false;assert(qa.player.x>px,'WASD keeps movement');
+const qa=sandbox.__TintaQA,px=qa.player.x,my=qa.mouse.x;qa.keys.ArrowRight=true;qa.update(.05);qa.keys.ArrowRight=false;assert(qa.player.x>px,'Arrow keys move without requiring a mouse');assert.equal(qa.mouse.x,my);qa.keys.KeyD=true;qa.update(.05);qa.keys.KeyD=false;assert(qa.player.x>px,'WASD keeps movement');
+// No mouse input: nearest valid enemy is attacked at the weapon's own cadence.
+qa.enemies.length=0;qa.cool.attack=0;
+const enemy={x:qa.player.x+45,y:qa.player.y,r:14,hp:10000,maxHp:10000,speed:0,damage:0,attack:100,kind:'crawler'};
+qa.enemies.push(enemy);const before=enemy.hp;qa.update(.01);assert(enemy.hp<before,'Automatic melee hits without pointer input');
+const after=enemy.hp;qa.update(.01);assert.equal(enemy.hp,after,'Attack cooldown is preserved');
+qa.cool.attack=0;qa.setPaused(true);qa.attack();assert.equal(enemy.hp,after,'Pause prevents auto attack');qa.setPaused(false);
+enemy.x=qa.player.x+900;qa.cool.attack=0;qa.attack();assert.equal(qa.cool.attack,0,'No attack outside weapon range');
+enemy.hp=0;enemy.x=qa.player.x+20;assert.equal(qa.attackTarget(),null,'Dead targets are ignored');qa.enemies.length=0;
+qa.setWeapon('bow');qa.cool.attack=0;
+const ranged={...enemy,hp:1000,x:qa.player.x,y:qa.player.y-180};qa.enemies.push(ranged);
+const shotCount=qa.projectiles.length;qa.attack();assert(qa.projectiles.length>shotCount,'Ranged weapon shoots without mouse');
+const shot=qa.projectiles[shotCount];assert(Math.abs(shot.vx)<.01&&shot.vy<0,'Projectile aims toward target');
+qa.enemies.length=0;qa.setWeapon('sword');
 qa.player.hp=10;qa.drops.push({x:qa.player.x,y:qa.player.y,type:'health',life:10,bob:0});qa.gather();assert(qa.player.hp>10);assert(qa.player.hp<=qa.player.maxHp);qa.drops.push({x:qa.player.x,y:qa.player.y,type:'slow',life:10,bob:0});qa.gather();assert.equal(qa.run.slowTimer,8);qa.run.supportTimer=21.99;qa.update(.05);assert(qa.drops.some(d=>d.type==='health'||d.type==='slow'),'Timed support objects spawn during expeditions');
 assert.equal(api.restore({version:21,heroId:'aldren'}),false,'Do not interpret incompatible old saves as v30');
 for(const [,asset] of html.matchAll(/assets\/([\w.-]+\.(?:webp|png))/g))assert(fs.existsSync('games/tierras_de_tinta/assets/'+asset),'Missing artwork '+asset);
