@@ -9,7 +9,7 @@ const LETTER_VALUES={A:1,E:1,I:1,L:1,N:1,O:1,R:1,S:1,T:1,U:1,D:2,G:2,B:3,C:3,M:3
 const MAX_BONUSES=5;
 const STARTER_POOL=['vocalista','consonante','palabra_larga','variedad','raras','mult','punto','cinco','sin_repetir','puerta_vocal','final_s','sustantivo','verbo'];
 const SERVICE_COSTS={remove:4,bold:4,italic:4,gold:7};
-let run=null,career=freshCareer(),storageKey='lexoma.v2.guest',dictionary=new Set(),dictionaryReady=false;
+let run=null,career=freshCareer(),storageKey='lexoma.v2.guest',dictionary=new Set(),dictionaryAliases=new Map(),dictionaryReady=false;
 
 function freshCareer(){return{games:0,wins:0,bestScore:0,bestPlay:0,bestPoints:0,bestMulti:1,words:0,phrases:0,concordances:0,errors:0,rerollsUsed:0,bonusesSeen:[],achievements:[]};}
 function strip(s){return String(s||'').normalize('NFD').replace(/[\u0300\u0301]/g,'').normalize('NFC');}
@@ -136,20 +136,28 @@ function rerollLetters(){
  run.discard.push(...removed.map(t=>({char:t.char,style:t.style})));run.rerolls--;career.rerollsUsed++;run.rerollSelection=[];replenish();unlock();save();return{ok:true,count:removed.length};
 }
 async function loadDictionary(onStatus){
- try{
-  onStatus?.('Cargando diccionario…');const res=await fetch('../word_play/dictionary-es-50k.txt',{cache:'force-cache'});if(!res.ok)throw new Error('HTTP '+res.status);
-  const text=await res.text();dictionary=new Set(text.split(/\r?\n/).map(x=>key(x.trim())).filter(Boolean));for(const w of L.lexicon.keys())dictionary.add(key(w));
-  dictionaryReady=true;onStatus?.(dictionary.size.toLocaleString('es-ES')+' palabras disponibles');return true;
- }catch{
-  dictionary=new Set([...L.lexicon.keys()].map(key));dictionaryReady=true;onStatus?.(dictionary.size.toLocaleString('es-ES')+' palabras locales');return false;
+ dictionaryReady=false;onStatus?.('Cargando diccionario…');
+ // Carga independiente: un fallo de la lista compartida no anula el banco de Forja.
+ const sources=await Promise.allSettled(['../word_play/dictionary-es-50k.txt','dictionary-es-extra.txt?v=20261005'].map(async url=>{
+  const res=await fetch(url,{cache:'force-cache'});if(!res.ok)throw new Error('HTTP '+res.status);return res.text();
+ }));
+ dictionary=new Set([...L.lexicon.keys()].map(key));
+ for(const source of sources)if(source.status==='fulfilled')for(const raw of source.value.split(/\r?\n/)){
+  const word=key(raw.trim());if(/^[a-záéíóúüñ]{2,}$/u.test(word))dictionary.add(word);
  }
+ // Alias solo de acentos: Ñ y Ü conservan su identidad. Lookup O(1) por jugada.
+ dictionaryAliases=new Map();for(const word of dictionary)if(!dictionaryAliases.has(strip(word)))dictionaryAliases.set(strip(word),word);
+ dictionaryReady=true;const loaded=sources.some(s=>s.status==='fulfilled');
+ onStatus?.(dictionary.size.toLocaleString('es-ES')+(loaded?' palabras disponibles':' palabras locales'));
+ return loaded;
 }
 function validate(raw){
  const display=String(raw||'').toUpperCase(),lexical=display.replace(/!/g,'');if(lexical.length<2)return{ok:false,message:'Forma una palabra de al menos 2 letras.'};
  if(display.includes('!')&&!display.endsWith('!'))return{ok:false,message:'La exclamación especial solo puede cerrar la palabra.'};
- const w=key(lexical),plain=strip(w),exact=dictionary.has(w)||L.lookup(w).length>0;
- if(!exact){if(dictionary.has(plain))return{ok:true,word:plain,display,analysis:L.lookup(plain)[0]||null};return{ok:false,message:'«'+lexical+'» no está en el diccionario de Forja.'};}
- return{ok:true,word:w,display,analysis:L.lookup(w)[0]||null};
+ const w=key(lexical),alias=dictionaryAliases.get(strip(w));
+ const canonical=L.lookup(w).length?w:L.lookup(alias).length?alias:dictionary.has(w)?w:alias;
+ if(!canonical)return{ok:false,message:'«'+lexical+'» no está en el diccionario de Forja.'};
+ return{ok:true,word:canonical,display,analysis:L.lookup(canonical)[0]||null};
 }
 function tileContribution(t,char){
  let points=t.style==='wild'?0:letterValue(char||t.char),multi=0;

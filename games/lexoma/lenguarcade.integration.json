@@ -5,7 +5,7 @@
   "status": "en pruebas",
   "integration": "embedded",
   "entry": "games/lexoma/index.html",
-  "banner": "https://pablogarciablancov.github.io/lenguarcade/games/lexoma/assets/banner.svg",
+  "banner": "https://pablogarciablancov.github.io/lenguarcade/games/lexoma/assets/forja-cover-v1.webp",
   "requires": {
     "studentRunner": true,
     "saveProgress": true,
@@ -30,7 +30,7 @@
     "icon": "F",
     "entry": "games/lexoma/",
     "description": "Forma palabras, gana monedas, compra y mejora Cartas de Forja, depura tu bolsa y afronta eventos para construir una run distinta cada vez.",
-    "banner": "https://pablogarciablancov.github.io/lenguarcade/games/lexoma/assets/banner.svg",
+    "banner": "https://pablogarciablancov.github.io/lenguarcade/games/lexoma/assets/forja-cover-v1.webp",
     "active": true,
     "integration": "embedded"
   },

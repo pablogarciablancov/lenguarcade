@@ -22,7 +22,7 @@ add('mañana','noun',{gender:'f',number:'s'});
 for(const w of 'a ante bajo con contra de desde durante en entre hacia hasta mediante para por según sin sobre tras'.split(' '))add(w,'prep');
 for(const w of 'y e o u pero aunque porque si'.split(' '))add(w,'conj');
 const endings={ar:{presente:['o','as','a','amos','áis','an'],imperfecto:['aba','abas','aba','ábamos','abais','aban'],pretérito:['é','aste','ó','amos','asteis','aron']},er:{presente:['o','es','e','emos','éis','en'],imperfecto:['ía','ías','ía','íamos','íais','ían'],pretérito:['í','iste','ió','imos','isteis','ieron']},ir:{presente:['o','es','e','imos','ís','en'],imperfecto:['ía','ías','ía','íamos','íais','ían'],pretérito:['í','iste','ió','imos','isteis','ieron']}};
-const regular='amar cantar saltar mirar caminar cruzar jugar hablar soñar pintar estudiar ayudar nadar bailar viajar comprar formar ganar volar buscar tocar leer correr comer beber aprender vender temer comprender responder vivir escribir subir abrir recibir compartir partir';
+const regular='talar amar cantar saltar mirar caminar cruzar jugar hablar soñar pintar estudiar ayudar nadar bailar viajar comprar formar ganar volar buscar tocar leer correr comer beber aprender vender temer comprender responder vivir escribir subir abrir recibir compartir partir';
 // Cambios ortográficos y de raíz se registran explícitamente; no se inventan formas.
 const irregularPresent={jugar:['juego','juegas','juega','jugamos','jugáis','juegan'],soñar:['sueño','sueñas','sueña','soñamos','soñáis','sueñan'],volar:['vuelo','vuelas','vuela','volamos','voláis','vuelan']};
 for(const lemma of regular.split(' ')){

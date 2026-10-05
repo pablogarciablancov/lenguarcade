@@ -1,3 +1,12 @@
+## 2026-10-05 · FORJA
+
+- `node games/lexoma/dictionary-test.mjs`: talar/TALAR, saltar, cantar, mesa, perro, casa, jardín/jardin, rápido/rapido, Unicode descompuesto, Ñ, palabras inválidas, puntuación, guardado y fallos independientes de las fuentes.
+- `node games/lexoma/smoke-test.mjs`: economía, tienda, eventos, infinito y guardado anterior.
+- `node games/lexoma/browser-test.mjs`: UI y bridge; 1366×768, 1440×900, 1920×1080 y altura reducida, sin scroll general. Usar LEXOMA_CHROMIUM si hace falta; movimiento reducido en las pruebas para poder clicar fichas animadas.
+- `node games/lexoma/integration-browser-test.cjs`: tarjeta con portada, runner real y backend simulado, TALAR, XP idempotente, cierre y restauración central sin caché, responsive embebido.
+- `npm run catalog:sync` y `npm run check`: 15 juegos oficiales, sintaxis y comprobaciones generales.
+- La prueba local no acredita publicación del /exec estable. Actualizarlo con `npm.cmd run apps:publish -- "Integra FORJA y amplía su diccionario"` si no hay credenciales en este entorno.
+
 ## 2026-10-05 · Lexitrama
 
 - `npm run catalog:sync` y `npm run check`: catálogo de 14 juegos y checks generales, incluidas 300 campañas/semillas y 1450 cascadas de Lexitrama.

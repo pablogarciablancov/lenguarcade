@@ -1,3 +1,9 @@
+## 2026-10-05 · FORJA: diccionario y catálogo
+
+- Banco propio `games/lexoma/dictionary-es-extra.txt` (54.492 entradas RLA-ES) y análisis de talar, sin modificar Word Play. Diccionario combinado: 90.903 palabras, carga independiente de las dos fuentes y alias de tildes conservando Ñ/Ü.
+- FORJA incorporada como juego oficial 15, gameId lexoma, desde su manifest. Portada aportada en `games/lexoma/assets/forja-cover-v1.webp`, catálogo generado sincronizado y caché del menú versionada.
+- Mecánicas, economía, bridge y esquema de guardado conservados.
+
 ## 2026-10-05 · Integración de Lexitrama
 
 - PR #83: primera versión fusionada; rediseño recuperado del commit 5dd906f, contrastado con Lexitrama_prueba.html (scripts y escenario coincidentes; CSS usa los assets extraídos).
