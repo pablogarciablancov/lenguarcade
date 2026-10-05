@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 13,
+  "version": 14,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -315,6 +315,29 @@
       "active": true,
       "integration": "embedded",
       "sortOrder": 14
+    },
+    {
+      "id": "lexoma",
+      "official": true,
+      "name": "FORJA",
+      "subtitle": "Roguelite de palabras y builds",
+      "category": "Vocabulario y estrategia",
+      "competencies": [
+        "vocabulario",
+        "ortografía",
+        "morfología",
+        "estrategia",
+        "toma de decisiones"
+      ],
+      "status": "en pruebas",
+      "color": "#9dd8e7",
+      "icon": "F",
+      "entry": "games/lexoma/",
+      "description": "Forma palabras, gana monedas, compra y mejora Cartas de Forja, depura tu bolsa y afronta eventos para construir una run distinta cada vez.",
+      "banner": "https://pablogarciablancov.github.io/lenguarcade/games/lexoma/assets/forja-cover-v1.webp",
+      "active": true,
+      "integration": "embedded",
+      "sortOrder": 15
     }
   ]
 }

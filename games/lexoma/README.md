@@ -38,3 +38,9 @@ Mantiene el protocolo común de LenguArcade: READY / INIT / CHECKPOINT / RESULT 
 
 - `node games/lexoma/smoke-test.mjs`
 - `node games/lexoma/browser-test.mjs` con Playwright disponible.
+
+## Diccionario y portada (2026-10-05)
+
+Forja combina el diccionario compartido de frecuencia con `dictionary-es-extra.txt`: 54,492 entradas minúsculas de RLA-ES/Hunspell ya incluido en el repositorio (sin nombres propios ni expansión de sufijos). Licencia en `assets/RLA_ES_LICENSE.md`; regeneración: extraer la entrada antes de `/` de `../word_play/hunspell/es_ES.dic`, conservar solo letras españolas y minúsculas, ordenar y quitar duplicados. No convertir flags Hunspell en palabras ni generar conjugaciones indiscriminadamente. `talar` también tiene análisis verbal local y conjugaciones documentadas.
+
+Los alias sin acento preservan Ñ y Ü; las cartas reciben el análisis de la forma canónica. La portada del catálogo y del manifest es `assets/forja-cover-v1.webp`.
