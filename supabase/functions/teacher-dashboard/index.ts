@@ -990,8 +990,9 @@ Deno.serve(async (request) => {
       ].filter(item => item.at && Number.isFinite(Date.parse(item.at)))
         .sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
       const latestActivity = activityCandidates.pop() || { at:"", gameId:"", eventType:"" };
-      const latestGameActivity = activityCandidates.slice().reverse().find(item => item.gameId) ||
-        (latestActivity.gameId ? latestActivity : { at:"", gameId:"", eventType:"" });
+      const latestGameActivity = latestActivity.gameId
+        ? latestActivity
+        : (activityCandidates.slice().reverse().find(item => item.gameId) || { at:"", gameId:"", eventType:"" });
       const lastActivity = latestActivity.at;
       return {
         studentId:profile.id,
