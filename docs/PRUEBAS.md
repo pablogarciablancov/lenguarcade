@@ -599,3 +599,11 @@ Límites: el contador conserva el total de duelos; la lista guarda los 100 más 
 - Comprobar nombres y porcentajes de cumplimiento en misiones y talleres.
 - Comprobar ranking de clase, historial de misiones y logros generales en la vista de alumno.
 - Confirmar que Ranking y Misiones se refrescan al volver a esas pantallas.
+
+## Panel profesor · Juegos unificados (2026-10-05)
+- Ejecutar `npm run check`.
+- Verificar una fila por juego, sesiones integradas y portadas de FORJA/Sopa de Tinta.
+- Simular portada ausente y error de carga: queda visible el fondo con icono.
+- Cambiar clase y comprobar abrir/cerrar/solo este y acciones globales con el mismo ámbito.
+- Probar selectores con clic, flechas, Inicio/Fin, Escape, Tab y cierre exterior.
+- Comprobar 1366×768, 1440×900 y 1920×1080: sin solapamientos ni scroll horizontal.

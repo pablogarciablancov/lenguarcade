@@ -168,13 +168,14 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
 <style id="la-game-access-manager-style">
 .gameControlCard{min-width:0}.gameControlHead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px}.gameControlHead h2{margin:2px 0 4px}.gameControlHead p{margin:0}
 .gameControlScope{width:min(250px,100%);flex:0 0 230px}.gameControlQuick{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px;border:1px solid var(--line);border-radius:16px;background:rgba(124,77,255,.055);margin-bottom:12px}.gameControlQuick button{width:auto;margin:0}
-.gameControlList{display:grid;gap:8px}.gameControlRow{display:grid;grid-template-columns:minmax(180px,1fr) minmax(120px,.65fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}
-.gameControlInfo{display:flex;align-items:center;gap:9px;min-width:0}.gameControlInfo .gameIcon{font-size:20px}.gameControlInfo strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gameControlInfo small{display:block;color:var(--muted);margin-top:2px}
+.gameControlList{display:grid;gap:8px}.gameControlRow{display:grid;grid-template-columns:minmax(220px,1fr) minmax(120px,.45fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}
+.gameControlInfo{display:flex;align-items:center;gap:9px;min-width:0}.gameControlInfo .gameIcon{font-size:20px}.gameControlInfo strong{display:block;overflow-wrap:anywhere}.gameControlInfo small{display:block;color:var(--muted);margin-top:2px}
 .gameControlState{display:flex;align-items:center;gap:8px;min-width:0}.gameControlMeter{height:7px;flex:1;min-width:64px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.gameControlMeter span{display:block;height:100%;background:linear-gradient(90deg,#00d4ff,#7c4dff)}
 .gameControlPill{font-size:10px;font-weight:900;padding:5px 7px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}.gameControlPill.open{color:#70dda9}.gameControlPill.closed{color:#ff9e9e}.gameControlPill.mixed{color:#ffd782}.gameControlPill.empty{color:var(--muted)}
 .gameControlActions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.gameControlActions button{width:auto!important;margin:0!important;padding:7px 9px!important;font-size:11px!important;white-space:nowrap}
 .gameUsageSection{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}.gameUsageSection h3{margin:0 0 10px}
-@media(max-width:980px){.gameControlHead{align-items:stretch;flex-direction:column}.gameControlScope{width:100%;flex-basis:auto}.gameControlRow{grid-template-columns:1fr}.gameControlActions{justify-content:flex-start}}
+@media(max-width:1300px){.gameControlRow{grid-template-columns:minmax(0,1fr) auto}.gameControlState{grid-column:1}.gameControlActions{grid-column:2;grid-row:1 / 3}}
+@media(max-width:980px){.gameControlActions{grid-column:auto;grid-row:auto}.gameControlHead{align-items:stretch;flex-direction:column}.gameControlScope{width:100%;flex-basis:auto}.gameControlRow{grid-template-columns:1fr}.gameControlActions{justify-content:flex-start}}
 </style>
 </head>
 <body>
@@ -267,10 +268,6 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
               <span class="rosterPill" id="gameAccessScopeSummary">Cargando...</span>
             </div>
             <div class="gameControlList" id="gameAccessControlList"></div>
-            <div class="gameUsageSection">
-              <h3>Uso en el ámbito seleccionado</h3>
-              <div id="popularGames"></div>
-            </div>
             <div class="status" id="gameAccessControlStatus">Los cambios se aplican al instante y no borran ningún progreso.</div>
           </div>
         </section>
@@ -390,6 +387,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
     let currentPlayerDetailFocus='';
 
     function esc(value){return String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));}
+    function teacherGameIcon(id,icon){return id==='lexitrama'?'🧭':(icon||'🎮');}
     function bannerUrl(id,banner){const direct=String(banner||'');if(/^https:\/\//i.test(direct))return direct;return ASSET_BASE+((/\.(?:png|jpe?g|webp|svg)$/i.test(direct)?direct:'')||BANNERS[id]||'maniacgrafia-banner.jpg');}
     function showLoader(text){$('loaderText').textContent=text||'Cargando...';$('loader').classList.add('open');}
     function hideLoader(){$('loader').classList.remove('open');}
@@ -471,7 +469,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       document.querySelectorAll('.studentRow').forEach(row=>row.onclick=()=>openStudentDetail(row.dataset.student));
       document.querySelectorAll('[data-player-access]').forEach(button=>button.onclick=event=>{event.stopPropagation();openStudentDetail(button.dataset.playerAccess,'access');});
       renderGameAccessControl(data);
-      $('popularGames').innerHTML=(data.popularGames||[]).map(game=>`<div class="gameMini" style="--img:url('${bannerUrl(game.gameId)}')"><div><strong>${esc(game.icono||'')} ${esc(game.nombre)}</strong><span>${game.sessions} sesiones</span><div class="bar" style="margin-top:8px"><div class="fill" style="width:${game.percent}%"></div></div></div></div>`).join('')||'<div class="sub">Sin partidas todavía.</div>';
+
       $('errors').innerHTML=(data.errorSummary||[]).map(row=>`<div class="box"><strong>${esc(row.label)}</strong><br><span class="sub">${row.count} apariciones</span></div>`).join('')||'<div class="sub">Sin errores registrados.</div>';
       $('recommendations').innerHTML=(data.recommendations||[]).map(text=>`<div class="box">${esc(text)}</div>`).join('');
       renderFocus(data.focus,data.focusProgress||[]);
@@ -490,8 +488,14 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       $('gameAccessScopeSummary').textContent=total+' alumno'+(total===1?'':'s')+' · '+rows.length+' juegos';
       $('gameAccessControlList').innerHTML=rows.map(game=>{
         const percentage=game.total?Math.round((game.open/game.total)*100):0;
-        return `<div class="gameControlRow"><div class="gameControlInfo"><span class="gameIcon">${esc(game.icono||'🎮')}</span><div><strong>${esc(game.nombre)}</strong><small>${game.open} abiertos · ${game.closed} cerrados</small></div></div><div class="gameControlState"><div class="gameControlMeter"><span style="width:${percentage}%"></span></div><span class="gameControlPill ${esc(game.state)}">${esc(gameAccessStateLabel(game.state))}</span></div><div class="gameControlActions"><button type="button" class="ghost" data-bulk-game-open="${esc(game.gameId)}">Abrir</button><button type="button" class="dangerAction" data-bulk-game-close="${esc(game.gameId)}">Cerrar</button><button type="button" data-bulk-game-only="${esc(game.gameId)}" data-game-name="${esc(game.nombre)}">Solo este</button></div></div>`;
+        const metadata=(data.games||[]).find(row=>row.id===game.gameId)||{};
+        const usage=(data.popularGames||[]).find(row=>row.gameId===game.gameId)||{};
+        const icon=teacherGameIcon(game.gameId,game.icono);
+        const image=/^https:\/\//i.test(metadata.banner||'')||/\.(?:png|jpe?g|webp|svg)$/i.test(metadata.banner||'')?metadata.banner:BANNERS[game.gameId];
+        const art=image?`<img src="${esc(bannerUrl(game.gameId,image))}" alt="" loading="lazy">`:'';
+        return `<div class="gameControlRow"><div class="gameControlInfo"><span class="gameControlArt"><span aria-hidden="true">${esc(icon)}</span>${art}</span><div><strong><span class="gameIcon" aria-hidden="true">${esc(icon)}</span> ${esc(game.nombre)}</strong><small>${game.open} abiertos · ${game.closed} cerrados</small><small>${Number(usage.sessions||0)} sesiones registradas</small></div></div><div class="gameControlState"><div class="gameControlMeter"><span style="width:${percentage}%"></span></div><span class="gameControlPill ${esc(game.state)}">${esc(gameAccessStateLabel(game.state))}</span></div><div class="gameControlActions"><button type="button" class="ghost" data-bulk-game-open="${esc(game.gameId)}">Abrir</button><button type="button" class="dangerAction" data-bulk-game-close="${esc(game.gameId)}">Cerrar</button><button type="button" data-bulk-game-only="${esc(game.gameId)}" data-game-name="${esc(game.nombre)}">Solo este</button></div></div>`;
       }).join('')||'<div class="sub">No hay juegos disponibles.</div>';
+      $('gameAccessControlList').querySelectorAll('img').forEach(img=>{img.addEventListener('error',()=>{img.style.visibility='hidden';});img.addEventListener('load',()=>{img.style.visibility='visible';});});
       document.querySelectorAll('[data-bulk-game-open]').forEach(button=>button.onclick=()=>changeBulkGameAccess({gameId:button.dataset.bulkGameOpen,enabled:true}));
       document.querySelectorAll('[data-bulk-game-close]').forEach(button=>button.onclick=()=>changeBulkGameAccess({gameId:button.dataset.bulkGameClose,enabled:false}));
       document.querySelectorAll('[data-bulk-game-only]').forEach(button=>button.onclick=()=>{
@@ -553,7 +557,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
         const enabled=game.enabled!==false&&game.accessEnabled!==false;
         const gameId=game.gameId||'';
         const gameName=game.gameName||game.nombre||gameId;
-        const icon=game.icono||'🎮';
+        const icon=teacherGameIcon(gameId,game.icono);
         return `<div class="gameAccessRow ${enabled?'':'closed'}"><div class="gameAccessName"><span>${esc(icon)}</span><div><strong>${esc(gameName)}</strong><span class="gameAccessState">${enabled?'Acceso abierto':'Acceso cerrado para este jugador'}</span></div></div><button type="button" class="${enabled?'dangerAction':'ghost'}" data-toggle-game-access="${esc(gameId)}" data-next-enabled="${enabled?'0':'1'}">${enabled?'Cerrar':'Abrir'}</button></div>`;
       }).join('')||'<div class="sub">No hay juegos disponibles.</div>';
       document.querySelectorAll('[data-toggle-game-access]').forEach(button=>button.onclick=()=>setPlayerGameAccess(button.dataset.toggleGameAccess,button.dataset.nextEnabled==='1'));
@@ -1071,7 +1075,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       grid.innerHTML=selected?(state.games||[]).map(function(game){
         var open=!!game.enabled;
         return '<div class="workshopGameRow '+(open?'':'isClosed')+'" data-workshop-game="'+workshopEsc(game.gameId)+'">'+
-          '<div class="workshopGameIcon" style="--workshop-img:url(\''+workshopEsc(typeof bannerUrl==='function'?bannerUrl(game.gameId):'')+'\')"><span>'+workshopEsc(game.icono||'🎮')+'</span></div>'+
+          '<div class="workshopGameIcon" style="--workshop-img:url(\''+workshopEsc(typeof bannerUrl==='function'?bannerUrl(game.gameId):'')+'\')"><span>'+workshopEsc(teacherGameIcon(game.gameId,game.icono))+'</span></div>'+
           '<div class="workshopGameInfo"><strong>'+workshopEsc(game.nombre)+'</strong><span>'+workshopEsc(teacherGameLabel(game))+'</span></div>'+
           '<button type="button" class="workshopToggle '+(open?'isOpen':'isClosed')+'" data-workshop-toggle="'+workshopEsc(game.gameId)+'" data-enabled="'+(open?'1':'0')+'">'+(open?'Abierto':'Cerrado')+'</button>'+
         '</div>';
@@ -1389,7 +1393,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     var catalog=workshopPlannerState&&workshopPlannerState.catalog||[];
     body.innerHTML='<div class="workshopEditorIntro"><div><h3>'+(plan.planId?'Editar sesión':'Nueva sesión')+'</h3><div class="sub">'+(plan.planId?'Los cambios quedan guardados en esta preparación. No afectan a los alumnos hasta que la abras.':'Elige una plantilla o prepara la sesión desde cero.')+'</div></div>'+(plan.planId?'<span class="workshopSessionState closed">Preparada</span>':'')+'</div><input id="workshopPlanId" type="hidden" value="'+sessionEsc(plan.planId||'')+'"><div class="workshopTemplateBar"><button type="button" class="workshopTemplateBtn" data-workshop-template="game"><strong>🎮 Sesión de juego</strong><span>Selecciona juegos y abre la clase cuando llegue el momento.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="xp"><strong>🎯 Reto de XP</strong><span>Prepara una sesión con objetivo visible de progreso.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="home"><strong>🏠 Trabajo en casa</strong><span>Deja preparado un horario de acceso fuera del aula.</span></button></div><div id="workshopTemplateFeedback" class="workshopTemplateFeedback">Elige una plantilla para rellenar automáticamente los campos principales.</div><div class="workshopEditorSteps">'+
       '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">1</span><div><strong>Identifica y comparte la sesión</strong><span>Prepara el taller una sola vez y asígnalo a todas las clases que lo vayan a utilizar.</span></div></div><div class="workshopFormGrid"><div class="field wide"><label>Clases que comparten esta preparación</label><div id="workshopPlanClasses" class="workshopClassPicker">'+classes.map(function(row){return '<label class="workshopClassChoice"><input type="checkbox" data-plan-class value="'+sessionEsc(row.classCode)+'" '+(selectedClasses[row.classCode]?'checked':'')+'> '+sessionEsc(row.nombreVisible)+'</label>';}).join('')+'</div><div class="workshopClassTools"><button type="button" id="workshopClassOnlyCurrent">Solo esta clase</button><button type="button" id="workshopClassAll">Seleccionar todas</button></div><div class="workshopClassShareHint">Compartir la preparación no abre el taller en todas a la vez: cada clase lo activa cuando le toca.</div></div><div class="field"><label>Título de la sesión</label><input id="workshopSessionTitle" type="text" maxlength="80" placeholder="Ej.: Taller 3 · Cazadores de tildes" value="'+sessionEsc(plan.title||'')+'"></div><div class="field"><label>Fecha prevista <span class="sub">(solo organización)</span></label><input id="workshopPlannedAt" type="datetime-local" value="'+sessionEsc(plan.plannedAt||'')+'"></div><div class="field wide"><label>Mensaje / instrucciones para los alumnos</label><textarea id="workshopSessionMessage" maxlength="400" placeholder="Ej.: Hoy trabajamos ortografía. Completa dos partidas y trata de superar el reto de XP.">'+sessionEsc(plan.message||'')+'</textarea></div><div class="field"><label>Objetivo de XP (opcional)</label><input id="workshopSessionXp" type="number" min="0" step="25" value="'+sessionEsc(Number(plan.targetXp||0))+'"></div></div></section>'+
-      '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">2</span><div><strong>Elige los juegos de esta sesión</strong><span>Al abrirla, solo estos juegos quedarán disponibles para la clase.</span></div></div><div id="workshopSessionGames" class="workshopGamePicker">'+catalog.map(function(game){var image=typeof bannerUrl==='function'?bannerUrl(game.gameId):'';return '<label class="workshopPick"><span class="workshopPickArt" style="--pick-img:url(\''+sessionEsc(image)+'\')">'+sessionEsc(game.icono||'🎮')+'</span><span><strong>'+sessionEsc(game.nombre)+'</strong><small>'+sessionEsc(game.categoria||game.subtitulo||'LenguArcade')+'</small></span><input type="checkbox" data-session-game value="'+sessionEsc(game.gameId)+'" '+(selected[String(game.gameId)]?'checked':'')+'></label>';}).join('')+'</div></section>'+
+      '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">2</span><div><strong>Elige los juegos de esta sesión</strong><span>Al abrirla, solo estos juegos quedarán disponibles para la clase.</span></div></div><div id="workshopSessionGames" class="workshopGamePicker">'+catalog.map(function(game){var image=typeof bannerUrl==='function'?bannerUrl(game.gameId):'';return '<label class="workshopPick"><span class="workshopPickArt" style="--pick-img:url(\''+sessionEsc(image)+'\')">'+sessionEsc(teacherGameIcon(game.gameId,game.icono))+'</span><span><strong>'+sessionEsc(game.nombre)+'</strong><small>'+sessionEsc(game.categoria||game.subtitulo||'LenguArcade')+'</small></span><input type="checkbox" data-session-game value="'+sessionEsc(game.gameId)+'" '+(selected[String(game.gameId)]?'checked':'')+'></label>';}).join('')+'</div></section>'+
       '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">3</span><div><strong>Acceso opcional desde casa</strong><span>Úsalo solo si quieres que esta misma sesión esté disponible durante un horario concreto fuera del colegio.</span></div></div><div class="workshopHomeBox"><div class="workshopHomeHead"><div><strong>🏠 Permitir acceso en casa</strong><div class="sub">El horario se activa y caduca automáticamente.</div></div><label><input id="workshopHomeEnabled" type="checkbox" '+(plan.homeEnabled?'checked':'')+'> Activar</label></div><div id="workshopHomeTimes" class="workshopHomeTimes '+(plan.homeEnabled?'':'isDisabled')+'"><div class="field"><label>Desde</label><input id="workshopHomeStart" type="datetime-local" value="'+sessionEsc(plan.homeStart||'')+'"></div><div class="field"><label>Hasta</label><input id="workshopHomeEnd" type="datetime-local" value="'+sessionEsc(plan.homeEnd||'')+'"></div></div></div></section>'+
       '</div><div class="workshopEditorActions"><button type="button" id="workshopPlanSave">💾 Guardar preparación</button><button type="button" id="workshopPlanSaveOpen">▶ Guardar y abrir ahora</button><button type="button" class="homeAction" id="workshopPlanSaveHome">🏠 Guardar y activar horario de casa</button><button type="button" class="secondaryAction" id="workshopPlanCancel">Limpiar editor</button></div><div class="workshopPlannerStatus" id="workshopPlannerStatus"></div>';
     document.getElementById('workshopHomeEnabled').onchange=function(){document.getElementById('workshopHomeTimes').classList.toggle('isDisabled',!this.checked);};
@@ -2755,7 +2759,7 @@ body.light .teacherMonitorTable th{background:#fff}
   function renderQuick(data){
     var games=(data.games||[]).filter(function(game){return !String(game.status||'').toLowerCase().includes('coming');});
     var previous=q('todayQuickGame')?q('todayQuickGame').value:'';
-    var options=games.map(function(game){return '<option value="'+safe(game.id)+'">'+safe((game.icon||'🎮')+' '+(game.name||game.id))+'</option>';}).join('');
+    var options=games.map(function(game){return '<option value="'+safe(game.id)+'">'+safe(teacherGameIcon(game.id,game.icon)+' '+(game.name||game.id))+'</option>';}).join('');
     var openCount=(data.gameAccessOverview||[]).filter(function(row){return row.state==='open';}).length;
     var total=(data.gameAccessOverview||[]).length;
     return '<div class="teacherCommandPanel"><div class="teacherCommandPanelHead"><div><div class="teacherCommandEyebrow">CONTROL RÁPIDO</div><h3>Qué pueden jugar</h3></div><span class="teacherSessionBadge '+(openCount?'':'off')+'">'+openCount+'/'+total+' abiertos</span></div>'+
@@ -2846,6 +2850,42 @@ body.light .teacherMonitorTable th{background:#fff}
     setInterval(silentRefresh,REFRESH_MS);
   }
   install();
+})();
+</script>
+
+
+<style>
+.gameControlArt{position:relative;flex:0 0 96px;height:60px;display:grid;place-items:center;overflow:hidden;border-radius:10px;background:radial-gradient(circle at 20% 10%,rgba(0,212,255,.4),transparent 65%),linear-gradient(135deg,#26234d,#121a33);border:1px solid var(--line)}
+.gameControlArt>span{font-size:30px;color:#fff}.gameControlArt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.gameControlInfo>div{min-width:0}.gameControlInfo .gameIcon{font-size:16px}
+.teacherPickerNative{display:none}.teacherPicker{position:relative;min-width:0;width:100%}.teacherPickerButton{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin:0;text-align:left;padding:12px 13px;background:var(--surface);color:var(--text);border:1px solid var(--line);box-shadow:none;font-weight:600}.teacherPickerButton span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.teacherPickerButton:focus-visible,.teacherPickerOption:focus-visible{outline:2px solid var(--secondary);outline-offset:2px}
+.teacherPickerMenu{position:fixed;z-index:70;overflow:auto;padding:6px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}.teacherPickerOption{display:block;width:100%;margin:0;padding:10px 12px;background:transparent;box-shadow:none;color:var(--text);font-weight:500;text-align:left;border-radius:9px;overflow-wrap:anywhere}.teacherPickerOption:hover,.teacherPickerOption[aria-selected="true"]{background:rgba(124,77,255,.22)}
+@media(max-width:600px){.gameControlArt{flex-basis:72px;height:54px}.gameControlInfo strong{font-size:14px}}
+</style>
+<script>
+(function(){
+  const ids=['classSelect','gameSelect','studentsClassSelect','gameAccessClassSelect','todayQuickGame'];
+  let active=null;
+  function close(returnFocus=false){if(!active)return;const old=active;active=null;old.menu.remove();old.button.setAttribute('aria-expanded','false');if(returnFocus)old.button.focus();}
+  function enhance(select){
+    if(select.classList.contains('teacherPickerNative'))return;
+    const wrap=document.createElement('div');wrap.className='teacherPicker';
+    const button=document.createElement('button');button.type='button';button.className='teacherPickerButton';button.setAttribute('aria-haspopup','listbox');button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls',select.id+'Menu');
+    select.before(wrap);wrap.append(select,button);select.classList.add('teacherPickerNative');
+    function sync(){const label=select.closest('.field')?.querySelector('label')?.textContent||document.querySelector('label[for="'+select.id+'"]')?.textContent||'Seleccionar';const value=select.options[select.selectedIndex]?.textContent||'Selecciona…';button.replaceChildren();const text=document.createElement('span');text.textContent=value;button.append(text,document.createTextNode('▾'));button.setAttribute('aria-label',label+': '+value);button.disabled=select.disabled||busy;if(active?.select===select)close();}
+    function open(){
+      close();const rect=button.getBoundingClientRect(),menu=document.createElement('div');menu.id=select.id+'Menu';menu.className='teacherPickerMenu';menu.setAttribute('role','listbox');menu.setAttribute('aria-label',button.getAttribute('aria-label'));
+      const availableBelow=innerHeight-rect.bottom-12,above=availableBelow<150&&rect.top>availableBelow,height=Math.min(300,above?rect.top-12:availableBelow);
+      const width=Math.min(Math.max(rect.width,220),innerWidth-24);menu.style.width=width+'px';menu.style.left=Math.max(12,Math.min(rect.left,innerWidth-width-12))+'px';menu.style.maxHeight=Math.max(80,height)+'px';if(above)menu.style.bottom=(innerHeight-rect.top+6)+'px';else menu.style.top=(rect.bottom+6)+'px';
+      Array.from(select.options).forEach(option=>{const item=document.createElement('button');item.type='button';item.className='teacherPickerOption';item.setAttribute('role','option');item.setAttribute('aria-selected',String(option.selected));item.textContent=option.textContent;item.disabled=option.disabled;item.onclick=()=>{select.value=option.value;close(true);select.dispatchEvent(new Event('change',{bubbles:true}));sync();};menu.append(item);});
+      document.body.append(menu);active={menu,button,select};button.setAttribute('aria-expanded','true');(menu.querySelector('[aria-selected="true"]:not(:disabled)')||menu.querySelector('button:not(:disabled)'))?.focus();
+      menu.onkeydown=event=>{const items=Array.from(menu.querySelectorAll('button:not(:disabled)')),index=items.indexOf(document.activeElement);let next=null;if(event.key==='ArrowDown')next=(index+1)%items.length;if(event.key==='ArrowUp')next=(index-1+items.length)%items.length;if(event.key==='Home')next=0;if(event.key==='End')next=items.length-1;if(event.key.length===1){next=items.findIndex((item,i)=>i>index&&item.textContent.toLocaleLowerCase('es').startsWith(event.key.toLocaleLowerCase('es')));if(next<0)next=items.findIndex(item=>item.textContent.toLocaleLowerCase('es').startsWith(event.key.toLocaleLowerCase('es')));if(next<0)next=null;}if(next!==null&&items[next]){event.preventDefault();items[next].focus();}if(event.key==='Escape'){event.preventDefault();close(true);}if(event.key==='Tab')close(true);};
+    }
+    button.onclick=()=>active?.button===button?close():open();button.onkeydown=event=>{if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();open();}};
+    new MutationObserver(sync).observe(select,{childList:true,subtree:true,attributes:true});select.addEventListener('change',sync);sync();
+  }
+  function scan(){ids.forEach(id=>{const select=document.getElementById(id);if(select)enhance(select);});if(active&&!active.button.isConnected)close();}
+  document.addEventListener('pointerdown',event=>{if(active&&!active.menu.contains(event.target)&&!active.button.contains(event.target))close();});window.addEventListener('resize',()=>close());document.addEventListener('scroll',event=>{if(active&&!active.menu.contains(event.target))close();},true);
+  new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});scan();
 })();
 </script>
 
