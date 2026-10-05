@@ -57,3 +57,9 @@ LEXITRAMA_SCREENSHOTS=/ruta/temporal CHROMIUM_PATH=/ruta/a/chromium node games/l
 El test de motor cubre 300 combinaciones campaña/semilla y 1450 jugadas/cascadas, reproducibilidad, guardado, alumnos, reloj, jefe, Lexifuria, todas las fichas, tildes y bridge con fallo/reintento/confirmación. El test de navegador prueba arrastre real, teclado, gesto táctil de Chromium, victoria, recarga, jefe, restauración mediante host de iframe simulado y salida confirmada. Comprueba 1366×768, 1440×900, 1920×1080, contenedor de 620 px y móvil 390×844.
 
 Pendiente de validación final tras integración: guardado en el servidor real, XP/logros globales, cierre por profesor en `/exec`, catálogo alumno/profesor y publicación coordinada. La prueba de iframe simula el servidor; no reemplaza esas comprobaciones en producción.
+
+## Rediseño visual de la prueba
+
+Escenario ilustrado propio (`assets/atlas-scene.webp`) generado para el juego: un Atlas mágico en un bosque nocturno, con espacio oscuro para los controles. Menú de expediciones con acción principal, iconos vectoriales, perfil y estadísticas compactas; regiones con hitos y rutas de etapas; HUD con contexto de mundo y tablero de fichas talladas con marco metálico. Solo cambia presentación y marcado de las vistas; motor, banco y protocolo de guardado se conservan.
+
+Validado con `browser-test.cjs`: selección con ratón, teclado y táctil, victoria, jefe, guardado/restauración y cierre confirmado en host simulado, tres resoluciones de escritorio, contenedor de 620 px y móvil. También se comprobó el HTML autónomo por `file://`, con assets incrustados, selección, guardado/recarga y menú responsive.

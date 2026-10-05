@@ -1,3 +1,11 @@
+## 2026-10-05 · Integración de Lexitrama
+
+- PR #83: primera versión fusionada; rediseño recuperado del commit 5dd906f, contrastado con Lexitrama_prueba.html (scripts y escenario coincidentes; CSS usa los assets extraídos).
+- Manifest procesado desde integration/*: juego oficial 14, portada ilustrada versionada en lenguarcade-assets y catálogo generado.
+- Perfil y partidas mediante el runner existente. Avance del Atlas en métricas; XP autoritativo sin recompensas por repetir guardados y 39 logros reportados al portal.
+- Salida voluntaria del juego comunica la intención al runner, incluida la gracia docente. Se conservan motor, contenidos, progresión y guardados v1.
+- No se requieren cambios de esquema, migraciones ni despliegues nuevos. Apps Script debe actualizarse con el flujo habitual y verificarse en /exec; esta máquina carece de credenciales clasp.
+
 # Registro de cambios
 
 ## 2026-09-30 · Conexión, guardado y Tierras de Tinta nativa

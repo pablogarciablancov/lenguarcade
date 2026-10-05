@@ -14,7 +14,7 @@ const canonicalMigration=fs.readFileSync(path.join(root,"supabase","migrations",
 
 if(catalog.schema!=="lenguarcade-game-catalog-v1") throw new Error("Catálogo: schema canónico incorrecto.");
 const official=catalog.games.filter(game=>game.official);
-if(official.length!==13) throw new Error("Catálogo: deben existir exactamente 13 juegos oficiales.");
+if(official.length!==14) throw new Error("Catálogo: deben existir exactamente 14 juegos oficiales.");
 
 const ids=new Set();
 for(const game of catalog.games){
@@ -96,6 +96,7 @@ if(catalog.games.some(game=>/rim[oó]polis/i.test(game.id+" "+game.name)) ||
 }
 
 for(const expected of [
+  ["lexitrama","games/lexitrama/","lexitrama-banner-v1.svg"],
   ["versopolis","games/versopolis/","versopolis-banner.jpg"],
   ["lexaria","games/lexaria/","lexaria-banner-v2.webp"],
   ["tower_defense","games/tower_defense/","tower-defense-banner-v2.webp"]
@@ -125,4 +126,4 @@ for(const [label,html] of [["alumno",student],["profesor",teacher]]){
     if(!html.includes(pair[0]+":'"+pair[1]+"'")) throw new Error("Falta portada de "+pair[0]+" en el panel de "+label+".");
   }
 }
-console.log("Catálogo canónico LenguArcade: 13 juegos oficiales; catálogo e integraciones principales sincronizados.");
+console.log("Catálogo canónico LenguArcade: 14 juegos oficiales; catálogo e integraciones principales sincronizados.");
