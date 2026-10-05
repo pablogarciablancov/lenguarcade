@@ -48,8 +48,29 @@ let bombPath=customBoard('bomb'),neighborUid=E.state.board[5].uid;E.submit(bombP
 let wildPath=customBoard('wild');E.state.board[0].letter='Z';assert.equal(E.submit(wildPath).word,'casa');
 let sealPath=customBoard('normal','verbo','casa');E.state.board[10].kind='sealed';const sealUid=E.state.board[10].uid;let nonGoal=E.submit(sealPath);assert(nonGoal.ok&&!nonGoal.goal);assert(E.state.board.some(t=>t.uid===sealUid&&t.kind==='sealed'),'Una palabra ajena a la misión no abre sellos');
 let goalPath=E.route(E.state.guaranteed);E.submit(goalPath);assert(!E.state.board.some(t=>t.kind==='sealed'));
-customBoard();E.state.board[10].kind='corrupt';E.state.board[10].age=3;let corruptUid=E.state.board[10].uid;E.submit([0,1,2,3]);assert(E.state.board.some(t=>t.uid===corruptUid&&t.kind==='normal'));
+customBoard();E.state.board[10].kind='corrupt';E.state.board[10].age=3;let corruptUid=E.state.board[10].uid;const corruptedAnswer=E.submit([0,1,2,3]);assert.equal(E.state.score,corruptedAnswer.points-20);assert(!E.state.board.some(t=>t.uid===corruptUid&&t.kind==='corrupt'),'La corrupción caduca incluso si el rescate repone esa ficha');
 let accentPath=customBoard('normal','hiato','río');assert(E.submit(accentPath).goal);accentPath=customBoard('normal','hiato','rio');assert(!E.submit(accentPath).ok);
+
+// Categorías compartidas, flexiones y clasificación ortográfica del mismo banco.
+const belongs=(mission,word)=>{assert(C.byWord.has(word),`Falta ${word}`);return C.missions.find(m=>m.id===mission).test(C.byWord.get(word));};
+for(const word of ['seto','setos','arbusto','arbustos','helecho','helechos','hiedra','zarza','hojarasca','bellota','pinar','arroyo','jabalí','jabalíes','búho','búhos','árbol','árboles','raíz','raíces','río','ríos','arboleda','arboledas']){
+  assert(C.byWord.has(word),`Falta ${word}`);assert(belongs('bosque',word),`${word} debe servir en bosque`);
+}
+for(const word of ['pulpo','pulpos','delfín','ballena','boya','boyas','mástil','mástiles','marinero','marineros','atún','atunes','ola','olas','pez','peces'])assert(belongs('mar',word),`${word} debe servir en mar`);
+for(const [word,fields] of [['sal',['mar','comida']],['agua',['mar','bosque','comida']],['oso',['bosque','animales']],['libro',['escuela']]])for(const field of fields)assert(C.byWord.get(word).semanticFields.includes(field),`${word}: no perder ${field}`);
+assert.equal(C.byWord.get('arboleda').family,'árbol');assert.equal(C.byWord.get('arboledas').family,'árbol');
+assert(belongs('sufijos','arboleda'));assert(belongs('sufijos','arboledas'));assert(belongs('verbo','nada'));assert(belongs('pronombre','nada'));assert(belongs('presente','nada'));
+for(const [word,tag] of [['seto','llana'],['setos','llana'],['helecho','llana'],['árboles','esdrújula'],['raíces','hiato'],['ríos','hiato'],['búho','hiato'],['buque','llana'],['guerra','llana'],['agua','diptongo'],['tierra','diptongo'],['sauce','diptongo'],['marea','hiato'],['océano','esdrújula'],['jabalí','aguda'],['atunes','llana'],['vivíamos','esdrújula']])assert(belongs(tag,word),`${word}: falta ${tag}`);
+assert(!C.byWord.has('árbols'));assert(!C.byWord.has('atúns'));assert(!belongs('bosque','tenedor'));assert(!belongs('mar','seto'));assert(!belongs('diptongo','buque'));assert(!belongs('diptongo','guerra'));
+// Tablero exacto de la captura: SETO conecta cuatro casillas vecinas sin ser rechazado.
+E.abandon();E.create({levelId:'bosque_2',seed:'seto-screenshot'});
+const capture=['E','R','B','R','L','O','O','T','?','I','E','E','E','V','R','S'];
+E.state.board.forEach((tile,i)=>Object.assign(tile,{letter:capture[i],kind:i===8?'wild':'normal',hits:1}));
+const screenshotAnswer=E.submit([15,10,7,6]);assert(screenshotAnswer.ok&&screenshotAnswer.goal);assert.equal(screenshotAnswer.word,'seto');assert.equal(E.state.errors,0);assert.equal(E.state.progress,1);
+// El diccionario ampliado funciona sin regenerar la partida guardada anterior.
+const oldSave=E.snapshot();oldSave.run.completed=false;oldSave.run.board.forEach((tile,i)=>Object.assign(tile,{letter:capture[i],kind:i===8?'wild':'normal'}));oldSave.run.used=[];
+const boardBefore=JSON.stringify(oldSave.run.board);E.initialize({studentId:'expanded-fields'},oldSave,true);assert.equal(JSON.stringify(E.state.board),boardBefore);assert(E.submit([15,10,7,6]).goal);
+console.log('Campos y flexiones OK: SETO en el tablero de la captura, categorías compartidas, plurales, homógrafos, ortografía y guardados anteriores.');
 
 // Host simulado: escrituras serializadas, aislamiento del canal y salida confirmada.
 const messages=[],events=new Map(),timers=new Map();let timerId=0;

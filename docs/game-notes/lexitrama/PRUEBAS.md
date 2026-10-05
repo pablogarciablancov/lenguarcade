@@ -1,3 +1,10 @@
+## 2026-10-05 · Regresión de categorías
+
+- `node scripts/check-lexitrama.mjs`: 300 campañas/semillas y 1450 cascadas, campos compartidos, plurales con tilde, homógrafos y misiones ortográficas. SETO aceptado en el tablero exacto de la captura y en un guardado v1 restaurado, sin cambiar sus letras.
+- `node games/lexitrama/browser-test.cjs`: arrastre real de S-E-T-O en ese tablero: suma un objetivo del bosque y no añade errores; también teclado, táctil, victoria, guardado, jefe y responsive.
+- `node games/lexitrama/integration-browser-test.cjs`: runner real con persistencia de prueba, XP, logros, salida/continuación, gracia, reapertura y cierre automático.
+- Publicación solo del juego mediante PR game/* y GitHub Pages; sin cambios en Apps Script o Supabase.
+
 # Pruebas de Lexitrama
 
 ## Ejecutadas
