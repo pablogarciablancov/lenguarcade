@@ -607,3 +607,10 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - La web del alumno carga el ranking real de su clase y destaca su posición.
 - El alumno dispone de historial de resultados de misiones y de los logros generales de LenguArcade con fecha de desbloqueo.
 - Ranking y misiones se refrescan al volver a sus pantallas sin exigir una recarga manual completa.
+
+## 2026-10-05 · Panel profesor: Juegos unificados
+- Una fila por juego combina portada, acceso, sesiones registradas y acciones existentes.
+- Usa el banner recibido del catálogo y muestra un fondo con icono si falta o falla.
+- Selectores de clase y juego en Hoy, filtros y Juegos con menú propio y navegación por teclado.
+- Lexitrama utiliza una brújula en el panel docente, diferenciándose de Lexaria.
+- Sin cambios de backend, permisos, catálogo, autenticación ni juegos.
