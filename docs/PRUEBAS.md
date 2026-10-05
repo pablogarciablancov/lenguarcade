@@ -1,3 +1,10 @@
+## 2026-10-05 · Lexitrama
+
+- `npm run catalog:sync` y `npm run check`: catálogo de 14 juegos y checks generales, incluidas 300 campañas/semillas y 1450 cascadas de Lexitrama.
+- `node games/lexitrama/browser-test.cjs`: Chromium con arrastre, teclado, táctil, victoria, recarga, jefe y perfil. 1366×768, 1440×900, 1920×1080, iframe de 620 px y móvil 390×844; sin scroll general ni errores JS.
+- `node games/lexitrama/integration-browser-test.cjs`: runner extraído del HTML real y persistencia de prueba con el cálculo autoritativo real. Carga, perfil, guardado central, XP idempotente, logros, salida y restauración sin caché; gracia de 60 s, guardado durante gracia, reapertura, salida voluntaria, checkpoint al agotarse el minuto y fallo/reintento.
+- Pendiente de credenciales: actualizar el /exec estable mediante `npm.cmd run apps:publish -- "Integra Lexitrama y conserva su diseño ilustrado"` y repetir con alumno/profesor reales. Las pruebas locales no demuestran publicación de Apps Script ni uso con alumnos reales.
+
 # Plan de pruebas
 
 ## Conexión y Tierras de Tinta (2026-09-30)

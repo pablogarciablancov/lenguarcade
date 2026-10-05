@@ -20,7 +20,7 @@
   function participant(outcome='checkpoint') {
     const s=E.state,correct=s?.correct||0,errors=s?.errors||0;
     const accuracy=correct+errors?Math.round(correct/(correct+errors)*100):0;
-    const metrics={score:s?.score||0,correct,errors,attempts:correct+errors,accuracy,grade:accuracy/10,percentage:s?Math.min(100,Math.round(s.progress/s.goal*100)):0,maxCombo:s?E.multiplier():1,mode:s?.mode||'menu',stars:s?.stars||0,words:correct,longestWord:s?.longest||0,content:s?.mission||'',completed:!!s?.completed,won:!!s?.won};
+    const metrics={score:s?.score||0,correct,errors,attempts:correct+errors,accuracy,grade:accuracy/10,percentage:Math.round(Object.keys(E.career?.stars||{}).length/C.levels.length*100),maxCombo:s?E.multiplier():1,mode:s?.mode||'menu',stars:s?.stars||0,words:correct,longestWord:s?.longest||0,content:s?.mission||'',completed:!!s?.completed,won:!!s?.won};
     const achievements=C.achievements.filter(a=>E.career?.achievements[a.id]).map(a=>({id:`lexitrama_${a.id}`,title:a.name,description:a.description,xpReward:25}));
     return {role:'primary',outcome,...metrics,metrics,achievements,save:E.snapshot()};
   }
@@ -63,6 +63,7 @@
     if(exitCheckpoint)return;
     clearTimeout(changeTimer);
     exitCheckpoint=checkpoint('exit');
+    post('REQUEST_EXIT');
     // CLOSE_READY se envía únicamente tras la confirmación real del host.
   }
   function ancestor(source){let p=window;for(let i=0;i<5;i++){if(p.parent===p)break;p=p.parent;if(source===p)return true;}return false;}

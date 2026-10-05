@@ -5,14 +5,34 @@
   "status": "en pruebas",
   "integration": "embedded",
   "entry": "games/lexitrama/index.html",
-  "banner": "games/lexitrama/assets/banner.svg",
-  "requires": { "studentRunner": true, "saveProgress": true, "supabaseCatalog": true },
-  "catalogEntry": {
-    "id": "lexitrama", "official": true, "name": "Lexitrama", "subtitle": "El Atlas de las Palabras",
-    "category": "Puzle lingüístico", "competencies": ["léxico", "morfología", "verbos", "ortografía", "acentuación"],
-    "status": "en pruebas", "color": "#83edc9", "icon": "✦", "entry": "games/lexitrama/",
-    "description": "Conecta letras vecinas, cumple misiones de Lengua y explora cinco mundos con gravedad, combos, jefes y progresión.",
-    "banner": "games/lexitrama/assets/banner.svg", "active": true, "integration": "embedded"
+  "banner": "lexitrama-banner-v1.svg",
+  "requires": {
+    "studentRunner": true,
+    "saveProgress": true,
+    "supabaseCatalog": true
   },
-  "notes": "Pendiente de integración coordinada desde integration/*: asignar sortOrder vigente, añadir al catálogo canónico y actualizar las comprobaciones que fijan exactamente 13 juegos. El renderer actual de banners puede requerir una ruta de asset o copiar el SVG al repositorio lenguarcade-assets. No cambiar listas paralelas. Bridge genérico READY/INIT, SESSION_STARTED, CHECKPOINT/CONFIRMED/FAILED, RESULT/SAVE_CONFIRMED/SAVE_FAILED, REQUEST_EXIT/CLOSE_READY y bootstrap window.name. El runner gestiona cierre remoto y minuto de gracia; se responde a REQUEST_CHECKPOINT y REQUEST_EXIT manteniendo el guardado hasta confirmación. No requiere cambios en auth o en el esquema del backend. Validar en /exec tras publicación coordinada."
+  "catalogEntry": {
+    "id": "lexitrama",
+    "official": true,
+    "name": "Lexitrama",
+    "subtitle": "El Atlas de las Palabras",
+    "category": "Puzle lingüístico",
+    "competencies": [
+      "léxico",
+      "morfología",
+      "verbos",
+      "ortografía",
+      "acentuación"
+    ],
+    "status": "en pruebas",
+    "color": "#83edc9",
+    "icon": "✦",
+    "entry": "games/lexitrama/",
+    "description": "Conecta letras vecinas, cumple misiones de Lengua y explora cinco mundos con gravedad, combos, jefes y progresión.",
+    "banner": "lexitrama-banner-v1.svg",
+    "active": true,
+    "integration": "embedded",
+    "sortOrder": 14
+  },
+  "notes": "Procesado desde integration/2026-10-05-lexitrama: catálogo canónico, portada ilustrada, runner genérico y guardado central autoritativo. Sin cambios de autenticación ni esquema. Publicación estable de Apps Script y verificación /exec requeridas."
 }

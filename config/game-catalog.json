@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 12,
+  "version": 13,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -292,6 +292,29 @@
       "banner": "lexaria-banner-v2.webp",
       "active": true,
       "integration": "embedded"
+    },
+    {
+      "id": "lexitrama",
+      "official": true,
+      "name": "Lexitrama",
+      "subtitle": "El Atlas de las Palabras",
+      "category": "Puzle lingüístico",
+      "competencies": [
+        "léxico",
+        "morfología",
+        "verbos",
+        "ortografía",
+        "acentuación"
+      ],
+      "status": "en pruebas",
+      "color": "#83edc9",
+      "icon": "✦",
+      "entry": "games/lexitrama/",
+      "description": "Conecta letras vecinas, cumple misiones de Lengua y explora cinco mundos con gravedad, combos, jefes y progresión.",
+      "banner": "lexitrama-banner-v1.svg",
+      "active": true,
+      "integration": "embedded",
+      "sortOrder": 14
     }
   ]
 }
