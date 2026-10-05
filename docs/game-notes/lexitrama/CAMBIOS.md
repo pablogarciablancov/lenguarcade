@@ -1,3 +1,11 @@
+## 2026-10-05 · Palabras y categorías
+
+- Corregida la pérdida de campos semánticos cuando una palabra se registraba en varias categorías; se conservan también sus lecturas gramaticales y familias.
+- Banco ampliado de 812 a más de 2.000 formas: vocabulario de bosque, mar y los demás campos, con plurales regulares y formas acentuadas declaradas. SETO y SETOS sirven en bosque.
+- La clasificación de acentuación, hiatos y diptongos se calcula para todo el banco; u muda y h intercalada incluidas.
+- Motor, diseño, objetivos, recompensas y formato de guardado v1 conservados; los tableros guardados usan las nuevas categorías sin regenerarse.
+- Recurso content.js versionado para evitar cargar el diccionario anterior.
+
 # Lexitrama — 2026-10-04
 
 Primera implementación jugable aislada en `games/lexitrama/`.

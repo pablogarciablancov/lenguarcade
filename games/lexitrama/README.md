@@ -18,7 +18,7 @@ Las palabras fuera del banco no se validan como incorrectas en español: se info
 
 ## Motor y solvencia
 
-`content.js` contiene 812 términos: vocabulario etiquetado y formas de 25 verbos regulares en presente, imperfecto y futuro de indicativo, además de infinitivos. Las formas compartidas conservan sus análisis posibles. No se deducen etiquetas de hiato o categorías gramaticales de un diccionario indiscriminado.
+`content.js` contiene 2031 términos: vocabulario etiquetado y formas de 25 verbos regulares en presente, imperfecto y futuro de indicativo, además de infinitivos. Las formas compartidas conservan sus análisis posibles. Los campos semánticos y lecturas gramaticales se conservan al compartir palabras; incluye plurales y clasificación ortográfica por núcleos vocálicos, u muda e hiatos.
 
 `engine.js` usa un PRNG con estado guardado. Las palabras se incrustan en rutas adyacentes verificables. Tras la gravedad, se busca un objetivo no utilizado. Si falta, el Atlas recompone una ruta y avisa visualmente; los sellos se respetan y el hielo conserva sus usos restantes. La garantía es progresiva: cada nuevo tablero tiene al menos un objetivo disponible hasta completar la misión. No se afirma que todos los objetivos estén simultáneamente en el tablero inicial. En contenidos con pocos términos se abren nuevos ciclos cuando se agota el banco de objetivos.
 
