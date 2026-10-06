@@ -96,7 +96,9 @@ cards.push(
  {id:"joker_eco",text:"Comodín del Eco",meter:null,rhyme:"libre",rhymeType:"comodín",theme:"poesía",devices:[],value:28,joker:true},
  {id:"joker_pulso",text:"Comodín del Pulso",meter:null,rhyme:"libre",rhymeType:"comodín",theme:"poesía",devices:[],value:28,joker:true}
 );
-cards=cards.concat(window.VersopolisVerseBank.build(window.VersopolisProsody));
+// Preserve the legacy standalone bootstrap used by profile/resume checks.
+// The full index loads the optional expanded bank before this file.
+cards=cards.concat(window.VersopolisVerseBank&&window.VersopolisProsody?window.VersopolisVerseBank.build(window.VersopolisProsody):[]);
 var MAX_DECK_SIZE=54;
 function starterDeck(){
  var groups=[['ino',8,'consonante'],['ente',8,'consonante'],['ado',8,'consonante'],['ía',8,'consonante'],['a-a',8,'asonante'],['e-a',8,'asonante'],['ana',11,'consonante'],['or',11,'consonante']],chosen=[];

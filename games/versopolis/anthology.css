@@ -44,3 +44,5 @@
 .cardTable .rivalPortrait{transition:transform 160ms,filter 160ms}
 .cardTable .hand .verseCard{flex-basis:clamp(260px,19vw,330px);gap:6px}
 @media(max-width:700px){.cardTable .hand .verseCard{flex-basis:240px}}
+@media(min-height:761px) and (min-width:851px){.cardTable.game{grid-template-rows:60px minmax(0,1fr) clamp(255px,32vh,350px)}}
+.cardTable .composerActions{position:sticky;bottom:0;z-index:3;background:#191125ed;box-shadow:0 -4px 10px #19112566}

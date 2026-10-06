@@ -14,6 +14,7 @@ for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1366,650],[1366,
   return text.top<panel.top-1||text.bottom>panel.bottom+1;
  }));
  assert.deepEqual(clipped,[],'Rival and contract text must fit their panels');
+ const controls=await page.locator('#playBtn').boundingBox();assert(controls.y+controls.height<=height,'Combat action remains visible');
  console.log('Layout OK:',width,height,layout.font+'px');
 }
 await page.setViewportSize({width:1366,height:768});
