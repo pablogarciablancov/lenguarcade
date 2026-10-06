@@ -182,10 +182,10 @@ body:has(#gameScreen:not(.hidden)) .topbar{
 body:has(#gameScreen:not(.hidden)) .brandMark{
   width:38px;height:38px;border-radius:12px;font-size:20px;
 }
-body:has(#gameScreen:not(.hidden)) .brand h1{font-size:1rem}
+body:has(#gameScreen:not(.hidden)) .brand h1{font-size:1.15rem}
 body:has(#gameScreen:not(.hidden)) .brand p{display:none}
-body:has(#gameScreen:not(.hidden)) .pill{padding:6px 9px;font-size:.75rem}
-body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:12px;font-size:.8rem}
+body:has(#gameScreen:not(.hidden)) .pill{padding:6px 9px;font-size:.95rem}
+body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:12px;font-size:1rem}
 
 .gameScreen:not(.hidden){
   min-height:0;
@@ -219,15 +219,15 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 }
 .gameScreen .playerCard.active::before{
   content:"TU TURNO";
-  position:absolute;right:10px;top:9px;
-  font-size:.62rem;font-weight:950;letter-spacing:.08em;
+  position:absolute;right:10px;bottom:12px;
+  font-size:.85rem;font-weight:950;letter-spacing:.08em;
   color:#fff;background:linear-gradient(135deg,var(--coral),#ff875f);
   padding:4px 7px;border-radius:999px;
 }
-.gameScreen .playerName{font-size:.95rem;padding-right:58px}
-.gameScreen .chips{font-size:1.38rem;margin:3px 0 3px}
+.gameScreen .playerName{font-size:1.2rem;padding-right:0;overflow-wrap:anywhere}
+.gameScreen .chips{font-size:1.8rem;margin:3px 0 3px}
 .gameScreen .playerBadges{margin-top:3px;gap:4px}
-.gameScreen .mini{padding:3px 6px;font-size:.66rem}
+.gameScreen .mini{padding:3px 6px;font-size:.9rem}
 .gameScreen .xpMini{height:5px!important;margin-top:5px!important}
 .gameScreen .centerRound{
   min-width:0;
@@ -237,15 +237,15 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   border:1px solid rgba(255,255,255,.11);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
 }
-.gameScreen .roundBig{font-size:1.13rem}
-.gameScreen .roundSmall{font-size:.68rem;margin-top:1px}
-.gameScreen .specialFlag{margin-top:4px;padding:4px 7px;font-size:.61rem}
+.gameScreen .roundBig{font-size:1.4rem}
+.gameScreen .roundSmall{font-size:.95rem;margin-top:1px}
+.gameScreen .specialFlag{margin-top:4px;padding:4px 7px;font-size:.85rem}
 
 .gameScreen .arena{
   min-height:0;
   height:100%;
   margin-top:0;
-  grid-template-columns:236px minmax(0,1fr) 220px;
+  grid-template-columns:250px minmax(0,1fr) 240px;
   gap:8px;
 }
 .gameScreen .sidePanel,
@@ -262,12 +262,12 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 }
 .gameScreen .sidePanel h3{
   margin:0 0 7px;
-  font-size:.72rem;
+  font-size:1rem;
   letter-spacing:.075em;
 }
 .gameScreen .sidePanel h3[style]{margin-top:10px!important}
 .gameScreen .tierList{
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1fr;
   gap:6px;
 }
 .gameScreen .betList{
@@ -281,22 +281,23 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   gap:5px;
 }
 .gameScreen .tierList .choice{
-  align-items:flex-start;
-  flex-direction:column;
-  justify-content:center;
+  display:flex;
+  align-items:center;
 }
-.gameScreen .choice strong{font-size:.76rem}
-.gameScreen .choice span{font-size:.61rem;line-height:1.15}
+.gameScreen .tierList .choice>div{display:grid;grid-template-columns:100px minmax(0,1fr);gap:5px;align-items:center;width:100%}
+.gameScreen .tierList .choice br{display:none}
+.gameScreen .choice strong{font-size:1rem}
+.gameScreen .choice span{font-size:.85rem;line-height:1.15}
 .gameScreen .tierList .choice>b{position:absolute;opacity:0}
-.gameScreen .betChoice{min-height:37px;padding:6px;font-size:.83rem}
+.gameScreen .betChoice{min-height:37px;padding:6px;font-size:1.15rem}
 .gameScreen .powerList{gap:6px}
 .gameScreen .power{
   padding:7px 8px;
   border-radius:11px;
   min-height:43px;
 }
-.gameScreen .power b{font-size:.76rem}
-.gameScreen .power div div{font-size:.61rem!important;line-height:1.2}
+.gameScreen .power b{font-size:1rem}
+.gameScreen .power div div{font-size:.85rem!important;line-height:1.2}
 .gameScreen .scoreLegend{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -307,7 +308,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   background:#fff;
   border-radius:9px;
   padding:5px 6px;
-  font-size:.63rem;
+  font-size:.9rem;
   font-weight:850;
   color:var(--muted);
   text-align:center;
@@ -345,9 +346,9 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 }
 .gameScreen .turnLabel{
   color:#ffad91;
-  font-size:.67rem;
+  font-size:.9rem;
 }
-.duelReadout{display:flex;align-items:center;gap:6px}
+.duelReadout{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:4px}
 .duelReadout span,
 .duelReadout strong{
   display:inline-flex;align-items:center;gap:4px;
@@ -355,7 +356,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   border:1px solid rgba(255,255,255,.13);
   border-radius:999px;
   padding:4px 8px;
-  font-size:.66rem;
+  font-size:.9rem;
   background:rgba(255,255,255,.07);
 }
 .duelReadout strong{
@@ -383,7 +384,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 }
 .gameScreen .challenge h2{
   color:#fff;
-  font-size:clamp(1.65rem,3.1vw,2.75rem);
+  font-size:clamp(2.4rem,3.5vw,3.4rem);
   margin:5px 0 4px;
   text-shadow:0 4px 18px rgba(0,0,0,.2);
 }
@@ -392,12 +393,12 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   line-height:1.42;
   max-width:560px;
   margin:0 auto 12px;
-  font-size:.88rem;
+  font-size:1.15rem;
 }
 .gameScreen .metaRow{gap:5px;margin:3px 0 7px}
 .gameScreen .metaTag{
   padding:4px 7px;
-  font-size:.66rem;
+  font-size:.9rem;
   color:#dce2f8;
   background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.1);
@@ -409,7 +410,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 }
 .gameScreen .prompt{
   color:#f5f7ff;
-  font-size:clamp(.95rem,1.35vw,1.12rem);
+  font-size:clamp(1.15rem,1.5vw,1.4rem);
   line-height:1.35;
   margin:0 auto 8px;
 }
@@ -417,7 +418,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 .gameScreen .answerInput{
   padding:10px 13px;
   border-radius:13px;
-  font-size:1rem;
+  font-size:1.35rem;
   border-color:rgba(255,255,255,.16);
   box-shadow:0 6px 18px rgba(4,9,26,.18);
 }
@@ -425,31 +426,49 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 .gameScreen .accentRow button{
   padding:4px 7px;
   border-radius:8px;
-  font-size:.72rem;
+  font-size:1rem;
 }
 .gameScreen .challengeActions{gap:6px;margin-top:3px}
 .gameScreen .challengeActions .btn{
   padding:8px 10px;
   border-radius:11px;
-  font-size:.75rem;
+  font-size:.95rem;
 }
 .gameScreen .challengeActions .btn.primary{
   min-width:118px;
   box-shadow:0 8px 18px rgba(255,102,77,.26);
 }
+/* The result replaces the answer controls, so it uses their space. */
+.gameScreen #questionState:has(.feedback:not(.hidden)) .answerArea,
+.gameScreen #questionState:has(.feedback:not(.hidden)) .timerWrap,
+.gameScreen #questionState:has(.feedback:not(.hidden)) .statusLine{display:none}
 .gameScreen .feedback{
-  width:100%;
-  margin:7px auto 0;
-  padding:8px 10px;
-  border-radius:12px;
-  font-size:.76rem;
-  line-height:1.32;
+  --result-color:#ffb8c1;
+  display:grid;grid-template-columns:56px minmax(0,1fr) auto;
+  align-items:center;gap:10px 14px;width:100%;
+  margin:12px auto 0;padding:18px;border-radius:20px;
+  font-size:1.05rem;line-height:1.35;color:#fff;
+  border:2px solid var(--result-color);
+  background:linear-gradient(135deg,#572737,#291d32);
+  box-shadow:0 12px 30px rgba(0,0,0,.24);
+  animation:resultPop .3s ease-out;
 }
-.gameScreen .feedback strong{margin-bottom:2px}
+.gameScreen .feedback.ok{--result-color:#83efb9;background:linear-gradient(135deg,#155b46,#132e36);box-shadow:0 0 30px rgba(60,220,150,.16)}
+.gameScreen .feedback.near{--result-color:#ffd477;background:linear-gradient(135deg,#614719,#302737)}
+.gameScreen .feedback .resultBadge{width:56px;height:56px;display:grid;place-items:center;border-radius:50%;color:var(--result-color);border:2px solid currentColor;background:rgba(255,255,255,.07)}
+.resultBadge svg{width:40px;height:40px}
+.gameScreen .feedback .resultCopy>strong{font-size:clamp(1.4rem,2vw,1.9rem);margin:0 0 5px;color:var(--result-color);line-height:1.15}
+.resultAnswer{overflow-wrap:anywhere}
+.resultReward{text-align:center;color:var(--result-color)}
+.resultReward b{display:block;font-size:clamp(1.9rem,3vw,2.8rem);line-height:1;font-weight:950}
+.resultReward span{font-size:1rem;font-weight:800}
+.resultDetails{grid-column:1/-1;border-top:1px solid rgba(255,255,255,.2);padding-top:9px;font-weight:800;color:var(--result-color)}
+@keyframes resultPop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.gameScreen .feedback{animation:none}}
 .gameScreen .statusLine{gap:4px;margin-top:5px}
 .gameScreen .statusLine span{
   padding:4px 6px;
-  font-size:.62rem;
+  font-size:.85rem;
   color:#d7def3;
   background:rgba(255,255,255,.075);
 }
@@ -465,7 +484,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 .gameScreen .log{
   max-width:none;
   color:#cbd3ea;
-  font-size:.72rem;
+  font-size:1rem;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -474,7 +493,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   flex:0 0 auto;
   padding:7px 10px;
   border-radius:10px;
-  font-size:.72rem;
+  font-size:1rem;
   background:rgba(255,255,255,.92);
 }
 
@@ -482,31 +501,50 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   body:has(#gameScreen:not(.hidden)) .topbar{min-height:48px;padding:5px 10px}
   body:has(#gameScreen:not(.hidden)) .brandMark{width:34px;height:34px;font-size:18px}
   .gameScreen .playerCard{min-height:66px;padding:7px 10px}
-  .gameScreen .chips{font-size:1.2rem}
+  .gameScreen .chips{font-size:1.7rem}
   .gameScreen .playerBadges{margin-top:1px}
-  .gameScreen .arena{grid-template-columns:220px minmax(0,1fr) 205px}
+  .gameScreen .arena{grid-template-columns:250px minmax(0,1fr) 240px}
   .gameScreen .sidePanel{padding:9px}
   .gameScreen .choice{min-height:41px;padding:5px 7px}
   .gameScreen .betChoice{min-height:32px}
   .gameScreen .power{min-height:38px;padding:5px 7px}
   .gameScreen .challenge{padding:8px 14px}
   .challengeHud{min-height:31px;padding-bottom:5px}
-  .gameScreen .challenge h2{font-size:clamp(1.45rem,2.6vw,2.25rem);margin:3px 0}
-  .gameScreen .preQuestion{font-size:.8rem;margin-bottom:8px}
+  .gameScreen .challenge h2{font-size:clamp(2.3rem,3.2vw,3rem);margin:3px 0}
+  .gameScreen .preQuestion{font-size:1rem;margin-bottom:8px}
   .gameScreen .metaRow{margin:2px 0 5px}
-  .gameScreen .prompt{font-size:.93rem;margin-bottom:6px}
+  .gameScreen .prompt{font-size:1.15rem;margin-bottom:6px}
   .gameScreen .answerInput{padding:8px 11px}
-  .gameScreen .challengeActions .btn{padding:6px 8px;font-size:.7rem}
-  .gameScreen .feedback{margin-top:5px;padding:6px 8px;font-size:.7rem}
+  .gameScreen .challengeActions .btn{padding:6px 8px;font-size:1rem}
   .gameScreen .statusLine{margin-top:3px}
   .gameScreen .scoreLegend{gap:4px}
-  .gameScreen .scoreLegend span{padding:4px 5px;font-size:.59rem}
+  .gameScreen .scoreLegend span{padding:4px 5px;font-size:.9rem}
 }
 @media (min-width:820px) and (max-width:1100px){
   .gameScreen .arena{grid-template-columns:190px minmax(0,1fr) 185px}
   .gameScreen .challenge{grid-column:auto;grid-row:auto}
   .gameScreen .matchHeader{grid-template-columns:minmax(0,1fr) 145px minmax(0,1fr)}
   .gameScreen .choice span{display:none}
+}
+@media (max-height:650px) and (min-width:820px){
+  .gameScreen .tierList .choice span{display:none}
+  .gameScreen .tierList .choice{min-height:32px;grid-template-columns:1fr}
+  .gameScreen .playerTop>.mini{display:none}
+  .gameScreen .playerCard{padding:5px 10px}
+  .gameScreen .playerName{font-size:1.05rem}
+  .gameScreen .chips{position:absolute;right:12px;top:5px;font-size:1.3rem;margin:0}
+  .gameScreen .playerTop{padding-right:130px}
+  .gameScreen .playerBadges{margin-top:5px}
+  .gameScreen .playerCard.active::before{bottom:8px;font-size:.7rem}
+  .gameScreen .power div div{display:none}
+  .gameScreen .challenge h2{font-size:2.3rem}
+  .gameScreen .metaRow{margin:2px 0}
+  .gameScreen .feedback{padding:12px;margin-top:6px;gap:6px 10px}
+  .gameScreen .feedback .resultCopy>strong{font-size:1.4rem}
+  .gameScreen .feedback .resultBadge{width:44px;height:44px}
+  .gameScreen .feedback{grid-template-columns:44px minmax(0,1fr) auto}
+  .gameScreen .resultReward b{font-size:2rem}
+  .gameScreen .resultDetails{padding-top:5px;font-size:.95rem}
 }
 @media (max-width:819px){
   body:has(#gameScreen:not(.hidden)){overflow:auto}
@@ -621,7 +659,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
               <button class="btn primary" id="submitBtn" type="button">Comprobar</button>
             </div>
           </div>
-          <div class="feedback hidden" id="feedback"></div>
+          <div class="feedback hidden" id="feedback" role="status" aria-live="polite" aria-atomic="true"></div>
           <div class="statusLine" id="statusLine"></div>
         </div>
       </main>
@@ -1267,7 +1305,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
     const p=current(),q=state.currentQuestion,bet=state.selectedBet,wasAllIn=bet===p.chips;
     const result=timeout?{ok:false,kind:'timeout'}:checkAnswer(q,user);
     p.save.lifetime.attempts++;state.questionOpen=false;$('answerInput').disabled=true;$('submitBtn').disabled=true;
-    let feedbackClass='bad',title='',body='',xp=0;
+    let feedbackClass='bad',title='',xp=0,chipDelta=0,rewardMultiplier=0;
     if(result.ok){
       const mult=TIERS[state.selectedTier].mult*(state.special?1.5:1)*(state.hintUsed?.75:1);
       const gain=Math.max(1,Math.round(bet*mult));
@@ -1279,18 +1317,26 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
       if(bet>=50)p.bigBetWins++;if(wasAllIn)p.allInWins++;
       p.save.best.chips=Math.max(Number(p.save.best.chips||100),p.chips);
       xp=8+({basic:0,medium:4,advanced:8,expert:12}[state.selectedTier]||0)+Math.min(10,Math.floor(bet/10))+Math.min(15,Math.max(0,p.streak-1)*3);
-      addXp(p,xp);feedbackClass='ok';title='✅ ¡Correcto!';body='La forma es «'+q.respuesta+'». Ganas '+gain+' fichas y '+xp+' XP.';
+      addXp(p,xp);feedbackClass='ok';title='¡Correcto!';chipDelta=gain;rewardMultiplier=mult;
       sfx('ok');
     }else{
       let loss=bet;if(state.insuranceActive)loss=Math.ceil(loss/2);
       p.chips=Math.max(0,p.chips-loss);p.errors++;p.streak=0;p.save.lifetime.errors++;
-      if(result.kind==='accent'){p.accentErrors++;p.save.lifetime.accentErrors++;feedbackClass='near';title='✍️ Casi: revisa la tilde';body='La conjugación correcta es «'+q.respuesta+'». Pierdes '+loss+' fichas.';}
-      else if(timeout){title='⏱️ Tiempo agotado';body='La respuesta era «'+q.respuesta+'». Pierdes '+loss+' fichas.';}
-      else{title='❌ No es esa forma';body='La respuesta correcta es «'+q.respuesta+'». Pierdes '+loss+' fichas.';}
+      chipDelta=-loss;
+      if(result.kind==='accent'){p.accentErrors++;p.save.lifetime.accentErrors++;feedbackClass='near';title='Casi: revisa la tilde';}
+      else if(timeout){title='Tiempo agotado';}
+      else{title='No es esa forma';}
       addXp(p,2);sfx('bad');
     }
     evaluateLiveAchievements(p,bet,wasAllIn);persistPlayer(p);
-    $('feedback').className='feedback '+feedbackClass;$('feedback').innerHTML='<strong>'+title+'</strong>'+escapeHtml(body);
+    const badge=result.ok
+      ? '<svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M12 7h16v9c0 8-16 8-16 0V7Zm0 3H6v5c0 5 6 5 6 5m16-10h6v5c0 5-6 5-6 5M20 23v8m-7 3h14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      : '<svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="15" stroke="currentColor" stroke-width="3"/><path d="M20 11v11m0 6v1" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
+    const details=result.ok
+      ? '×'+String(rewardMultiplier).replace('.',',')+' · +'+xp+' XP'+(state.special?' · Ronda bote':'')+(state.hintUsed?' · Pista −25%':'')
+      : state.insuranceActive?'Seguro activo · pérdida reducida a la mitad':'La próxima es tuya';
+    $('feedback').className='feedback '+feedbackClass;
+    $('feedback').innerHTML='<div class="resultBadge">'+badge+'</div><div class="resultCopy"><strong>'+title+'</strong><div class="resultAnswer">Forma correcta: <b>'+escapeHtml(q.respuesta)+'</b></div></div><div class="resultReward"><b>'+(chipDelta>=0?'+':'−')+Math.abs(chipDelta)+'</b><span>fichas</span></div><div class="resultDetails">'+escapeHtml(details)+'</div>';
     renderPlayerCards();renderPowerList();
     if(p.chips<=0){
       if(p.rescues===0){
