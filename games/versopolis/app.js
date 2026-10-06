@@ -96,7 +96,23 @@ cards.push(
  {id:"joker_eco",text:"Comodín del Eco",meter:null,rhyme:"libre",rhymeType:"comodín",theme:"poesía",devices:[],value:28,joker:true},
  {id:"joker_pulso",text:"Comodín del Pulso",meter:null,rhyme:"libre",rhymeType:"comodín",theme:"poesía",devices:[],value:28,joker:true}
 );
+cards=cards.concat(window.VersopolisVerseBank.build(window.VersopolisProsody));
 var MAX_DECK_SIZE=54;
+function starterDeck(){
+ var groups=[['ino',8,'consonante'],['ente',8,'consonante'],['ado',8,'consonante'],['ía',8,'consonante'],['a-a',8,'asonante'],['e-a',8,'asonante'],['ana',11,'consonante'],['or',11,'consonante']],chosen=[];
+ groups.forEach(function(g){var pool=cards.filter(function(c){return c.rhyme===g[0]&&c.meter===g[1]&&c.rhymeType===g[2];});chosen=chosen.concat(shuffle(pool).slice(0,3));});
+ // Original image cards keep the resource challenges solvable; special cards
+ // enter every new run, while legacy runs retain their exact inventory.
+ ['ino2','ado3','ea4'].forEach(function(id){if(chosen.every(function(c){return c.id!==id;}))chosen.push(baseCard(id));});
+ var specials=shuffle(cards.filter(function(c){return c.power&&!chosen.some(function(x){return x.id===c.id;});})).slice(0,3);chosen=chosen.concat(specials);
+ chosen=chosen.concat(shuffle(cards.filter(function(c){return !c.joker&&!chosen.some(function(x){return x.id===c.id;});})).slice(0,49-chosen.length));
+ return chosen.map(function(c){return c.id;}).concat(['joker_eco','joker_pulso']);
+}
+function powerBonus(c,a){
+ if(!c.power)return 0;
+ var eligible=c.power==='eco'&&a.repeated||c.power==='pulso'&&a.allMeter||c.power==='imagen'&&a.devices.length>=2||c.power==='constelacion'&&a.n===4&&['ABAB','ABBA','AABB'].indexOf(a.pattern)>=0;
+ return eligible?window.VersopolisVerseBank.powers[c.power].bonus:0;
+}
 // Separación métrica revisada para las cartas del banco. El guion separa sílabas;
 // el guion bajo une vocales por sinalefa. Las agudas suman una sílaba final.
 var SCANS={
@@ -115,7 +131,7 @@ var SCANS={
  or5:"La vie-ja pla-za cam-bia de co-lor",or6:"Los ver-sos bus-can siem-pre su va-lor",or7:"Un fa-ro guar-da to-do su ful-gor",or8:"Las ca-lles guar-dan sue-ños de co-lor"
 };
 
-var startingBaseIds=cards.filter(function(c){return["ea6","ana8","or8"].indexOf(c.id)<0;}).map(function(c){return c.id;});
+var startingBaseIds=cards.filter(function(c){return !c.generated&&["ea6","ana8","or8"].indexOf(c.id)<0;}).map(function(c){return c.id;});
 
 var challenges=[
 {id:"abba",title:"CERROJO ABBA",desc:"Construye cuatro versos con esquema de rima ABBA.",mult:1.55,min:0,test:function(a){return a.n===4&&a.pattern==="ABBA";},can:function(list){return canTwoRhymePairs(list);}},
@@ -265,9 +281,9 @@ function collectionCards(){return(run&&run.cardPool||[]).map(function(x){return 
 function familyOf(c){if(c.joker)return"wild";if(c.level>=3)return"master";if(c.meter===11)return"rhythm";if(c.rhymeType==="asonante")return"echo";if(c.devices.length)return"image";return"rhyme";}
 function familyLabel(f){return{rhyme:"RIMA",echo:"ECO",rhythm:"RITMO",image:"IMAGEN",master:"MAESTRO",wild:"COMODÍN"}[f]||"VERSO";}
 function stars(level){var s="";for(var i=0;i<level;i+=1)s+="★";return s;}
-function show(name){finishCardDrag(true);["writingScreen","homeScreen","atlasScreen","achievementsScreen","codexScreen","museScreen","eventScreen","deckScreen","gameScreen","resultScreen"].forEach(function(id){$(id).classList.toggle("hidden",id!==name);});}
+function show(name){finishCardDrag(true);["poemsScreen","writingScreen","homeScreen","atlasScreen","achievementsScreen","codexScreen","museScreen","eventScreen","deckScreen","gameScreen","resultScreen"].forEach(function(id){$(id).classList.toggle("hidden",id!==name);});}
 function renderCareer(){
- $("careerLine").textContent=career.runs?"Mejor expedición: "+career.bestScore.toLocaleString("es-ES")+" · "+career.wins+" victorias · mejor impacto "+Number(career.bestCombo||0).toLocaleString("es-ES"):"Tu primera expedición te espera.";
+ $("careerLine").textContent=career.runs?"Mejor expedición: "+career.bestScore.toLocaleString("es-ES")+" · "+career.wins+" victorias · mejor impacto "+Number(career.bestCombo||0).toLocaleString("es-ES"):"Tu primera expedición te espera · 1720 versos por descubrir.";
  $("continueBtn").classList.toggle("hidden",!resumeSave);
 }
 
@@ -276,7 +292,7 @@ function renderAtlas(){var grid=$("atlasGrid");grid.innerHTML="";MAPS.forEach(fu
 function newRun(mapId){
  if(!mapById(mapId)){showAtlas();return;}
  setActiveMap(mapId);
- run={version:6,mapId:mapId,districtIndex:0,runScore:0,rivalPrestige:0,maxPrestige:0,inspiration:4,maxInspiration:4,handsLeft:0,discardsLeft:0,bonusDiscards:0,handSize:7,cardPool:startingBaseIds.map(function(id){return makeInstance(id,0);}),deck:[],discardPile:[],hand:[],selected:[],discardMode:false,discardSelected:[],muses:[],challengeId:null,lastChallengeId:null,awaitingMuse:true,awaitingEvent:false,eventId:null,districtStarted:false,finished:false,won:false,streak:0,bestStreak:0,firstPlay:true,locked:false,lastEventId:null,scans:0,usedScanInBoss:false,forms:{},rhymeCounts:{},eventActions:{},stats:{compositions:0,structured:0,districtsCleared:0,bestCombo:0,contracts:0,failedContracts:0},startedAt:Date.now()};
+ run={version:6,mapId:mapId,districtIndex:0,runScore:0,rivalPrestige:0,maxPrestige:0,inspiration:4,maxInspiration:4,handsLeft:0,discardsLeft:0,bonusDiscards:0,handSize:7,cardPool:starterDeck().map(function(id){return makeInstance(id,0);}),deck:[],discardPile:[],hand:[],selected:[],discardMode:false,discardSelected:[],muses:[],challengeId:null,lastChallengeId:null,awaitingMuse:true,awaitingEvent:false,eventId:null,districtStarted:false,finished:false,won:false,streak:0,bestStreak:0,firstPlay:true,locked:false,lastEventId:null,scans:0,usedScanInBoss:false,forms:{},rhymeCounts:{},eventActions:{},stats:{compositions:0,structured:0,districtsCleared:0,bestCombo:0,contracts:0,failedContracts:0},startedAt:Date.now()};
  resumeSave=null;showMuseChoice("Elige tu primera Musa","Prepara tu mazo para "+activeMap().name+".");bridgeCall("sessionStarted");
 }
 function showMuseChoice(title,subtitle){
@@ -473,16 +489,18 @@ function analyzeResolved(chosen,links){
  else if(n===4&&pattern==="AABB"){name="DOBLE PAREADO";rhymeBonus=290;formBonus=140;}
  else if(repeated.length){name="CADENA DE ECOS";rhymeBonus=100*repeated.length;}
  if(allMeter&&n>=2)meterBonus=70*n+(n===4?80:0);
- var subtotal=base+rhymeBonus+formBonus+meterBonus+deviceBonus+themeBonus,multiplier=1,d=districts[run.districtIndex],active=run.muses;
+ var specialBonus=chosen.reduce(function(sum,c){return sum+powerBonus(c,{repeated:repeated.length>0,allMeter:allMeter,devices:devices,n:n,pattern:pattern});},0);
+ var subtotal=base+rhymeBonus+formBonus+meterBonus+deviceBonus+themeBonus+specialBonus,multiplier=1,d=districts[run.districtIndex],active=run.muses;
  if(d.focus==="rhyme"&&rhymeBonus>0)multiplier*=1.25;if(d.focus==="meter"&&allMeter)multiplier*=1.28;if(d.focus==="devices")subtotal+=devices.length*55;if(d.focus==="all"&&formBonus>0)multiplier*=1.18;
  if(active.indexOf("eco")>=0&&rhymeBonus>0)multiplier*=1.30;if(active.indexOf("pulso")>=0&&allMeter)multiplier*=1.35;if(active.indexOf("imagen")>=0)subtotal+=devices.length*55;
  if(active.indexOf("arquitecta")>=0&&n===4&&(pattern==="ABAB"||pattern==="ABBA"||pattern==="AABB"))multiplier*=1.40;if(active.indexOf("duende")>=0&&run.firstPlay)multiplier*=1.50;if(active.indexOf("afinacion")>=0&&n===4&&allMeter)subtotal+=180;if(active.indexOf("coleccionista")>=0&&devices.length>=2)subtotal+=140;
  var score=Math.round(subtotal*multiplier),tags=[];
  if(repeated.length||sameRhyme)tags.push("Rima "+rhymeKind+(n===4?" · "+pattern:""));if(allMeter)tags.push(meters[0]+" sílabas · ritmo uniforme");if(devices.length)tags.push(devices.join(" · "));if(sameTheme)tags.push("tema: "+chosen[0].theme);
- var breakdown=[{label:"Versos",value:base},{label:"Rima y forma",value:rhymeBonus+formBonus},{label:"Ritmo",value:meterBonus},{label:"Recursos",value:deviceBonus+(d.focus==="devices"?devices.length*55:0)+(active.indexOf("imagen")>=0?devices.length*55:0)},{label:"Tema",value:themeBonus}];
+ if(specialBonus)tags.push("Lacres especiales +"+specialBonus);
+ var breakdown=[{label:"Lacres especiales",value:specialBonus},{label:"Versos",value:base},{label:"Rima y forma",value:rhymeBonus+formBonus},{label:"Ritmo",value:meterBonus},{label:"Recursos",value:deviceBonus+(d.focus==="devices"?devices.length*55:0)+(active.indexOf("imagen")>=0?devices.length*55:0)},{label:"Tema",value:themeBonus}];
  if(multiplier>1)breakdown.push({label:"Sinergias",value:"×"+multiplier.toFixed(2).replace(".",",")});
  var structured=!!(rhymeBonus||meterBonus||devices.length>=2||sameTheme),tier=score>=900?"LEGENDARIA":score>=650?"MAGISTRAL":score>=430?"POTENTE":score>=280?"SÓLIDA":"IMPROVISADA";
- return{name:name,score:score,tags:tags,breakdown:breakdown,structured:structured,pattern:pattern,rhymes:rhymes,meters:meters,allMeter:allMeter,meterValue:allMeter?meters[0]:0,sameRhyme:sameRhyme,rhymeKind:rhymeKind,devices:devices,sameTheme:sameTheme,formBonus:formBonus,tier:tier,n:n,resolvedCards:chosen,jokerSources:links,jokerCount:0};
+ return{name:name,score:score,specialBonus:specialBonus,tags:tags,breakdown:breakdown,structured:structured,pattern:pattern,rhymes:rhymes,meters:meters,allMeter:allMeter,meterValue:allMeter?meters[0]:0,sameRhyme:sameRhyme,rhymeKind:rhymeKind,devices:devices,sameTheme:sameTheme,formBonus:formBonus,tier:tier,n:n,resolvedCards:chosen,jokerSources:links,jokerCount:0};
 }
 
 function contractMet(a){return!a.noAnchor&&currentChallenge().test(a);}
@@ -500,6 +518,7 @@ function renderGame(){
  $("challengeTitle").textContent=ch.title;$("challengeDesc").textContent=ch.desc;$("challengeMultiplier").textContent="×"+String(ch.mult).replace(".",",");
  $("challengeBanner").className="challengeBanner"+(hiddenHint?"":run.selected.length>=2?(met?" met":" fail"):"");$("challengeState").textContent=hiddenHint?"A TU JUICIO":run.selected.length<2?"PENDIENTE":met?"CUMPLIDO":"BLOQUEADO";
  $("codexTip").textContent=hiddenHint?"Solo al jugar sabrás si tu análisis fue correcto. Un fallo consume la ronda y la Inspiración.":contractTip(a,met,d,ch);$("scanBtn").classList.toggle("hidden",!map||map.id!=="torre"||run.districtIndex!==1);$("scanBtn").disabled=!!run.scanReveal;renderSlots();renderHand();renderActiveMuses();renderInspiration();renderRoute();renderChangeConsole();
+ $("tablePoemsBtn").disabled=!!run.locked;
  var play=$("playBtn"),discardBtn=$("discardBtn"),shuffleBtn=$("shuffleHandBtn"),clearBtn=$("clearBtn");
  play.classList.remove("validAttack","invalidAttack");
  if(run.discardMode){
@@ -524,7 +543,7 @@ function contractTip(a,met,d,ch){
  return"CUMPLE Y BLOQUEA: el contrato multiplica tu impacto y la réplica queda anulada.";
 }
 function describeAnalysis(a){var parts=[];if(a.noAnchor)return"El comodín necesita al menos un verso real para copiar su rima, medida y tema.";if(a.pattern&&a.n===4)parts.push("Esquema "+a.pattern+".");if(a.allMeter)parts.push("Ritmo uniforme de "+a.meterValue+" sílabas.");if(a.devices.length)parts.push("Recursos: "+a.devices.join(", ")+".");if(a.jokerCount)parts.push("El comodín imita otro verso de tu selección.");if(!parts.length)parts.push("La selección todavía carece de una estructura fuerte.");return parts.join(" ");}
-function scansionFeedback(ids,a){return ids.map(function(id,i){var original=effectiveCard(id),source=original.joker?effectiveCard(a.jokerSources[id]):original;if(!source)return (i+1)+". Comodín sin verso de referencia.";var scan=SCANS[source.id],sinalefa=scan.indexOf("_")>=0?"sinalefa marcada con _":"sin sinalefa",final=source.id.indexOf("or")===0?"aguda +1":"llana +0";return (i+1)+". "+(original.joker?"Comodín → ":"")+scan+" → "+source.meter+" sílabas ("+sinalefa+", "+final+").";}).join("\n");}
+function scansionFeedback(ids,a){return ids.map(function(id,i){var original=effectiveCard(id),source=original.joker?effectiveCard(a.jokerSources[id]):original;if(!source)return (i+1)+". Comodín sin verso de referencia.";if(source.generated){var reading=source.reading;return (i+1)+". "+(original.joker?"Comodín → ":"")+source.text+" → "+source.meter+" sílabas ("+reading.synalephas+" sinalefas; ajuste final "+reading.last.adjustment+").";}var scan=SCANS[source.id],sinalefa=scan.indexOf("_")>=0?"sinalefa marcada con _":"sin sinalefa",final=source.id.indexOf("or")===0?"aguda +1":"llana +0";return (i+1)+". "+(original.joker?"Comodín → ":"")+scan+" → "+source.meter+" sílabas ("+sinalefa+", "+final+").";}).join("\n");}
 
 function renderInspiration(){$("inspirationHearts").innerHTML="";for(var i=0;i<run.maxInspiration;i+=1){var heart=document.createElement("i");heart.textContent="✦";if(i>=run.inspiration)heart.className="empty";$("inspirationHearts").appendChild(heart);}}
 function renderChangeConsole(){
@@ -548,7 +567,11 @@ function renderSlots(){
   }else slot.textContent="Verso "+(i+1);$("poemSlots").appendChild(slot);
  }
 }
-function cardHTML(c,combat){
+function cardHTML(c,combat){var html=plainCardHTML(c,combat),rarity=c.rarity||"common",power=c.power&&window.VersopolisVerseBank.powers[c.power];
+ if(rarity!=="common")html='<span class="rarityRibbon '+rarity+'">'+({rare:'◆ RARA',epic:'✦ ÉPICA',legendary:'★ LEGENDARIA'}[rarity])+'</span>'+html;
+ if(power)html+='<span class="powerRibbon" title="'+power.description+'">'+power.label+'</span>';
+ return html;}
+function plainCardHTML(c,combat){
  var fam=familyOf(c),device=c.devices.length?'<span class="device">'+c.devices[0]+"</span>":"";
  if(c.joker)return '<span class="cardCorners"><b class="meterBadge">★</b><b class="rhymeSeal">✦</b></span><span class="jokerBody"><img src="./assets/art/'+(c.id==="joker_eco"?"joker-eco":"joker-pulso")+'.webp" alt=""><strong>'+c.text+'</strong><small>Imita rima, medida y tema de otro verso elegido</small></span><span class="cardMeta"><span class="cardFamily">COMODÍN</span><span>VERSO LIBRE</span></span>'+(c.level?'<span class="cardLevel">'+stars(c.level)+'</span>':"");
  if(combat&&activeMap()){var phase=run.districtIndex;if(phase===3)return '<span class="verseText">'+c.text+'</span>';if(phase===2)return '<span class="verseText">'+c.text+'</span><span class="cardMeta"><span>'+c.rhymeType+'</span></span>';if(phase===1){return '<span class="cardCorners"><b class="meterBadge">'+(run.scanReveal?c.meter:"?")+'</b><b class="rhymeSeal">-'+c.rhyme+'</b></span><span class="verseText">'+c.text+'</span><span class="cardMeta"><span>'+c.rhymeType+'</span></span>';}}
@@ -566,7 +589,7 @@ function renderHand(){
  run.hand.forEach(function(id){
   var c=effectiveCard(id),b=document.createElement("button"),fam=familyOf(c),discardPick=run.discardMode&&run.discardSelected.indexOf(id)>=0;
   b.type="button";b.className="verseCard family-"+fam+(run.selected.indexOf(id)>=0&&!run.discardMode?" selected":"")+(run.districtIndex<2&&cardHelpsContract(c)&&!run.discardMode?" cardSynergy":"")+(discardPick?" discardPick":"");
-  if(renderedHandIds.indexOf(id)<0)b.classList.add("cardDealt");b.dataset.cardId=id;b.dataset.hints=run.districtIndex>=2&&!c.joker?"hidden":"shown";b.title=c.joker||run.districtIndex>0?c.text:"Tema: "+c.theme+" · "+familyLabel(fam);b.setAttribute("aria-pressed",String(run.selected.indexOf(id)>=0||!!discardPick));b.innerHTML=cardHTML(c,true)+(discardPick?'<span class="discardStamp">DESCARTAR</span>':"");
+  if(renderedHandIds.indexOf(id)<0)b.classList.add("cardDealt");b.dataset.rarity=c.rarity||"common";b.dataset.cardId=id;b.dataset.hints=run.districtIndex>=2&&!c.joker?"hidden":"shown";b.title=(c.joker||run.districtIndex>0?c.text:"Tema: "+c.theme+" · "+familyLabel(fam))+(c.power?" · "+window.VersopolisVerseBank.powers[c.power].description:"");b.setAttribute("aria-pressed",String(run.selected.indexOf(id)>=0||!!discardPick));b.innerHTML=cardHTML(c,true)+(discardPick?'<span class="discardStamp">DESCARTAR</span>':"");
   b.addEventListener("click",function(){toggleCard(id);});$("hand").appendChild(b);
  });
  renderedHandIds=run.hand.slice();$("hand").scrollLeft=handScroll;
@@ -585,7 +608,7 @@ function playSelection(){
  run.locked=true;run.handsLeft-=1;run.stats.compositions+=1;
  run.lastFeedback=(met?"Cumplido. ":"Contrato fallido. ")+describeAnalysis(a)+" Exigía: "+ch.desc+"\n"+scansionFeedback(run.selected,a);
  if(!met){run.stats.failedContracts+=1;run.streak=0;run.inspiration=Math.max(0,run.inspiration-d.failPenalty);moveSelectedToDiscard();$("rivalSpeech").textContent=pick(d.taunts);$("playerPanel").classList.remove("hurt");void $("playerPanel").offsetWidth;$("playerPanel").classList.add("hurt");showBurst("CONTRATO FALLIDO",ch.title,"SIN ATAQUE","−"+d.failPenalty+" Inspiración",false);renderGame();bridgeCall("checkpoint","contract_failed");setTimeout(afterFailedTurn,900);return;}
- var damage=contractDamage(a);run.stats.contracts+=1;if(a.structured){run.stats.structured+=1;run.streak+=1;}else run.streak=0;run.bestStreak=Math.max(run.bestStreak,run.streak);run.stats.bestCombo=Math.max(run.stats.bestCombo,damage);run.runScore+=damage;run.rivalPrestige=Math.max(0,run.rivalPrestige-damage);run.firstPlay=false;moveSelectedToDiscard();renderGame();
+ var damage=contractDamage(a);window.VersopolisPoems.capture(a.resolvedCards.map(function(c){return c.text;}),{form:a.name,pattern:a.pattern,score:damage,map:activeMap()&&activeMap().name||"Versópolis",jokers:a.jokerCount});run.stats.contracts+=1;if(a.structured){run.stats.structured+=1;run.streak+=1;}else run.streak=0;run.bestStreak=Math.max(run.bestStreak,run.streak);run.stats.bestCombo=Math.max(run.stats.bestCombo,damage);run.runScore+=damage;run.rivalPrestige=Math.max(0,run.rivalPrestige-damage);run.firstPlay=false;moveSelectedToDiscard();renderGame();
  recordComposition(a);checkAchievements();
  $("damageFloat").textContent="−"+damage.toLocaleString("es-ES");$("damageFloat").classList.remove("show");void $("damageFloat").offsetWidth;$("damageFloat").classList.add("show");showBurst(a.tier+" · CONTRATO CUMPLIDO",a.name,"−"+damage.toLocaleString("es-ES")+" PRESTIGIO",ch.title+" · "+(a.tags[0]||""),true);bridgeCall("checkpoint","contract_attack");
  setTimeout(function(){if(!run||run.finished)return;if(run.rivalPrestige<=0){run.locked=false;winDistrict();return;}rivalCounter(damage);},900);
@@ -640,7 +663,7 @@ function submitWriting(event){
  var w=run.writingRound,first=$("writingA").value.trim(),second=$("writingB").value.trim(),a=window.VersopolisProsody.evaluate(first,w.a),b=window.VersopolisProsody.evaluate(second,w.b);
  w.draftA=first;w.draftB=second;run.stats.compositions++;var ok=a.meterMatches&&a.rhymeMatches&&b.meterMatches&&b.rhymeMatches;
  $("writingFeedback").textContent="Verso 3: "+a.syllables+" sílabas · "+(a.rhymeMatches?"rima ✓":"revisa la rima A")+". Verso 4: "+b.syllables+" sílabas · "+(b.rhymeMatches?"rima ✓":"revisa la rima B")+".";
- if(ok){run.stats.contracts++;run.stats.structured++;run.runScore+=250;run.inspiration=Math.min(run.maxInspiration,run.inspiration+1);w.done=true;w.poem=[w.a,w.b,first,second];career.poems=career.poems||[];career.poems.push({verses:w.poem,date:Date.now()});saveCareer();showToast("ESTROFA SELLADA · +250 prestigio y +1 inspiración","ok");showEvent();}else{run.stats.failedContracts++;showToast("Revisa el cómputo y las palabras finales. Puedes volver a intentarlo.","bad");}
+ if(ok){run.stats.contracts++;run.stats.structured++;run.runScore+=250;run.inspiration=Math.min(run.maxInspiration,run.inspiration+1);w.done=true;w.poem=[w.a,w.b,first,second];window.VersopolisPoems.capture(w.poem,{title:"Mi voz · estrofa ABAB",kind:"escrita",form:"ABAB",score:250,map:activeMap().name});saveCareer();showToast("ESTROFA SELLADA · +250 prestigio y +1 inspiración","ok");showEvent();}else{run.stats.failedContracts++;showToast("Revisa el cómputo y las palabras finales. Puedes volver a intentarlo.","bad");}
  bridgeCall("checkpoint","written_stanza");
 }
 $("writingForm").addEventListener("submit",submitWriting);
@@ -669,7 +692,7 @@ function resolveEventAction(action){
 }
 function showDraft(rare){
  if(run.cardPool.length>=MAX_DECK_SIZE)return;
- var pool=cards.filter(function(c){return!c.joker;});if(rare)pool=pool.filter(function(c){return c.meter===11||c.devices.indexOf("metáfora")>=0||c.devices.indexOf("sinestesia")>=0;});
+ var pool=cards.filter(function(c){return!c.joker;});if(rare)pool=pool.filter(function(c){return !!c.power;});
  var offers=shuffle(pool).slice(0,3);$("eventTitle").textContent=rare?"Pergaminos selectos":"Elige un nuevo verso";$("eventText").textContent="La carta elegida entra permanentemente en tu mazo para el resto de la expedición.";$("eventChoices").className="eventChoices draftMode";$("eventChoices").innerHTML="";
  offers.forEach(function(base){var temp=Object.assign({},base,{uid:"preview",level:rare?1:0}),b=document.createElement("button");b.type="button";b.className="verseCard family-"+familyOf(temp);b.innerHTML=cardHTML(temp);b.addEventListener("click",function(){if(run.cardPool.length>=MAX_DECK_SIZE)return;recordEventAction(rare?"draftRare":"draft");run.cardPool.push(makeInstance(base.id,rare?1:0));finishEvent("Has añadido «"+base.text+"» al mazo.");});$("eventChoices").appendChild(b);});
 }
@@ -724,7 +747,7 @@ function migrateRun(oldRun,version){
 function restore(raw){
  try{
   var save=raw&&raw.run!==undefined?raw:raw&&raw.save?raw.save:raw;if(!save)return false;
-  if(save.career){if(save.version===1||save.career.games!==undefined){career.runs=Math.max(career.runs,Number(save.career.games||0));career.bestScore=Math.max(career.bestScore,Number(save.career.bestScore||0));career.bestStreak=Math.max(career.bestStreak,Number(save.career.bestStreak||0));}else career=Object.assign(career,save.career);saveCareer();}
+  if(save.career){if(save.version===1||save.career.games!==undefined){career.runs=Math.max(career.runs,Number(save.career.games||0));career.bestScore=Math.max(career.bestScore,Number(save.career.bestScore||0));career.bestStreak=Math.max(career.bestStreak,Number(save.career.bestStreak||0));}else{var poems=window.VersopolisPoems?window.VersopolisPoems.merge(career.poems,save.career.poems):career.poems||save.career.poems||[];career=Object.assign(career,save.career,{poems:poems});}saveCareer();}
   if((save.version===2||save.version===3||save.version===4||save.version===5||save.version===6)&&save.run&&!save.run.finished){resumeSave=migrateRun(save.run,save.version);renderCareer();return true;}renderCareer();return!!save.career;
  }catch(err){return false;}
 }
@@ -745,7 +768,7 @@ $("startBtn").addEventListener("click",showAtlas);$("continueBtn").addEventListe
 $("atlasBackBtn").addEventListener("click",function(){show("homeScreen");});$("achievementsBtn").addEventListener("click",function(){renderAchievements();show("achievementsScreen");});$("achievementsBackBtn").addEventListener("click",function(){show("homeScreen");});$("codexBtn").addEventListener("click",function(){renderCodex();show("codexScreen");});$("codexBackBtn").addEventListener("click",function(){show("homeScreen");});$("scanBtn").addEventListener("click",function(){if(!run||!activeMap()||activeMap().id!=="torre"||run.districtIndex!==1||run.scanReveal)return;run.scanReveal=true;run.scans+=1;renderGame();bridgeCall("checkpoint","scan_meter");});
 $("playBtn").addEventListener("click",playSelection);$("discardBtn").addEventListener("click",discardSelection);$("shuffleHandBtn").addEventListener("click",shuffleHand);$("clearBtn").addEventListener("click",clearSelection);$("exitBtn").addEventListener("click",saveAndHome);$("museExitBtn").addEventListener("click",saveAndHome);$("eventExitBtn").addEventListener("click",saveAndHome);$("openDeckBtn").addEventListener("click",openDeckInspect);$("deckBackBtn").addEventListener("click",backFromDeck);
 $("helpBtn").addEventListener("click",function(){$("modal").classList.remove("hidden");});$("closeModal").addEventListener("click",function(){$("modal").classList.add("hidden");});$("modal").addEventListener("click",function(e){if(e.target===$("modal"))$("modal").classList.add("hidden");});
-window.VersopolisGame={persist:persist,setProfile:setProfile,snapshot:snapshot,restore:restore,metrics:metrics,get run(){return run;},get career(){return career;}};
+window.VersopolisGame={savePoems:function(){saveCareer();persist();},show:show,renderGame:renderGame,persist:persist,setProfile:setProfile,snapshot:snapshot,restore:restore,metrics:metrics,get run(){return run;},get career(){return career;}};
 $("tableInfoBtn").addEventListener("click",function(){var open=$("gameScreen").classList.toggle("showTableInfo");this.setAttribute("aria-expanded",String(open));});
 setupCardDrag();
 renderCareer();

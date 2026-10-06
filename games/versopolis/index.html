@@ -6,7 +6,8 @@
   <meta name="theme-color" content="#0b0717">
   <title>Versópolis · LenguArcade</title>
   <link rel="stylesheet" href="./styles.css?v=20261006-cards">
-  <link rel="stylesheet" href="./table.css?v=20261006-unclipped">
+  <link rel="stylesheet" href="./table.css?v=20261006-anthology">
+  <link rel="stylesheet" href="./anthology.css?v=20261006-anthology">
 </head>
 <body>
 <main id="app" class="app">
@@ -17,13 +18,14 @@
       <button id="helpBtn" class="iconBtn" type="button" aria-label="Cómo jugar">?</button>
     </header>
     <div class="homeHero">
-      <span class="kicker">ROGUELIKE POÉTICO · V0.6</span>
+      <span class="kicker">ROGUELIKE POÉTICO · EL ARCHIVO DE LOS LACRES</span>
       <h1>VERSÓPOLIS</h1>
       <p>Construye tu mazo de versos, supera contratos poéticos y derrota a los maestros antes de que se agote tu Inspiración.</p>
       <div class="homeActions">
         <button id="startBtn" class="primary huge" type="button">INICIAR EXPEDICIÓN</button>
         <button id="continueBtn" class="secondary hidden" type="button">CONTINUAR PARTIDA</button>
         <button id="achievementsBtn" class="secondary" type="button">LOGROS</button>
+        <button id="poemsBtn" class="secondary" type="button">✒ MIS POEMAS</button>
         <button id="codexBtn" class="secondary" type="button">CÓDICE</button>
       </div>
       <div id="careerLine" class="careerLine"></div>
@@ -42,6 +44,12 @@
   </section>
   <section id="achievementsScreen" class="screen archiveScreen hidden"><header class="topbar compact"><div class="brand"><span class="brandMark">V</span><span>ARCHIVO DE HAZAÑAS</span></div><button id="achievementsBackBtn" class="ghost" type="button">Volver</button></header><div class="archiveStage"><span class="kicker">COLECCIÓN DE SELLOS</span><h2>Hazañas de Versópolis</h2><p id="achievementCount"></p><div id="achievementGrid" class="archiveGrid"></div></div></section>
   <section id="codexScreen" class="screen archiveScreen hidden"><header class="topbar compact"><div class="brand"><span class="brandMark">V</span><span>CÓDICE DEL POETA</span></div><button id="codexBackBtn" class="ghost" type="button">Volver</button></header><div class="archiveStage"><span class="kicker">DESCUBRE JUGANDO</span><h2>Formas que ya conoces</h2><p>Las páginas se abren al construir cada forma durante una expedición.</p><div id="codexGrid" class="archiveGrid codexGrid"></div></div></section>
+
+<section id="poemsScreen" class="screen poemsScreen hidden">
+<header class="topbar compact"><div class="brand"><span class="brandMark">✒</span><span>MIS POEMAS · ANTOLOGÍA DE VERSÓPOLIS</span></div><button id="poemsBackBtn" class="ghost" type="button">Volver</button></header>
+<div class="poemsWorkspace"><aside class="poemsShelf"><span class="kicker">EL ARCHIVO DE TU VOZ</span><h2>Mis poemas</h2><p id="poemsCount"></p><button id="newPoemBtn" class="primary" type="button">＋ Página en blanco</button><input id="poemSearch" type="search" placeholder="Buscar un verso o un título…" aria-label="Buscar poemas"><div id="poemsList" class="poemsList"></div><button id="assemblePoemsBtn" class="secondary" disabled type="button">Reunir estrofas marcadas</button><button id="exportAnthologyBtn" class="ghost" type="button">Exportar antología · TXT</button></aside>
+<div class="poemsDesk"><div id="poemWelcome" class="poemWelcome"><span>✒</span><h2>De la mesa al papel</h2><p>Cada contrato cumplido conserva sus versos. Marca varias estrofas para reunirlas en un poema, ponle título o escribe una página propia.</p></div><article id="poemEditor" class="poemEditor hidden"><div class="poemEditHead"><label>TÍTULO<input id="poemTitle" maxlength="80" placeholder="Ponle título a tu poema"></label><p id="poemOrigin"></p></div><label class="poemTextLabel">TUS VERSOS · una línea por verso; una línea vacía separa estrofas<textarea id="poemText" maxlength="8000" spellcheck="true" placeholder="Aquí empieza tu voz…"></textarea></label><div class="poemTools"><button id="savePoemBtn" class="primary" type="button">Guardar poema</button><button id="exportPoemTxtBtn" class="secondary" type="button">TXT</button><button id="exportPoemHtmlBtn" class="secondary" type="button">Página HTML</button><button id="printPoemBtn" class="ghost" type="button">Imprimir / PDF</button></div><div class="poemPrint"><h1 id="poemReadTitle"></h1><pre id="poemReadText"></pre><small>Mi antología · Versópolis</small></div></article><p id="poemStatus" class="poemStatus" role="status"></p></div></div>
+</section>
 
   <section id="museScreen" class="screen rewardScreen hidden">
     <header class="topbar compact">
@@ -102,6 +110,7 @@
         <span><small>RACHA</small><b id="streakText">×0</b></span>
         <span><small>TOTAL</small><b id="runScoreText">0</b></span>
       </div>
+      <button id="tablePoemsBtn" class="ghost compactBtn" type="button">✒ Poemas</button>
       <button id="tableInfoBtn" class="ghost compactBtn" type="button" aria-expanded="false" aria-controls="playerPanel tableCodex">Detalles</button>
       <button id="openDeckBtn" class="ghost compactBtn" type="button">Mazo</button>
       <button id="exitBtn" class="ghost compactBtn" type="button">Salir</button>
@@ -201,6 +210,7 @@
         <span><b id="bestComboText">0</b> mejor impacto</span>
       </div>
       <button id="againBtn" class="primary" type="button">NUEVA EXPEDICIÓN</button>
+      <button id="resultPoemsBtn" class="secondary" type="button">✒ MIS POEMAS</button>
       <button id="homeBtn" class="ghost" type="button">VOLVER A LA CIUDAD</button>
     </div>
   </section>
@@ -223,7 +233,9 @@
   </div>
 <section id="writingScreen" class="screen hidden writing-screen"><div class="writing-panel"><span class="eyebrow">TALLER DE CREACIÓN · ESTROFA ABAB</span><h1>Tu voz abre el siguiente distrito</h1><p>Escribe dos versos nuevos: el tercero rima con el primero y el cuarto con el segundo. Todos deben tener ocho sílabas métricas.</p><form id="writingForm"><blockquote id="writingAnchorA"></blockquote><blockquote id="writingAnchorB"></blockquote><label>Verso 3 · rima A<input id="writingA" maxlength="120" autocomplete="off" required></label><label>Verso 4 · rima B<input id="writingB" maxlength="120" autocomplete="off" required></label><p id="writingFeedback" aria-live="polite"></p><small>Cómputo orientativo con sinalefa automática y ajuste por acento final. Puedes separar dos palabras con | para evitar su sinalefa. Las licencias poéticas se revisan con el profesor.</small><div class="writing-actions"><button class="primary" type="submit">Sellar mi estrofa</button><button type="button" id="writingSkip">Continuar sin bonus</button><button type="button" id="writingSave">Guardar y salir</button></div></form></div></section></main>
 <script src="./prosody.js?v=20260930-gameplay"></script>
-<script src="./app.js?v=20261006-cards"></script>
+<script src="./verse-bank.js?v=20261006-anthology"></script>
+<script src="./app.js?v=20261006-anthology"></script>
+<script src="./poems.js?v=20261006-anthology"></script>
 <script src="./bridge.js?v=20260930-gameplay"></script>
 </body>
 </html>
