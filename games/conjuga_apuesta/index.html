@@ -158,6 +158,368 @@ button{cursor:pointer}
   .statGrid{grid-template-columns:repeat(2,1fr)}
   .achievementGrid{grid-template-columns:1fr}
 }
+
+/* ===== Battle cockpit · no-scroll redesign ===== */
+body:has(#gameScreen:not(.hidden)){
+  padding:8px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 18% 0%,rgba(255,102,77,.16),transparent 28%),
+    radial-gradient(circle at 82% 0%,rgba(111,92,255,.18),transparent 30%),
+    #eef1f7;
+}
+body:has(#gameScreen:not(.hidden)) .app{
+  height:calc(100dvh - 16px);
+  max-width:1480px;
+  grid-template-rows:auto minmax(0,1fr);
+  gap:8px;
+}
+body:has(#gameScreen:not(.hidden)) .topbar{
+  min-height:54px;
+  padding:7px 12px;
+  border-radius:16px;
+}
+body:has(#gameScreen:not(.hidden)) .brandMark{
+  width:38px;height:38px;border-radius:12px;font-size:20px;
+}
+body:has(#gameScreen:not(.hidden)) .brand h1{font-size:1rem}
+body:has(#gameScreen:not(.hidden)) .brand p{display:none}
+body:has(#gameScreen:not(.hidden)) .pill{padding:6px 9px;font-size:.75rem}
+body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:12px;font-size:.8rem}
+
+.gameScreen:not(.hidden){
+  min-height:0;
+  height:100%;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  gap:8px;
+  padding:9px;
+  border-color:#2d365b;
+  background:
+    radial-gradient(circle at 50% 42%,rgba(111,92,255,.18),transparent 34%),
+    linear-gradient(145deg,#202845 0%,#151a2e 58%,#111625 100%);
+  box-shadow:0 20px 60px rgba(18,23,42,.28);
+}
+.gameScreen .matchHeader{
+  gap:8px;
+  min-height:0;
+  grid-template-columns:minmax(0,1fr) 170px minmax(0,1fr);
+}
+.gameScreen .playerCard{
+  min-height:76px;
+  padding:9px 12px;
+  border-radius:16px;
+  border-color:rgba(255,255,255,.16);
+  background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(246,247,253,.94));
+  box-shadow:0 9px 22px rgba(4,9,26,.18);
+}
+.gameScreen .playerCard.active{
+  border-color:#ff9f7e;
+  box-shadow:0 0 0 3px rgba(255,102,77,.2),0 9px 22px rgba(4,9,26,.18);
+}
+.gameScreen .playerCard.active::before{
+  content:"TU TURNO";
+  position:absolute;right:10px;top:9px;
+  font-size:.62rem;font-weight:950;letter-spacing:.08em;
+  color:#fff;background:linear-gradient(135deg,var(--coral),#ff875f);
+  padding:4px 7px;border-radius:999px;
+}
+.gameScreen .playerName{font-size:.95rem;padding-right:58px}
+.gameScreen .chips{font-size:1.38rem;margin:3px 0 3px}
+.gameScreen .playerBadges{margin-top:3px;gap:4px}
+.gameScreen .mini{padding:3px 6px;font-size:.66rem}
+.gameScreen .xpMini{height:5px!important;margin-top:5px!important}
+.gameScreen .centerRound{
+  min-width:0;
+  border-radius:16px;
+  padding:8px 10px;
+  background:linear-gradient(145deg,#10162a,#262f53);
+  border:1px solid rgba(255,255,255,.11);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+.gameScreen .roundBig{font-size:1.13rem}
+.gameScreen .roundSmall{font-size:.68rem;margin-top:1px}
+.gameScreen .specialFlag{margin-top:4px;padding:4px 7px;font-size:.61rem}
+
+.gameScreen .arena{
+  min-height:0;
+  height:100%;
+  margin-top:0;
+  grid-template-columns:236px minmax(0,1fr) 220px;
+  gap:8px;
+}
+.gameScreen .sidePanel,
+.gameScreen .challenge{
+  min-height:0;
+  height:100%;
+  border-radius:18px;
+}
+.gameScreen .sidePanel{
+  overflow:hidden;
+  padding:11px;
+  border-color:rgba(255,255,255,.22);
+  background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(244,246,252,.96));
+}
+.gameScreen .sidePanel h3{
+  margin:0 0 7px;
+  font-size:.72rem;
+  letter-spacing:.075em;
+}
+.gameScreen .sidePanel h3[style]{margin-top:10px!important}
+.gameScreen .tierList{
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+.gameScreen .betList{
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+.gameScreen .choice{
+  min-height:46px;
+  padding:7px 8px;
+  border-radius:11px;
+  gap:5px;
+}
+.gameScreen .tierList .choice{
+  align-items:flex-start;
+  flex-direction:column;
+  justify-content:center;
+}
+.gameScreen .choice strong{font-size:.76rem}
+.gameScreen .choice span{font-size:.61rem;line-height:1.15}
+.gameScreen .tierList .choice>b{position:absolute;opacity:0}
+.gameScreen .betChoice{min-height:37px;padding:6px;font-size:.83rem}
+.gameScreen .powerList{gap:6px}
+.gameScreen .power{
+  padding:7px 8px;
+  border-radius:11px;
+  min-height:43px;
+}
+.gameScreen .power b{font-size:.76rem}
+.gameScreen .power div div{font-size:.61rem!important;line-height:1.2}
+.gameScreen .scoreLegend{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+}
+.gameScreen .scoreLegend span{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:9px;
+  padding:5px 6px;
+  font-size:.63rem;
+  font-weight:850;
+  color:var(--muted);
+  text-align:center;
+}
+
+.gameScreen .challenge{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  overflow:hidden;
+  padding:10px clamp(13px,2vw,24px);
+  color:#f7f8ff;
+  border-color:rgba(144,155,225,.28);
+  background:
+    radial-gradient(circle at 50% 20%,rgba(255,102,77,.16),transparent 30%),
+    radial-gradient(circle at 50% 120%,rgba(111,92,255,.22),transparent 46%),
+    linear-gradient(180deg,#20294a 0%,#161d35 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 10px 26px rgba(4,9,26,.24);
+}
+.gameScreen .challenge::before{
+  width:340px;height:340px;left:calc(50% - 170px);top:38%;
+  background:radial-gradient(circle,rgba(245,184,61,.065),transparent 64%);
+}
+.challengeHud{
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-height:36px;
+  padding-bottom:7px;
+  border-bottom:1px solid rgba(255,255,255,.09);
+}
+.gameScreen .turnLabel{
+  color:#ffad91;
+  font-size:.67rem;
+}
+.duelReadout{display:flex;align-items:center;gap:6px}
+.duelReadout span,
+.duelReadout strong{
+  display:inline-flex;align-items:center;gap:4px;
+  min-height:25px;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:999px;
+  padding:4px 8px;
+  font-size:.66rem;
+  background:rgba(255,255,255,.07);
+}
+.duelReadout strong{
+  color:#ffd46c;
+  border-color:rgba(245,184,61,.28);
+  background:rgba(245,184,61,.09);
+}
+.gameScreen #preQuestionState,
+.gameScreen #questionState:not(.hidden){
+  position:relative;
+  z-index:1;
+  flex:1;
+  min-height:0;
+}
+.gameScreen #preQuestionState{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+.gameScreen #questionState:not(.hidden){
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.gameScreen .challenge h2{
+  color:#fff;
+  font-size:clamp(1.65rem,3.1vw,2.75rem);
+  margin:5px 0 4px;
+  text-shadow:0 4px 18px rgba(0,0,0,.2);
+}
+.gameScreen .preQuestion{
+  color:#cbd3ef;
+  line-height:1.42;
+  max-width:560px;
+  margin:0 auto 12px;
+  font-size:.88rem;
+}
+.gameScreen .metaRow{gap:5px;margin:3px 0 7px}
+.gameScreen .metaTag{
+  padding:4px 7px;
+  font-size:.66rem;
+  color:#dce2f8;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.1);
+}
+.gameScreen .timerWrap{
+  height:6px;
+  margin:0 auto 7px;
+  background:rgba(255,255,255,.1);
+}
+.gameScreen .prompt{
+  color:#f5f7ff;
+  font-size:clamp(.95rem,1.35vw,1.12rem);
+  line-height:1.35;
+  margin:0 auto 8px;
+}
+.gameScreen .answerArea{gap:6px;max-width:620px}
+.gameScreen .answerInput{
+  padding:10px 13px;
+  border-radius:13px;
+  font-size:1rem;
+  border-color:rgba(255,255,255,.16);
+  box-shadow:0 6px 18px rgba(4,9,26,.18);
+}
+.gameScreen .accentRow{gap:4px}
+.gameScreen .accentRow button{
+  padding:4px 7px;
+  border-radius:8px;
+  font-size:.72rem;
+}
+.gameScreen .challengeActions{gap:6px;margin-top:3px}
+.gameScreen .challengeActions .btn{
+  padding:8px 10px;
+  border-radius:11px;
+  font-size:.75rem;
+}
+.gameScreen .challengeActions .btn.primary{
+  min-width:118px;
+  box-shadow:0 8px 18px rgba(255,102,77,.26);
+}
+.gameScreen .feedback{
+  width:100%;
+  margin:7px auto 0;
+  padding:8px 10px;
+  border-radius:12px;
+  font-size:.76rem;
+  line-height:1.32;
+}
+.gameScreen .feedback strong{margin-bottom:2px}
+.gameScreen .statusLine{gap:4px;margin-top:5px}
+.gameScreen .statusLine span{
+  padding:4px 6px;
+  font-size:.62rem;
+  color:#d7def3;
+  background:rgba(255,255,255,.075);
+}
+.gameScreen .bottomBar{
+  min-height:38px;
+  margin-top:0;
+  padding:6px 8px 6px 11px;
+  border-radius:13px;
+  color:#d9e0f5;
+  border-color:rgba(255,255,255,.12);
+  background:rgba(13,18,34,.72);
+}
+.gameScreen .log{
+  max-width:none;
+  color:#cbd3ea;
+  font-size:.72rem;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.gameScreen .bottomBar .btn{
+  flex:0 0 auto;
+  padding:7px 10px;
+  border-radius:10px;
+  font-size:.72rem;
+  background:rgba(255,255,255,.92);
+}
+
+@media (max-height:820px) and (min-width:820px){
+  body:has(#gameScreen:not(.hidden)) .topbar{min-height:48px;padding:5px 10px}
+  body:has(#gameScreen:not(.hidden)) .brandMark{width:34px;height:34px;font-size:18px}
+  .gameScreen .playerCard{min-height:66px;padding:7px 10px}
+  .gameScreen .chips{font-size:1.2rem}
+  .gameScreen .playerBadges{margin-top:1px}
+  .gameScreen .arena{grid-template-columns:220px minmax(0,1fr) 205px}
+  .gameScreen .sidePanel{padding:9px}
+  .gameScreen .choice{min-height:41px;padding:5px 7px}
+  .gameScreen .betChoice{min-height:32px}
+  .gameScreen .power{min-height:38px;padding:5px 7px}
+  .gameScreen .challenge{padding:8px 14px}
+  .challengeHud{min-height:31px;padding-bottom:5px}
+  .gameScreen .challenge h2{font-size:clamp(1.45rem,2.6vw,2.25rem);margin:3px 0}
+  .gameScreen .preQuestion{font-size:.8rem;margin-bottom:8px}
+  .gameScreen .metaRow{margin:2px 0 5px}
+  .gameScreen .prompt{font-size:.93rem;margin-bottom:6px}
+  .gameScreen .answerInput{padding:8px 11px}
+  .gameScreen .challengeActions .btn{padding:6px 8px;font-size:.7rem}
+  .gameScreen .feedback{margin-top:5px;padding:6px 8px;font-size:.7rem}
+  .gameScreen .statusLine{margin-top:3px}
+  .gameScreen .scoreLegend{gap:4px}
+  .gameScreen .scoreLegend span{padding:4px 5px;font-size:.59rem}
+}
+@media (min-width:820px) and (max-width:1100px){
+  .gameScreen .arena{grid-template-columns:190px minmax(0,1fr) 185px}
+  .gameScreen .challenge{grid-column:auto;grid-row:auto}
+  .gameScreen .matchHeader{grid-template-columns:minmax(0,1fr) 145px minmax(0,1fr)}
+  .gameScreen .choice span{display:none}
+}
+@media (max-width:819px){
+  body:has(#gameScreen:not(.hidden)){overflow:auto}
+  body:has(#gameScreen:not(.hidden)) .app{height:auto;display:grid}
+  .gameScreen:not(.hidden){height:auto;display:block;padding:8px}
+  .gameScreen .matchHeader{grid-template-columns:1fr 1fr}
+  .gameScreen .centerRound{grid-column:1/-1;grid-row:1}
+  .gameScreen .arena{height:auto;grid-template-columns:1fr;margin-top:8px}
+  .gameScreen .challenge{grid-column:auto;grid-row:auto;min-height:420px}
+  .gameScreen .sidePanel{height:auto;margin-top:8px}
+  .gameScreen .bottomBar{margin-top:8px}
+}
+
 </style>
 </head>
 <body>
@@ -232,7 +594,13 @@ button{cursor:pointer}
       </aside>
 
       <main class="challenge">
-        <div class="turnLabel" id="turnLabel">Turno de…</div>
+        <div class="challengeHud">
+          <div class="turnLabel" id="turnLabel">Turno de…</div>
+          <div class="duelReadout">
+            <span id="riskValue">Básico · ×1</span>
+            <strong id="potValue">10 🟠</strong>
+          </div>
+        </div>
         <div id="preQuestionState">
           <h2>¿Cuánto te la juegas?</h2>
           <p class="preQuestion">Elige una dificultad y una cantidad. Las preguntas más difíciles multiplican más las ganancias, pero si fallas pierdes la apuesta.</p>
@@ -261,14 +629,13 @@ button{cursor:pointer}
       <aside class="sidePanel">
         <h3>Tu mochila táctica</h3>
         <div class="powerList" id="powerList"></div>
-        <h3 style="margin-top:20px">Cómo puntúa</h3>
-        <div style="font-size:.86rem;color:var(--muted);line-height:1.7;text-align:left">
-          <b>Básico</b> ×1<br>
-          <b>Intermedio</b> ×1,35<br>
-          <b>Avanzado</b> ×1,7<br>
-          <b>Experto</b> ×2,1<br>
-          <b>Ronda bote</b> ×1,5 adicional<br><br>
-          Una racha aumenta la XP, pero nunca cambia la respuesta correcta.
+        <h3 style="margin-top:10px">Multiplicadores</h3>
+        <div class="scoreLegend" aria-label="Multiplicadores de dificultad">
+          <span>Básico ×1</span>
+          <span>Intermedio ×1,35</span>
+          <span>Avanzado ×1,7</span>
+          <span>Experto ×2,1</span>
+          <span style="grid-column:1/-1">✨ Ronda bote ×1,5</span>
         </div>
       </aside>
     </div>
@@ -751,6 +1118,8 @@ button{cursor:pointer}
 
   function renderTierChoices(){
     $('tierList').innerHTML=Object.entries(TIERS).map(([key,t])=>'<button type="button" class="choice '+(state.selectedTier===key?'selected':'')+'" data-tier="'+key+'" '+(state.questionOpen?'disabled':'')+'><div><strong>'+t.label+'</strong><br><span>'+t.desc+'</span></div><b>×'+String(t.mult).replace('.',',')+'</b></button>').join('');
+    const risk=TIERS[state.selectedTier],riskEl=$('riskValue');
+    if(riskEl&&risk)riskEl.textContent=risk.label+' · ×'+String(risk.mult).replace('.',',');
     $('tierList').querySelectorAll('[data-tier]').forEach(btn=>btn.onclick=()=>{state.selectedTier=btn.dataset.tier;renderTierChoices();});
   }
   function availableBets(){
@@ -763,6 +1132,7 @@ button{cursor:pointer}
     const chips=Math.max(0,current()?.chips||0),bets=availableBets();
     if(!bets.includes(state.selectedBet))state.selectedBet=bets[0]||0;
     $('betList').innerHTML=bets.map(v=>'<button type="button" class="choice betChoice '+(state.selectedBet===v?'selected':'')+'" data-bet="'+v+'" '+(state.questionOpen?'disabled':'')+'>'+v+(v===chips&&chips>50?' · TODO':'')+' 🟠</button>').join('')||'<div style="color:var(--muted);font-size:.85rem">Sin fichas disponibles.</div>';
+    const potEl=$('potValue');if(potEl)potEl.textContent=(state.selectedBet||0)+' 🟠';
     $('betList').querySelectorAll('[data-bet]').forEach(btn=>btn.onclick=()=>{state.selectedBet=Number(btn.dataset.bet);renderBetChoices();});
   }
   function renderPlayerCards(){
