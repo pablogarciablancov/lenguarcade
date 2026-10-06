@@ -4,7 +4,7 @@ import vm from "node:vm";
 import assert from "node:assert/strict";
 
 const root=process.cwd(),dir=path.join(root,"games","versopolis");
-for(const file of ["index.html","styles.css","app.js","bridge.js","lenguarcade.integration.json"]){
+for(const file of ["index.html","styles.css","app.js","verse-bank.js","poems.js","anthology.css","bridge.js","lenguarcade.integration.json"]){
   if(!fs.existsSync(path.join(dir,file))) throw new Error("Versópolis: falta "+file);
 }
 const html=fs.readFileSync(path.join(dir,"index.html"),"utf8");
@@ -49,13 +49,17 @@ function boot(){
   const elements=new Map();
   function el(){const e={textContent:"",className:"",style:{},dataset:{},offsetWidth:1,disabled:false,classList:{add(){},remove(){},toggle(){}},appendChild(){},addEventListener(){},setAttribute(){}};Object.defineProperty(e,"innerHTML",{get(){return this.html||"";},set(v){this.html=v;}});return e;}
   const document={getElementById(id){if(!elements.has(id))elements.set(id,el());return elements.get(id);},createElement:el};
-  const window={},localStorage={getItem(){return null;},setItem(){}};
-  const exposed='window.__test={moveCard,toggleCard,moveSelected,removeSelected,cards,startingBaseIds,challenges,newRun,chooseMuse,rollChallenge,witnessFor,collectionCards,analyze,contractMet,makeInstance,applyDeckAction,migrateRun,get run(){return run;}};';
-  vm.runInNewContext(app.replace(/\}\)\(\);\s*$/,exposed+'})();'),{window,document,localStorage,console,setTimeout(){return 1;},clearTimeout(){},Math,Date,Intl});
+  const window={addEventListener(){}},localStorage={getItem(){return null;},setItem(){}};
+  const exposed='window.__test={starterDeck,powerBonus,restore,snapshot,get career(){return career;},moveCard,toggleCard,moveSelected,removeSelected,cards,startingBaseIds,challenges,newRun,chooseMuse,rollChallenge,witnessFor,collectionCards,analyze,contractMet,makeInstance,applyDeckAction,migrateRun,get run(){return run;}};';
+  const context={window,document,localStorage,console,setTimeout(){return 1;},clearTimeout(){},Math,Date,Intl};
+  for(const file of ["prosody.js","verse-bank.js"])vm.runInNewContext(fs.readFileSync(path.join(dir,file),"utf8"),context);
+  vm.runInNewContext(app.replace(/\}\)\(\);\s*$/,exposed+'})();'),context);
+  vm.runInNewContext(fs.readFileSync(path.join(dir,"poems.js"),"utf8"),context);
+  window.__test.poems=window.VersopolisPoems;
   return window.__test;
 }
 for(const map of ["jardines","fortaleza","teatro","torre"]){
-  const t=boot();assert.equal(t.cards.length,54);assert.equal(t.startingBaseIds.length,51);t.newRun(map);t.chooseMuse("eco");
+  const t=boot();assert.equal(t.cards.length,1722);assert.equal(new Set(t.cards.filter(c=>!c.joker).map(c=>c.text)).size,1720);assert.equal(t.startingBaseIds.length,51);t.newRun(map);assert(t.collectionCards().filter(c=>c.power).length>=3);t.chooseMuse("eco");
   assert.equal(t.run.cardPool.length,51);assert(t.run.hand.some(id=>t.collectionCards().find(c=>c.uid===id)?.joker),"El primer reparto muestra un comodín");
   for(const ch of t.challenges.filter(c=>c.min<=3&&c.id!=="rescate")){
     const witness=t.witnessFor(ch,t.collectionCards());
@@ -94,4 +98,15 @@ for(const map of ["jardines","fortaleza","teatro","torre"]){
   while(t.run.cardPool.length<54)t.run.cardPool.push(t.makeInstance(anchor.id,0));
   t.applyDeckAction("duplicate",anchor.uid);assert.equal(t.run.cardPool.length,54,"El mazo no supera 54 cartas");
 }
-console.log("Versópolis V0.6 OK: 52 versos, 2 comodines, contratos resolubles y límite de 54 cartas.");
+const t=boot();t.newRun("jardines");t.chooseMuse("eco");
+const bank=t.cards.filter(c=>c.generated);
+assert(bank.length>=520);for(const c of bank){assert([8,11].includes(c.meter));assert.equal(c.reading.syllables,c.meter);assert(c.reading.last);}
+const decks=new Set(Array.from({length:12},()=>t.starterDeck().join(',')));assert(decks.size>1,"El mazo de salida debe variar");
+for(const [power,bonus] of Object.entries({eco:45,pulso:55,imagen:65,constelacion:90})){
+ assert.equal(t.powerBonus({power},{repeated:true,allMeter:true,devices:['metáfora','personificación'],n:4,pattern:'ABAB'}),bonus);
+ assert.equal(t.powerBonus({power},{repeated:false,allMeter:false,devices:[],n:2,pattern:'AB'}),0);
+}
+const special=t.collectionCards().find(c=>c.power);special && assert(special.value>=54);
+const merged=t.poems.merge([{verses:['uno','dos'],date:12}],[{verses:['uno','dos'],date:12}]);assert.equal(merged.length,1,"No duplicar poemas antiguos al restaurar");
+t.career.poems=merged;const snap=JSON.parse(JSON.stringify(t.snapshot()));t.career.poems.push({id:'local-new',title:'Mi poema',verses:['tres'],date:13});t.restore(snap);assert.equal(t.career.poems.length,2,"Restaurar un guardado antiguo no borra poemas locales nuevos");
+console.log("Versópolis OK: 1720 versos, 2 comodines, lacres condicionales, mazos variados, poemas y compatibilidad V5/V6.");

@@ -1,0 +1,48 @@
+/* Illustrated battle desk and lacquer rarities use existing game art. */
+.cardTable{--tableAccent:#9fe9d5}
+.cardTable[data-scene="fortress"]{--tableAccent:#ffb372}.cardTable[data-scene="theater"]{--tableAccent:#efaddd}.cardTable[data-scene="tower"]{--tableAccent:#9bcfff}
+.cardTable .battleHud{grid-template-columns:minmax(165px,1fr) auto minmax(380px,1.2fr) repeat(4,auto);gap:7px}
+.cardTable .districtBadge{border-color:color-mix(in srgb,var(--tableAccent) 50%,transparent);box-shadow:inset 0 0 20px #0a041a,0 3px 0 #03030d}
+.cardTable .duelBoard{border:1px solid color-mix(in srgb,var(--tableAccent) 45%,transparent);background:linear-gradient(#0d092de0,#16102cf5),var(--scene) center/cover;box-shadow:inset 0 0 0 4px #08071388,inset 0 0 75px #0007,0 10px 35px #0005}
+.cardTable .rivalStage{background:linear-gradient(95deg,#100822d9,#30204399,#120c24e6);border-color:color-mix(in srgb,var(--tableAccent) 24%,transparent)}
+.cardTable .rivalPortrait{border-radius:50%;border-color:var(--tableAccent);box-shadow:0 0 22px color-mix(in srgb,var(--tableAccent) 30%,transparent)}
+.cardTable .prestigeBar i{background:linear-gradient(90deg,#97357e,#ff747a,#ffcb76)}
+.cardTable .composer{border-color:#dec58535;background:radial-gradient(ellipse at center,#74538118,transparent 70%),linear-gradient(150deg,#251735bb,#100c23ee)}
+.cardTable .composerHead h3{color:#fff1d0;text-shadow:0 2px 3px #000}.cardTable .previewScore{border-color:#ffd77d80;background:#211127;box-shadow:inset 0 0 15px #fbc36316}.cardTable .previewScore strong{color:#ffe39e}
+.cardTable .poemSlot{border-color:color-mix(in srgb,var(--tableAccent) 27%,transparent);background:linear-gradient(135deg,#c2a57109,#04021470);color:#b4a7bb}
+.cardTable .poemSlot.filled{border-color:var(--tableAccent);background:linear-gradient(100deg,#7d597331,#17102988);box-shadow:inset 4px 0 0 var(--tableAccent),inset 0 0 24px #ead1a30a}
+.cardTable .handZone{border-top:1px solid #dbbd7844;background:linear-gradient(#0d071eab,#211225e6);box-shadow:0 -8px 24px #0003}.cardTable .handInstructions{color:#dccda6;letter-spacing:.025em}
+.verseCard:has(.rarityRibbon){--rarityGlow:#74d9ea;border-color:var(--rarityGlow)}
+.verseCard:has(.rarityRibbon.epic){--rarityGlow:#c08bfa}.verseCard:has(.rarityRibbon.legendary){--rarityGlow:#ffd575}
+.cardTable .hand .verseCard:has(.rarityRibbon){border-color:var(--rarityGlow);box-shadow:0 5px 0 #715346,0 0 17px color-mix(in srgb,var(--rarityGlow) 35%,transparent),0 12px 18px #0008}
+.rarityRibbon{position:absolute;top:11px;left:50%;transform:translateX(-50%);font:900 10px/1.3 system-ui;letter-spacing:.045em;color:#175269;white-space:nowrap;z-index:1}.rarityRibbon.epic{color:#663a87}.rarityRibbon.legendary{color:#79510c}
+.powerRibbon{position:absolute;bottom:8px;right:12px;font:900 11px/1.2 system-ui;color:#513651;background:#fff2cf;border:1px solid #b79869;border-radius:5px;padding:3px 6px;z-index:1}
+.cardTable .hand .verseCard:has(.powerRibbon){padding-bottom:33px}.cardTable .hand .verseCard[data-hints="hidden"]:has(.rarityRibbon){padding-top:29px}
+.cardTable .attackBtn{border:1px solid #fff0ba;background:linear-gradient(130deg,#fff0b0,#e8b258);box-shadow:0 3px 0 #76502a,0 0 18px #ffc45b28}.cardTable .attackBtn.validAttack{box-shadow:0 3px 0 #75512a,0 0 24px #ffd47066}
+.poemsScreen{background:linear-gradient(#080617c9,#080617ed),url('./assets/art/scene-theater.webp') center/cover}
+.poemsWorkspace{height:calc(100% - 62px);display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px;padding:20px clamp(16px,3vw,48px);max-width:1480px;margin:auto;min-height:0}
+.poemsShelf{display:flex;flex-direction:column;gap:10px;min-height:0;padding:18px;border:1px solid #c7a46a60;border-radius:16px;background:#160f29e8}.poemsShelf h2{font:700 30px Georgia;margin:0;color:#fce3aa}.poemsShelf p{font-size:13px;margin:0;color:#cdbbda}
+.poemsShelf input[type="search"]{padding:10px;border:1px solid #79608e;border-radius:8px;background:#0e0a1b;color:#fff;font-size:14px;width:100%}.poemsList{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;display:flex;flex-direction:column;gap:8px}
+.poemEntry{display:flex;align-items:center;gap:8px;background:#39244166;border:1px solid #b898682e;border-radius:10px;padding:8px}.poemEntry.active{border-color:#eac77e;background:#5b3c5566}.poemEntry input{width:18px;height:18px;flex:none;accent-color:#eac77e}.poemEntry button{min-width:0;flex:1;background:none;border:0;color:#fff0db;text-align:left;cursor:pointer;padding:0;display:grid;gap:5px}.poemEntry small{font-size:9px;color:#d8b576;letter-spacing:.08em}.poemEntry strong{font:700 18px Georgia}.poemEntry span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:italic 14px Georgia;color:#cbbcca}.poemEntry em{font:11px system-ui;color:#b7a6c8}.poemEmpty{line-height:1.6;padding:12px}
+.poemsDesk{display:flex;flex-direction:column;min-height:0;min-width:0}.poemEditor{flex:1;min-height:0;display:flex;flex-direction:column;gap:12px;border-radius:14px;border:1px solid #efcf9166;background:linear-gradient(145deg,#f6e9ca,#e9d4a7);color:#3a2636;padding:clamp(16px,2vw,30px);box-shadow:0 10px 40px #0005,inset 0 0 0 5px #a7864118}
+.poemEditHead label{display:block;font:900 11px system-ui;letter-spacing:.1em;color:#795c4a}.poemEditHead input{width:100%;border:0;border-bottom:1px solid #b69a79;background:transparent;padding:8px 0;font:700 clamp(24px,2.2vw,34px) Georgia;color:#392338}.poemEditHead p{font-size:12px;color:#795c4a;margin:9px 0 0;line-height:1.4}.poemTextLabel{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;font:700 11px system-ui;color:#795c4a}
+.poemTextLabel textarea{width:100%;flex:1;min-height:90px;resize:none;border:0;border-radius:8px;background:#fff9ee55;padding:14px;font:italic clamp(20px,1.7vw,25px)/1.65 Georgia;color:#38243b;scrollbar-width:thin}.poemTools{display:flex;flex-wrap:wrap;gap:8px}.poemTools button{font-size:13px;min-height:38px}.poemTools .ghost,.poemTools .secondary{background:#37253d;color:#fff1d4}.poemStatus{min-height:32px;margin:8px 0 0;color:#e0cfb4;font-size:13px;line-height:1.4}.poemWelcome{margin:auto;text-align:center;max-width:470px;padding:24px}.poemWelcome>span{font:80px Georgia;color:#edcc8b}.poemWelcome h2{font:32px Georgia;color:#edcc8b}.poemWelcome p{font-size:17px;line-height:1.7;color:#e0cede}.poemPrint{display:none}
+@media(max-width:1250px){.cardTable .battleHud{grid-template-columns:minmax(145px,1fr) minmax(360px,1.2fr) repeat(4,auto)}.cardTable .routePips{display:none}.cardTable .compactBtn{padding:0 9px;font-size:13px}}
+@media(max-width:850px){.cardTable .battleHud{grid-template-columns:1fr repeat(4,auto);grid-template-rows:1fr 1fr}.poemsWorkspace{grid-template-columns:240px minmax(0,1fr);gap:10px;padding:10px}.poemsShelf{padding:12px}.poemTools{gap:4px}}
+@media(max-width:600px){.poemsWorkspace{grid-template-columns:1fr;grid-template-rows:180px minmax(0,1fr)}.poemsShelf{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px}.poemsShelf>.kicker,.poemsShelf h2,.poemsShelf>p,.poemsShelf input[type="search"]{display:none}.poemsList{grid-column:1/-1;grid-row:2;min-height:0;flex-direction:row}.poemEntry{min-width:210px}.poemsShelf button{min-height:32px;font-size:11px}.poemEditor{padding:12px;gap:8px}.poemStatus{font-size:11px}.poemEditHead input{font-size:24px}}
+@media print{body,html{height:auto;overflow:visible;background:white}.app{height:auto;overflow:visible}.screen{display:none!important}.screen.poemsScreen{display:block!important;position:static;background:white}.poemsScreen>.topbar,.poemsShelf,.poemWelcome,.poemEditHead,.poemTextLabel,.poemTools,.poemStatus{display:none!important}.poemsWorkspace,.poemsDesk,.poemEditor{display:block;height:auto;max-width:none;background:white;border:0;box-shadow:none;padding:0}.poemPrint{display:block;color:#201820}.poemPrint h1{font:32px Georgia}.poemPrint pre{font:22px/1.8 Georgia;white-space:pre-wrap}.poemPrint small{font:12px system-ui}}
+@media(min-height:701px){.cardTable .rivalStage{min-height:78px;grid-template-columns:78px minmax(0,1fr) minmax(180px,.55fr)}.cardTable .rivalPortrait{width:64px;height:64px}.cardTable .rivalIdentity h2{font-size:26px}.cardTable .eyebrow{letter-spacing:.15em}}
+@media(prefers-reduced-motion:reduce){.cardTable .attackBtn.validAttack,.cardTable .verseCard{animation:none}}
+/* Text sets the minimum size of the atril; constrained windows scroll the
+   illustrated desk rather than squeezing verse baselines into tiny rows. */
+.cardTable .duelBoard{grid-template-rows:auto auto minmax(min-content,1fr)}
+.cardTable .composer{grid-template-rows:auto minmax(min-content,1fr) auto auto}
+.cardTable .poemSlots{grid-template-rows:repeat(2,minmax(min-content,1fr))}
+.cardTable .poemSlot{min-height:48px}
+@media(max-width:700px){.cardTable .poemSlots{grid-template-rows:repeat(4,minmax(min-content,1fr))}}
+.cardTable .rivalIdentity>.eyebrow{display:block}
+.cardTable .rivalPortrait{transition:transform 160ms,filter 160ms}
+.cardTable .hand .verseCard{flex-basis:clamp(260px,19vw,330px);gap:6px}
+@media(max-width:700px){.cardTable .hand .verseCard{flex-basis:240px}}
+@media(min-height:761px) and (min-width:851px){.cardTable.game{grid-template-rows:60px minmax(0,1fr) clamp(255px,32vh,350px)}}
+.cardTable .composerActions{position:sticky;bottom:0;z-index:3;background:#191125ed;box-shadow:0 -4px 10px #19112566}
