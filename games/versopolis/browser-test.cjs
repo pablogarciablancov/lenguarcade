@@ -3,11 +3,17 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const root=process.cwd();const server=http.createServer((req,res)=>{const f=path.join(root,new URL(req.url,'http://local').pathname.replace(/\/$/,'/index.html'));try{const b=fs.readFileSync(f);res.setHeader('Content-Type',f.endsWith('.js')?'text/javascript':f.endsWith('.css')?'text/css':f.endsWith('.webp')?'image/webp':'text/html');res.end(b);}catch{res.statusCode=404;res.end();}});
 (async()=>{await new Promise(r=>server.listen(0,'127.0.0.1',r));const browser=await chromium.launch({headless:true,executablePath:process.env.VERSOPOLIS_CHROMIUM||undefined,args:["--no-sandbox","--disable-dev-shm-usage","--use-gl=angle","--use-angle=swiftshader","--single-process","--no-zygote"]});const page=await browser.newPage({viewport:{width:1366,height:768},hasTouch:true});const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('**/app.js?*',async route=>{const r=await route.fetch();let s=await r.text();s=s.replace(/\}\)\(\);\s*$/,'window.__test={newRun,chooseMuse,witnessFor,currentChallenge,collectionCards,renderGame,playSelection,get run(){return run;}};})();');await route.fulfill({response:r,body:s});});await page.goto('http://127.0.0.1:'+server.address().port+'/games/versopolis/');await page.evaluate(()=>window.VersopolisGame.setProfile({studentId:'table-test'}));await page.click('#startBtn');await page.locator('.atlasCard').first().click();await page.locator('.museCard').first().click();
-for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1366,650]]){
+for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1366,650],[1366,580],[1100,600]]){
  await page.setViewportSize({width,height});
  const layout=await page.evaluate(()=>({width:document.body.scrollWidth,height:document.body.scrollHeight,font:parseFloat(getComputedStyle(document.querySelector('.hand .verseText')).fontSize),cards:Array.from(document.querySelectorAll('#hand .verseCard')).map(e=>({text:e.textContent,scroll:e.scrollHeight,client:e.clientHeight}))}));
  assert.equal(layout.width,width);assert.equal(layout.height,height);assert(layout.font>=20&&layout.font<=24);
  layout.cards.forEach(c=>assert(c.scroll<=c.client+1,'No clipped card content'));
+ const clipped=await page.evaluate(()=>['#rivalName','#rivalRank','#challengeTitle','#challengeDesc'].filter(selector=>{
+  const element=document.querySelector(selector),range=document.createRange();range.selectNodeContents(element);
+  const text=range.getBoundingClientRect(),panel=element.closest('.rivalStage,.challengeBanner').getBoundingClientRect();
+  return text.top<panel.top||text.bottom>panel.bottom;
+ }));
+ assert.deepEqual(clipped,[],'Rival and contract text must fit their panels');
  console.log('Layout OK:',width,height,layout.font+'px');
 }
 await page.setViewportSize({width:1366,height:768});
