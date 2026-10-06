@@ -1,0 +1,65 @@
+/* Main table layout. Secondary screens keep their existing presentation. */
+.cardTable.game{grid-template-rows:60px minmax(0,1fr) clamp(275px,32vh,350px);gap:10px;padding:10px 16px 12px}
+.cardTable .battleHud{grid-template-columns:minmax(200px,1fr) auto minmax(450px,1.2fr) auto auto auto;grid-template-rows:1fr}
+.cardTable .districtBadge strong{font-size:20px}.cardTable .districtBadge span{font-size:12px}
+.cardTable .battleStats small{font-size:11px}.cardTable .battleStats b{font-size:24px}
+.cardTable .compactBtn{font-size:15px;min-height:42px}
+.cardTable .arena{position:relative;grid-template-columns:minmax(0,1fr)}
+.cardTable .duelBoard{min-height:0;grid-template-rows:58px 76px minmax(0,1fr);gap:8px;padding:8px}
+.cardTable .rivalStage{grid-template-columns:60px minmax(0,1fr) minmax(180px,.55fr);grid-template-rows:1fr auto;padding:5px 12px}
+.cardTable .rivalPortrait{width:44px;height:44px;grid-row:1}.cardTable .rivalName{font-size:24px}
+.cardTable .rivalIdentity h2{font-size:22px;line-height:1.05;margin:3px 0}.cardTable .rivalIdentity p{display:none}.cardTable .rivalSpeech{display:none}
+.cardTable .eyebrow{font-size:11px}.cardTable .prestigeLabel{font-size:14px}
+.cardTable .challengeBanner{min-height:0;grid-template-columns:44px minmax(0,1fr) 92px 110px;padding:9px 16px;gap:12px}
+.cardTable .challengeCopy span,.cardTable .challengeReward span{font-size:11px}
+.cardTable .challengeCopy strong{font-size:clamp(21px,1.8vw,28px);line-height:1.1}
+.cardTable .challengeCopy small{font-size:15px;white-space:normal;line-height:1.25}
+.cardTable .challengeReward b{font-size:25px}.cardTable .challengeState{font-size:12px}
+.cardTable .composer{grid-template-rows:auto minmax(0,1fr) auto auto;gap:7px;padding:10px 14px}
+.cardTable .composerHead h3{font-size:24px}.cardTable .previewScore{padding:4px 8px}.cardTable .previewScore strong{font-size:26px}
+.cardTable .poemSlots{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px}
+.cardTable .poemSlot{padding:8px 110px 8px 16px;font-size:clamp(20px,1.6vw,24px);line-height:1.25;border-radius:12px;touch-action:none;user-select:none}
+.cardTable .poemSlot.filled{cursor:grab}.cardTable .slotNumber{right:8px;gap:4px}
+.cardTable .slotNumber button{width:30px;height:30px;font-size:18px}
+.cardTable .comboTags{min-height:0}.cardTable .comboTags span{font-size:13px}
+.cardTable .composerActions{grid-template-columns:auto auto 1fr 1fr 1.2fr;gap:8px}
+.cardTable .composerActions button{font-size:14px;min-height:40px;padding:0 12px}
+.cardTable .handZone{grid-template-columns:64px minmax(0,1fr) 145px;gap:10px;padding:6px 10px 8px}
+.cardTable .handTray{display:flex;flex-direction:column;min-height:0;min-width:0}
+.cardTable .handInstructions{font-size:13px;font-weight:700;color:#ffe6b0;padding:3px 14px 0}
+.cardTable .hand{display:flex;flex:1;gap:12px;padding:18px 14px 14px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#bca369 #291521;align-items:stretch}
+.cardTable .hand .verseCard{flex:0 0 clamp(240px,17.6vw,300px);min-width:0;min-height:0;padding:16px 14px 12px;clip-path:none;border:2px solid #b69162;border-radius:14px;gap:8px;touch-action:none;user-select:none;cursor:grab;box-shadow:0 5px 0 #7e5136,0 10px 18px #0008}
+.cardTable .hand .verseCard[data-hints="hidden"]{grid-template-rows:1fr auto}
+.cardTable .hand .verseCard:after{clip-path:none;border-radius:9px}
+.cardTable .hand .verseCard.selected{border-color:#ffdf80;background:linear-gradient(165deg,#fff1c7,#e6c47f);box-shadow:0 0 0 2px #ffdf80,0 0 22px #ffc95b60,0 10px 18px #0008;transform:translateY(-8px)}
+.cardTable .hand .verseCard:hover{transform:translateY(-7px) scale(1.025)}
+.cardTable .hand .verseCard .verseText,.dragGhost .verseText{font-size:clamp(20px,1.6vw,24px);line-height:1.25;color:#382418}
+.cardTable .hand .cardMeta span{font-size:14px;line-height:1.15;padding:3px 5px}
+.cardTable .hand .cardFamily,.cardTable .hand .cardMeta .theme{display:none}.cardTable .hand .meterBadge{font-size:24px;width:36px;height:36px}
+.cardTable .hand .rhymeSeal{font-size:15px;min-width:40px;min-height:36px}
+.cardTable .hand .jokerBody{min-height:0;gap:10px}.cardTable .hand .jokerBody img{position:absolute;width:38px;height:38px;left:calc(50% - 19px);top:14px;object-fit:contain}.cardTable .hand .jokerBody strong{font-size:20px}.cardTable .hand .jokerBody small{max-width:180px;font-size:14px;line-height:1.2}
+.cardTable .changeConsole b{font-size:15px;text-align:center}.cardTable .changeConsole small{font-size:13px;line-height:1.4}.cardTable .deckBadge b{font-size:28px}.cardTable .deckBadge span{font-size:12px}
+.cardTable .playerPanel,.cardTable .codexPanel{display:none;position:absolute;top:0;bottom:0;width:280px;z-index:8;overflow:auto;background:#140d29f5;border:1px solid #d5ad58;padding:18px;font-size:15px}
+.cardTable .playerPanel{left:0}.cardTable .codexPanel{right:0}.cardTable.showTableInfo .playerPanel,.cardTable.showTableInfo .codexPanel{display:block}
+.cardTable .playerPanel p,.cardTable .codexPanel p{font-size:15px;line-height:1.5}.cardTable .pileStats span{font-size:12px}.cardTable .pileStats b{font-size:18px}
+.cardTable .toast{font-size:17px;max-width:min(680px,90%)}
+.cardTable.draggingCards .poemSlot:not(.dropReady){opacity:.4}
+.cardTable .dropReady{outline:2px dashed #d5ad58;outline-offset:-3px}
+.cardTable .dropOver{outline:3px solid #91edbf;outline-offset:-3px;background-color:#38765766;box-shadow:inset 0 0 25px #91edbf30}
+.cardTable .dragSource{opacity:.3}
+.dragGhost{position:fixed;inset:0 auto auto 0;z-index:1000;pointer-events:none;transform-origin:top left;min-width:0;grid-template-rows:auto 1fr auto;padding:14px;color:#382418;background:linear-gradient(165deg,#fff1cd,#e4c38e);border:2px solid #ffe59b;box-shadow:0 20px 45px #0009;will-change:transform}
+.dragGhost .cardMeta span{font-size:14px;color:#382418}.dragGhost .jokerBody img{object-fit:contain;max-height:75px}.dragGhost .jokerBody strong{font-size:20px}
+.cardPlaced{animation:cardPlace 220ms ease-out}.cardDealt{animation:cardDeal 220ms ease-out}.cardLeaving{animation:cardLeave 180ms ease-in forwards}
+@keyframes cardPlace{from{transform:scale(.94);filter:brightness(1.5)}to{transform:scale(1);filter:brightness(1)}}
+@keyframes cardDeal{from{opacity:0;translate:30px 8px}to{opacity:1;translate:0 0}}
+@keyframes cardLeave{to{opacity:0;translate:0 -24px}}
+@media(max-height:760px){.cardTable.game{grid-template-rows:54px minmax(0,1fr) 275px;padding:6px 10px;gap:6px}.cardTable .duelBoard{grid-template-rows:56px 68px minmax(0,1fr);gap:5px;padding:5px}.cardTable .rivalStage{grid-template-columns:58px 1fr 200px}.cardTable .rivalPortrait{width:55px;height:55px}.cardTable .rivalSpeech{display:none}.cardTable .composer{padding:6px 10px;gap:4px}.cardTable .composerHead h3{font-size:20px}.cardTable .composerActions button{min-height:36px}.cardTable .poemSlot{padding-top:4px;padding-bottom:4px}.cardTable .comboTags{display:none}}
+@media(max-width:1050px){.cardTable .battleHud{grid-template-columns:1fr 1fr auto auto auto}.cardTable .routePips{display:none}.cardTable .handZone{grid-template-columns:48px minmax(0,1fr)}.cardTable .changeConsole{display:none}.cardTable .composerActions button{font-size:12px;padding:0 6px}.cardTable .poemSlot{padding-right:100px}.cardTable .battleHud{grid-template-columns:minmax(150px,1fr) minmax(330px,1.2fr) auto auto auto}}
+@media(max-width:700px){.cardTable.game{grid-template-rows:84px minmax(0,1fr) 235px;padding:6px}.cardTable .districtBadge strong{font-size:16px}.cardTable .duelBoard{grid-template-rows:58px 86px minmax(0,1fr)}.cardTable .rivalStage{grid-template-columns:48px 1fr 100px}.cardTable .rivalPortrait{width:44px;height:44px}.cardTable .rivalIdentity h2{font-size:16px}.cardTable .rivalIdentity p,.cardTable .rivalSpeech,.cardTable .rivalRank{display:none}.cardTable .prestigeLabel{font-size:11px}.cardTable .challengeBanner{grid-template-columns:minmax(0,1fr) 70px;padding:8px 12px;gap:5px}.cardTable .challengeSigil,.cardTable .challengeState{display:none}.cardTable .challengeCopy strong{font-size:20px}.cardTable .poemSlots{grid-template-columns:1fr;grid-template-rows:repeat(4,minmax(0,1fr));gap:4px;overflow:auto}.cardTable .poemSlot{min-height:44px;font-size:18px}.cardTable .composerHead h3{font-size:18px}.cardTable .composerActions{grid-template-columns:repeat(4,minmax(0,1fr))}.cardTable .composerActions .attackBtn{grid-column:1/-1}.cardTable .handInstructions{font-size:11px}.cardTable .hand .verseCard{flex-basis:200px}.cardTable .playerPanel,.cardTable .codexPanel{width:48%}}
+@media(prefers-reduced-motion:reduce){.cardTable *, .dragGhost{animation:none;transition:none}}
+
+.cardTable .battleStats{grid-template-columns:repeat(5,minmax(0,1fr))}
+.cardTable .inspirationHearts{justify-content:center;flex-wrap:wrap;gap:1px;margin:0}.cardTable .inspirationHearts i{font-size:16px;flex:0 0 18px;width:18px;height:18px}
+.cardTable .hand .family-wild .cardMeta{display:none}
+@media(max-height:700px){.cardTable.game{grid-template-rows:50px minmax(0,1fr) 255px}.cardTable .duelBoard{grid-template-rows:48px 72px minmax(0,1fr)}.cardTable .rivalPortrait{width:40px;height:40px}.cardTable .rivalStage{grid-template-columns:48px 1fr 180px}.cardTable .rivalIdentity h2{font-size:20px}.cardTable .rivalIdentity p{display:none}.cardTable .composerHead .eyebrow{display:none}.cardTable .previewScore{padding:3px 8px}.cardTable .hand .verseCard .verseText{font-size:20px}.cardTable .hand .cardMeta span{font-size:14px}}
+@media(max-width:850px){.cardTable .battleHud{grid-template-columns:1fr auto auto auto;grid-template-rows:1fr 1fr}.cardTable .districtBadge{grid-column:1;grid-row:1}.cardTable .compactBtn{grid-column:auto;grid-row:1;height:auto}.cardTable .battleStats{grid-column:1/-1;grid-row:2;grid-template-columns:repeat(5,minmax(0,1fr))}.cardTable .battleStats span:nth-child(3),.cardTable .battleStats span:nth-child(4){display:block}.cardTable.game{grid-template-rows:94px minmax(0,1fr) 235px}.cardTable .rivalStage{grid-template-columns:48px 1fr 130px}.cardTable .composerActions{grid-template-columns:repeat(4,minmax(0,1fr))}.cardTable .composerActions .attackBtn{grid-column:1/-1}}

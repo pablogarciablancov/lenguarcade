@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0b0717">
   <title>Versópolis · LenguArcade</title>
-  <link rel="stylesheet" href="./styles.css?v=20260930-gameplay">
+  <link rel="stylesheet" href="./styles.css?v=20261006-cards">
+  <link rel="stylesheet" href="./table.css?v=20261006-cards">
 </head>
 <body>
 <main id="app" class="app">
@@ -86,7 +87,7 @@
     </div>
   </section>
 
-  <section id="gameScreen" class="screen game hidden" data-theme="rhyme">
+  <section id="gameScreen" class="screen game cardTable hidden" data-theme="rhyme">
     <div class="sceneGlow"></div>
     <header class="battleHud v04Hud">
       <div class="districtBadge">
@@ -95,11 +96,13 @@
       </div>
       <div class="routePips" id="routePips"></div>
       <div class="battleStats">
+        <span class="inspirationHud"><small>INSPIRACIÓN</small><div id="inspirationHearts" class="inspirationHearts"></div></span>
         <span><small>RONDAS</small><b id="handsText">5</b></span>
         <span class="changesHud"><small>CAMBIOS</small><b id="discardsText">2</b></span>
         <span><small>RACHA</small><b id="streakText">×0</b></span>
         <span><small>TOTAL</small><b id="runScoreText">0</b></span>
       </div>
+      <button id="tableInfoBtn" class="ghost compactBtn" type="button" aria-expanded="false" aria-controls="playerPanel tableCodex">Detalles</button>
       <button id="openDeckBtn" class="ghost compactBtn" type="button">Mazo</button>
       <button id="exitBtn" class="ghost compactBtn" type="button">Salir</button>
     </header>
@@ -108,7 +111,7 @@
       <aside id="playerPanel" class="playerPanel">
         <div class="playerCrest">✒</div>
         <span class="eyebrow">INSPIRACIÓN</span>
-        <div id="inspirationHearts" class="inspirationHearts"></div>
+
         <p>No se recupera automáticamente entre distritos. Los eventos pueden salvar una expedición.</p>
         <div class="pileStats"><span>MAZO <b id="deckCount">0</b></span><span>DESCARTE <b id="discardCount">0</b></span><span>MANO <b id="handSizeText">7</b></span></div>
         <div id="activeMuses" class="activeMuses"></div>
@@ -143,7 +146,7 @@
             <div><span class="eyebrow">ATRIL DE COMPOSICIÓN</span><h3 id="comboName">Elige de 2 a 4 versos</h3></div>
             <div class="previewScore"><span>IMPACTO</span><strong id="scorePreview">0</strong></div>
           </div>
-          <div id="poemSlots" class="poemSlots" aria-label="Versos elegidos"></div>
+          <div id="poemSlots" class="poemSlots" aria-label="Versos elegidos: arrastra para colocar o reordenar"></div>
           <div id="comboTags" class="comboTags"></div>
           <div class="composerActions v042Actions">
             <button id="scanBtn" class="ghost small" type="button">ESCANDIR</button><button id="clearBtn" class="ghost small" type="button">↩ DEVOLVER</button>
@@ -154,7 +157,7 @@
         </div>
       </section>
 
-      <aside class="codexPanel">
+      <aside id="tableCodex" class="codexPanel">
         <div class="codexTab">CÓDICE</div>
         <span class="eyebrow">LECTURA POÉTICA</span>
         <h3 id="analysisTitle">Busca una combinación</h3>
@@ -166,7 +169,7 @@
 
     <section class="handZone v04HandZone">
       <div class="deckBadge"><span>ROBO</span><b id="drawPileCount">0</b></div>
-      <div id="hand" class="hand v04Hand"></div>
+      <div class="handTray"><span class="handInstructions">TU MANO · Haz clic o arrastra al atril · Devuelve los versos arrastrándolos aquí</span><div id="hand" class="hand v04Hand"></div></div>
       <div id="changeConsole" class="changeConsole">
         <span id="handHintTitle" class="eyebrow">CAMBIOS DISPONIBLES</span>
         <div id="changeTokens" class="changeTokens"></div>
@@ -220,7 +223,7 @@
   </div>
 <section id="writingScreen" class="screen hidden writing-screen"><div class="writing-panel"><span class="eyebrow">TALLER DE CREACIÓN · ESTROFA ABAB</span><h1>Tu voz abre el siguiente distrito</h1><p>Escribe dos versos nuevos: el tercero rima con el primero y el cuarto con el segundo. Todos deben tener ocho sílabas métricas.</p><form id="writingForm"><blockquote id="writingAnchorA"></blockquote><blockquote id="writingAnchorB"></blockquote><label>Verso 3 · rima A<input id="writingA" maxlength="120" autocomplete="off" required></label><label>Verso 4 · rima B<input id="writingB" maxlength="120" autocomplete="off" required></label><p id="writingFeedback" aria-live="polite"></p><small>Cómputo orientativo con sinalefa automática y ajuste por acento final. Puedes separar dos palabras con | para evitar su sinalefa. Las licencias poéticas se revisan con el profesor.</small><div class="writing-actions"><button class="primary" type="submit">Sellar mi estrofa</button><button type="button" id="writingSkip">Continuar sin bonus</button><button type="button" id="writingSave">Guardar y salir</button></div></form></div></section></main>
 <script src="./prosody.js?v=20260930-gameplay"></script>
-<script src="./app.js?v=20260930-gameplay"></script>
+<script src="./app.js?v=20261006-cards"></script>
 <script src="./bridge.js?v=20260930-gameplay"></script>
 </body>
 </html>

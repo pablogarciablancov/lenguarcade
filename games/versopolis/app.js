@@ -265,7 +265,7 @@ function collectionCards(){return(run&&run.cardPool||[]).map(function(x){return 
 function familyOf(c){if(c.joker)return"wild";if(c.level>=3)return"master";if(c.meter===11)return"rhythm";if(c.rhymeType==="asonante")return"echo";if(c.devices.length)return"image";return"rhyme";}
 function familyLabel(f){return{rhyme:"RIMA",echo:"ECO",rhythm:"RITMO",image:"IMAGEN",master:"MAESTRO",wild:"COMODÍN"}[f]||"VERSO";}
 function stars(level){var s="";for(var i=0;i<level;i+=1)s+="★";return s;}
-function show(name){["writingScreen","homeScreen","atlasScreen","achievementsScreen","codexScreen","museScreen","eventScreen","deckScreen","gameScreen","resultScreen"].forEach(function(id){$(id).classList.toggle("hidden",id!==name);});}
+function show(name){finishCardDrag(true);["writingScreen","homeScreen","atlasScreen","achievementsScreen","codexScreen","museScreen","eventScreen","deckScreen","gameScreen","resultScreen"].forEach(function(id){$(id).classList.toggle("hidden",id!==name);});}
 function renderCareer(){
  $("careerLine").textContent=career.runs?"Mejor expedición: "+career.bestScore.toLocaleString("es-ES")+" · "+career.wins+" victorias · mejor impacto "+Number(career.bestCombo||0).toLocaleString("es-ES"):"Tu primera expedición te espera.";
  $("continueBtn").classList.toggle("hidden",!resumeSave);
@@ -306,7 +306,13 @@ function drawToHand(){
   var id=run.deck.shift();if(run.hand.indexOf(id)<0)run.hand.push(id);
  }
 }
+function animateDepartingCards(ids){
+ if(!document.body)return;
+ ids.forEach(function(id){var source=$("hand").querySelector('[data-card-id="'+id+'"]');if(!source)return;var rect=source.getBoundingClientRect(),ghost=source.cloneNode(true);ghost.classList.add("cardLeaving");ghost.style.cssText="position:fixed;pointer-events:none;z-index:900;left:"+rect.left+"px;top:"+rect.top+"px;width:"+rect.width+"px;height:"+rect.height+"px;";document.body.appendChild(ghost);setTimeout(function(){ghost.remove();},180);});
+}
 function moveSelectedToDiscard(){
+ animateDepartingCards(run.selected);
+
  var played=run.selected.slice();played.forEach(function(id){var i=run.hand.indexOf(id);if(i>=0)run.hand.splice(i,1);run.discardPile.push(id);});run.selected=[];drawToHand();return played;
 }
 
@@ -351,8 +357,22 @@ function rollChallenge(){
 }
 function currentChallenge(){return challengeById(run&&run.challengeId)||challenges[0];}
 
+// Selection is an ordered view of the hand: movement never transfers ownership.
+function moveCard(id,destination,index){
+ if(!run||run.locked||run.finished||run.discardMode||run.hand.indexOf(id)<0)return false;
+ var from=run.selected.indexOf(id);
+ if(destination==="hand"){
+  if(from<0)return false;
+  run.selected.splice(from,1);
+ }else if(destination==="slot"){
+  if(from<0&&run.selected.length>=4)return false;
+  if(from>=0)run.selected.splice(from,1);
+  run.selected.splice(Math.max(0,Math.min(index,run.selected.length)),0,id);
+ }else return false;
+ renderGame();return true;
+}
 function toggleCard(id){
- if(!run||run.locked)return;
+ if(!run||run.locked||run.hand.indexOf(id)<0)return;
  if(run.discardMode){
   var di=run.discardSelected.indexOf(id);
   if(di>=0)run.discardSelected.splice(di,1);
@@ -360,12 +380,63 @@ function toggleCard(id){
   else showToast("Puedes descartar un máximo de cinco cartas por Cambio.","bad");
   renderGame();return;
  }
- var idx=run.selected.indexOf(id);
- if(idx>=0)run.selected.splice(idx,1);else if(run.selected.length<4)run.selected.push(id);else showToast("El atril admite cuatro pergaminos como máximo.","bad");
- renderGame();
+ if(!moveCard(id,run.selected.indexOf(id)>=0?"hand":"slot",run.selected.length))showToast("El atril admite cuatro pergaminos como máximo.","bad");
 }
-function removeSelected(id){if(!run||run.locked)return;var i=run.selected.indexOf(id);if(i>=0){run.selected.splice(i,1);renderGame();}}
-function moveSelected(id,dir){if(!run||run.locked)return;var i=run.selected.indexOf(id),j=i+dir;if(i<0||j<0||j>=run.selected.length)return;var t=run.selected[i];run.selected[i]=run.selected[j];run.selected[j]=t;renderGame();}
+function removeSelected(id){moveCard(id,"hand",0);}
+function moveSelected(id,dir){
+ if(!run)return;var i=run.selected.indexOf(id),j=i+dir;
+ if(i>=0&&j>=0&&j<run.selected.length)moveCard(id,"slot",j);
+}
+var cardDrag=null,suppressCardClick=false;
+function dragDestination(x,y){
+ var el=document.elementFromPoint(x,y),slot=el&&el.closest(".poemSlot");
+ if(slot&&$("poemSlots").contains(slot)&&run&&!run.locked&&!run.discardMode&&(run.selected.indexOf(cardDrag.id)>=0||run.selected.length<4))return slot;
+ var hand=el&&el.closest("#hand");
+ return hand&&run&&!run.locked&&!run.discardMode&&run.selected.indexOf(cardDrag.id)>=0?hand:null;
+}
+function finishCardDrag(cancelled){
+ var drag=cardDrag;if(!drag)return;cardDrag=null;
+ if(drag.active){
+  suppressCardClick=true;setTimeout(function(){suppressCardClick=false;},400);
+  var target=cancelled?null:drag.target;
+  var moved=target&&moveCard(drag.id,target.id==="hand"?"hand":"slot",Number(target.dataset.slotIndex));
+  if(moved){var placed=target.id==="hand"?$("hand").querySelector('[data-card-id="'+drag.id+'"]'):$("poemSlots").children[run.selected.indexOf(drag.id)];if(placed)placed.classList.add("cardPlaced");drag.ghost.remove();}
+  else{drag.ghost.style.transition="transform 220ms ease, opacity 220ms ease";drag.ghost.style.transform="translate("+drag.rect.left+"px,"+drag.rect.top+"px)";drag.ghost.style.opacity="0";setTimeout(function(){drag.ghost.remove();},220);}
+  drag.source.classList.remove("dragSource");$("gameScreen").classList.remove("draggingCards");
+  $("poemSlots").querySelectorAll(".dropReady,.dropOver").forEach(function(el){el.classList.remove("dropReady","dropOver");});$("hand").classList.remove("dropReady","dropOver");
+ }
+ if($("gameScreen").hasPointerCapture&&$("gameScreen").hasPointerCapture(drag.pointerId))$("gameScreen").releasePointerCapture(drag.pointerId);
+}
+function setupCardDrag(){
+ var surface=$("gameScreen");
+ surface.addEventListener("pointerdown",function(e){
+  suppressCardClick=false;
+  if(e.button!==0||e.isPrimary===false||!run||run.locked||run.discardMode||cardDrag)return;
+  var source=e.target.closest("[data-card-id]");
+  if(!source||e.target.closest(".slotNumber"))return;
+  cardDrag={id:source.dataset.cardId,source:source,pointerId:e.pointerId,x:e.clientX,y:e.clientY,rect:source.getBoundingClientRect(),active:false};
+ });
+ surface.addEventListener("pointermove",function(e){
+  var drag=cardDrag;if(!drag||drag.pointerId!==e.pointerId)return;
+  if(!drag.active&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<8)return;
+  e.preventDefault();
+  if(!drag.active){
+   surface.setPointerCapture(e.pointerId);drag.active=true;drag.ghost=document.createElement("div");drag.ghost.className="verseCard family-"+familyOf(effectiveCard(drag.id))+" dragGhost";drag.ghost.innerHTML=cardHTML(effectiveCard(drag.id),true);drag.ghost.style.width=Math.max(210,drag.rect.width)+"px";drag.ghost.style.height=Math.max(190,drag.rect.height)+"px";drag.ghost.setAttribute("aria-hidden","true");document.body.appendChild(drag.ghost);drag.source.classList.add("dragSource");surface.classList.add("draggingCards");
+   if(run.selected.indexOf(drag.id)>=0||run.selected.length<4)$("poemSlots").querySelectorAll(".poemSlot").forEach(function(el){el.classList.add("dropReady");});
+   if(run.selected.indexOf(drag.id)>=0)$("hand").classList.add("dropReady");
+  }
+  drag.ghost.style.transform="translate("+(e.clientX-45)+"px,"+(e.clientY-45)+"px) rotate(2deg)";
+  if(drag.target)drag.target.classList.remove("dropOver");drag.target=dragDestination(e.clientX,e.clientY);if(drag.target)drag.target.classList.add("dropOver");
+  var handRect=$("hand").getBoundingClientRect();if(e.clientY>=handRect.top&&e.clientY<=handRect.bottom){if(e.clientX>handRect.right-48)$("hand").scrollLeft+=18;else if(e.clientX<handRect.left+48)$("hand").scrollLeft-=18;}
+ });
+ surface.addEventListener("pointerup",function(e){if(cardDrag&&cardDrag.pointerId===e.pointerId){if(cardDrag.active){e.preventDefault();cardDrag.target=dragDestination(e.clientX,e.clientY);}finishCardDrag(false);}});
+ surface.addEventListener("pointercancel",function(){finishCardDrag(true);});
+ surface.addEventListener("pointerleave",function(){if(cardDrag&&!cardDrag.active)finishCardDrag(true);});
+ surface.addEventListener("keydown",function(e){if(e.key==="Escape")finishCardDrag(true);});
+ surface.addEventListener("lostpointercapture",function(e){if(e.target===surface&&cardDrag&&cardDrag.pointerId===e.pointerId)finishCardDrag(true);});
+ surface.addEventListener("click",function(e){if(suppressCardClick){suppressCardClick=false;e.preventDefault();e.stopImmediatePropagation();}},true);
+ if(window.addEventListener)window.addEventListener("blur",function(){finishCardDrag(true);});
+}
 function clearSelection(){
  if(!run||run.locked)return;
  if(run.discardMode){run.discardMode=false;run.discardSelected=[];showToast("Descarte cancelado.","");renderGame();return;}
@@ -419,7 +490,7 @@ function contractDamage(a){return Math.round(a.score*currentChallenge().mult);}
 function renderGame(){
  if(!run)return;
  var d=districts[run.districtIndex],a=analyze(run.selected),ch=currentChallenge(),met=run.selected.length>=2&&contractMet(a),remainingPct=Math.max(0,Math.round(run.rivalPrestige/run.maxPrestige*100)),map=activeMap(),hiddenHint=map&&run.districtIndex>=2;
- $("gameScreen").dataset.theme=d.focus;$("gameScreen").dataset.scene=map?map.scene:"legacy";$("gameScreen").dataset.boss=map&&run.districtIndex===3?"yes":"no";$("districtStep").textContent="DUELO "+(run.districtIndex+1)+" / "+districts.length;$("districtName").textContent=d.name;$("rivalRank").textContent=d.rank;$("rivalName").textContent=d.rival;$("rivalPortrait").textContent=map?"":d.portrait;$("rivalPortrait").style.backgroundImage=map?'url("'+SPRITE_ASSETS.rivals.replace("{scene}",map.scene).replace("{stage}",run.districtIndex)+'")':"";$("rivalRule").textContent=d.rule;
+ $("gameScreen").dataset.theme=d.focus;$("gameScreen").dataset.scene=map?map.scene:"legacy";$("gameScreen").dataset.boss=map&&run.districtIndex===3?"yes":"no";$("districtStep").textContent="DUELO "+(run.districtIndex+1)+" / "+districts.length;$("districtName").textContent=d.name;$("rivalRank").textContent=d.rank;$("rivalName").textContent=d.rival;$("rivalPortrait").textContent=map?"":d.portrait;$("rivalPortrait").style.backgroundImage=map?'url("'+SPRITE_ASSETS.rivals.replace("{scene}",map.scene).replace("{stage}",run.districtIndex)+'")':"";$("rivalRule").textContent=d.rule;$("rivalStage").title=d.rule;
  $("handsText").textContent=run.handsLeft;$("discardsText").textContent=run.discardsLeft;$("streakText").textContent="×"+run.streak;$("runScoreText").textContent=run.runScore.toLocaleString("es-ES");
  $("prestigeText").textContent=run.rivalPrestige.toLocaleString("es-ES")+" / "+run.maxPrestige.toLocaleString("es-ES");$("prestigeFill").style.width=remainingPct+"%";
  $("deckCount").textContent=run.cardPool.length;$("discardCount").textContent=run.discardPile.length;$("handSizeText").textContent=run.handSize;$("drawPileCount").textContent=run.deck.length;
@@ -468,11 +539,11 @@ function renderRoute(){$("routePips").innerHTML="";for(var i=0;i<districts.lengt
 function renderSlots(){
  $("poemSlots").innerHTML="";
  var resolved=analyze(run.selected).resolvedCards||[],pattern=activeMap()&&activeMap().id==="teatro"?({abba:"ABBA",abab:"ABAB",aabb:"AABB",consonanteABBA:"ABBA",consonanteABAB:"ABAB"}[run.challengeId]||""):"";if(pattern&&resolved[0]&&resolved[0].meter<=8)pattern=pattern.toLowerCase();
- for(var i=0;i<4;i+=1){var id=run.selected[i],c=resolved[i],slot=document.createElement("div");slot.className="poemSlot"+(c?" filled":"")+(c&&c.joker?" jokerSlot":"");if(pattern){slot.dataset.guide=pattern[i];if(c){var previous=pattern.slice(0,i).indexOf(pattern[i]);if(previous>=0&&resolved[previous]&&resolved[previous].rhyme===c.rhyme)slot.classList.add("guideMatch");}}if(c&&resolved.slice(0,i).some(function(o){return o&&o.rhyme===c.rhyme&&o.rhymeType===c.rhymeType;}))slot.classList.add(c.rhymeType==="asonante"?"echoMatch":"sealMatch");
+ for(var i=0;i<4;i+=1){var id=run.selected[i],c=resolved[i],slot=document.createElement("div");slot.dataset.slotIndex=i;if(id)slot.dataset.cardId=id;slot.className="poemSlot"+(c?" filled":"")+(c&&c.joker?" jokerSlot":"");if(pattern){slot.dataset.guide=pattern[i];if(c){var previous=pattern.slice(0,i).indexOf(pattern[i]);if(previous>=0&&resolved[previous]&&resolved[previous].rhyme===c.rhyme)slot.classList.add("guideMatch");}}if(c&&resolved.slice(0,i).some(function(o){return o&&o.rhyme===c.rhyme&&o.rhymeType===c.rhymeType;}))slot.classList.add(c.rhymeType==="asonante"?"echoMatch":"sealMatch");
   if(c){var text=document.createElement("span");text.textContent=(i+1)+". "+(c.joker?"COMODÍN → ":"")+c.text;slot.appendChild(text);var controls=document.createElement("span");controls.className="slotNumber";
-   var up=document.createElement("button");up.type="button";up.textContent="↑";up.disabled=i===0;up.addEventListener("click",function(cardId){return function(e){e.stopPropagation();moveSelected(cardId,-1);};}(id));
-   var down=document.createElement("button");down.type="button";down.textContent="↓";down.disabled=i===run.selected.length-1;down.addEventListener("click",function(cardId){return function(e){e.stopPropagation();moveSelected(cardId,1);};}(id));
-   var del=document.createElement("button");del.type="button";del.textContent="×";del.addEventListener("click",function(cardId){return function(e){e.stopPropagation();removeSelected(cardId);};}(id));
+   var up=document.createElement("button");up.type="button";up.textContent="↑";up.setAttribute("aria-label","Subir verso");up.disabled=i===0;up.addEventListener("click",function(cardId){return function(e){e.stopPropagation();moveSelected(cardId,-1);};}(id));
+   var down=document.createElement("button");down.type="button";down.textContent="↓";down.setAttribute("aria-label","Bajar verso");down.disabled=i===run.selected.length-1;down.addEventListener("click",function(cardId){return function(e){e.stopPropagation();moveSelected(cardId,1);};}(id));
+   var del=document.createElement("button");del.type="button";del.textContent="×";del.setAttribute("aria-label","Devolver verso a la mano");del.addEventListener("click",function(cardId){return function(e){e.stopPropagation();removeSelected(cardId);};}(id));
    controls.appendChild(up);controls.appendChild(down);controls.appendChild(del);slot.appendChild(controls);
   }else slot.textContent="Verso "+(i+1);$("poemSlots").appendChild(slot);
  }
@@ -488,14 +559,17 @@ function cardHelpsContract(c){
  var testIds=run.selected.indexOf(c.uid)>=0?run.selected.slice():run.selected.concat([c.uid]);if(testIds.length>4)return false;
  return contractMet(analyze(testIds));
 }
+var renderedHandIds=[];
 function renderHand(){
+ var handScroll=$("hand").scrollLeft||0;
  $("hand").innerHTML="";$("hand").classList.toggle("discardMode",!!run.discardMode);
  run.hand.forEach(function(id){
   var c=effectiveCard(id),b=document.createElement("button"),fam=familyOf(c),discardPick=run.discardMode&&run.discardSelected.indexOf(id)>=0;
   b.type="button";b.className="verseCard family-"+fam+(run.selected.indexOf(id)>=0&&!run.discardMode?" selected":"")+(run.districtIndex<2&&cardHelpsContract(c)&&!run.discardMode?" cardSynergy":"")+(discardPick?" discardPick":"");
-  b.innerHTML=cardHTML(c,true)+(discardPick?'<span class="discardStamp">DESCARTAR</span>':"");
+  if(renderedHandIds.indexOf(id)<0)b.classList.add("cardDealt");b.dataset.cardId=id;b.dataset.hints=run.districtIndex>=2&&!c.joker?"hidden":"shown";b.title=c.joker||run.districtIndex>0?c.text:"Tema: "+c.theme+" · "+familyLabel(fam);b.setAttribute("aria-pressed",String(run.selected.indexOf(id)>=0||!!discardPick));b.innerHTML=cardHTML(c,true)+(discardPick?'<span class="discardStamp">DESCARTAR</span>':"");
   b.addEventListener("click",function(){toggleCard(id);});$("hand").appendChild(b);
  });
+ renderedHandIds=run.hand.slice();$("hand").scrollLeft=handScroll;
 }
 function renderActiveMuses(){$("activeMuses").innerHTML=run.muses.length?'<span class="eyebrow">MUSAS ACTIVAS</span>'+run.muses.map(function(id){var m=museById(id);return m?'<span class="museUnit">'+museArt(id)+m.name+"</span>":"";}).join(""):"";}
 
@@ -533,7 +607,7 @@ function discardSelection(){
   return;
  }
  if(!run.discardSelected.length)return;
- var thrown=run.discardSelected.slice(),n=thrown.length;
+ var thrown=run.discardSelected.slice(),n=thrown.length;animateDepartingCards(thrown);
  thrown.forEach(function(id){var i=run.hand.indexOf(id);if(i>=0)run.hand.splice(i,1);run.discardPile.push(id);});
  run.discardSelected=[];run.discardMode=false;run.discardsLeft-=1;drawToHand();renderGame();
  showToast("DESCARTE · Cambias "+n+" carta"+(n===1?"":"s")+". Te quedan "+run.discardsLeft+" Cambios.","");
@@ -672,5 +746,7 @@ $("atlasBackBtn").addEventListener("click",function(){show("homeScreen");});$("a
 $("playBtn").addEventListener("click",playSelection);$("discardBtn").addEventListener("click",discardSelection);$("shuffleHandBtn").addEventListener("click",shuffleHand);$("clearBtn").addEventListener("click",clearSelection);$("exitBtn").addEventListener("click",saveAndHome);$("museExitBtn").addEventListener("click",saveAndHome);$("eventExitBtn").addEventListener("click",saveAndHome);$("openDeckBtn").addEventListener("click",openDeckInspect);$("deckBackBtn").addEventListener("click",backFromDeck);
 $("helpBtn").addEventListener("click",function(){$("modal").classList.remove("hidden");});$("closeModal").addEventListener("click",function(){$("modal").classList.add("hidden");});$("modal").addEventListener("click",function(e){if(e.target===$("modal"))$("modal").classList.add("hidden");});
 window.VersopolisGame={persist:persist,setProfile:setProfile,snapshot:snapshot,restore:restore,metrics:metrics,get run(){return run;},get career(){return career;}};
+$("tableInfoBtn").addEventListener("click",function(){var open=$("gameScreen").classList.toggle("showTableInfo");this.setAttribute("aria-expanded",String(open));});
+setupCardDrag();
 renderCareer();
 })();

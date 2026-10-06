@@ -47,10 +47,10 @@ for(const token of ["READY","CHECKPOINT","RESULT","REQUEST_EXIT","CLOSE_READY"])
 }
 function boot(){
   const elements=new Map();
-  function el(){const e={textContent:"",className:"",style:{},dataset:{},offsetWidth:1,disabled:false,classList:{add(){},remove(){},toggle(){}},appendChild(){},addEventListener(){}};Object.defineProperty(e,"innerHTML",{get(){return this.html||"";},set(v){this.html=v;}});return e;}
+  function el(){const e={textContent:"",className:"",style:{},dataset:{},offsetWidth:1,disabled:false,classList:{add(){},remove(){},toggle(){}},appendChild(){},addEventListener(){},setAttribute(){}};Object.defineProperty(e,"innerHTML",{get(){return this.html||"";},set(v){this.html=v;}});return e;}
   const document={getElementById(id){if(!elements.has(id))elements.set(id,el());return elements.get(id);},createElement:el};
   const window={},localStorage={getItem(){return null;},setItem(){}};
-  const exposed='window.__test={cards,startingBaseIds,challenges,newRun,chooseMuse,rollChallenge,witnessFor,collectionCards,analyze,contractMet,makeInstance,applyDeckAction,migrateRun,get run(){return run;}};';
+  const exposed='window.__test={moveCard,toggleCard,moveSelected,removeSelected,cards,startingBaseIds,challenges,newRun,chooseMuse,rollChallenge,witnessFor,collectionCards,analyze,contractMet,makeInstance,applyDeckAction,migrateRun,get run(){return run;}};';
   vm.runInNewContext(app.replace(/\}\)\(\);\s*$/,exposed+'})();'),{window,document,localStorage,console,setTimeout(){return 1;},clearTimeout(){},Math,Date,Intl});
   return window.__test;
 }
@@ -71,6 +71,20 @@ for(const map of ["jardines","fortaleza","teatro","torre"]){
     assert(ch.test(t.analyze(witness.map(c=>c.uid))),map+": testigo inválido "+ch.id);
     assert.equal(new Set([...t.run.hand,...t.run.deck,...t.run.discardPile]).size,t.run.cardPool.length,map+": carta duplicada o perdida");
   }
+  const originalHand=t.run.hand.slice(),originalDeck=t.run.deck.slice(),originalDiscard=t.run.discardPile.slice();
+  const chosen=t.run.hand.slice(0,5);t.run.selected=[];
+  chosen.slice(0,4).forEach((id,i)=>assert(t.moveCard(id,"slot",i)));
+  assert(!t.moveCard(chosen[4],"slot",0),"Un atril lleno rechaza una quinta carta");
+  assert(!t.moveCard("invalid-card","slot",0),"Una carta ajena no entra en el atril");
+  assert(t.moveCard(chosen[3],"slot",0));assert.equal(t.run.selected[0],chosen[3]);
+  t.moveSelected(chosen[3],1);assert.equal(t.run.selected[1],chosen[3]);
+  t.toggleCard(chosen[0]);assert(!t.run.selected.includes(chosen[0]));
+  t.toggleCard(chosen[0]);assert(t.run.selected.includes(chosen[0]));
+  assert.equal(new Set(t.run.selected).size,4);
+  const selection=t.run.selected.slice();t.run.locked=true;assert(!t.moveCard(chosen[0],"hand",0));t.run.locked=false;
+  t.run.discardMode=true;assert(!t.moveCard(chosen[0],"hand",0));t.run.discardMode=false;
+  assert.deepEqual(t.run.selected,selection);assert.deepEqual(t.run.hand,originalHand);assert.deepEqual(t.run.deck,originalDeck);assert.deepEqual(t.run.discardPile,originalDiscard);
+  chosen.forEach(id=>t.removeSelected(id));assert.equal(t.run.selected.length,0);
   const anchor=t.collectionCards().find(c=>!c.joker),joker=t.collectionCards().find(c=>c.joker);
   t.run.challengeId="consonante";const mimic=t.analyze([anchor.uid,joker.uid]);
   assert.equal(mimic.jokerCount,1);assert.equal(mimic.rhymes[0],mimic.rhymes[1]);assert(t.contractMet(mimic));
