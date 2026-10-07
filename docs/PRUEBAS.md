@@ -1,3 +1,22 @@
+## 2026-10-07 · Profesor contra alumno online
+
+1. Publicar el núcleo desde `main` actualizado: `npm.cmd run apps:publish -- "Conjuga: profesor contra alumno"`. Mantener el despliegue estable.
+2. Entrar en `/exec` como profesor; abrir Alumnos → «Jugar con un alumno»; elegir una clase asignada.
+3. Crear sala desde el juego y pasar el código a un alumno de esa clase, con el juego abierto para él.
+4. Ambos pulsan «Estoy listo». Solo quien tiene el turno puede apostar o contestar; ambos ven el mismo resultado.
+5. Recargar el iframe: debe recuperar la misma partida. Cerrar desde el panel: debe abandonar y guardar los aciertos del alumno.
+6. Repetir creando la sala desde el alumno y uniéndose el profesor mediante código.
+7. Revisar que el alumno recibe XP, sesiones y logros una sola vez. El profesor no obtiene progreso ni modifica su guardado anterior.
+8. Rechazar profesor de otra clase, organización distinta, clase archivada y pareja de dos profesores. Cerrar el juego para el alumno y comprobar que se aplica su acceso.
+
+Validación automatizada:
+
+- `npm run check`: incluye motor y permisos online con perfiles, organización, membresías activas y cierre de taller.
+- `PGLITE_MODULE=/ruta/a/pglite/dist/index.js node --no-warnings scripts/check-conjuga-online-db.mjs`: migraciones originales y actualización, cierre alumno–alumno y profesor–alumno, recompensas e idempotencia.
+- `PLAYWRIGHT_MODULE=/ruta/a/playwright CHROMIUM_EXECUTABLE=/ruta/a/chromium node --no-warnings scripts/check-conjuga-online-browser.mjs`: dos navegadores y panel profesor real contra backend de pruebas; creación/unión, turnos, reconexión, mensajes ajenos y cierre.
+
+Las pruebas locales usan perfiles y autenticación simulados; la prueba final en `/exec` requiere dos sesiones reales después de publicar Apps Script.
+
 ## 2026-10-07 — Duelo online de Conjuga y apuesta
 
 Automáticas:

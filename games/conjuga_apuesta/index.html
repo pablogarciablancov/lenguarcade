@@ -568,6 +568,10 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 .gameScreen.onlineSpectator .answerArea{opacity:.6}
 .gameScreen.onlineSpectator .playerCard.active::before{content:"RIVAL EN TURNO"}.gameScreen.onlineSpectator .choice{cursor:default}
 @media(max-width:600px){.onlinePlayers{grid-template-columns:1fr}.onlineLobby{margin:8px;padding:14px}}
+@media (max-height:650px) and (min-width:820px){
+  body.teacher-online:has(#gameScreen:not(.hidden)) .topbar{display:none}
+  body.teacher-online:has(#gameScreen:not(.hidden)) .app{grid-template-rows:minmax(0,1fr);gap:0}
+}
 </style>
 </head>
 <body>
@@ -730,7 +734,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 </div>
 <div class="toastStack" id="toastStack"></div>
 
-<script src="online.js"></script>
+<script src="online.js?v=20261007-teacher"></script>
 <script>
 (function(){
   'use strict';
@@ -1484,7 +1488,8 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
       const s=(ctx&&ctx.student)||{};primary.student=s;primary.save=normalizeSave(ctx&&ctx.save);initialized=true;clearInterval(readyTimer);
       const name=[s.nombre,s.apellidos].filter(Boolean).join(' ')||'Jugador 1';$('name1').value=name;$('name1').disabled=true;
       $('integratedStatus').textContent='Perfil conectado: '+name+(ctx.onlineMultiplayer===true?'. Duelo online para dos dispositivos; conectar rival para compartir este ordenador.':'. Conecta al rival si quieres guardar también su progreso.');
-      Online.configure(ctx.onlineMultiplayer===true);
+      if(ctx.teacherOnline===true){document.body.classList.add('teacher-online');$('connectOpponentBtn').classList.add('hidden');$('startBtn').classList.add('hidden');$('integratedStatus').textContent='Profesor conectado: '+name+'. Juega online con un alumno de tu clase; tu partida es de práctica.';}
+      Online.configure(ctx.onlineMultiplayer===true,ctx.teacherOnline===true);
       renderProfileHeader();post('INITIALIZED',{profileId:s.studentId||'',multiplayer:true});
     }
     function applyOpponent(payload){

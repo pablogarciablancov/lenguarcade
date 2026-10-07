@@ -1,9 +1,9 @@
 // Optional adapter: the local duel does not use this transport or state.
 window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAll,renderProfileHeader,log,sfx,request,commit,close}){
-  let room=null,enabled=false,busy=false,poll=null,clock=null,offset=0,failures=0,resultKey='',inFlight=null;
+  let room=null,enabled=false,busy=false,poll=null,clock=null,offset=0,failures=0,resultKey='',inFlight=null,teacher=false;
   const messages={room_not_found:'No encuentro esa sala en tu clase. Revisa el código.',room_full:'La sala ya tiene dos jugadores.',
     not_your_turn:'Ahora le toca a tu compañero.',game_access_closed:'El profesor ha cerrado este juego.',
-    no_classroom:'Necesitas entrar con un perfil de alumno de una clase.',room_expired:'La sala ha caducado. Crea otra.',already_in_room:'Ya estás en otra sala. Sal de ella antes de unirte.',
+    student_required:'El duelo necesita un alumno; no admite dos profesores.',forbidden:'Tu perfil no tiene permiso para jugar en esta clase.',no_classroom:'Necesitas pertenecer a la clase de esta sala.',room_expired:'La sala ha caducado. Crea otra.',already_in_room:'Ya estás en otra sala. Sal de ella antes de unirte.',
     session_expired:'Tu sesión ha caducado. Vuelve a entrar en LenguArcade.',stale_turn:'El turno ya ha cambiado.',
     online_unavailable:'El duelo online aún no está disponible en este panel.',connection_timeout:'La conexión está tardando. Puedes volver a intentarlo.'};
   const active=()=>!!room;
@@ -70,7 +70,7 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
     $('winnerSubtitle').textContent=(s.reason==='disconnected'?'Un jugador no ha reconectado dentro de 90 segundos. ':aborted?'Se ha abandonado la sala. ':'')+'El servidor ha guardado el progreso de cada alumno. La XP de LenguArcade se calcula a partir de los aciertos.';
     $('resultsGrid').innerHTML=s.players.map((p,i)=>'<article class="resultCard '+(i===s.winner?'winner':'')+'"><div class="playerTop"><div class="playerName">'+esc(p.name)+'</div><b>'+p.chips+' fichas</b></div><div class="statGrid"><div class="stat"><b>'+p.correct+'</b><span>Aciertos</span></div><div class="stat"><b>'+p.errors+'</b><span>Errores</span></div><div class="stat"><b>'+p.maxStreak+'</b><span>Mejor racha</span></div><div class="stat"><b>+'+p.xpGain+'</b><span>XP de juego</span></div></div></article>').join('');
     $('unlocks').innerHTML=(s.players[room.ownIndex].newAchievements||[]).map(a=>'<div class="unlock"><div class="unlockIcon">'+esc(a.icon)+'</div><div><strong>'+esc(a.title)+'</strong><div>'+esc(a.desc)+'</div></div></div>').join('');
-    commit(s.players[room.ownIndex].save);renderProfileHeader();
+    if(!teacher)commit(s.players[room.ownIndex].save);renderProfileHeader();
   }
   function apply(next){
     if(!next)return;
@@ -141,7 +141,8 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
   window.addEventListener('online',()=>{failures=0;schedule();});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();});
   return {active,ownIndex:()=>room?.ownIndex||0,lockChoices,act,leave,back,
-    configure:async available=>{
+    configure:async (available,practice=false)=>{
+      teacher=practice;
       if(enabled||!available)return;enabled=true;$('onlineBtn').classList.remove('hidden');
       try{const data=await send('resume');if(data.room&&data.room.state.phase!=='finished')schedule();else if(data.room){room=null;state.players=[];$('endScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');}}catch(_){}
     }};

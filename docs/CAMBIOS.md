@@ -1,3 +1,12 @@
+## 2026-10-07 · Profesor jugador en Conjuga y apuesta
+
+- Panel profesor: «Jugar con un alumno», selector de sus clases y runner específico del duelo online.
+- El profesor puede crear una sala o unirse a la de un alumno de su clase. Se admiten alumno–alumno y profesor–alumno; no profesor–profesor.
+- El servidor consulta el rol y la asignación de clase reales. Respeta clases activas, organización, sesiones y apertura del juego para el alumno.
+- La participación del profesor es de práctica: el cierre guarda únicamente progreso, XP y logros del alumno. No modifica el guardado previo del profesor.
+- Comprobaciones de permisos, transacción y panel real con dos navegadores. Estudio de siguientes modos en `docs/COOPERATIVO_ONLINE.md`.
+- Publicación: GitHub Pages y Supabase; el panel requiere actualizar el despliegue estable de Apps Script mediante el comando habitual.
+
 ## 2026-10-07 — Conjuga y apuesta: duelo online por salas
 
 - Dos perfiles de la misma clase crean/se unen a una sala de ocho caracteres desde dispositivos distintos y confirman «Estoy listo».
