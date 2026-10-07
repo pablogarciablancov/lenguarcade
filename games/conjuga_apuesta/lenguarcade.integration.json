@@ -1,0 +1,8 @@
+{
+  "gameId": "conjuga_apuesta",
+  "name": "Conjuga y apuesta",
+  "integration": "embedded",
+  "entry": "games/conjuga_apuesta/index.html",
+  "requires": {"studentRunner": true, "onlineMultiplayer": true, "backendFunction": "conjuga-online"},
+  "notes": "Duelo online 1v1 entre perfiles de la misma clase. El runner intermedia ONLINE_REQUEST/ONLINE_REPLY sin entregar credenciales al juego. Guardado y recompensas online transaccionales en servidor; no enviar RESULT local para una sala online. Publicar juntos migración, función y panel Apps Script estable. Modo local intacto."
+}

@@ -1,3 +1,13 @@
+## 2026-10-07 — Conjuga y apuesta: duelo online por salas
+
+- Dos perfiles de la misma clase crean/se unen a una sala de ocho caracteres desde dispositivos distintos y confirman «Estoy listo».
+- Servidor autoritativo para reto, turno, reloj, apuesta, ayudas, acierto, fichas y final. El cliente solo muestra el estado y envía acciones.
+- Guardado transaccional de ambos alumnos, logros y eventos idempotentes. XP de plataforma: seis por acierto verificado, con los límites comunes de recompensas.
+- Sondeo de 1,5 segundos con retroceso ante fallos; reconexión al recargar y margen de 90 segundos. Selección inactiva: reto básico automático tras 60 segundos. Salas caducan a las dos horas.
+- Puente limitado a `conjuga-online`: credenciales conservadas en el host. Tablas y RPC sin permisos de alumno; soluciones omitidas del estado público hasta resolver el reto.
+- Modo local y rediseño de batalla conservados. Sobre de salas reutilizable para posteriores juegos; cooperativo aún no implementado.
+- Despliegue coordinado necesario: migración, Edge Function con `verify_jwt=true` y actualización del Apps Script estable. No crear otro despliegue.
+
 ## 2026-10-05 · Panel del profesor · Fase 1
 
 - La pantalla inicial pasa a ser «Hoy»: selector de clase, KPIs de clase, taller activo, control rápido de juegos y monitor de actividad reciente.

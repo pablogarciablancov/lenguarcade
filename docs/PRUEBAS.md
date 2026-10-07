@@ -1,3 +1,22 @@
+## 2026-10-07 — Duelo online de Conjuga y apuesta
+
+Automáticas:
+
+- `npm run check`: incluye `scripts/check-conjuga-online.mjs` (reglas, duplicados, tildes, ayudas, timeout, rescate, final, desconexión y privacidad).
+- `scripts/check-conjuga-online-db.mjs`: PostgreSQL PGlite con las tablas originales de progreso; migración, recompensas de dos perfiles, logros, permisos e idempotencia. Requiere `@electric-sql/pglite@0.3.14`, disponible en `PGLITE_MODULE` si está instalado fuera del proyecto.
+- `scripts/check-conjuga-online-browser.mjs`: dos páginas aisladas, host con el proxy real y servidor local con el motor. Requiere Playwright y Chromium (`PLAYWRIGHT_MODULE`, `CHROMIUM_EXECUTABLE`). Crear/unirse/listos, turno exclusivo, resultado compartido, texto conservado durante sondeo, seguro y recarga. 1366×768, 1440×900, 1920×1080 y 600 px disponibles, sin scroll ni errores JS.
+- Estas pruebas de navegador usan perfiles ficticios: no sustituyen la prueba final del `/exec` con dos alumnos reales.
+
+Tras publicar el despliegue estable:
+
+1. Dos alumnos de una misma clase, cada uno con sesión de LenguArcade en su Chromebook.
+2. Abrir Conjuga y apuesta → Duelo online. A crea; B introduce su código. Ambos pulsan «Estoy listo».
+3. Confirmar turnos exclusivos, apuestas, acierto/fallo compartido, pistas, seguro y cambio.
+4. Recargar durante una pregunta; recuperar sala y reloj sin duplicar jugadas.
+5. Cortar la red brevemente; recuperar antes de 90 s. Probar abandono y cierre por profesor.
+6. Completar la partida, cerrar el juego y verificar progreso/evento único de ambos perfiles en el panel.
+7. Comprobar rechazo de códigos de otra clase y de un tercer jugador. Confirmar modo local.
+
 ## 2026-10-05 · Panel del profesor · Fase 1
 
 1. Abrir `/exec?page=profesor`, iniciar sesión y comprobar que «Resumen» aparece como «Hoy» sin alterar el resto de navegación.
