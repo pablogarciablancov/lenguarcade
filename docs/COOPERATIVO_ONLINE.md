@@ -2,7 +2,7 @@
 
 ## Estado y alcance
 
-Conjuga y apuesta incorpora duelo alumno–alumno y profesor–alumno desde dispositivos separados. Es competición por turnos. La infraestructura de sala, identidad, presencia, versiones, recuperación y cierre sirve de base para nuevos adaptadores, pero cada juego necesita su motor y reglas de validación en el servidor. Ninguno de los modos cooperativos propuestos aquí está implementado aún.
+Conjuga y apuesta incorpora duelo alumno–alumno y profesor–alumno desde dispositivos separados. El profesor accede desde el modo jugador y el catálogo común; el runner específico del panel profesor ha sido sustituido por este acceso. Es competición por turnos. La infraestructura de sala, identidad, presencia, versiones, recuperación y cierre sirve de base para nuevos adaptadores, pero cada juego necesita su motor y reglas de validación en el servidor. Ninguno de los modos cooperativos propuestos aquí está implementado aún.
 
 ## Candidatos revisados
 

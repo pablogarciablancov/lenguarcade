@@ -632,6 +632,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   <section class="screen onlineLobby hidden" id="onlineLobby">
     <h2>Duelo online</h2>
     <p>Cada alumno juega desde su Chromebook. Comparte el código con un compañero de tu clase.</p>
+    <div id="onlineTeacherClass" class="hidden"><label for="onlineClassInput">Tu clase</label><select id="onlineClassInput" aria-label="Clase para la sala" style="max-width:360px;margin:8px 0 16px"></select></div>
     <div id="onlineConnect"><button class="btn primary" id="onlineCreate" type="button">Crear sala</button>
       <div class="onlineJoin"><input id="onlineCodeInput" maxlength="8" placeholder="Código de sala" aria-label="Código de sala"><button class="btn violet" id="onlineJoin" type="button">Unirse</button></div>
     </div>
@@ -734,7 +735,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 </div>
 <div class="toastStack" id="toastStack"></div>
 
-<script src="online.js?v=20261007-teacher"></script>
+<script src="online.js?v=20261007-player"></script>
 <script>
 (function(){
   'use strict';
@@ -1489,7 +1490,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
       const name=[s.nombre,s.apellidos].filter(Boolean).join(' ')||'Jugador 1';$('name1').value=name;$('name1').disabled=true;
       $('integratedStatus').textContent='Perfil conectado: '+name+(ctx.onlineMultiplayer===true?'. Duelo online para dos dispositivos; conectar rival para compartir este ordenador.':'. Conecta al rival si quieres guardar también su progreso.');
       if(ctx.teacherOnline===true){document.body.classList.add('teacher-online');$('connectOpponentBtn').classList.add('hidden');$('startBtn').classList.add('hidden');$('integratedStatus').textContent='Profesor conectado: '+name+'. Juega online con un alumno de tu clase; tu partida es de práctica.';}
-      Online.configure(ctx.onlineMultiplayer===true,ctx.teacherOnline===true);
+      Online.configure(ctx.onlineMultiplayer===true,ctx.teacherOnline===true||ctx.teacherPractice===true,ctx.teacherPractice===true);
       renderProfileHeader();post('INITIALIZED',{profileId:s.studentId||'',multiplayer:true});
     }
     function applyOpponent(payload){

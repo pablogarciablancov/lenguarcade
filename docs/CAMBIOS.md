@@ -1,3 +1,12 @@
+## 2026-10-07 · Modo jugador del profesor en el panel común
+
+- «Modo jugador» abre el panel de alumno existente, con el catálogo habitual y la identidad de profesor verificada por Google/Supabase. Está disponible en la barra lateral y en Alumnos.
+- La ruta `?page=jugador-profesor` solicita la entrada del profesor, sin incluir credenciales ni conceder permisos por URL. Evita restaurar una sesión de alumno guardada y verifica el rol devuelto por el servidor.
+- «Panel profesor» permite volver desde el modo jugador. Se conservan los accesos anteriores de alumno, profesor y profe-jugador.
+- Conjuga y apuesta usa el runner común; el profesor elige una de sus clases al crear la sala o se une al código del alumno. Se retira la ventana específica del duelo del panel profesor.
+- El backend publicado mantiene el progreso del alumno y excluye las recompensas online del profesor. No requiere cambios en Supabase.
+- Pruebas de rutas, autenticación y dos navegadores con el panel jugador real, catálogo, clase, duelo, recarga y vuelta al profesor. Requiere publicar Apps Script desde el ordenador autenticado.
+
 ## 2026-10-07 · Profesor jugador en Conjuga y apuesta
 
 - Panel profesor: «Jugar con un alumno», selector de sus clases y runner específico del duelo online.

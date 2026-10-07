@@ -1,6 +1,6 @@
 // Optional adapter: the local duel does not use this transport or state.
 window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAll,renderProfileHeader,log,sfx,request,commit,close}){
-  let room=null,enabled=false,busy=false,poll=null,clock=null,offset=0,failures=0,resultKey='',inFlight=null,teacher=false;
+  let room=null,enabled=false,busy=false,poll=null,clock=null,offset=0,failures=0,resultKey='',inFlight=null,teacher=false,chooseClass=false;
   const messages={room_not_found:'No encuentro esa sala en tu clase. Revisa el código.',room_full:'La sala ya tiene dos jugadores.',
     not_your_turn:'Ahora le toca a tu compañero.',game_access_closed:'El profesor ha cerrado este juego.',
     student_required:'El duelo necesita un alumno; no admite dos profesores.',forbidden:'Tu perfil no tiene permiso para jugar en esta clase.',no_classroom:'Necesitas pertenecer a la clase de esta sala.',room_expired:'La sala ha caducado. Crea otra.',already_in_room:'Ya estás en otra sala. Sal de ella antes de unirte.',
@@ -45,7 +45,7 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
   }
   function lobby(){
     $('setupScreen').classList.add('hidden');$('gameScreen').classList.add('hidden');$('endScreen').classList.add('hidden');
-    $('onlineLobby').classList.remove('hidden');$('onlineConnect').classList.toggle('hidden',!!room);$('onlineRoom').classList.toggle('hidden',!room);
+    $('onlineLobby').classList.remove('hidden');$('onlineTeacherClass').classList.toggle('hidden',!chooseClass||!!room);$('onlineConnect').classList.toggle('hidden',!!room);$('onlineRoom').classList.toggle('hidden',!room);
     if(!room){$('onlineNotice').textContent='Usaremos las rondas y el banco elegidos en el menú. Tiempo mínimo: 20 segundos.';return;}
     $('onlineRoomCode').textContent=room.code;
     $('onlinePlayers').innerHTML=room.state.players.map((p,i)=>'<div class="onlinePlayer"><b>'+esc(p.name)+(i===room.ownIndex?' · Tú':'')+'</b><small>'+(p.ready?'✓ Listo':'Preparándose…')+'</small></div>').join('')+(room.state.players.length<2?'<div class="onlinePlayer">Esperando compañero…</div>':'');
@@ -118,10 +118,12 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
     }finally{busy=false;if(room?.state.phase==='waiting')lobby();else controls();schedule();}
   }
   async function connect(action){
-    if(busy)return;busy=true;
+    if(busy)return;
+    if(action==='create'&&chooseClass&&!$('onlineClassInput').value){$('onlineNotice').textContent='No tienes clases asignadas. Sincroniza tus cursos de Classroom.';return;}
+    busy=true;
     $('onlineCreate').disabled=true;$('onlineJoin').disabled=true;$('onlineNotice').textContent='Conectando…';
     try{
-      await send(action,{code:$('onlineCodeInput').value,options:{rounds:Number($('rounds').value),timerSeconds:Number($('timer').value),bankMode:$('bankMode').value}});
+      await send(action,{code:$('onlineCodeInput').value,classCode:teacher?$('onlineClassInput').value:undefined,options:{rounds:Number($('rounds').value),timerSeconds:Number($('timer').value),bankMode:$('bankMode').value}});
       schedule();
     }catch(e){$('onlineNotice').textContent=messages[e.message]||'No se pudo conectar. Vuelve a intentarlo.';}
     finally{busy=false;$('onlineCreate').disabled=false;$('onlineJoin').disabled=false;if(room?.state.phase==='waiting')lobby();}
@@ -141,9 +143,17 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
   window.addEventListener('online',()=>{failures=0;schedule();});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();});
   return {active,ownIndex:()=>room?.ownIndex||0,lockChoices,act,leave,back,
-    configure:async (available,practice=false)=>{
-      teacher=practice;
-      if(enabled||!available)return;enabled=true;$('onlineBtn').classList.remove('hidden');
-      try{const data=await send('resume');if(data.room&&data.room.state.phase!=='finished')schedule();else if(data.room){room=null;state.players=[];$('endScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');}}catch(_){}
+    configure:async (available,practice=false,selectClass=false)=>{
+      teacher=practice;chooseClass=selectClass;
+      if(enabled||!available)return;enabled=true;if(!chooseClass)$('onlineBtn').classList.remove('hidden');
+      try{
+        if(chooseClass){
+          const context=await request({action:'context',requestId:crypto.randomUUID()});
+          $('onlineTeacherClass').classList.remove('hidden');
+          $('onlineClassInput').innerHTML=(context.classes||[]).map(c=>'<option value="'+esc(c.classCode)+'">'+esc(c.name)+'</option>').join('');
+          $('onlineBtn').classList.remove('hidden');
+          if(!context.classes?.length)$('onlineNotice').textContent='No tienes clases asignadas. Sincroniza tus cursos de Classroom.';
+        }
+        const data=await send('resume');if(data.room&&data.room.state.phase!=='finished')schedule();else if(data.room){room=null;state.players=[];$('endScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');}}catch(_){}
     }};
 };

@@ -1,3 +1,16 @@
+## 2026-10-07 · Profesor en el panel común de jugador
+
+1. Actualizar `main` y publicar el despliegue estable: `npm.cmd run apps:publish -- "Modo jugador del profesor"`.
+2. En el panel profesor, pulsar «Modo jugador» en la barra lateral. Debe abrir el catálogo habitual con la cuenta Google del profesor, sin pedir una cuenta de alumno.
+3. Comprobar que el perfil conserva rol de profesor y que aparece «Panel profesor» para volver. Los accesos normales de alumnos no muestran ese botón.
+4. Abrir Conjuga y apuesta desde el catálogo → Duelo online. Elegir una clase propia, crear sala y compartir código con un alumno con el juego abierto.
+5. Jugar varios turnos y recargar el iframe. Debe recuperar la misma sala y mantener los turnos exclusivos. Al terminar, el alumno conserva XP/logros y el profesor no recibe recompensas online.
+6. Repetir creando la sala desde el alumno y entrando como profe-jugador con el código.
+7. Si hay una sesión antigua de alumno en ese navegador, la ruta de profesor debe verificar Google antes de enseñar el catálogo; el parámetro de URL no permite convertirse en profesor.
+8. Probar «Panel profesor», tanto en página directa como dentro de Sites; se mantiene la navegación del acceso existente y puede requerir permitir ventanas emergentes.
+
+Automatizado: `npm run check` incluye pruebas de rutas y aislamiento de sesión de entrada; `scripts/check-conjuga-online-browser.mjs` prueba el profesor con el panel de jugador real y servicios simulados. La comprobación final de Google y `/exec` requiere publicar Apps Script y usar cuentas reales.
+
 ## 2026-10-07 · Profesor contra alumno online
 
 1. Publicar el núcleo desde `main` actualizado: `npm.cmd run apps:publish -- "Conjuga: profesor contra alumno"`. Mantener el despliegue estable.

@@ -24,12 +24,34 @@ const server=http.createServer(async(req,res)=>{
  if(url.pathname==='/teacher'){
   res.setHeader('content-type','text/html');
   let panel=fs.readFileSync(root+'/apps-script/LenguArcade_Profesor.html','utf8');
-  panel=panel.replace('https://pablogarciablancov.github.io/lenguarcade/games/conjuga_apuesta/','http://127.0.0.1:8765/games/conjuga_apuesta/');
   panel=panel.replace('</body>',`<script>
-  edge=async(name,payload)=>{const r=await fetch('/api?actor=T',{method:'POST',body:JSON.stringify(payload)});const data=await r.json();if(!r.ok){const e=new Error(data.error);e.code=data.error;throw e;}return data;};
+  appsCall=async()=> 'http://127.0.0.1:8765/player';
   session={access_token:'fixture'};document.getElementById('appContent').classList.remove('hidden');document.getElementById('loginCard').classList.add('hidden');
   </script></body>`);
   res.end(panel);return;
+ }
+ if(url.pathname==='/player'){
+  res.setHeader('content-type','text/html');
+  const dashboard={ok:true,source:'supabase',student:{studentId:'T',nombre:'Profesor',apellidos:'',email:'profe@fomento.edu',clase:'Profesor',role:'teacher',avatar:{}},
+    general:{xp:0,level:1,plumas:0,accuracy:0,totalGames:1,sessions:0,levelProgress:0},grade:{score:0},games:[{gameId:'conjuga_apuesta',nombre:'Conjuga y apuesta',estado:'en pruebas',categoria:'Verbos',url:'http://127.0.0.1:8765/games/conjuga_apuesta/',integration:'embedded',locked:false,progress:{percentage:0,sessions:0},buttonLabel:'Jugar',color:'#fb7185'}],ranking:[],missions:[],events:[],achievements:[],evaluations:[],workshopSession:null};
+  let panel=fs.readFileSync(root+'/apps-script/LenguArcade_Alumno.html','utf8');
+  const bootstrap=`<script>
+    window.__LA_TEACHER_PLAYER_ENTRY__=true;
+    window.testDashboard=${JSON.stringify(dashboard)};
+    window.google={script:{run:new Proxy({}, {get(_t,name){if(name==='withSuccessHandler')return success=>({withFailureHandler:failure=>new Proxy({}, {get(_t,fn){return ()=>Promise.resolve().then(()=>success(fn==='getPublicMetaV03'?{version:'test',classes:[],games:[]}:fn==='getWebAppUrl'?'http://127.0.0.1:8765/teacher':{ok:true,session:null}));}})});}})}};
+    const baseFetch=window.fetch.bind(window);
+    window.fetch=async(url,options)=>{
+      if(String(url).includes('supabase.co/')){
+        if(String(url).includes('/auth/'))return new Response(JSON.stringify({access_token:'fixture',refresh_token:'fixture-refresh',expires_at:Math.floor(Date.now()/1000)+3600}),{status:200});
+        if(String(url).includes('/student-dashboard'))return new Response(JSON.stringify(testDashboard),{status:200});
+        if(String(url).includes('/conjuga-online'))return baseFetch('/api?actor=T',options);
+        if(String(url).includes('/student-access-state'))return new Response(JSON.stringify({ok:true,fingerprint:'fixture',games:testDashboard.games}),{status:200});
+        return new Response(JSON.stringify({ok:true,session:null}),{status:200});
+      }
+      return baseFetch(url,options);
+    };
+  </script>`;
+  panel=panel.replace('<head>','<head>'+bootstrap);res.end(panel);return;
  }
  if(url.pathname==='/host'){
   const actor=url.searchParams.get('actor');res.setHeader('content-type','text/html');
@@ -79,46 +101,37 @@ try{
  // finish through the server, verify both end screens arrive via polling.
  command(room.state,'A','leave',{requestId:'testleave'},Date.now());room.version++;
  await fa.locator('#endScreen').waitFor({state:'visible'});await fb.locator('#endScreen').waitFor({state:'visible'});
- // Use the actual teacher panel and its scoped proxy, in both host/guest positions.
- const teacher=await browser.newPage({viewport:{width:1366,height:768}});teacher.on('pageerror',e=>errors.push(e.message));
- await teacher.route('**/*',route=>route.request().url().startsWith('http://127.0.0.1:8765/')?route.continue():route.abort());
- await teacher.goto('http://127.0.0.1:8765/teacher',{waitUntil:'domcontentloaded'});await teacher.locator('.nav [data-target=alumnos]').click();
- await teacher.locator('#teacherOnlineBtn').click();await teacher.locator('#teacherOnlineLaunch').click();
- const ft=teacher.frameLocator('#teacherOnlineFrame');
+ // The teacher enters the actual common player panel through its navigation button.
+ const teacherPanel=await browser.newPage({viewport:{width:1366,height:768}});teacherPanel.on('pageerror',e=>errors.push(e.message));
+ await teacherPanel.route('**/*',route=>route.request().url().startsWith('http://127.0.0.1:8765/')?route.continue():route.abort());
+ await teacherPanel.goto('http://127.0.0.1:8765/teacher',{waitUntil:'domcontentloaded'});
+ const popupPromise=teacherPanel.waitForEvent('popup');await teacherPanel.locator('#teacherPlayerModeBtn').click();const teacher=await popupPromise;
+ teacher.on('pageerror',e=>errors.push(e.message));await teacher.route('**/*',route=>route.request().url().startsWith('http://127.0.0.1:8765/')?route.continue():route.abort());
+ await teacher.waitForURL('**/player?page=jugador-profesor');
+ await teacher.locator('#teacherReturnPanelBtn').waitFor({state:'visible'});
+ assert.equal(await teacher.evaluate(()=>currentDashboard.student.role),'teacher');
+ await teacher.locator('.nav [data-target=juegos]').click();
+ await teacher.locator('#games .play').click();
+ const ft=teacher.frameLocator('#gameRunnerFrame');
  await ft.locator('#onlineBtn').waitFor({state:'visible'});
- assert.equal(await ft.locator('#startBtn').isVisible(),false);assert.equal(await ft.locator('#connectOpponentBtn').isVisible(),false);
- // A forged message from the panel itself must not reach the backend.
- const beforeSpoof=teacherApiCalls;
- await teacher.evaluate(()=>window.postMessage({namespace:'lenguarcade-game',gameId:'conjuga_apuesta',channel:teacherOnlineRunner.channel,type:'ONLINE_REQUEST',payload:{action:'create',requestId:'forged'}},'*'));
- await teacher.waitForTimeout(150);assert.equal(teacherApiCalls,beforeSpoof);
- await ft.locator('#onlineBtn').click();await ft.locator('#onlineCreate').click();await ft.locator('#onlineRoomCode').waitFor({state:'visible'});
+ // The same game menu is available; the teacher keeps ordinary local play too.
+ assert.equal(await ft.locator('#startBtn').isVisible(),true);
+ await ft.locator('#onlineBtn').click();await ft.locator('#onlineClassInput option').first().waitFor({state:'attached'});
+ assert.equal(await ft.locator('#onlineClassInput').inputValue(),'C');
+ await ft.locator('#onlineCreate').click();await ft.locator('#onlineRoomCode').waitFor({state:'visible'});
  assert.equal(room.state.players[0].profileRole,'teacher');
  await b.reload();await fb.locator('#onlineBtn').click();await fb.locator('#onlineCodeInput').fill(room.code);await fb.locator('#onlineJoin').click();
  await fb.locator('#onlineReady').click();await ft.locator('#onlineReady').click();
  await ft.locator('#revealBtn').click();await ft.locator('#questionState').waitFor({state:'visible'});await ft.locator('#answerInput').fill(room.state.currentQuestion.respuesta);await ft.locator('#submitBtn').click();
  await fb.locator('#feedback.ok').waitFor({state:'visible'});
  await b.waitForTimeout(4000);assert.equal(await ft.locator('#revealBtn').isDisabled(),true);
- await fb.locator('#revealBtn').click();await fb.locator('#questionState').waitFor({state:'visible'});await fb.locator('#answerInput').fill(room.state.currentQuestion.respuesta);await fb.locator('#submitBtn').click();
- await ft.locator('#feedback.ok').waitFor({state:'visible'});
- const iframeMetrics=await teacher.locator('#teacherOnlineFrame').evaluate(e=>({bottom:e.getBoundingClientRect().bottom,height:innerHeight}));assert.ok(iframeMetrics.bottom<=iframeMetrics.height);
- for(const size of [{width:1366,height:768},{width:1440,height:900},{width:1366,height:690}]){
-  await teacher.setViewportSize(size);await teacher.waitForTimeout(100);
-  const f=teacher.frames().find(f=>f.url().includes('/games/'));
-  const m=await f.evaluate(()=>({height:document.documentElement.clientHeight,scroll:document.documentElement.scrollHeight,width:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,controls:[...document.querySelectorAll('#tierList button,#betList button')].map(e=>({bottom:e.getBoundingClientRect().bottom,panel:e.closest('aside').getBoundingClientRect().bottom}))}));
-  assert.ok(m.scroll<=m.height+1,JSON.stringify({size,m}));assert.ok(m.scrollWidth<=m.width+1);assert.ok(m.controls.every(x=>x.bottom<=x.panel+1),JSON.stringify({size,m}));
- }
- await teacher.screenshot({path:process.env.TEACHER_SCREENSHOT||'/workspace/scratch/b108abc757e0/conjuga-teacher-online.png'});
- teacher.once('dialog',d=>d.accept());await teacher.locator('#teacherOnlineClose').click();await teacher.locator('#teacherOnlineModal').waitFor({state:'hidden'});
- assert.equal(room.state.phase,'finished');assert.equal(room.state.reason,'abandoned');
- // Student hosts; teacher joins, reloads the iframe and resumes that exact room.
- room=null;await a.reload();await fa.locator('#onlineBtn').click();await fa.locator('#onlineCreate').click();await fa.locator('#onlineRoomCode').waitFor({state:'visible'});
- await teacher.locator('#teacherOnlineBtn').click();await teacher.locator('#teacherOnlineLaunch').click();await ft.locator('#onlineBtn').click();await ft.locator('#onlineCodeInput').fill(room.code);await ft.locator('#onlineJoin').click();await ft.locator('#onlineRoom').waitFor({state:'visible'});
- assert.equal(room.state.players[1].profileRole,'teacher');
- await ft.locator('#onlineReady').click();await fa.locator('#onlineReady').click();await ft.locator('#gameScreen').waitFor({state:'visible'});
- const teacherMatch=room.id;const teacherFrame=teacher.frames().find(f=>f.url().includes('/games/'));await teacherFrame.goto(teacherFrame.url());await ft.locator('#gameScreen').waitFor({state:'visible'});assert.equal(room.id,teacherMatch);assert.equal(await ft.locator('#revealBtn').isDisabled(),true);
- command(room.state,'A','leave',{requestId:'teacher-end'},Date.now());room.version++;
- await ft.locator('#endScreen').waitFor({state:'visible'});await teacher.locator('#teacherOnlineClose').click();
- console.log('Panel profesor real: clases, creación y unión a alumno, turnos, cierre, reconexión, aislamiento de mensajes y práctica sin modo local.');
+ await fb.locator('#revealBtn').click();await fb.locator('#questionState').waitFor({state:'visible'});await fb.locator('#answerInput').fill(room.state.currentQuestion.respuesta);await fb.locator('#submitBtn').click();await ft.locator('#feedback.ok').waitFor({state:'visible'});
+ const matchId=room.id;const teacherFrame=teacher.frames().find(f=>f.url().includes('/games/'));await teacherFrame.goto(teacherFrame.url());await ft.locator('#gameScreen').waitFor({state:'visible'});assert.equal(room.id,matchId);
+ command(room.state,'A' in room.state.lastSeen?'A':'T','leave',{requestId:'teacher-end'},Date.now());room.version++;
+ await ft.locator('#endScreen').waitFor({state:'visible'});
+ await teacher.evaluate(()=>destroyGameRunner(false));
+ await teacher.locator('#teacherReturnPanelBtn').click();await teacher.waitForURL('**/teacher?page=profesor');
+ console.log('Modo jugador real: navegación desde profesor, login Google simulado, identidad de profesor, catálogo común, selector de clase, duelo y reconexión; vuelta al panel.');
  assert.deepEqual(errors,[]);
  console.log('Dos navegadores: crear/unirse/listos, turno exclusivo, acierto compartido, escritura conservada, seguro, recarga/reconexión, final y responsive sin scroll; sin errores JS.');
 }finally{await browser.close();server.close();}

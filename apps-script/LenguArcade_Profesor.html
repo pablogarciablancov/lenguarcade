@@ -200,6 +200,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
         <button type="button" data-target="classroom">Classroom</button>
       </nav>
       <div class="railFooter">
+        <button type="button" id="teacherPlayerModeBtn">🎮 Modo jugador</button>
         <button type="button" class="ghost" id="themeBtn">Modo claro/oscuro</button>
         <button type="button" class="ghost" id="logoutBtn">Salir</button>
         <div class="sub">Todos los juegos. Un mismo universo.</div>
@@ -250,7 +251,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
               </div>
               <div class="studentListTools">
                 <button type="button" class="ghost teacherPlayerShortcut hidden" id="teacherPlayerBtn">🎮 Mi jugador profesor</button>
-                <button type="button" class="teacherPlayerShortcut" id="teacherOnlineBtn">⚔️ Jugar con un alumno</button>
+                <button type="button" class="teacherPlayerShortcut" id="teacherOnlineBtn">🎮 Modo jugador</button>
                 <div class="studentClassPicker field">
                   <label>Clase</label>
                   <select id="studentsClassSelect"><option value="">Todos los alumnos</option></select>
@@ -376,24 +377,6 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
     <section class="studentDetailSection"><h2>Actividad reciente</h2><div class="detailTimeline" id="studentDetailActivity"></div></section>
     <section class="studentDetailSection"><h2>Logros desbloqueados</h2><div class="detailTimeline" id="studentDetailAchievements"></div></section>
     <section class="studentDetailSection"><h2>Errores registrados</h2><div class="detailTimeline" id="studentDetailErrors"></div></section>
-  </div></div>
-  <style>
-    #teacherOnlineModal{z-index:1000;padding:12px}
-    #teacherOnlineModal .teacherOnlineDialog{width:min(1600px,100%);height:calc(100dvh - 24px);max-height:none;display:flex;flex-direction:column;padding:12px;overflow:hidden;background:#101925;color:#eaf1fc;border:1px solid #344766;border-radius:18px}
-    #teacherOnlineModal .dialogHead{flex:0 0 auto;margin-bottom:8px;gap:12px}
-    #teacherOnlineModal h2{margin:0;font-size:18px;color:#eaf1fc}
-    #teacherOnlineModal .sub{color:#adbbd3}
-    #teacherOnlineSetup{display:flex;align-items:end;gap:14px;flex-wrap:wrap;padding:20px}
-    #teacherOnlineSetup.hidden{display:none}
-    #teacherOnlineModal select{min-width:220px}
-    #teacherOnlineFrame{flex:1;min-height:0;width:100%;border:0;background:#101925;border-radius:12px}
-    #teacherOnlineStatus{font-size:12px;color:#adbbd3;min-height:18px}
-  </style>
-  <div class="modal" id="teacherOnlineModal" role="dialog" aria-modal="true" aria-labelledby="teacherOnlineTitle"><div class="teacherOnlineDialog">
-    <div class="dialogHead"><div><h2 id="teacherOnlineTitle">Conjuga y apuesta · Profesor contra alumno</h2><div class="sub">Tu partida es de práctica. El alumno conserva su progreso y recompensas.</div></div><button type="button" id="teacherOnlineClose">Cerrar</button></div>
-    <div id="teacherOnlineSetup"><div class="field"><label for="teacherOnlineClass">Tu clase</label><select id="teacherOnlineClass"></select></div><button type="button" id="teacherOnlineLaunch">Entrar al juego</button></div>
-    <div id="teacherOnlineStatus" role="status"></div>
-    <iframe id="teacherOnlineFrame" class="hidden" title="Duelo online de Conjuga y apuesta" allow="fullscreen"></iframe>
   </div></div>
   <div class="modal" id="classroomModal"><div class="dialog">
     <div class="dialogHead"><div><h2>Selecciona los cursos</h2><div class="sub">Solo se importarán los cursos marcados.</div></div><button type="button" class="closeX" id="classroomModalClose">Cerrar</button></div>
@@ -862,76 +845,17 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       }
     }
 
-    let teacherOnlineContext=null,teacherOnlineRunner=null;
-    async function openTeacherOnline(){
-      if(teacherOnlineRunner){$('teacherOnlineModal').classList.add('open');return;}
-      $('teacherOnlineModal').classList.add('open');$('teacherOnlineSetup').classList.remove('hidden');
-      $('teacherOnlineLaunch').disabled=true;$('teacherOnlineStatus').textContent='Cargando tus clases…';
+    async function openTeacherPlayerMode(){
+      // Open during the click so an embedded Apps Script panel can create the tab.
+      const popup=window.open('about:blank','_blank');
+      if(!popup){setStatus('Permite ventanas emergentes de LenguArcade para abrir el modo jugador.');return;}
       try{
-        const context=await edge('conjuga-online',{action:'context'});
-        if(!$('teacherOnlineModal').classList.contains('open'))return;
-        teacherOnlineContext=context;
-        $('teacherOnlineClass').innerHTML=(context.classes||[]).map(c=>`<option value="${esc(c.classCode)}">${esc(c.name)}</option>`).join('');
-        $('teacherOnlineLaunch').disabled=!context.classes?.length;
-        $('teacherOnlineStatus').textContent=context.classes?.length?'Crea una sala y comparte el código con el alumno, o entra con el suyo. El juego debe estar abierto para él.':'No tienes clases asignadas. Sincroniza tus cursos de Classroom antes de jugar.';
-      }catch(error){$('teacherOnlineStatus').textContent='No se pudo preparar el duelo. '+(error.status===401?'Vuelve a iniciar sesión.':'Inténtalo de nuevo.');}
+        const url=new URL(await appsCall('getWebAppUrl',[]));url.searchParams.set('page','jugador-profesor');
+        popup.location.replace(url.toString());
+      }catch(error){popup.close();setStatus('No se pudo abrir el modo jugador. Vuelve a intentarlo.');}
     }
-    function launchTeacherOnline(){
-      if(teacherOnlineRunner||!teacherOnlineContext||!$('teacherOnlineClass').value)return;
-      const iframe=$('teacherOnlineFrame');
-      // Same canonical game entry used by the student runner; credentials stay in the panel.
-      const url=new URL('https://pablogarciablancov.github.io/lenguarcade/games/conjuga_apuesta/');
-      const channel='teacher_'+crypto.randomUUID();url.searchParams.set('lenguarcade','1');url.searchParams.set('channel',channel);
-      teacherOnlineRunner={iframe,channel,origin:url.origin,classCode:$('teacherOnlineClass').value,onlineBusy:false,roomId:null,phase:null};
-      iframe.src=url.toString();iframe.classList.remove('hidden');$('teacherOnlineSetup').classList.add('hidden');
-      $('teacherOnlineStatus').textContent='Conectando tu perfil de profesor…';
-    }
-    function teacherOnlinePost(runner,type,payload={}){
-      runner.iframe.contentWindow?.postMessage({namespace:'lenguarcade-host',channel:runner.channel,type,payload},runner.origin);
-    }
-    function destroyTeacherOnline(){
-      teacherOnlineRunner=null;teacherOnlineContext=null;$('teacherOnlineFrame').src='about:blank';
-      $('teacherOnlineFrame').classList.add('hidden');$('teacherOnlineModal').classList.remove('open');$('teacherOnlineSetup').classList.remove('hidden');
-    }
-    async function closeTeacherOnline(){
-      const runner=teacherOnlineRunner;
-      if(runner?.onlineBusy){$('teacherOnlineStatus').textContent='Espera a que termine la acción y vuelve a cerrar.';return;}
-      if(runner?.roomId&&runner.phase!=='finished'){
-        if(!confirm('¿Salir del duelo? Se guardará lo que haya jugado el alumno.'))return;
-        runner.onlineBusy=true;
-        try{await edge('conjuga-online',{action:'leave',roomId:runner.roomId,requestId:crypto.randomUUID()});}
-        catch(error){$('teacherOnlineStatus').textContent='No se pudo cerrar la sala. Vuelve a intentarlo.';return;}
-        finally{runner.onlineBusy=false;}
-      }
-      destroyTeacherOnline();$('teacherOnlineBtn').focus();
-    }
-    window.addEventListener('message',event=>{
-      const runner=teacherOnlineRunner,message=event.data||{};
-      if(!runner||event.source!==runner.iframe.contentWindow||event.origin!==runner.origin||message.namespace!=='lenguarcade-game'||message.channel!==runner.channel||message.gameId!=='conjuga_apuesta')return;
-      if(message.type==='READY'){
-        teacherOnlinePost(runner,'INIT',{student:{studentId:teacherOnlineContext.player.id,nombre:teacherOnlineContext.player.name,isTeacherPlayer:true},save:{},onlineMultiplayer:true,teacherOnline:true});return;
-      }
-      if(message.type==='INITIALIZED'){$('teacherOnlineStatus').textContent='Perfil conectado · práctica de profesor';return;}
-      if(message.type==='CLOSE_READY'){closeTeacherOnline();return;}
-      if(message.type!=='ONLINE_REQUEST')return;
-      const payload=message.payload||{},requestId=String(payload.requestId||'');
-      if(!requestId||requestId.length>80)return;
-      const actions=['create','join','resume','get','ready','reveal','answer','hint','swap','insurance','leave'];
-      if(!actions.includes(payload.action)){teacherOnlinePost(runner,'ONLINE_REPLY',{requestId,error:'online_unavailable'});return;}
-      if(runner.onlineBusy){teacherOnlinePost(runner,'ONLINE_REPLY',{requestId,error:'request_busy'});return;}
-      runner.onlineBusy=true;
-      edge('conjuga-online',{...payload,classCode:runner.classCode}).then(data=>{
-        if(teacherOnlineRunner!==runner)return;
-        if(data.room){runner.roomId=data.room.id;runner.phase=data.room.state.phase;}
-        $('teacherOnlineStatus').textContent=runner.phase==='finished'?'Duelo terminado · progreso del alumno guardado':runner.roomId?'Sala online conectada · práctica de profesor':'Perfil conectado · práctica de profesor';
-        teacherOnlinePost(runner,'ONLINE_REPLY',{requestId,data});
-      }).catch(error=>{
-        if(teacherOnlineRunner===runner)teacherOnlinePost(runner,'ONLINE_REPLY',{requestId,error:error.code||'room_unavailable'});
-      }).finally(()=>{runner.onlineBusy=false;});
-    });
 
     function logout(){
-      if(teacherOnlineRunner){if(teacherOnlineRunner.roomId&&teacherOnlineRunner.phase!=='finished')edge('conjuga-online',{action:'leave',roomId:teacherOnlineRunner.roomId,requestId:crypto.randomUUID()}).catch(()=>{});destroyTeacherOnline();}
       if(session?.access_token)request('/auth/v1/logout',{method:'POST'},session.access_token).catch(()=>{});
       localStorage.removeItem(SESSION_KEY);session=null;currentTeacher=null;$('appContent').classList.add('hidden');$('loginCard').classList.remove('hidden');setStatus('Sesión cerrada.');
     }
@@ -965,9 +889,8 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       $('studentModalClose').onclick=()=>{$('studentModal').classList.remove('open');currentPlayerDetailId='';currentPlayerDetailFocus='';};
       $('applyPlayerAdjustmentBtn').onclick=applyPlayerAdjustment;
       $('resetPlayerProgressBtn').onclick=resetPlayerProgress;
-      $('teacherOnlineBtn').onclick=openTeacherOnline;
-      $('teacherOnlineLaunch').onclick=launchTeacherOnline;
-      $('teacherOnlineClose').onclick=()=>closeTeacherOnline();
+      $('teacherOnlineBtn').onclick=openTeacherPlayerMode;
+      $('teacherPlayerModeBtn').onclick=openTeacherPlayerMode;
       $('teacherPlayerBtn').onclick=()=>{const player=currentTeacher?.teacherPlayer;if(player)openStudentDetail(player.studentId);};
       $('classroomModalClose').onclick=()=>$('classroomModal').classList.remove('open');
       $('classroomSyncBtn').onclick=openClassroomPicker;
