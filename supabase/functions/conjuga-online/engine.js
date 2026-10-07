@@ -10,7 +10,7 @@ export function createState(player,options={},now=Date.now()){
     bankMode:options.bankMode==='course'?'course':'complete',turnNo:0,currentPlayer:0,
     selectedTier:'basic',selectedBet:10,currentQuestion:null,questionOpen:false,
     used:[],usedAnswers:[],recentVerbs:[],insuranceActive:false,hintUsed:false,
-    players:[{...makePlayer(player.name,0,player.save,'primary'),profileId:player.id,baseSave:structuredClone(player.save),ready:false}],
+    players:[{...makePlayer(player.name,0,player.save,'primary'),profileId:player.id,profileRole:player.profileRole||'student',baseSave:structuredClone(player.save),ready:false}],
     newUnlocks:[],lastSeen:{[player.id]:now},requests:[],createdAt:now};
 }
 function api(s){

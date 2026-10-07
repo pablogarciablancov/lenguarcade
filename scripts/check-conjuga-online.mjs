@@ -47,3 +47,4 @@ new Function(fs.readFileSync('games/conjuga_apuesta/online.js','utf8'));
 const host=fs.readFileSync('apps-script/LenguArcade_Alumno.html','utf8');assert.ok(host.includes("callSupabaseFunction('conjuga-online',payload,token)"));
 const sql=fs.readFileSync(fs.readdirSync('supabase/migrations').filter(n=>n.endsWith('_conjuga_apuesta_online.sql')).map(n=>'supabase/migrations/'+n)[0],'utf8');assert.ok(sql.includes('security invoker'));assert.ok(sql.includes('from public,anon,authenticated'));
 console.log('Duelo online: turnos, apuestas, acierto, tildes, seguro, pista, timeout, rescate, duplicados, desconexión, final y privacidad correctos.');
+await import('./check-conjuga-online-access.mjs');
