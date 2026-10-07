@@ -558,6 +558,16 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   .gameScreen .bottomBar{margin-top:8px}
 }
 
+
+.onlineLobby{max-width:760px;margin:20px auto;padding:22px;border:1px solid #4ccab5;border-radius:20px;background:linear-gradient(140deg,#112a32,#171d39)}
+.onlineLobby h2{font-size:clamp(1.6rem,3vw,2.4rem);margin:0 0 12px}.onlineLobby p{color:var(--muted);font-size:1rem}
+.onlineCode{font-size:clamp(1.6rem,4vw,2.5rem);letter-spacing:.13em;color:var(--gold);font-weight:950;overflow-wrap:anywhere}
+.onlinePlayers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.onlinePlayer{padding:14px;border:1px solid #52617b;border-radius:14px;font-size:1.1rem}
+.onlinePlayer small{display:block;color:var(--muted);margin-top:6px}.onlineJoin{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.onlineJoin input{min-width:160px;flex:1;text-transform:uppercase}
+.onlineNotice{font-size:1rem;color:var(--muted);min-height:1.5em;margin-top:12px}.onlineLobby .setupActions{flex-wrap:wrap}
+.gameScreen.onlineSpectator .answerArea{opacity:.6}
+.gameScreen.onlineSpectator .playerCard.active::before{content:"RIVAL EN TURNO"}.gameScreen.onlineSpectator .choice{cursor:default}
+@media(max-width:600px){.onlinePlayers{grid-template-columns:1fr}.onlineLobby{margin:8px;padding:14px}}
 </style>
 </head>
 <body>
@@ -608,12 +618,24 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
       </div>
       <div class="setupActions">
         <button class="btn violet hidden" id="connectOpponentBtn" type="button">🔐 Conectar rival de LenguArcade</button>
+        <button class="btn violet hidden" id="onlineBtn" type="button">🌐 Duelo online · dos dispositivos</button>
         <button class="btn primary" id="startBtn" type="button">Empezar duelo</button>
       </div>
       <small style="color:var(--muted);line-height:1.55">Las fichas son puntos ficticios del juego. No hay dinero real ni compras.</small>
     </div>
   </section>
 
+  <section class="screen onlineLobby hidden" id="onlineLobby">
+    <h2>Duelo online</h2>
+    <p>Cada alumno juega desde su Chromebook. Comparte el código con un compañero de tu clase.</p>
+    <div id="onlineConnect"><button class="btn primary" id="onlineCreate" type="button">Crear sala</button>
+      <div class="onlineJoin"><input id="onlineCodeInput" maxlength="8" placeholder="Código de sala" aria-label="Código de sala"><button class="btn violet" id="onlineJoin" type="button">Unirse</button></div>
+    </div>
+    <div id="onlineRoom" class="hidden"><div class="onlineCode" id="onlineRoomCode"></div><div class="onlinePlayers" id="onlinePlayers"></div>
+      <button class="btn primary" id="onlineReady" type="button">Estoy listo</button></div>
+    <div class="onlineNotice" id="onlineNotice" role="status" aria-live="polite"></div>
+    <div class="setupActions"><button class="btn ghost" id="onlineBack" type="button">Volver</button></div>
+  </section>
   <section class="screen gameScreen hidden" id="gameScreen">
     <div class="matchHeader">
       <article class="playerCard" id="playerCard0"></article>
@@ -708,6 +730,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 </div>
 <div class="toastStack" id="toastStack"></div>
 
+<script src="online.js"></script>
 <script>
 (function(){
   'use strict';
@@ -1148,7 +1171,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   function opponentIndex(){return state.currentPlayer===0?1:0}
 
   function renderProfileHeader(){
-    const save=state.players[0]?.save||(Bridge.enabled()?Bridge.primarySave():loadLocalSave($('name1').value||'jugador'));
+    const save=state.players[Online.active()?Online.ownIndex():0]?.save||(Bridge.enabled()?Bridge.primarySave():loadLocalSave($('name1').value||'jugador'));
     const level=levelFromXp(save.xp);
     $('profileLevel').textContent='Nivel '+level;
     $('profileXp').textContent=Math.round(save.xp)+' XP';
@@ -1158,6 +1181,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
     $('tierList').innerHTML=Object.entries(TIERS).map(([key,t])=>'<button type="button" class="choice '+(state.selectedTier===key?'selected':'')+'" data-tier="'+key+'" '+(state.questionOpen?'disabled':'')+'><div><strong>'+t.label+'</strong><br><span>'+t.desc+'</span></div><b>×'+String(t.mult).replace('.',',')+'</b></button>').join('');
     const risk=TIERS[state.selectedTier],riskEl=$('riskValue');
     if(riskEl&&risk)riskEl.textContent=risk.label+' · ×'+String(risk.mult).replace('.',',');
+    if(Online.active())Online.lockChoices();
     $('tierList').querySelectorAll('[data-tier]').forEach(btn=>btn.onclick=()=>{state.selectedTier=btn.dataset.tier;renderTierChoices();});
   }
   function availableBets(){
@@ -1171,6 +1195,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
     if(!bets.includes(state.selectedBet))state.selectedBet=bets[0]||0;
     $('betList').innerHTML=bets.map(v=>'<button type="button" class="choice betChoice '+(state.selectedBet===v?'selected':'')+'" data-bet="'+v+'" '+(state.questionOpen?'disabled':'')+'>'+v+(v===chips&&chips>50?' · TODO':'')+' 🟠</button>').join('')||'<div style="color:var(--muted);font-size:.85rem">Sin fichas disponibles.</div>';
     const potEl=$('potValue');if(potEl)potEl.textContent=(state.selectedBet||0)+' 🟠';
+    if(Online.active())Online.lockChoices();
     $('betList').querySelectorAll('[data-bet]').forEach(btn=>btn.onclick=()=>{state.selectedBet=Number(btn.dataset.bet);renderBetChoices();});
   }
   function renderPlayerCards(){
@@ -1220,6 +1245,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   }
 
   function revealQuestion(){
+    if(Online.active())return Online.act('reveal',{tier:state.selectedTier,bet:state.selectedBet});
     const p=current();
     if(!state.selectedBet||state.selectedBet>p.chips)return toast('Apuesta no válida','Elige una cantidad que tengas disponible.');
     state.currentQuestion=pickQuestion(state.selectedTier);
@@ -1251,12 +1277,14 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
     input.value=input.value.slice(0,start)+ch+input.value.slice(end);input.focus();input.selectionStart=input.selectionEnd=start+ch.length;
   }
   function useHint(){
+    if(Online.active())return Online.act('hint');
     if(!state.questionOpen||state.hintUsed||current().chips<5)return;
     current().chips=Math.max(0,current().chips-5);state.hintUsed=true;$('hintBtn').disabled=true;
     toast('Pista',hintFor(state.currentQuestion));renderPlayerCards();renderBetChoices();
     $('statusLine').insertAdjacentHTML('beforeend','<span>💡 Pista usada · premio −25%</span>');
   }
   function useSwap(){
+    if(Online.active())return Online.act('swap');
     const p=current();if(!state.questionOpen||p.swap<=0)return;
     p.swap--;state.currentQuestion=pickQuestion(state.selectedTier);state.insuranceActive=false;state.hintUsed=false;
     $('verbTitle').textContent=state.currentQuestion.verbo.toUpperCase();
@@ -1265,6 +1293,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
     $('answerInput').value='';$('hintBtn').disabled=p.chips<5;renderPowerList();startTimer();toast('Cambio usado','Nuevo reto, misma apuesta y dificultad.');
   }
   function useInsurance(){
+    if(Online.active())return Online.act('insurance');
     const p=current();if(!state.questionOpen||p.insurance<=0||state.insuranceActive)return;
     p.insurance--;state.insuranceActive=true;renderPowerList();toast('Seguro activado','Si fallas, perderás solo la mitad de la apuesta.');
     $('statusLine').insertAdjacentHTML('beforeend','<span>🛡️ Seguro activo</span>');
@@ -1300,6 +1329,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   }
 
   function resolveAnswer(user,timeout){
+    if(Online.active())return timeout?undefined:Online.act('answer',{answer:user});
     if(!state.questionOpen)return;
     clearInterval(state.timerId);
     const p=current(),q=state.currentQuestion,bet=state.selectedBet,wasAllIn=bet===p.chips;
@@ -1349,6 +1379,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   }
 
   function nextTurn(){
+    if(Online.active())return;
     if(state.ended)return;
     state.turnNo++;
     if(state.turnNo>=totalTurns())return finishMatch('complete');
@@ -1358,6 +1389,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   }
 
   function finishMatch(reason){
+    if(Online.active())return Online.leave();
     if(state.ended)return;state.ended=true;state.running=false;state.finishReason=reason;clearInterval(state.timerId);
     const a=state.players[0],b=state.players[1],abandoned=reason==='abandoned';
     let winner=-1;if(!abandoned){if(a.chips>b.chips)winner=0;else if(b.chips>a.chips)winner=1;}
@@ -1414,9 +1446,11 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
     renderAll();log('⚔️ Empieza el duelo. <b>'+escapeHtml(n1)+'</b> abre la partida.');Bridge.sessionStarted();
   }
   function rematch(){
+    if(Online.active())return Online.back();
     $('endScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');startMatch();
   }
   function newMatch(){
+    if(Online.active())return Online.back();
     $('endScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');renderProfileHeader();
   }
   function requestExit(){
@@ -1426,15 +1460,18 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
   }
 
   function renderAchievements(){
-    const save=state.players[0]?.save||(Bridge.enabled()?Bridge.primarySave():loadLocalSave($('name1').value||'jugador'));
+    const save=state.players[Online.active()?Online.ownIndex():0]?.save||(Bridge.enabled()?Bridge.primarySave():loadLocalSave($('name1').value||'jugador'));
     const unlocked=new Set(save.achievements||[]);
     $('achievementSummary').textContent=unlocked.size+' de '+ACHIEVEMENTS.length+' desbloqueados · Nivel '+levelFromXp(save.xp)+' · '+Math.round(save.xp)+' XP';
     $('achievementGrid').innerHTML=ACHIEVEMENTS.map(a=>'<article class="ach '+(unlocked.has(a.id)?'':'locked')+'"><div class="icon">'+(unlocked.has(a.id)?a.icon:'🔒')+'</div><strong>'+escapeHtml(a.title)+'</strong><small>'+escapeHtml(a.desc)+' · +'+a.xp+' XP</small></article>').join('');
     $('achievementsModal').classList.add('open');
   }
 
+  const Online=window.createConjugaOnline({$,state,TIERS,escapeHtml,toast,renderAll,renderProfileHeader,log,sfx,
+    request:payload=>Bridge.onlineRequest(payload),commit:save=>Bridge.commitSaves(save,null),close:()=>Bridge.closeReady()});
+
   const Bridge=(()=>{
-    let isEnabled=false,channel='',hostWindow=null,initialized=false,readyTimer=null,primary={student:null,save:defaultSave()},opponent={student:null,save:defaultSave()};
+    let isEnabled=false,channel='',hostWindow=null,initialized=false,readyTimer=null,primary={student:null,save:defaultSave()},opponent={student:null,save:defaultSave()},onlinePending=new Map();
     function post(type,payload={}){if(!isEnabled||!channel)return;const msg={namespace:'lenguarcade-game',channel,gameId:GAME_ID,type,payload};if(hostWindow)hostWindow.postMessage(msg,'*');else if(window.parent!==window)window.parent.postMessage(msg,'*');}
     function announce(){post('READY',{protocol:2,multiplayer:true,version:3})}
     function start(){
@@ -1446,7 +1483,8 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
     function applyContext(ctx){
       const s=(ctx&&ctx.student)||{};primary.student=s;primary.save=normalizeSave(ctx&&ctx.save);initialized=true;clearInterval(readyTimer);
       const name=[s.nombre,s.apellidos].filter(Boolean).join(' ')||'Jugador 1';$('name1').value=name;$('name1').disabled=true;
-      $('integratedStatus').textContent='Perfil conectado: '+name+'. Conecta al rival si quieres guardar también su progreso.';
+      $('integratedStatus').textContent='Perfil conectado: '+name+(ctx.onlineMultiplayer===true?'. Duelo online para dos dispositivos; conectar rival para compartir este ordenador.':'. Conecta al rival si quieres guardar también su progreso.');
+      Online.configure(ctx.onlineMultiplayer===true);
       renderProfileHeader();post('INITIALIZED',{profileId:s.studentId||'',multiplayer:true});
     }
     function applyOpponent(payload){
@@ -1460,6 +1498,8 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
       if(m.type==='INIT'){hostWindow=event.source;if(!initialized)applyContext(m.payload||{});else post('INITIALIZED',{profileId:primary.student?.studentId||'',multiplayer:true});}
       if(m.type==='OPPONENT_AUTHENTICATED')applyOpponent(m.payload||{});
       if(m.type==='OPPONENT_AUTH_FAILED')toast('No se pudo conectar',String(m.payload?.message||'Revisa el código.'));
+      if(m.type==='ONLINE_REPLY'){const p=onlinePending.get(m.payload?.requestId);if(p){clearTimeout(p.timer);onlinePending.delete(m.payload.requestId);m.payload.error?p.reject(new Error(m.payload.error)):p.resolve(m.payload.data);}}
+      if(m.type==='REQUEST_EXIT'&&Online.active()){Online.leave();return;}
       if(m.type==='REQUEST_EXIT'){if(state.running&&!state.ended)finishMatch('abandoned');else post('CLOSE_READY');}
       if(m.type==='SAVE_CONFIRMED'&&state.ended){
         if(state.finishReason==='abandoned')post('CLOSE_READY');
@@ -1473,6 +1513,11 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
     }
     window.addEventListener('message',onMessage);window.addEventListener('load',start);
     return {
+      onlineRequest:payload=>new Promise((resolve,reject)=>{
+        const requestId=payload.requestId||uid();
+        const timer=setTimeout(()=>{onlinePending.delete(requestId);reject(new Error('connection_timeout'));},12000);
+        onlinePending.set(requestId,{resolve,reject,timer});post('ONLINE_REQUEST',{...payload,requestId});
+      }),
       enabled:()=>isEnabled,hasOpponent:()=>!!opponent.student,primarySave:()=>normalizeSave(primary.save),opponentSave:()=>normalizeSave(opponent.save),
       requestOpponent:()=>post('REQUEST_OPPONENT_AUTH'),sessionStarted:()=>post('SESSION_STARTED',{mode:'duel',matchId:state.matchId}),
       commitSaves:(primarySave,opponentSave)=>{primary.save=normalizeSave(primarySave);if(opponent.student)opponent.save=normalizeSave(opponentSave)},

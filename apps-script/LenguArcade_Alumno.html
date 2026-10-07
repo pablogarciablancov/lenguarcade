@@ -1498,6 +1498,7 @@ async function authenticateGameOpponent(){
 }
 function buildGameInitPayload(runner){
   return {
+    onlineMultiplayer:supabaseBackend===true&&runner.game.gameId==='conjuga_apuesta',
     student:currentDashboard.student,
     save:parseStoredGameSave(runner.game),
     feedback:(currentDashboard.evaluations||[]).find(item=>item.gameId===runner.game.gameId)||null
@@ -2234,6 +2235,30 @@ window.addEventListener('message',event=>{
     $('gameRunnerStatus').textContent='Partida en curso.';
   }
   if(message.type==='REQUEST_OPPONENT_AUTH')openGameOpponentLogin(message.payload||{});
+  if(message.type==='ONLINE_REQUEST'&&runner.game.gameId==='conjuga_apuesta'){
+    if(event.source!==runner.gameWindow&&event.source!==runner.iframe?.contentWindow)return;
+    const payload=message.payload||{},requestId=String(payload.requestId||'');
+    if(!requestId||requestId.length>80)return;
+    const target=event.source;
+    const allowed=['create','join','resume','get','ready','reveal','answer','hint','swap','insurance','leave'];
+    if(!supabaseBackend||!allowed.includes(payload.action)){
+      postToGameWindow(runner,target,'ONLINE_REPLY',{requestId,error:'online_unavailable'});return;
+    }
+    if(runner.onlineBusy){postToGameWindow(runner,target,'ONLINE_REPLY',{requestId,error:'request_busy'});return;}
+    runner.onlineBusy=true;
+    callSupabaseFunction('conjuga-online',payload,token).then(data=>{
+      if(activeGameRunner!==runner)return;
+      if(data.room){
+        runner.sessionActive=data.room.state.phase!=='finished'&&data.room.state.phase!=='waiting';
+        $('gameRunnerStatus').textContent=runner.sessionActive?'Duelo online en curso.':'Sala online conectada.';
+        if(data.room.state.phase==='finished')runner.lastResultReason=String(data.room.state.reason||'');
+      }
+      postToGameWindow(runner,target,'ONLINE_REPLY',{requestId,data});
+    }).catch(error=>{
+      if(activeGameRunner===runner)postToGameWindow(runner,target,'ONLINE_REPLY',{requestId,error:error.code||'room_unavailable'});
+    }).finally(()=>{runner.onlineBusy=false;});
+  }
+
   if(message.type==='REQUEST_EXIT'&&runner.game.gameId==='lexitrama')requestCloseGameRunner();
   if(message.type==='CHECKPOINT')persistGameCheckpoint(message.payload||{});
   if(message.type==='REQUEST_OPPONENTS'&&runner.game.gameId==='lexaria'){
