@@ -59,12 +59,16 @@ function doGet(e) {
 
   const isTeacher = page === 'profesor' || page === 'profe' || page === 'teacher';
   const file = isTeacher ? 'LenguArcade_Profesor' : 'LenguArcade_Alumno';
-  const title = isTeacher ? 'LenguArcade - Profesor' : 'LenguArcade - Alumno';
-  return buildLenguArcadeHtmlOutput_(file, title);
+  const teacherPlayerEntry = page === 'jugador-profesor';
+  const title = isTeacher ? 'LenguArcade - Profesor' : teacherPlayerEntry ? 'LenguArcade - Modo jugador' : 'LenguArcade - Alumno';
+  return buildLenguArcadeHtmlOutput_(file, title, teacherPlayerEntry);
 }
 
-function buildLenguArcadeHtmlOutput_(file, title) {
-  return HtmlService.createHtmlOutputFromFile(file)
+function buildLenguArcadeHtmlOutput_(file, title, teacherPlayerEntry) {
+  const output = HtmlService.createHtmlOutputFromFile(file);
+  // Routing is only a UI request; Google login and Supabase still verify the role.
+  if (teacherPlayerEntry) output.setContent(output.getContent().replace('<head>', '<head><script>window.__LA_TEACHER_PLAYER_ENTRY__=true;</script>'));
+  return output
     .setTitle(title)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

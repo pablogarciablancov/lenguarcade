@@ -256,7 +256,8 @@ async function check(){
   assert.equal(await client(api,browserStorage).evaluate('restoreSupabaseStudentSession()'),false);
   assert.equal(browserStorage.getItem('LA_SUPABASE_SESSION'),null,'Restore borra identidad realmente inválida');
 
-  console.log('Sesiones de alumno: 429, PIN, logout, refresh, recarga, cambio de alumno, Google, profesor, rival y guardado correctos.');
+console.log('Sesiones de alumno: 429, PIN, logout, refresh, recarga, cambio de alumno, Google, profesor, rival y guardado correctos.');
+await import('./check-teacher-player-mode.mjs');
 }
 
 await check();
