@@ -40,14 +40,14 @@ function renderWord(r){
  const byId=new Map(r.hand.map(t=>[t.id,t]));$('wordRow').innerHTML='';
  for(let i=0;i<9;i++){
   const sel=r.selected[i],t=sel?byId.get(sel.id):null,el=document.createElement(sel?'button':'div');
-  if(sel&&t){el.type='button';el.className='word-tile '+t.style+(t.id===selectedPulseId?' entering':'');const letter=sel.char||t.char;el.innerHTML=wordTileMarkup(t,letter);el.title=/^[AEIOUÁÉÍÓÚ]$/i.test(letter)?'Pulsa para poner o quitar tilde':'Pulsa para devolver a la mano';el.addEventListener('click',()=>{/^[AEIOUÁÉÍÓÚ]$/i.test(letter)?E.cycleAccent(t.id):E.select(t.id);});}
+  if(sel&&t){el.type='button';el.dataset.tile=t.id;el.draggable=!rerollMode&&!scoringAnimation;el.className='word-tile '+t.style+(t.id===selectedPulseId?' entering':'');const letter=sel.char||t.char;el.innerHTML=wordTileMarkup(t,letter);el.title=/^[AEIOUÁÉÍÓÚ]$/i.test(letter)?'Pulsa para poner o quitar tilde':'Pulsa para devolver a la mano';el.addEventListener('click',()=>{if(scoringAnimation)return;/^[AEIOUÁÉÍÓÚ]$/i.test(letter)?E.cycleAccent(t.id):E.select(t.id);});}
   else{el.className='word-tile empty';el.innerHTML='<span>'+(i+1)+'</span>';}
-  $('wordRow').appendChild(el);
+  el.dataset.slot=i;$('wordRow').appendChild(el);
  }
 }
 function renderHand(r){
  const selected=new Set(r.selected.map(s=>s.id));
- $('hand').innerHTML=r.hand.filter(t=>!selected.has(t.id)).map((t,i)=>{const reroll=r.rerollSelection.includes(t.id);return'<button class="hand-tile '+t.style+' '+(reroll?'reroll-selected':'')+'" data-tile="'+t.id+'" style="--hand-i:'+i+'">'+tileStyleLabel(t)+'<strong>'+esc(t.char)+'</strong><small>'+(t.style==='wild'?0:E.letterValue(t.char))+'</small></button>';}).join('');
+ $('hand').innerHTML=r.hand.filter(t=>!selected.has(t.id)).map((t,i)=>{const reroll=r.rerollSelection.includes(t.id);return'<button class="hand-tile '+t.style+' '+(reroll?'reroll-selected':'')+'" data-tile="'+t.id+'" draggable="'+(!rerollMode&&!scoringAnimation)+'" style="--hand-i:'+i+'">'+tileStyleLabel(t)+'<strong>'+esc(t.char)+'</strong><small>'+(t.style==='wild'?0:E.letterValue(t.char))+'</small></button>';}).join('');
  $('handInfo').textContent=r.maxHand+' letras · '+r.hand.length+' en mano';
 }
 function renderGame(){
@@ -59,7 +59,7 @@ function renderGame(){
  $('rerollModeBtn').classList.toggle('active',rerollMode);$('rerollTray').textContent=r.rerollSelection.length+' / 3';$('doRerollBtn').disabled=!!scoringAnimation||!rerollMode||!r.rerollSelection.length||r.rerolls<=0;$('playBtn').disabled=!!scoringAnimation||!validation?.ok;$('clearBtn').disabled=!!scoringAnimation||!r.selected.length;
  renderBonusStack(r);scoringAnimation?renderScoringWord(scoringAnimation.score):renderWord(r);renderHand(r);$('effectFloat').innerHTML=(preview.effects||[]).slice(-7).map((e,i)=>'<span style="--i:'+i+'">'+esc(e)+'</span>').join('');$('playfield').classList.toggle('score-resolving',!!scoringAnimation);
  if(scoringAnimation)$('feedback').textContent=scoringAnimation.score.display.toUpperCase()+' · '+fmt(scoringAnimation.score.points)+' × '+fmt(scoringAnimation.score.multis)+' = '+fmt(scoringAnimation.score.total);
- else if(lastMessage)$('feedback').textContent=lastMessage;else if(validation?.ok)$('feedback').textContent='✓ '+raw.toUpperCase()+' · '+categoryText(validation.analysis)+' · '+fmt(livePreview.points)+' × '+fmt(livePreview.multis)+' = '+fmt(livePreview.total);else if(raw)$('feedback').textContent=validation?.message||'Esta combinación no forma una palabra válida.';else $('feedback').textContent=rerollMode?'Selecciona hasta 3 letras de la mano y pulsa ↻.':'Selecciona letras de tu mano. Pulsa una vocal colocada para acentuarla.';
+ else if(lastMessage)$('feedback').textContent=lastMessage;else if(validation?.ok)$('feedback').textContent='✓ '+raw.toUpperCase()+' · '+categoryText(validation.analysis)+' · '+fmt(livePreview.points)+' × '+fmt(livePreview.multis)+' = '+fmt(livePreview.total);else if(raw)$('feedback').textContent=validation?.message||'Esta combinación no forma una palabra válida.';else $('feedback').textContent=rerollMode?'Selecciona hasta 3 letras de la mano y pulsa ↻.':'Arrastra fichas para formar la palabra o intercambiarlas. Pulsa una vocal para acentuarla.';
  $('saveStatus').textContent=!E.storageOK?'Error de guardado':B.embedded?'LenguArcade · guardado activo':'Guardado local';$('gameExitBtn').hidden=!B.embedded;renderOverlay();
 }
 function shopCard(offer){
@@ -101,7 +101,7 @@ function render(){renderTitle();if(title){$('overlay').hidden=true;$('shopPanel'
 function openCollection(mode){collectionMode=mode;document.body.dataset.collectionOpen='1';render();}
 function closeCollection(){document.body.dataset.collectionOpen='0';render();}
 function openDialog(html,state){choiceState=state;$('choiceBody').innerHTML=html;$('choiceDialog').showModal();}
-function openWild(id){const letters=[...'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'];openDialog('<h2>Elige la letra del comodín</h2><div class="letter-choice">'+letters.map(c=>'<button data-letter="'+c+'">'+c+'</button>').join('')+'</div>',{type:'wild',id});}
+function openWild(id,index=null){const letters=[...'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'];openDialog('<h2>Elige la letra del comodín</h2><div class="letter-choice">'+letters.map(c=>'<button data-letter="'+c+'">'+c+'</button>').join('')+'</div>',{type:'wild',id,index});}
 function openReplacement(newId){
  const incoming=C.bonuses.find(x=>x.id===newId),offer=E.run.shop.cards.find(x=>x.id===newId);
  openDialog('<h2>Tu build está completa</h2><p class="replace-copy">Comprar <strong>'+esc(incoming?.name||'esta carta')+'</strong> cuesta '+fmt(offer?.price)+' ◉. Elige cuál de tus 5 cartas quieres sustituir.</p><div class="replace-grid">'+E.run.bonuses.map(id=>{const b=C.bonuses.find(x=>x.id===id);return b?'<button data-replace="'+id+'">'+cardLevelBadge(id)+'<strong>'+esc(b.name)+'</strong><small>'+esc(b.description)+'</small></button>':'';}).join('')+'</div>',{type:'replace',newId});
@@ -129,6 +129,40 @@ function playCurrent(){if(scoringAnimation)return;playingNow=true;const q=E.play
 function start(mode){title=false;rerollMode=false;lastMessage='';scoringAnimation=null;closeCollection();E.newRun(mode);B.start();tone('reward');render();}
 function shopActionResult(q,success){lastMessage=q?.message||success||'';tone(q?.ok?'coin':'error');if(q?.ok)B.checkpoint('shop');render();}
 
+let draggedTile=null;
+function canDrag(){return !title&&E.run?.status==='play'&&!E.run.finished&&!rerollMode&&!scoringAnimation&&!$('choiceDialog').open&&$('overlay').hidden;}
+function clearDrag(){
+ draggedTile=null;document.querySelectorAll('.drag-source,.drop-target').forEach(el=>el.classList.remove('drag-source','drop-target'));
+}
+$('playfield').addEventListener('dragstart',e=>{
+ const tile=e.target.closest('[data-tile]');
+ if(!tile||!canDrag()){e.preventDefault();return;}
+ draggedTile=Number(tile.dataset.tile);e.dataTransfer.effectAllowed='move';
+ e.dataTransfer.setData('text/plain',String(draggedTile));tile.classList.add('drag-source');
+});
+$('playfield').addEventListener('dragover',e=>{
+ if(draggedTile===null||!canDrag())return;
+ const target=e.target.closest('[data-slot],.hand-zone');
+ document.querySelectorAll('.drop-target').forEach(el=>el.classList.remove('drop-target'));
+ if(!target)return;
+ e.preventDefault();e.dataTransfer.dropEffect='move';target.classList.add('drop-target');
+});
+$('playfield').addEventListener('drop',e=>{
+ const id=draggedTile,target=e.target.closest('[data-slot],.hand-zone');
+ if(id===null||!target||!canDrag()){clearDrag();return;}
+ e.preventDefault();clearDrag();
+ if(target.matches('.hand-zone')){
+  if(E.run.selected.some(s=>s.id===id))E.select(id);
+ }else{
+  const index=Number(target.dataset.slot),tile=E.run.hand.find(t=>t.id===id);
+  if(!tile)return;
+  if((tile.style==='wild'||tile.char==='*')&&!E.run.selected.some(s=>s.id===id))openWild(id,index);
+  else E.placeTile(id,index);
+ }
+ tone('select');
+});
+window.addEventListener('dragend',clearDrag);
+
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>start(b.dataset.mode)));
 $('continueBtn').addEventListener('click',()=>{title=false;lastMessage='';B.start();render();});
 $('menuBtn').addEventListener('click',()=>{title=true;rerollMode=false;scoringAnimation=null;E.save();B.checkpoint('menu');render();});
@@ -150,7 +184,7 @@ $('endMenuBtn').addEventListener('click',()=>{title=true;rerollMode=false;scorin
 $('endlessBtn').addEventListener('click',()=>{const ok=E.continueEndless();if(ok){title=false;lastMessage='Modo infinito activado: los objetivos seguirán creciendo.';tone('reward');B.checkpoint('endless');render();}else{lastMessage='No se ha podido iniciar el modo infinito.';render();}});
 $('choiceBody').addEventListener('click',e=>{
  const letter=e.target.closest('[data-letter]'),replace=e.target.closest('[data-replace]'),upgrade=e.target.closest('[data-upgrade]'),remove=e.target.closest('[data-remove-letter]'),engrave=e.target.closest('[data-engrave]');
- if(letter&&choiceState?.type==='wild'){const id=choiceState.id;closeDialog();E.select(id,letter.dataset.letter);return;}
+ if(letter&&choiceState?.type==='wild'){const {id,index}=choiceState;closeDialog();index===null?E.select(id,letter.dataset.letter):E.placeTile(id,index,letter.dataset.letter);return;}
  if(replace&&choiceState?.type==='replace'){const newId=choiceState.newId,old=replace.dataset.replace;closeDialog();const q=E.buyCard(newId,old);shopActionResult(q,q.ok?'Carta comprada y build actualizada.':'');return;}
  if(upgrade&&choiceState?.type==='upgrade'){const id=upgrade.dataset.upgrade;const q=E.upgradeCard(id);if(q.ok)closeDialog();shopActionResult(q,q.ok?'Carta templada a nivel '+q.level+'.':'');return;}
  if(remove&&choiceState?.type==='remove'){const q=E.removeLetter(remove.dataset.removeLetter);if(q.ok)closeDialog();shopActionResult(q,q.ok?'Letra '+q.char+' eliminada de la bolsa.':'');return;}
