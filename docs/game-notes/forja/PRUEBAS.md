@@ -2,7 +2,7 @@
 
 ## Automáticas
 
-`node games/lexoma/smoke-test.mjs`
+`node games/forja/smoke-test.mjs`
 
 Valida léxico, acentos, irregularidades registradas, positivos y negativos gramaticales, primer robo real, conservación de fichas, rechazo de palabras, tildes/comodines, efectos de reliquias, compras y rechazo de duplicados, recorrido hasta victoria/derrota, tres fases de Morfax, snapshot y separación de perfiles. La prueba completa de recorrido controla la frase para aislar combate/economía; la prueba de primer turno sí forma EL MAGO CORRE desde las fichas reales.
 
@@ -10,11 +10,11 @@ Pruebas de interfaz realizadas con Chromium: primer ataque real por clics, ideas
 
 Host de pruebas con iframe a 1366×768 y cabecera de 110 px: READY/INIT, checkpoint confirmado, restauración de selección a mitad de turno, salida guardada, fallo de guardado con fallback explícito, solicitud de checkpoint/salida simulando final de gracia y cambio de alumno. No sustituye la validación del despliegue real /exec.
 
-Prueba de interfaz reproducible: `node games/lexoma/browser-test.mjs` (requiere Playwright instalado; `LEXOMA_CHROMIUM` permite indicar un navegador ya instalado). Usa su propio servidor temporal. `LEXOMA_SCREENSHOTS` permite guardar capturas fuera del repositorio.
+Prueba de interfaz reproducible: `node games/forja/browser-test.mjs` (requiere Playwright instalado; `LEXOMA_CHROMIUM` permite indicar un navegador ya instalado). Usa su propio servidor temporal. `LEXOMA_SCREENSHOTS` permite guardar capturas fuera del repositorio.
 
 ## Prueba manual
 
-1. Abrir `games/lexoma/index.html` desde un servidor estático. Entrar en la forja.
+1. Abrir `games/forja/index.html` desde un servidor estático. Entrar en la forja.
 2. Seleccionar E, L; Forjar. Seleccionar M, A, G, O; Forjar. Seleccionar C, O, R, R, E; Forjar. Finalizar. Se obtienen 290 puntos sin reliquias aplicables.
 3. Reordenar cartas con ‹/› o retirarlas con ×; observar los errores y bonificaciones antes de atacar.
 4. Forjar una secuencia no incluida: no consume letras. Aplicar ficha de tilde después de vocal. Elegir letra en comodín y análisis en una forma ambigua.

@@ -6,8 +6,8 @@
 
 ## Pruebas
 
-- `node games/lexoma/smoke-test.mjs`: economía, cartas, eventos, puntuación y guardado.
-- `node games/lexoma/browser-test.mjs`: arrastre real, inserción, intercambio con tilde/comodín, devolución, cancelación fuera del destino y clic.
+- `node games/forja/smoke-test.mjs`: economía, cartas, eventos, puntuación y guardado.
+- `node games/forja/browser-test.mjs`: arrastre real, inserción, intercambio con tilde/comodín, devolución, cancelación fuera del destino y clic.
 - Tienda a 1366×768, 1440×900, 1920×1080 y 1366×658; efectos de 16 px sin desbordamiento horizontal.
 - Juego sin scroll general; checkpoint, restauración y salida en iframe LenguArcade.
 

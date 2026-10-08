@@ -1,6 +1,6 @@
 # LEXOMA — MVP · 4 de octubre de 2026
 
-Juego nuevo aislado en `games/lexoma/`. 1.300 formas locales con análisis morfológico, ocho categorías, selección de análisis ambiguos y tildes que cambian formas. Diccionario delimitado: una forma desconocida se informa como fuera del léxico, no como necesariamente inexistente.
+Juego nuevo aislado en `games/forja/`. 1.300 formas locales con análisis morfológico, ocho categorías, selección de análisis ambiguos y tildes que cambian formas. Diccionario delimitado: una forma desconocida se informa como fuera del léxico, no como necesariamente inexistente.
 
 Bolsa de 101 fichas, mano de diez, reciclaje, descartes por ronda, comodines y tildes. Primer robo guiado EL → MAGO → CORRE; después robo determinista con RNG serializado. Una palabra rechazada conserva las fichas. Forjar consume las letras y las recicla; retirar una carta no duplica esas letras. Cerrar ronda permite renovar una mano bloqueada y cuesta una ronda.
 

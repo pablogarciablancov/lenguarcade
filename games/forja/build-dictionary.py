@@ -1,6 +1,6 @@
 """Expand the bundled RLA-ES rules offline; never guess conjugations at runtime.
 
-Run: python games/lexoma/build-dictionary.py [--verify-native]
+Run: python games/forja/build-dictionary.py [--verify-native]
 The optional native check requires libhunspell and tests a deterministic sample.
 Only the SET/FLAG/PFX/SFX dialect used by this pinned dictionary is supported.
 """

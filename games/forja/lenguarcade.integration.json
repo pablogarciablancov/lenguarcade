@@ -4,8 +4,8 @@
   "name": "FORJA",
   "status": "en pruebas",
   "integration": "embedded",
-  "entry": "games/lexoma/index.html",
-  "banner": "https://pablogarciablancov.github.io/lenguarcade/games/lexoma/assets/forja-cover-v1.webp",
+  "entry": "games/forja/index.html",
+  "banner": "https://pablogarciablancov.github.io/lenguarcade/games/forja/assets/forja-cover-v1.webp",
   "requires": {
     "studentRunner": true,
     "saveProgress": true,
@@ -28,12 +28,12 @@
     "status": "en pruebas",
     "color": "#9dd8e7",
     "icon": "F",
-    "entry": "games/lexoma/",
+    "entry": "games/forja/",
     "description": "Forma palabras, gana monedas, compra y mejora Cartas de Forja, depura tu bolsa y afronta eventos para construir una run distinta cada vez.",
-    "banner": "https://pablogarciablancov.github.io/lenguarcade/games/lexoma/assets/forja-cover-v1.webp",
+    "banner": "https://pablogarciablancov.github.io/lenguarcade/games/forja/assets/forja-cover-v1.webp",
     "active": true,
     "integration": "embedded"
   },
-  "progressAdapter": "games/lexoma/central-progress.adapter.js",
+  "progressAdapter": "games/forja/central-progress.adapter.js",
   "notes": "Forja v2: PUNTOS × MULTIS, energía por ronda, economía con monedero e interés, tienda inicial y entre rondas, cartas comprables con niveles I-III, máximo 5 activas, taller de letras/fichas, eventos, diccionario español ampliado, guardado por alumno y protocolo READY/INIT/CHECKPOINT/RESULT/CLOSE_READY."
 }

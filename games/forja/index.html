@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#9acfe0">
+<title>FORJA · LenguArcade</title>
+<link rel="stylesheet" href="styles.css?v=20261008-drag-cards">
+</head>
+<body>
+<main id="app">
+<section id="titleScreen" class="title-screen">
+  <div class="title-pattern"></div>
+  <header class="title-top">
+    <div class="brand-lockup"><span class="brand-mark">F</span><div><strong>FORJA</strong><small>ROGUELITE DE PALABRAS</small></div></div>
+    <div class="title-actions"><span id="dictionaryStatus">Preparando diccionario…</span><button id="soundBtn">♫ No</button></div>
+  </header>
+  <div class="title-content">
+    <div class="title-copy">
+      <span class="kicker">LENGUARCADE · VOCABULARIO + ESTRATEGIA</span>
+      <h1>PALABRAS.<br><em>PUNTOS.</em><br>MULTIS.</h1>
+      <p>Crea palabras con una mano limitada, supera el objetivo antes de quedarte sin energía y construye una build de cartas, mejora tu bolsa y rompe el marcador.</p>
+      <div class="mode-buttons">
+        <button class="mode-btn easy" data-mode="easy"><span>7 RONDAS</span><strong>Fácil</strong><small>Más energía · objetivos suaves</small></button>
+        <button class="mode-btn normal recommended" data-mode="normal"><span>10 RONDAS</span><strong>Normal</strong><small>La experiencia completa</small></button>
+        <button class="mode-btn hard" data-mode="hard"><span>12 RONDAS</span><strong>Difícil</strong><small>Menos rerolls · objetivos altos</small></button>
+        <button class="mode-btn daily" data-mode="daily"><span>HOY</span><strong>Reto diario</strong><small>Misma semilla durante todo el día</small></button>
+      </div>
+      <button id="continueBtn" class="continue-btn" hidden>Continuar partida</button>
+    </div>
+    <aside class="career-card">
+      <span class="kicker">TU FORJA</span>
+      <h2>Historial</h2>
+      <div id="careerStats" class="career-stats"></div>
+      <button id="achievementsBtn" class="subtle-btn">Logros y cartas</button>
+    </aside>
+  </div>
+</section>
+
+<section id="gameScreen" class="game-screen" hidden>
+  <header class="game-top">
+    <div class="brand-mini"><span>F</span><strong>FORJA</strong></div>
+    <div class="round-label"><small>RONDA</small><strong id="roundLabel">1 / 10</strong><span id="modeLabel">NORMAL</span></div>
+    <div class="run-total"><span><small>TOTAL RUN</small><strong id="runTotal">0</strong></span><span class="wallet-hud"><small>MONEDERO</small><strong id="walletValue">0 ◉</strong></span></div>
+    <div class="game-actions"><span id="saveStatus">Guardado local</span><button id="menuBtn">Menú</button></div>
+  </header>
+
+  <div id="playfield" class="playfield">
+    <aside class="left-rail">
+      <button id="bonusDeckBtn" class="rail-card bonus-deck" type="button"><span>CARTAS</span><strong id="bonusCount">0/5</strong><small>tu build</small></button>
+      <div id="bonusStack" class="bonus-stack"></div>
+      <button id="rerollModeBtn" class="reroll-card" type="button"><span>REROLL</span><strong id="rerollCount">3 ↻</strong><small>Cambia hasta 3 letras</small></button>
+      <div class="reroll-tray"><span id="rerollTray">0 / 3</span><button id="doRerollBtn" disabled>↻</button></div>
+    </aside>
+
+    <section class="wordatro-board">
+      <div class="score-row">
+        <article class="score-card points-card"><span>Puntos</span><strong id="pointsValue">0</strong><i>●</i></article>
+        <b class="math-sign">×</b>
+        <article class="score-card multis-card"><span>Multis</span><strong id="multisValue">1</strong><i>◆</i></article>
+        <b class="math-sign">=</b>
+        <article class="score-card target-card"><span>Puntuación</span><strong id="scoreValue">0</strong><small>/ <b id="targetValue">100</b></small><div class="score-progress"><i id="scoreProgress"></i></div></article>
+        <article class="score-card energy-card"><span>Energía</span><strong id="energyValue">5</strong><i>ϟ</i></article>
+      </div>
+
+      <div class="target-hint"><span id="targetHint">OBJETIVO BONUS · 4 LETRAS</span><strong id="categoryHint">Forma una palabra</strong></div>
+
+      <div id="wordRow" class="word-row" aria-label="Palabra actual"></div>
+      <div id="effectFloat" class="effect-float" aria-live="polite"></div>
+
+      <div class="word-actions">
+        <button id="clearBtn" class="action-hex">↶<small>DESHACER</small></button>
+        <button id="playBtn" class="play-word-btn">JUGAR PALABRA</button>
+      </div>
+
+      <div id="feedback" class="feedback">Selecciona letras de tu mano.</div>
+    </section>
+
+    <aside class="right-rail">
+      <div class="round-card">
+        <small>OBJETIVO</small><strong id="goalBig">100</strong><span>puntos esta ronda</span>
+      </div>
+      <div class="bag-card">
+        <small>BOLSA</small><strong id="bagCount">0</strong><span>letras restantes</span>
+      </div>
+      <button id="historyBtn" class="rail-action">Historial</button>
+    </aside>
+
+    <section class="hand-zone">
+      <div class="hand-title"><span>Mano</span><small id="handInfo">7 letras</small></div>
+      <div id="hand" class="hand" aria-label="Mano de letras"></div>
+    </section>
+  </div>
+</section>
+
+<div id="overlay" class="overlay" hidden>
+  <section id="shopPanel" class="overlay-card shop-panel" hidden>
+    <aside class="shop-side">
+      <span class="kicker">ENTRE RONDAS</span>
+      <h2 id="shopSideTitle">La Forja</h2>
+      <div class="wallet-panel"><small>MONEDERO</small><strong id="shopWallet">0 ◉</strong></div>
+      <div id="incomePanel" class="income-panel"></div>
+      <h3>Tu build <span id="shopBuildCount">0/5</span></h3>
+      <div id="shopOwned" class="reward-owned"></div>
+      <div class="reward-resource"><span>Rerolls de mano</span><strong id="shopRerolls">0 ↻</strong></div>
+    </aside>
+    <div class="shop-main">
+      <div class="shop-heading">
+        <div><span id="shopKicker" class="kicker">TIENDA INICIAL</span><h2 id="shopTitle">Prepara tu run</h2><p id="shopIntro">Compra si quieres. También puedes guardar las monedas y empezar sin carta.</p></div>
+        <button id="leaveShopBtn" class="leave-shop-btn">EMPEZAR RONDA →</button>
+      </div>
+      <div id="shopCards" class="shop-cards"></div>
+      <div class="shop-tools">
+        <section class="workshop-panel">
+          <div class="tool-head"><span class="kicker">TALLER</span><h3>Mejora tu run</h3></div>
+          <div class="tool-grid">
+            <button id="upgradeCardBtn" class="tool-card"><b>✦ Templar carta</b><span>Sube una carta activa hasta nivel III.</span><em>desde 5 ◉</em></button>
+            <button id="removeLetterBtn" class="tool-card"><b>✂ Depurar bolsa</b><span>Elimina una letra para siempre.</span><em>4 ◉</em></button>
+            <button id="engravePointsBtn" class="tool-card"><b>● Grabar +P</b><span>Convierte una ficha de la mano en ficha de Puntos.</span><em>4 ◉</em></button>
+            <button id="engraveMultiBtn" class="tool-card"><b>◆ Grabar +M</b><span>Convierte una ficha de la mano en ficha de Multis.</span><em>4 ◉</em></button>
+            <button id="goldTileBtn" class="tool-card gold-tool"><b>★ Dorar ficha</b><span>Una ficha gana +5 Puntos y +2 Multis.</span><em>7 ◉</em></button>
+          </div>
+        </section>
+        <section id="eventPanel" class="event-panel"></section>
+      </div>
+      <footer class="shop-footer">
+        <button id="refreshShopBtn" class="reroll-bonuses-btn">↻ Renovar cartas · 2 ◉</button>
+        <span id="shopMessage">No estás obligado a comprar nada.</span>
+        <button id="leaveShopBtnBottom" class="leave-shop-btn secondary">CONTINUAR →</button>
+      </footer>
+    </div>
+  </section>
+
+  <section id="endPanel" class="overlay-card end-panel" hidden>
+    <span id="endKicker" class="kicker">FIN DE LA RUN</span>
+    <h2 id="endTitle">La forja se apagó</h2>
+    <div id="endScore" class="end-score">0</div>
+    <div id="endStats" class="end-stats"></div>
+    <div class="end-buttons"><button id="againBtn" class="primary">Nueva partida</button><button id="endlessBtn" hidden>Continuar infinito</button><button id="endMenuBtn">Menú</button></div>
+  </section>
+
+  <section id="collectionPanel" class="overlay-card collection-panel" hidden>
+    <div class="modal-head"><div><span class="kicker">CÓDICE</span><h2 id="collectionTitle">Tu build</h2></div><button id="closeCollectionBtn">×</button></div>
+    <div id="collectionBody" class="collection-body"></div>
+  </section>
+</div>
+
+<dialog id="choiceDialog"><div id="choiceBody"></div><button id="cancelChoice">Cancelar</button></dialog>
+</main>
+<script src="linguistics.js?v=20261005-inflections"></script>
+<script src="content.js?v=20261005-inflections"></script>
+<script src="engine.js?v=20261008-drag-cards"></script>
+<script src="bridge.js?v=20261005-inflections"></script>
+<script src="app.js?v=20261008-single-menu"></script>
+</body>
+</html>

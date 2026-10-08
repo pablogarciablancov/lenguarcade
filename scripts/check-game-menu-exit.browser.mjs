@@ -34,6 +34,17 @@ async function noClose(page){await page.waitForTimeout(150);assert.equal(await p
 try{
  // Same embedded setup as production: exit buttons must navigate inside the iframe.
  {
+  const {page,frame,errors}=await open('lexoma');await frame.waitForFunction(()=>LexomaEngine.dictionaryReady&&LexomaBridge.initialized);
+  assert.equal(new URL(frame.url()).pathname,'/games/forja/');assert.equal(new URL(frame.url()).searchParams.get('channel'),'exit-test');
+  await frame.locator('[data-mode="normal"]').click();await frame.locator('#leaveShopBtn').click();
+  await frame.locator('#hand .hand-tile:not(.wild)').first().click();const before=await frame.evaluate(()=>LexomaEngine.snapshot());
+  await frame.locator('#menuBtn').click();await noClose(page);
+  await frame.goto(origin+'/games/lexoma/?lenguarcade=1&channel=exit-test#compatibility');await frame.waitForFunction(()=>LexomaEngine.dictionaryReady&&LexomaBridge.initialized);
+  assert.equal(new URL(frame.url()).hash,'#compatibility');assert.equal(await frame.evaluate(()=>LexomaEngine.run.id),before.run.id);
+  assert.deepEqual(await frame.evaluate(()=>LexomaEngine.run.selected),before.run.selected);
+  assert.deepEqual(errors,[]);console.log('FORJA: alias antiguo, canal, hash y guardados anteriores OK');await page.close();
+ }
+ {
   const {page,frame,errors}=await open('versopolis');
   await frame.locator('#startBtn').click();await frame.locator('.atlasCard').first().click();await frame.locator('.museCard').first().click();
   const before=await frame.evaluate(()=>VersopolisGame.snapshot().run);

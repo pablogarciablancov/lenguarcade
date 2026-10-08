@@ -62,10 +62,10 @@ Tras publicar el despliegue estable:
 
 ## 2026-10-05 · FORJA
 
-- `node games/lexoma/dictionary-test.mjs`: talar/TALAR, saltar, cantar, mesa, perro, casa, jardín/jardin, rápido/rapido, Unicode descompuesto, Ñ, palabras inválidas, puntuación, guardado y fallos independientes de las fuentes.
-- `node games/lexoma/smoke-test.mjs`: economía, tienda, eventos, infinito y guardado anterior.
-- `node games/lexoma/browser-test.mjs`: UI y bridge; 1366×768, 1440×900, 1920×1080 y altura reducida, sin scroll general. Usar LEXOMA_CHROMIUM si hace falta; movimiento reducido en las pruebas para poder clicar fichas animadas.
-- `node games/lexoma/integration-browser-test.cjs`: tarjeta con portada, runner real y backend simulado, TALAR, XP idempotente, cierre y restauración central sin caché, responsive embebido.
+- `node games/forja/dictionary-test.mjs`: talar/TALAR, saltar, cantar, mesa, perro, casa, jardín/jardin, rápido/rapido, Unicode descompuesto, Ñ, palabras inválidas, puntuación, guardado y fallos independientes de las fuentes.
+- `node games/forja/smoke-test.mjs`: economía, tienda, eventos, infinito y guardado anterior.
+- `node games/forja/browser-test.mjs`: UI y bridge; 1366×768, 1440×900, 1920×1080 y altura reducida, sin scroll general. Usar LEXOMA_CHROMIUM si hace falta; movimiento reducido en las pruebas para poder clicar fichas animadas.
+- `node games/forja/integration-browser-test.cjs`: tarjeta con portada, runner real y backend simulado, TALAR, XP idempotente, cierre y restauración central sin caché, responsive embebido.
 - `npm run catalog:sync` y `npm run check`: 15 juegos oficiales, sintaxis y comprobaciones generales.
 - La prueba local no acredita publicación del /exec estable. Actualizarlo con `npm.cmd run apps:publish -- "Integra FORJA y amplía su diccionario"` si no hay credenciales en este entorno.
 
@@ -673,7 +673,7 @@ Límites: el contador conserva el total de duelos; la lista guarda los 100 más 
 
 ## Salida al menú propio (2026-10-08)
 - `npm run check`; la comprobación de Word Play exige ahora checkpoint y navegación interna para Guardar y salir.
-- `node games/lexoma/browser-test.mjs`: salir al título sin CLOSE_READY, continuar con mismos datos y cerrar ante REQUEST_EXIT del host.
+- `node games/forja/browser-test.mjs`: salir al título sin CLOSE_READY, continuar con mismos datos y cerrar ante REQUEST_EXIT del host.
 - `node scripts/check-game-menu-exit.browser.mjs`: siete juegos en iframe con perfil, confirmación de guardado y detección de CLOSE_READY/REQUEST_EXIT inesperados.
 - Verificar regreso al inicio y continuación en Versópolis, Lexitrama, Sopa de Tinta y Play the Word; reloj pausado en Lexitrama y Sopa de Tinta.
 - Conjuga y apuesta y Batalla verbal: salida local conserva resultados y vuelve al inicio; cierre del host permanece operativo.
@@ -682,5 +682,10 @@ Límites: el contador conserva el total de duelos; la lista guarda los 100 más 
 
 ## Botones de menú sin duplicados (2026-10-08)
 - `npm run check`.
-- `node games/lexoma/browser-test.mjs`: no existen gameExitBtn/exitBtn; Menú guarda y vuelve al título; Continuar y cierre del host funcionan.
+- `node games/forja/browser-test.mjs`: no existen gameExitBtn/exitBtn; Menú guarda y vuelve al título; Continuar y cierre del host funcionan.
 - `node scripts/check-game-menu-exit.browser.mjs`: navegación y guardados con los botones restantes; ausencia de exit en Lexitrama/Sopa de Tinta y menuExitBtn en Batalla verbal.
+
+## Carpeta de FORJA (2026-10-08)
+- `node games/forja/smoke-test.mjs`, `node games/forja/dictionary-test.mjs`, `node games/forja/browser-test.mjs` y `npm run check` aprobados.
+- `node scripts/check-game-menu-exit.browser.mjs`: entrada desde `/games/lexoma/` en iframe, redirección a `/games/forja/`, conservación de canal/hash, guardado y restauración de la misma partida.
+- La prueba antigua `integration-browser-test.cjs` mantiene un fixture del launcher desactualizado (no genera las tarjetas actuales); la navegación de compatibilidad se valida con la prueba en iframe anterior y el browser-test del juego.
