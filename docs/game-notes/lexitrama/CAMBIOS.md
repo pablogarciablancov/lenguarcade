@@ -19,3 +19,10 @@ Primera implementación jugable aislada en `games/lexitrama/`.
 - Sin cambios en otros juegos ni en núcleo/catálogo/backend. Integración central declarada en el manifiesto.
 
 Estado: PR de juego lista para revisión; publicación e integración conjunta pendientes según las reglas de trabajo concurrente.
+
+## 2026-10-08 — Sustantivos espontáneos
+
+- Causa: LOSA y PISO no figuraban en el banco, aunque la misión pedía sustantivos sin restricciones. El motor ya valida todas las entradas compatibles, no solo la palabra garantizada.
+- Se añaden 1492 entradas nuevas (sustantivos comunes y flexiones nominales), pasando de 2031 a 3523 palabras. Las categorías compartidas conservan sus lecturas y los campos semánticos no se amplían indiscriminadamente.
+- La captura original admite LOSA, PISO, LODO, ROSA, SILO, SOL, BOCA y PUPITRE como objetivo. Se actualiza la versión del recurso para evitar el banco antiguo en caché.
+- Se mantiene el banco pedagógico local: la ampliación no equivale a un diccionario exhaustivo de español. No cambia el formato de guardado ni las reglas de puntuación.
