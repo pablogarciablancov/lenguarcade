@@ -124,6 +124,10 @@ await host.goto(origin+'/host-test.html');const frame=host.frames().find(f=>f.pa
 await frame.locator('[data-mode="normal"]').click();await frame.waitForSelector('#shopPanel:not([hidden])');await frame.locator('#leaveShopBtn').click();
 await frame.locator('#hand .hand-tile:not(.wild)').first().click();await host.evaluate(()=>post('REQUEST_CHECKPOINT'));await host.waitForFunction(()=>saved?.rawGameData?.save?.run?.selected?.length===1);
 const id=await frame.evaluate(()=>LexomaEngine.run.id),coins=await frame.evaluate(()=>LexomaEngine.run.coins);await frame.goto(frame.url());await frame.waitForFunction(()=>LexomaBridge.initialized&&LexomaEngine.dictionaryReady);assert.equal(await frame.evaluate(()=>LexomaEngine.run.id),id);assert.equal(await frame.evaluate(()=>LexomaEngine.run.coins),coins);
+await frame.locator('#continueBtn').click();await frame.locator('#gameExitBtn').click();await frame.waitForSelector('#titleScreen:not([hidden])');
+assert.equal(await host.evaluate(()=>closeReady),null);
+assert.equal(await frame.evaluate(()=>LexomaEngine.run.id),id);
+await frame.locator('#continueBtn').click();assert.equal(await frame.evaluate(()=>LexomaEngine.run.coins),coins);
 await host.evaluate(()=>post('REQUEST_EXIT'));await host.waitForFunction(()=>closeReady);assert.equal(await host.evaluate(()=>closeReady.saved),true);
 assert.deepEqual(hostErrors,[]);console.log('Bridge OK: economía, checkpoint, restauración y salida.');
 await browser.close();server.close();

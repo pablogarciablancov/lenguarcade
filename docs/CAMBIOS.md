@@ -654,3 +654,10 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Colección v3 versionada; v1 y v2 se conservan.
 - Distintivo común en tarjetas alumno/profesor usando el logo real, separado de la ilustración para mantenerlo idéntico y legible.
 - Sin cambios de partidas, permisos, progreso ni mecánicas.
+
+## 2026-10-08 · Salir vuelve al inicio de cada juego
+- Los botones internos de salida vuelven al menú propio en FORJA, Versópolis, Lexitrama, Sopa de Tinta, Play the Word, Batalla verbal y Conjuga y apuesta.
+- Guardianes de la Biblioteca: el botón de salida de pausa vuelve al inicio en lugar de mostrar un aviso de integración futura.
+- Conservados los guardados, checkpoints y resultados. Las solicitudes explícitas de cierre de LenguArcade mantienen su protocolo independiente.
+- Lexitrama pausa reloj y ataques de jefe cuando la expedición está en el menú.
+- Revisados los juegos restantes: sus botones ya vuelven al menú propio o no exponen salida interna al catálogo.

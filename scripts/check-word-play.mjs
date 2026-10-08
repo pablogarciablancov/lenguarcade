@@ -84,7 +84,7 @@ for (const required of ["const GAME_ID='word_play'","post('READY'","post('INITIA
 }
 if(!/function readBootstrap\(\)[\s\S]*window\.name[\s\S]*initialize\(bootstrap,'bootstrap'\)/.test(bridge))throw new Error('Word Play no usa el contexto bootstrap para restaurar sin esperar al handshake');
 if(!/function saveAndExit\(\)[\s\S]*checkpoint\('exit'\)[\s\S]*EXIT_FALLBACK_MS/.test(bridge))throw new Error('La salida no fuerza un checkpoint inmediato con fallback');
-if(!app.includes('WordPlayBridge.saveAndExit'))throw new Error('Guardar y salir no usa el bridge al estar embebido');
+if(!app.includes("WordPlayBridge?.checkpoint('return_menu')")||!app.includes('menu(true)')||app.includes('WordPlayBridge.saveAndExit'))throw new Error('Guardar y salir debe guardar y volver al menú del juego sin cerrar el host');
 for (const required of ['AudioContext','Oscillator','WordPlaySound','MutationObserver']) {
   if (!sound.includes(required)) throw new Error(`Falta sonido: ${required}`);
 }
