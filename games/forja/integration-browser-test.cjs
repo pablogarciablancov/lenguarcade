@@ -10,7 +10,7 @@ const cardCode=html.slice(html.indexOf('function renderGames('),html.indexOf('fu
 const bannerCode=html.slice(html.indexOf('function bannerUrl('),html.indexOf('function setStatus(',html.indexOf('function bannerUrl(')));
 const menuCSS=html.slice(html.indexOf('<style>')+7,html.indexOf('</style>'));
 const fixture=`<!doctype html><html><head><style>${menuCSS}${css}.hidden{display:none!important}body{margin:0}button{cursor:pointer}</style></head><body><div class="games" id="games"></div><button id="play">Jugar Forja</button><script>
-const $=id=>document.getElementById(id);let token='qa',currentDashboard={student:{studentId:'integration-student',nombre:'Prueba'},games:[{gameId:'lexoma',nombre:'FORJA',banner:${JSON.stringify(game.banner)},url:location.origin+'/games/lexoma/',integration:'embedded',progress:{}}]};
+const $=id=>document.getElementById(id);let token='qa',currentDashboard={student:{studentId:'integration-student',nombre:'Prueba'},games:[{gameId:'lexoma',nombre:'FORJA',banner:${JSON.stringify(game.banner)},url:location.origin+'/games/forja/',integration:'embedded',progress:{}}]};
 function esc(s){return String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('\"','&quot;');}
 ${bannerCode}
 ${cardCode}
@@ -27,7 +27,7 @@ const server=http.createServer((req,res)=>{if(req.url==='/fixture'){res.setHeade
  await new Promise(r=>server.listen(8766,'127.0.0.1',r));
  const browser=await chromium.launch({headless:true,executablePath:process.env.LEXOMA_CHROMIUM,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1366,height:768},reducedMotion:'reduce'}),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.route('https://pablogarciablancov.github.io/lenguarcade/games/lexoma/assets/forja-cover-v1.webp',route=>route.fulfill({contentType:'image/webp',body:fs.readFileSync(path.join(__dirname,'assets/forja-cover-v1.webp'))}));
+ await page.route('https://pablogarciablancov.github.io/lenguarcade/games/forja/assets/forja-cover-v1.webp',route=>route.fulfill({contentType:'image/webp',body:fs.readFileSync(path.join(__dirname,'assets/forja-cover-v1.webp'))}));
  await page.goto('http://127.0.0.1:8766/fixture');
  assert((await page.locator('#games .game').getAttribute('style')).includes(game.banner));
  const image=await page.evaluate(async url=>{const i=new Image();i.src=url;await i.decode();return [i.naturalWidth,i.naturalHeight];},game.banner);assert(image[0]>1000);

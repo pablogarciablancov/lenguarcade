@@ -36,8 +36,8 @@
 
 ## 2026-10-05 · FORJA: diccionario y catálogo
 
-- Banco propio `games/lexoma/dictionary-es-extra.txt` (54.492 entradas RLA-ES) y análisis de talar, sin modificar Word Play. Diccionario combinado: 90.903 palabras, carga independiente de las dos fuentes y alias de tildes conservando Ñ/Ü.
-- FORJA incorporada como juego oficial 15, gameId lexoma, desde su manifest. Portada aportada en `games/lexoma/assets/forja-cover-v1.webp`, catálogo generado sincronizado y caché del menú versionada.
+- Banco propio `games/forja/dictionary-es-extra.txt` (54.492 entradas RLA-ES) y análisis de talar, sin modificar Word Play. Diccionario combinado: 90.903 palabras, carga independiente de las dos fuentes y alias de tildes conservando Ñ/Ü.
+- FORJA incorporada como juego oficial 15, gameId lexoma, desde su manifest. Portada aportada en `games/forja/assets/forja-cover-v1.webp`, catálogo generado sincronizado y caché del menú versionada.
 - Mecánicas, economía, bridge y esquema de guardado conservados.
 
 ## 2026-10-05 · Integración de Lexitrama
@@ -668,3 +668,9 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Sopa de Tinta conserva Pausa / Café y las vueltas de cada pantalla; elimina la salida de cabecera.
 - Batalla verbal elimina Salir de su propia pantalla inicial, donde no tenía destino distinto.
 - Se mantienen las vueltas al menú en ventanas de pausa y pantallas finales: corresponden a contextos diferentes.
+
+## 2026-10-08 · Carpeta de FORJA
+- Código, pruebas, documentación y manifest trasladados a `games/forja/`; notas propias en `docs/game-notes/forja/`.
+- Se conserva el gameId `lexoma` y las claves de almacenamiento para mantener todos los progresos existentes.
+- `games/lexoma/` queda como alias de compatibilidad para el catálogo ya desplegado; redirige al juego actual conservando query, hash y bootstrap. La portada antigua mantiene su URL.
+- Sin cambios del catálogo desplegado, backend ni Apps Script: los enlaces existentes funcionan mediante la redirección.
