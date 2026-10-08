@@ -116,13 +116,24 @@ function allowed(){return run&&run.status==='play'&&!run.finished;}
 function tileChar(sel){const t=run.hand.find(x=>x.id===sel.id);return sel.char||t?.char||'';}
 function draft(){return (run?.selected||[]).map(tileChar).join('');}
 function selectedTiles(){return (run?.selected||[]).map(s=>run.hand.find(t=>t.id===s.id)).filter(Boolean);}
-function select(id,assigned=null){
+function select(id,assigned=null,index=run?.selected.length){
  if(!allowed())return;const t=run.hand.find(x=>x.id===id);if(!t)return;run.rerollSelection=[];
  const i=run.selected.findIndex(x=>x.id===id);if(i>=0){run.selected.splice(i,1);save();return;}
  if(run.selected.length>=9)return;
  if(t.style==='wild'||t.char==='*'){if(!/^[A-ZÑÁÉÍÓÚÜ]$/u.test(assigned||''))return;run.selected.push({id,char:assigned.toUpperCase()});}
  else if(t.style==='bang'||t.char==='!'){if(run.selected.some(x=>tileChar(x)==='!'))return;run.selected.push({id,char:'!'});}
- else run.selected.push({id,char:t.char});save();
+ else run.selected.push({id,char:t.char});
+ const entry=run.selected.pop();run.selected.splice(Math.max(0,Math.min(Number.isInteger(index)?index:run.selected.length,run.selected.length)),0,entry);save();
+}
+// Preserve each selected entry (including its accent or wildcard letter) when swapping.
+function placeTile(id,index,assigned=null){
+ if(!allowed()||!Number.isInteger(index)||index<0||index>8)return;
+ const from=run.selected.findIndex(s=>s.id===id);
+ if(from<0){select(id,assigned,index);return;}
+ const to=Math.min(index,run.selected.length-1);
+ if(from===to)return;
+ [run.selected[from],run.selected[to]]=[run.selected[to],run.selected[from]];
+ run.rerollSelection=[];save();
 }
 function cycleAccent(id){if(!allowed())return;const s=run.selected.find(x=>x.id===id);if(!s)return;const c=String(s.char||tileChar(s)).toUpperCase();if(ACCENTS[c]){s.char=ACCENTS[c];save();}}
 function clear(){if(!allowed())return;run.selected=[];save();}
@@ -364,7 +375,7 @@ function setProfile(profile){storageKey='lexoma.v2.'+encodeURIComponent(String(p
 function metrics(){const correct=run?.words?.length||0,errors=run?.errors||0;return{score:run?.totalScore||0,correct,errors,attempts:correct+errors,accuracy:correct+errors?Math.round(correct/(correct+errors)*100):0,percentage:run?.status==='victory'?100:Math.min(99,Math.round(((run?.round||1)-1)/Math.max(1,totalRounds())*100)),maxCombo:career.bestMulti||1,words:correct,concordances:0};}
 
 window.LexomaEngine={
- newRun,start:newRun,select,cycleAccent,clear,toggleReroll,rerollLetters,draft,score,play,
+ newRun,start:newRun,select,placeTile,cycleAccent,clear,toggleReroll,rerollLetters,draft,score,play,
  buyCard,chooseBonus:buyCard,refreshShop,leaveShop,upgradeCard,upgradePrice,removeLetter,inventory,engraveTile,resolveEvent,
  continueEndless,loadDictionary,validate,letterValue,cardLevel,cardPrice,snapshot,restore,setProfile,save,metrics,totalRounds,targetForRound,roundEnergy,maxBonuses:MAX_BONUSES,serviceCosts:SERVICE_COSTS,storageOK:true,
  get dictionaryReady(){return dictionaryReady;},get run(){return run;},get career(){return career;},get achievements(){return C.achievements.filter(a=>career.achievements.includes(a.id));}

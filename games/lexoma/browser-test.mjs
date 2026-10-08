@@ -31,11 +31,47 @@ await page.waitForSelector('#shopPanel:not([hidden])');
 assert.equal(await page.evaluate(()=>LexomaEngine.run.coins),8);
 assert.equal(await page.locator('.shop-offer').count(),3);
 assert.equal(await page.evaluate(()=>LexomaEngine.run.bonuses.length),0);
+for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1366,658]]){
+ await page.setViewportSize({width,height});
+ assert.ok(await page.locator('.shop-offer p').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize)>=16));
+ assert.ok(await page.locator('#shopPanel').evaluate(el=>el.scrollWidth<=el.clientWidth));
+ if(process.env.LEXOMA_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.LEXOMA_SCREENSHOT_DIR,'shop-'+width+'x'+height+'.png')});
+}
+await page.setViewportSize({width:1366,height:768});
 
 // Se puede empezar sin comprar ninguna carta.
 await page.locator('#leaveShopBtn').click();
 assert.equal(await page.evaluate(()=>LexomaEngine.run.status),'play');
 assert.equal(await page.evaluate(()=>LexomaEngine.run.bonuses.length),0);
+
+// Real mouse dragging: insert, swap, return, cancel and wildcard placement.
+await page.evaluate(()=>{const r=LexomaEngine.run;r.hand=[{id:101,char:'C',style:'normal'},{id:102,char:'A',style:'normal'},{id:103,char:'S',style:'gold'},{id:104,char:'*',style:'wild'}];r.selected=[];LexomaEngine.save();});
+const hand=id=>page.locator('#hand [data-tile="'+id+'"]');
+const slot=i=>page.locator('#wordRow [data-slot="'+i+'"]');
+await hand(101).dragTo(slot(0));await hand(102).dragTo(slot(1));
+await slot(1).click(); // A -> Á; the accent must travel with the tile.
+await hand(103).dragTo(slot(0));
+assert.equal(await page.evaluate(()=>LexomaEngine.draft()),'SCÁ');
+await slot(0).dragTo(slot(2));
+assert.equal(await page.evaluate(()=>LexomaEngine.draft()),'ÁCS');
+await slot(2).dragTo(page.locator('#hand'));
+assert.equal(await page.evaluate(()=>LexomaEngine.draft()),'ÁC');
+await hand(103).dragTo(page.locator('#targetHint'));
+assert.equal(await page.evaluate(()=>LexomaEngine.draft()),'ÁC');
+await hand(104).dragTo(slot(1));
+await page.locator('[data-letter="O"]').click();
+assert.equal(await page.evaluate(()=>LexomaEngine.draft()),'ÁOC');
+await slot(1).dragTo(slot(2));
+assert.equal(await page.evaluate(()=>LexomaEngine.draft()),'ÁCO');
+assert.equal(await page.evaluate(()=>LexomaEngine.run.selected.find(s=>s.id===104).char),'O');
+assert.equal(await page.evaluate(()=>LexomaEngine.run.hand.find(t=>t.id===103).style),'gold');
+await page.locator('#rerollModeBtn').click();
+assert.equal(await hand(103).getAttribute('draggable'),'false');
+await page.locator('#rerollModeBtn').click();
+await page.locator('#clearBtn').click();
+await hand(101).click();assert.equal(await page.evaluate(()=>LexomaEngine.draft()),'C');
+await page.locator('#clearBtn').click();
+console.log('Drag OK: insert, swap, accents, wildcard, return, cancelled drop and click.');
 
 // Fuerza primera tienda tras ronda, comprueba ingresos y compra.
 await page.evaluate(()=>{const r=LexomaEngine.run;r.hand=[{id:101,char:'E',style:'normal'},{id:102,char:'L',style:'normal'},{id:103,char:'M',style:'normal'},{id:104,char:'A',style:'normal'},{id:105,char:'G',style:'normal'},{id:106,char:'O',style:'normal'},{id:107,char:'R',style:'normal'}];r.target=1;window.dispatchEvent(new Event('lexoma:change'));});
@@ -86,7 +122,7 @@ assert.deepEqual(errors,[]);console.log('UI OK: monedero, pasar sin comprar, com
 const host=await browser.newPage({viewport:{width:1366,height:768},reducedMotion:'reduce'});const hostErrors=[];host.on('pageerror',e=>hostErrors.push(e.message));
 await host.goto(origin+'/host-test.html');const frame=host.frames().find(f=>f.parentFrame());await frame.waitForFunction(()=>LexomaBridge.initialized&&LexomaEngine.dictionaryReady);
 await frame.locator('[data-mode="normal"]').click();await frame.waitForSelector('#shopPanel:not([hidden])');await frame.locator('#leaveShopBtn').click();
-await frame.locator('#hand .hand-tile').first().click();await host.evaluate(()=>post('REQUEST_CHECKPOINT'));await host.waitForFunction(()=>saved?.rawGameData?.save?.run?.selected?.length===1);
+await frame.locator('#hand .hand-tile:not(.wild)').first().click();await host.evaluate(()=>post('REQUEST_CHECKPOINT'));await host.waitForFunction(()=>saved?.rawGameData?.save?.run?.selected?.length===1);
 const id=await frame.evaluate(()=>LexomaEngine.run.id),coins=await frame.evaluate(()=>LexomaEngine.run.coins);await frame.goto(frame.url());await frame.waitForFunction(()=>LexomaBridge.initialized&&LexomaEngine.dictionaryReady);assert.equal(await frame.evaluate(()=>LexomaEngine.run.id),id);assert.equal(await frame.evaluate(()=>LexomaEngine.run.coins),coins);
 await host.evaluate(()=>post('REQUEST_EXIT'));await host.waitForFunction(()=>closeReady);assert.equal(await host.evaluate(()=>closeReady.saved),true);
 assert.deepEqual(hostErrors,[]);console.log('Bridge OK: economía, checkpoint, restauración y salida.');
