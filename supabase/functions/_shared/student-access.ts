@@ -59,5 +59,5 @@ export function studentGameButtonLabel(
   }
   if (access.lockedByTeacher) return "Cerrado por tu profesor";
   if (access.locked) return isLockedStatus(status) ? "En revisión" : "No disponible";
-  return sessions > 0 ? "Continuar" : "Jugar";
+  return "Entrar";
 }
