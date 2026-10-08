@@ -46,7 +46,7 @@ try{
   const {page,frame,errors}=await open('sopa_de_tinta');await frame.waitForFunction(()=>TintaGame.ready);
   await frame.locator('[data-action="quick"]').click();await frame.locator('[data-action="start-quick"]').click();
   const id=await frame.evaluate(()=>TintaGame.run.id);
-  await frame.locator('#exit').click();assert.equal(await frame.evaluate(()=>TintaGame.getScreen()),'home');await noClose(page);
+  assert.equal(await frame.locator('#exit').count(),0);await frame.locator('[data-action="pause"]').click();assert.equal(await frame.evaluate(()=>TintaGame.getScreen()),'home');await noClose(page);
   assert.equal(await frame.evaluate(()=>TintaGame.run.id),id);
   const elapsed=await frame.evaluate(()=>TintaGame.run.elapsed);await page.waitForTimeout(1200);assert.equal(await frame.evaluate(()=>TintaGame.run.elapsed),elapsed);
   await frame.locator('[data-action="resume"]').click();assert.equal(await frame.evaluate(()=>TintaGame.getScreen()),'play');
@@ -56,7 +56,7 @@ try{
   const {page,frame,errors}=await open('lexitrama');await frame.waitForFunction(()=>LexitramaEngine.ready);
   await frame.locator('[data-action="timed"]').click();await frame.locator('#setupForm button[type="submit"]').click();await frame.waitForFunction(()=>document.body.dataset.screen==='game');
   const id=await frame.evaluate(()=>LexitramaEngine.state.id);
-  await frame.locator('#exit').click();assert.equal(await frame.evaluate(()=>document.body.dataset.screen),'menu');await noClose(page);
+  assert.equal(await frame.locator('#exit').count(),0);await frame.locator('[data-action="menu"]').click();assert.equal(await frame.evaluate(()=>document.body.dataset.screen),'menu');await noClose(page);
   assert.equal(await frame.evaluate(()=>LexitramaEngine.state.id),id);
   const remaining=await frame.evaluate(()=>LexitramaEngine.state.remaining);await page.waitForTimeout(1200);assert.equal(await frame.evaluate(()=>LexitramaEngine.state.remaining),remaining);
   await frame.locator('[data-action="continue"]').click();assert.equal(await frame.evaluate(()=>document.body.dataset.screen),'game');
@@ -78,7 +78,7 @@ try{
   assert.deepEqual(errors,[]);console.log('Conjuga y apuesta: inicio y cierre explícito del host OK');await page.close();
  }
  {
-  const {page,frame,errors}=await open('verb_battle');await frame.locator('#menuPracticeBtn').click();await frame.locator('#startBtn').click();
+  const {page,frame,errors}=await open('verb_battle');assert.equal(await frame.locator('#menuExitBtn').count(),0);await frame.locator('#menuPracticeBtn').click();await frame.locator('#startBtn').click();
   await frame.locator('#exitBtn').click();await frame.locator('#setupScreen').waitFor({state:'visible'});await noClose(page);
   await page.evaluate(()=>post('REQUEST_EXIT'));await page.waitForFunction(()=>messages.some(m=>m.type==='CLOSE_READY'));
   assert.deepEqual(errors,[]);console.log('Batalla verbal: inicio y cierre explícito del host OK');await page.close();

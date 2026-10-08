@@ -60,7 +60,7 @@ function renderGame(){
  renderBonusStack(r);scoringAnimation?renderScoringWord(scoringAnimation.score):renderWord(r);renderHand(r);$('effectFloat').innerHTML=(preview.effects||[]).slice(-7).map((e,i)=>'<span style="--i:'+i+'">'+esc(e)+'</span>').join('');$('playfield').classList.toggle('score-resolving',!!scoringAnimation);
  if(scoringAnimation)$('feedback').textContent=scoringAnimation.score.display.toUpperCase()+' · '+fmt(scoringAnimation.score.points)+' × '+fmt(scoringAnimation.score.multis)+' = '+fmt(scoringAnimation.score.total);
  else if(lastMessage)$('feedback').textContent=lastMessage;else if(validation?.ok)$('feedback').textContent='✓ '+raw.toUpperCase()+' · '+categoryText(validation.analysis)+' · '+fmt(livePreview.points)+' × '+fmt(livePreview.multis)+' = '+fmt(livePreview.total);else if(raw)$('feedback').textContent=validation?.message||'Esta combinación no forma una palabra válida.';else $('feedback').textContent=rerollMode?'Selecciona hasta 3 letras de la mano y pulsa ↻.':'Arrastra fichas para formar la palabra o intercambiarlas. Pulsa una vocal para acentuarla.';
- $('saveStatus').textContent=!E.storageOK?'Error de guardado':B.embedded?'LenguArcade · guardado activo':'Guardado local';$('gameExitBtn').hidden=false;renderOverlay();
+ $('saveStatus').textContent=!E.storageOK?'Error de guardado':B.embedded?'LenguArcade · guardado activo':'Guardado local';renderOverlay();
 }
 function shopCard(offer){
  const b=C.bonuses.find(x=>x.id===offer.id);if(!b)return'';
@@ -167,7 +167,6 @@ document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',(
 $('continueBtn').addEventListener('click',()=>{title=false;lastMessage='';B.start();render();});
 function returnToTitle(){clearDrag();closeDialog();title=true;rerollMode=false;scoringAnimation=null;E.save();B.checkpoint('menu');render();}
 $('menuBtn').addEventListener('click',returnToTitle);
-$('exitBtn').addEventListener('click',returnToTitle);$('gameExitBtn').addEventListener('click',returnToTitle);
 $('soundBtn').addEventListener('click',()=>{sound=!sound;$('soundBtn').textContent='♫ '+(sound?'Sí':'No');tone();});
 $('hand').addEventListener('click',e=>{const b=e.target.closest('[data-tile]');if(!b||!E.run||scoringAnimation)return;const id=Number(b.dataset.tile),t=E.run.hand.find(x=>x.id===id);tone('select');if(rerollMode){E.toggleReroll(id);return;}selectedPulseId=id;if(t?.style==='wild'||t?.char==='*')openWild(id);else E.select(id);setTimeout(()=>{selectedPulseId=null;},260);});
 $('clearBtn').addEventListener('click',()=>{lastMessage='';E.clear();});$('playBtn').addEventListener('click',playCurrent);

@@ -13,7 +13,7 @@
   }
   function header(){if(!E.ready)return;const xp=E.career.xp;const thresholds=[0,100,500,1500,3500,7000];let r=0;for(let i=0;i<thresholds.length;i++)if(xp>=thresholds[i])r=i;$('rank').textContent=C.ranks[r];$('xp').textContent=`${xp.toLocaleString('es-ES')} XP`;}
   function page(title,body){return `<section class="page"><div class="page-head"><h2>${title}</h2>${button('Menú','menu','quiet')}</div>${body}</section>`;}
-  function menu(){screen='menu';path=[];render();}
+  function menu(){screen='menu';path=[];if(E.ready){E.persist();window.LexitramaBridge?.checkpoint('return_menu');}render();}
   function render(){
     document.body.dataset.screen=screen;
     header();if(!E.ready){$('view').innerHTML='<section class="result"><div class="result-card"><h2>Abriendo el Atlas…</h2><p class="sub">Esperando el perfil de LenguArcade.</p></div></section>';return;}
@@ -107,7 +107,7 @@
   }
   document.addEventListener('click',event=>{const level=event.target.closest('[data-level]');if(level&&!level.disabled)return requestStart({levelId:level.dataset.level});const b=event.target.closest('[data-action]');if(b&&!b.disabled)action(b.dataset.action);});
   document.addEventListener('keydown',event=>{if(screen==='game'&&!$('modal').open){if(event.key==='Escape')cancel();if(event.key==='Enter'&&path.length>=2){event.preventDefault();submit();}}});
-  $('brand').onclick=menu;$('exit').onclick=()=>{E.persist();menu();window.LexitramaBridge?.checkpoint('return_menu');};$('save').onclick=()=>{E.persist();if(window.LexitramaBridge?.embedded){window.LexitramaBridge.retry();}else $('saveStatus').textContent='Progreso local guardado.';};
+  $('brand').onclick=menu;$('save').onclick=()=>{E.persist();if(window.LexitramaBridge?.embedded){window.LexitramaBridge.retry();}else $('saveStatus').textContent='Progreso local guardado.';};
   $('sound').onclick=()=>{$('sound').textContent=`Sonido: ${A.toggle()?'no':'sí'}`;};$('reduce').onchange=()=>document.body.classList.toggle('reduce-motion',$('reduce').checked);$('modalClose').onclick=()=>$('modal').close();
   window.addEventListener('lexitrama:change',()=>{if(E.ready)render();});window.addEventListener('lexitrama:menu',menu);
   window.addEventListener('lexitrama:save-status',e=>$('saveStatus').textContent=e.detail);

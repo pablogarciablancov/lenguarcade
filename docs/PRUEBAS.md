@@ -679,3 +679,8 @@ Límites: el contador conserva el total de duelos; la lista guarda los 100 más 
 - Conjuga y apuesta y Batalla verbal: salida local conserva resultados y vuelve al inicio; cierre del host permanece operativo.
 - Guardianes: cerrar pausa muestra su inicio, oculta el modal, guarda la partida y no muestra el aviso de integración futura.
 - Prueba online real pendiente de dos alumnos: Conjuga utiliza la función existente Online.back para abandonar la sala y volver al inicio; el host conserva Online.leave para cerrar.
+
+## Botones de menú sin duplicados (2026-10-08)
+- `npm run check`.
+- `node games/lexoma/browser-test.mjs`: no existen gameExitBtn/exitBtn; Menú guarda y vuelve al título; Continuar y cierre del host funcionan.
+- `node scripts/check-game-menu-exit.browser.mjs`: navegación y guardados con los botones restantes; ausencia de exit en Lexitrama/Sopa de Tinta y menuExitBtn en Batalla verbal.
