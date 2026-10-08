@@ -26,3 +26,9 @@
 7. Abrir otro juego y verificar menú de alumno/profesor tras publicar el catálogo.
 
 No se ha probado la base de datos real ni el `/exec` estable en esta rama aislada. La semilla de clase tiene resumen comparable, no un ranking remoto nuevo.
+
+## 2026-10-08 — Regresión de sustantivos
+
+- `node scripts/check-lexitrama.mjs`: 300 campañas/semillas, 1450 cascadas, ocho respuestas sobre la cuadrícula de la captura, plurales, progreso/dominio, guardado/restauración, tildes, categorías compartidas y campos semánticos.
+- `node games/lexitrama/browser-test.cjs`: arrastre real de las ocho respuestas sobre la captura (hielo y dorada), SETO, victoria/recarga, jefe, teclado, móvil e iframe con guardado simulado. Resoluciones 1366×768, 1440×900 y 1920×1080; sin scroll general ni errores JS.
+- Prueba manual: abrir Maestría > Sustantivos, trazar cualquier sustantivo conocido de letras adyacentes y confirmar +1 objetivo; seleccionar Verbos y confirmar que un sustantivo sin lectura verbal solo suma puntos, sin avanzar la misión.

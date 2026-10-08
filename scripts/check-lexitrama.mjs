@@ -92,3 +92,25 @@ hostMessage('SAVE_CONFIRMED',{resultId:latest.payload.resultId});latest=messages
 B.saveAndExit();assert(!messages.some(m=>m.type==='CLOSE_READY'));
 hostMessage('CHECKPOINT_CONFIRMED',{checkpointId:latest.payload.checkpointId});latest=messages.at(-1);assert.equal(latest.payload.reason,'exit');hostMessage('CHECKPOINT_FAILED',{checkpointId:latest.payload.checkpointId});assert(!messages.some(m=>m.type==='CLOSE_READY'));B.retry();hostMessage('CHECKPOINT_CONFIRMED',{checkpointId:latest.payload.checkpointId});assert(messages.some(m=>m.type==='CLOSE_READY'&&m.payload.saved));
 console.log('Fichas, tildes, misión y bridge OK: cola de guardado, resultado estable, fallo/reintento, canal y salida tras confirmación.');
+
+// Regresión: respuestas espontáneas del tablero real, no solo la incrustada.
+const captureLetters='VELPUERTIPSLOSALIIDAEABOC';
+for(const word of ['losa','piso','lodo','rosa','silo','sol','boca','pupitre']) {
+  E.abandon();E.create({mode:'mastery',mission:'sustantivo',size:5,seed:'noun-capture'});
+  E.state.goal=8;E.state.guaranteed='pupitre';
+  E.state.board.forEach((tile,i)=>Object.assign(tile,{letter:captureLetters[i],kind:i===6?'ice':i===16?'gold':'normal',hits:i===6?2:1}));
+  const route=E.route(word);assert(route,`Falta ruta en la captura: ${word}`);
+  const before=E.snapshot();E.initialize({},before,true);
+  const result=E.submit(route);
+  assert(result.ok&&result.goal,`${word} debe contar como sustantivo`);
+  assert.equal(E.state.progress,1);assert.equal(E.state.errors,0);
+  assert.equal(E.career.mastery.sustantivo,(before.career.mastery.sustantivo||0)+1);
+  const saved=E.snapshot();E.initialize({},saved,true);assert.equal(E.state.progress,1);
+}
+for(const word of ['losa','piso','techo','pared','puerta','pelo','hilo','risa','rosa','cosa','lodo','pila','silo','sillón','virtud','talento']) {
+  const entry=C.byWord.get(word);assert(entry&&C.missions.find(m=>m.id==='sustantivo').test(entry),`Sustantivo común ausente: ${word}`);
+}
+for(const word of ['losas','pisos','techos','paredes','puertas','pelos','hilos','risas','rosas','cosas','lodos','pilas','silos'])assert(C.missions.find(m=>m.id==='sustantivo').test(C.byWord.get(word)));
+assert(!C.missions.find(m=>m.id==='sustantivo').test(C.byWord.get('cantamos')));
+assert.equal(C.missions.find(m=>m.id==='bosque').test(C.byWord.get('piso')),false);
+console.log('Captura de sustantivos OK: ocho respuestas, plurales, hielo/dorada, dominio y restauración del guardado.');
