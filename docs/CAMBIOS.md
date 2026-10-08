@@ -661,3 +661,10 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Conservados los guardados, checkpoints y resultados. Las solicitudes explícitas de cierre de LenguArcade mantienen su protocolo independiente.
 - Lexitrama pausa reloj y ataques de jefe cuando la expedición está en el menú.
 - Revisados los juegos restantes: sus botones ya vuelven al menú propio o no exponen salida interna al catálogo.
+
+## 2026-10-08 · Botones de menú sin duplicados
+- FORJA conserva Menú y elimina los dos botones de salida redundantes, incluido el oculto del título.
+- Lexitrama conserva Menú en cada pantalla y elimina la salida adicional de cabecera; centraliza persistencia y checkpoint en la navegación al menú.
+- Sopa de Tinta conserva Pausa / Café y las vueltas de cada pantalla; elimina la salida de cabecera.
+- Batalla verbal elimina Salir de su propia pantalla inicial, donde no tenía destino distinto.
+- Se mantienen las vueltas al menú en ventanas de pausa y pantallas finales: corresponden a contextos diferentes.

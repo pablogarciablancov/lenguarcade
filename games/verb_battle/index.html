@@ -121,7 +121,6 @@ button:disabled{cursor:not-allowed;opacity:.45}
           <button class="gameMenuBtn" id="menuAchievementsBtn"><span class="menuIco">🏆</span><span>LOGROS</span><small>Tu progreso</small></button>
           <button class="gameMenuBtn" id="menuProfileBtn"><span class="menuIco">👤</span><span>PERFIL</span><small>Nivel y estadísticas</small></button>
           <button class="gameMenuBtn" id="menuHelpBtn"><span class="menuIco">?</span><span>CÓMO SE JUEGA</span><small>Reglas rápidas</small></button>
-          <button class="gameMenuBtn quit" id="menuExitBtn"><span class="menuIco">↪</span><span>SALIR</span><small>Volver al inicio del juego</small></button>
         </nav>
       </aside>
 
@@ -992,7 +991,6 @@ $("menuPracticeBtn").onclick=()=>openSetupDrawer("practice");
 $("menuAchievementsBtn").onclick=()=>{achievementPage=0;renderAchievements()};
 $("menuProfileBtn").onclick=renderProfileMenu;
 $("menuHelpBtn").onclick=()=>$("helpModal").classList.add("open");
-$("menuExitBtn").onclick=()=>requestExit();
 $("setupCloseBtn").onclick=closeSetupDrawer;
 $("closeProfileModal").onclick=()=>$("profileModal").classList.remove("open");
 $("closeHelpModal").onclick=()=>$("helpModal").classList.remove("open");
