@@ -98,6 +98,8 @@ async function edge(profileId){
   assert.equal(a.games[0].lockedByTeacher,true);
   assert.equal(b.games[0].locked,false);
   assert.equal(a.games[1].locked,false);
+  assert.equal(a.games[0].lockedLabel,'Cerrado por tu profesor');
+  for(const sessions of [0,1,10])assert.equal(studentGameButtonLabel({locked:false},'Disponible',sessions),'Entrar');
   const original=a.fingerprint;
   access[0].enabled=true;
   assert.notEqual((await edge('p1')).fingerprint,original);
@@ -219,6 +221,7 @@ function browser(){
   ui.listeners.online();
   await ui.settle();
   assert.equal(ui.cards[0].items['.play'].disabled,false);
+  assert.equal(ui.cards[0].items['.play'].textContent,'Entrar');
   await ui.context.openGame('battlegrafia');
   assert.equal(ui.counts.baseOpens,1);
   ui.setHidden(true);

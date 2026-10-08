@@ -689,3 +689,9 @@ Límites: el contador conserva el total de duelos; la lista guarda los 100 más 
 - `node games/forja/smoke-test.mjs`, `node games/forja/dictionary-test.mjs`, `node games/forja/browser-test.mjs` y `npm run check` aprobados.
 - `node scripts/check-game-menu-exit.browser.mjs`: entrada desde `/games/lexoma/` en iframe, redirección a `/games/forja/`, conservación de canal/hash, guardado y restauración de la misma partida.
 - La prueba antigua `integration-browser-test.cjs` mantiene un fixture del launcher desactualizado (no genera las tarjetas actuales); la navegación de compatibilidad se valida con la prueba en iframe anterior y el browser-test del juego.
+
+## 2026-10-08 · Botones Entrar
+1. Abrir el tablón con juegos nuevos y con progreso: todos los abiertos deben mostrar «Entrar».
+2. Entrar, guardar progreso y volver; recargar y revisar la caché: la etiqueta permanece.
+3. Cerrar y reabrir un juego desde profesor o taller: conserva el aviso de cierre y vuelve a «Entrar» al abrirse.
+Automatizado: `npm run check`, incluido `scripts/check-live-access.mjs`.

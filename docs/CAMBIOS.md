@@ -674,3 +674,7 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Se conserva el gameId `lexoma` y las claves de almacenamiento para mantener todos los progresos existentes.
 - `games/lexoma/` queda como alias de compatibilidad para el catálogo ya desplegado; redirige al juego actual conservando query, hash y bootstrap. La portada antigua mantiene su URL.
 - Sin cambios del catálogo desplegado, backend ni Apps Script: los enlaces existentes funcionan mediante la redirección.
+
+## 2026-10-08 · Entrar en los juegos del tablón
+- Todos los botones de juegos abiertos muestran «Entrar», con o sin partidas previas, también al restaurar la caché, guardar progreso y actualizar disponibilidad.
+- Apps Script y Supabase entregan la misma etiqueta; se conservan los avisos de juegos cerrados.

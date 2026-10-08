@@ -194,7 +194,7 @@ function gameCardIcon(id){
   const path=GAME_CARD_ICON_PATHS[id]||'M4 5h16v14H4z M8 9h8 M8 13h8';
   return '<svg class="gameGenreIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+path+'"/></svg>';
 }
-function renderGames(games){$('games').innerHTML=games.map(g=>`<article class="game ${g.locked?'locked':''}" style="--c:${esc(g.color||'#7c4dff')};--img:url('${bannerUrl(g.gameId,g.banner)}')"><div class="gameCoverHeader"><span class="laCoverBrand" aria-hidden="true"><img src="https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-logo.png" alt="" loading="lazy">LenguArcade</span><span class="chip">${esc(g.estado)}</span></div><div class="gameArt"><span class="genreSymbol">${gameCardIcon(g.gameId)}</span><span class="genreLabel">${esc(g.categoria||'Juego')}</span></div><div class="gameText"><h3 class="gameTitleAccess">${esc(g.nombre)}</h3><p>${esc(g.descripcion||g.subtitulo)}</p></div><div class="gameMeta"><div class="bar"><div class="fill" style="width:${Number(g.progress.percentage||0)}%"></div></div><button type="button" class="play" onclick="openGame('${esc(g.gameId)}')" ${g.locked?'disabled':''}>${esc(g.buttonLabel)}</button></div></article>`).join('');}function openGame(gameId){const g=(currentDashboard?.games||[]).find(x=>x.gameId===gameId);if(!g)return;if(g.url){window.open(g.url,'_blank');return}$('gameModalTitle').textContent=g.nombre;$('gameModalText').textContent='Este juego ya está en el catálogo de LenguArcade, pero todavía no está integrado para abrirse desde aquí. El siguiente paso será conectar Maniacgrafía como primer juego real.';$('gameModal').classList.add('open')}function renderRows(id,rows){const target=$(id);if(!target)return;target.innerHTML=rows.length?rows.map(x=>`<div class="row"><span>${esc(x.l)}</span><strong>${esc(x.r)}</strong></div>`).join(''):'<div class="sub">Sin datos todavía.</div>'}async function simulateProgress(){if(!token)return setStatus('Primero inicia sesión.');const game=(currentDashboard?.games||[]).find(g=>!g.locked)||{gameId:'maniacgrafia'};setBusy(true,'Guardando progreso simulado...');try{const res=await callServer('saveProgress',[{sessionToken:token,gameId:game.gameId,eventType:'progreso_demo',progress:{xpDelta:80,plumasDelta:3,percentage:Math.floor(20+Math.random()*70),accuracy:Math.floor(65+Math.random()*30),attempts:10,successes:8,errors:2,streak:3},achievements:[{id:'demo_'+Date.now(),title:'Pulso arcade',description:'Progreso simulado',xpReward:10}],rawGameData:{source:'v0.4_demo'}}]);currentDashboard=res.dashboard;saveCache('LA_DASHBOARD_CACHE',currentDashboard);renderDashboard(currentDashboard);setStatus('Progreso guardado.');}catch(e){setStatus('Error al guardar: '+(e.message||e));}finally{setBusy(false);}}function saveCache(k,v){try{localStorage.setItem(k,JSON.stringify({t:Date.now(),v:v}))}catch(e){}}function readCache(k){try{const raw=localStorage.getItem(k);if(!raw)return null;const o=JSON.parse(raw);return o.v||null}catch(e){return null}}boot();
+function renderGames(games){$('games').innerHTML=games.map(g=>`<article class="game ${g.locked?'locked':''}" style="--c:${esc(g.color||'#7c4dff')};--img:url('${bannerUrl(g.gameId,g.banner)}')"><div class="gameCoverHeader"><span class="laCoverBrand" aria-hidden="true"><img src="https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/brand/lenguarcade-logo.png" alt="" loading="lazy">LenguArcade</span><span class="chip">${esc(g.estado)}</span></div><div class="gameArt"><span class="genreSymbol">${gameCardIcon(g.gameId)}</span><span class="genreLabel">${esc(g.categoria||'Juego')}</span></div><div class="gameText"><h3 class="gameTitleAccess">${esc(g.nombre)}</h3><p>${esc(g.descripcion||g.subtitulo)}</p></div><div class="gameMeta"><div class="bar"><div class="fill" style="width:${Number(g.progress.percentage||0)}%"></div></div><button type="button" class="play" onclick="openGame('${esc(g.gameId)}')" ${g.locked?'disabled':''}>${esc(g.locked?g.buttonLabel:'Entrar')}</button></div></article>`).join('');}function openGame(gameId){const g=(currentDashboard?.games||[]).find(x=>x.gameId===gameId);if(!g)return;if(g.url){window.open(g.url,'_blank');return}$('gameModalTitle').textContent=g.nombre;$('gameModalText').textContent='Este juego ya está en el catálogo de LenguArcade, pero todavía no está integrado para abrirse desde aquí. El siguiente paso será conectar Maniacgrafía como primer juego real.';$('gameModal').classList.add('open')}function renderRows(id,rows){const target=$(id);if(!target)return;target.innerHTML=rows.length?rows.map(x=>`<div class="row"><span>${esc(x.l)}</span><strong>${esc(x.r)}</strong></div>`).join(''):'<div class="sub">Sin datos todavía.</div>'}async function simulateProgress(){if(!token)return setStatus('Primero inicia sesión.');const game=(currentDashboard?.games||[]).find(g=>!g.locked)||{gameId:'maniacgrafia'};setBusy(true,'Guardando progreso simulado...');try{const res=await callServer('saveProgress',[{sessionToken:token,gameId:game.gameId,eventType:'progreso_demo',progress:{xpDelta:80,plumasDelta:3,percentage:Math.floor(20+Math.random()*70),accuracy:Math.floor(65+Math.random()*30),attempts:10,successes:8,errors:2,streak:3},achievements:[{id:'demo_'+Date.now(),title:'Pulso arcade',description:'Progreso simulado',xpReward:10}],rawGameData:{source:'v0.4_demo'}}]);currentDashboard=res.dashboard;saveCache('LA_DASHBOARD_CACHE',currentDashboard);renderDashboard(currentDashboard);setStatus('Progreso guardado.');}catch(e){setStatus('Error al guardar: '+(e.message||e));}finally{setBusy(false);}}function saveCache(k,v){try{localStorage.setItem(k,JSON.stringify({t:Date.now(),v:v}))}catch(e){}}function readCache(k){try{const raw=localStorage.getItem(k);if(!raw)return null;const o=JSON.parse(raw);return o.v||null}catch(e){return null}}boot();
 </script>
 <script type="text/plain" id="legacyAvatarBuilder">
 const AVATAR_OPTIONS_CLIENT={
@@ -1470,11 +1470,11 @@ function applySavedGameRecordToDashboard(runner,record,isPrimary,participantRole
   if(!target)return;
   const progress=normalizeGameProgressRecord(record,target);
   target.progress=Object.assign({},target.progress||{},progress);
-  target.buttonLabel='Continuar';
+  target.buttonLabel='Entrar';
   if(isPrimary&&currentDashboard?.games){
     const index=currentDashboard.games.findIndex(game=>game.gameId===progress.gameId);
     if(index>=0){
-      currentDashboard.games[index]=Object.assign({},currentDashboard.games[index],{progress,buttonLabel:'Continuar'});
+      currentDashboard.games[index]=Object.assign({},currentDashboard.games[index],{progress,buttonLabel:'Entrar'});
       runner.game=currentDashboard.games[index];
       saveCache('LA_DASHBOARD_CACHE',currentDashboard);
       renderDashboard(currentDashboard);
@@ -2720,7 +2720,7 @@ body.light .workshopGameRow{background:rgba(94,53,177,.04)}
           copy.lockedByTeacher=false;
           copy.lockedByWorkshop=false;
           copy.accessEnabled=true;
-          copy.buttonLabel=Number(copy.progress&&copy.progress.sessions||0)>0?'Continuar':'Jugar';
+          copy.buttonLabel='Entrar';
         }
       }else{
         copy.locked=true;
@@ -3010,7 +3010,7 @@ body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionS
         var canWorkshopOpen=game.catalogLocked===false&&(game.lockedByTeacher||game.lockedByWorkshop||game.locked===false);
         if(button&&canWorkshopOpen){
           button.disabled=false;
-          button.textContent=Number(game.progress&&game.progress.sessions||0)>0?'Continuar':'Jugar';
+          button.textContent='Entrar';
         }
         if(canWorkshopOpen)card.classList.remove('sessionLocked','locked');
         if(chip&&canWorkshopOpen)chip.textContent=s.mode==='home'?'🏠 Disponible en casa':'✅ Disponible en la sesión';
@@ -3673,7 +3673,7 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
     card.classList.toggle('locked',!!game.locked);
     card.classList.toggle('sessionLocked',!!game.lockedByWorkshop);
     var button=card.querySelector('.play');
-    if(button){button.disabled=!!game.locked;button.textContent=game.buttonLabel;}
+    if(button){button.disabled=!!game.locked;button.textContent=game.locked?game.buttonLabel:'Entrar';}
     var chip=card.querySelector('.chip');
     if(chip){
       chip.textContent=game.lockedByWorkshop
@@ -3709,7 +3709,7 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
         lockedByWorkshop:next.lockedByWorkshop,
         locked:next.locked,
         accessClosedAt:next.closedAt||'',
-        buttonLabel:next.locked?next.lockedLabel:(Number(game.progress&&game.progress.sessions||0)>0?'Continuar':'Jugar')
+        buttonLabel:next.locked?next.lockedLabel:'Entrar'
       });
       if(changed){
         changedGames=true;

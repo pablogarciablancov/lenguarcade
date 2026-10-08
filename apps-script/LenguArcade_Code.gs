@@ -469,7 +469,7 @@ function getStudentDashboardCore_(studentId) {
   progressRows.forEach(r => byGame[r.gameId] = r);
   const gameCards = games.map(g => {
     const p = byGame[g.gameId] || emptyProgressForGame_(student, g);
-    return Object.assign({}, g, { progress:p, locked:isGameLockedStatus_(g.estado), buttonLabel:isGameLockedStatus_(g.estado) ? 'En revisión' : (p.sessions > 0 ? 'Continuar' : 'Jugar') });
+    return Object.assign({}, g, { progress:p, locked:isGameLockedStatus_(g.estado), buttonLabel:isGameLockedStatus_(g.estado) ? 'En revisión' : 'Entrar' });
   });
   return {
     ok:true,
@@ -492,7 +492,7 @@ function getStudentGameRecord_(student, game) {
   return Object.assign({}, decorated, {
     progress:normalized,
     locked:isGameLockedStatus_(decorated.estado),
-    buttonLabel:isGameLockedStatus_(decorated.estado) ? 'En revisión' : (normalized.sessions > 0 ? 'Continuar' : 'Jugar')
+    buttonLabel:isGameLockedStatus_(decorated.estado) ? 'En revisión' : 'Entrar'
   });
 }
 
