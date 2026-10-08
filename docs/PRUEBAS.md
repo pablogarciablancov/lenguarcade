@@ -670,3 +670,12 @@ Límites: el contador conserva el total de duelos; la lista guarda los 100 más 
 - Verificar dieciséis WebP distintos a 1280×720 y rutas públicas.
 - Comprobar el logo oficial en el encabezado de cada tarjeta alumno y en la esquina de cada miniatura docente.
 - Revisar título, sello y estado sin solapamientos en 1366×768, 1440×900 y 1920×1080 tras publicar Apps Script.
+
+## Salida al menú propio (2026-10-08)
+- `npm run check`; la comprobación de Word Play exige ahora checkpoint y navegación interna para Guardar y salir.
+- `node games/lexoma/browser-test.mjs`: salir al título sin CLOSE_READY, continuar con mismos datos y cerrar ante REQUEST_EXIT del host.
+- `node scripts/check-game-menu-exit.browser.mjs`: siete juegos en iframe con perfil, confirmación de guardado y detección de CLOSE_READY/REQUEST_EXIT inesperados.
+- Verificar regreso al inicio y continuación en Versópolis, Lexitrama, Sopa de Tinta y Play the Word; reloj pausado en Lexitrama y Sopa de Tinta.
+- Conjuga y apuesta y Batalla verbal: salida local conserva resultados y vuelve al inicio; cierre del host permanece operativo.
+- Guardianes: cerrar pausa muestra su inicio, oculta el modal, guarda la partida y no muestra el aviso de integración futura.
+- Prueba online real pendiente de dos alumnos: Conjuga utiliza la función existente Online.back para abandonar la sala y volver al inicio; el host conserva Online.leave para cerrar.

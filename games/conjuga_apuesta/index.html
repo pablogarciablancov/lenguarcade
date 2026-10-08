@@ -1458,10 +1458,12 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
     if(Online.active())return Online.back();
     $('endScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');renderProfileHeader();
   }
-  function requestExit(){
-    if(state.running&&!state.ended){
-      if(confirm('¿Salir de la partida? Se guardará lo jugado hasta ahora.'))finishMatch('abandoned');
-    }else Bridge.closeReady();
+  let hostExitRequested=false;
+  async function requestExit(){
+    if(state.running&&!state.ended&&!confirm('¿Volver al inicio del juego? Se guardará lo jugado hasta ahora.'))return;
+    if(Online.active()){await Online.back();return;}
+    if(state.running&&!state.ended)finishMatch('abandoned');
+    $('gameScreen').classList.add('hidden');newMatch();
   }
 
   function renderAchievements(){
@@ -1505,10 +1507,10 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
       if(m.type==='OPPONENT_AUTHENTICATED')applyOpponent(m.payload||{});
       if(m.type==='OPPONENT_AUTH_FAILED')toast('No se pudo conectar',String(m.payload?.message||'Revisa el código.'));
       if(m.type==='ONLINE_REPLY'){const p=onlinePending.get(m.payload?.requestId);if(p){clearTimeout(p.timer);onlinePending.delete(m.payload.requestId);m.payload.error?p.reject(new Error(m.payload.error)):p.resolve(m.payload.data);}}
-      if(m.type==='REQUEST_EXIT'&&Online.active()){Online.leave();return;}
-      if(m.type==='REQUEST_EXIT'){if(state.running&&!state.ended)finishMatch('abandoned');else post('CLOSE_READY');}
+      if(m.type==='REQUEST_EXIT'&&Online.active()){hostExitRequested=true;Online.leave();return;}
+      if(m.type==='REQUEST_EXIT'){hostExitRequested=true;if(state.running&&!state.ended)finishMatch('abandoned');else post('CLOSE_READY');}
       if(m.type==='SAVE_CONFIRMED'&&state.ended){
-        if(state.finishReason==='abandoned')post('CLOSE_READY');
+        if(state.finishReason==='abandoned'){if(hostExitRequested){hostExitRequested=false;post('CLOSE_READY');}else toast('✅ Progreso guardado','Puedes empezar otra partida.');}
         else{
           toast('✅ Progreso guardado','La partida se ha guardado en LenguArcade.');
           setTimeout(()=>{

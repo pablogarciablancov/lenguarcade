@@ -107,13 +107,13 @@
   }
   document.addEventListener('click',event=>{const level=event.target.closest('[data-level]');if(level&&!level.disabled)return requestStart({levelId:level.dataset.level});const b=event.target.closest('[data-action]');if(b&&!b.disabled)action(b.dataset.action);});
   document.addEventListener('keydown',event=>{if(screen==='game'&&!$('modal').open){if(event.key==='Escape')cancel();if(event.key==='Enter'&&path.length>=2){event.preventDefault();submit();}}});
-  $('brand').onclick=menu;$('exit').onclick=()=>window.LexitramaBridge?.saveAndExit();$('save').onclick=()=>{E.persist();if(window.LexitramaBridge?.embedded){window.LexitramaBridge.retry();}else $('saveStatus').textContent='Progreso local guardado.';};
+  $('brand').onclick=menu;$('exit').onclick=()=>{E.persist();menu();window.LexitramaBridge?.checkpoint('return_menu');};$('save').onclick=()=>{E.persist();if(window.LexitramaBridge?.embedded){window.LexitramaBridge.retry();}else $('saveStatus').textContent='Progreso local guardado.';};
   $('sound').onclick=()=>{$('sound').textContent=`Sonido: ${A.toggle()?'no':'sí'}`;};$('reduce').onchange=()=>document.body.classList.toggle('reduce-motion',$('reduce').checked);$('modalClose').onclick=()=>$('modal').close();
   window.addEventListener('lexitrama:change',()=>{if(E.ready)render();});window.addEventListener('lexitrama:menu',menu);
   window.addEventListener('lexitrama:save-status',e=>$('saveStatus').textContent=e.detail);
   window.addEventListener('lexitrama:finish',()=>{A.play(E.state.won?'win':'lose');if(screen==='game'){screen='result';render();}});
   window.addEventListener('lexitrama:attack',()=>{A.play('attack');const b=document.querySelector('.boss');b?.classList.add('boss-attacking');setTimeout(()=>b?.classList.remove('boss-attacking'),550);if($('feedback'))$('feedback').textContent='El jefe ataca: +2 corrupción. ¡Completa la misión!';});
   window.addEventListener('resize',()=>updateSelection());
-  setInterval(()=>{const now=performance.now(),seconds=Math.floor((now-lastTime)/1000);if(seconds>0){lastTime+=seconds*1000;if(!window.LexitramaBridge?.exiting)E.tick(seconds);if(E.state&&!E.state.completed)updateHud();}},250);
+  setInterval(()=>{const now=performance.now(),seconds=Math.floor((now-lastTime)/1000);if(seconds>0){lastTime+=seconds*1000;if(screen==='game'&&!window.LexitramaBridge?.exiting)E.tick(seconds);if(E.state&&!E.state.completed)updateHud();}},250);
   render();
 })();
