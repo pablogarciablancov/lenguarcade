@@ -1,9 +1,3 @@
-## Navegación del profesor y progreso de Maniacgrafía (2026-10-10)
-- Ejecutar `node scripts/check-learning-tracking.mjs`: los enlaces cruzados deben invocar `laShowTeacherScreen` y pasar el filtro de progreso de Maniacgrafía (palabras acertadas, mundo de aventura y porcentaje que no retrocede).
-- Ejecutar `npm run check`.
-- En `/exec`, alternar desde «Planificar taller» a Taller y desde el acceso del Taller a Misiones: la sección elegida debe quedar visible y el botón correcto activo.
-- Enviar un resultado de Maniacgrafía con `stats.totalWords=250` y sin `metrics.percentage`: el progreso guardado debe mostrar 25 %, y conservar cualquier porcentaje anterior superior.
-
 ## 2026-10-07 · Profesor en el panel común de jugador
 
 1. Actualizar `main` y publicar el despliegue estable: `npm.cmd run apps:publish -- "Modo jugador del profesor"`.
@@ -711,4 +705,13 @@ Automatizado: `npm run check`, incluido `scripts/check-live-access.mjs`.
 6. Confirmar que la navegación permite pasar del planificador de talleres al tablón de retos y misiones.
 7. La suma automática +5 requiere configurar `FLEET_MARKER_WEBHOOK_URL` y `FLEET_MARKER_WEBHOOK_SECRET` en Supabase, y `LENGUARCADE_FLEET_WEBHOOK_SECRET` como propiedad del script con el mismo valor. El envío queda apagado mientras falte cualquiera de las dos variables de Supabase.
 8. Tras autorizar y activar el despliegue, probar primero con un perfil de prueba vinculado: alcanzar `target_xp` en un taller activo debe añadir una entrada `CAT1` de +5; repetir el envío con el mismo ID no debe volver a sumar. Una identidad inexistente/ambigua o un token incorrecto debe dejar intactas las puntuaciones.
+
+## Navegación del profesor y progreso de Maniacgrafía (2026-10-10)
+- Ejecutar `node scripts/check-learning-tracking.mjs`: los enlaces cruzados deben invocar `laShowTeacherScreen` y pasar el filtro de progreso de Maniacgrafía (palabras acertadas, mundo de aventura y porcentaje que no retrocede).
+- Ejecutar `node scripts/check-workshop-planner.mjs`: cada apertura debe persistir una ejecución; al cerrar o abrir otro taller, la anterior conserva fecha de fin y resultados.
+- En una clase con planes usados en la hoja, abrir Talleres: el sistema reconstruye provisionalmente cada ejecución hasta la siguiente activación de esa clase, muestra XP por alumno y no envía +5 para esas reconstrucciones.
+- En un taller nuevo, alcanzar el objetivo en uno o varios juegos seleccionados: se registra una sola entrada de +5; cerrar el taller y volver a guardar no duplica el premio.
+- Ejecutar `npm run check`.
+- En `/exec`, alternar desde «Planificar taller» a Taller y desde el acceso del Taller a Misiones: la sección elegida debe quedar visible y el botón correcto activo.
+- Enviar un resultado de Maniacgrafía con `stats.totalWords=250` y sin `metrics.percentage`: el progreso guardado debe mostrar 25 %, y conservar cualquier porcentaje anterior superior.
 
