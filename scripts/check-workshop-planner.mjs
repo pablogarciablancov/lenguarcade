@@ -11,6 +11,7 @@ const studentDashboard = fs.readFileSync(path.join(root, "supabase", "functions"
 const saveProgress = fs.readFileSync(path.join(root, "supabase", "functions", "save-progress", "index.ts"), "utf8");
 const workshopAccessMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "20260924191500_add_workshop_game_access.sql"), "utf8");
 const workshopSessionMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "20260924204500_add_class_workshop_sessions.sql"), "utf8");
+const workshopHistoryMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "202610100001_workshop_run_history.sql"), "utf8");
 const errors = [];
 
 function expect(condition, message) {
@@ -51,10 +52,32 @@ expect(
   "La sesión activa del Taller debe persistir una sola vez por clase y quedar protegida.",
 );
 expect(
+  workshopHistoryMigration.includes("create table if not exists public.workshop_runs") &&
+    workshopHistoryMigration.includes("closed_at") &&
+    workshopHistoryMigration.includes("is_provisional") &&
+    workshopHistoryMigration.includes("enable row level security"),
+  "Cada ejecución debe conservar su intervalo y marcar las reconstrucciones provisionales.",
+);
+expect(
   teacherDashboard.includes('action === "setWorkshopGameAccess"') &&
   teacherDashboard.includes('from("workshop_sessions")') &&
+  teacherDashboard.includes('from("workshop_runs")') &&
+  teacherDashboard.includes('action === "reconstructWorkshopHistory"') &&
+  teacherDashboard.includes('is_provisional:true') &&
+  teacherDashboard.includes('active_to:next ? next.startedAt : null') &&
   !teacherDashboard.includes('from("workshop_game_access")'),
-  "El panel docente debe sincronizar el Taller por clase, no materializar permisos por alumno.",
+  "El panel debe conservar ejecuciones y reconstruir talleres anteriores como provisionales.",
+);
+expect(
+  saveProgress.includes('from("workshop_runs")') &&
+    saveProgress.includes('session.closed_at') &&
+    saveProgress.includes('.eq("is_provisional", false)'),
+  "Los puntos de flota deben comprobar sesiones cerradas reales y omitir reconstrucciones provisionales.",
+);
+expect(
+  html.includes("action:'reconstructWorkshopHistory'") &&
+    html.includes("loadTeacher(false)"),
+  "Al abrir el planificador deben importarse activaciones históricas y refrescarse los resultados.",
 );
 expect(
   studentDashboard.includes('from("workshop_sessions")') &&
@@ -134,7 +157,12 @@ expect(
   html.includes("🗑 Eliminar taller"),
   "Eliminar taller debe mostrarse como una acción destructiva visible.",
 );
-expect(html.includes("Crear misión"), "Cada taller debe poder convertirse rápidamente en una misión.");
+expect(
+  html.includes("Reto de esta sesión · objetivo de XP") &&
+    html.includes("objetivo, juegos y resultados queden unidos") &&
+    !html.includes("data-plan-mission"),
+  "El reto de XP y sus juegos deben gestionarse dentro del taller, sin crear una misión duplicada.",
+);
 expect(html.includes("Sesión de juego") && html.includes("Reto de XP") && html.includes("Trabajo en casa"), "El editor de Taller debe ofrecer plantillas prácticas.");
 expect(html.includes("Ajustes avanzados de disponibilidad"), "El control manual de juegos debe quedar relegado a ajustes avanzados.");
 expect(html.includes("No necesitas tocar esto para preparar una sesión."), "Los ajustes avanzados deben explicar que no son el flujo principal.");
