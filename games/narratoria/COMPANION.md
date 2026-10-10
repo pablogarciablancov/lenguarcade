@@ -1,6 +1,6 @@
 # Plumín: mascota animada de Narratoria
 
-Plumín usa una hoja de sprites 4×4 dibujada a lápiz: una fila para parpadeo, otra para aletear, otra para hablar y otra para pequeños saltos y desplazamientos. Aletea cuando el alumno escribe; cuando hay pausa alterna gestos breves y vuelve a parpadear.
+Plumín usa una hoja de sprites WebP 6×4 dibujada a lápiz con 24 poses: seis fotogramas para el parpadeo y los giros de cabeza, seis para el ciclo completo de aleteo, seis para abrir y cerrar el pico al hablar y seis para expresar emociones. Aletea mientras el alumno escribe, celebra al alcanzar el mínimo de palabras o superar una fase, piensa si se intenta evaluar un texto incompleto y cambia de postura al pasar de fase. En los descansos parpadea, ladea la cabeza y alterna gestos de curiosidad.
 
 La guía lateral de escritura pasa a un desplegable. Dentro reúne la misión, los objetivos de la fase, las seis cartas, el inventario y el hábitat de Plumín. Su avatar sigue visible en el desplegable cerrado y junto al editor.
 
@@ -8,8 +8,8 @@ La Tienda del Gremio conserva sus ayudas narrativas e incorpora skins, accesorio
 
 ## Validación
 
-- Ejecuta `node games/narratoria/check-companion.mjs` para comprobar la hoja de sprites, sus rutas, las animaciones, los controles y los identificadores de la tienda.
+- Ejecuta `node games/narratoria/check-companion.mjs` para comprobar la hoja de sprites WebP 6×4 con transparencia, sus rutas, las animaciones, las reacciones, los controles y los identificadores de la tienda.
 - Ejecuta `node scripts/check-syntax.mjs` para validar los bloques de código del juego.
-- Prueba en el juego: inicia una historia, escribe para ver el aleteo, espera para ver el parpadeo y los gestos, abre la guía lateral y saluda a Plumín.
+- Prueba en el juego: inicia una historia, escribe para ver el aleteo, alcanza el mínimo de palabras para ver la celebración, evalúa para ver la reacción de fase y prueba una evaluación incompleta para ver el gesto pensativo. Espera para ver el parpadeo y los gestos de curiosidad; abre la guía lateral y saluda a Plumín.
 - En la tienda, compra una skin, un accesorio y una jaula; equipa y cambia los elementos, sal del juego y reanúdalo para comprobar que se conservan.
 - Comprueba en 1366×768 y móvil que el editor siga siendo cómodo con la guía cerrada y que el panel desplegado permita leer objetivos y cartas.
