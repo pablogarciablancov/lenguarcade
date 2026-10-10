@@ -678,3 +678,10 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 ## 2026-10-08 · Entrar en los juegos del tablón
 - Todos los botones de juegos abiertos muestran «Entrar», con o sin partidas previas, también al restaurar la caché, guardar progreso y actualizar disponibilidad.
 - Apps Script y Supabase entregan la misma etiqueta; se conservan los avisos de juegos cerrados.
+
+## XP transparente y recompensas aplazadas · 2026-10-10
+- El panel del alumno explica las reglas de XP de los 16 juegos oficiales.
+- El backend registra en cada evento la regla aplicada, la XP solicitada, otorgada y pendiente.
+- El límite antispam conserva el excedente pendiente para guardados posteriores; ningún límite lo elimina silenciosamente.
+- Los eventos que otorgan XP o plumas se registran incluso si el cliente solicitó un guardado silencioso.
+- El seguimiento de objetivos de taller muestra el progreso de todo el alumnado de la clase.
