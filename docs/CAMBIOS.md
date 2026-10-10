@@ -685,3 +685,9 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - El límite antispam conserva el excedente en el progreso del juego y lo entrega en un guardado posterior de ese mismo juego; ningún límite lo elimina silenciosamente.
 - Los eventos que otorgan XP o plumas se registran incluso si el cliente solicitó un guardado silencioso.
 - El seguimiento de objetivos de taller muestra el progreso de todo el alumnado de la clase.
+
+## +5 automático por reto completado · 2026-10-10
+- Cada guardado consulta los talleres activos del alumno y suma el XP de los juegos seleccionados desde el inicio de la sesión, igual que el panel docente.
+- Al alcanzar `target_xp`, LenguArcade envía al receptor del Marcador la identidad vinculada del perfil y un ID de operación estable; el marcador registra `CAT1` (+5) y deduplica los reintentos.
+- El envío queda inactivo si faltan `FLEET_MARKER_WEBHOOK_URL` o `FLEET_MARKER_WEBHOOK_SECRET` en Supabase. El receptor exige la misma clave en `LENGUARCADE_FLEET_WEBHOOK_SECRET` de Apps Script.
+- La activación requiere desplegar una versión del receptor accesible desde Supabase; todavía no se han aplicado puntos reales.
