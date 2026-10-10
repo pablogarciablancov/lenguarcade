@@ -67,7 +67,28 @@ const entre=snapshotProgress(
 );
 assert.equal(entre.xp,166,'Entre Líneas debe premiar un acierto y un caso realmente nuevo');
 
-const edge=readFileSync('supabase/functions/save-progress/index.ts','utf8');
+
+const {XP_REWARD_GUIDE,capProgressionAward}=progression;
+const allOfficialGames=[
+  'battlegrafia','sopa_de_tinta','rayuela','entre_lineas','versopolis','lexaria','tierras_de_tinta',
+  'maniacgrafia','narratoria','scrabble','conjuga_y_apuesta','batalla_verbal','guardianes_de_la_biblioteca',
+  'word_play','lexitrama','forja'
+];
+for(const gameId of allOfficialGames){
+ assert.ok(XP_REWARD_GUIDE[gameId],gameId+' debe explicar la regla de XP');
+ const generic= ['battlegrafia','sopa_de_tinta','rayuela','entre_lineas','versopolis','lexaria','tierras_de_tinta'].includes(gameId);
+ const before={metrics:{correct:0,errors:0,attempts:0,percentage:0}};
+ const after={metrics:{correct:1,errors:0,attempts:1,percentage:10}};
+ const result=snapshotProgress(gameId,after,before,{}, {}, {},{});
+ assert.ok(result.xp>=6,gameId+' debe conceder XP por progreso válido');
+}
+assert.deepEqual(capProgressionAward(240,20,170,890,14,58),{
+ awardedXp:10,awardedFeathers:1,pendingXp:230,pendingFeathers:19
+},'La protección debe aplazar y no borrar el excedente');
+assert.deepEqual(capProgressionAward(25,3,0,0,0,0),{
+ awardedXp:25,awardedFeathers:3,pendingXp:0,pendingFeathers:0
+},'Los premios dentro del límite se pagan completos');
+\nconst edge=readFileSync('supabase/functions/save-progress/index.ts','utf8');
 assert.match(edge,/const newXp = oldXp;/,'El backend no debe aceptar XP absoluto del cliente');
 assert.match(edge,/xpReward:0,/,'Los logros reportados por cliente no deben acuñar XP');
 assert.match(edge,/180 - minuteXp/,'Debe existir un límite de XP por minuto');
