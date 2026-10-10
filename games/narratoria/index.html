@@ -253,6 +253,123 @@
 
         .writing-layout { display: grid; grid-template-columns: 280px 1fr; gap: 30px; }
         @media (max-width: 900px) { .writing-layout { grid-template-columns: 1fr; } }
+        .writer-companion {
+            display: flex; align-items: center; gap: 14px; padding: 12px 15px; margin-bottom: 12px;
+            border: 1px solid rgba(138,109,31,0.36); border-radius: 12px;
+            background: linear-gradient(110deg, #fffdf7, #f7e8c6); box-shadow: 0 4px 12px rgba(50,31,13,0.09);
+            font-family: var(--font-ui);
+        }
+        .companion-avatar {
+            position: relative; flex: 0 0 62px; width: 62px; height: 62px; overflow: hidden;
+            border-radius: 18px; background: radial-gradient(circle at 35% 25%, #fff, #ead5a1 74%);
+            border: 2px solid rgba(138,109,31,0.38); filter: drop-shadow(0 3px 2px rgba(50,31,13,0.15));
+        }
+        .companion-avatar::after { content: ''; position: absolute; right: -3px; bottom: -3px; width: 15px; height: 15px; border-radius: 50%; background: #66a66c; border: 2px solid #fffdf7; }
+        .owl-sprite {
+            position: relative; display: block; width: 100%; height: 100%;
+            background-image: url("assets/plumin-sprites-v1.png"); background-repeat: no-repeat; background-size: 400% 400%; background-position: 0 0;
+            animation: owl-blink 2.8s steps(4, end) infinite;
+        }
+        @keyframes owl-blink { from { background-position: 0 0; } to { background-position: 100% 0; } }
+        @keyframes owl-flap { from { background-position: 0 33.333%; } to { background-position: 100% 33.333%; } }
+        @keyframes owl-talk { from { background-position: 0 66.667%; } to { background-position: 100% 66.667%; } }
+        @keyframes owl-hop {
+            0% { background-position: 0 100%; transform: translateY(0) rotate(0); }
+            100% { background-position: 100% 100%; transform: translateY(-5px) rotate(2deg); }
+        }
+        .owl-sprite.motion-flap { animation: owl-flap 0.62s steps(4, end) infinite; }
+        .owl-sprite.motion-talk { animation: owl-talk 0.55s steps(4, end) 2; }
+        .owl-sprite.motion-hop { animation: owl-hop 0.8s steps(4, end) 1; }
+        .owl-sprite.skin-nieve { filter: brightness(1.12) saturate(0.65); }
+        .owl-sprite.skin-luna { filter: sepia(0.16) hue-rotate(155deg) saturate(0.82); }
+        .owl-sprite.skin-cobre { filter: sepia(0.48) saturate(1.5) hue-rotate(-12deg); }
+        .owl-wearable { position: absolute; z-index: 2; line-height: 1; font-style: normal; filter: drop-shadow(0 1px 1px rgba(30,20,10,0.25)); }
+        .owl-wearable.slot-head { left: 50%; top: -7%; transform: translateX(-50%); font-size: 1.45rem; }
+        .owl-wearable.slot-face { left: 50%; top: 34%; transform: translateX(-50%); font-size: 1.25rem; }
+        .owl-wearable.slot-body { left: 50%; bottom: 10%; transform: translateX(-50%); font-size: 1.4rem; }
+        .companion-avatar .owl-wearable.slot-head { font-size: 0.85rem; }
+        .companion-avatar .owl-wearable.slot-face { font-size: 0.72rem; }
+        .companion-avatar .owl-wearable.slot-body { font-size: 0.85rem; }
+        .writing-codex { min-width: 0; align-self: start; font-family: var(--font-ui); }
+        .writing-codex > summary {
+            min-height: 74px; display: flex; align-items: center; gap: 11px; padding: 8px 12px; list-style: none;
+            cursor: pointer; border: 2px solid rgba(138,109,31,0.45); border-radius: 12px;
+            background: linear-gradient(130deg, #fffdf7, #f3dfad); box-shadow: 0 4px 12px rgba(50,31,13,0.10);
+        }
+        .writing-codex > summary::-webkit-details-marker { display: none; }
+        .codex-summary-avatar { width: 54px; height: 54px; flex: 0 0 54px; border-radius: 13px; overflow: hidden; background: #f8eed7; border: 1px solid rgba(138,109,31,0.3); }
+        .codex-summary-copy { min-width: 0; flex: 1; color: var(--ink); font-weight: 800; font-size: 0.86rem; line-height: 1.25; }
+        .codex-summary-copy small { display: block; margin-top: 3px; color: var(--ink-light); font-size: 0.7rem; font-weight: 600; }
+        .codex-summary-chevron { color: var(--gold-dark); font-size: 1.1rem; transition: transform 0.2s ease; }
+        .writing-codex[open] .codex-summary-chevron { transform: rotate(180deg); }
+        .writing-codex .side-panel { margin-top: 10px; max-height: min(68vh, 680px); overflow-y: auto; }
+        .owl-pet-panel { margin-top: 18px; padding-top: 13px; border-top: 1px solid rgba(93,64,55,0.18); text-align: center; }
+        .owl-pet-panel h3 { text-align: left; }
+        .owl-habitat {
+            --cage-ink: #80542e; --cage-back: #f3e1be; --cage-floor: #c49a61;
+            width: min(100%, 250px); height: 218px; position: relative; overflow: hidden; margin: 0 auto 9px;
+            border: 3px solid var(--cage-ink); border-radius: 18px 18px 12px 12px;
+            background: radial-gradient(ellipse at 50% 86%, rgba(255,255,255,0.9), transparent 65%), var(--cage-back);
+            box-shadow: inset 0 0 22px rgba(73,42,19,0.12), 0 5px 12px rgba(43,29,14,0.16);
+        }
+        .owl-habitat.cage-gremio { --cage-ink: #9a7226; --cage-back: #fff1c9; --cage-floor: #d7ae52; }
+        .owl-habitat.cage-jardin { --cage-ink: #52764b; --cage-back: #e6f0d8; --cage-floor: #79a45e; }
+        .owl-habitat.cage-noche { --cage-ink: #495278; --cage-back: #dce3f5; --cage-floor: #7d83a8; }
+        .habitat-dome { position: absolute; left: 8%; right: 8%; top: 12px; height: 125px; border: 2px solid var(--cage-ink); border-bottom: 0; border-radius: 120px 120px 0 0; opacity: 0.72; }
+        .habitat-perch { position: absolute; z-index: 1; left: 16%; right: 16%; bottom: 42px; height: 9px; border-radius: 10px; background: var(--cage-floor); box-shadow: 0 3px 4px rgba(43,29,14,0.18); }
+        .habitat-owl { position: absolute; z-index: 2; left: 50%; bottom: 44px; width: 126px; height: 126px; transform: translateX(-50%); }
+        .habitat-bars { position: absolute; z-index: 3; inset: 13px 12px 28px; border-left: 2px solid color-mix(in srgb, var(--cage-ink) 75%, transparent); border-right: 2px solid color-mix(in srgb, var(--cage-ink) 75%, transparent); pointer-events: none; }
+        .habitat-bars::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 23%, color-mix(in srgb, var(--cage-ink) 62%, transparent) 24% 25%, transparent 26% 48%); }
+        .habitat-base { position: absolute; z-index: 4; bottom: 0; left: 0; right: 0; height: 31px; display: grid; place-items: center; background: linear-gradient(#e7c98f, var(--cage-floor)); border-top: 2px solid var(--cage-ink); color: #59401f; font-size: 1.1rem; }
+        .owl-greet { border: 1px solid rgba(138,109,31,0.48); border-radius: 999px; padding: 6px 12px; background: #fff9e9; color: var(--ink); font-weight: 800; cursor: pointer; }
+        .owl-greet:hover { background: #f4e0a7; }
+        .owl-equipped-label { margin: 7px auto 0; max-width: 250px; color: var(--ink-light); font-size: 0.7rem; line-height: 1.4; }
+        .owl-shop-section { margin-top: 28px; padding-top: 18px; border-top: 2px solid rgba(138,109,31,0.25); }
+        .store-subtitle { margin: 8px 0 12px; color: var(--ink); font: 700 1.25rem var(--font-title); }
+        .owl-shop-layout { display: grid; grid-template-columns: minmax(220px, 270px) 1fr; gap: 16px; align-items: start; margin-top: 14px; }
+        .owl-shop-showcase { padding: 15px; border: 2px solid rgba(138,109,31,0.34); border-radius: 14px; background: linear-gradient(145deg, #fffdf7, #f4e3c1); text-align: center; }
+        .owl-shop-showcase h4 { margin-bottom: 8px; font-size: 1.15rem; }
+        .owl-shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+        .owl-shop-card { display: flex; flex-direction: column; padding: 13px; border: 1px solid rgba(138,109,31,0.35); border-radius: 12px; background: rgba(255,255,255,0.78); box-shadow: 0 3px 8px rgba(43,29,14,0.08); }
+        .owl-item-preview { width: 66px; height: 66px; display: grid; place-items: center; align-self: center; margin-bottom: 7px; border-radius: 18px; background: #f7ecd3; border: 1px solid rgba(138,109,31,0.2); font-size: 2.2rem; }
+        .owl-preview-sprite { width: 62px; height: 62px; background: url("assets/plumin-sprites-v1.png") no-repeat 0 0 / 400% 400%; }
+        .cage-preview { width: 48px; height: 48px; display: grid; place-items: center; border: 2px solid #80542e; border-radius: 15px 15px 8px 8px; background: #f3e1be; font-size: 1.65rem; }
+        .cage-preview.cage-gremio { border-color: #9a7226; background: #fff1c9; }
+        .cage-preview.cage-jardin { border-color: #52764b; background: #e6f0d8; }
+        .cage-preview.cage-noche { border-color: #495278; background: #dce3f5; }
+        .owl-item-category { color: var(--gold-dark); text-transform: uppercase; font: 700 0.62rem var(--font-ui); letter-spacing: 0.08em; }
+        .owl-shop-card h4 { margin: 3px 0 4px; font: 700 0.92rem var(--font-ui); color: var(--ink); }
+        .owl-shop-card p { flex: 1; margin-bottom: 10px; color: var(--ink-light); font: 0.75rem/1.4 var(--font-ui); }
+        .owl-shop-card .btn { padding: 8px 9px; font-size: 0.76rem; letter-spacing: 0; }
+        .owl-shop-card .btn.equipped { background: var(--success); border-color: var(--success); }
+        .companion-copy { flex: 1; min-width: 0; }
+        .companion-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+        .companion-name { color: var(--ink); font-size: 0.9rem; font-weight: 800; }
+        .companion-status { color: #54724c; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+        .companion-dialogue { min-height: 2.5em; color: var(--ink-light); font-size: 0.82rem; line-height: 1.35; }
+        .manuscript-label { display: flex; justify-content: space-between; gap: 8px; margin: 8px 0 4px; color: var(--ink-light); font-size: 0.66rem; font-weight: 700; }
+        .manuscript-pages { display: grid; grid-template-columns: repeat(5, minmax(20px, 1fr)); gap: 5px; }
+        .manuscript-page { height: 9px; overflow: hidden; border-radius: 99px; background: #e3d8c2; box-shadow: inset 0 1px 2px rgba(43,29,14,0.12); }
+        .manuscript-page-fill { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #b08253, #d4af37); transition: width 0.25s ease; }
+        .manuscript-page.completed .manuscript-page-fill { background: linear-gradient(90deg, #4c8c63, #8fbd76); }
+        @media (max-width: 550px) {
+            .writer-companion { gap: 10px; padding: 10px; }
+            .companion-avatar { flex-basis: 52px; width: 52px; height: 52px; }
+            .writing-codex > summary { gap: 8px; padding: 7px 9px; }
+            .codex-summary-avatar { width: 46px; height: 46px; flex-basis: 46px; }
+            .writing-codex .side-panel { max-height: 62vh; padding: 14px; }
+            .owl-shop-layout { grid-template-columns: 1fr; }
+            .owl-shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .owl-shop-card { padding: 10px; }
+            .owl-item-preview { width: 54px; height: 54px; font-size: 1.8rem; }
+            .companion-name { font-size: 0.82rem; }
+            .companion-status { font-size: 0.56rem; }
+            .companion-dialogue { font-size: 0.76rem; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .owl-sprite { animation: none !important; }
+            .manuscript-page-fill { transition: none; }
+        }
         .side-panel { background: rgba(255, 255, 255, 0.5); border: 2px solid rgba(139, 69, 19, 0.2); padding: 20px; border-radius: 12px; font-family: var(--font-ui); }
         .side-panel h3 { font-family: var(--font-title); font-size: 1.2rem; margin-bottom: 15px; border-bottom: 2px solid var(--gold); padding-bottom: 5px;}
         .objective-list { list-style: none; margin-bottom: 25px; }
@@ -444,19 +561,39 @@
         <section id="screen-writing" class="screen">
             <div class="progress-container" id="progress-bar"></div>
             <div class="writing-layout">
-                <aside class="side-panel">
-                    <div class="mission-reminder">
-                        <span class="mission-label">Misión objetivo</span>
-                        <strong id="ui-writing-mission"></strong>
-                    </div>
-                    <h3>Objetivos</h3><ul class="objective-list" id="objective-list"></ul>
-                    <h3>Tus Cartas</h3><div id="mini-cards-container"></div>
-                    <h3 style="margin-top: 20px;">Inventario</h3>
-                    <div class="inventory-panel" id="writing-inventory"></div>
-                    <div style="margin-top: 30px; text-align: center;">
-                        <button class="btn btn-secondary" style="padding: 10px 20px; font-size: 0.9rem;" onclick="game.saveAndExit()">Guardar historia y salir</button>
-                    </div>
-                </aside>
+                <details class="writing-codex" id="writing-codex">
+                    <summary>
+                        <span class="codex-summary-avatar"><span class="owl-sprite"></span></span>
+                        <span class="codex-summary-copy">Guía de la aventura<small>Misión, cartas, objetivos y Plumín</small></span>
+                        <span class="companion-status" id="codex-progress">0/5</span>
+                        <span class="codex-summary-chevron" aria-hidden="true">⌄</span>
+                    </summary>
+                    <aside class="side-panel">
+                        <div class="mission-reminder">
+                            <span class="mission-label">Misión objetivo</span>
+                            <strong id="ui-writing-mission"></strong>
+                        </div>
+                        <h3>Objetivos de esta fase</h3><ul class="objective-list" id="objective-list"></ul>
+                        <h3>Tus seis cartas</h3><div id="mini-cards-container"></div>
+                        <h3 style="margin-top: 20px;">Inventario</h3>
+                        <div class="inventory-panel" id="writing-inventory"></div>
+                        <div class="owl-pet-panel">
+                            <h3>🦉 Plumín y su jaula</h3>
+                            <div class="owl-habitat cage-roble" id="writing-owl-habitat" aria-label="Jaula de Plumín">
+                                <div class="habitat-dome"></div>
+                                <div class="habitat-perch"></div>
+                                <div class="habitat-owl"><span class="owl-sprite" id="plumin-writing-sprite"></span></div>
+                                <div class="habitat-bars"></div>
+                                <div class="habitat-base">🌿</div>
+                            </div>
+                            <p class="owl-equipped-label" id="writing-owl-equipped"></p>
+                            <button class="owl-greet" onclick="ui.greetOwl('writing')">Saludar a Plumín</button>
+                        </div>
+                        <div style="margin-top: 22px; text-align: center;">
+                            <button class="btn btn-secondary" style="padding: 10px 20px; font-size: 0.9rem;" onclick="game.saveAndExit()">Guardar historia y salir</button>
+                        </div>
+                    </aside>
+                </details>
                 <main style="display: flex; flex-direction: column;">
                     <div class="phase-header"><h2 id="ui-phase-title" style="font-size: 2.2rem; color: var(--ink);"></h2><div class="word-counter" id="ui-word-count"></div></div>
                     <div class="instruction-box">
@@ -464,7 +601,16 @@
                         <p class="instruction-text" id="ui-phase-instruction"></p>
                         <p class="tip-text" id="ui-phase-tip" style="font-style: italic; color: var(--ink-light); margin-top: 5px;"></p>
                     </div>
-                    <textarea id="editor" placeholder="Escribe aquí tu crónica..." oninput="ui.updateWordCount()"></textarea>
+                    <div class="writer-companion" id="writer-companion" aria-label="Plumín, tu compañero de escritura">
+                        <div class="companion-avatar" aria-hidden="true"><span class="owl-sprite" id="plumin-inline-sprite"></span></div>
+                        <div class="companion-copy">
+                            <div class="companion-heading"><strong class="companion-name">Plumín, aprendiz de escriba</strong><span class="companion-status" id="companion-status">Esperando ideas</span></div>
+                            <p class="companion-dialogue" id="companion-dialogue" aria-live="polite"></p>
+                            <div class="manuscript-label"><span>Manuscrito compartido</span><span id="manuscript-count">0 de 5 fases</span></div>
+                            <div class="manuscript-pages" id="manuscript-pages" role="progressbar" aria-label="Progreso del manuscrito" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        </div>
+                    </div>
+                    <textarea id="editor" placeholder="Escribe aquí tu crónica..." oninput="ui.updateWordCount(true)"></textarea>
                     <div class="navigation-bar">
                         <button class="btn btn-secondary" id="btn-prev" onclick="game.prevPhase()">« Fase Anterior</button>
                         <button class="btn" id="btn-eval" onclick="game.evaluatePhase()" style="background: var(--ink);">Evaluar Fase Actual</button>
@@ -494,7 +640,31 @@
         </section>
 
         <section id="screen-achievements" class="screen"><h2 style="text-align: center; font-size: 3rem; margin-bottom: 10px;">Muro de los Escribas</h2><p style="text-align: center; font-size: 1.2rem; margin-bottom: 20px;">Descubre los 50 secretos del Reino Inacabado.</p><div class="achievements-grid" id="achievements-container"></div><div style="text-align: center; margin-top: 30px;"><button class="btn" onclick="ui.showScreen('screen-home')">Volver al Menú</button></div></section>
-        <section id="screen-shop" class="screen"><h2 style="text-align: center; font-size: 3rem; margin-bottom: 10px;">Tienda del Gremio</h2><p style="text-align: center; font-size: 1.2rem; font-style: italic; margin-bottom: 20px;">Gasta tus tinteros (✒️) para comprar ayudas narrativas.</p><div style="text-align: center; margin-bottom: 30px; font-size: 1.5rem; background: #fff; padding: 15px; border-radius: 8px; border: 2px solid var(--gold); display: inline-block; align-self: center;">Tus Tinteros: <strong style="color: #8e24aa;"><span id="shop-tinteros">0</span> ✒️</strong></div><div class="shop-grid" id="shop-container"></div><div style="text-align: center; margin-top: 30px;"><button class="btn" onclick="ui.showScreen('screen-home')">Volver al Menú</button></div></section>
+        <section id="screen-shop" class="screen">
+            <h2 style="text-align: center; font-size: 3rem; margin-bottom: 10px;">Tienda del Gremio</h2>
+            <p style="text-align: center; font-size: 1.1rem; font-style: italic; margin-bottom: 20px;">Mejora tus historias y prepara a tu compañero de aventuras.</p>
+            <div style="text-align: center; margin-bottom: 22px; font-size: 1.4rem; background: #fff; padding: 12px 22px; border-radius: 8px; border: 2px solid var(--gold); display: inline-block; align-self: center;">Tus Tinteros: <strong style="color: #8e24aa;"><span id="shop-tinteros">0</span> ✒️</strong></div>
+            <h3 class="store-subtitle">Herramientas narrativas</h3>
+            <div class="shop-grid" id="shop-container"></div>
+            <div class="owl-shop-section">
+                <h3 class="store-subtitle">El rincón de Plumín</h3>
+                <p class="teacher-small">Elige su aspecto, sus accesorios y el hogar donde descansará. Lo que compres se queda en tu colección.</p>
+                <div class="owl-shop-layout">
+                    <div class="owl-shop-showcase">
+                        <h4>Tu compañero</h4>
+                        <div class="owl-habitat cage-roble" id="shop-owl-habitat" aria-label="Vista previa de Plumín">
+                            <div class="habitat-dome"></div><div class="habitat-perch"></div>
+                            <div class="habitat-owl"><span class="owl-sprite" id="plumin-shop-sprite"></span></div>
+                            <div class="habitat-bars"></div><div class="habitat-base">🌿</div>
+                        </div>
+                        <p class="owl-equipped-label" id="shop-owl-equipped"></p>
+                        <button class="owl-greet" onclick="ui.greetOwl('shop')">Saludar a Plumín</button>
+                    </div>
+                    <div class="owl-shop-grid" id="owl-shop-container"></div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 30px;"><button class="btn" onclick="ui.showScreen('screen-home')">Volver al Menú</button></div>
+        </section>
         <section id="screen-profile" class="screen"><h2 style="text-align: center; font-size: 3rem; margin-bottom: 30px;">Tu Perfil de Escriba</h2><div class="profile-grid"><div class="profile-stat-box"><div class="profile-stat-label">Nivel Actual</div><div class="profile-stat-value" id="prof-level">1</div></div><div class="profile-stat-box"><div class="profile-stat-label">Historias Completadas</div><div class="profile-stat-value" id="prof-stories">0</div></div><div class="profile-stat-box"><div class="profile-stat-label">Palabras Escritas</div><div class="profile-stat-value" id="prof-words">0</div></div><div class="profile-stat-box"><div class="profile-stat-label">XP Acumulada</div><div class="profile-stat-value" id="prof-xp" style="color: var(--xp-color);">0</div></div></div><div style="text-align: center; margin-top: 40px;"><button class="btn" onclick="ui.showScreen('screen-home')">Volver al Menú</button></div></section>
     </div>
 
@@ -705,6 +875,26 @@
             pocion: { name: "Poción de Inspiración", cost: 40, icon: "🧪", desc: "Se usa en la pantalla de ESCRITURA. Te ayuda en la revisión final, pero no garantiza buena nota si faltan objetivos, redacción u ortografía." }
         };
 
+        const OWL_SHOP_ITEMS = [
+            { id: "skin_grafito", name: "Plumín original", category: "Aspecto", slot: "skin", cost: 0, icon: "✏️", cssClass: "", desc: "Su plumaje de lápiz, tal como llegó al Gremio.", included: true },
+            { id: "skin_nieve", name: "Nieve de biblioteca", category: "Aspecto", slot: "skin", cost: 40, icon: "❄️", cssClass: "skin-nieve", desc: "Plumaje claro como las páginas recién estrenadas." },
+            { id: "skin_luna", name: "Azul de medianoche", category: "Aspecto", slot: "skin", cost: 50, icon: "🌙", cssClass: "skin-luna", desc: "Un tono nocturno para historias de misterio." },
+            { id: "skin_cobre", name: "Cobre antiguo", category: "Aspecto", slot: "skin", cost: 55, icon: "🍂", cssClass: "skin-cobre", desc: "Un brillo cálido de tinta y hojas de otoño." },
+            { id: "head_gorro", name: "Gorro de aprendiz", category: "Accesorio", slot: "head", cost: 35, icon: "🎓", overlay: "🎓", desc: "El uniforme oficial de los nuevos cronistas." },
+            { id: "head_corona", name: "Corona de papel", category: "Accesorio", slot: "head", cost: 65, icon: "👑", overlay: "👑", desc: "Para quien ya se siente rey del manuscrito." },
+            { id: "face_gafas", name: "Gafas de archivero", category: "Accesorio", slot: "face", cost: 30, icon: "🧐", overlay: "👓", desc: "Le ayudan a encontrar hasta las comas escondidas." },
+            { id: "body_capa", name: "Capa exploradora", category: "Traje", slot: "body", cost: 55, icon: "🧣", overlay: "🧣", desc: "Lista para acompañar a cualquier protagonista." },
+            { id: "body_delantal", name: "Chaleco de cronista", category: "Traje", slot: "body", cost: 50, icon: "🦺", overlay: "🦺", desc: "Bolsillos extra para plumas, mapas y buenas ideas." },
+            { id: "cage_roble", name: "Nido de roble", category: "Jaula", slot: "cage", cost: 0, icon: "🪵", cssClass: "cage-roble", desc: "Su hogar original, sencillo y acogedor.", included: true },
+            { id: "cage_jardin", name: "Invernadero del Gremio", category: "Jaula", slot: "cage", cost: 60, icon: "🌿", cssClass: "cage-jardin", desc: "Una pequeña jaula-jardín llena de calma." },
+            { id: "cage_gremio", name: "Aviario dorado", category: "Jaula", slot: "cage", cost: 75, icon: "✨", cssClass: "cage-gremio", desc: "Un aviario brillante para una mascota célebre." },
+            { id: "cage_noche", name: "Observatorio lunar", category: "Jaula", slot: "cage", cost: 80, icon: "🌌", cssClass: "cage-noche", desc: "Un refugio azul para vigilar las estrellas." }
+        ];
+        const DEFAULT_OWL_STATE = {
+            owned: ["skin_grafito", "cage_roble"],
+            equipped: { skin: "skin_grafito", head: "", face: "", body: "", cage: "cage_roble" }
+        };
+
         const tcgThemes = {
             protagonista: { title: "Protagonista", icon: "👤", footer: "Toda historia necesita una mirada." },
             deseo: { title: "Deseo", icon: "✨", footer: "Lo que se busca mueve el relato." },
@@ -824,6 +1014,7 @@
             totalStories: 0,
             totalWords: 0,
             inventory: { pluma: 0, pocion: 0 },
+            owl: { owned: ["skin_grafito", "cage_roble"], equipped: { skin: "skin_grafito", head: "", face: "", body: "", cage: "cage_roble" } },
             bonusPoints: 0,
             finalReport: null,
             sessionId: "",
@@ -837,7 +1028,20 @@
         };
         function makeId() { return `NAR-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`; }
         function cloneDefaultState() { return JSON.parse(JSON.stringify(defaultState)); }
+        function normalizeOwlState(raw = {}) {
+            const owned = Array.isArray(raw?.owned) ? raw.owned.filter(id => OWL_SHOP_ITEMS.some(item => item.id === id)) : [];
+            const safeOwned = [...new Set([...DEFAULT_OWL_STATE.owned, ...owned])];
+            const equipped = { ...DEFAULT_OWL_STATE.equipped, ...(raw?.equipped || {}) };
+            Object.entries(equipped).forEach(([slot, id]) => {
+                const item = OWL_SHOP_ITEMS.find(candidate => candidate.id === id);
+                if (id && (!item || item.slot !== slot || !safeOwned.includes(id))) equipped[slot] = DEFAULT_OWL_STATE.equipped[slot] || '';
+            });
+            return { owned: safeOwned, equipped };
+        }
         let state = cloneDefaultState();
+        let companionPauseTimer = null;
+        let owlMotionTimer = null;
+        let owlMotionMode = '';
 
         const storage = {
             save: () => {
@@ -854,6 +1058,7 @@
                     state = { ...base, ...loaded };
                     state.student = { ...base.student, ...(loaded.student || {}) };
                     state.inventory = { ...base.inventory, ...(loaded.inventory || {}) };
+                    state.owl = normalizeOwlState(loaded.owl);
                     state.stats = { ...base.stats, ...(loaded.stats || {}) };
                     state.itemUses = { ...base.itemUses, ...(loaded.itemUses || {}) };
                     if(!state.storyId) state.storyId = loaded.storyId || loaded.sessionId || makeId();
@@ -1088,6 +1293,7 @@
                 mission: snapshot.stateData?.mission || snapshot.mission || '',
                 cards,
                 rarities,
+                owl: normalizeOwlState(snapshot.stateData?.owl),
                 texts: safeTexts,
                 evaluations: Array.isArray(snapshot.stateData?.evaluations) ? snapshot.stateData.evaluations : asArray(snapshot.phaseEvaluationsJson, [null,null,null,null,null]),
                 currentPhase: resolvedPhase,
@@ -1521,6 +1727,7 @@
                 ui.checkContinueBtn();
                 ui.updateHUD();
                 ui.renderStudentPanel();
+            ui.renderOwl();
                 sheets.renderStatus();
             },
 
@@ -1577,6 +1784,7 @@
                 state = { ...base, ...loadedState };
                 state.student = { ...base.student, ...(loadedState.student || {}) };
                 state.inventory = { ...base.inventory, ...(loadedState.inventory || {}) };
+                state.owl = normalizeOwlState(loadedState.owl);
                 state.stats = { ...base.stats, ...(loadedState.stats || {}) };
                 state.itemUses = { ...base.itemUses, ...(loadedState.itemUses || {}) };
                 if(!state.storyId) state.storyId = snapshot.storyId;
@@ -1683,6 +1891,38 @@
                 } else {
                     ui.showToast("No tienes tinteros suficientes.", '❌');
                 }
+            },
+
+            buyOwlItem: (id) => {
+                const item = OWL_SHOP_ITEMS.find(candidate => candidate.id === id);
+                if (!item || item.included) return;
+                state.owl = normalizeOwlState(state.owl);
+                if (state.owl.owned.includes(id)) { game.equipOwlItem(id); return; }
+                if (state.tinteros < item.cost) {
+                    ui.showToast("A Plumín le encanta, pero aún faltan tinteros.", '✒️');
+                    return;
+                }
+                state.tinteros -= item.cost;
+                state.owl.owned.push(id);
+                state.owl.equipped[item.slot] = id;
+                state.stats.items++;
+                if(state.stats.items >= 1) game.checkAchievement('a_shop_1');
+                if(state.stats.items >= 5) game.checkAchievement('a_shop_5');
+                storage.save();
+                ui.renderOwl();
+                ui.renderShop();
+                ui.showToast(`¡${item.name} ya es de Plumín!`, item.icon);
+            },
+
+            equipOwlItem: (id) => {
+                const item = OWL_SHOP_ITEMS.find(candidate => candidate.id === id);
+                state.owl = normalizeOwlState(state.owl);
+                if (!item || !state.owl.owned.includes(id)) return;
+                state.owl.equipped[item.slot] = id;
+                storage.save();
+                ui.renderOwl();
+                ui.renderShop();
+                ui.showToast(`Plumín ya lleva: ${item.name}.`, item.icon);
             },
 
             useItem: (id) => {
@@ -2060,10 +2300,10 @@
                 nextBtn.style.display = evals ? 'inline-block' : 'none';
                 nextBtn.innerText = state.currentPhase === 4 ? "Ir a la Evaluación Final" : "Siguiente Fase »";
 
-                ui.updateWordCount();
+                ui.updateWordCount(false);
             },
 
-            updateWordCount: () => {
+            updateWordCount: (typing = false) => {
                 const text = document.getElementById('editor').value.trim();
                 const c = countWords(text);
                 const m = state.difficulty.minWords;
@@ -2071,6 +2311,141 @@
 
                 cnt.innerText = `Palabras: ${c} / Mín: ${m}`;
                 cnt.style.background = c >= m ? 'var(--success)' : 'var(--danger)';
+                ui.updateCompanion(typing, text, c);
+            },
+
+            updateCompanion: (typing = false, currentText = null, wordCount = null) => {
+                const companion = document.getElementById('writer-companion');
+                const pages = document.getElementById('manuscript-pages');
+                if (!companion || !pages) return;
+
+                const phaseIndex = clamp(asNumber(state.currentPhase, 0), 0, PHASES.length - 1);
+                const phase = PHASES[phaseIndex];
+                const text = currentText === null
+                    ? (document.getElementById('editor')?.value ?? state.texts[phaseIndex] ?? '')
+                    : currentText;
+                const words = wordCount === null ? countWords(text) : wordCount;
+                const target = Math.max(1, asNumber(state.difficulty?.minWords, 30));
+                const phaseDone = state.evaluations?.[phaseIndex] !== null && state.evaluations?.[phaseIndex] !== undefined;
+                const completed = (state.evaluations || []).filter(result => result !== null && result !== undefined).length;
+                const dialogue = document.getElementById('companion-dialogue');
+                const status = document.getElementById('companion-status');
+                const countLabel = document.getElementById('manuscript-count');
+
+                if (phaseDone) {
+                    dialogue.textContent = `¡${phase.name} terminada! Ya forma parte de nuestro manuscrito.`;
+                } else if (words === 0) {
+                    dialogue.textContent = `Abro el cuaderno para el ${phase.name.toLowerCase()}. ¿Qué imagen quieres que recuerde el lector?`;
+                } else if (words < Math.ceil(target / 2)) {
+                    dialogue.textContent = '¡Ya hay tinta en la página! Sigue tirando del hilo de esa idea.';
+                } else if (words < target) {
+                    dialogue.textContent = 'La escena va tomando forma. Una acción concreta puede hacerla avanzar.';
+                } else {
+                    dialogue.textContent = '¡Página lista para revisar! Evalúa esta fase cuando quieras.';
+                }
+
+                companion.classList.toggle('is-writing', typing && !phaseDone);
+                status.textContent = typing && !phaseDone ? 'Escribiendo contigo' : (phaseDone ? 'Fase terminada' : 'Esperando ideas');
+                ui.setOwlMotion(phaseDone ? 'talk' : (typing ? 'flap' : 'idle'));
+                if (typing && !phaseDone) {
+                    clearTimeout(companionPauseTimer);
+                    companionPauseTimer = setTimeout(() => ui.updateCompanion(false), 850);
+                }
+
+                const pageProgress = [];
+                let manuscriptProgress = 0;
+                PHASES.forEach((item, index) => {
+                    const done = state.evaluations?.[index] !== null && state.evaluations?.[index] !== undefined;
+                    const pageText = index === phaseIndex ? text : (state.texts?.[index] || '');
+                    const pageWords = countWords(pageText);
+                    const fill = done ? 100 : Math.min(100, (pageWords / target) * 100);
+                    manuscriptProgress += fill / PHASES.length;
+                    pageProgress.push(`<span class="manuscript-page ${done ? 'completed' : ''}" title="${escapeHTML(item.name)}"><span class="manuscript-page-fill" style="width:${fill}%"></span></span>`);
+                });
+                pages.innerHTML = pageProgress.join('');
+                pages.setAttribute('aria-valuenow', String(Math.round(manuscriptProgress)));
+                if (countLabel) countLabel.textContent = `${completed} de ${PHASES.length} fases cerradas`;
+                const codexProgress = document.getElementById('codex-progress');
+                if (codexProgress) codexProgress.textContent = `${completed}/${PHASES.length}`;
+            },
+
+            setOwlMotion: (mode = 'idle') => {
+                const sprites = document.querySelectorAll('.owl-sprite');
+                if (!sprites.length || owlMotionMode === mode) return;
+                owlMotionMode = mode;
+                sprites.forEach(sprite => {
+                    sprite.classList.remove('motion-flap', 'motion-talk', 'motion-hop');
+                    if (mode !== 'idle') sprite.classList.add(`motion-${mode}`);
+                });
+                clearTimeout(owlMotionTimer);
+                if (mode === 'flap') return;
+                const duration = mode === 'talk' ? 1250 : (mode === 'hop' ? 900 : 4800 + Math.random() * 3300);
+                owlMotionTimer = setTimeout(() => {
+                    if (mode === 'idle') {
+                        const writing = document.getElementById('writer-companion')?.classList.contains('is-writing');
+                        ui.setOwlMotion(writing ? 'flap' : (Math.random() > 0.5 ? 'hop' : 'talk'));
+                    } else {
+                        ui.setOwlMotion('idle');
+                    }
+                }, duration);
+            },
+
+            renderOwl: () => {
+                state.owl = normalizeOwlState(state.owl);
+                const equipped = state.owl.equipped;
+                const selected = slot => OWL_SHOP_ITEMS.find(item => item.id === equipped[slot]);
+                const skin = selected('skin');
+                const cage = selected('cage');
+                const skinClasses = OWL_SHOP_ITEMS.filter(item => item.slot === 'skin' && item.cssClass).map(item => item.cssClass);
+                document.querySelectorAll('.owl-habitat').forEach(habitat => {
+                    habitat.classList.remove(...OWL_SHOP_ITEMS.filter(item => item.slot === 'cage').map(item => item.cssClass));
+                    habitat.classList.add(cage?.cssClass || 'cage-roble');
+                });
+                document.querySelectorAll('.owl-sprite').forEach(sprite => {
+                    sprite.classList.remove(...skinClasses);
+                    if (skin?.cssClass) sprite.classList.add(skin.cssClass);
+                    const overlays = ['head', 'face', 'body'].map(slot => selected(slot)).filter(item => item?.overlay);
+                    sprite.innerHTML = overlays.map(item => `<i class="owl-wearable slot-${item.slot}" title="${escapeHTML(item.name)}">${escapeHTML(item.overlay)}</i>`).join('');
+                });
+                const label = [skin, selected('head'), selected('face'), selected('body'), cage].filter(Boolean).map(item => item.name).join(' · ');
+                ['writing-owl-equipped', 'shop-owl-equipped'].forEach(id => {
+                    const node = document.getElementById(id);
+                    if (node) node.textContent = label;
+                });
+                ui.setOwlMotion('idle');
+            },
+
+            greetOwl: () => {
+                const dialogue = document.getElementById('companion-dialogue');
+                if (dialogue) dialogue.textContent = '¡Huu-huu! Ya estoy listo para llenar otra página contigo.';
+                const status = document.getElementById('companion-status');
+                if (status) status.textContent = '¡Plumín saluda!';
+                ui.setOwlMotion('talk');
+            },
+
+            renderOwlShop: () => {
+                const container = document.getElementById('owl-shop-container');
+                if (!container) return;
+                state.owl = normalizeOwlState(state.owl);
+                container.innerHTML = OWL_SHOP_ITEMS.map(item => {
+                    const owned = state.owl.owned.includes(item.id);
+                    const equipped = state.owl.equipped[item.slot] === item.id;
+                    const disabled = equipped || (!owned && state.tinteros < item.cost);
+                    const action = owned
+                        ? `game.equipOwlItem('${item.id}')`
+                        : `game.buyOwlItem('${item.id}')`;
+                    const buttonText = equipped ? 'Equipado' : (owned ? 'Equipar' : (item.included ? 'Incluido' : `Comprar · ${item.cost} ✒️`));
+                    const preview = item.slot === 'skin'
+                        ? `<span class="owl-preview-sprite ${item.cssClass || ''}"></span>`
+                        : (item.slot === 'cage' ? `<span class="cage-preview ${item.cssClass || ''}">${item.icon}</span>` : item.icon);
+                    return `<article class="owl-shop-card">
+                        <div class="owl-item-preview">${preview}</div>
+                        <span class="owl-item-category">${escapeHTML(item.category)}</span>
+                        <h4>${escapeHTML(item.name)}</h4>
+                        <p>${escapeHTML(item.desc)}</p>
+                        <button class="btn ${equipped ? 'equipped' : 'btn-secondary'}" ${disabled ? 'disabled' : ''} onclick="${action}">${buttonText}</button>
+                    </article>`;
+                }).join('');
             },
 
             renderShop: () => {
@@ -2086,6 +2461,8 @@
                         </button>
                     </div>
                 `).join('');
+                ui.renderOwl();
+                ui.renderOwlShop();
             },
 
             renderProfile: () => {
@@ -2249,6 +2626,7 @@
             };
             loaded.cards = laObject(source.cards, laObject(source.cardsJson, base.cards));
             loaded.rarities = laObject(source.rarities, laObject(source.raritiesJson, base.rarities));
+            loaded.owl = normalizeOwlState(source.owl);
             loaded.inventory = { ...base.inventory, ...laObject(source.inventory, laObject(source.inventoryJson, {})) };
             loaded.stats = { ...base.stats, ...laObject(source.stats, laObject(source.statsJson, {})) };
             loaded.itemUses = { ...base.itemUses, ...laObject(source.itemUses, laObject(source.itemUsesJson, {})) };
