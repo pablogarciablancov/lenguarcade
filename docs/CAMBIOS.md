@@ -700,3 +700,10 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Los talleres nuevos pueden conceder +5 al completar el objetivo; los reintentos conservan el ID estable y el receptor puede deduplicarlos.
 - Verificación: planificador, misiones, seguimiento, sintaxis del panel y progreso de Maniacgrafía (avance por palabras, aventura y monotonicidad).
 
+## 2026-10-10 · Corrección del historial de retos de taller
+- El panel docente pagina todos los eventos de actividad con orden estable; deja de truncar el seguimiento al límite de filas de Supabase.
+- Las sesiones de disponibilidad sin objetivo de XP dejan de aparecer como retos completables.
+- En reconstrucciones históricas, los cambios de plan de menos de un minuto se excluyen de los resultados; objetivos idénticos reactivados en ese mismo cambio se muestran como una sola ejecución provisional.
+- Cada resultado indica su objetivo de XP para distinguir ejecuciones con el mismo título.
+- Las reconstrucciones históricas siguen marcadas como provisionales; no se alteran ni se premian hasta revisar qué activación representa cada registro.
+
