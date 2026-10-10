@@ -682,6 +682,6 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 ## XP transparente y recompensas aplazadas · 2026-10-10
 - El panel del alumno explica las reglas de XP de los 16 juegos oficiales.
 - El backend registra en cada evento la regla aplicada, la XP solicitada, otorgada y pendiente.
-- El límite antispam conserva el excedente pendiente para guardados posteriores; ningún límite lo elimina silenciosamente.
+- El límite antispam conserva el excedente en el progreso del juego y lo entrega en un guardado posterior de ese mismo juego; ningún límite lo elimina silenciosamente.
 - Los eventos que otorgan XP o plumas se registran incluso si el cliente solicitó un guardado silencioso.
 - El seguimiento de objetivos de taller muestra el progreso de todo el alumnado de la clase.
