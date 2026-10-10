@@ -90,6 +90,18 @@ expect(
   "Los puntos de flota deben comprobar sesiones cerradas reales y omitir reconstrucciones provisionales.",
 );
 expect(
+  saveProgress.includes(".range(offset, offset + pageSize - 1)") &&
+    saveProgress.includes('.order("id", { ascending:true })'),
+  "El cálculo de XP del taller debe paginar eventos con orden estable para no truncar sesiones largas.",
+);
+expect(
+  saveProgress.includes('subject:"LenguArcade"') &&
+    saveProgress.includes('asignatura:"LenguArcade"') &&
+    saveProgress.includes('categoryId:"CAT1"') &&
+    saveProgress.includes('query.in("game_id", selectedGames)'),
+  "Todos los juegos seleccionados deben sumar XP al mismo objetivo y enviar la asignatura LenguArcade al marcador.",
+);
+expect(
   html.includes("action:'reconstructWorkshopHistory'") &&
     html.includes("loadTeacher(false)"),
   "Al abrir el planificador deben importarse activaciones históricas y refrescarse los resultados.",
