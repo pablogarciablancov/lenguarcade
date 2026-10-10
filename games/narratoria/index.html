@@ -255,73 +255,24 @@
         @media (max-width: 900px) { .writing-layout { grid-template-columns: 1fr; } }
         .owl-sprite {
             position: relative; display: block; width: 100%; height: 100%; transform-origin: 50% 90%;
-            background-image: url("assets/plumin-sprites-v2.webp"); background-repeat: no-repeat; background-size: 600% 400%; background-position: 0 0;
-            animation: owl-idle 4.8s linear infinite, owl-idle-sway 2.4s ease-in-out infinite;
-        }
-        /* Each cel holds for its own interval, then snaps to the next exact tile. */
-        @keyframes owl-idle {
-            0% { background-position: 0 0; animation-timing-function: steps(1, end); }
-            16.666% { background-position: 20% 0; animation-timing-function: steps(1, end); }
-            33.333% { background-position: 40% 0; animation-timing-function: steps(1, end); }
-            50% { background-position: 60% 0; animation-timing-function: steps(1, end); }
-            66.666% { background-position: 80% 0; animation-timing-function: steps(1, end); }
-            83.333% { background-position: 100% 0; animation-timing-function: steps(1, end); }
-            100% { background-position: 100% 0; }
-        }
-        @keyframes owl-flap {
-            0% { background-position: 0 33.333%; animation-timing-function: steps(1, end); }
-            16.666% { background-position: 20% 33.333%; animation-timing-function: steps(1, end); }
-            33.333% { background-position: 40% 33.333%; animation-timing-function: steps(1, end); }
-            50% { background-position: 60% 33.333%; animation-timing-function: steps(1, end); }
-            66.666% { background-position: 80% 33.333%; animation-timing-function: steps(1, end); }
-            83.333% { background-position: 100% 33.333%; animation-timing-function: steps(1, end); }
-            100% { background-position: 100% 33.333%; }
-        }
-        @keyframes owl-talk {
-            0% { background-position: 0 66.667%; animation-timing-function: steps(1, end); }
-            16.666% { background-position: 20% 66.667%; animation-timing-function: steps(1, end); }
-            33.333% { background-position: 40% 66.667%; animation-timing-function: steps(1, end); }
-            50% { background-position: 60% 66.667%; animation-timing-function: steps(1, end); }
-            66.666% { background-position: 80% 66.667%; animation-timing-function: steps(1, end); }
-            83.333% { background-position: 100% 66.667%; animation-timing-function: steps(1, end); }
-            100% { background-position: 100% 66.667%; }
-        }
-        @keyframes owl-react {
-            0% { background-position: 0 100%; animation-timing-function: steps(1, end); }
-            16.666% { background-position: 20% 100%; animation-timing-function: steps(1, end); }
-            33.333% { background-position: 40% 100%; animation-timing-function: steps(1, end); }
-            50% { background-position: 60% 100%; animation-timing-function: steps(1, end); }
-            66.666% { background-position: 80% 100%; animation-timing-function: steps(1, end); }
-            83.333% { background-position: 100% 100%; animation-timing-function: steps(1, end); }
-            100% { background-position: 100% 100%; }
+            background: url("assets/plumin-frames/idle-01.png") no-repeat center / contain;
+            animation: owl-idle-sway 2.4s ease-in-out infinite;
         }
         @keyframes owl-idle-sway { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-1.5px) rotate(1deg); } }
         @keyframes owl-flight-bob { 0%, 100% { transform: translateY(0) rotate(0) scale(1); } 50% { transform: translateY(-3px) rotate(-1.5deg) scale(1.015); } }
         @keyframes owl-talk-nod { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(1px) rotate(1.5deg); } }
         @keyframes owl-react-sway { 0%, 100% { transform: rotate(0); } 50% { transform: translateY(-2px) rotate(2deg); } }
-        @keyframes owl-cheer {
-            0% { background-position: 0 100%; animation-timing-function: steps(1, end); }
-            25% { background-position: 20% 100%; animation-timing-function: steps(1, end); }
-            50% { background-position: 0 100%; animation-timing-function: steps(1, end); }
-            75% { background-position: 20% 100%; animation-timing-function: steps(1, end); }
-            100% { background-position: 20% 100%; }
-        }
         @keyframes owl-cheer-bob {
             0%, 100% { transform: translateY(0) rotate(0); }
             32% { transform: translateY(-5px) rotate(-2deg); }
             68% { transform: translateY(-2px) rotate(2deg); }
         }
-        @keyframes owl-think {
-            0% { background-position: 40% 100%; animation-timing-function: steps(1, end); }
-            50% { background-position: 60% 100%; animation-timing-function: steps(1, end); }
-            100% { background-position: 60% 100%; }
-        }
         @keyframes owl-think-sway { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-3deg); } }
-        .owl-sprite.motion-flap { animation: owl-flap 0.9s linear infinite, owl-flight-bob 0.9s ease-in-out infinite; }
-        .owl-sprite.motion-talk { animation: owl-talk 1.15s linear 2, owl-talk-nod 0.575s ease-in-out 4; }
-        .owl-sprite.motion-react { animation: owl-react 1.7s linear 1, owl-react-sway 1.7s ease-in-out 1; }
-        .owl-sprite.motion-cheer { animation: owl-cheer 0.82s linear 1, owl-cheer-bob 0.82s ease-out 1; }
-        .owl-sprite.motion-think { animation: owl-think 1s linear 1, owl-think-sway 1s ease-in-out 1; }
+        .owl-sprite.motion-flap { animation: owl-flight-bob 0.9s ease-in-out infinite; }
+        .owl-sprite.motion-talk { animation: owl-talk-nod 0.575s ease-in-out infinite; }
+        .owl-sprite.motion-react { animation: owl-react-sway 1.7s ease-in-out 1; }
+        .owl-sprite.motion-cheer { animation: owl-cheer-bob 0.82s ease-out 1; }
+        .owl-sprite.motion-think { animation: owl-think-sway 1s ease-in-out 1; }
         .owl-sprite.skin-nieve { filter: brightness(1.12) saturate(0.65); }
         .owl-sprite.skin-luna { filter: sepia(0.16) hue-rotate(155deg) saturate(0.82); }
         .owl-sprite.skin-cobre { filter: sepia(0.48) saturate(1.5) hue-rotate(-12deg); }
@@ -370,7 +321,7 @@
         .owl-shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
         .owl-shop-card { display: flex; flex-direction: column; padding: 13px; border: 1px solid rgba(138,109,31,0.35); border-radius: 12px; background: rgba(255,255,255,0.78); box-shadow: 0 3px 8px rgba(43,29,14,0.08); }
         .owl-item-preview { width: 66px; height: 66px; display: grid; place-items: center; align-self: center; margin-bottom: 7px; border-radius: 18px; background: #f7ecd3; border: 1px solid rgba(138,109,31,0.2); font-size: 2.2rem; }
-        .owl-preview-sprite { width: 62px; height: 62px; background: url("assets/plumin-sprites-v2.webp") no-repeat 0 0 / 600% 400%; }
+        .owl-preview-sprite { width: 62px; height: 62px; background: url("assets/plumin-frames/idle-01.png") no-repeat center / contain; }
         .cage-preview { width: 48px; height: 48px; display: grid; place-items: center; border: 2px solid #80542e; border-radius: 15px 15px 8px 8px; background: #f3e1be; font-size: 1.65rem; }
         .cage-preview.cage-gremio { border-color: #9a7226; background: #fff1c9; }
         .cage-preview.cage-jardin { border-color: #52764b; background: #e6f0d8; }
@@ -917,6 +868,11 @@
             { id: "cage_gremio", name: "Aviario dorado", category: "Jaula", slot: "cage", cost: 75, icon: "✨", cssClass: "cage-gremio", desc: "Un aviario brillante para una mascota célebre." },
             { id: "cage_noche", name: "Observatorio lunar", category: "Jaula", slot: "cage", cost: 80, icon: "🌌", cssClass: "cage-noche", desc: "Un refugio azul para vigilar las estrellas." }
         ];
+        const OWL_FRAME_SEQUENCES = Object.fromEntries(['idle', 'flap', 'talk', 'react'].map(sequence => [
+            sequence, Array.from({ length: 12 }, (_, index) => `assets/plumin-frames/${sequence}-${String(index + 1).padStart(2, '0')}.png`)
+        ]));
+        OWL_FRAME_SEQUENCES.cheer = ['react-06', 'react-08', 'react-12', 'react-06'].map(frame => `assets/plumin-frames/${frame}.png`);
+        OWL_FRAME_SEQUENCES.think = ['react-03', 'react-05', 'react-03', 'react-05'].map(frame => `assets/plumin-frames/${frame}.png`);
         const DEFAULT_OWL_STATE = {
             owned: ["skin_grafito", "cage_roble"],
             equipped: { skin: "skin_grafito", head: "", face: "", body: "", cage: "cage_roble" }
@@ -1068,6 +1024,7 @@
         let state = cloneDefaultState();
         let companionPauseTimer = null;
         let owlMotionTimer = null;
+        let owlFrameTimer = null;
         let owlMotionMode = '';
         let companionLastPhase = -1;
         let companionLastWords = 0;
@@ -2417,6 +2374,24 @@
                     if (mode !== 'idle') sprite.classList.add(`motion-${mode}`);
                 });
                 clearTimeout(owlMotionTimer);
+                clearInterval(owlFrameTimer);
+                const frames = OWL_FRAME_SEQUENCES[mode] || OWL_FRAME_SEQUENCES.idle;
+                let frameIndex = 0;
+                const showFrame = () => sprites.forEach(sprite => {
+                    sprite.style.backgroundImage = `url("${frames[frameIndex]}")`;
+                });
+                showFrame();
+                const frameDelay = mode === 'idle' ? 480
+                    : mode === 'flap' ? 85
+                    : mode === 'talk' ? 145
+                    : mode === 'react' ? 145
+                    : 175;
+                if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    owlFrameTimer = setInterval(() => {
+                        frameIndex = (frameIndex + 1) % frames.length;
+                        showFrame();
+                    }, frameDelay);
+                }
                 if (mode === 'flap') return;
                 const duration = mode === 'talk' ? 2300
                     : mode === 'cheer' ? 950
