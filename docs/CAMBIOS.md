@@ -707,3 +707,9 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Cada resultado indica su objetivo de XP para distinguir ejecuciones con el mismo título.
 - Las reconstrucciones históricas siguen marcadas como provisionales; no se alteran ni se premian hasta revisar qué activación representa cada registro.
 
+## 2026-10-10 · Premios de taller en la asignatura LenguArcade
+
+- El cálculo del objetivo XP pagina todos los eventos con orden estable, también en talleres largos que superen el límite de filas de una consulta.
+- Los talleres con el reto cumplido envían +5 (`CAT1`, «Deberes hechos») al marcador con la asignatura `LenguArcade`; todos los juegos elegidos comparten el mismo cálculo.
+- Se conserva el identificador de operación estable para que reintentar un guardado no duplique el premio.
+
