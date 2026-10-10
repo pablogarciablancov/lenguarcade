@@ -1,4 +1,4 @@
-import {snapshotProgress} from "../_shared/progression.js";
+import {snapshotProgress, XP_REWARD_GUIDE, capProgressionAward} from "../_shared/progression.js";
 import {
   boundedNumber,
   corsHeaders,
@@ -358,23 +358,23 @@ Deno.serve(async (request) => {
     }
     const requestedXpDelta = Math.max(0, Number(record.xp || 0) - oldXp);
     const requestedFeathersDelta = Math.max(0, Number(record.feathers || 0) - oldFeathers);
-    const allowedXpDelta = Math.max(0, Math.min(
-      requestedXpDelta,
-      180 - minuteXp,
-      900 - tenMinuteXp,
-    ));
-    const allowedFeathersDelta = Math.max(0, Math.min(
-      requestedFeathersDelta,
-      15 - minuteFeathers,
-      60 - tenMinuteFeathers,
-    ));
-    const integrityLimited =
-      allowedXpDelta < requestedXpDelta ||
-      allowedFeathersDelta < requestedFeathersDelta;
-    record.xp = oldXp + Math.round(allowedXpDelta);
-    record.feathers = oldFeathers + Math.round(allowedFeathersDelta);
+    const priorPending = old?.raw_data && typeof old.raw_data === "object"
+      ? (old.raw_data as Record<string, unknown>)._integrityPending as Record<string, unknown> | undefined
+      : undefined;
+    const totalRequestedXp = requestedXpDelta + Math.max(0, Number(priorPending?.xp || 0));
+    const totalRequestedFeathers = requestedFeathersDelta + Math.max(0, Number(priorPending?.feathers || 0));
+    const award = capProgressionAward(totalRequestedXp, totalRequestedFeathers, minuteXp, tenMinuteXp, minuteFeathers, tenMinuteFeathers);
+    const integrityLimited = award.pendingXp > 0 || award.pendingFeathers > 0;
+    record.xp = oldXp + award.awardedXp;
+    record.feathers = oldFeathers + award.awardedFeathers;
+    record.raw_data = {
+      ...rawGameData,
+      _integrityPending:{xp:award.pendingXp,feathers:award.pendingFeathers},
+    };
 
-    if(body.writeEvent!==false&&(record.xp>oldXp||record.attempts>Number(old?.attempts||0)))shouldWriteEvent=true;
+    // Any XP or feather payout must have an auditable event even when a client
+    // requested a silent autosave. This is also the source for challenge tracking.
+    if(record.xp>oldXp||record.feathers>oldFeathers||record.attempts>Number(old?.attempts||0))shouldWriteEvent=true;
     const { error:progressError } = await admin.from("game_progress")
       .upsert(record, { onConflict:"profile_id,game_id" });
     if (progressError) throw progressError;
@@ -391,6 +391,12 @@ Deno.serve(async (request) => {
         details:{
           ...(body.details && typeof body.details === "object" ? body.details : {}),
           sessionCounted:shouldCountSession,
+          xpAward:{
+            reason:XP_REWARD_GUIDE[gameId] || "Progreso de juego validado por el servidor.",
+            requestedXp:totalRequestedXp,
+            awardedXp:award.awardedXp,
+            pendingXp:award.pendingXp,
+          },
           integrity:{
             serverAuthoritative:true,
             rateLimited:integrityLimited,
