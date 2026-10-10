@@ -703,4 +703,6 @@ Automatizado: `npm run check`, incluido `scripts/check-live-access.mjs`.
 4. Alcanzar el límite de seguridad en entorno de prueba: comprobar que el exceso se guarda como pendiente y se paga en un guardado posterior del mismo juego, sin duplicar progreso.
 5. En el panel docente, abrir Actividades de clase y un taller con más de ocho alumnos: comprobar que se ven todos, su XP/objetivo y el estado completado/pendiente.
 6. Confirmar que la navegación permite pasar del planificador de talleres al tablón de retos y misiones.
-7. La suma automática al marcador externo requiere aún completar la vinculación segura de IDs de alumno entre LenguArcade y el Marcador de flotas, así como instalar la función receptora en su Apps Script; comprobar los requisitos al integrar ambos sistemas.
+7. La suma automática +5 requiere configurar `FLEET_MARKER_WEBHOOK_URL` y `FLEET_MARKER_WEBHOOK_SECRET` en Supabase, y `LENGUARCADE_FLEET_WEBHOOK_SECRET` como propiedad del script con el mismo valor. El envío queda apagado mientras falte cualquiera de las dos variables de Supabase.
+8. Tras autorizar y activar el despliegue, probar primero con un perfil de prueba vinculado: alcanzar `target_xp` en un taller activo debe añadir una entrada `CAT1` de +5; repetir el envío con el mismo ID no debe volver a sumar. Una identidad inexistente/ambigua o un token incorrecto debe dejar intactas las puntuaciones.
+
