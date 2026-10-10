@@ -2577,7 +2577,7 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
       var students=Array.isArray(w.students)?w.students:[];
       var progress=students.map(function(row){return '<span class="completionName '+(row.completed?'done':'')+'">'+tEsc(row.nombre)+' · '+tEsc(row.xp)+'/'+tEsc(w.targetXp)+' XP · '+(row.completed?'✅ Objetivo conseguido':'Pendiente')+'</span>';});
       var done=students.filter(function(row){return row.completed;}).length;
-      return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(w.title||'Taller')+'</strong><div class="sub">'+tEsc(w.className||'')+' · '+tEsc(w.targetXp)+' XP'+(w.provisional?' · Reconstrucción provisional · revisar':'')+'</div></div><span class="completionPill">'+tEsc(done)+' / '+tEsc(students.length)+' objetivos</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,students.length?done/students.length*100:0))+'%"></span></div><div class="completionNames">'+progress.join('')+'</div></article>';
+      return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(w.title||'Taller')+'</strong><div class="sub">'+tEsc(w.className||'')+' · Reto: '+tEsc(w.targetXp)+' XP'+(w.provisional?' · Reconstrucción provisional · revisar':'')+'</div></div><span class="completionPill">'+tEsc(done)+' / '+tEsc(students.length)+' objetivos</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,students.length?done/students.length*100:0))+'%"></span></div><div class="completionNames">'+progress.join('')+'</div></article>';
     }).join('')+'</div>';
   }
   function renderTracking(data){renderSortedStudentRows(data||{});renderMissionTracking(data||{});renderWorkshopTracking(data||{});}
