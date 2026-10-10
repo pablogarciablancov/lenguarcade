@@ -210,6 +210,28 @@ expect(
 expect(html.includes("Sesión de juego") && html.includes("Reto de XP") && html.includes("Trabajo en casa"), "El editor de Taller debe ofrecer plantillas prácticas.");
 expect(html.includes("Ajustes avanzados de disponibilidad"), "El control manual de juegos debe quedar relegado a ajustes avanzados.");
 expect(html.includes("No necesitas tocar esto para preparar una sesión."), "Los ajustes avanzados deben explicar que no son el flujo principal.");
+const visibleHelper = html.match(/function plannerSameGoal\(plan,outcome\)\s*\{[\s\S]*?\n  \}/)?.[0] || "";
+const visiblePlansHelper = html.match(/function plannerVisiblePlans\(\)\s*\{[\s\S]*?\n  \}/)?.[0] || "";
+const outcomeHelper = html.match(/function plannerOutcomesForClass\(\)\s*\{[\s\S]*?\n  \}/)?.[0] || "";
+const routeHelper = html.match(/function plannerRouteMatchesOutcome\(outcome,preset\)\s*\{[\s\S]*?\n  \}/)?.[0] || "";
+expect(visibleHelper && visiblePlansHelper && outcomeHelper && routeHelper && html.includes("plannerVisiblePlans().forEach"), "El planificador debe derivar realizados de sesiones reales y filtrar duplicados.");
+if (visibleHelper && visiblePlansHelper && outcomeHelper) {
+  const context={workshopPlannerState:{plans:[
+    {planId:"used-real",title:"Primeros pasos",targetXp:400,gameIds:["battlegrafia"],usedAt:"hoy"},
+    {planId:"used-duplicate",title:"Primeros pasos",targetXp:400,gameIds:["battlegrafia"],usedAt:"hoy"},
+    {planId:"old-draft",title:"Primeros pasos",targetXp:400,gameIds:["battlegrafia"],usedAt:""},
+    {planId:"draft-next",title:"Ortografía",targetXp:500,gameIds:["battlegrafia","maniacgrafia"],usedAt:""},
+    {planId:"test-zero",title:"Prueba de contacto",targetXp:0,gameIds:["battlegrafia"],usedAt:"hoy"}
+  ],workshopOutcomes:[{planId:"used-real",title:"Primeros pasos",targetXp:400,gameIds:["battlegrafia"],classroomId:"C"}]},
+  teacherCurrentClass:()=> "C"};
+  const ids=vm.runInNewContext(visibleHelper+"\n"+outcomeHelper+"\n"+visiblePlansHelper+"\nplannerVisiblePlans().map(function(p){return p.planId;})",context);
+  expect(JSON.stringify(ids)===JSON.stringify(["used-real","draft-next"]), "La biblioteca debe colapsar segmentos/test y ocultar borradores ya completados.");
+}
+if(routeHelper){
+  const completed=vm.runInNewContext(routeHelper+"\nplannerRouteMatchesOutcome({title:'Primeros pasos',targetXp:400,gameIds:['battlegrafia']},{title:'Primeros pasos',targetXp:100,gameIds:['battlegrafia']})",{});
+  const wrongGame=vm.runInNewContext(routeHelper+"\nplannerRouteMatchesOutcome({title:'Ortografía',targetXp:500,gameIds:['battlegrafia']},{title:'Ortografía',targetXp:150,gameIds:['battlegrafia','maniacgrafia']})",{});
+  expect(completed===true&&wrongGame===false,"La ruta debe reflejar talleres reales del mismo objetivo y juegos.");
+}
 expect(
   html.includes('id="workshopAdvancedDetails"') &&
   html.includes("if(advanced&&advanced.open)loadTeacherWorkshopState"),
