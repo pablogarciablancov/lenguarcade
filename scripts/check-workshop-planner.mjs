@@ -69,6 +69,21 @@ expect(
   "El panel debe conservar ejecuciones y reconstruir talleres anteriores como provisionales.",
 );
 expect(
+  teacherDashboard.includes("async function loadActivityEvents(") &&
+    teacherDashboard.includes(".range(offset, offset + pageSize - 1)") &&
+    teacherDashboard.includes('.order("occurred_at", { ascending:true })') &&
+    teacherDashboard.includes('.order("id", { ascending:true })'),
+  "El seguimiento debe paginar los eventos de actividad con orden estable para no truncar XP.",
+);
+expect(
+  teacherDashboard.includes("function collapseProvisionalWorkshopRuns(") &&
+    teacherDashboard.includes(".filter(session => Number(session.target_xp || 0) > 0)") &&
+    teacherDashboard.includes("end - start < 60_000") &&
+    teacherDashboard.includes("start - previousEnd <= 60_000") &&
+    /const workshopOutcomes = collapseProvisionalWorkshopRuns\([\s\S]*?\)\s*\.filter\(session => !classCode/.test(teacherDashboard),
+  "Las sesiones de disponibilidad sin objetivo de XP no deben presentarse como retos de taller.",
+);
+expect(
   saveProgress.includes('from("workshop_runs")') &&
     saveProgress.includes('session.closed_at') &&
     saveProgress.includes('.eq("is_provisional", false)'),
@@ -131,6 +146,7 @@ expect(
   "Debe existir una biblioteca de talleres organizada por estado.",
 );
 expect(html.includes("Guardar preparación"), "Debe quedar claro que guardar no publica.");
+expect(html.includes("· Reto: ") && html.includes("XP"), "Cada resultado debe identificar el objetivo de XP para distinguir talleres repetidos.");
 expect(html.includes("Guardar y abrir ahora"), "Debe existir una acción directa para abrir la sesión en clase.");
 expect(html.includes("Guardar y activar horario de casa"), "Debe existir una acción explícita para el acceso programado en casa.");
 expect(
