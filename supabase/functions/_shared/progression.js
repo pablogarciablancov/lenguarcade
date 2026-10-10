@@ -23,7 +23,8 @@ export function capProgressionAward(requestedXp,requestedFeathers,minuteXp,tenMi
  const awardedFeathers=Math.max(0,Math.min(feathers,15-Math.max(0,Number(minuteFeathers)||0),60-Math.max(0,Number(tenMinuteFeathers)||0)));
  return{awardedXp,awardedFeathers,pendingXp:xp-awardedXp,pendingFeathers:feathers-awardedFeathers};
 }
-\nexport function levelProgress(xp){
+
+export function levelProgress(xp){
   xp=Math.max(0,Number(xp)||0);let level=1,start=0,cost=1000;
   while(xp>=start+cost&&level<1000){start+=cost;level++;cost=Math.ceil(1000*Math.pow(1.3,level-1)/50)*50;}
   return{level,levelStartXp:start,nextLevelXp:start+cost,levelCost:cost,levelProgress:Math.min(100,Math.floor((xp-start)/cost*100))};
