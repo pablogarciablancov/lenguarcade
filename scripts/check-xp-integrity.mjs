@@ -96,8 +96,8 @@ assert.deepEqual(capProgressionAward(25,3,0,0,0,0),{
 const edge=readFileSync('supabase/functions/save-progress/index.ts','utf8');
 assert.match(edge,/const newXp = oldXp;/,'El backend no debe aceptar XP absoluto del cliente');
 assert.match(edge,/xpReward:0,/,'Los logros reportados por cliente no deben acuñar XP');
-assert.match(edge,/180 - minuteXp/,'Debe existir un límite de XP por minuto');
-assert.match(edge,/900 - tenMinuteXp/,'Debe existir un límite de XP por diez minutos');
+assert.match(edge,/capProgressionAward\(totalRequestedXp,/ ,'save-progress debe aplicar el límite compartido de XP y plumas por minuto y diez minutos');
+
 assert.match(edge,/serverAuthoritative:true/,'Los eventos deben registrar la protección de integridad');
 assert.doesNotMatch(edge,/oldXp \+ xpDelta/,'No debe quedar la ruta genérica antigua que sumaba XP del cliente');
 
