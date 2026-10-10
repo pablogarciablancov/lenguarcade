@@ -1,3 +1,9 @@
+## Navegación del profesor y progreso de Maniacgrafía (2026-10-10)
+- Ejecutar `node scripts/check-learning-tracking.mjs`: los enlaces cruzados deben invocar `laShowTeacherScreen` y pasar el filtro de progreso de Maniacgrafía (palabras acertadas, mundo de aventura y porcentaje que no retrocede).
+- Ejecutar `npm run check`.
+- En `/exec`, alternar desde «Planificar taller» a Taller y desde el acceso del Taller a Misiones: la sección elegida debe quedar visible y el botón correcto activo.
+- Enviar un resultado de Maniacgrafía con `stats.totalWords=250` y sin `metrics.percentage`: el progreso guardado debe mostrar 25 %, y conservar cualquier porcentaje anterior superior.
+
 ## 2026-10-07 · Profesor en el panel común de jugador
 
 1. Actualizar `main` y publicar el despliegue estable: `npm.cmd run apps:publish -- "Modo jugador del profesor"`.
