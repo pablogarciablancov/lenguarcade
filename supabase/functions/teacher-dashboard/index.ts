@@ -56,6 +56,7 @@ function collapseProvisionalWorkshopRuns(sessions: any[]) {
     if (sameReconstructedGoal) {
       previous.closed_at = session.closed_at || session.active_to || null;
       previous.active_to = session.active_to || session.closed_at || null;
+      previous.reviewed_at = previous.reviewed_at || session.reviewed_at || null;
       previous.mergedRunCount = Number(previous.mergedRunCount || 1) + 1;
       continue;
     }
@@ -1019,7 +1020,7 @@ Deno.serve(async (request) => {
         .eq("organization_id", organizationId)
         .eq("published", true),
       admin.from("workshop_runs")
-        .select("run_id,classroom_id,title,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,updated_at,is_provisional")
+        .select("run_id,classroom_id,title,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,updated_at,is_provisional,reviewed_at")
         .eq("organization_id", organizationId)
         .order("started_at", { ascending:false })
         .limit(500),
@@ -1426,7 +1427,8 @@ Deno.serve(async (request) => {
           startedAt:session.started_at || session.active_from || null,
           updatedAt:session.updated_at || null,
           endedAt:session.closed_at || null,
-          provisional:session.is_provisional === true,
+          reviewedAt:session.reviewed_at || null,
+          provisional:session.is_provisional === true && !session.reviewed_at,
           classroomOpen:session.classroom_open === true,
           homeEnabled:session.home_enabled === true,
           gameIds:[...selectedGames],
