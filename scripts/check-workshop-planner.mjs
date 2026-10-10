@@ -12,6 +12,7 @@ const saveProgress = fs.readFileSync(path.join(root, "supabase", "functions", "s
 const workshopAccessMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "20260924191500_add_workshop_game_access.sql"), "utf8");
 const workshopSessionMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "20260924204500_add_class_workshop_sessions.sql"), "utf8");
 const workshopHistoryMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "202610100001_workshop_run_history.sql"), "utf8");
+const workshopReviewMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "20261010172255_add_workshop_run_reviewed_at.sql"), "utf8");
 const errors = [];
 
 function expect(condition, message) {
@@ -64,9 +65,16 @@ expect(
   teacherDashboard.includes('from("workshop_runs")') &&
   teacherDashboard.includes('action === "reconstructWorkshopHistory"') &&
   teacherDashboard.includes('is_provisional:true') &&
+  teacherDashboard.includes('reviewed_at') &&
+  teacherDashboard.includes('provisional:session.is_provisional === true && !session.reviewed_at') &&
   teacherDashboard.includes('active_to:next ? next.startedAt : null') &&
   !teacherDashboard.includes('from("workshop_game_access")'),
   "El panel debe conservar ejecuciones y reconstruir talleres anteriores como provisionales.",
+);
+expect(
+  workshopReviewMigration.includes("add column if not exists reviewed_at timestamptz") &&
+    teacherDashboard.includes("previous.reviewed_at = previous.reviewed_at || session.reviewed_at || null"),
+  "La revisión debe poder retirarse visualmente sin cambiar el estado que bloquea premios automáticos.",
 );
 expect(
   teacherDashboard.includes("async function loadActivityEvents(") &&
@@ -190,6 +198,14 @@ expect(
     html.includes("objetivo, juegos y resultados queden unidos") &&
     !html.includes("data-plan-mission"),
   "El reto de XP y sus juegos deben gestionarse dentro del taller, sin crear una misión duplicada.",
+);
+const workshopTracking = html.match(/function renderWorkshopTracking\(data\)\s*\{[\s\S]*?\n  \}/)?.[0] || "";
+expect(
+  workshopTracking.includes("row.nombre") &&
+    workshopTracking.includes("row.xp") &&
+    workshopTracking.includes("Objetivo conseguido") &&
+    !workshopTracking.includes("namesHtml(done"),
+  "El seguimiento de taller debe mostrar a cada alumno una vez, con XP y estado del objetivo.",
 );
 expect(html.includes("Sesión de juego") && html.includes("Reto de XP") && html.includes("Trabajo en casa"), "El editor de Taller debe ofrecer plantillas prácticas.");
 expect(html.includes("Ajustes avanzados de disponibilidad"), "El control manual de juegos debe quedar relegado a ajustes avanzados.");

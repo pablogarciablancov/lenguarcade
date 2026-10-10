@@ -713,3 +713,9 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Los talleres con el reto cumplido envían +5 (`CAT1`, «Deberes hechos») al marcador con la asignatura `LenguArcade`; todos los juegos elegidos comparten el mismo cálculo.
 - Se conserva el identificador de operación estable para que reintentar un guardado no duplique el premio.
 
+## 2026-10-10 · Revisión histórica y lista de resultados de taller
+
+- El seguimiento muestra una sola fila por alumno en cada taller, con el XP obtenido y el estado del reto.
+- `reviewed_at` permite retirar la advertencia de revisión sin convertir una reconstrucción histórica en una sesión premiable automáticamente.
+- Se marcaron como revisados los registros que representan las cuatro sesiones de 2º ESO C y D verificadas y puntuadas manualmente; dos tramos contiguos de la misma sesión de 2º C comparten la revisión.
+
