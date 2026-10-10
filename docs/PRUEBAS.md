@@ -723,3 +723,8 @@ Automatizado: `npm run check`, incluido `scripts/check-live-access.mjs`.
 - Una reconstrucción con un cambio de plan inferior a un minuto no debe crear una tarjeta propia; si se reabre enseguida el mismo objetivo (mismo título, XP y juegos), debe conservarse como un solo reto provisional.
 - Mantener la etiqueta provisional de los registros históricos hasta verificar cada activación; no se deben emitir puntos retroactivos durante la reconstrucción.
 
+## Revisión manual de talleres · 2026-10-10
+- En cada tarjeta, cada alumno debe aparecer una sola vez con XP/objetivo y el estado conseguido o pendiente.
+- Marcar `reviewed_at` debe ocultar «Reconstrucción provisional · revisar» sin cambiar `is_provisional` ni conceder puntos automáticos.
+- Confirmar las cuatro sesiones revisadas de 2º ESO C/D; el objetivo de 400 XP de 2º C combina dos tramos reconstruidos contiguos.
+
