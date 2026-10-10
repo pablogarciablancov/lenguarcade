@@ -60,20 +60,29 @@ async function sendCompletedWorkshopAwards(
 
       const startedAt = String(session.started_at || session.active_from || "");
       if (!startedAt || !Number.isFinite(Date.parse(startedAt))) continue;
-      const query = admin.from("game_events")
-        .select("event_type,xp_delta,occurred_at")
-        .eq("profile_id", profileId)
-        .neq("event_type", "teacher_adjustment")
-        .gte("occurred_at", startedAt)
-        .order("occurred_at", { ascending:true });
       const endAt = session.closed_at || session.active_to;
-      if (endAt) query.lte("occurred_at", String(endAt));
-      if (selectedGames.length) query.in("game_id", selectedGames);
-      const { data:events, error:eventError } = await query;
-      if (eventError) throw eventError;
-
-      const xp = (events || []).reduce((sum: number, event: Record<string, unknown>) =>
-        sum + Math.max(0, Number(event.xp_delta || 0)), 0);
+      const pageSize = 1000;
+      let offset = 0;
+      let xp = 0;
+      while (true) {
+        let query = admin.from("game_events")
+          .select("id,event_type,xp_delta,occurred_at")
+          .eq("profile_id", profileId)
+          .neq("event_type", "teacher_adjustment")
+          .gte("occurred_at", startedAt)
+          .order("occurred_at", { ascending:true })
+          .order("id", { ascending:true })
+          .range(offset, offset + pageSize - 1);
+        if (endAt) query = query.lte("occurred_at", String(endAt));
+        if (selectedGames.length) query = query.in("game_id", selectedGames);
+        const { data:events, error:eventError } = await query;
+        if (eventError) throw eventError;
+        const page = events || [];
+        xp += page.reduce((sum: number, event: Record<string, unknown>) =>
+          sum + Math.max(0, Number(event.xp_delta || 0)), 0);
+        if (page.length < pageSize) break;
+        offset += pageSize;
+      }
       if (xp < targetXp) continue;
 
       const awardSeed = [
@@ -95,6 +104,8 @@ async function sendCompletedWorkshopAwards(
             profileId,
             awardId,
             challengeCompleted:true,
+            subject:"LenguArcade",
+            asignatura:"LenguArcade",
             categoryId:"CAT1",
             points:5,
             title:String(session.title || "Taller").slice(0, 100) + ": reto completado",

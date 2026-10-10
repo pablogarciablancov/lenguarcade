@@ -705,6 +705,7 @@ Automatizado: `npm run check`, incluido `scripts/check-live-access.mjs`.
 6. Confirmar que la navegación permite pasar del planificador de talleres al tablón de retos y misiones.
 7. La suma automática +5 requiere configurar `FLEET_MARKER_WEBHOOK_URL` y `FLEET_MARKER_WEBHOOK_SECRET` en Supabase, y `LENGUARCADE_FLEET_WEBHOOK_SECRET` como propiedad del script con el mismo valor. El envío queda apagado mientras falte cualquiera de las dos variables de Supabase.
 8. Tras autorizar y activar el despliegue, probar primero con un perfil de prueba vinculado: alcanzar `target_xp` en un taller activo debe añadir una entrada `CAT1` de +5; repetir el envío con el mismo ID no debe volver a sumar. Una identidad inexistente/ambigua o un token incorrecto debe dejar intactas las puntuaciones.
+9. Comprobar que la entrada queda en `Asignatura = LenguArcade`; sumar XP en cualquier combinación de los juegos seleccionados debe completar el mismo reto, incluso si el historial supera 1.000 eventos.
 
 ## Navegación del profesor y progreso de Maniacgrafía (2026-10-10)
 - Ejecutar `node scripts/check-learning-tracking.mjs`: los enlaces cruzados deben invocar `laShowTeacherScreen` y pasar el filtro de progreso de Maniacgrafía (palabras acertadas, mundo de aventura y porcentaje que no retrocede).
