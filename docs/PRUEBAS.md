@@ -715,3 +715,10 @@ Automatizado: `npm run check`, incluido `scripts/check-live-access.mjs`.
 - En `/exec`, alternar desde «Planificar taller» a Taller y desde el acceso del Taller a Misiones: la sección elegida debe quedar visible y el botón correcto activo.
 - Enviar un resultado de Maniacgrafía con `stats.totalWords=250` y sin `metrics.percentage`: el progreso guardado debe mostrar 25 %, y conservar cualquier porcentaje anterior superior.
 
+## Resultados históricos de retos de taller · 2026-10-10
+- Ejecutar `node scripts/check-workshop-planner.mjs`: comprobar paginación estable de eventos, ocultación de sesiones sin objetivo y objetivo visible en cada tarjeta.
+- En una clase con más de 1.000 eventos, comparar el resultado del panel con el total calculado directamente desde `game_events`; deben incluirse también los eventos más recientes.
+- Abrir los talleres históricos de 2º ESO C y D: cada objetivo debe aparecer una vez por activación real, con XP completada y pendiente acorde al intervalo; la sesión de pruebas sin reto no debe aparecer.
+- Una reconstrucción con un cambio de plan inferior a un minuto no debe crear una tarjeta propia; si se reabre enseguida el mismo objetivo (mismo título, XP y juegos), debe conservarse como un solo reto provisional.
+- Mantener la etiqueta provisional de los registros históricos hasta verificar cada activación; no se deben emitir puntos retroactivos durante la reconstrucción.
+
