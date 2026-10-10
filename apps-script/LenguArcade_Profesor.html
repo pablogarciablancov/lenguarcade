@@ -2570,15 +2570,17 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
       }).join('')+'</div>':'<div class="completionEmpty">No hay misiones publicadas con alumnos en este filtro.</div>');
   }
   function renderWorkshopTracking(data){
-    var summary=data&&data.summary?data.summary:{};
-    var sessions=Array.isArray(data&&data.sessions)?data.sessions:[];
-    if(!sessions.length)return '<div class="emptyState">Todavía no hay talleres con un objetivo de XP para esta clase.</div>';
-    return '<div class="trackingSummary">'+tEsc(summary.total||sessions.length)+' talleres · '+tEsc(summary.completed||0)+' objetivos completados</div><div class="completionList">'+sessions.map(function(w){
-      var students=Array.isArray(w.students)?w.students:[];
-      var progress=students.map(function(row){return '<span class="completionName '+(row.completed?'done':'')+'">'+tEsc(row.nombre)+' · '+tEsc(row.xp)+'/'+tEsc(w.targetXp)+' XP · '+(row.completed?'✅ Objetivo conseguido':'Pendiente')+'</span>';});
-      var done=students.filter(function(row){return row.completed;}).length;
-      return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(w.title||'Taller')+'</strong><div class="sub">'+tEsc(w.className||'')+' · Reto: '+tEsc(w.targetXp)+' XP'+(w.provisional?' · Reconstrucción provisional · revisar':'')+'</div></div><span class="completionPill">'+tEsc(done)+' / '+tEsc(students.length)+' objetivos</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,students.length?done/students.length*100:0))+'%"></span></div><div class="completionNames">'+progress.join('')+'</div></article>';
-    }).join('')+'</div>';
+    var parent=document.getElementById('taller');if(!parent)return;
+    var host=ensureTrackingHost(parent,'workshopCompletionTracking','Objetivos de taller','Seguimiento del objetivo XP de la sesión publicada.');
+    var rows=Array.isArray(data.workshopOutcomes)?data.workshopOutcomes:[];
+    host.innerHTML='<div class="completionTrackingHead"><div><h3>🎯 Objetivos de los talleres</h3><div class="sub">Cada alumno aparece una sola vez por sesión, con su XP y el estado del objetivo. Las sesiones reconstruidas no conceden puntos automáticos para evitar duplicar puntuaciones manuales.</div></div><span class="rosterPill">'+rows.length+' sesiones</span></div>'+
+      (rows.length?'<div class="completionTrackingGrid">'+rows.map(function(w){
+        var pct=Number(w.completionPercent||0);
+        var progress=(w.students||[]).map(function(row){return '<span class="completionName '+(row.completed?'done':'')+'">'+tEsc(row.nombre)+' · '+tEsc(row.xp)+'/'+tEsc(w.targetXp)+' XP · '+(row.completed?'✅ Objetivo conseguido':'Pendiente')+'</span>';});
+        var provisional=w.provisional?'<span class="workshopSessionState closed">Reconstrucción provisional · revisar</span>':'';
+        var range=(w.startedAt?' · Desde '+tEsc(formatDate(w.startedAt)):'')+(w.endedAt?' · Hasta '+tEsc(formatDate(w.endedAt)):'');
+        return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(w.title||'Taller')+'</strong><div class="sub">'+tEsc(w.className||w.classCode||'Clase')+' · Reto: '+tEsc(w.targetXp||0)+' XP'+range+'</div>'+provisional+'</div><span class="completionPill">'+tEsc(w.completedCount||0)+' / '+tEsc(w.eligibleCount||0)+' objetivo</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'+(progress.length?'<div class="completionNames" style="margin-top:7px">'+progress.join('')+'</div>':'<div class="completionEmpty">No hay alumnos para mostrar.</div>')+'</article>';
+      }).join('')+'</div>':'<div class="completionEmpty">No hay ningún taller publicado en el ámbito actual.</div>');
   }
   function renderTracking(data){renderSortedStudentRows(data||{});renderMissionTracking(data||{});renderWorkshopTracking(data||{});}
   function install(){
