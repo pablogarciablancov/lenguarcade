@@ -1,4 +1,29 @@
 // Platform XP is retained. Only the cost of each successive level changes.
+export const XP_REWARD_GUIDE = Object.freeze({
+  battlegrafia:"6 XP por respuesta correcta nueva y 25 XP por monstruo derrotado; límite 360 XP por guardado (180 en checkpoint).",
+  sopa_de_tinta:"6 XP por palabra nueva correcta; límite 320 XP por guardado (150 en checkpoint).",
+  rayuela:"3 XP por elemento nuevo de estructura y 60 XP por primera entrega válida; límite 360 XP (150 en checkpoint).",
+  entre_lineas:"6 XP por respuesta correcta nueva y 60 XP por caso nuevo (máximo 3 por guardado); límite 360 XP (180 en checkpoint).",
+  versopolis:"6 XP por composición correcta nueva y XP adicional según la puntuación nueva de la partida; límite 360 XP (180 en checkpoint).",
+  lexaria:"6 XP por respuesta correcta nueva, 12 por victoria de carrera, 6 por victoria de duelo y 2 por derrota de duelo; límite 360 XP (180 en checkpoint).",
+  tierras_de_tinta:"6 XP por respuesta correcta nueva y 30 por victoria nueva; límite 360 XP (180 en checkpoint).",
+  maniacgrafia:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  narratoria:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  scrabble:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  conjuga_apuesta:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  verb_battle:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  tower_defense:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  word_play:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  lexitrama:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  lexoma:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+});
+export function capProgressionAward(requestedXp,requestedFeathers,minuteXp,tenMinuteXp,minuteFeathers,tenMinuteFeathers){
+ const xp=Math.max(0,Math.round(Number(requestedXp)||0)),feathers=Math.max(0,Math.round(Number(requestedFeathers)||0));
+ const awardedXp=Math.max(0,Math.min(xp,180-Math.max(0,Number(minuteXp)||0),900-Math.max(0,Number(tenMinuteXp)||0)));
+ const awardedFeathers=Math.max(0,Math.min(feathers,15-Math.max(0,Number(minuteFeathers)||0),60-Math.max(0,Number(tenMinuteFeathers)||0)));
+ return{awardedXp,awardedFeathers,pendingXp:xp-awardedXp,pendingFeathers:feathers-awardedFeathers};
+}
+
 export function levelProgress(xp){
   xp=Math.max(0,Number(xp)||0);let level=1,start=0,cost=1000;
   while(xp>=start+cost&&level<1000){start+=cost;level++;cost=Math.ceil(1000*Math.pow(1.3,level-1)/50)*50;}

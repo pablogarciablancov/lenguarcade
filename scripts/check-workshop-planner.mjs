@@ -95,7 +95,11 @@ expect(activatePlan.includes("ensureWorkshopSessionSheet_"), "Abrir una sesión 
 expect(activatePlan.includes("classroomOpen:!!openNow"), "La activación debe distinguir abrir en clase de publicar solo para casa.");
 expect(server.includes("function saveAndActivateWorkshopPlan("), "Guardar y abrir debe poder resolverse en una sola llamada de Apps Script.");
 
-expect(html.includes("Talleres · Diseña y lanza sesiones"), "El panel debe presentar Talleres como planificador de sesiones.");
+expect(
+  html.includes("Actividades de clase · Talleres y retos") ||
+  html.includes("Talleres · Diseña y lanza sesiones"),
+  "El panel debe presentar Talleres como planificador de sesiones integrado con retos.",
+);
 expect(
   html.includes("Tus talleres") &&
   html.includes("Próximos") &&

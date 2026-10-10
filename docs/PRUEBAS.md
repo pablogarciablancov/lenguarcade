@@ -695,3 +695,14 @@ Límites: el contador conserva el total de duelos; la lista guarda los 100 más 
 2. Entrar, guardar progreso y volver; recargar y revisar la caché: la etiqueta permanece.
 3. Cerrar y reabrir un juego desde profesor o taller: conserva el aviso de cierre y vuelve a «Entrar» al abrirse.
 Automatizado: `npm run check`, incluido `scripts/check-live-access.mjs`.
+
+## XP transparente, objetivos de taller y puntos de flota · 2026-10-10
+1. Ejecutar `node scripts/check-xp-integrity.mjs` y `npm run check`; deben pasar las pruebas de los 16 juegos, topes y recompensas pendientes.
+2. Abrir la ficha del alumno: expandir «¿Cómo se gana la XP?» y comprobar que están explicadas las reglas de todos los juegos oficiales.
+3. Repetir un guardado sin progreso: no suma XP; avanzar en un juego: el evento muestra regla aplicada, solicitada, otorgada y pendiente.
+4. Alcanzar el límite de seguridad en entorno de prueba: comprobar que el exceso se guarda como pendiente y se paga en un guardado posterior del mismo juego, sin duplicar progreso.
+5. En el panel docente, abrir Actividades de clase y un taller con más de ocho alumnos: comprobar que se ven todos, su XP/objetivo y el estado completado/pendiente.
+6. Confirmar que la navegación permite pasar del planificador de talleres al tablón de retos y misiones.
+7. La suma automática +5 requiere configurar `FLEET_MARKER_WEBHOOK_URL` y `FLEET_MARKER_WEBHOOK_SECRET` en Supabase, y `LENGUARCADE_FLEET_WEBHOOK_SECRET` como propiedad del script con el mismo valor. El envío queda apagado mientras falte cualquiera de las dos variables de Supabase.
+8. Tras autorizar y activar el despliegue, probar primero con un perfil de prueba vinculado: alcanzar `target_xp` en un taller activo debe añadir una entrada `CAT1` de +5; repetir el envío con el mismo ID no debe volver a sumar. Una identidad inexistente/ambigua o un token incorrecto debe dejar intactas las puntuaciones.
+

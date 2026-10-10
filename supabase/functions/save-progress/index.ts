@@ -1,4 +1,4 @@
-import {snapshotProgress} from "../_shared/progression.js";
+import {snapshotProgress, XP_REWARD_GUIDE, capProgressionAward} from "../_shared/progression.js";
 import {
   boundedNumber,
   corsHeaders,
@@ -20,6 +20,96 @@ function cleanAchievement(value: unknown) {
     xpReward:0,
     hidden:Boolean(item.hidden),
   };
+}
+
+
+async function sendCompletedWorkshopAwards(
+  admin: any,
+  profileId: string,
+  classroomIds: string[],
+  currentGameId: string,
+) {
+  const endpoint = Deno.env.get("FLEET_MARKER_WEBHOOK_URL") || "";
+  const secret = Deno.env.get("FLEET_MARKER_WEBHOOK_SECRET") || "";
+  if (!endpoint || !secret || !classroomIds.length) return;
+
+  try {
+    const { data:sessions, error } = await admin.from("workshop_sessions")
+      .select("classroom_id,title,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at")
+      .in("classroom_id", classroomIds)
+      .eq("published", true)
+      .gt("target_xp", 0);
+    if (error) throw error;
+
+    for (const session of sessions || []) {
+      const targetXp = Math.max(0, Number(session.target_xp || 0));
+      const selectedGames = Array.isArray(session.game_ids)
+        ? session.game_ids.map((value: unknown) => String(value || "")).filter(Boolean)
+        : [];
+      if (selectedGames.length && !selectedGames.includes(currentGameId)) continue;
+
+      const now = Date.now();
+      const from = session.active_from ? Date.parse(String(session.active_from)) : Number.NaN;
+      const to = session.active_to ? Date.parse(String(session.active_to)) : Number.NaN;
+      const isActive = session.classroom_open === true ||
+        (session.home_enabled === true && Number.isFinite(from) && Number.isFinite(to) && now >= from && now < to);
+      if (!isActive) continue;
+
+      const startedAt = String(session.started_at || session.active_from || "");
+      if (!startedAt || !Number.isFinite(Date.parse(startedAt))) continue;
+      const query = admin.from("game_events")
+        .select("event_type,xp_delta,occurred_at")
+        .eq("profile_id", profileId)
+        .neq("event_type", "teacher_adjustment")
+        .gte("occurred_at", startedAt)
+        .order("occurred_at", { ascending:true });
+      if (Number.isFinite(to)) query.lte("occurred_at", String(session.active_to));
+      if (selectedGames.length) query.in("game_id", selectedGames);
+      const { data:events, error:eventError } = await query;
+      if (eventError) throw eventError;
+
+      const xp = (events || []).reduce((sum: number, event: Record<string, unknown>) =>
+        sum + Math.max(0, Number(event.xp_delta || 0)), 0);
+      if (xp < targetXp) continue;
+
+      const awardSeed = [
+        String(session.classroom_id || ""),
+        String(session.plan_id || ""),
+        String(Date.parse(startedAt)),
+        profileId,
+      ].join(":");
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(awardSeed));
+      const awardId = "LA:" + Array.from(new Uint8Array(digest))
+        .map(value => value.toString(16).padStart(2, "0"))
+        .join("");
+      try {
+        const response = await fetch(endpoint, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify({
+            token:secret,
+            profileId,
+            awardId,
+            challengeCompleted:true,
+            categoryId:"CAT1",
+            points:5,
+            title:String(session.title || "Taller").slice(0, 100) + ": reto completado",
+          }),
+          signal:AbortSignal.timeout(5000),
+        });
+        const result = await response.json().catch(() => null);
+        if (!response.ok || result?.ok !== true) {
+          console.error("fleet marker award was not accepted", response.status, result?.error || "invalid_response");
+        }
+      } catch (deliveryError) {
+        // The next save retries with the same awardId; the marker receiver deduplicates it.
+        console.error("fleet marker award delivery failed", deliveryError);
+      }
+    }
+  } catch (awardError) {
+    // Marker delivery must not discard an already-saved game checkpoint.
+    console.error("workshop award check failed", awardError);
+  }
 }
 
 Deno.serve(async (request) => {
@@ -358,23 +448,23 @@ Deno.serve(async (request) => {
     }
     const requestedXpDelta = Math.max(0, Number(record.xp || 0) - oldXp);
     const requestedFeathersDelta = Math.max(0, Number(record.feathers || 0) - oldFeathers);
-    const allowedXpDelta = Math.max(0, Math.min(
-      requestedXpDelta,
-      180 - minuteXp,
-      900 - tenMinuteXp,
-    ));
-    const allowedFeathersDelta = Math.max(0, Math.min(
-      requestedFeathersDelta,
-      15 - minuteFeathers,
-      60 - tenMinuteFeathers,
-    ));
-    const integrityLimited =
-      allowedXpDelta < requestedXpDelta ||
-      allowedFeathersDelta < requestedFeathersDelta;
-    record.xp = oldXp + Math.round(allowedXpDelta);
-    record.feathers = oldFeathers + Math.round(allowedFeathersDelta);
+    const priorPending = old?.raw_data && typeof old.raw_data === "object"
+      ? (old.raw_data as Record<string, unknown>)._integrityPending as Record<string, unknown> | undefined
+      : undefined;
+    const totalRequestedXp = requestedXpDelta + Math.max(0, Number(priorPending?.xp || 0));
+    const totalRequestedFeathers = requestedFeathersDelta + Math.max(0, Number(priorPending?.feathers || 0));
+    const award = capProgressionAward(totalRequestedXp, totalRequestedFeathers, minuteXp, tenMinuteXp, minuteFeathers, tenMinuteFeathers);
+    const integrityLimited = award.pendingXp > 0 || award.pendingFeathers > 0;
+    record.xp = oldXp + award.awardedXp;
+    record.feathers = oldFeathers + award.awardedFeathers;
+    record.raw_data = {
+      ...rawGameData,
+      _integrityPending:{xp:award.pendingXp,feathers:award.pendingFeathers},
+    };
 
-    if(body.writeEvent!==false&&(record.xp>oldXp||record.attempts>Number(old?.attempts||0)))shouldWriteEvent=true;
+    // Any XP or feather payout must have an auditable event even when a client
+    // requested a silent autosave. This is also the source for challenge tracking.
+    if(record.xp>oldXp||record.feathers>oldFeathers||record.attempts>Number(old?.attempts||0))shouldWriteEvent=true;
     const { error:progressError } = await admin.from("game_progress")
       .upsert(record, { onConflict:"profile_id,game_id" });
     if (progressError) throw progressError;
@@ -391,6 +481,12 @@ Deno.serve(async (request) => {
         details:{
           ...(body.details && typeof body.details === "object" ? body.details : {}),
           sessionCounted:shouldCountSession,
+          xpAward:{
+            reason:XP_REWARD_GUIDE[gameId] || "Progreso de juego validado por el servidor.",
+            requestedXp:totalRequestedXp,
+            awardedXp:award.awardedXp,
+            pendingXp:award.pendingXp,
+          },
           integrity:{
             serverAuthoritative:true,
             rateLimited:integrityLimited,
@@ -435,6 +531,8 @@ Deno.serve(async (request) => {
         occurred_at:now,
       })));
     }
+
+    await sendCompletedWorkshopAwards(admin, profileId, classroomIds, gameId);
 
     return jsonResponse({ ok:true, duplicate:false, record });
   } catch (error) {

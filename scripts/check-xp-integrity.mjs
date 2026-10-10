@@ -67,11 +67,37 @@ const entre=snapshotProgress(
 );
 assert.equal(entre.xp,166,'Entre Líneas debe premiar un acierto y un caso realmente nuevo');
 
+
+const {XP_REWARD_GUIDE,capProgressionAward}=progression;
+const fixtures={
+ battlegrafia:[{stats_correct:0,stats_wrong:0,defeatedMonsters:[],totalMonsters:20},{stats_correct:1,stats_wrong:0,defeatedMonsters:[],totalMonsters:20},{},{}],
+ sopa_de_tinta:[{profile:{stats:{words:0,errors:0}}},{profile:{stats:{words:1,errors:0}}},{},{}],
+ rayuela:[{activeProjectId:'p1',projects:[{id:'p1',status:'draft',nodes:[],objectiveRewards:[]}]},{activeProjectId:'p1',projects:[{id:'p1',status:'draft',nodes:[{id:'n1',choices:[]},{id:'n2',choices:[]}],objectiveRewards:[]}]},{},{}],
+ entre_lineas:[{profile:{cases:0}},{profile:{cases:1}},{metrics:{correct:0,errors:0,attempts:0}},{metrics:{correct:1,errors:0,attempts:1}}],
+ versopolis:[{run:{startedAt:'r1',stats:{compositions:0,contracts:0},runScore:0}},{run:{startedAt:'r1',stats:{compositions:1,contracts:1},runScore:0}},{},{}],
+ lexaria:[{career:{metrics:{trainingAttempts:0,trainingCorrect:0},careerWins:0,duels:{}}},{career:{metrics:{trainingAttempts:1,trainingCorrect:1},careerWins:0,duels:{}}},{},{}],
+ tierras_de_tinta:[{campaign:{stats:{asked:0,correct:0},victories:{}}},{campaign:{stats:{asked:1,correct:1},victories:{}}},{},{}],
+};
+const allOfficialGames=['battlegrafia','maniacgrafia','narratoria','versopolis','scrabble','conjuga_apuesta','verb_battle','rayuela','entre_lineas','tower_defense','word_play','tierras_de_tinta','lexaria','lexitrama','lexoma','sopa_de_tinta'];
+for(const gameId of allOfficialGames){
+ assert.ok(XP_REWARD_GUIDE[gameId],gameId+' debe explicar la regla de XP');
+ const fixture=fixtures[gameId]||[{}, {},{metrics:{correct:0,errors:0,attempts:0,percentage:0}},{metrics:{correct:1,errors:0,attempts:1,percentage:10}}];
+ const [prior,save,priorRaw,raw]=fixture;
+ const result=snapshotProgress(gameId,save,prior,{},raw,priorRaw,{});
+ assert.ok(result.xp>=6,gameId+' debe conceder XP por progreso válido');
+}
+assert.deepEqual(capProgressionAward(240,20,170,890,14,58),{
+ awardedXp:10,awardedFeathers:1,pendingXp:230,pendingFeathers:19
+},'La protección debe aplazar y no borrar el excedente');
+assert.deepEqual(capProgressionAward(25,3,0,0,0,0),{
+ awardedXp:25,awardedFeathers:3,pendingXp:0,pendingFeathers:0
+},'Los premios dentro del límite se pagan completos');
+
 const edge=readFileSync('supabase/functions/save-progress/index.ts','utf8');
 assert.match(edge,/const newXp = oldXp;/,'El backend no debe aceptar XP absoluto del cliente');
 assert.match(edge,/xpReward:0,/,'Los logros reportados por cliente no deben acuñar XP');
-assert.match(edge,/180 - minuteXp/,'Debe existir un límite de XP por minuto');
-assert.match(edge,/900 - tenMinuteXp/,'Debe existir un límite de XP por diez minutos');
+assert.match(edge,/capProgressionAward\(totalRequestedXp,/ ,'save-progress debe aplicar el límite compartido de XP y plumas por minuto y diez minutos');
+
 assert.match(edge,/serverAuthoritative:true/,'Los eventos deben registrar la protección de integridad');
 assert.doesNotMatch(edge,/oldXp \+ xpDelta/,'No debe quedar la ruta genérica antigua que sumaba XP del cliente');
 
