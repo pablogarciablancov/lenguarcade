@@ -240,6 +240,21 @@ export function snapshotProgress(gameId,save,previous,old={},raw={},previousRaw=
   if(gameId==='rayuela')return rayuelaSnapshot(save,previous,old,context);
   if(gameId==='entre_lineas')return entreLineasSnapshot(save,previous,old,raw,previousRaw,context);
 
+  // Maniacgrafía guarda sus estadísticas dentro de `save.stats` y no envía
+  // `metrics.percentage`. Sin esta adaptación, XP y partidas se guardan pero
+  // el progreso del juego permanece en 0% para siempre.
+  if(gameId==='maniacgrafia'){
+    const stats=save.stats&&typeof save.stats==='object'?save.stats:{};
+    const summary=save.summary&&typeof save.summary==='object'?save.summary:{};
+    const words=Math.max(n(stats.totalWords),n(summary.totalWords));
+    const world=Math.max(1,Math.min(12,n(summary.adventureWorld)||n(stats.adventureWorld)||1));
+    const adventureCompleted=Boolean(summary.adventureCompleted||stats.adventureCompleted);
+    const wordProgress=Math.min(100,words/10); // 1.000 palabras correctas completa la barra.
+    const adventureProgress=adventureCompleted?100:Math.max(0,(world-1)/11*100);
+    const metrics=metricsOf(raw);
+    raw={...raw,metrics:{...metrics,percentage:Math.max(n(metrics.percentage),wordProgress,adventureProgress)}};
+  }
+
   let attempts=0,correct=0,score=0,pct=0,priorAttempts=0,priorCorrect=0,priorScore=0;
   if(gameId==='versopolis'){
     const r=save.run||{},p=previous.run||{},same=r.startedAt&&r.startedAt===p.startedAt;
