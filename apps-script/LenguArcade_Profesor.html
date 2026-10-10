@@ -1328,12 +1328,42 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     if(plan&&plan.plannedAt)return 'upcoming';
     return 'draft';
   }
+  function plannerOutcomesForClass(){
+    var rows=workshopPlannerState&&Array.isArray(workshopPlannerState.workshopOutcomes)?workshopPlannerState.workshopOutcomes:[];
+    var classCode=String(teacherCurrentClass()||'');
+    return rows.filter(function(row){return !classCode||String(row.classroomId||'')===classCode||String(row.classCode||'')===classCode;});
+  }
+  function plannerSameGoal(plan,outcome){
+    if(!plan||!outcome)return false;
+    var clean=function(value){return String(value||'').trim().toLocaleLowerCase();};
+    if(clean(plan.title)!==clean(outcome.title)||Number(plan.targetXp||0)!==Number(outcome.targetXp||0))return false;
+    var planGames=Array.isArray(plan.gameIds)?plan.gameIds.map(String).sort():[];
+    var outcomeGames=Array.isArray(outcome.gameIds)?outcome.gameIds.map(String).sort():[];
+    return planGames.length===outcomeGames.length&&planGames.every(function(id,index){return id===outcomeGames[index];});
+  }
+  function plannerVisiblePlans(){
+    var all=workshopPlannerState&&Array.isArray(workshopPlannerState.plans)?workshopPlannerState.plans:[];
+    var outcomes=plannerOutcomesForClass().filter(function(row){return Number(row.targetXp||0)>0;});
+    var used=[],usedIds={};
+    outcomes.forEach(function(outcome){
+      var plan=all.find(function(item){return !!item.usedAt&&String(item.planId)===String(outcome.planId||'');})||
+        all.find(function(item){return !!item.usedAt&&plannerSameGoal(item,outcome);});
+      if(plan&&!usedIds[String(plan.planId)]){usedIds[String(plan.planId)]=true;used.push(plan);}
+    });
+    var pending=all.filter(function(plan){
+      if(plan.usedAt)return false;
+      var duplicate=outcomes.some(function(outcome){return plannerSameGoal(plan,outcome);});
+      if(duplicate&&!plan.active&&!plan.plannedAt)return false;
+      return true;
+    });
+    return used.concat(pending);
+  }
   function plannerBucketLabel(plan){
     return ({active:'Activa',upcoming:'Próxima',draft:'Borrador',used:'Realizada'})[plannerBucket(plan)]||'Sesión';
   }
   function plannerCounts(){
     var counts={upcoming:0,draft:0,used:0};
-    (workshopPlannerState&&workshopPlannerState.plans||[]).forEach(function(plan){
+    plannerVisiblePlans().forEach(function(plan){
       var bucket=plannerBucket(plan);
       if(bucket==='active'||bucket==='upcoming')counts.upcoming++;
       else if(bucket==='draft')counts.draft++;
@@ -1371,7 +1401,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
   function renderPlannerList(){
     var list=document.getElementById('workshopPlanList');if(!list)return;
     renderPlannerTabs();
-    var all=workshopPlannerState&&workshopPlannerState.plans||[];
+    var all=plannerVisiblePlans();
     var plans=all.filter(function(plan){
       var bucket=plannerBucket(plan);
       if(workshopPlanView==='upcoming')return bucket==='active'||bucket==='upcoming';
@@ -1461,11 +1491,17 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
   function workshopRouteGameNames(preset){
     return (preset.gameIds||[]).map(function(id){var game=plannerCatalogGame(id);return game?game.nombre:id;}).join(' · ');
   }
+  function plannerRouteMatchesOutcome(outcome,preset){
+    var clean=function(value){return String(value||'').trim().toLocaleLowerCase();};
+    if(clean(outcome&&outcome.title)!==clean(preset&&preset.title))return false;
+    if(Number(outcome&&outcome.targetXp||0)<Number(preset&&preset.targetXp||0))return false;
+    var games=Array.isArray(outcome&&outcome.gameIds)?outcome.gameIds.map(String):[];
+    return (preset&&Array.isArray(preset.gameIds)?preset.gameIds:[]).every(function(id){return games.indexOf(String(id))!==-1;});
+  }
   function renderWorkshopRoute(){
     var host=document.getElementById('workshopRouteList');if(!host)return;
-    var current=teacherCurrentClass();
     host.innerHTML=WORKSHOP_ROUTE_PRESETS.map(function(preset){
-      var used=(workshopPlannerState&&workshopPlannerState.plans||[]).some(function(plan){return String(plan.planId)===routePlanId(preset.id,current)&&!!plan.usedAt;});
+      var used=plannerOutcomesForClass().some(function(outcome){return plannerRouteMatchesOutcome(outcome,preset);});
       return '<article class="workshopRouteCard"><div class="workshopRouteNo">Taller '+preset.step+' de '+WORKSHOP_ROUTE_PRESETS.length+'</div><h4>'+sessionEsc(preset.title)+'</h4><p>'+sessionEsc(preset.focus)+'</p><div class="workshopRouteMeta"><span>🎯 '+sessionEsc(preset.targetXp)+' XP</span><span>🎮 '+sessionEsc(workshopRouteGameNames(preset))+'</span></div>'+(used?'<span class="workshopRouteDone">✓ REALIZADO EN ESTA CLASE</span>':'')+'<div class="workshopRouteActions"><button type="button" class="routePrepare" data-route-prepare="'+sessionEsc(preset.id)+'">Preparar / editar</button><button type="button" data-route-open="'+sessionEsc(preset.id)+'">▶ Abrir ahora</button></div></article>';
     }).join('');
     [].slice.call(host.querySelectorAll('[data-route-prepare]')).forEach(function(button){button.onclick=function(){prepareWorkshopRoutePreset(button.dataset.routePrepare);};});
@@ -1525,6 +1561,8 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
         var usedPlans=(result.plans||[]).filter(function(plan){return !!plan.usedAt;}).map(function(plan){return {planId:plan.planId,title:plan.title,message:plan.message,targetXp:plan.targetXp,gameIds:plan.gameIds,usedAt:plan.usedAt};});
         if(usedPlans.length){var rebuilt=await edge('teacher-dashboard',{action:'reconstructWorkshopHistory',classCode:classCode,plans:usedPlans});if(Number(rebuilt&&rebuilt.imported||0)>0)await loadTeacher(false);}
       }catch(historyError){console.warn('No se pudo reconstruir el historial provisional de talleres.',historyError);}
+      var historyData=await edge('teacher-dashboard',{classCode:classCode,gameId:''});
+      result.workshopOutcomes=Array.isArray(historyData.workshopOutcomes)?historyData.workshopOutcomes:[];
       mount.innerHTML='<section class="workshopRouteSection"><div class="workshopRouteHead"><div><div class="sub">RUTA RECOMENDADA</div><h3>🚀 Ruta LenguArcade · 8 talleres en continuidad</h3><div class="sub">Empiezan con una toma de contacto y van subiendo el objetivo de XP mientras recorren ortografía, léxico, verbos, lectura, estrategia y escritura. Puedes abrir uno directamente o cargarlo en el editor.</div></div></div><div id="workshopRouteList" class="workshopRouteList"></div></section><div id="workshopActiveHost"></div><div class="workshopPlannerGrid"><section class="workshopPlanLibrary"><div class="workshopPanelTitle"><div><h3>Tus talleres</h3><div class="sub">Próximos, borradores y sesiones ya utilizadas.</div></div><button type="button" id="workshopNewPlan">＋ Crear taller</button></div><div class="workshopListSummary" id="workshopListSummary"></div><div class="workshopPlanTabs" id="workshopPlanTabs"></div><div id="workshopPlanList" class="workshopPlanList"></div></section><section class="workshopPlanEditor"><div class="workshopPanelTitle"><div><h3>Preparar la sesión</h3><div class="sub">Guardar no publica nada automáticamente.</div></div></div><div id="workshopPlanEditorBody" class="workshopPlanEditorBody"></div></section></div>';
       document.getElementById('workshopNewPlan').onclick=newPlannerPlan;
       renderWorkshopPlanner(result);
