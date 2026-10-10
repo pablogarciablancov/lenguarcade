@@ -23,8 +23,8 @@ for(const key of ['nombre','clase','xp','level','sessions','gamesPlayed','accura
 }
 assert.match(teacherUi,/missionCompletionTracking/,'La interfaz docente debe mostrar cumplimiento de misiones');
 assert.match(teacherUi,/workshopCompletionTracking/,'La interfaz docente debe mostrar cumplimiento de talleres');
-assert.match(teacherUi,/laShowTeacherScreen\\('taller'\\)/,'El botón de Misiones debe abrir la pantalla de Talleres');
-assert.match(teacherUi,/laShowTeacherScreen\\('misiones'\\)/,'El botón del Taller debe abrir la pantalla de Misiones');
+assert.match(teacherUi,/laShowTeacherScreen\('taller'\)/,'El botón de Misiones debe abrir la pantalla de Talleres');
+assert.ok(teacherUi.includes("laShowTeacherScreen(\\'misiones"),'El botón del Taller debe abrir la pantalla de Misiones');
 
 assert.match(studentUi,/rankCard/,'La interfaz del alumno debe renderizar el ranking');
 assert.match(studentUi,/missionHistoryStudent/,'La interfaz del alumno debe mostrar historial de misiones');
