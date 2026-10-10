@@ -5,23 +5,22 @@ import { dirname, join } from 'node:path';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const html = readFileSync(join(root, 'index.html'), 'utf8');
-const frameDirectory = join(root, 'assets', 'plumin-frames');
+const frameDirectory = join(root, 'assets', 'plumin-frames-60');
 assert.ok(existsSync(frameDirectory), 'Faltan los fotogramas individuales de Plumín.');
 const sequences = ['idle', 'flap', 'talk', 'react'];
-const expectedFrames = sequences.flatMap(sequence => Array.from({ length: 12 }, (_, index) => `${sequence}-${String(index + 1).padStart(2, '0')}.png`));
-assert.equal(readdirSync(frameDirectory).length, 48, 'Plumín debe tener 48 archivos de fotograma, sin extras.');
+const expectedFrames = sequences.flatMap(sequence => Array.from({ length: 60 }, (_, index) => `${sequence}-${String(index + 1).padStart(3, '0')}.webp`));
+assert.equal(readdirSync(frameDirectory).length, 240, 'Plumín debe tener 60 fotogramas independientes por secuencia.');
 for (const name of expectedFrames) {
   const frame = readFileSync(join(frameDirectory, name));
-  assert.ok(statSync(join(frameDirectory, name)).size > 2_000, `${name} parece incompleto.`);
-  assert.equal(frame.toString('hex', 0, 8), '89504e470d0a1a0a', `${name} no es un PNG válido.`);
-  assert.equal(frame.readUInt32BE(16), 256, `${name} debe tener 256 px de ancho.`);
-  assert.equal(frame.readUInt32BE(20), 256, `${name} debe tener 256 px de alto.`);
-  assert.equal(frame[25], 6, `${name} debe conservar canal alfa RGBA.`);
+  assert.ok(statSync(join(frameDirectory, name)).size > 12_000, `${name} está vacío o parece incompleto.`);
+  assert.equal(frame.toString('ascii', 0, 4), 'RIFF', `${name} no tiene una cabecera RIFF válida.`);
+  assert.equal(frame.toString('ascii', 8, 12), 'WEBP', `${name} no es un WebP válido.`);
 }
-assert.ok(html.includes('assets/plumin-frames/idle-01.png'), 'El CSS debe usar una imagen completa por fotograma.');
+assert.ok(html.includes('assets/plumin-frames-60/idle-001.webp'), 'El CSS debe usar una imagen completa por fotograma.');
 assert.ok(html.includes('sprite.style.backgroundImage'), 'La animación debe cambiar archivos de fotograma completos.');
 assert.ok(!html.includes('plumin-sprites-v2.webp') && !html.includes('background-position:'), 'No debe desplazar ni recortar la hoja antigua durante la animación.');
-assert.match(html, /length: 12/, 'Cada secuencia debe recorrer doce poses distintas.');
+assert.match(html, /length: 60/, 'Cada secuencia debe recorrer sesenta posiciones.');
+assert.ok(html.includes('preloadOwlSequence') && html.includes('owlMotionGeneration'), 'Los fotogramas deben precargarse antes del cambio para evitar parpadeos vacíos.');
 const writingScreen = html.slice(html.indexOf('id="screen-writing"'), html.indexOf('id="screen-shop"'));
 assert.equal((writingScreen.match(/class="owl-sprite"/g) || []).length, 1, 'Narratoria debe mostrar un único Plumín grande dentro del panel lateral.');
 assert.ok(!html.includes('plumin-inline-sprite') && !html.includes('codex-summary-avatar'), 'No debe duplicarse Plumín junto al editor ni en el encabezado plegado.');
@@ -43,4 +42,4 @@ for (const item of ['skin_grafito', 'skin_nieve', 'skin_luna', 'skin_cobre', 'he
 
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(new Set(ids).size, ids.length, 'Hay identificadores HTML duplicados.');
-console.log(`Plumín OK · 48 fotogramas PNG RGBA independientes de 256×256 · animaciones y reacciones · tienda y guardado verificados.`);
+console.log(`Plumín OK · 240 fotogramas WebP independientes · 60 posiciones por secuencia · animaciones precargadas · tienda y guardado verificados.`);
