@@ -260,26 +260,42 @@
             font-family: var(--font-ui);
         }
         .companion-avatar {
-            position: relative; flex: 0 0 62px; width: 62px; height: 62px; overflow: hidden;
+            position: relative; flex: 0 0 74px; width: 74px; height: 74px; overflow: hidden;
             border-radius: 18px; background: radial-gradient(circle at 35% 25%, #fff, #ead5a1 74%);
             border: 2px solid rgba(138,109,31,0.38); filter: drop-shadow(0 3px 2px rgba(50,31,13,0.15));
         }
         .companion-avatar::after { content: ''; position: absolute; right: -3px; bottom: -3px; width: 15px; height: 15px; border-radius: 50%; background: #66a66c; border: 2px solid #fffdf7; }
         .owl-sprite {
-            position: relative; display: block; width: 100%; height: 100%;
-            background-image: url("assets/plumin-sprites-v1.png"); background-repeat: no-repeat; background-size: 400% 400%; background-position: 0 0;
-            animation: owl-blink 2.8s steps(4, end) infinite;
+            position: relative; display: block; width: 100%; height: 100%; transform-origin: 50% 90%;
+            background-image: url("assets/plumin-sprites-v2.webp"); background-repeat: no-repeat; background-size: 600% 400%; background-position: 0 0;
+            animation: owl-idle 4.8s steps(6, end) infinite, owl-idle-sway 2.4s ease-in-out infinite;
         }
-        @keyframes owl-blink { from { background-position: 0 0; } to { background-position: 100% 0; } }
+        @keyframes owl-idle { from { background-position: 0 0; } to { background-position: 100% 0; } }
         @keyframes owl-flap { from { background-position: 0 33.333%; } to { background-position: 100% 33.333%; } }
         @keyframes owl-talk { from { background-position: 0 66.667%; } to { background-position: 100% 66.667%; } }
-        @keyframes owl-hop {
-            0% { background-position: 0 100%; transform: translateY(0) rotate(0); }
-            100% { background-position: 100% 100%; transform: translateY(-5px) rotate(2deg); }
+        @keyframes owl-react { from { background-position: 0 100%; } to { background-position: 100% 100%; } }
+        @keyframes owl-idle-sway { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-1.5px) rotate(1deg); } }
+        @keyframes owl-flight-bob { 0%, 100% { transform: translateY(0) rotate(0) scale(1); } 50% { transform: translateY(-3px) rotate(-1.5deg) scale(1.015); } }
+        @keyframes owl-talk-nod { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(1px) rotate(1.5deg); } }
+        @keyframes owl-react-sway { 0%, 100% { transform: rotate(0); } 50% { transform: translateY(-2px) rotate(2deg); } }
+        @keyframes owl-cheer {
+            0% { background-position: 0 100%; }
+            32% { background-position: 20% 100%; }
+            68% { background-position: 0 100%; }
+            100% { background-position: 20% 100%; }
         }
-        .owl-sprite.motion-flap { animation: owl-flap 0.62s steps(4, end) infinite; }
-        .owl-sprite.motion-talk { animation: owl-talk 0.55s steps(4, end) 2; }
-        .owl-sprite.motion-hop { animation: owl-hop 0.8s steps(4, end) 1; }
+        @keyframes owl-cheer-bob {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            32% { transform: translateY(-5px) rotate(-2deg); }
+            68% { transform: translateY(-2px) rotate(2deg); }
+        }
+        @keyframes owl-think { 0%, 100% { background-position: 40% 100%; } 50% { background-position: 60% 100%; } }
+        @keyframes owl-think-sway { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-3deg); } }
+        .owl-sprite.motion-flap { animation: owl-flap 0.9s steps(6, end) infinite, owl-flight-bob 0.9s ease-in-out infinite; }
+        .owl-sprite.motion-talk { animation: owl-talk 1.15s steps(6, end) 2, owl-talk-nod 0.575s ease-in-out 4; }
+        .owl-sprite.motion-react { animation: owl-react 1.7s steps(6, end) 1, owl-react-sway 1.7s ease-in-out 1; }
+        .owl-sprite.motion-cheer { animation: owl-cheer 0.82s steps(4, end) 1, owl-cheer-bob 0.82s ease-out 1; }
+        .owl-sprite.motion-think { animation: owl-think 1s steps(2, end) 1, owl-think-sway 1s ease-in-out 1; }
         .owl-sprite.skin-nieve { filter: brightness(1.12) saturate(0.65); }
         .owl-sprite.skin-luna { filter: sepia(0.16) hue-rotate(155deg) saturate(0.82); }
         .owl-sprite.skin-cobre { filter: sepia(0.48) saturate(1.5) hue-rotate(-12deg); }
@@ -317,7 +333,7 @@
         .owl-habitat.cage-noche { --cage-ink: #495278; --cage-back: #dce3f5; --cage-floor: #7d83a8; }
         .habitat-dome { position: absolute; left: 8%; right: 8%; top: 12px; height: 125px; border: 2px solid var(--cage-ink); border-bottom: 0; border-radius: 120px 120px 0 0; opacity: 0.72; }
         .habitat-perch { position: absolute; z-index: 1; left: 16%; right: 16%; bottom: 42px; height: 9px; border-radius: 10px; background: var(--cage-floor); box-shadow: 0 3px 4px rgba(43,29,14,0.18); }
-        .habitat-owl { position: absolute; z-index: 2; left: 50%; bottom: 44px; width: 126px; height: 126px; transform: translateX(-50%); }
+        .habitat-owl { position: absolute; z-index: 2; left: 50%; bottom: 44px; width: 146px; height: 146px; transform: translateX(-50%); }
         .habitat-bars { position: absolute; z-index: 3; inset: 13px 12px 28px; border-left: 2px solid color-mix(in srgb, var(--cage-ink) 75%, transparent); border-right: 2px solid color-mix(in srgb, var(--cage-ink) 75%, transparent); pointer-events: none; }
         .habitat-bars::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 23%, color-mix(in srgb, var(--cage-ink) 62%, transparent) 24% 25%, transparent 26% 48%); }
         .habitat-base { position: absolute; z-index: 4; bottom: 0; left: 0; right: 0; height: 31px; display: grid; place-items: center; background: linear-gradient(#e7c98f, var(--cage-floor)); border-top: 2px solid var(--cage-ink); color: #59401f; font-size: 1.1rem; }
@@ -332,7 +348,7 @@
         .owl-shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
         .owl-shop-card { display: flex; flex-direction: column; padding: 13px; border: 1px solid rgba(138,109,31,0.35); border-radius: 12px; background: rgba(255,255,255,0.78); box-shadow: 0 3px 8px rgba(43,29,14,0.08); }
         .owl-item-preview { width: 66px; height: 66px; display: grid; place-items: center; align-self: center; margin-bottom: 7px; border-radius: 18px; background: #f7ecd3; border: 1px solid rgba(138,109,31,0.2); font-size: 2.2rem; }
-        .owl-preview-sprite { width: 62px; height: 62px; background: url("assets/plumin-sprites-v1.png") no-repeat 0 0 / 400% 400%; }
+        .owl-preview-sprite { width: 62px; height: 62px; background: url("assets/plumin-sprites-v2.webp") no-repeat 0 0 / 600% 400%; }
         .cage-preview { width: 48px; height: 48px; display: grid; place-items: center; border: 2px solid #80542e; border-radius: 15px 15px 8px 8px; background: #f3e1be; font-size: 1.65rem; }
         .cage-preview.cage-gremio { border-color: #9a7226; background: #fff1c9; }
         .cage-preview.cage-jardin { border-color: #52764b; background: #e6f0d8; }
@@ -354,7 +370,7 @@
         .manuscript-page.completed .manuscript-page-fill { background: linear-gradient(90deg, #4c8c63, #8fbd76); }
         @media (max-width: 550px) {
             .writer-companion { gap: 10px; padding: 10px; }
-            .companion-avatar { flex-basis: 52px; width: 52px; height: 52px; }
+            .companion-avatar { flex-basis: 64px; width: 64px; height: 64px; }
             .writing-codex > summary { gap: 8px; padding: 7px 9px; }
             .codex-summary-avatar { width: 46px; height: 46px; flex-basis: 46px; }
             .writing-codex .side-panel { max-height: 62vh; padding: 14px; }
@@ -1042,6 +1058,9 @@
         let companionPauseTimer = null;
         let owlMotionTimer = null;
         let owlMotionMode = '';
+        let companionLastPhase = -1;
+        let companionLastWords = 0;
+        let companionLastPhaseDone = false;
 
         const storage = {
             save: () => {
@@ -2327,6 +2346,9 @@
                 const words = wordCount === null ? countWords(text) : wordCount;
                 const target = Math.max(1, asNumber(state.difficulty?.minWords, 30));
                 const phaseDone = state.evaluations?.[phaseIndex] !== null && state.evaluations?.[phaseIndex] !== undefined;
+                const phaseChanged = companionLastPhase !== phaseIndex;
+                const phaseCompletedNow = phaseDone && companionLastPhase === phaseIndex && !companionLastPhaseDone;
+                const targetReachedNow = !phaseChanged && !phaseDone && words >= target && companionLastWords < target;
                 const completed = (state.evaluations || []).filter(result => result !== null && result !== undefined).length;
                 const dialogue = document.getElementById('companion-dialogue');
                 const status = document.getElementById('companion-status');
@@ -2346,7 +2368,15 @@
 
                 companion.classList.toggle('is-writing', typing && !phaseDone);
                 status.textContent = typing && !phaseDone ? 'Escribiendo contigo' : (phaseDone ? 'Fase terminada' : 'Esperando ideas');
-                ui.setOwlMotion(phaseDone ? 'talk' : (typing ? 'flap' : 'idle'));
+                if (phaseCompletedNow || targetReachedNow) ui.setOwlMotion('cheer');
+                else if (phaseDone) ui.setOwlMotion('talk');
+                else if (owlMotionMode === 'cheer' && words >= target) { /* deja terminar el gesto de celebración */ }
+                else if (typing) ui.setOwlMotion('flap');
+                else if (phaseChanged) ui.setOwlMotion('react');
+                else ui.setOwlMotion('idle');
+                companionLastPhase = phaseIndex;
+                companionLastWords = words;
+                companionLastPhaseDone = phaseDone;
                 if (typing && !phaseDone) {
                     clearTimeout(companionPauseTimer);
                     companionPauseTimer = setTimeout(() => ui.updateCompanion(false), 850);
@@ -2374,18 +2404,23 @@
                 if (!sprites.length || owlMotionMode === mode) return;
                 owlMotionMode = mode;
                 sprites.forEach(sprite => {
-                    sprite.classList.remove('motion-flap', 'motion-talk', 'motion-hop');
+                    sprite.classList.remove('motion-flap', 'motion-talk', 'motion-react', 'motion-cheer', 'motion-think');
                     if (mode !== 'idle') sprite.classList.add(`motion-${mode}`);
                 });
                 clearTimeout(owlMotionTimer);
                 if (mode === 'flap') return;
-                const duration = mode === 'talk' ? 1250 : (mode === 'hop' ? 900 : 4800 + Math.random() * 3300);
+                const duration = mode === 'talk' ? 2300
+                    : mode === 'cheer' ? 950
+                    : mode === 'think' ? 1150
+                    : mode === 'react' ? 1850
+                    : 5200 + Math.random() * 3000;
                 owlMotionTimer = setTimeout(() => {
                     if (mode === 'idle') {
                         const writing = document.getElementById('writer-companion')?.classList.contains('is-writing');
-                        ui.setOwlMotion(writing ? 'flap' : (Math.random() > 0.5 ? 'hop' : 'talk'));
+                        ui.setOwlMotion(writing ? 'flap' : (Math.random() > 0.55 ? 'react' : 'think'));
                     } else {
-                        ui.setOwlMotion('idle');
+                        const writing = document.getElementById('writer-companion')?.classList.contains('is-writing');
+                        ui.setOwlMotion(writing ? 'flap' : 'idle');
                     }
                 }, duration);
             },
