@@ -10,6 +10,60 @@ function average(values: number[]) {
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 }
 
+async function loadActivityEvents(admin: any, profileIds: string[], fromIso: string) {
+  const pageSize = 1000;
+  const rows: Array<Record<string, unknown>> = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await admin.from("game_events")
+      .select("profile_id,game_id,event_type,occurred_at,xp_delta,accuracy,details")
+      .in("profile_id", profileIds)
+      .gte("occurred_at", fromIso)
+      .order("occurred_at", { ascending:true })
+      .order("id", { ascending:true })
+      .range(offset, offset + pageSize - 1);
+    if (error) return { data:null, error };
+    const page = data || [];
+    rows.push(...page);
+    if (page.length < pageSize) break;
+  }
+  return { data:rows, error:null };
+}
+
+function collapseProvisionalWorkshopRuns(sessions: any[]) {
+  const candidates = (sessions || [])
+    .filter(session => Number(session.target_xp || 0) > 0)
+    .slice()
+    .sort((a, b) => Date.parse(String(a.started_at || a.active_from || "")) - Date.parse(String(b.started_at || b.active_from || "")));
+  const visible: any[] = [];
+  for (const session of candidates) {
+    const start = Date.parse(String(session.started_at || session.active_from || ""));
+    const endText = String(session.closed_at || session.active_to || "");
+    const end = endText ? Date.parse(endText) : Number.POSITIVE_INFINITY;
+    // Las reconstrucciones pueden capturar un cambio de plan de pocos segundos
+    // mientras el profesor corrige la sesión. No es un reto histórico útil.
+    if (session.is_provisional === true && Number.isFinite(start) && Number.isFinite(end) && end - start < 60_000) continue;
+
+    const previous = visible[visible.length - 1];
+    const previousEndText = String(previous?.closed_at || previous?.active_to || "");
+    const previousEnd = previousEndText ? Date.parse(previousEndText) : Number.POSITIVE_INFINITY;
+    const gameKey = (row: any) => (Array.isArray(row.game_ids) ? row.game_ids.map(String).sort().join("|") : "");
+    const sameReconstructedGoal = previous?.is_provisional === true && session.is_provisional === true &&
+      String(previous.classroom_id || "") === String(session.classroom_id || "") &&
+      String(previous.title || "") === String(session.title || "") &&
+      Number(previous.target_xp || 0) === Number(session.target_xp || 0) &&
+      gameKey(previous) === gameKey(session) &&
+      Number.isFinite(previousEnd) && Number.isFinite(start) && start >= previousEnd && start - previousEnd <= 60_000;
+    if (sameReconstructedGoal) {
+      previous.closed_at = session.closed_at || session.active_to || null;
+      previous.active_to = session.active_to || session.closed_at || null;
+      previous.mergedRunCount = Number(previous.mergedRunCount || 1) + 1;
+      continue;
+    }
+    visible.push({ ...session, mergedRunCount:1 });
+  }
+  return visible;
+}
+
 function randomPin() {
   const bytes = new Uint32Array(1);
   crypto.getRandomValues(bytes);
@@ -1032,12 +1086,7 @@ Deno.serve(async (request) => {
             .in("profile_id", activityProfileIds)
         : Promise.resolve(emptyResult),
       profileIds.length
-        ? admin.from("game_events")
-            .select("profile_id,game_id,event_type,occurred_at,xp_delta,accuracy,details")
-            .in("profile_id", profileIds)
-            .gte("occurred_at", activityStartIso)
-            .order("occurred_at", { ascending:true })
-            .limit(10000)
+        ? loadActivityEvents(admin, profileIds, activityStartIso)
         : Promise.resolve(emptyResult),
       profileIds.length
         ? admin.from("player_achievements")
@@ -1321,7 +1370,7 @@ Deno.serve(async (request) => {
       });
     }
 
-    const workshopOutcomes = (workshopRunsResult.data || workshopSessionsResult.data || [])
+    const workshopOutcomes = collapseProvisionalWorkshopRuns(workshopRunsResult.data || workshopSessionsResult.data || [])
       .filter(session => !classCode || selectedClassroomIds.has(String(session.classroom_id || "")))
       .map(session => {
         const classroomId = String(session.classroom_id || "");
