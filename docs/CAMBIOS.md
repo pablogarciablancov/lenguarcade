@@ -1,3 +1,10 @@
+## 2026-10-10 · Navegación del taller y progreso de Maniacgrafía
+
+- Los accesos cruzados «Planificar taller» y «Abrir retos y misiones» cambian de pantalla mediante la navegación del panel, que mantiene ambas secciones ocultas hasta activarlas.
+- Maniacgrafía no envía `metrics.percentage`; el cálculo compartido deriva el avance de palabras acertadas y mundos de aventura (`1.000` aciertos equivalen al 100 %), manteniendo el progreso previo.
+- No cambia XP, guardados ni puntuaciones del marcador.
+- Verificación: sintaxis de los scripts del panel; prueba de progreso en Maniacgrafía (avance por palabras, aventura y monotonicidad).
+
 ## 2026-10-07 · Modo jugador del profesor en el panel común
 
 - «Modo jugador» abre el panel de alumno existente, con el catálogo habitual y la identidad de profesor verificada por Google/Supabase. Está disponible en la barra lateral y en Alumnos.
