@@ -251,37 +251,59 @@
         .rarity-legendaria .tcg-card-front { border-color: var(--rarity-legendaria); box-shadow: 0 0 20px rgba(255,202,40,0.6); } .rarity-legendaria .tcg-rarity { background: var(--rarity-legendaria); color:#000;}
 
 
-        .writing-layout { display: grid; grid-template-columns: 280px 1fr; gap: 30px; }
+        .writing-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 24px; }
         @media (max-width: 900px) { .writing-layout { grid-template-columns: 1fr; } }
-        .writer-companion {
-            display: flex; align-items: center; gap: 14px; padding: 12px 15px; margin-bottom: 12px;
-            border: 1px solid rgba(138,109,31,0.36); border-radius: 12px;
-            background: linear-gradient(110deg, #fffdf7, #f7e8c6); box-shadow: 0 4px 12px rgba(50,31,13,0.09);
-            font-family: var(--font-ui);
-        }
-        .companion-avatar {
-            position: relative; flex: 0 0 74px; width: 74px; height: 74px; overflow: hidden;
-            border-radius: 18px; background: radial-gradient(circle at 35% 25%, #fff, #ead5a1 74%);
-            border: 2px solid rgba(138,109,31,0.38); filter: drop-shadow(0 3px 2px rgba(50,31,13,0.15));
-        }
-        .companion-avatar::after { content: ''; position: absolute; right: -3px; bottom: -3px; width: 15px; height: 15px; border-radius: 50%; background: #66a66c; border: 2px solid #fffdf7; }
         .owl-sprite {
             position: relative; display: block; width: 100%; height: 100%; transform-origin: 50% 90%;
             background-image: url("assets/plumin-sprites-v2.webp"); background-repeat: no-repeat; background-size: 600% 400%; background-position: 0 0;
-            animation: owl-idle 4.8s steps(6, end) infinite, owl-idle-sway 2.4s ease-in-out infinite;
+            animation: owl-idle 4.8s linear infinite, owl-idle-sway 2.4s ease-in-out infinite;
         }
-        @keyframes owl-idle { from { background-position: 0 0; } to { background-position: 100% 0; } }
-        @keyframes owl-flap { from { background-position: 0 33.333%; } to { background-position: 100% 33.333%; } }
-        @keyframes owl-talk { from { background-position: 0 66.667%; } to { background-position: 100% 66.667%; } }
-        @keyframes owl-react { from { background-position: 0 100%; } to { background-position: 100% 100%; } }
+        /* Each cel holds for its own interval, then snaps to the next exact tile. */
+        @keyframes owl-idle {
+            0% { background-position: 0 0; animation-timing-function: steps(1, end); }
+            16.666% { background-position: 20% 0; animation-timing-function: steps(1, end); }
+            33.333% { background-position: 40% 0; animation-timing-function: steps(1, end); }
+            50% { background-position: 60% 0; animation-timing-function: steps(1, end); }
+            66.666% { background-position: 80% 0; animation-timing-function: steps(1, end); }
+            83.333% { background-position: 100% 0; animation-timing-function: steps(1, end); }
+            100% { background-position: 100% 0; }
+        }
+        @keyframes owl-flap {
+            0% { background-position: 0 33.333%; animation-timing-function: steps(1, end); }
+            16.666% { background-position: 20% 33.333%; animation-timing-function: steps(1, end); }
+            33.333% { background-position: 40% 33.333%; animation-timing-function: steps(1, end); }
+            50% { background-position: 60% 33.333%; animation-timing-function: steps(1, end); }
+            66.666% { background-position: 80% 33.333%; animation-timing-function: steps(1, end); }
+            83.333% { background-position: 100% 33.333%; animation-timing-function: steps(1, end); }
+            100% { background-position: 100% 33.333%; }
+        }
+        @keyframes owl-talk {
+            0% { background-position: 0 66.667%; animation-timing-function: steps(1, end); }
+            16.666% { background-position: 20% 66.667%; animation-timing-function: steps(1, end); }
+            33.333% { background-position: 40% 66.667%; animation-timing-function: steps(1, end); }
+            50% { background-position: 60% 66.667%; animation-timing-function: steps(1, end); }
+            66.666% { background-position: 80% 66.667%; animation-timing-function: steps(1, end); }
+            83.333% { background-position: 100% 66.667%; animation-timing-function: steps(1, end); }
+            100% { background-position: 100% 66.667%; }
+        }
+        @keyframes owl-react {
+            0% { background-position: 0 100%; animation-timing-function: steps(1, end); }
+            16.666% { background-position: 20% 100%; animation-timing-function: steps(1, end); }
+            33.333% { background-position: 40% 100%; animation-timing-function: steps(1, end); }
+            50% { background-position: 60% 100%; animation-timing-function: steps(1, end); }
+            66.666% { background-position: 80% 100%; animation-timing-function: steps(1, end); }
+            83.333% { background-position: 100% 100%; animation-timing-function: steps(1, end); }
+            100% { background-position: 100% 100%; }
+        }
         @keyframes owl-idle-sway { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-1.5px) rotate(1deg); } }
         @keyframes owl-flight-bob { 0%, 100% { transform: translateY(0) rotate(0) scale(1); } 50% { transform: translateY(-3px) rotate(-1.5deg) scale(1.015); } }
         @keyframes owl-talk-nod { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(1px) rotate(1.5deg); } }
         @keyframes owl-react-sway { 0%, 100% { transform: rotate(0); } 50% { transform: translateY(-2px) rotate(2deg); } }
         @keyframes owl-cheer {
-            0% { background-position: 0 100%; }
-            32% { background-position: 20% 100%; }
-            68% { background-position: 0 100%; }
+            0% { background-position: 0 100%; animation-timing-function: steps(1, end); }
+            25% { background-position: 20% 100%; animation-timing-function: steps(1, end); }
+            50% { background-position: 0 100%; animation-timing-function: steps(1, end); }
+            75% { background-position: 20% 100%; animation-timing-function: steps(1, end); }
             100% { background-position: 20% 100%; }
         }
         @keyframes owl-cheer-bob {
@@ -289,13 +311,17 @@
             32% { transform: translateY(-5px) rotate(-2deg); }
             68% { transform: translateY(-2px) rotate(2deg); }
         }
-        @keyframes owl-think { 0%, 100% { background-position: 40% 100%; } 50% { background-position: 60% 100%; } }
+        @keyframes owl-think {
+            0% { background-position: 40% 100%; animation-timing-function: steps(1, end); }
+            50% { background-position: 60% 100%; animation-timing-function: steps(1, end); }
+            100% { background-position: 60% 100%; }
+        }
         @keyframes owl-think-sway { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-3deg); } }
-        .owl-sprite.motion-flap { animation: owl-flap 0.9s steps(6, end) infinite, owl-flight-bob 0.9s ease-in-out infinite; }
-        .owl-sprite.motion-talk { animation: owl-talk 1.15s steps(6, end) 2, owl-talk-nod 0.575s ease-in-out 4; }
-        .owl-sprite.motion-react { animation: owl-react 1.7s steps(6, end) 1, owl-react-sway 1.7s ease-in-out 1; }
-        .owl-sprite.motion-cheer { animation: owl-cheer 0.82s steps(4, end) 1, owl-cheer-bob 0.82s ease-out 1; }
-        .owl-sprite.motion-think { animation: owl-think 1s steps(2, end) 1, owl-think-sway 1s ease-in-out 1; }
+        .owl-sprite.motion-flap { animation: owl-flap 0.9s linear infinite, owl-flight-bob 0.9s ease-in-out infinite; }
+        .owl-sprite.motion-talk { animation: owl-talk 1.15s linear 2, owl-talk-nod 0.575s ease-in-out 4; }
+        .owl-sprite.motion-react { animation: owl-react 1.7s linear 1, owl-react-sway 1.7s ease-in-out 1; }
+        .owl-sprite.motion-cheer { animation: owl-cheer 0.82s linear 1, owl-cheer-bob 0.82s ease-out 1; }
+        .owl-sprite.motion-think { animation: owl-think 1s linear 1, owl-think-sway 1s ease-in-out 1; }
         .owl-sprite.skin-nieve { filter: brightness(1.12) saturate(0.65); }
         .owl-sprite.skin-luna { filter: sepia(0.16) hue-rotate(155deg) saturate(0.82); }
         .owl-sprite.skin-cobre { filter: sepia(0.48) saturate(1.5) hue-rotate(-12deg); }
@@ -303,17 +329,13 @@
         .owl-wearable.slot-head { left: 50%; top: -7%; transform: translateX(-50%); font-size: 1.45rem; }
         .owl-wearable.slot-face { left: 50%; top: 34%; transform: translateX(-50%); font-size: 1.25rem; }
         .owl-wearable.slot-body { left: 50%; bottom: 10%; transform: translateX(-50%); font-size: 1.4rem; }
-        .companion-avatar .owl-wearable.slot-head { font-size: 0.85rem; }
-        .companion-avatar .owl-wearable.slot-face { font-size: 0.72rem; }
-        .companion-avatar .owl-wearable.slot-body { font-size: 0.85rem; }
         .writing-codex { min-width: 0; align-self: start; font-family: var(--font-ui); }
         .writing-codex > summary {
-            min-height: 74px; display: flex; align-items: center; gap: 11px; padding: 8px 12px; list-style: none;
+            min-height: 62px; display: flex; align-items: center; gap: 11px; padding: 8px 12px; list-style: none;
             cursor: pointer; border: 2px solid rgba(138,109,31,0.45); border-radius: 12px;
             background: linear-gradient(130deg, #fffdf7, #f3dfad); box-shadow: 0 4px 12px rgba(50,31,13,0.10);
         }
         .writing-codex > summary::-webkit-details-marker { display: none; }
-        .codex-summary-avatar { width: 54px; height: 54px; flex: 0 0 54px; border-radius: 13px; overflow: hidden; background: #f8eed7; border: 1px solid rgba(138,109,31,0.3); }
         .codex-summary-copy { min-width: 0; flex: 1; color: var(--ink); font-weight: 800; font-size: 0.86rem; line-height: 1.25; }
         .codex-summary-copy small { display: block; margin-top: 3px; color: var(--ink-light); font-size: 0.7rem; font-weight: 600; }
         .codex-summary-chevron { color: var(--gold-dark); font-size: 1.1rem; transition: transform 0.2s ease; }
@@ -323,7 +345,7 @@
         .owl-pet-panel h3 { text-align: left; }
         .owl-habitat {
             --cage-ink: #80542e; --cage-back: #f3e1be; --cage-floor: #c49a61;
-            width: min(100%, 250px); height: 218px; position: relative; overflow: hidden; margin: 0 auto 9px;
+            width: min(100%, 280px); height: 258px; position: relative; overflow: hidden; margin: 0 auto 9px;
             border: 3px solid var(--cage-ink); border-radius: 18px 18px 12px 12px;
             background: radial-gradient(ellipse at 50% 86%, rgba(255,255,255,0.9), transparent 65%), var(--cage-back);
             box-shadow: inset 0 0 22px rgba(73,42,19,0.12), 0 5px 12px rgba(43,29,14,0.16);
@@ -333,7 +355,7 @@
         .owl-habitat.cage-noche { --cage-ink: #495278; --cage-back: #dce3f5; --cage-floor: #7d83a8; }
         .habitat-dome { position: absolute; left: 8%; right: 8%; top: 12px; height: 125px; border: 2px solid var(--cage-ink); border-bottom: 0; border-radius: 120px 120px 0 0; opacity: 0.72; }
         .habitat-perch { position: absolute; z-index: 1; left: 16%; right: 16%; bottom: 42px; height: 9px; border-radius: 10px; background: var(--cage-floor); box-shadow: 0 3px 4px rgba(43,29,14,0.18); }
-        .habitat-owl { position: absolute; z-index: 2; left: 50%; bottom: 44px; width: 146px; height: 146px; transform: translateX(-50%); }
+        .habitat-owl { position: absolute; z-index: 2; left: 50%; bottom: 44px; width: 192px; height: 192px; transform: translateX(-50%); }
         .habitat-bars { position: absolute; z-index: 3; inset: 13px 12px 28px; border-left: 2px solid color-mix(in srgb, var(--cage-ink) 75%, transparent); border-right: 2px solid color-mix(in srgb, var(--cage-ink) 75%, transparent); pointer-events: none; }
         .habitat-bars::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 23%, color-mix(in srgb, var(--cage-ink) 62%, transparent) 24% 25%, transparent 26% 48%); }
         .habitat-base { position: absolute; z-index: 4; bottom: 0; left: 0; right: 0; height: 31px; display: grid; place-items: center; background: linear-gradient(#e7c98f, var(--cage-floor)); border-top: 2px solid var(--cage-ink); color: #59401f; font-size: 1.1rem; }
@@ -358,21 +380,18 @@
         .owl-shop-card p { flex: 1; margin-bottom: 10px; color: var(--ink-light); font: 0.75rem/1.4 var(--font-ui); }
         .owl-shop-card .btn { padding: 8px 9px; font-size: 0.76rem; letter-spacing: 0; }
         .owl-shop-card .btn.equipped { background: var(--success); border-color: var(--success); }
-        .companion-copy { flex: 1; min-width: 0; }
-        .companion-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+        .writer-companion { margin-top: 18px; text-align: center; }
+        .companion-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
         .companion-name { color: var(--ink); font-size: 0.9rem; font-weight: 800; }
         .companion-status { color: #54724c; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
-        .companion-dialogue { min-height: 2.5em; color: var(--ink-light); font-size: 0.82rem; line-height: 1.35; }
+        .companion-dialogue { min-height: 2.5em; margin: 8px auto; max-width: 34ch; color: var(--ink-light); font-size: 0.82rem; line-height: 1.35; }
         .manuscript-label { display: flex; justify-content: space-between; gap: 8px; margin: 8px 0 4px; color: var(--ink-light); font-size: 0.66rem; font-weight: 700; }
         .manuscript-pages { display: grid; grid-template-columns: repeat(5, minmax(20px, 1fr)); gap: 5px; }
         .manuscript-page { height: 9px; overflow: hidden; border-radius: 99px; background: #e3d8c2; box-shadow: inset 0 1px 2px rgba(43,29,14,0.12); }
         .manuscript-page-fill { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #b08253, #d4af37); transition: width 0.25s ease; }
         .manuscript-page.completed .manuscript-page-fill { background: linear-gradient(90deg, #4c8c63, #8fbd76); }
         @media (max-width: 550px) {
-            .writer-companion { gap: 10px; padding: 10px; }
-            .companion-avatar { flex-basis: 64px; width: 64px; height: 64px; }
             .writing-codex > summary { gap: 8px; padding: 7px 9px; }
-            .codex-summary-avatar { width: 46px; height: 46px; flex-basis: 46px; }
             .writing-codex .side-panel { max-height: 62vh; padding: 14px; }
             .owl-shop-layout { grid-template-columns: 1fr; }
             .owl-shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -579,8 +598,7 @@
             <div class="writing-layout">
                 <details class="writing-codex" id="writing-codex">
                     <summary>
-                        <span class="codex-summary-avatar"><span class="owl-sprite"></span></span>
-                        <span class="codex-summary-copy">Guía de la aventura<small>Misión, cartas, objetivos y Plumín</small></span>
+                        <span class="codex-summary-copy">Guía de la aventura<small>Misión, objetivos, cartas y Plumín</small></span>
                         <span class="companion-status" id="codex-progress">0/5</span>
                         <span class="codex-summary-chevron" aria-hidden="true">⌄</span>
                     </summary>
@@ -590,11 +608,8 @@
                             <strong id="ui-writing-mission"></strong>
                         </div>
                         <h3>Objetivos de esta fase</h3><ul class="objective-list" id="objective-list"></ul>
-                        <h3>Tus seis cartas</h3><div id="mini-cards-container"></div>
-                        <h3 style="margin-top: 20px;">Inventario</h3>
-                        <div class="inventory-panel" id="writing-inventory"></div>
-                        <div class="owl-pet-panel">
-                            <h3>🦉 Plumín y su jaula</h3>
+                        <div class="writer-companion owl-pet-panel" id="writer-companion" aria-label="Plumín, tu compañero de escritura">
+                            <div class="companion-heading"><strong class="companion-name">Plumín, aprendiz de escriba</strong><span class="companion-status" id="companion-status">Esperando ideas</span></div>
                             <div class="owl-habitat cage-roble" id="writing-owl-habitat" aria-label="Jaula de Plumín">
                                 <div class="habitat-dome"></div>
                                 <div class="habitat-perch"></div>
@@ -602,9 +617,15 @@
                                 <div class="habitat-bars"></div>
                                 <div class="habitat-base">🌿</div>
                             </div>
+                            <p class="companion-dialogue" id="companion-dialogue" aria-live="polite"></p>
                             <p class="owl-equipped-label" id="writing-owl-equipped"></p>
                             <button class="owl-greet" onclick="ui.greetOwl('writing')">Saludar a Plumín</button>
+                            <div class="manuscript-label"><span>Manuscrito compartido</span><span id="manuscript-count">0 de 5 fases</span></div>
+                            <div class="manuscript-pages" id="manuscript-pages" role="progressbar" aria-label="Progreso del manuscrito" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
                         </div>
+                        <h3>Tus seis cartas</h3><div id="mini-cards-container"></div>
+                        <h3 style="margin-top: 20px;">Inventario</h3>
+                        <div class="inventory-panel" id="writing-inventory"></div>
                         <div style="margin-top: 22px; text-align: center;">
                             <button class="btn btn-secondary" style="padding: 10px 20px; font-size: 0.9rem;" onclick="game.saveAndExit()">Guardar historia y salir</button>
                         </div>
@@ -613,18 +634,8 @@
                 <main style="display: flex; flex-direction: column;">
                     <div class="phase-header"><h2 id="ui-phase-title" style="font-size: 2.2rem; color: var(--ink);"></h2><div class="word-counter" id="ui-word-count"></div></div>
                     <div class="instruction-box">
-                        <div class="phase-mission-line"><strong>Misión global:</strong> <span id="ui-writing-mission-inline"></span></div>
                         <p class="instruction-text" id="ui-phase-instruction"></p>
                         <p class="tip-text" id="ui-phase-tip" style="font-style: italic; color: var(--ink-light); margin-top: 5px;"></p>
-                    </div>
-                    <div class="writer-companion" id="writer-companion" aria-label="Plumín, tu compañero de escritura">
-                        <div class="companion-avatar" aria-hidden="true"><span class="owl-sprite" id="plumin-inline-sprite"></span></div>
-                        <div class="companion-copy">
-                            <div class="companion-heading"><strong class="companion-name">Plumín, aprendiz de escriba</strong><span class="companion-status" id="companion-status">Esperando ideas</span></div>
-                            <p class="companion-dialogue" id="companion-dialogue" aria-live="polite"></p>
-                            <div class="manuscript-label"><span>Manuscrito compartido</span><span id="manuscript-count">0 de 5 fases</span></div>
-                            <div class="manuscript-pages" id="manuscript-pages" role="progressbar" aria-label="Progreso del manuscrito" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
-                        </div>
                     </div>
                     <textarea id="editor" placeholder="Escribe aquí tu crónica..." oninput="ui.updateWordCount(true)"></textarea>
                     <div class="navigation-bar">
@@ -2284,9 +2295,7 @@
                 document.getElementById('ui-phase-title').innerText = `Fase ${state.currentPhase + 1}: ${phase.name}`;
                 const missionText = state.mission || 'Completa la historia respetando tus cartas y el objetivo narrativo.';
                 const sideMission = document.getElementById('ui-writing-mission');
-                const inlineMission = document.getElementById('ui-writing-mission-inline');
                 if (sideMission) sideMission.innerText = missionText;
-                if (inlineMission) inlineMission.innerText = missionText;
                 document.getElementById('ui-phase-instruction').innerText = phase.instruction;
                 document.getElementById('ui-phase-tip').innerText = `Consejo: ${phase.tip}`;
                 document.getElementById('editor').value = state.texts[state.currentPhase] || "";
