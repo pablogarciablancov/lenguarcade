@@ -691,3 +691,12 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Al alcanzar `target_xp`, LenguArcade envía al receptor del Marcador la identidad vinculada del perfil y un ID de operación estable; el marcador registra `CAT1` (+5) y deduplica los reintentos.
 - El envío queda inactivo si faltan `FLEET_MARKER_WEBHOOK_URL` o `FLEET_MARKER_WEBHOOK_SECRET` en Supabase. El receptor exige la misma clave en `LENGUARCADE_FLEET_WEBHOOK_SECRET` de Apps Script.
 - La activación requiere desplegar una versión del receptor accesible desde Supabase; todavía no se han aplicado puntos reales.
+## 2026-10-10 · Navegación del taller y progreso de Maniacgrafía
+
+- Los accesos cruzados «Planificar taller» y «Abrir retos y misiones» cambian de pantalla mediante la navegación del panel, que mantiene ambas secciones ocultas hasta activarlas.
+- Maniacgrafía no envía `metrics.percentage`; el cálculo compartido deriva el avance de palabras acertadas y mundos de aventura (`1.000` aciertos equivalen al 100 %), manteniendo el progreso previo.
+- Cada activación del taller se conserva en `workshop_runs`, con fecha de cierre, juegos y objetivo propios; retirarla ya no borra su resultado.
+- Al abrir el planificador, las activaciones previas de la hoja de talleres se reconstruyen hasta la siguiente activación de esa clase. Se marcan provisionales y no generan +5 retroactivo.
+- Los talleres nuevos pueden conceder +5 al completar el objetivo; los reintentos conservan el ID estable y el receptor puede deduplicarlos.
+- Verificación: planificador, misiones, seguimiento, sintaxis del panel y progreso de Maniacgrafía (avance por palabras, aventura y monotonicidad).
+

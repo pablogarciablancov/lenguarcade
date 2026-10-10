@@ -34,10 +34,11 @@ async function sendCompletedWorkshopAwards(
   if (!endpoint || !secret || !classroomIds.length) return;
 
   try {
-    const { data:sessions, error } = await admin.from("workshop_sessions")
-      .select("classroom_id,title,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at")
+    const { data:sessions, error } = await admin.from("workshop_runs")
+      .select("run_id,classroom_id,title,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,is_provisional")
       .in("classroom_id", classroomIds)
       .eq("published", true)
+      .eq("is_provisional", false)
       .gt("target_xp", 0);
     if (error) throw error;
 
@@ -51,9 +52,11 @@ async function sendCompletedWorkshopAwards(
       const now = Date.now();
       const from = session.active_from ? Date.parse(String(session.active_from)) : Number.NaN;
       const to = session.active_to ? Date.parse(String(session.active_to)) : Number.NaN;
-      const isActive = session.classroom_open === true ||
-        (session.home_enabled === true && Number.isFinite(from) && Number.isFinite(to) && now >= from && now < to);
-      if (!isActive) continue;
+      const isActive = !session.closed_at && (session.classroom_open === true ||
+        (session.home_enabled === true && Number.isFinite(from) && Number.isFinite(to) && now >= from && now < to));
+      const isEnded = Boolean(session.closed_at) ||
+        (session.home_enabled === true && Number.isFinite(to) && now >= to);
+      if (!isActive && !isEnded) continue;
 
       const startedAt = String(session.started_at || session.active_from || "");
       if (!startedAt || !Number.isFinite(Date.parse(startedAt))) continue;
@@ -63,7 +66,8 @@ async function sendCompletedWorkshopAwards(
         .neq("event_type", "teacher_adjustment")
         .gte("occurred_at", startedAt)
         .order("occurred_at", { ascending:true });
-      if (Number.isFinite(to)) query.lte("occurred_at", String(session.active_to));
+      const endAt = session.closed_at || session.active_to;
+      if (endAt) query.lte("occurred_at", String(endAt));
       if (selectedGames.length) query.in("game_id", selectedGames);
       const { data:events, error:eventError } = await query;
       if (eventError) throw eventError;
@@ -74,7 +78,7 @@ async function sendCompletedWorkshopAwards(
 
       const awardSeed = [
         String(session.classroom_id || ""),
-        String(session.plan_id || ""),
+        String(session.run_id || session.plan_id || ""),
         String(Date.parse(startedAt)),
         profileId,
       ].join(":");
