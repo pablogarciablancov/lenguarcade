@@ -700,7 +700,7 @@ Automatizado: `npm run check`, incluido `scripts/check-live-access.mjs`.
 1. Ejecutar `node scripts/check-xp-integrity.mjs` y `npm run check`; deben pasar las pruebas de los 16 juegos, topes y recompensas pendientes.
 2. Abrir la ficha del alumno: expandir «¿Cómo se gana la XP?» y comprobar que están explicadas las reglas de todos los juegos oficiales.
 3. Repetir un guardado sin progreso: no suma XP; avanzar en un juego: el evento muestra regla aplicada, solicitada, otorgada y pendiente.
-4. Alcanzar el límite de seguridad en entorno de prueba: comprobar que el exceso se guarda como pendiente y se paga en guardados posteriores, sin duplicar progreso.
+4. Alcanzar el límite de seguridad en entorno de prueba: comprobar que el exceso se guarda como pendiente y se paga en un guardado posterior del mismo juego, sin duplicar progreso.
 5. En el panel docente, abrir Actividades de clase y un taller con más de ocho alumnos: comprobar que se ven todos, su XP/objetivo y el estado completado/pendiente.
 6. Confirmar que la navegación permite pasar del planificador de talleres al tablón de retos y misiones.
 7. La suma automática al marcador externo requiere aún completar la vinculación segura de IDs de alumno entre LenguArcade y el Marcador de flotas, así como instalar la función receptora en su Apps Script; comprobar los requisitos al integrar ambos sistemas.
