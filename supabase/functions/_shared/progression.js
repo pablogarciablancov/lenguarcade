@@ -10,12 +10,12 @@ export const XP_REWARD_GUIDE = Object.freeze({
   maniacgrafia:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
   narratoria:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
   scrabble:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
-  conjuga_y_apuesta:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
-  batalla_verbal:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
-  guardianes_de_la_biblioteca:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  conjuga_apuesta:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  verb_battle:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  tower_defense:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
   word_play:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
   lexitrama:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
-  forja:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  lexoma:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
 });
 export function capProgressionAward(requestedXp,requestedFeathers,minuteXp,tenMinuteXp,minuteFeathers,tenMinuteFeathers){
  const xp=Math.max(0,Math.round(Number(requestedXp)||0)),feathers=Math.max(0,Math.round(Number(requestedFeathers)||0));
