@@ -137,44 +137,41 @@ button:disabled{cursor:not-allowed;opacity:.45}
       </div>
 
       <main class="menuShowcase">
-        <div class="duelPreview">
-          <div class="previewTop">
-            <div class="previewSide you"><span class="previewAvatar" id="previewHeroAvatar"><img id="previewHeroAvatarImg" src="./assets/heroes/warrior.png" alt="Guerrero"></span><b>Tú</b><div class="previewHp"><span></span></div></div>
-            <div class="previewVs">VS</div>
-            <div class="previewSide rival"><div class="previewHp"><span></span></div><b>Rival</b><span class="previewAvatar enemyAvatar"><span class="enemySprite enemySprite--shadow" aria-hidden="true"></span></span></div>
-          </div>
-          <div class="previewScene">
-            <div class="previewFighter hero" id="previewHero">
-              <div class="fighterAura"></div>
-              <div class="previewCharacter" id="previewHeroGlyph"><img id="previewHeroSprite" src="./assets/heroes/warrior.png" alt="Guerrero"></div>
-              <div class="previewNameplate heroPlate"><small>TU HÉROE</small><b id="previewHeroRole">Guerrero</b></div>
+        <section class="rosterCatalog" aria-label="Héroes y rivales de Batalla Verbal">
+          <header class="rosterCatalogHead">
+            <div><span class="rosterEyebrow">LA ARENA TE ESPERA</span><h1>Elige a tu héroe</h1></div>
+            <p>Cuatro campeones. Ocho rivales. Cada palabra cuenta.</p>
+          </header>
+          <section class="rosterFaction heroesFaction" aria-label="Elige tu héroe">
+            <div class="rosterFactionTitle"><span>01</span><b>TU EQUIPO</b><i></i><small>Selecciona un campeón</small></div>
+            <div class="heroRosterGrid">
+              <button class="rosterCard heroRosterCard warrior" data-menu-class="warrior" aria-label="Elegir Guerrero">
+                <span class="rosterCardArt"><img src="./assets/heroes/warrior.png" alt=""></span><span class="rosterCardInfo"><b>Guerrero</b><small>Fuerza en cada palabra</small><em>+10 % daño</em></span><span class="rosterSelectedMark">✓</span>
+              </button>
+              <button class="rosterCard heroRosterCard mage" data-menu-class="mage" aria-label="Elegir Mago">
+                <span class="rosterCardArt"><img src="./assets/heroes/mage.png" alt=""></span><span class="rosterCardInfo"><b>Mago</b><small>Conjuga el conocimiento</small><em>Más energía</em></span><span class="rosterSelectedMark">✓</span>
+              </button>
+              <button class="rosterCard heroRosterCard archer" data-menu-class="archer" aria-label="Elegir Arquero">
+                <span class="rosterCardArt"><img src="./assets/heroes/archer.png" alt=""></span><span class="rosterCardInfo"><b>Arquero</b><small>Precisión gramatical</small><em>+10 % puntos</em></span><span class="rosterSelectedMark">✓</span>
+              </button>
+              <button class="rosterCard heroRosterCard cleric" data-menu-class="cleric" aria-label="Elegir Clérigo">
+                <span class="rosterCardArt"><img src="./assets/heroes/cleric.png" alt=""></span><span class="rosterCardInfo"><b>Clérigo</b><small>Corrige y protege</small><em>Cura al defender</em></span><span class="rosterSelectedMark">✓</span>
+              </button>
             </div>
-            <div class="previewImpact"><span>VS</span></div>
-            <div class="previewFighter enemy">
-              <div class="fighterAura"></div>
-              <div class="previewCharacter previewEnemyCharacter"><span class="enemySprite enemySprite--shadow" aria-hidden="true"></span></div>
-              <div class="previewNameplate enemyPlate"><small>RIVAL</small><b>Sombra del error</b></div>
+          </section>
+          <section class="rosterFaction rivalsFaction" aria-label="Rivales de la arena">
+            <div class="rosterFactionTitle"><span>02</span><b>RIVALES DE LA ARENA</b><i></i><small>Entrena contra todos</small></div>
+            <div class="enemyRosterGrid">
+              <article class="rosterCard enemyRosterCard"><span class="enemyRosterArt"><span class="enemySprite enemySprite--slime" aria-hidden="true"></span></span><span class="rosterCardInfo"><b>Moco léxico</b><small>Rival 1</small></span></article>
+              <article class="rosterCard enemyRosterCard"><span class="enemyRosterArt"><span class="enemySprite enemySprite--wisp" aria-hidden="true"></span></span><span class="rosterCardInfo"><b>Fuego verbal</b><small>Rival 2</small></span></article>
+              <article class="rosterCard enemyRosterCard"><span class="enemyRosterArt"><span class="enemySprite enemySprite--beetle" aria-hidden="true"></span></span><span class="rosterCardInfo"><b>Escarabajo sintáctico</b><small>Rival 3</small></span></article>
+              <article class="rosterCard enemyRosterCard"><span class="enemyRosterArt"><span class="enemySprite enemySprite--troll" aria-hidden="true"></span></span><span class="rosterCardInfo"><b>Trol de la concordancia</b><small>Rival 4</small></span></article>
+              <article class="rosterCard enemyRosterCard"><span class="enemyRosterArt"><span class="enemySprite enemySprite--shadow" aria-hidden="true"></span></span><span class="rosterCardInfo"><b>Sombra del error</b><small>Rival 5</small></span></article>
+              <article class="rosterCard enemyRosterCard"><span class="enemyRosterArt"><span class="enemySprite enemySprite--shaman" aria-hidden="true"></span></span><span class="rosterCardInfo"><b>Chamán irregular</b><small>Rival 6</small></span></article>
+              <article class="rosterCard enemyRosterCard"><span class="enemyRosterArt"><span class="enemySprite enemySprite--golem" aria-hidden="true"></span></span><span class="rosterCardInfo"><b>Gólem de las palabras</b><small>Rival 7</small></span></article>
+              <article class="rosterCard enemyRosterCard"><span class="enemyRosterArt"><span class="enemySprite enemySprite--owl" aria-hidden="true"></span></span><span class="rosterCardInfo"><b>Búho arcano</b><small>Rival 8</small></span></article>
             </div>
-          </div>
-          <div class="previewSlogan">Escribe bien. <strong>Ataca mejor.</strong></div>
-        </div>
-
-        <section class="classDeck">
-          <div class="classDeckTitle"><span></span><b>ELIGE TU CLASE</b><span></span></div>
-          <div class="menuClasses">
-            <button class="menuClassCard warrior" data-menu-class="warrior">
-              <span class="classPortrait"><img src="./assets/heroes/warrior.png" alt="" aria-hidden="true"></span><b>Guerrero</b><small>Fuerza en cada palabra</small><em>+10% daño</em>
-            </button>
-            <button class="menuClassCard mage" data-menu-class="mage">
-              <span class="classPortrait"><img src="./assets/heroes/mage.png" alt="" aria-hidden="true"></span><b>Mago</b><small>Conjuga el conocimiento</small><em>Más energía</em>
-            </button>
-            <button class="menuClassCard archer" data-menu-class="archer">
-              <span class="classPortrait"><img src="./assets/heroes/archer.png" alt="" aria-hidden="true"></span><b>Arquero</b><small>Precisión gramatical</small><em>+10% puntos</em>
-            </button>
-            <button class="menuClassCard cleric" data-menu-class="cleric">
-              <span class="classPortrait"><img src="./assets/heroes/cleric.png" alt="" aria-hidden="true"></span><b>Clérigo</b><small>Corrige y protege</small><em>Cura al defender</em>
-            </button>
-          </div>
+          </section>
         </section>
       </main>
 
@@ -749,10 +746,10 @@ function renderFighters(){
     const rivalIndex=Math.min(PRACTICE_RIVALS.length-1,Math.floor(resolvedCells/4)),rival=PRACTICE_RIVALS[rivalIndex];
     const resistance=clamp((25-resolvedCells)/25*100,0,100);
     right.style.setProperty("--fighter",rival.color);
-    right.innerHTML='<div class="fighterLabel">RIVAL '+(rivalIndex+1)+'/'+PRACTICE_RIVALS.length+'</div>'+
+    right.innerHTML='<div class="fighterLabel">RETO '+(rivalIndex+1)+'/'+PRACTICE_RIVALS.length+'</div>'+
       '<div class="fighterSprite fighterEnemyFrame"><span class="enemySprite enemySprite--'+rival.sprite+'" aria-hidden="true"></span></div>'+
       '<div class="fighterHud enemyFighterHud">'+
-        '<div class="fighterHudHead"><div><small>RIVAL DE ENTRENAMIENTO</small><b>'+escapeHtml(rival.name)+'</b><span>Cada 4 retos aparece uno nuevo</span></div><strong>'+(25-resolvedCells)+'/25</strong></div>'+
+        '<div class="fighterHudHead"><div><small>GUARDIÁN DEL RETO</small><b>'+escapeHtml(rival.name)+'</b><span>Cambia cada cuatro desafíos</span></div><strong>'+(25-resolvedCells)+'/25</strong></div>'+
         '<div class="fighterMeterLabel"><span>Resistencia</span><span>'+Math.round(resistance)+'%</span></div>'+
         '<div class="fighterMeter"><div class="fighterHp enemyHp" style="width:'+resistance+'%"></div></div>'+
         '<div class="fighterStatus">Supera los retos para derrotarlo</div>'+
@@ -832,6 +829,7 @@ function renderProfileMenu(){
 }
 function renderAll(){
   renderTarget();renderPlayers();renderBoard();renderCareer();
+  $("gameScreen").classList.toggle("practiceMode",setupMode==="practice");
   $("battleStage").classList.toggle("practiceStage",setupMode==="practice");
   const until=5-(resolvedCells%5);
   $("eventNext").textContent="Evento en "+until+" acción"+(until===1?"":"es");
@@ -840,9 +838,9 @@ function renderAll(){
   if($("battleProgressText"))$("battleProgressText").textContent=resolvedCells+" / 25";
   if($("battleProgressFill"))$("battleProgressFill").style.width=clamp(resolvedCells/25*100,0,100)+"%";
   if($("arenaBuffBadge")){
-    let buff="Arena estable";
-    if(arenaBuff.damage>1)buff="🔥 Frenesí: próximo daño +25%";
-    else if(arenaBuff.score>1)buff="💰 Bote: próxima puntuación ×2";
+    let buff=setupMode==="practice"?"Sala de entrenamiento":"Arena estable";
+    if(setupMode==="battle"&&arenaBuff.damage>1)buff="🔥 Frenesí: próximo daño +25%";
+    else if(setupMode==="battle"&&arenaBuff.score>1)buff="💰 Bote: próxima puntuación ×2";
     $("arenaBuffBadge").textContent=buff
   }
 }

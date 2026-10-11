@@ -3,6 +3,8 @@ import path from "node:path";
 
 const root=process.cwd();
 const game=fs.readFileSync(path.join(root,"games","verb_battle","index.html"),"utf8");
+const gameCss=fs.readFileSync(path.join(root,"games","verb_battle","arcade.css"),"utf8");
+const practiceBackdrop=path.join(root,"games","verb_battle","assets","arena","practice-academy.webp");
 const code=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Code.gs"),"utf8");
 const generatedCatalog=fs.readFileSync(path.join(root,"apps-script","LenguArcade_GameCatalog.gs"),"utf8");
 const student=fs.readFileSync(path.join(root,"apps-script","LenguArcade_Alumno.html"),"utf8");
@@ -55,6 +57,12 @@ if(game.includes("Ha acertado") || game.includes("Mostrar solución") || game.in
 
 const personCount=(game.match(/label:"[123]\.ª persona/g)||[]).length;
 if(personCount<6)errors.push("Faltan las seis personas gramaticales.");
+
+if((game.match(/class="rosterCard heroRosterCard/g)||[]).length!==4)errors.push("La portada debe mostrar las cuatro cartas de héroe.");
+if((game.match(/class="rosterCard enemyRosterCard/g)||[]).length!==8)errors.push("La portada debe mostrar las ocho cartas de rivales.");
+if(game.includes('class="duelPreview"'))errors.push("La portada no debe mostrar una pelea activa.");
+if(!fs.existsSync(practiceBackdrop) || !gameCss.includes("practice-academy.webp"))errors.push("Falta el fondo propio de la sala de práctica.");
+if(!game.includes('classList.toggle("practiceMode",setupMode==="practice")') || !gameCss.includes("#gameScreen.practiceMode .vsMark"))errors.push("La presentación de práctica no está aislada del modo batalla.");
 
 if(!generatedCatalog.includes('gameId:"verb_battle"') ||
    !generatedCatalog.includes('integration:"embedded"') ||
