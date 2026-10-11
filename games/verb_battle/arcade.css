@@ -498,10 +498,6 @@ button:disabled{cursor:not-allowed;opacity:.42}
   color:#fff0c8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
 }
 .moveFooterText small{
-
-Warning: truncated output (original token count: 8084)
-Total output lines: 500
-
   display:block;margin-top:1px;font-size:5.5px;color:#b7c0ce;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
 }
 .moveReward{
@@ -728,7 +724,76 @@ Total output lines: 500
   background:
     linear-gradient(180deg,rgba(28,75,124,.95),rgba(12,35,69,.98));
   clip-path:polygon(4% 0,96% 0,100% 50%,96% 100%,4% 100%,0 50%);
-  box-shadow:inset 0 1px rgba(255,255,255,.11),inset 0 -8px 20px rgba(0,0,0,.14)…1084 tokens truncated…ansparent 20%,transparent 80%,rgba(3,7,15,.35)),
+  box-shadow:inset 0 1px rgba(255,255,255,.11),inset 0 -8px 20px rgba(0,0,0,.14),0 7px 15px rgba(0,0,0,.24);
+  transition:.14s
+}
+.gameMenuBtn:before{
+  content:"";position:absolute;inset:3px;
+  clip-path:inherit;border:1px solid rgba(117,183,245,.2);pointer-events:none
+}
+.gameMenuBtn:hover{transform:translateX(5px);filter:brightness(1.14);border-color:#67b6f3}
+.gameMenuBtn>span:not(.menuIco){font-family:Georgia,"Times New Roman",serif;font-size:17px;font-weight:950;letter-spacing:.02em}
+.gameMenuBtn small{grid-column:1;color:#9fbfe3;font-size:7px;text-transform:uppercase;letter-spacing:.1em}
+.menuIco{
+  position:absolute;left:19px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;
+  display:grid;place-items:center;font-size:17px;color:#cfeeff;
+  background:rgba(5,21,43,.6);border:1px solid rgba(110,190,255,.24)
+}
+.gameMenuBtn.primary{
+  min-height:65px;padding-left:66px;border-color:#ffe19a;color:#3c2105;
+  background:linear-gradient(180deg,#fff0a2 0,#ffc94c 40%,#ee9d1b 100%);
+  box-shadow:inset 0 2px rgba(255,255,255,.65),inset 0 -7px 12px rgba(142,75,0,.2),0 0 24px rgba(255,177,47,.27),0 9px 17px rgba(0,0,0,.28)
+}
+.gameMenuBtn.primary>span:not(.menuIco){font-size:23px;text-shadow:0 1px rgba(255,255,255,.4)}
+.gameMenuBtn.primary small{color:#7d4a14}
+.gameMenuBtn.primary .menuIco{width:37px;height:37px;color:#47270a;background:rgba(111,52,0,.09);border-color:rgba(108,55,3,.2);font-size:23px}
+.gameMenuBtn.quit{opacity:.86}
+
+/* HUD superior */
+.menuProfileHud{
+  position:absolute;z-index:22;right:clamp(18px,3.8vw,58px);top:clamp(18px,3vh,32px);
+  width:min(620px,52vw);height:78px;padding:8px 14px 8px 82px;
+  display:grid;grid-template-columns:minmax(190px,1fr) 80px 88px;gap:8px;align-items:center;
+  background:linear-gradient(180deg,rgba(8,24,45,.96),rgba(6,17,34,.98));
+  border:2px solid #b58a3c;border-radius:6px;
+  box-shadow:inset 0 0 0 2px rgba(255,211,111,.08),0 14px 30px rgba(0,0,0,.28)
+}
+.menuProfileHud:before,.menuProfileHud:after{content:"";position:absolute;width:17px;height:17px;border:2px solid #e0b858;transform:rotate(45deg)}
+.menuProfileHud:before{left:-7px;top:29px;background:#101d35}.menuProfileHud:after{right:-7px;top:29px;background:#101d35}
+.profilePortrait{
+  position:absolute;left:-12px;top:50%;transform:translateY(-50%);
+  width:82px;height:82px;border-radius:50%;display:grid;place-items:center;font-size:38px;
+  background:radial-gradient(circle at 50% 40%,#355f90,#101c32 72%);
+  border:4px solid #d7aa4d;box-shadow:0 0 0 2px #5f3c0f,0 0 24px rgba(92,180,255,.2)
+}
+.profileIdentity{min-width:0;display:grid;grid-template-columns:1fr auto;column-gap:8px;align-items:center}
+.profileIdentity strong{font-family:Georgia,"Times New Roman",serif;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profileIdentity>span{font-size:9px;color:#bbcae1}
+.menuXpTrack{grid-column:1/3;height:8px;margin-top:4px;border-radius:99px;background:#030912;border:1px solid #385679;overflow:hidden}
+.menuXpTrack span{display:block;height:100%;width:0;background:linear-gradient(90deg,#18b9e8,#5fdbff 70%,#b2f5ff);box-shadow:0 0 10px rgba(78,213,255,.6)}
+.profileIdentity small{grid-column:1/3;margin-top:3px;font-size:7px;color:#98aac2;text-align:right}
+.profileStat{
+  height:52px;border-left:1px solid rgba(212,172,89,.28);display:grid;grid-template-columns:29px 1fr;grid-template-rows:1fr 1fr;align-items:center;padding-left:10px
+}
+.profileStat>span{grid-row:1/3;font-size:25px}.profileStat b{font-size:17px;line-height:1}.profileStat small{font-size:7px;text-transform:uppercase;color:#d9c69a}
+
+/* escaparate de combate + clases */
+.menuShowcase{
+  position:absolute;z-index:10;right:clamp(18px,4vw,60px);top:clamp(112px,15vh,145px);bottom:clamp(18px,3vh,32px);
+  left:clamp(395px,31vw,500px);display:grid;grid-template-rows:minmax(250px,1.35fr) auto;gap:15px;align-content:end
+}
+.duelPreview{
+  position:relative;min-height:0;border:2px solid #bf9140;border-radius:7px;overflow:hidden;
+  background:
+    radial-gradient(circle at 73% 47%,rgba(157,81,255,.24),transparent 22%),
+    radial-gradient(circle at 29% 48%,rgba(255,135,50,.2),transparent 23%),
+    linear-gradient(180deg,#1d3c64 0,#172c4f 48%,#0c172a 100%);
+  box-shadow:inset 0 0 0 2px rgba(255,224,143,.08),0 18px 36px rgba(0,0,0,.34)
+}
+.duelPreview:before{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(90deg,rgba(3,7,15,.35),transparent 20%,transparent 80%,rgba(3,7,15,.35)),
     repeating-linear-gradient(90deg,transparent 0 78px,rgba(124,172,230,.035) 79px 80px);
   pointer-events:none
 }
@@ -933,7 +998,6 @@ Total output lines: 500
 .previewFighter.enemy .previewCharacter img{
   filter:drop-shadow(0 16px 14px rgba(0,0,0,.42)) drop-shadow(0 0 12px rgba(157,90,255,.25))
 }
-
 
 .fighterSprite{
   overflow:visible;border-color:transparent;
@@ -1434,10 +1498,6 @@ Total output lines: 500
 
 /* ---------- COMBATE: dos franjas reales ---------- */
 .battleScreen{
-
-Warning: truncated output (original token count: 7146)
-Total output lines: 466
-
   background:
     linear-gradient(180deg,rgba(5,11,23,.82),rgba(4,9,19,.94)),
     url("./assets/arena/battle-academy.jpg") center/cover fixed no-repeat
@@ -1691,7 +1751,14 @@ Total output lines: 466
 .rosterFactionTitle{display:flex;align-items:center;gap:8px;min-width:0;color:#f4d88e}
 .rosterFactionTitle>span{color:#7bdfff;font-size:8px;font-weight:950}
 .rosterFactionTitle>b{white-space:nowrap;font-size:clamp(8px,.72vw,10px);letter-spacing:.16em}
-.rosterFactionTi…146 tokens truncated…--class) 58%,rgba(255,255,255,.2));border-radius:12px;
+.rosterFactionTitle>i{height:1px;flex:1;background:linear-gradient(90deg,rgba(221,178,88,.55),transparent)}
+.rosterFactionTitle>small{color:#aabbd2;font-size:clamp(7px,.6vw,9px);white-space:nowrap}
+.heroRosterGrid,.enemyRosterGrid{min-width:0;min-height:0;display:grid;gap:clamp(5px,.65vw,9px)}
+.heroRosterGrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.enemyRosterGrid{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr))}
+.rosterCard{
+  --class:#78caff;position:relative;min-width:0;min-height:0;overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--class) 58%,rgba(255,255,255,.2));border-radius:12px;
   color:#f8f5eb;background:radial-gradient(circle at 50% 0,color-mix(in srgb,var(--class) 24%,transparent),transparent 62%),linear-gradient(155deg,rgba(27,43,65,.95),rgba(5,13,26,.98));
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 9px 18px rgba(0,0,0,.28)
 }
