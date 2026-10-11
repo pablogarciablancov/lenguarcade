@@ -28,9 +28,13 @@ function scan(line){
  blocked=false;previous=w;lastWord=x;});
  return{syllables:Math.max(0,count+(lastWord?.adjustment||0)),synalephas:joins,last:lastWord};
 }
-function evaluate(line,reference,type='consonant'){
+function evaluate(line,reference,type='any'){
  const a=scan(line),b=scan(reference),different=a.last?.word!==b.last?.word;
- return{...a,meterMatches:a.syllables===b.syllables,rhymeMatches:!!a.last&&different&&a.last[type]===b.last?.[type],target:b.syllables};
+ const consonantMatch=!!a.last&&different&&a.last.consonant===b.last?.consonant;
+ const assonantMatch=!!a.last&&different&&a.last.assonant===b.last?.assonant;
+ const rhymeMatchType=consonantMatch?'consonante':assonantMatch?'asonante':null;
+ const rhymeMatches=type==='any'?(consonantMatch||assonantMatch):type==='assonant'?assonantMatch:consonantMatch;
+ return{...a,meterMatches:a.syllables===b.syllables,rhymeMatches,rhymeMatchType:rhymeMatches?rhymeMatchType:null,target:b.syllables};
 }
 window.VersopolisProsody={scan,wordScan,evaluate};
 })();
