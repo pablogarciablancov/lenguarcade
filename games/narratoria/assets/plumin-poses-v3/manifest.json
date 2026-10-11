@@ -1,0 +1,1530 @@
+{
+  "canvas": [
+    256,
+    256
+  ],
+  "baselineY": 250,
+  "maxForegroundHeight": 232,
+  "frames": [
+    {
+      "source": "pose-01.png",
+      "sourceSha256": "ebfb491736d2b7f0a873f2cfcca58defb5cd35e7433442b9dbdfba90f330c380",
+      "frame": "pose-01.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        31,
+        18,
+        224,
+        250
+      ],
+      "sha256": "9477cd0adf7bf239599663f8c61067fa7bf7025c383c16c25cd6bb4661ddcd1a",
+      "removedComponents": 1,
+      "removedPixels": 851,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-02.png",
+      "sourceSha256": "bc9272f306308eb22875d94c88350b54e73a38d4d4bcf017745901d9a4a1f4df",
+      "frame": "pose-02.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        18,
+        223,
+        250
+      ],
+      "sha256": "6640d6a8096b3b7dc87988043050f594a02b2ace3316fca45ec6489cf1cab21d",
+      "removedComponents": 4,
+      "removedPixels": 853,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-03.png",
+      "sourceSha256": "194c2efb5d01f31466b055cab49d57ecb632ae1a765b1aa86e568144392ec7c9",
+      "frame": "pose-03.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        18,
+        224,
+        250
+      ],
+      "sha256": "eea5793488babe98c8563764b1f5adf87dcec5c8d5b94ba0b87ea84ed73f6892",
+      "removedComponents": 6,
+      "removedPixels": 838,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-04.png",
+      "sourceSha256": "63b257b9faff7646fb47edfefa78cba9c71de421220b3e832f5b71e836ad5a05",
+      "frame": "pose-04.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        18,
+        224,
+        250
+      ],
+      "sha256": "8812f3046545f0ad520d0bc12751cfcd1a2113a08e56f384a4eabda677ce6773",
+      "removedComponents": 3,
+      "removedPixels": 854,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-05.png",
+      "sourceSha256": "de740679524c1574c6a9dad57c71fbd9531b27859a7f4a1c1ecb8661533b584b",
+      "frame": "pose-05.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        31,
+        18,
+        224,
+        250
+      ],
+      "sha256": "fa2a90ad97e07e2b9cd03b072ba017703b43e29f338e1a5baa5ddf07ec362193",
+      "removedComponents": 0,
+      "removedPixels": 864,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-06.png",
+      "sourceSha256": "d801c82f75fd49890f170a9fd79ce943dbbf42f43d60e6099ef2a917a95f3a38",
+      "frame": "pose-06.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        15,
+        18,
+        240,
+        250
+      ],
+      "sha256": "77eb52476ccc60ed2b9a8c68b5a36b620267c71131ac9869286dcf5126176602",
+      "removedComponents": 4,
+      "removedPixels": 927,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-07.png",
+      "sourceSha256": "b920ebe00adf5ec7612cbd08f702e4ddb306da982fd366860e44d592dfba21a8",
+      "frame": "pose-07.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        31,
+        252,
+        250
+      ],
+      "sha256": "4ee87f178cc15a12de48689b96583417e954668dbc688e73bab19f462be16663",
+      "removedComponents": 1,
+      "removedPixels": 886,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-08.png",
+      "sourceSha256": "7d90bf8abb03d621cbacfa636e9270508b05d3df98512ce375848fcd2e035506",
+      "frame": "pose-08.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        29,
+        18,
+        226,
+        250
+      ],
+      "sha256": "5d47a25072594e8c630518eb61e9508b17d0cee7e87f080204d183ff95b06761",
+      "removedComponents": 0,
+      "removedPixels": 881,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-09.png",
+      "sourceSha256": "d08c9b7280390445456ebdfa3f939b32dc5085e9c5ee427ea009f618a6b315c8",
+      "frame": "pose-09.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        29,
+        18,
+        226,
+        250
+      ],
+      "sha256": "04c396542a2e9794031bf696d1dd101471d8421347a9b786d43767e435ef7436",
+      "removedComponents": 3,
+      "removedPixels": 820,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-10.png",
+      "sourceSha256": "0fcfb4d344d90e0bd4fdafbd7b541b5ee91f440a87d1f0bb6e41370abbd0ce47",
+      "frame": "pose-10.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        30,
+        18,
+        226,
+        250
+      ],
+      "sha256": "e47fd290f888e4d55b5b984646247ff21dda06e51ea0ed6cc1fffeb463a6a7f7",
+      "removedComponents": 4,
+      "removedPixels": 824,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-11.png",
+      "sourceSha256": "2a7f88d124219361ae2162fd1960f45eebcf6fbcac68fee5fb6fcb0171b641ae",
+      "frame": "pose-11.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        26,
+        18,
+        230,
+        250
+      ],
+      "sha256": "2e22e71c9e59103ca1b217439838b8094eb07c4ce4eb7ae05939a91f8974aeae",
+      "removedComponents": 3,
+      "removedPixels": 879,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-12.png",
+      "sourceSha256": "ee9eb072c6b30763356653e9226bdc5d564443592d60641673a714445a3a9be6",
+      "frame": "pose-12.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        19,
+        18,
+        236,
+        250
+      ],
+      "sha256": "679cdf7260529a177cb76d3eec5a35891a0cae9d7559d2c5893cb9393461654f",
+      "removedComponents": 2,
+      "removedPixels": 937,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-13.png",
+      "sourceSha256": "1f1372c5a5cfaed6abebcb2ada0f9003984a17cf644f8c8eb3dbdbd3d4fe0dd5",
+      "frame": "pose-13.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        22,
+        18,
+        234,
+        250
+      ],
+      "sha256": "6832f420aaa143578576d1871df4e9c100417986a6c7e62d742bbc651f682a90",
+      "removedComponents": 5,
+      "removedPixels": 787,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-14.png",
+      "sourceSha256": "b10906656f1665174580edb87d431ff2bace59a19a53ee1eacaaa2494b919fe1",
+      "frame": "pose-14.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        22,
+        18,
+        233,
+        250
+      ],
+      "sha256": "cf82a7ace412564398b26d8a572940f1ffdb348772354dbef1f3a627f0ebe70b",
+      "removedComponents": 3,
+      "removedPixels": 784,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-15.png",
+      "sourceSha256": "16702d541c3f7741812c24c952a00e6d0ec13b1a8fbead97833d889d659c2c14",
+      "frame": "pose-15.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        27,
+        18,
+        228,
+        250
+      ],
+      "sha256": "3e9723a770fdf789ad688dcd66661c2e8e0f18009f6bf5514290c92afb11a231",
+      "removedComponents": 0,
+      "removedPixels": 876,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-16.png",
+      "sourceSha256": "48e4d1f6fa4773f1363ce294bead3d8dd9d5fdea6fa41cad7c1292049baa8c2e",
+      "frame": "pose-16.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        30,
+        252,
+        250
+      ],
+      "sha256": "d4f4678416a9e5077e3b65e0d16570b150b38819ead28a4fcb4fa761b18c4aaa",
+      "removedComponents": 0,
+      "removedPixels": 877,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-17.png",
+      "sourceSha256": "1f955ceb8532d1363a32268dd674bc24e92ccda7db86300991500b9041b1f00c",
+      "frame": "pose-17.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        29,
+        18,
+        227,
+        250
+      ],
+      "sha256": "7e223fcc8e5c366a4a06868903ad788a9b82e98a0e50b2e409ba07e1c1912385",
+      "removedComponents": 12,
+      "removedPixels": 2021,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-18.png",
+      "sourceSha256": "a8820ea9becb5e1a30a68481ff4f2c962314190df25902ec6b128dd062b1878f",
+      "frame": "pose-18.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        34,
+        18,
+        221,
+        250
+      ],
+      "sha256": "b15b44dfe3b7031e87b84e104f74dd276903d4bf1195cfab7c965e9598608c5e",
+      "removedComponents": 12,
+      "removedPixels": 2284,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-19.png",
+      "sourceSha256": "33733b700c7ad808ff36a46e517dc18eaf49fac93da7a30cf7ac891cce94f3fd",
+      "frame": "pose-19.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        36,
+        18,
+        219,
+        250
+      ],
+      "sha256": "f82cf1287197b9bb5f641aea9303b9480386d5504001b9c14b97490db764794d",
+      "removedComponents": 12,
+      "removedPixels": 2037,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-20.png",
+      "sourceSha256": "13c0d84352ff18369c76b9618e67c8fd851d104b0fe4d9d005de85aaf0845945",
+      "frame": "pose-20.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        31,
+        18,
+        225,
+        250
+      ],
+      "sha256": "5babb0651c8b1378f35d05dbf82d843b385e36b6c90873d29a8a74ca018cf496",
+      "removedComponents": 11,
+      "removedPixels": 2020,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-21.png",
+      "sourceSha256": "dcbbd48dca859a86b92730d8872ca81b5092f05eabe12a8b171989ee605b7b48",
+      "frame": "pose-21.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        33,
+        18,
+        223,
+        250
+      ],
+      "sha256": "34e88e54356cceb41c3c423d53057df4019fa7514aa9716c022d39750a114615",
+      "removedComponents": 9,
+      "removedPixels": 2356,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-22.png",
+      "sourceSha256": "38dc12eb9be378aa074cea66d579c3b345f1c2859b02e20690fc761203621354",
+      "frame": "pose-22.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        33,
+        18,
+        223,
+        250
+      ],
+      "sha256": "98db7db645c55fb75202c51cf876d02b8f8c2baff7c86dabd055478ce7606a8a",
+      "removedComponents": 15,
+      "removedPixels": 2116,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-23.png",
+      "sourceSha256": "701d00e78149d4b917cfc8f9fb25102701657951c6c5434c17dac99de1e0e4a3",
+      "frame": "pose-23.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        27,
+        18,
+        228,
+        250
+      ],
+      "sha256": "16259fc74c268d7e53aa1df5b3c2e24f16e8fba39567567005c14c155d72a811",
+      "removedComponents": 21,
+      "removedPixels": 2482,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-24.png",
+      "sourceSha256": "37046f3c11d7fc18b65695b53fb3738b144068c9a5db2319df237a17741d075e",
+      "frame": "pose-24.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        18,
+        223,
+        250
+      ],
+      "sha256": "e3f95688fddd09fb66f035f8f5f426a889d3f30536061876349ddaab0acdce54",
+      "removedComponents": 12,
+      "removedPixels": 2146,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-25.png",
+      "sourceSha256": "e74257e54c6386c68550f61ab40739a06c388bca11a0cc2d7913ea21b321895f",
+      "frame": "pose-25.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        27,
+        18,
+        228,
+        250
+      ],
+      "sha256": "dd7fe66c3ef7ff3367f6f4e551fc491a60bb5111a81e64685b276cc16c7585fe",
+      "removedComponents": 15,
+      "removedPixels": 2339,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-26.png",
+      "sourceSha256": "0b785d0c7d1ebe6a12cc5159c72bfe69437ad81f71eee2a9c141a8d02275ead8",
+      "frame": "pose-26.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        29,
+        18,
+        227,
+        250
+      ],
+      "sha256": "7b8564377abd60a2d3f7a61731d1f63e61ca33237a255c67de693a1f71bec9a7",
+      "removedComponents": 12,
+      "removedPixels": 2581,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-27.png",
+      "sourceSha256": "3e2cbb40eb25f8fd5e4e4b91ad5e62b2aaaf8e4f96e918dbd5ea8f1a56161403",
+      "frame": "pose-27.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        30,
+        18,
+        226,
+        250
+      ],
+      "sha256": "19e902d3f5cdb8924f104e6d2767bf122a90f156868a98e05567c26edd639f16",
+      "removedComponents": 15,
+      "removedPixels": 2659,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-28.png",
+      "sourceSha256": "cca67c64a618ae28f5b47096f6432be1a6bd240dbd2712d234d8309c88535651",
+      "frame": "pose-28.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        18,
+        224,
+        250
+      ],
+      "sha256": "17965e398896ade24dc97da99f07bd0bb1686071b10432a763cb7cdd0ede9642",
+      "removedComponents": 13,
+      "removedPixels": 2009,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-29.png",
+      "sourceSha256": "acb756026ec62f789c4f07d1a7143bcc682b99a9bb51236f0ab57aadfda70917",
+      "frame": "pose-29.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        25,
+        18,
+        230,
+        250
+      ],
+      "sha256": "97e4c70e3557f9bf7553a19fb82c2a79c1d39e09fd57ef760c820a68dc29872a",
+      "removedComponents": 9,
+      "removedPixels": 2160,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-30.png",
+      "sourceSha256": "a0eea42dfd40a36020810d1aef32b0ed43e95217b1822cebc3c059208ed4b7a8",
+      "frame": "pose-30.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        27,
+        18,
+        228,
+        250
+      ],
+      "sha256": "4b1ddeb9d6bb0931f0f571dbb92a50cae0d7069bf87b655ba9684c9c930a0217",
+      "removedComponents": 14,
+      "removedPixels": 2461,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-31.png",
+      "sourceSha256": "e1ed0a97439477d1e14d8d0ef07e2662fce98fffc7a23b7ba98fec666ca856c0",
+      "frame": "pose-31.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        25,
+        18,
+        230,
+        250
+      ],
+      "sha256": "3659af9ab74efad64cadf6f9d2567d98c53249481d1fe1ea9d6dabb75942518b",
+      "removedComponents": 12,
+      "removedPixels": 2231,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-32.png",
+      "sourceSha256": "2992c0df50fbc0dc8d7eeb3d2cf74f05328049a1db29e419e6346c62a0773c3c",
+      "frame": "pose-32.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        22,
+        18,
+        233,
+        250
+      ],
+      "sha256": "29350049747623113e3c63cd9043701b796fd004a6d97e2e119b6c3051dd9701",
+      "removedComponents": 8,
+      "removedPixels": 2101,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-33.png",
+      "sourceSha256": "a7a02064f4a46a51f15e0a3c88773e4c85d2b13c452a7ba8726ceb04695e8aa0",
+      "frame": "pose-33.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        27,
+        18,
+        228,
+        250
+      ],
+      "sha256": "c16856a33dacd2cce67922d8b8bd47105488b07181593364bab9d67014284bb0",
+      "removedComponents": 14,
+      "removedPixels": 1878,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-34.png",
+      "sourceSha256": "a2c91021063c7a246c48b9a02d9fc9b77a16026bb3fdae07539ead536b7efad2",
+      "frame": "pose-34.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        29,
+        18,
+        227,
+        250
+      ],
+      "sha256": "f0201c8c27027578afa785dc3fb520b5369f6b3a6c26eddca5ba162b80649a87",
+      "removedComponents": 18,
+      "removedPixels": 2209,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-35.png",
+      "sourceSha256": "86e3dc87aec60dfb3910fed4c8fb70cc355949df705beb42f1b911ae98157a1d",
+      "frame": "pose-35.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        30,
+        18,
+        225,
+        250
+      ],
+      "sha256": "45564e0f8f9ee9a2a2e2df36fc8636df035d81e294eda380f1d4c1176f470450",
+      "removedComponents": 18,
+      "removedPixels": 2005,
+      "maxDetachedPixels": 10
+    },
+    {
+      "source": "pose-36.png",
+      "sourceSha256": "449a9cd2947a8336142a0cecfb623a5d7c1d5ee22fee5eec994f11d59231fa98",
+      "frame": "pose-36.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        18,
+        18,
+        238,
+        250
+      ],
+      "sha256": "7de281c0245a54002e4a5ee7dbc7158b9c97140bd0043ac4d1a344b35d3ad1dc",
+      "removedComponents": 17,
+      "removedPixels": 1549,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-37.png",
+      "sourceSha256": "5362070059489954372b8ea4fa1b199cb906638ff0704c026b86130f5230587b",
+      "frame": "pose-37.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        16,
+        18,
+        240,
+        250
+      ],
+      "sha256": "a5394b680d13868b7a4b11cdb304daba71627fd9f07ab3739e21b635ae1fc039",
+      "removedComponents": 19,
+      "removedPixels": 1384,
+      "maxDetachedPixels": 32
+    },
+    {
+      "source": "pose-38.png",
+      "sourceSha256": "53c1224a018b4f65a2871f23888803def901d0f0e28a436471a1c0b89c553205",
+      "frame": "pose-38.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        9,
+        18,
+        246,
+        250
+      ],
+      "sha256": "378d963d0509d500dac0bcea766f81153105ab4c1571b120bb527796f2547382",
+      "removedComponents": 9,
+      "removedPixels": 1635,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-39.png",
+      "sourceSha256": "36bddceac1b0c425f8276354480aa569f0efd1cbfa596d757fd2729fd12e6004",
+      "frame": "pose-39.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        14,
+        18,
+        242,
+        250
+      ],
+      "sha256": "60afecf9aada7f7c01602578b6152434d82a5f55c5f2789a772a6a4eeb2dceda",
+      "removedComponents": 13,
+      "removedPixels": 1397,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-40.png",
+      "sourceSha256": "6eaaf69e83acb6ff8c3fc059f3eacc8b39200e635e3529f99351cc7725260775",
+      "frame": "pose-40.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        31,
+        18,
+        225,
+        250
+      ],
+      "sha256": "2e39d9aaaca64bb7d6f853df31ae46280d7e31054004845fade4c0159aaab7fe",
+      "removedComponents": 23,
+      "removedPixels": 2029,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-41.png",
+      "sourceSha256": "a8a3d6114b9d88b9edd3b7f19840350b22baaf768d60b68c0744e330d619bad4",
+      "frame": "pose-41.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        24,
+        18,
+        232,
+        250
+      ],
+      "sha256": "cf078b22da14a6ffdc31deca2a5a19ccd6307322d1599bd375a6ad603588d94b",
+      "removedComponents": 20,
+      "removedPixels": 2571,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-42.png",
+      "sourceSha256": "f9ab74f98b7906dce607012d302e6612bfba448d13678bc9852ea453d1e42b74",
+      "frame": "pose-42.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        24,
+        18,
+        232,
+        250
+      ],
+      "sha256": "33dad7e06ece12b86b56a1d4650db8da6ae7dc26cf8d8a66e6588bc83f9df943",
+      "removedComponents": 20,
+      "removedPixels": 2631,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-43.png",
+      "sourceSha256": "a0bce029e0032a250addffd8364ecfe9a867044732ca216287c2390c6e6d00df",
+      "frame": "pose-43.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        23,
+        18,
+        233,
+        250
+      ],
+      "sha256": "d1c094044fe8076e6f0281d04d74529ca89aaa70a4b90d27d8b6f6fec23a1734",
+      "removedComponents": 16,
+      "removedPixels": 2064,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-44.png",
+      "sourceSha256": "fac9733ba7c24ec8ea5c1fec9ea59aeaf66260c653d7f048c61c3a8241aa611e",
+      "frame": "pose-44.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        26,
+        18,
+        229,
+        250
+      ],
+      "sha256": "5889007fd0c0c16322f987fd45935926823087319b9c69481e7a91146f001276",
+      "removedComponents": 21,
+      "removedPixels": 2615,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-45.png",
+      "sourceSha256": "528a53c89c3592ae48077dfcb7ba479b843d4d9b7829cddce39a9a194d5f8a4f",
+      "frame": "pose-45.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        11,
+        18,
+        244,
+        250
+      ],
+      "sha256": "62ace65ff0c993c1f74427f5b121f195878319b973c38a3239df3cac3a8c7d6c",
+      "removedComponents": 14,
+      "removedPixels": 1447,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-46.png",
+      "sourceSha256": "681a88bb8f47bae2f63b2854202b6f1654d10daeeae337642a39e1e24cf8d23b",
+      "frame": "pose-46.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        7,
+        18,
+        249,
+        250
+      ],
+      "sha256": "46347646924db0b18153867c293a2d5471bdb13d68881b52fdd956fd07adf8d5",
+      "removedComponents": 11,
+      "removedPixels": 1522,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-47.png",
+      "sourceSha256": "9694d04ac02612181f6e9225e1923b09cb2ec717911ab376849587513837ae6b",
+      "frame": "pose-47.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        20,
+        18,
+        236,
+        250
+      ],
+      "sha256": "956b1576b3cca23efacdff1d18cecd11bd347913fd79cfd955aef2fa4d8c49b9",
+      "removedComponents": 23,
+      "removedPixels": 1765,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-48.png",
+      "sourceSha256": "753040c72b64f4bb17a62c747aaec1ea59671ddb9d55beeb9ba46ce1c19331b2",
+      "frame": "pose-48.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        25,
+        18,
+        231,
+        250
+      ],
+      "sha256": "b1a39be3fbaf8932450c1a9903d45161c581fcd10fa132542d83c6a98dab0194",
+      "removedComponents": 14,
+      "removedPixels": 1928,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-49.png",
+      "sourceSha256": "393f6cf731b2dee46a40bdd8d76ee06b09486100d99579f5e51e2048d308384e",
+      "frame": "pose-49.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        31,
+        18,
+        225,
+        250
+      ],
+      "sha256": "8ba3492efc7566cb4faa2a9e77a8b7a9797cb60f2bda60f6c90a4e81f4e4b1a4",
+      "removedComponents": 12,
+      "removedPixels": 2532,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-50.png",
+      "sourceSha256": "53866fe79c11a974d8cf986cda7367b759a025e8e0b80fda6bddb03f51c92fe7",
+      "frame": "pose-50.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        30,
+        18,
+        225,
+        250
+      ],
+      "sha256": "a1e96eaef1efd91dac02a7d764301ccf6e4620ecd77a23c10a5554c8efb9481d",
+      "removedComponents": 17,
+      "removedPixels": 2560,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-51.png",
+      "sourceSha256": "102afab3b9ef85f76a2f6fa439766d2d39419b658ef2a9dd0c958e62532dd7f2",
+      "frame": "pose-51.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        18,
+        251,
+        250
+      ],
+      "sha256": "07642c72d4e91d48ce2967cd0343db085dba64e283aaf0caccfe455d3b11fe64",
+      "removedComponents": 9,
+      "removedPixels": 1639,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-52.png",
+      "sourceSha256": "7cea32d7b0e03d7d63422cb9a24dd97b688d2364d6d8ca2e7643f0cba216a8ac",
+      "frame": "pose-52.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        19,
+        252,
+        250
+      ],
+      "sha256": "5255feb40571ca7274b07cd6ecbc4803ba06f637d5c81d922329069cd3eb2a4f",
+      "removedComponents": 9,
+      "removedPixels": 1687,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-53.png",
+      "sourceSha256": "7e18798f8f7008a06e0b483bb833bc8380450c77d893cf55a9625b14d5a49a0c",
+      "frame": "pose-53.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        26,
+        252,
+        250
+      ],
+      "sha256": "d57f1ec211fed0f956fb8573e27f7311702861bfb468b6d7ec6b6f22b5b6d441",
+      "removedComponents": 8,
+      "removedPixels": 1249,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-54.png",
+      "sourceSha256": "c896d0d61bde9a68142899aad69482384a1bd2b79b78ed6ecd9eb1ac59f55fc3",
+      "frame": "pose-54.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        25,
+        252,
+        250
+      ],
+      "sha256": "c64b9e4793e11d184f14785d037bee6ca931686672b56c1168572d4d9a03dbe4",
+      "removedComponents": 11,
+      "removedPixels": 1609,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-55.png",
+      "sourceSha256": "99d9af39a91481046b7a6be80b65a86a4f0bb27b1fe463a64451195503300573",
+      "frame": "pose-55.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        33,
+        252,
+        250
+      ],
+      "sha256": "379a970a7d0508d031a5299ecdeca62a8f618c064be914ceb25c7351df5954c6",
+      "removedComponents": 12,
+      "removedPixels": 1835,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-56.png",
+      "sourceSha256": "116e5b5e4d647b8059d761850ff9cf5e2dd3a9e522e5317e81eeb5cc2f72b9e2",
+      "frame": "pose-56.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        18,
+        252,
+        250
+      ],
+      "sha256": "211073d9f36bba64088dce33c75370a78230e9a190fe045e540a24bc3cc589f2",
+      "removedComponents": 23,
+      "removedPixels": 1807,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-57.png",
+      "sourceSha256": "da8da537bcd5c2f3056e9dcf4b2af33545bf98e015f88a70fc2ea0b96a85424b",
+      "frame": "pose-57.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        36,
+        252,
+        250
+      ],
+      "sha256": "530d42c1daf01bab45aaa7a4159a8f65d1f1178027947618e451708f0edefe40",
+      "removedComponents": 9,
+      "removedPixels": 1633,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-58.png",
+      "sourceSha256": "f7ffb8e23f50408d1e379cc1422a3b1b4a5322dbdbd5dd8e15e9a3fe5ddb3be1",
+      "frame": "pose-58.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        34,
+        252,
+        250
+      ],
+      "sha256": "748ef0e850b3b9bcd89139011a3d6fe12784b8da4c396984eb69abe983fdab11",
+      "removedComponents": 20,
+      "removedPixels": 1683,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-59.png",
+      "sourceSha256": "c35271bb27019856ba78f42d08e1f30a1307aade3321196c7efe3ff83a3a7486",
+      "frame": "pose-59.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        29,
+        252,
+        250
+      ],
+      "sha256": "de8a2321ac4175c25cf03d34a61345ddcc05532b27a0b8e83b84c8c5f6670ee6",
+      "removedComponents": 14,
+      "removedPixels": 2184,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-60.png",
+      "sourceSha256": "6854367de4ec1dd95c1b20f1dbdd1e9acce0bea94bf7fb48bda1472d4f3683bf",
+      "frame": "pose-60.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        30,
+        18,
+        225,
+        250
+      ],
+      "sha256": "86b43fd4cf61bdab502c5617953ecdb577670d77edb16dac47daeafb818b871a",
+      "removedComponents": 11,
+      "removedPixels": 2162,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-61.png",
+      "sourceSha256": "9893d88f531a6a1d41a8675c6ef5748e76805dc2a92c9799e58890aaca147329",
+      "frame": "pose-61.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        32,
+        18,
+        224,
+        250
+      ],
+      "sha256": "f111d6cab362126af0bd495baf35cbe62fd52fda4b4d0f173a63dc84257fd1fc",
+      "removedComponents": 13,
+      "removedPixels": 2445,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-62.png",
+      "sourceSha256": "1486f8dae63f3edf171bd14a17e2c7636a28034f22928d4bcf38a9f47947e7a8",
+      "frame": "pose-62.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        12,
+        18,
+        243,
+        250
+      ],
+      "sha256": "7f394f2723c0b18e94067b7ad313023f8cbeb0d5a11b7e2c53e8608da3f26b4f",
+      "removedComponents": 7,
+      "removedPixels": 1674,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-63.png",
+      "sourceSha256": "4e7dc331197ddb62b82784b54441ad0f7b47efedf373519034396a872d3795a6",
+      "frame": "pose-63.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        19,
+        252,
+        250
+      ],
+      "sha256": "eba51cdead0853a95693359dde62c8da88f3c933aafdb1a6214f1b83a16d675b",
+      "removedComponents": 6,
+      "removedPixels": 1621,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-64.png",
+      "sourceSha256": "d94a6943328ceb786c3985712fd7b168000825bc3efcf8823423011ce69f2a6f",
+      "frame": "pose-64.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        28,
+        18,
+        227,
+        250
+      ],
+      "sha256": "2c439ec5d08441e26cf6d23c737aa8fbb5f0175d424e9f834cd7d0257e3e96a5",
+      "removedComponents": 14,
+      "removedPixels": 2336,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-65.png",
+      "sourceSha256": "5d983a6f92e60c4ba119ccfccdfed407f16ea6cedf633ced4d18160ac14d131f",
+      "frame": "pose-65.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        28,
+        18,
+        227,
+        250
+      ],
+      "sha256": "acf6447fa6e78062e6673e6cab68752b0ea831103c9bbb54629cd16e196e6322",
+      "removedComponents": 23,
+      "removedPixels": 2566,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-66.png",
+      "sourceSha256": "0649123d6d68df4aa63d0ccd210bfccbac68a1ec3a55f5ed4247390b91d23fa4",
+      "frame": "pose-66.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        14,
+        18,
+        241,
+        250
+      ],
+      "sha256": "750649a1bd0c747a99e5073a8e3b549d58873244f0e1395ded0e577f6534a380",
+      "removedComponents": 14,
+      "removedPixels": 2061,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-67.png",
+      "sourceSha256": "7930e250a51e848b8be764cce2f49b275ca17608c44465f5281179646c14ff68",
+      "frame": "pose-67.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        18,
+        252,
+        250
+      ],
+      "sha256": "50ae603c7281f2b1de4bb9e9ee333628a6e1945bd8956cdb00bcacbab547665a",
+      "removedComponents": 16,
+      "removedPixels": 1747,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-68.png",
+      "sourceSha256": "ad120ea8a17edb27638d731b644f406c78229db3accc5c72240f056023c110da",
+      "frame": "pose-68.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        25,
+        252,
+        250
+      ],
+      "sha256": "9a56059a21c5b4620b2fd3411d6323b8419fc6c12fe7004eba8e723c7e05f16b",
+      "removedComponents": 12,
+      "removedPixels": 1815,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-69.png",
+      "sourceSha256": "d3dd527d88ddb3767fc1b3c4409787dbad473bbd00de6270f8779a4317dbe16a",
+      "frame": "pose-69.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        29,
+        252,
+        250
+      ],
+      "sha256": "a107bcc718abc9cc45388c9067ab04491f1c41ae0a4cc8b0b489889901296385",
+      "removedComponents": 14,
+      "removedPixels": 1895,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-70.png",
+      "sourceSha256": "c4675b4189a01d9f1d345bff4153c833df5b95787baca40005382793eb2efa2f",
+      "frame": "pose-70.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        25,
+        252,
+        250
+      ],
+      "sha256": "13bb17fc97c9bb7399418b4773f0167fc50776f5cef0b6c0c768d38685c86421",
+      "removedComponents": 14,
+      "removedPixels": 1854,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-71.png",
+      "sourceSha256": "c2c21df5f7d089b68eb51cfa0029a6586ae6e814d007ab6dd128090a0fbe9274",
+      "frame": "pose-71.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        31,
+        252,
+        250
+      ],
+      "sha256": "179611d9b95421587f47a61666c51d5759dd0a9b71aa30f33d826495ea07a013",
+      "removedComponents": 16,
+      "removedPixels": 1707,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-72.png",
+      "sourceSha256": "7c55a05f2b30fe1fdbdd2bf407efa9789e2cd75d6dd9713be674ac9d18c7c4da",
+      "frame": "pose-72.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        30,
+        252,
+        250
+      ],
+      "sha256": "844a204e988f9d92d89e848fb93664a0920d99638ec5b871aac963ce6d131f83",
+      "removedComponents": 12,
+      "removedPixels": 1713,
+      "maxDetachedPixels": 22
+    },
+    {
+      "source": "pose-73.png",
+      "sourceSha256": "2fc1dd9a74bcf46d6fe586775a6f2d810c63f7b902536540dc9f625f3cc1f79f",
+      "frame": "pose-73.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        27,
+        252,
+        250
+      ],
+      "sha256": "b8e2e9fb69fdb10cf640bdeb8bd384a22e3df9818d13b3b995269ed9f016c908",
+      "removedComponents": 9,
+      "removedPixels": 1960,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-74.png",
+      "sourceSha256": "615fadc404e86a5e927d349005ec5fca7e6a80fe800ff3f398869fc070492c5e",
+      "frame": "pose-74.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        10,
+        18,
+        246,
+        250
+      ],
+      "sha256": "a1c342ad817edd6bec2fcd6c13283e47ff1e8fe37acad6f72ac98538845da8c7",
+      "removedComponents": 10,
+      "removedPixels": 2155,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-75.png",
+      "sourceSha256": "4072a61192c78785d0decf14a6514664c4ab511a48bb3d75a4d933d09a2a00a3",
+      "frame": "pose-75.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        4,
+        23,
+        252,
+        250
+      ],
+      "sha256": "1924a5c6e5b8c386dd5fef2f74dc8697d4a06f4cd759793ee07191a98112b98f",
+      "removedComponents": 15,
+      "removedPixels": 2603,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-76.png",
+      "sourceSha256": "9ce25e14e436e6fc88d59eda283fe04f852f509c1dbe49197a5a654f3bdfbc01",
+      "frame": "pose-76.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        5,
+        18,
+        251,
+        250
+      ],
+      "sha256": "1fa2d2ff3f5604da3db265c66e65ff7b096d865b8ca17f6ca62af1cea9f4f016",
+      "removedComponents": 12,
+      "removedPixels": 2278,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-77.png",
+      "sourceSha256": "2991f2dcd1277ed4d892a71c88a57b179eacdf4339ffe3a7e660548ef0c34c13",
+      "frame": "pose-77.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        16,
+        18,
+        239,
+        250
+      ],
+      "sha256": "4cc249d69f6d56c11be2dd24d71df0bc8b868ca6f44b8cb9769aba781fc2d9cd",
+      "removedComponents": 12,
+      "removedPixels": 2071,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-78.png",
+      "sourceSha256": "b84c7cad87701de6d291b52832edbeacc5d39a9ae47a789e1b57b0c3792c7213",
+      "frame": "pose-78.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        18,
+        18,
+        237,
+        250
+      ],
+      "sha256": "7aa517c23fdc2f3219b034de4c66031bf7048c7e711ce525ac6f4fdfaa463ba0",
+      "removedComponents": 12,
+      "removedPixels": 2030,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-79.png",
+      "sourceSha256": "30ffffb6359416e8c71c483176f8a455a16a2fd21e63458e297c02f6b18b0c13",
+      "frame": "pose-79.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        28,
+        18,
+        228,
+        250
+      ],
+      "sha256": "d23c47689fdfeb5af63e7366daebb1aec80f62d81e33becabb3007724fbe41e6",
+      "removedComponents": 23,
+      "removedPixels": 2535,
+      "maxDetachedPixels": 0
+    },
+    {
+      "source": "pose-80.png",
+      "sourceSha256": "e64dd1ab6d0e43aceb3007a75c834bb8d99042e6a0663c737c761e52b011a734",
+      "frame": "pose-80.webp",
+      "canvas": [
+        256,
+        256
+      ],
+      "bbox": [
+        23,
+        18,
+        232,
+        250
+      ],
+      "sha256": "bd4c38b426a5a1b08679eae42616341437fab4ea2fcf7784164f7630016f607d",
+      "removedComponents": 12,
+      "removedPixels": 2361,
+      "maxDetachedPixels": 0
+    }
+  ]
+}
