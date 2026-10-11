@@ -39,7 +39,7 @@
     const imageData = context.getImageData(0, 0, width, height);
     const pixels = imageData.data;
     const total = width * height;
-    const visited = new Uint8Array(total);
+    const labels = new Int32Array(total);
     const stack = new Int32Array(total);
     const components = [];
     const alphaThreshold = 24;
@@ -52,12 +52,13 @@
     }
 
     for (let start = 0; start < total; start++) {
-      if (visited[start] || pixels[start * 4 + 3] === 0) continue;
+      if (labels[start] || pixels[start * 4 + 3] === 0) continue;
+      const label = components.length + 1;
       let top = 0;
       let area = 0;
       let minX = width, minY = height, maxX = -1, maxY = -1;
       stack[top++] = start;
-      visited[start] = 1;
+      labels[start] = label;
 
       while (top) {
         const index = stack[--top];
@@ -77,14 +78,14 @@
             const nx = x + dx;
             if (nx < 0 || nx >= width) continue;
             const neighbor = ny * width + nx;
-            if (!visited[neighbor] && pixels[neighbor * 4 + 3] > 0) {
-              visited[neighbor] = 1;
+            if (!labels[neighbor] && pixels[neighbor * 4 + 3] > 0) {
+              labels[neighbor] = label;
               stack[top++] = neighbor;
             }
           }
         }
       }
-      components.push({ area, minX, minY, maxX, maxY });
+      components.push({ label, area, minX, minY, maxX, maxY });
     }
 
     if (components.length > 1) {
@@ -95,22 +96,16 @@
       const minY = core.minY - marginY, maxY = core.maxY + marginY;
       const minimumArea = Math.max(18, Math.floor(total * 0.0012));
       const largeDetachedArea = Math.floor(total * 0.007);
-      const keep = new Uint8Array(total);
+      const keep = new Uint8Array(components.length + 1);
 
       for (const component of components) {
         const nearCore = component.maxX >= minX && component.minX <= maxX &&
           component.maxY >= minY && component.minY <= maxY;
-        if (component.area < minimumArea || (!nearCore && component.area < largeDetachedArea)) continue;
-        for (let y = component.minY; y <= component.maxY; y++) {
-          for (let x = component.minX; x <= component.maxX; x++) {
-            const index = y * width + x;
-            if (visited[index] && pixels[index * 4 + 3] > 0) keep[index] = 1;
-          }
-        }
+        if (component.area >= minimumArea && (nearCore || component.area >= largeDetachedArea)) keep[component.label] = 1;
       }
 
       for (let p = 0; p < total; p++) {
-        if (pixels[p * 4 + 3] > 0 && !keep[p]) pixels[p * 4 + 3] = 0;
+        if (labels[p] && !keep[labels[p]]) pixels[p * 4 + 3] = 0;
       }
       context.putImageData(imageData, 0, 0);
     }
