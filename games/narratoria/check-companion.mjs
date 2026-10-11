@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -8,34 +9,45 @@ const htmlBytes = readFileSync(join(root, 'index.html'));
 const html = htmlBytes.toString('utf8');
 assert.ok(html.startsWith('<!DOCTYPE html>'), 'Narratoria index.html no comienza como una página HTML.');
 assert.ok(!html.includes('\uFFFD'), 'Narratoria index.html contiene bytes que no son UTF-8 válido.');
-const frameDirectory = join(root, 'assets', 'plumin-frames-60');
-assert.ok(existsSync(frameDirectory), 'Faltan los fotogramas individuales de Plumín.');
-const sequences = ['idle', 'flap', 'talk', 'react'];
-const expectedFrames = sequences.flatMap(sequence => Array.from({ length: 60 }, (_, index) => `${sequence}-${String(index + 1).padStart(3, '0')}.webp`));
-assert.equal(readdirSync(frameDirectory).length, 240, 'Plumín debe tener 60 fotogramas independientes por secuencia.');
+
+const frameDirectory = join(root, 'assets', 'plumin-poses-v2');
+assert.ok(existsSync(frameDirectory), 'Faltan los fotogramas nuevos de Plumín.');
+const expectedFrames = Array.from({ length: 16 }, (_, index) => `pose-${String(index + 1).padStart(2, '0')}.png`);
+const frameNames = readdirSync(frameDirectory).filter(name => name.endsWith('.png')).sort();
+assert.deepEqual(frameNames, expectedFrames, 'Debe haber 16 sprites PNG separados, sin hojas de contacto.');
+const hashes = new Set();
 for (const name of expectedFrames) {
-  const frame = readFileSync(join(frameDirectory, name));
-  assert.ok(statSync(join(frameDirectory, name)).size > 12_000, `${name} está vacío o parece incompleto.`);
-  assert.equal(frame.toString('ascii', 0, 4), 'RIFF', `${name} no tiene una cabecera RIFF válida.`);
-  assert.equal(frame.toString('ascii', 8, 12), 'WEBP', `${name} no es un WebP válido.`);
+  const path = join(frameDirectory, name);
+  const frame = readFileSync(path);
+  assert.ok(statSync(path).size > 10_000, `${name} está vacío o incompleto.`);
+  assert.deepEqual([...frame.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10], `${name} no es un PNG válido.`);
+  assert.equal(frame.readUInt32BE(16), 256, `${name} debe medir 256 px de ancho.`);
+  assert.equal(frame.readUInt32BE(20), 256, `${name} debe medir 256 px de alto.`);
+  assert.equal(frame[25], 6, `${name} debe conservar transparencia RGBA.`);
+  const hash = createHash('sha256').update(frame).digest('hex');
+  assert.ok(!hashes.has(hash), `${name} repite otra pose en vez de ser un fotograma individual.`);
+  hashes.add(hash);
 }
-assert.ok(html.includes('assets/plumin-frames-60/idle-001.webp'), 'El CSS debe usar una imagen completa por fotograma.');
-assert.ok(html.includes('sprite.style.backgroundImage'), 'La animación debe cambiar archivos de fotograma completos.');
-assert.ok(!html.includes('plumin-sprites-v2.webp') && !html.includes('background-position:'), 'No debe desplazar ni recortar la hoja antigua durante la animación.');
-assert.match(html, /length: 60/, 'Cada secuencia debe recorrer sesenta posiciones.');
-assert.ok(html.includes('preloadOwlSequence') && html.includes('owlMotionGeneration'), 'Los fotogramas deben precargarse antes del cambio para evitar parpadeos vacíos.');
-const writingScreen = html.slice(html.indexOf('id="screen-writing"'), html.indexOf('id="screen-shop"'));
-assert.equal((writingScreen.match(/class="owl-sprite"/g) || []).length, 1, 'Narratoria debe mostrar un único Plumín grande dentro del panel lateral.');
-assert.ok(!html.includes('plumin-inline-sprite') && !html.includes('codex-summary-avatar'), 'No debe duplicarse Plumín junto al editor ni en el encabezado plegado.');
-assert.ok(!html.includes('ui-writing-mission-inline'), 'La misión de escritura debe mostrarse desde la guía desplegable lateral.');
-assert.ok(writingScreen.indexOf('id="ui-writing-mission"') < writingScreen.indexOf('id="objective-list"') && writingScreen.indexOf('id="objective-list"') < writingScreen.indexOf('id="writer-companion"'), 'Misión y objetivos deben quedar encima de Plumín en la guía lateral.');
-for (const token of ['owl-cheer', 'owl-think', 'motion-cheer', 'motion-think', 'phaseCompletedNow', 'targetReachedNow']) {
-  assert.ok(html.includes(token), `Falta la reacción de Plumín: ${token}`);
-}
+
+assert.ok(html.includes('assets/plumin-poses-v2/pose-04.png'), 'El estado de reposo debe mostrar la pose tranquila fija.');
+assert.ok(html.includes('sprite.style.backgroundImage'), 'Las animaciones deben cambiar entre archivos de imagen completos.');
+assert.ok(!html.includes('background-position:') && !html.includes('plumin-sprites-v2.webp'), 'No se debe desplazar ni recortar una tira de sprites.');
+assert.ok(html.includes('assets/plumin-poses-v2/pose-${String(frame).padStart(2, \'0\')}.png'), 'Las poses deben cargarse como PNG individuales.');
+assert.ok(html.includes('idle: [owlPose(4)]'), 'El modo en reposo debe quedarse en un único fotograma.');
+assert.ok(html.includes("talk: [5, 6, 7, 8].map(owlPose)"), 'Saludar debe reproducir su secuencia de poses.');
+assert.ok(html.includes("flap: [9, 10, 11, 12].map(owlPose)"), 'Escribir debe reproducir la secuencia de aleteo.');
+assert.ok(html.includes("else if (typing && !phaseDone) ui.setOwlMotion('flap')"), 'La escritura debe activar el movimiento y la pausa devolverlo a reposo.');
+assert.ok(!html.includes('5200 + Math.random()') && !html.includes("ui.setOwlMotion(writing ? 'flap' : (Math.random()"), 'No debe haber movimientos aleatorios mientras espera.');
+
+const writingScreen = html.slice(html.indexOf('id="screen-writing"'), html.indexOf('id="screen-final"'));
+assert.equal((writingScreen.match(/class="owl-sprite"/g) || []).length, 1, 'Debe aparecer un único Plumín grande durante la escritura.');
+assert.ok(writingScreen.indexOf('id="writer-companion"') < writingScreen.indexOf('id="writing-codex"'), 'Plumín debe estar fuera del desplegable y visible al cerrarlo.');
+assert.ok(writingScreen.indexOf('id="ui-writing-mission"') > writingScreen.indexOf('id="writing-codex"'), 'La misión debe permanecer dentro del desplegable.');
+assert.ok(writingScreen.indexOf('id="objective-list"') > writingScreen.indexOf('id="writing-codex"'), 'Los objetivos deben permanecer dentro del desplegable.');
 
 for (const token of [
   'id="writing-codex"', 'id="ui-writing-mission"', 'id="objective-list"', 'id="mini-cards-container"',
-  'id="writing-owl-habitat"', 'id="owl-shop-container"', 'id="shop-owl-habitat"',
+  'id="writing-owl-habitat"', 'id="owl-shop-container"', 'id="shop-owl-habitat"', 'ui.greetOwl',
   'game.buyOwlItem', 'game.equipOwlItem', 'normalizeOwlState(source.owl)', 'normalizeOwlState(loaded.owl)'
 ]) assert.ok(html.includes(token), `Falta el enlace de integración: ${token}`);
 
@@ -45,4 +57,4 @@ for (const item of ['skin_grafito', 'skin_nieve', 'skin_luna', 'skin_cobre', 'he
 
 const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(new Set(ids).size, ids.length, 'Hay identificadores HTML duplicados.');
-console.log(`Plumín OK · 240 fotogramas WebP independientes · 60 posiciones por secuencia · animaciones precargadas · tienda y guardado verificados.`);
+console.log('Plumín OK · 16 PNG individuales RGBA sin duplicados · reposo fijo · movimientos solo por interacción · tienda conservada.');

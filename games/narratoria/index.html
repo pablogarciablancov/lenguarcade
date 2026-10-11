@@ -251,28 +251,19 @@
         .rarity-legendaria .tcg-card-front { border-color: var(--rarity-legendaria); box-shadow: 0 0 20px rgba(255,202,40,0.6); } .rarity-legendaria .tcg-rarity { background: var(--rarity-legendaria); color:#000;}
 
 
-        .writing-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 24px; }
+        .writing-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 24px; align-items: start; }
         @media (max-width: 900px) { .writing-layout { grid-template-columns: 1fr; } }
+        .writing-sidebar { display: grid; gap: 12px; align-content: start; min-width: 0; }
+        .writing-sidebar .writing-codex { width: 100%; }
+        .writing-sidebar .writer-companion {
+            margin: 0; padding: 14px; border: 1px solid rgba(138,109,31,0.36); border-radius: 14px;
+            background: linear-gradient(145deg, #fffdf7, #f7e8c6); box-shadow: 0 4px 12px rgba(50,31,13,0.09);
+        }
         .owl-sprite {
-            position: relative; display: block; width: 100%; height: 100%; transform-origin: 50% 90%;
-            background: url("assets/plumin-frames-60/idle-001.webp") no-repeat center / contain;
-            animation: owl-idle-sway 2.4s ease-in-out infinite;
+            position: relative; display: block; width: 100%; height: 100%;
+            background: url("assets/plumin-poses-v2/pose-04.png") no-repeat center / contain;
         }
-        @keyframes owl-idle-sway { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-1.5px) rotate(1deg); } }
-        @keyframes owl-flight-bob { 0%, 100% { transform: translateY(0) rotate(0) scale(1); } 50% { transform: translateY(-3px) rotate(-1.5deg) scale(1.015); } }
-        @keyframes owl-talk-nod { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(1px) rotate(1.5deg); } }
-        @keyframes owl-react-sway { 0%, 100% { transform: rotate(0); } 50% { transform: translateY(-2px) rotate(2deg); } }
-        @keyframes owl-cheer-bob {
-            0%, 100% { transform: translateY(0) rotate(0); }
-            32% { transform: translateY(-5px) rotate(-2deg); }
-            68% { transform: translateY(-2px) rotate(2deg); }
-        }
-        @keyframes owl-think-sway { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-3deg); } }
-        .owl-sprite.motion-flap { animation: owl-flight-bob 0.9s ease-in-out infinite; }
-        .owl-sprite.motion-talk { animation: owl-talk-nod 0.575s ease-in-out infinite; }
-        .owl-sprite.motion-react { animation: owl-react-sway 1.7s ease-in-out 1; }
-        .owl-sprite.motion-cheer { animation: owl-cheer-bob 0.82s ease-out 1; }
-        .owl-sprite.motion-think { animation: owl-think-sway 1s ease-in-out 1; }
+        .owl-sprite.motion-flap, .owl-sprite.motion-talk, .owl-sprite.motion-cheer { animation: none; }
         .owl-sprite.skin-nieve { filter: brightness(1.12) saturate(0.65); }
         .owl-sprite.skin-luna { filter: sepia(0.16) hue-rotate(155deg) saturate(0.82); }
         .owl-sprite.skin-cobre { filter: sepia(0.48) saturate(1.5) hue-rotate(-12deg); }
@@ -331,7 +322,7 @@
         .owl-shop-card p { flex: 1; margin-bottom: 10px; color: var(--ink-light); font: 0.75rem/1.4 var(--font-ui); }
         .owl-shop-card .btn { padding: 8px 9px; font-size: 0.76rem; letter-spacing: 0; }
         .owl-shop-card .btn.equipped { background: var(--success); border-color: var(--success); }
-        .writer-companion { margin-top: 18px; text-align: center; }
+        .writer-companion { text-align: center; }
         .companion-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
         .companion-name { color: var(--ink); font-size: 0.9rem; font-weight: 800; }
         .companion-status { color: #54724c; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
@@ -547,18 +538,7 @@
         <section id="screen-writing" class="screen">
             <div class="progress-container" id="progress-bar"></div>
             <div class="writing-layout">
-                <details class="writing-codex" id="writing-codex">
-                    <summary>
-                        <span class="codex-summary-copy">Guía de la aventura<small>Misión, objetivos, cartas y Plumín</small></span>
-                        <span class="companion-status" id="codex-progress">0/5</span>
-                        <span class="codex-summary-chevron" aria-hidden="true">⌄</span>
-                    </summary>
-                    <aside class="side-panel">
-                        <div class="mission-reminder">
-                            <span class="mission-label">Misión objetivo</span>
-                            <strong id="ui-writing-mission"></strong>
-                        </div>
-                        <h3>Objetivos de esta fase</h3><ul class="objective-list" id="objective-list"></ul>
+                <aside class="writing-sidebar" aria-label="Plumín y guía de escritura">
                         <div class="writer-companion owl-pet-panel" id="writer-companion" aria-label="Plumín, tu compañero de escritura">
                             <div class="companion-heading"><strong class="companion-name">Plumín, aprendiz de escriba</strong><span class="companion-status" id="companion-status">Esperando ideas</span></div>
                             <div class="owl-habitat cage-roble" id="writing-owl-habitat" aria-label="Jaula de Plumín">
@@ -574,6 +554,18 @@
                             <div class="manuscript-label"><span>Manuscrito compartido</span><span id="manuscript-count">0 de 5 fases</span></div>
                             <div class="manuscript-pages" id="manuscript-pages" role="progressbar" aria-label="Progreso del manuscrito" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
                         </div>
+                <details class="writing-codex" id="writing-codex">
+                    <summary>
+                        <span class="codex-summary-copy">Guía de la aventura<small>Misión, objetivos, cartas e inventario</small></span>
+                        <span class="companion-status" id="codex-progress">0/5</span>
+                        <span class="codex-summary-chevron" aria-hidden="true">⌄</span>
+                    </summary>
+                    <aside class="side-panel">
+                        <div class="mission-reminder">
+                            <span class="mission-label">Misión objetivo</span>
+                            <strong id="ui-writing-mission"></strong>
+                        </div>
+                        <h3>Objetivos de esta fase</h3><ul class="objective-list" id="objective-list"></ul>
                         <h3>Tus seis cartas</h3><div id="mini-cards-container"></div>
                         <h3 style="margin-top: 20px;">Inventario</h3>
                         <div class="inventory-panel" id="writing-inventory"></div>
@@ -581,7 +573,8 @@
                             <button class="btn btn-secondary" style="padding: 10px 20px; font-size: 0.9rem;" onclick="game.saveAndExit()">Guardar historia y salir</button>
                         </div>
                     </aside>
-                </details>
+                    </details>
+                </aside>
                 <main style="display: flex; flex-direction: column;">
                     <div class="phase-header"><h2 id="ui-phase-title" style="font-size: 2.2rem; color: var(--ink);"></h2><div class="word-counter" id="ui-word-count"></div></div>
                     <div class="instruction-box">
@@ -868,11 +861,13 @@
             { id: "cage_gremio", name: "Aviario dorado", category: "Jaula", slot: "cage", cost: 75, icon: "✨", cssClass: "cage-gremio", desc: "Un aviario brillante para una mascota célebre." },
             { id: "cage_noche", name: "Observatorio lunar", category: "Jaula", slot: "cage", cost: 80, icon: "🌌", cssClass: "cage-noche", desc: "Un refugio azul para vigilar las estrellas." }
         ];
-        const OWL_FRAME_SEQUENCES = Object.fromEntries(['idle', 'flap', 'talk', 'react'].map(sequence => [
-            sequence, Array.from({ length: 60 }, (_, index) => `assets/plumin-frames-60/${sequence}-${String(index + 1).padStart(3, '0')}.webp`)
-        ]));
-        OWL_FRAME_SEQUENCES.cheer = [...OWL_FRAME_SEQUENCES.react.slice(24, 36), ...OWL_FRAME_SEQUENCES.react.slice(44, 56), ...OWL_FRAME_SEQUENCES.react.slice(24, 36)];
-        OWL_FRAME_SEQUENCES.think = [...OWL_FRAME_SEQUENCES.react.slice(8, 20), ...OWL_FRAME_SEQUENCES.react.slice(32, 44), ...OWL_FRAME_SEQUENCES.react.slice(8, 20)];
+        const owlPose = frame => `assets/plumin-poses-v2/pose-${String(frame).padStart(2, '0')}.png`;
+        const OWL_FRAME_SEQUENCES = {
+            idle: [owlPose(4)],
+            talk: [5, 6, 7, 8].map(owlPose),
+            flap: [9, 10, 11, 12].map(owlPose),
+            cheer: [13, 14, 15, 16].map(owlPose)
+        };
         const owlFrameCache = new Map();
         const preloadOwlFrame = path => {
             if (!owlFrameCache.has(path)) {
@@ -2350,10 +2345,7 @@
                 companion.classList.toggle('is-writing', typing && !phaseDone);
                 status.textContent = typing && !phaseDone ? 'Escribiendo contigo' : (phaseDone ? 'Fase terminada' : 'Esperando ideas');
                 if (phaseCompletedNow || targetReachedNow) ui.setOwlMotion('cheer');
-                else if (phaseDone) ui.setOwlMotion('talk');
-                else if (owlMotionMode === 'cheer' && words >= target) { /* deja terminar el gesto de celebración */ }
-                else if (typing) ui.setOwlMotion('flap');
-                else if (phaseChanged) ui.setOwlMotion('react');
+                else if (typing && !phaseDone) ui.setOwlMotion('flap');
                 else ui.setOwlMotion('idle');
                 companionLastPhase = phaseIndex;
                 companionLastWords = words;
@@ -2382,10 +2374,10 @@
 
             setOwlMotion: (mode = 'idle') => {
                 const sprites = document.querySelectorAll('.owl-sprite');
-                if (!sprites.length || owlMotionMode === mode) return;
+                if (!sprites.length || (owlMotionMode === mode && mode !== 'talk' && mode !== 'cheer')) return;
                 owlMotionMode = mode;
                 sprites.forEach(sprite => {
-                    sprite.classList.remove('motion-flap', 'motion-talk', 'motion-react', 'motion-cheer', 'motion-think');
+                    sprite.classList.remove('motion-flap', 'motion-talk', 'motion-cheer');
                     if (mode !== 'idle') sprite.classList.add(`motion-${mode}`);
                 });
                 clearTimeout(owlMotionTimer);
@@ -2399,36 +2391,22 @@
                         sprite.style.backgroundImage = `url("${loadedFrames[frameIndex]}")`;
                     });
                     showFrame();
-                    const frameDelay = mode === 'idle' ? 62
-                        : mode === 'flap' ? 34
-                        : mode === 'talk' ? 42
-                        : mode === 'react' ? 40
-                        : 42;
-                    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                        owlFrameTimer = setInterval(() => {
-                            frameIndex = (frameIndex + 1) % loadedFrames.length;
+                    if (mode === 'idle' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                    const frameDelay = mode === 'flap' ? 125 : 145;
+                    owlFrameTimer = setInterval(() => {
+                        if (frameIndex + 1 < loadedFrames.length) {
+                            frameIndex += 1;
                             showFrame();
-                        }, frameDelay);
-                    }
-                    if (mode === 'flap') return;
-                    const duration = mode === 'talk' ? 2300
-                        : mode === 'cheer' ? 1500
-                        : mode === 'think' ? 1500
-                        : mode === 'react' ? 2000
-                        : 5200 + Math.random() * 3000;
-                    owlMotionTimer = setTimeout(() => {
-                        if (generation !== owlMotionGeneration) return;
-                        if (mode === 'idle') {
-                            const writing = document.getElementById('writer-companion')?.classList.contains('is-writing');
-                            ui.setOwlMotion(writing ? 'flap' : (Math.random() > 0.55 ? 'react' : 'think'));
+                        } else if (mode === 'flap') {
+                            frameIndex = 0;
+                            showFrame();
                         } else {
-                            const writing = document.getElementById('writer-companion')?.classList.contains('is-writing');
-                            ui.setOwlMotion(writing ? 'flap' : 'idle');
+                            clearInterval(owlFrameTimer);
+                            if (generation === owlMotionGeneration) ui.setOwlMotion('idle');
                         }
-                    }, duration);
+                    }, frameDelay);
                 });
             },
-
             renderOwl: () => {
                 state.owl = normalizeOwlState(state.owl);
                 const equipped = state.owl.equipped;
