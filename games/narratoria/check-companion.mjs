@@ -62,4 +62,5 @@ const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
 assert.equal(new Set(ids).size, ids.length, 'Hay identificadores HTML duplicados.');
 assert.ok(html.includes('head_gorro: \'<path') && html.includes('face_gafas: \'<g') && html.includes('body_capa: \'<path'), 'Los accesorios deben dibujarse como piezas vectoriales superpuestas, no como emojis.');
 assert.ok(html.includes('height: 39%') && html.includes('height: 38%') && html.includes('height: 53%'), 'Los accesorios deben ocupar una escala legible sobre el cuerpo.');
+assert.ok(html.includes('.owl-item-preview { position: relative;') && html.includes('.owl-item-preview .owl-preview-sprite'), 'Las miniaturas deben limitar las imágenes a su tarjeta y evitar que cubran la página.');
 console.log('Plumín OK · 80 PNG individuales RGBA sin duplicados · transiciones cruzadas · reposo fijo · accesorios vectoriales grandes · tienda conservada.');
