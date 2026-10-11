@@ -12,6 +12,7 @@
   const atlasLoads = new Map();
   const heroCells = new Map();
   const heroAtlasCells = new Map();
+  const resolvedHeroAtlases = new Map();
   let sequence = 0;
 
   function loadAtlas(source) {
@@ -122,6 +123,7 @@
 
       cropContext.putImageData(crop, 0, 0);
       cells.set(col + "|" + row, {
+        canvas: cropCanvas,
         width: cropWidth,
         height: cropHeight,
         href: cropCanvas.toDataURL("image/png")
@@ -136,7 +138,11 @@
     const key = source + "|" + col + "|" + row;
     if (!heroCells.has(key)) {
       if (!heroAtlasCells.has(source)) {
-        heroAtlasCells.set(source, loadAtlas(source).then(image => extractHeroCells(image, cols, rows)));
+        heroAtlasCells.set(source, loadAtlas(source).then(image => {
+          const cells = extractHeroCells(image, cols, rows);
+          resolvedHeroAtlases.set(source, cells);
+          return cells;
+        }));
       }
       heroCells.set(key, heroAtlasCells.get(source).then(cells => cells.get(col + "|" + row)));
     }
@@ -210,6 +216,13 @@
       if (el.style.backgroundImage !== "none") el.style.backgroundImage = "none";
     });
   }
+
+  window.TintaHeroSprites = {
+    get(col, row) {
+      const source = new URL("assets/heroes-cartoon-v3.webp", document.baseURI).href;
+      return resolvedHeroAtlases.get(source)?.get(col + "|" + row) || null;
+    }
+  };
 
   fit();
   new MutationObserver(records => {
