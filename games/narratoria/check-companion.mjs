@@ -4,7 +4,10 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const root = dirname(fileURLToPath(import.meta.url));
-const html = readFileSync(join(root, 'index.html'), 'utf8');
+const htmlBytes = readFileSync(join(root, 'index.html'));
+const html = htmlBytes.toString('utf8');
+assert.ok(html.startsWith('<!DOCTYPE html>'), 'Narratoria index.html no comienza como una página HTML.');
+assert.ok(!html.includes('\uFFFD'), 'Narratoria index.html contiene bytes que no son UTF-8 válido.');
 const frameDirectory = join(root, 'assets', 'plumin-frames-60');
 assert.ok(existsSync(frameDirectory), 'Faltan los fotogramas individuales de Plumín.');
 const sequences = ['idle', 'flap', 'talk', 'react'];
