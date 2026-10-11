@@ -271,8 +271,18 @@
   const art={characters:new Image(),environment:new Image(),heroes:new Image(),expansion:new Image(),heroRemaster:new Image(),monsterRemaster:new Image(),bossRemaster:new Image(),loaded:0,ready:false};
   art.characters.src='assets/heroes-cartoon-v3.webp';art.environment.src='assets/environment-cartoon-v3.webp';art.heroes.src='assets/heroes-cartoon-v3.webp';art.expansion.src='assets/heroes-cartoon-v3.webp';art.heroRemaster.src='assets/heroes-cartoon-v3.webp';art.monsterRemaster.src='assets/enemies-cartoon-v3.webp';art.bossRemaster.src='assets/enemies-cartoon-v3.webp';
   const artImages=[art.characters,art.environment,art.heroes,art.expansion,art.heroRemaster,art.monsterRemaster,art.bossRemaster];artImages.forEach(img=>{img.onload=()=>{art.loaded++;art.ready=art.loaded===artImages.length};img.onerror=()=>{art.ready=false}});
-  function sprite(img,col,row,cols,rows,x,y,w,h,alpha=1){if(!img.complete||!img.naturalWidth)return false;if(x+w<camera.x-100||x-w>camera.x+W+100||y+h<camera.y-100||y-h>camera.y+H+100)return true;const sw=img.naturalWidth/cols,sh=img.naturalHeight/rows,fit=Math.min(w/sw,h/sh);w=sw*fit;h=sh*fit;ctx.save();ctx.globalAlpha=alpha;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(img,col*sw,row*sh,sw,sh,x-w/2,y-h/2,w,h);ctx.restore();return true}
-  function motionSprite(img,col,row,cols,rows,x,y,w,h,alpha=1,rotation=0,scaleX=1,scaleY=1){if(!img.complete||!img.naturalWidth)return false;if(x+w<camera.x-100||x-w>camera.x+W+100||y+h<camera.y-100||y-h>camera.y+H+100)return true;const sw=img.naturalWidth/cols,sh=img.naturalHeight/rows,fit=Math.min(w/sw,h/sh);w=sw*fit;h=sh*fit;ctx.save();ctx.translate(x,y);ctx.rotate(rotation);ctx.scale(scaleX,Math.abs(scaleX));ctx.globalAlpha=alpha;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(img,col*sw,row*sh,sw,sh,-w/2,-h/2,w,h);ctx.restore();return true}
+  function spriteFrame(img,col,row,cols,rows){
+    const source=(img.currentSrc||img.src||'').split(/[?#]/)[0];
+    if(source.endsWith('/heroes-cartoon-v3.webp')){
+      const isolated=window.TintaHeroSprites?.get(col,row);
+      if(!isolated?.canvas)return null;
+      return {image:isolated.canvas,sx:0,sy:0,sw:isolated.width,sh:isolated.height};
+    }
+    const sw=img.naturalWidth/cols,sh=img.naturalHeight/rows;
+    return {image:img,sx:col*sw,sy:row*sh,sw,sh};
+  }
+  function sprite(img,col,row,cols,rows,x,y,w,h,alpha=1){if(!img.complete||!img.naturalWidth)return false;if(x+w<camera.x-100||x-w>camera.x+W+100||y+h<camera.y-100||y-h>camera.y+H+100)return true;const frame=spriteFrame(img,col,row,cols,rows);if(!frame)return false;const fit=Math.min(w/frame.sw,h/frame.sh),dw=frame.sw*fit,dh=frame.sh*fit;ctx.save();ctx.globalAlpha=alpha;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(frame.image,frame.sx,frame.sy,frame.sw,frame.sh,x-dw/2,y-dh/2,dw,dh);ctx.restore();return true}
+  function motionSprite(img,col,row,cols,rows,x,y,w,h,alpha=1,rotation=0,scaleX=1,scaleY=1){if(!img.complete||!img.naturalWidth)return false;if(x+w<camera.x-100||x-w>camera.x+W+100||y+h<camera.y-100||y-h>camera.y+H+100)return true;const frame=spriteFrame(img,col,row,cols,rows);if(!frame)return false;const fit=Math.min(w/frame.sw,h/frame.sh),dw=frame.sw*fit,dh=frame.sh*fit;ctx.save();ctx.translate(x,y);ctx.rotate(rotation);ctx.scale(scaleX,Math.abs(scaleX));ctx.globalAlpha=alpha;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(frame.image,frame.sx,frame.sy,frame.sw,frame.sh,-dw/2,-dh/2,dw,dh);ctx.restore();return true}
   function shadow(x,y,w,a=.3){ctx.save();ctx.globalAlpha=a;ctx.fillStyle='#02070a';ctx.beginPath();ctx.ellipse(x,y,w,w*.34,0,0,7);ctx.fill();ctx.restore()}
   const WORLD={w:2600,h:1650};
   let W=0,H=0,dpr=1,raf=0,last=0,running=false,paused=false,camera={x:0,y:0},animClock=0,miniTick=0;
@@ -539,7 +549,7 @@
 
 })();
 </script>
-<script src="sprite-fit.js?v=20261011-global-components-3"></script>
+<script src="sprite-fit.js?v=20261011-battle-hero-components-4"></script>
 <script src="bridge.js?v=20260930"></script>
 </body>
 </html>
