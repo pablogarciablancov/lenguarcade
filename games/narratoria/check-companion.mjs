@@ -73,6 +73,7 @@ assert.ok(html.includes('head_gorro: \'<path') && html.includes('face_gafas: \'<
 assert.ok(html.includes('height: 39%') && html.includes('height: 38%') && html.includes('height: 53%'), 'Los accesorios deben ocupar una escala visible sobre el cuerpo.');
 assert.ok(html.includes('.owl-item-preview { position: relative;') && html.includes('.owl-item-preview .owl-preview-sprite'), 'Las miniaturas deben quedarse dentro de su tarjeta.');
 assert.ok(html.includes('id="owl-notebook"') && html.includes('id="owl-last-memory"'), 'El hogar debe mostrar el cuaderno persistente.');
+assert.ok(html.includes('id="owl-writing-desk"') && html.includes('id="owl-desk-notebook"'), 'La escena de escritura debe mostrar escritorio y cuaderno.');
 assert.ok(html.includes('phaseRewardLedgers') && html.includes('registerOwlPhaseReward'), 'Las recompensas deben guardarse por historia y fase.');
 assert.ok(html.includes('game.trackOwlWritingProgress(c)') && !html.includes('game.awardOwlWritingCoins(c)'), 'Escribir palabras no debe conceder plumillas.');
 assert.ok(html.includes("companion.classList.toggle('is-thinking'") && html.includes("ui.setOwlMotion('think')"), 'Una pausa debe cambiar la postura de Plumín.');
