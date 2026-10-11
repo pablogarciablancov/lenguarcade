@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 26683)
-Total output lines: 1966
-
 
 /* Batalla Verbal · Arena v3
    Capa visual deliberadamente separada de la lógica del juego.
@@ -501,6 +498,10 @@ button:disabled{cursor:not-allowed;opacity:.42}
   color:#fff0c8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
 }
 .moveFooterText small{
+
+Warning: truncated output (original token count: 8084)
+Total output lines: 500
+
   display:block;margin-top:1px;font-size:5.5px;color:#b7c0ce;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
 }
 .moveReward{
@@ -669,7 +670,617 @@ button:disabled{cursor:not-allowed;opacity:.42}
 }
 .banner{
   position:absolute;z-index:0;top:7%;width:74px;height:240px;
-  display:gri…8683 tokens truncated…nsform:none!important;
+  display:grid;justify-items:center;align-content:start;gap:10px;padding-top:28px;
+  color:#e8c777;background:linear-gradient(180deg,#273a8b,#271b63 74%,transparent);
+  border-left:3px solid rgba(240,189,69,.36);border-right:3px solid rgba(240,189,69,.36);
+  clip-path:polygon(0 0,100% 0,100% 86%,50% 100%,0 86%);
+  box-shadow:0 14px 30px rgba(0,0,0,.24)
+}
+.banner span{font-size:26px;text-shadow:0 0 18px #66b9ff}.banner b{writing-mode:vertical-rl;font-size:8px;letter-spacing:.22em}
+.bannerLeft{left:43%}.bannerRight{right:14%;top:10%}
+
+/* columna de título y navegación */
+.menuColumn{
+  position:absolute;z-index:20;left:clamp(20px,4vw,64px);top:50%;transform:translateY(-50%);
+  width:clamp(275px,26vw,385px);display:grid;gap:14px
+}
+.gameLogo{position:relative;text-align:center;padding-top:47px;filter:drop-shadow(0 16px 18px rgba(0,0,0,.38))}
+.logoCrest{
+  position:absolute;left:50%;top:0;transform:translateX(-50%);
+  width:150px;height:80px;display:grid;place-items:center
+}
+.logoBook{position:absolute;z-index:3;font-size:48px;filter:drop-shadow(0 0 15px #4dbeff)}
+.logoCrystal{
+  position:absolute;z-index:2;top:-7px;color:#64d5ff;font-size:45px;
+  text-shadow:0 0 8px #79dfff,0 0 28px #3e8cff
+}
+.logoBlade{position:absolute;width:12px;height:66px;top:4px;border-radius:10px 10px 2px 2px;background:linear-gradient(#cbd8e9,#435b81 45%,#16263e);border:1px solid #86a1c6}
+.logoBlade.left{left:24px;transform:rotate(-39deg)}.logoBlade.right{right:24px;transform:rotate(39deg)}
+.logoWord{
+  position:relative;z-index:3;font-family:Georgia,"Times New Roman",serif;font-weight:1000;line-height:.82;
+  letter-spacing:-.055em;-webkit-text-stroke:1px rgba(0,0,0,.45)
+}
+.logoBattle{
+  font-size:clamp(45px,5.1vw,75px);
+  background:linear-gradient(180deg,#fff0a3 0,#ffcf55 25%,#e8891e 66%,#8f3d12 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 4px 0 #5c260e,0 8px 16px rgba(0,0,0,.45)
+}
+.logoVerbal{
+  margin-top:5px;font-size:clamp(50px,5.4vw,82px);
+  background:linear-gradient(180deg,#eefaff 0,#6fe5ff 28%,#268ee7 68%,#163f9e 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 4px 0 #173b7f,0 0 26px rgba(58,176,255,.38)
+}
+.logoRibbon{
+  width:78%;margin:-2px auto 0;padding:7px 14px 6px;
+  font-family:Georgia,"Times New Roman",serif;font-size:clamp(10px,1vw,14px);font-weight:900;
+  text-transform:uppercase;letter-spacing:.09em;color:#ffe29c;
+  background:linear-gradient(180deg,#302009,#151424);border:1px solid #dba743;
+  clip-path:polygon(6% 0,94% 0,100% 50%,94% 100%,6% 100%,0 50%);
+  box-shadow:0 5px 16px rgba(0,0,0,.35)
+}
+.gameMenuButtons{display:grid;gap:7px}
+.gameMenuBtn{
+  position:relative;min-height:52px;padding:8px 16px 8px 58px;
+  display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-items:center;text-align:left;
+  border:1px solid #345c92;color:#ecf5ff;
+  background:
+    linear-gradient(180deg,rgba(28,75,124,.95),rgba(12,35,69,.98));
+  clip-path:polygon(4% 0,96% 0,100% 50%,96% 100%,4% 100%,0 50%);
+  box-shadow:inset 0 1px rgba(255,255,255,.11),inset 0 -8px 20px rgba(0,0,0,.14)…1084 tokens truncated…ansparent 20%,transparent 80%,rgba(3,7,15,.35)),
+    repeating-linear-gradient(90deg,transparent 0 78px,rgba(124,172,230,.035) 79px 80px);
+  pointer-events:none
+}
+.duelPreview:after{
+  content:"";position:absolute;left:-5%;right:-5%;bottom:-33%;height:62%;
+  border-radius:50%;border-top:1px solid rgba(171,205,255,.16);
+  background:radial-gradient(ellipse at 50% 0%,rgba(70,114,167,.28),transparent 55%),#091422;
+  transform:perspective(500px) rotateX(62deg)
+}
+.previewTop{
+  position:absolute;z-index:5;left:14px;right:14px;top:10px;display:grid;grid-template-columns:1fr 70px 1fr;align-items:center;gap:10px
+}
+.previewSide{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;align-items:center;gap:3px 7px;font-size:10px}
+.previewSide.rival{grid-template-columns:1fr auto;text-align:right}.previewSide.rival .previewHp{grid-column:1}.previewSide.rival b{grid-column:1}.previewSide.rival .previewAvatar{grid-column:2;grid-row:1/3}
+.previewAvatar{
+  grid-row:1/3;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:19px;
+  background:#182b49;border:2px solid #d6a84d
+}
+.previewHp{height:7px;border-radius:99px;background:#07101c;border:1px solid rgba(225,231,240,.2);overflow:hidden}
+.previewHp span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#44d56f,#83ee92)}
+.previewSide.rival .previewHp span{background:linear-gradient(90deg,#ff626c,#d8374a)}
+.previewVs{
+  font-family:Georgia,"Times New Roman",serif;font-size:24px;font-style:italic;font-weight:1000;text-align:center;
+  color:#ffcf55;text-shadow:0 0 18px rgba(255,159,34,.55)
+}
+.previewScene{position:absolute;z-index:3;left:5%;right:5%;top:19%;bottom:17%;display:flex;align-items:center;justify-content:space-between}
+.previewFighter{position:relative;width:40%;display:grid;justify-items:center;text-align:center}
+.previewFighter.enemy{transform:scaleX(-1)}.previewFighter.enemy>*{transform:scaleX(-1)}
+.previewCharacter{
+  position:relative;z-index:2;width:clamp(112px,12vw,175px);height:clamp(112px,12vw,175px);
+  display:grid;place-items:center;border-radius:45% 45% 38% 38%;font-size:clamp(54px,6vw,82px);
+  background:linear-gradient(150deg,#53311d,#17213a 66%);border:2px solid #e19a42;
+  box-shadow:0 18px 28px rgba(0,0,0,.34),0 0 28px rgba(255,137,48,.15)
+}
+.previewFighter.enemy .previewCharacter{background:linear-gradient(150deg,#523088,#141a34 68%);border-color:#ac77ff;box-shadow:0 18px 28px rgba(0,0,0,.34),0 0 30px rgba(153,87,255,.24)}
+.fighterAura{position:absolute;width:150px;height:150px;top:10%;border-radius:50%;background:radial-gradient(circle,rgba(255,135,44,.26),transparent 65%);filter:blur(8px)}
+.previewFighter.enemy .fighterAura{background:radial-gradient(circle,rgba(142,75,255,.3),transparent 65%)}
+.previewFighter>span{position:relative;z-index:3;margin-top:5px;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#f3ddb5}
+.previewImpact{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:68px;height:68px;border-radius:50%;display:grid;place-items:center;font-size:29px;color:#fff4a8;
+  background:radial-gradient(circle,#ffbf39 0,#ff8130 18%,rgba(255,129,48,.12) 38%,transparent 68%);
+  text-shadow:0 0 15px #fff;animation:previewPulse 2.4s ease-in-out infinite
+}
+@keyframes previewPulse{0%,100%{scale:.9;opacity:.82}50%{scale:1.12;opacity:1}}
+.previewSlogan{
+  position:absolute;z-index:7;left:16%;right:16%;bottom:0;transform:translateY(34%);
+  padding:8px 16px;text-align:center;font-family:Georgia,"Times New Roman",serif;font-size:clamp(13px,1.4vw,19px);
+  color:#eef7ff;background:linear-gradient(180deg,#102542,#07182d);border:1px solid #c5923f;
+  clip-path:polygon(5% 0,95% 0,100% 50%,95% 100%,5% 100%,0 50%);
+  box-shadow:0 7px 18px rgba(0,0,0,.34)
+}
+.previewSlogan strong{color:#ffd674}
+.classDeck{min-height:0}
+.classDeckTitle{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-bottom:8px;color:#f5d987}
+.classDeckTitle span{height:1px;background:linear-gradient(90deg,transparent,#d7a844)}
+.classDeckTitle span:last-child{background:linear-gradient(90deg,#d7a844,transparent)}
+.classDeckTitle b{font-family:Georgia,"Times New Roman",serif;font-size:11px;letter-spacing:.16em}
+.menuClasses{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.menuClassCard{
+  --class:#db6c5e;position:relative;min-height:132px;padding:10px 7px 8px;display:grid;justify-items:center;align-content:end;
+  color:#fff;border:1px solid color-mix(in srgb,var(--class) 72%,#fff 10%);border-radius:8px;
+  background:
+    radial-gradient(circle at 50% 18%,color-mix(in srgb,var(--class) 32%,transparent),transparent 38%),
+    linear-gradient(160deg,color-mix(in srgb,var(--class) 32%,#101a2c),#0a1324 72%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05),0 10px 24px rgba(0,0,0,.28);transition:.15s
+}
+.menuClassCard:hover{transform:translateY(-4px);box-shadow:0 13px 28px rgba(0,0,0,.32),0 0 22px color-mix(in srgb,var(--class) 23%,transparent)}
+.menuClassCard.selected{transform:translateY(-5px);box-shadow:0 0 0 2px #ffe79b,0 15px 30px rgba(0,0,0,.34),0 0 28px color-mix(in srgb,var(--class) 36%,transparent)}
+.menuClassCard:after{
+  content:"";position:absolute;left:8px;right:8px;top:8px;height:1px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--class) 70%,#fff),transparent)
+}
+.menuClassCard.warrior{--class:#ff664e}.menuClassCard.mage{--class:#9d5df5}.menuClassCard.archer{--class:#46cf7b}.menuClassCard.cleric{--class:#f0bd4c}
+.classPortrait{
+  width:60px;height:60px;margin-bottom:5px;border-radius:50%;display:grid;place-items:center;font-size:34px;
+  background:radial-gradient(circle at 50% 34%,color-mix(in srgb,var(--class) 45%,#fff 6%),#111b31 72%);
+  border:2px solid color-mix(in srgb,var(--class) 72%,#fff 8%);box-shadow:0 0 18px color-mix(in srgb,var(--class) 27%,transparent)
+}
+.menuClassCard b{font-family:Georgia,"Times New Roman",serif;font-size:13px}.menuClassCard small{font-size:7px;color:#c3d0e2;margin-top:2px;text-align:center}.menuClassCard em{font-style:normal;font-size:6px;color:color-mix(in srgb,var(--class) 75%,#fff);margin-top:4px;text-transform:uppercase;letter-spacing:.08em}
+
+/* setup modal de partida */
+.setupDrawer{
+  position:absolute;z-index:60;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(820px,92vw);max-height:min(620px,90vh);padding:18px;
+  display:grid;grid-template-rows:auto auto minmax(150px,1fr) auto;gap:12px;
+  border:2px solid #c89a47;border-radius:12px;
+  background:
+    radial-gradient(circle at 80% 0%,rgba(102,103,239,.16),transparent 28%),
+    linear-gradient(155deg,rgba(19,36,64,.99),rgba(7,17,33,.99));
+  box-shadow:0 0 0 9999px rgba(1,5,12,.68),0 30px 90px rgba(0,0,0,.64),inset 0 0 0 2px rgba(255,219,139,.06);
+  overflow:hidden
+}
+.drawerGlow{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(80,166,255,.05),transparent)}
+.drawerEyebrow{font-size:7px;color:#e5bf70;font-weight:950;letter-spacing:.18em;text-transform:uppercase}
+.setupDrawer .setupHead h2{font-family:Georgia,"Times New Roman",serif;font-size:25px;margin-top:2px;color:#fff3cb}
+.setupDrawer .setupHead p{font-size:9px;color:#9fb2ce}
+.drawerClose{
+  width:32px;height:32px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(215,177,102,.38);
+  background:#14233d;color:#efd39b;font-size:21px;line-height:1
+}
+.setupDrawer .settingsRow{gap:9px}.setupDrawer .field label{color:#e2ba6b}
+.setupDrawer .field select{background:#0b172c;border-color:#425c80}
+.setupDrawer .roster{overflow:auto;padding-right:2px}.setupDrawer .playerSlot{border-color:#314b72;background:linear-gradient(145deg,#152844,#0c172c)}
+.setupDrawer .primaryBtn.startArenaBtn{
+  min-width:180px;font-family:Georgia,"Times New Roman",serif;font-size:13px;color:#392006;
+  background:linear-gradient(180deg,#ffe995,#ffc24b 48%,#e49418);border:1px solid #fff0b2;
+  box-shadow:0 0 22px rgba(255,177,43,.2),inset 0 1px rgba(255,255,255,.6)
+}
+
+/* modales del menú */
+.menuInfoModal{border-top:3px solid #d5a44d}
+.profileHero{display:flex;align-items:center;gap:13px;margin:14px 0;padding:12px;border-radius:13px;background:#11213b;border:1px solid rgba(205,163,80,.2)}
+.profileHeroIcon{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;font-size:31px;background:#1d3153;border:2px solid #c99c4b}
+.profileHero>div:last-child{display:grid;gap:4px}.profileHero b{font-size:18px}.profileHero span{font-size:9px;color:#a8bad4}
+.profileStatsGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.profileStatsGrid div{padding:10px;border-radius:11px;background:#12223c;border:1px solid rgba(103,143,205,.18);text-align:center}
+.profileStatsGrid b{display:block;font-size:18px;color:#ffe09a}.profileStatsGrid span{display:block;margin-top:2px;font-size:7px;color:#9fb1cb;text-transform:uppercase}
+.howToGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.howToGrid>div{position:relative;padding:12px 12px 12px 45px;border-radius:12px;background:#11213b;border:1px solid rgba(106,146,208,.18)}
+.howToGrid>div>span{position:absolute;left:10px;top:10px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#d4a044;color:#1d1305;font-weight:950}
+.howToGrid b{font-size:11px}.howToGrid p{font-size:8px;color:#a9bad3;line-height:1.45;margin:4px 0 0}
+.howToMotto{text-align:center;font-family:Georgia,"Times New Roman",serif;font-size:18px;color:#ffdc85;letter-spacing:.04em}
+
+/* Responsive del menú: prioriza 1366×768 y embeds */
+@media(max-height:820px){
+  .menuColumn{gap:9px;left:26px;width:315px}.gameLogo{padding-top:35px}.logoCrest{transform:translateX(-50%) scale(.82);transform-origin:center bottom}.logoBattle{font-size:50px}.logoVerbal{font-size:56px}.logoRibbon{padding:5px 10px;font-size:9px}
+  .gameMenuButtons{gap:5px}.gameMenuBtn{min-height:42px;padding-top:5px;padding-bottom:5px}.gameMenuBtn.primary{min-height:50px}.gameMenuBtn>span:not(.menuIco){font-size:14px}.gameMenuBtn.primary>span:not(.menuIco){font-size:19px}.gameMenuBtn small{display:none}.menuIco{width:27px;height:27px;font-size:15px}
+  .menuProfileHud{height:67px;top:12px;padding-left:72px;width:min(570px,54vw)}.profilePortrait{width:70px;height:70px;font-size:32px}.profileIdentity strong{font-size:15px}.profileStat{height:46px}
+  .menuShowcase{left:360px;top:92px;bottom:13px;right:18px;grid-template-rows:minmax(220px,1fr) auto;gap:10px}
+  .previewCharacter{width:100px;height:100px;font-size:48px}.classDeckTitle{margin-bottom:5px}.menuClassCard{min-height:112px;padding:7px 5px 6px}.classPortrait{width:49px;height:49px;font-size:27px}.menuClassCard b{font-size:11px}
+  .setupDrawer{max-height:92vh;padding:13px;gap:8px}
+}
+@media(max-width:1050px){
+  .menuColumn{left:20px;width:300px}.menuShowcase{left:335px;right:16px}.menuProfileHud{right:18px;width:58vw}
+}
+@media(max-width:820px){
+  .mainMenuScene{overflow:auto}
+  .menuColumn{position:relative;left:auto;top:auto;transform:none;width:auto;padding:16px;gap:10px}.gameLogo{max-width:330px;margin:auto}
+  .gameMenuButtons{grid-template-columns:1fr 1fr}.gameMenuBtn.primary{grid-column:1/3}
+  .menuProfileHud{position:relative;right:auto;top:auto;margin:0 16px;width:auto}
+  .menuShowcase{position:relative;left:auto;right:auto;top:auto;bottom:auto;padding:14px 16px 20px;grid-template-rows:280px auto}
+  .banner,.arenaSpire{display:none}
+}
+@media(max-width:560px){
+  .gameMenuButtons{grid-template-columns:1fr}.gameMenuBtn.primary{grid-column:auto}
+  .menuProfileHud{grid-template-columns:minmax(120px,1fr) 54px;padding-right:7px}.profileStat:last-child{display:none}
+  .menuClasses{grid-template-columns:1fr 1fr}.menuShowcase{grid-template-rows:250px auto}.previewCharacter{width:85px;height:85px;font-size:40px}
+  .setupDrawer{width:94vw}.setupDrawer .settingsRow{grid-template-columns:1fr 1fr}.setupDrawer .settingsRow .field:last-child{grid-column:1/3}
+  .howToGrid{grid-template-columns:1fr}.profileStatsGrid{grid-template-columns:1fr 1fr}
+}
+
+
+/* ---------- HÉROES ILUSTRADOS V5 ---------- */
+.avatar,
+.profilePortrait,
+.previewAvatar,
+.profileHeroIcon,
+.pcHeroThumb{overflow:hidden}
+
+.rosterHeroSprite,
+.profilePortrait img,
+.previewAvatar img,
+.profileHeroIcon img,
+.pcHeroThumb img{
+  display:block;width:auto;max-width:none;object-fit:contain;
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.28))
+}
+.rosterHeroSprite{height:152%;transform:translateY(15%)}
+.profilePortrait img{height:154%;transform:translateY(15%)}
+.previewAvatar img{height:155%;transform:translateY(16%)}
+.profileHeroIcon img{height:160%;transform:translateY(17%)}
+
+.classPortrait{
+  position:relative;width:100%;height:74px;margin:0 0 3px;
+  border:0;border-radius:0;background:none;box-shadow:none;
+  display:grid;place-items:end center;overflow:visible
+}
+.classPortrait img{
+  display:block;width:auto;height:108px;max-width:118%;object-fit:contain;object-position:center bottom;
+  filter:drop-shadow(0 9px 10px rgba(0,0,0,.38));
+  transform:translateY(10px);transition:transform .16s ease,filter .16s ease
+}
+.menuClassCard{overflow:visible}
+.menuClassCard:hover .classPortrait img,
+.menuClassCard.selected .classPortrait img{
+  transform:translateY(5px) scale(1.06);
+  filter:drop-shadow(0 11px 13px rgba(0,0,0,.42)) drop-shadow(0 0 10px color-mix(in srgb,var(--class) 35%,transparent))
+}
+
+.previewCharacter{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  overflow:visible
+}
+.previewCharacter img{
+  position:relative;z-index:2;display:block;width:auto;height:158%;max-width:176%;
+  object-fit:contain;object-position:center bottom;
+  filter:drop-shadow(0 16px 14px rgba(0,0,0,.42))
+}
+.previewFighter.hero .previewCharacter img{
+  filter:drop-shadow(0 16px 14px rgba(0,0,0,.42)) drop-shadow(0 0 12px color-mix(in srgb,var(--preview-role,#ff8e4e) 28%,transparent))
+}
+.previewFighter.enemy .previewCharacter img{
+  filter:drop-shadow(0 16px 14px rgba(0,0,0,.42)) drop-shadow(0 0 12px rgba(157,90,255,.25))
+}
+
+
+.fighterSprite{
+  overflow:visible;border-color:transparent;
+  background:radial-gradient(circle at 50% 58%,color-mix(in srgb,var(--fighter) 18%,transparent),transparent 62%);
+  box-shadow:none
+}
+.fighterSpriteImg{
+  position:relative;z-index:2;display:block;width:auto;height:154%;max-width:162%;
+  object-fit:contain;object-position:center bottom;
+  filter:drop-shadow(0 16px 15px rgba(0,0,0,.45)) drop-shadow(0 0 13px color-mix(in srgb,var(--fighter) 24%,transparent))
+}
+.fighterRight .fighterSpriteImg{transform:scaleX(1)}
+.battleStage.stage-hit .fighterRight .fighterSpriteImg{filter:brightness(1.22) drop-shadow(0 16px 15px rgba(0,0,0,.45))}
+
+.pcIdentity{display:flex;align-items:center;gap:6px;min-width:0}
+.pcHeroThumb{
+  flex:0 0 27px;width:27px;height:27px;border-radius:8px;
+  display:grid;place-items:center;background:color-mix(in srgb,var(--p) 15%,#0b1529);
+  border:1px solid color-mix(in srgb,var(--p) 28%,transparent)
+}
+.pcHeroThumb img{height:155%;transform:translateY(16%)}
+
+.profileHeroIcon{
+  position:relative;background:radial-gradient(circle at 50% 35%,#31557c,#15243c 68%);
+  box-shadow:0 0 18px rgba(91,172,255,.15)
+}
+
+@media(max-height:820px){
+  .classPortrait{height:57px}
+  .classPortrait img{height:87px;transform:translateY(9px)}
+  .menuClassCard:hover .classPortrait img,
+  .menuClassCard.selected .classPortrait img{transform:translateY(5px) scale(1.05)}
+  .profilePortrait img{height:150%}
+  .fighterSpriteImg{height:145%}
+}
+@media(max-width:760px){
+  .classPortrait{height:52px}
+  .classPortrait img{height:80px}
+  .fighterSpriteImg{height:137%}
+  .pcHeroThumb{width:22px;height:22px;flex-basis:22px}
+}
+
+
+/* Ajustes responsive finales de las cartas de acción */
+@media(max-height:760px){
+  .battleShell{grid-template-rows:46px minmax(0,1fr) 220px;gap:6px}
+  .commandDeck{grid-template-columns:176px minmax(0,1fr);gap:6px}
+  .commandSide,.movesPanel{padding:7px}
+  .movesPanel{gap:5px}
+  .moveGrid{gap:6px}
+  .moveCard{
+    padding:0;
+    grid-template-rows:30px 45px 18px minmax(48px,1fr) 30px;
+    border-radius:8px
+  }
+  .moveCardHeader{grid-template-columns:26px minmax(0,1fr) 36px}
+  .moveSigil{font-size:14px}
+  .moveName{font-size:8px;padding:0 4px}
+  .moveDamage b{font-size:12px}.moveDamage small{font-size:4.5px}
+  .moveCardArt img{width:78px;height:105px;bottom:-24px}
+  .moveCategory{left:6px;bottom:5px;padding:3px 5px;font-size:5.5px}
+  .moveDifficulty{padding:0 5px;gap:4px;font-size:5px}
+  .difficultyPips{gap:3px}.difficultyPips i{width:6px;height:6px}
+  .moveDifficulty b{font-size:5px}
+  .movePrompt{padding:5px 6px}
+  .movePrompt span{font-size:7.5px;line-height:1.12;-webkit-line-clamp:3}
+  .moveCardFooter{grid-template-columns:25px minmax(0,1fr) auto;padding-right:4px}
+  .moveFooterSigil{font-size:12px}.moveFooterText{padding-left:4px}
+  .moveFooterText b{font-size:5.8px}.moveFooterText small{font-size:4.8px}
+  .moveReward{font-size:5px;padding:2px 3px}
+  .moveRune{top:32px;font-size:4.8px;padding:2px 4px}
+}
+
+@media(max-width:980px){
+  .moveCard{padding:0}
+  .moveGrid{gap:6px}
+  .moveName{font-size:8.5px}
+  .movePrompt span{font-size:8px}
+  .moveFooterText b{font-size:6.2px}
+}
+
+@media(max-width:760px){
+  .battleShell{grid-template-rows:44px minmax(0,1fr) 246px}
+  .movesPanel{padding:6px}
+  .moveGrid{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:5px}
+  .moveCard{
+    padding:0;
+    grid-template-rows:26px 17px minmax(36px,1fr) 25px;
+    border-radius:7px
+  }
+  .moveCardArt{display:none}
+  .moveCardHeader{grid-template-columns:24px minmax(0,1fr) 34px}
+  .moveSigil{font-size:12px}
+  .moveName{font-size:7px}
+  .moveDamage b{font-size:10px}
+  .moveDamage small{font-size:4px}
+  .moveDifficulty{font-size:4.8px}
+  .difficultyPips i{width:5px;height:5px}
+  .movePrompt{padding:4px 5px}
+  .movePrompt span{font-size:7px;line-height:1.08;-webkit-line-clamp:3}
+  .moveCardFooter{grid-template-columns:22px minmax(0,1fr) auto}
+  .moveFooterSigil{font-size:10px}
+  .moveFooterText b{font-size:5.2px}.moveFooterText small{display:none}
+  .moveReward{font-size:4.7px}
+  .moveRune{top:27px;right:3px;font-size:4px;padding:1px 3px}
+  .moveRune span{font-size:6px}
+}
+
+
+/* ==========================================================
+   AJUSTES TRAS CAPTURA REAL · V7
+   Menú más compacto, retratos visibles, rivales con sprite y
+   cartas integradas en la arena en lugar de panel web.
+   ========================================================== */
+
+/* Sprites enemigos: hoja 4x2 autocontenida en assets/enemies/enemies.webp */
+.enemySprite{
+  display:block;width:100%;height:100%;
+  background-image:url("./assets/enemies/enemies.webp");
+  background-repeat:no-repeat;background-size:400% 200%;
+  filter:drop-shadow(0 12px 13px rgba(0,0,0,.42));
+}
+.enemySprite--slime{background-position:0% 0%}
+.enemySprite--wisp{background-position:33.333% 0%}
+.enemySprite--beetle{background-position:66.666% 0%}
+.enemySprite--troll{background-position:100% 0%}
+.enemySprite--shadow{background-position:0% 100%}
+.enemySprite--shaman{background-position:33.333% 100%}
+.enemySprite--golem{background-position:66.666% 100%}
+.enemySprite--owl{background-position:100% 100%}
+
+/* El slogan ya no invade la selección de clase. */
+.previewSlogan{bottom:10px;transform:none;left:18%;right:18%}
+
+/* Menú: más peso visual a héroes y clases, menos vacío central. */
+.menuShowcase{
+  grid-template-rows:minmax(300px,1fr) 210px;
+  gap:12px
+}
+.previewScene{top:11%;bottom:42px;left:3%;right:3%}
+.previewFighter{width:44%}
+.previewCharacter{
+  width:clamp(160px,14vw,225px)!important;
+  height:clamp(160px,14vw,225px)!important
+}
+.previewCharacter img{
+  height:138%!important;max-width:150%!important
+}
+.previewEnemyCharacter{
+  display:grid!important;place-items:center;
+  width:clamp(170px,15vw,235px)!important;
+  height:clamp(170px,15vw,235px)!important
+}
+.previewEnemyCharacter .enemySprite{
+  width:100%;height:100%;
+  filter:drop-shadow(0 17px 14px rgba(0,0,0,.44)) drop-shadow(0 0 17px rgba(97,132,255,.28))
+}
+.previewFighter.enemy{transform:none}
+.previewFighter.enemy>*{transform:none}
+
+.menuClasses{height:calc(100% - 22px)}
+.menuClassCard{
+  min-height:0;height:100%;
+  display:grid;grid-template-rows:minmax(82px,1fr) auto auto auto;
+  align-content:stretch;overflow:hidden;padding:7px 7px 9px
+}
+.classPortrait{
+  width:100%!important;height:auto!important;min-height:82px!important;
+  margin:0!important;overflow:hidden!important;place-items:end center!important
+}
+.classPortrait img{
+  height:128px!important;max-width:125%!important;
+  transform:translateY(18px)!important
+}
+.menuClassCard:hover .classPortrait img,
+.menuClassCard.selected .classPortrait img{
+  transform:translateY(11px) scale(1.05)!important
+}
+.menuClassCard b{position:relative;z-index:3;font-size:13px!important}
+.menuClassCard small{position:relative;z-index:3;font-size:7px}
+.menuClassCard em{position:relative;z-index:3;font-size:6px}
+
+/* Retratos: la captura mostró círculos vacíos por el encuadre anterior. */
+.profilePortrait,.previewAvatar{position:relative}
+.profilePortrait img,
+.previewAvatar:not(.enemyAvatar) img{
+  position:absolute;z-index:2;left:50%;bottom:-17%;
+  width:auto!important;height:152%!important;max-width:none!important;
+  transform:translateX(-50%)!important;object-fit:contain
+}
+.enemyAvatar{overflow:hidden}
+.enemyAvatar .enemySprite{
+  position:absolute;inset:-23%;
+  width:146%;height:146%;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.35))
+}
+
+/* Combate: más espacio útil para cartas y menos sensación de panel web. */
+.battleShell{grid-template-rows:54px minmax(0,1fr) 310px}
+.commandDeck{grid-template-columns:185px minmax(0,1fr);gap:10px}
+.movesPanel{
+  padding:0 2px 2px;
+  background:transparent;border:0;box-shadow:none;
+  gap:6px
+}
+.movesHeader{padding:0 6px 2px}
+.movesTitle{color:#8fe2ff;text-shadow:0 1px 6px rgba(0,0,0,.55)}
+.commandSide{
+  border-color:rgba(216,168,72,.3);
+  background:
+    radial-gradient(circle at 50% 0%,rgba(68,119,179,.12),transparent 38%),
+    linear-gradient(160deg,rgba(15,29,52,.96),rgba(7,15,29,.97));
+  box-shadow:inset 0 0 0 1px rgba(255,218,137,.035),0 10px 28px rgba(0,0,0,.22)
+}
+
+/* En práctica, el HUD del jugador vive con su héroe, no debajo del VS. */
+.practiceStage .playersBar{
+  left:7%;right:auto;width:min(250px,28%);justify-content:flex-start
+}
+.practiceStage .playerCard{width:100%}
+
+/* Combatientes algo mayores y rival NPC consistente. */
+.fighterSprite{
+  width:clamp(135px,14vw,190px);
+  height:clamp(135px,14vw,190px)
+}
+.fighterEnemyFrame{
+  display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 58%,color-mix(in srgb,var(--fighter) 21%,transparent),transparent 64%)
+}
+.fighterEnemyFrame .enemySprite{
+  width:114%;height:114%;
+  filter:drop-shadow(0 17px 16px rgba(0,0,0,.46)) drop-shadow(0 0 15px color-mix(in srgb,var(--fighter) 25%,transparent))
+}
+.enemyHp{background:linear-gradient(90deg,#e06157,#f2b65e)!important}
+
+/* Cartas: mayor legibilidad y proporción más cercana al concept art. */
+.moveCard{
+  grid-template-rows:36px 80px 23px minmax(76px,1fr) 42px
+}
+.moveCardHeader{grid-template-columns:32px minmax(0,1fr) 47px}
+.moveSigil{font-size:18px}
+.moveName{font-size:11px;padding:0 7px}
+.moveDamage b{font-size:16px}.moveDamage small{font-size:5px}
+.moveCardArt img{width:116px;height:154px;bottom:-37px}
+.moveCategory{font-size:6.6px;padding:4px 7px}
+.moveDifficulty{font-size:6.7px;padding:0 8px}
+.moveDifficulty b{font-size:6px}
+.difficultyPips i{width:8px;height:8px}
+.movePrompt{padding:8px 10px}
+.movePrompt span{
+  font-size:10.5px;line-height:1.18;-webkit-line-clamp:4
+}
+.moveCardFooter{grid-template-columns:32px minmax(0,1fr) auto;padding-right:7px}
+.moveFooterSigil{font-size:16px}
+.moveFooterText{padding-left:7px}
+.moveFooterText b{font-size:7.5px}
+.moveFooterText small{font-size:6px}
+.moveReward{font-size:6.2px;padding:3px 5px}
+
+/* Alturas habituales de Chromebook / embed de Sites. */
+@media(max-height:840px) and (min-width:821px){
+  .menuShowcase{
+    left:355px;top:84px;bottom:10px;right:16px;
+    grid-template-rows:minmax(285px,1fr) 205px
+  }
+  .previewCharacter{
+    width:168px!important;height:168px!important
+  }
+  .previewEnemyCharacter{
+    width:178px!important;height:178px!important
+  }
+  .menuClassCard{
+    grid-template-rows:minmax(78px,1fr) auto auto auto
+  }
+  .classPortrait{min-height:78px!important}
+  .classPortrait img{height:118px!important}
+  .profilePortrait img{height:146%!important}
+
+  .battleShell{grid-template-rows:46px minmax(0,1fr) 280px;gap:6px}
+  .commandDeck{grid-template-columns:170px minmax(0,1fr);gap:7px}
+  .moveCard{grid-template-rows:31px 62px 20px minmax(65px,1fr) 34px}
+  .moveName{font-size:9px}
+  .moveDamage b{font-size:13px}
+  .moveCardArt img{width:90px;height:122px;bottom:-29px}
+  .movePrompt span{font-size:8.8px;line-height:1.14}
+  .moveFooterText b{font-size:6.4px}.moveFooterText small{font-size:5.2px}
+  .fighterSprite{width:135px;height:135px}
+  .fighterEnemyFrame .enemySprite{width:116%;height:116%}
+}
+
+/* Mantener la versión compacta existente en alturas realmente bajas. */
+@media(max-height:760px){
+  .menuShowcase{grid-template-rows:minmax(255px,1fr) 176px}
+  .previewCharacter{width:145px!important;height:145px!important}
+  .previewEnemyCharacter{width:150px!important;height:150px!important}
+  .menuClassCard{grid-template-rows:minmax(64px,1fr) auto auto auto}
+  .classPortrait{min-height:64px!important}
+  .classPortrait img{height:98px!important}
+  .battleShell{grid-template-rows:46px minmax(0,1fr) 225px}
+  .moveCard{grid-template-rows:29px 45px 18px minmax(48px,1fr) 30px}
+  .movePrompt span{font-size:7.6px}
+  .fighterEnemyFrame{width:116px;height:116px}
+}
+
+@media(max-width:760px){
+  .previewSlogan{left:12%;right:12%;bottom:6px}
+  .practiceStage .playersBar{left:5px;right:5px;width:auto;justify-content:center}
+  .practiceStage .playerCard{width:25%}
+}
+
+
+/* ==========================================================
+   BATALLA VERBAL · LAYOUT V8
+   Implementación del concept art aprobado.
+   ========================================================== */
+
+#app:has(#gameScreen:not(.hidden)){grid-template-rows:46px minmax(0,1fr)}
+#app:has(#gameScreen:not(.hidden))>.topbar{
+  min-height:46px;padding:0 14px;
+  background:linear-gradient(180deg,rgba(9,18,35,.98),rgba(5,12,25,.98));
+  border-bottom:1px solid rgba(215,171,78,.22)
+}
+
+/* ---------- MENÚ: lobby de videojuego ---------- */
+.mainMenuScene{
+  display:grid!important;
+  grid-template-columns:300px minmax(0,1fr)!important;
+  grid-template-rows:68px minmax(0,1fr)!important;
+  gap:10px 14px!important;
+  padding:14px 18px 14px 20px!important;
+  background:
+    linear-gradient(90deg,rgba(4,10,21,.92) 0%,rgba(4,10,21,.76) 19%,rgba(4,10,21,.26) 52%,rgba(4,10,21,.48) 100%),
+    linear-gradient(180deg,rgba(8,18,36,.24),rgba(4,10,22,.68)),
+    url("./assets/arena/menu-academy.webp") center 52%/cover no-repeat!important;
+}
+.mainMenuScene:before{
+  z-index:0!important;
+  background:
+    radial-gradient(circle at 62% 40%,rgba(76,176,255,.11),transparent 27%),
+    linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.22))!important
+}
+.mainMenuScene:after{display:none!important}
+.skyGlow,.arenaSpire,.arenaCrowd,.banner{display:none!important}
+
+.menuColumn{
+  position:relative!important;z-index:20!important;left:auto!important;top:auto!important;transform:none!important;
   grid-column:1!important;grid-row:1/3!important;width:auto!important;height:100%!important;
   display:grid!important;grid-template-rows:auto minmax(0,1fr)!important;align-content:start!important;gap:10px!important;
   padding:10px 12px 12px!important;
@@ -823,6 +1434,10 @@ button:disabled{cursor:not-allowed;opacity:.42}
 
 /* ---------- COMBATE: dos franjas reales ---------- */
 .battleScreen{
+
+Warning: truncated output (original token count: 7146)
+Total output lines: 466
+
   background:
     linear-gradient(180deg,rgba(5,11,23,.82),rgba(4,9,19,.94)),
     url("./assets/arena/battle-academy.jpg") center/cover fixed no-repeat
@@ -1076,14 +1691,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
 .rosterFactionTitle{display:flex;align-items:center;gap:8px;min-width:0;color:#f4d88e}
 .rosterFactionTitle>span{color:#7bdfff;font-size:8px;font-weight:950}
 .rosterFactionTitle>b{white-space:nowrap;font-size:clamp(8px,.72vw,10px);letter-spacing:.16em}
-.rosterFactionTitle>i{height:1px;flex:1;background:linear-gradient(90deg,rgba(221,178,88,.55),transparent)}
-.rosterFactionTitle>small{color:#aabbd2;font-size:clamp(7px,.6vw,9px);white-space:nowrap}
-.heroRosterGrid,.enemyRosterGrid{min-width:0;min-height:0;display:grid;gap:clamp(5px,.65vw,9px)}
-.heroRosterGrid{grid-template-columns:repeat(4,minmax(0,1fr))}
-.enemyRosterGrid{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr))}
-.rosterCard{
-  --class:#78caff;position:relative;min-width:0;min-height:0;overflow:hidden;
-  border:1px solid color-mix(in srgb,var(--class) 58%,rgba(255,255,255,.2));border-radius:12px;
+.rosterFactionTi…146 tokens truncated…--class) 58%,rgba(255,255,255,.2));border-radius:12px;
   color:#f8f5eb;background:radial-gradient(circle at 50% 0,color-mix(in srgb,var(--class) 24%,transparent),transparent 62%),linear-gradient(155deg,rgba(27,43,65,.95),rgba(5,13,26,.98));
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 9px 18px rgba(0,0,0,.28)
 }
