@@ -264,11 +264,16 @@
             background: url("assets/plumin-poses-v2/pose-04.png") no-repeat center / contain;
         }
         .owl-sprite.has-frames { background-image: none; }
-        .owl-frame-layer {
-            position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
-            opacity: 0; transition: opacity 105ms ease-in-out; pointer-events: none;
+        .owl-frame {
+            position: absolute; inset: 0; display: block; width: 100%; height: 100%;
+            object-fit: contain; pointer-events: none;
         }
-        .owl-frame-layer.is-active { opacity: 1; }
+        .owl-wearable.slot-back { z-index: 0; transform-origin: 50% 18%; transform: rotate(var(--owl-body-angle, 0deg)); }
+        .owl-wearable.slot-head { left: calc(50% + var(--owl-head-x, 0px)); top: calc(-2% + var(--owl-head-y, 0px)); width: 92%; height: 39%; transform: translateX(-50%) rotate(var(--owl-head-angle, 0deg)); transform-origin: 50% 82%; }
+        .owl-wearable.slot-face { left: calc(50% + var(--owl-head-x, 0px)); top: calc(22% + var(--owl-head-y, 0px)); width: 91%; height: 38%; transform: translateX(-50%) rotate(var(--owl-head-angle, 0deg)); transform-origin: 50% 48%; }
+        .owl-wearable.slot-body { left: 50%; top: 44%; width: 100%; height: 53%; transform: translateX(-50%) rotate(var(--owl-body-angle, 0deg)); transform-origin: 50% 12%; }
+        .owl-wearable.slot-back { left: 50%; top: 45%; width: 100%; height: 53%; }
+        .owl-wearable.slot-back svg { width: 100%; height: 100%; }
         .owl-sprite.motion-flap, .owl-sprite.motion-talk, .owl-sprite.motion-think, .owl-sprite.motion-cheer { animation: none; }
         .owl-sprite.skin-nieve { filter: brightness(1.12) saturate(0.65); }
         .owl-sprite.skin-luna { filter: sepia(0.16) hue-rotate(155deg) saturate(0.82); }
@@ -278,9 +283,6 @@
             pointer-events: none; overflow: visible;
         }
         .owl-wearable svg { display: block; width: 100%; height: 100%; overflow: visible; }
-        .owl-wearable.slot-head { left: 50%; top: -2%; width: 92%; height: 39%; transform: translateX(-50%); }
-        .owl-wearable.slot-face { left: 50%; top: 22%; width: 91%; height: 38%; transform: translateX(-50%); }
-        .owl-wearable.slot-body { left: 50%; top: 44%; width: 100%; height: 53%; transform: translateX(-50%); }
         .owl-item-preview.accessory-preview { position: relative; width: 84px; height: 84px; overflow: hidden; }
         .owl-item-preview .owl-preview-sprite {
             position: absolute; inset: 1px; width: auto; height: auto;
@@ -290,7 +292,7 @@
         .owl-item-preview .owl-wearable.slot-face { top: 21%; width: 94%; height: 40%; }
         .owl-item-preview .owl-wearable.slot-body { top: 43%; width: 102%; height: 55%; }
         @media (prefers-reduced-motion: reduce) {
-            .owl-frame-layer { transition: none; }
+            .owl-frame { transition: none; }
         }
         .writing-codex { min-width: 0; align-self: start; font-family: var(--font-ui); }
         .writing-codex > summary {
@@ -325,6 +327,30 @@
         .owl-greet { border: 1px solid rgba(138,109,31,0.48); border-radius: 999px; padding: 6px 12px; background: #fff9e9; color: var(--ink); font-weight: 800; cursor: pointer; }
         .owl-greet:hover { background: #f4e0a7; }
         .owl-equipped-label { margin: 7px auto 0; max-width: 250px; color: var(--ink-light); font-size: 0.7rem; line-height: 1.4; }
+        .owl-home-status { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: 5px auto 8px; color: var(--ink-light); font: 700 0.67rem/1.25 var(--font-ui); }
+        .owl-home-status strong { color: var(--ink); }
+        .owl-home-status .owl-feather-count { color: #795b24; white-space: nowrap; }
+        .owl-home-upgrade { border: 1px solid rgba(138,109,31,.35); border-radius: 99px; padding: 4px 8px; background: #fff7df; color: var(--ink); font: 800 .64rem var(--font-ui); cursor: pointer; white-space: nowrap; }
+        .owl-home-upgrade:disabled { opacity: .58; cursor: default; }
+        .owl-habitat { transition: width .3s ease, height .3s ease, background .35s ease, border-radius .35s ease; }
+        .owl-habitat.home-level-2 { width: min(100%, 310px); --cage-back: #f4e8d1; background: linear-gradient(180deg,#f8eddb 0 75%,#d7b681 75% 100%); border-radius: 14px; }
+        .owl-habitat.home-level-2 .habitat-dome { display: none; }
+        .owl-habitat.home-level-2 .habitat-bars { opacity: .26; }
+        .owl-habitat.home-level-3 { width: min(100%, 320px); height: 272px; background: linear-gradient(180deg,#d9e9e4 0 69%,#c49b66 69% 100%); border-radius: 13px; }
+        .owl-habitat.home-level-3 .habitat-dome { display: none; }
+        .owl-habitat.home-level-3 .habitat-bars { opacity: .16; }
+        .home-piece-window { top: 22px; left: 50%; width: 72px; height: 82px; border: 5px solid #8b6441; border-radius: 40px 40px 6px 6px; transform: translateX(-50%); background: linear-gradient(145deg,#b8dce8 0 49%,#f8e8b8 50%); box-shadow: 0 2px 5px #62482e55; font-size: 0; }
+        .home-piece-window::before, .home-piece-window::after { content: ''; position: absolute; background: #8b6441; }
+        .home-piece-window::before { width: 4px; top: 0; bottom: 0; left: calc(50% - 2px); }
+        .home-piece-window::after { height: 4px; left: 0; right: 0; top: 52%; }
+        .home-furnishing { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+        .home-piece { position: absolute; display: grid; place-items: center; width: 38px; height: 42px; border-radius: 12px; background: rgba(255,250,231,.72); box-shadow: 0 2px 5px rgba(61,42,21,.17); font-size: 1.42rem; line-height: 1; }
+        .home-piece-bookcase { left: 7%; bottom: 34px; }
+        .home-piece-lamp { right: 7%; top: 35%; }
+        .home-piece-plant { right: 6%; bottom: 31px; }
+        .home-piece-rug { left: 50%; bottom: 5px; width: 106px; height: 22px; border-radius: 50%; transform: translateX(-50%); font-size: 1rem; background: rgba(183,141,81,.5); }
+        .home-piece-desk { left: 4%; top: 47%; }
+        .furniture-preview { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(145deg,#fff7df,#e9d4a8); border: 2px solid rgba(138,109,31,.25); font-size: 2rem; }
         .owl-shop-section { margin-top: 28px; padding-top: 18px; border-top: 2px solid rgba(138,109,31,0.25); }
         .store-subtitle { margin: 8px 0 12px; color: var(--ink); font: 700 1.25rem var(--font-title); }
         .owl-shop-layout { display: grid; grid-template-columns: minmax(220px, 270px) 1fr; gap: 16px; align-items: start; margin-top: 14px; }
@@ -562,9 +588,11 @@
                 <aside class="writing-sidebar" aria-label="Plumín y guía de escritura">
                         <div class="writer-companion owl-pet-panel" id="writer-companion" aria-label="Plumín, tu compañero de escritura">
                             <div class="companion-heading"><strong class="companion-name">Plumín, aprendiz de escriba</strong><span class="companion-status" id="companion-status">Esperando ideas</span></div>
-                            <div class="owl-habitat cage-roble" id="writing-owl-habitat" aria-label="Jaula de Plumín">
+                            <div class="owl-home-status"><span>Nido <strong id="writing-home-level">1</strong> · vínculo <strong id="writing-bond-level">1</strong></span><span class="owl-feather-count">🪶 <strong id="writing-feathers">0</strong></span><button class="owl-home-upgrade" id="writing-home-upgrade" onclick="game.upgradeOwlHome()">Ampliar</button></div>
+                            <div class="owl-habitat cage-roble home-level-1" id="writing-owl-habitat" aria-label="Hogar de Plumín">
                                 <div class="habitat-dome"></div>
                                 <div class="habitat-perch"></div>
+                                <div class="home-furnishing" aria-label="Muebles del hogar"></div>
                                 <div class="habitat-owl"><span class="owl-sprite" id="plumin-writing-sprite"></span></div>
                                 <div class="habitat-bars"></div>
                                 <div class="habitat-base">🌿</div>
@@ -639,13 +667,15 @@
             <h3 class="store-subtitle">Herramientas narrativas</h3>
             <div class="shop-grid" id="shop-container"></div>
             <div class="owl-shop-section">
-                <h3 class="store-subtitle">El rincón de Plumín</h3>
-                <p class="teacher-small">Elige su aspecto, sus accesorios y el hogar donde descansará. Lo que compres se queda en tu colección.</p>
+                <h3 class="store-subtitle">Casa y vestuario de Plumín</h3>
+                <p class="teacher-small">Viste a Plumín con tinteros y gana plumillas escribiendo para ampliar su casa y amueblar su rincón.</p>
                 <div class="owl-shop-layout">
                     <div class="owl-shop-showcase">
-                        <h4>Tu compañero</h4>
-                        <div class="owl-habitat cage-roble" id="shop-owl-habitat" aria-label="Vista previa de Plumín">
+                        <h4>El hogar de Plumín</h4>
+                        <div class="owl-home-status"><span>Nido <strong id="shop-home-level">1</strong> · vínculo <strong id="shop-bond-level">1</strong></span><span class="owl-feather-count">🪶 <strong id="shop-feathers">0</strong></span><button class="owl-home-upgrade" id="shop-home-upgrade" onclick="game.upgradeOwlHome()">Ampliar</button></div>
+                        <div class="owl-habitat cage-roble home-level-1" id="shop-owl-habitat" aria-label="Hogar de Plumín">
                             <div class="habitat-dome"></div><div class="habitat-perch"></div>
+                            <div class="home-furnishing" aria-label="Muebles del hogar"></div>
                             <div class="habitat-owl"><span class="owl-sprite" id="plumin-shop-sprite"></span></div>
                             <div class="habitat-bars"></div><div class="habitat-base">🌿</div>
                         </div>
@@ -880,19 +910,32 @@
             { id: "cage_roble", name: "Nido de roble", category: "Jaula", slot: "cage", cost: 0, icon: "🪵", cssClass: "cage-roble", desc: "Su hogar original, sencillo y acogedor.", included: true },
             { id: "cage_jardin", name: "Invernadero del Gremio", category: "Jaula", slot: "cage", cost: 60, icon: "🌿", cssClass: "cage-jardin", desc: "Una pequeña jaula-jardín llena de calma." },
             { id: "cage_gremio", name: "Aviario dorado", category: "Jaula", slot: "cage", cost: 75, icon: "✨", cssClass: "cage-gremio", desc: "Un aviario brillante para una mascota célebre." },
-            { id: "cage_noche", name: "Observatorio lunar", category: "Jaula", slot: "cage", cost: 80, icon: "🌌", cssClass: "cage-noche", desc: "Un refugio azul para vigilar las estrellas." }
+            { id: "cage_noche", name: "Observatorio lunar", category: "Jaula", slot: "cage", cost: 80, icon: "🌌", cssClass: "cage-noche", desc: "Un refugio azul para vigilar las estrellas." },
+            { id: "home_bookcase", name: "Estante de cuentos", category: "Mueble", slot: "bookcase", cost: 4, currency: "plumillas", icon: "📚", desc: "Un lugar para guardar las historias que escribimos." },
+            { id: "home_lamp", name: "Farol de lectura", category: "Mueble", slot: "lamp", cost: 3, currency: "plumillas", icon: "🏮", desc: "Una luz cálida para las ideas nocturnas." },
+            { id: "home_plant", name: "Hiedra del bosque", category: "Mueble", slot: "plant", cost: 5, currency: "plumillas", icon: "🪴", desc: "Un rincón verde que crece con Plumín." },
+            { id: "home_rug", name: "Alfombra de plumas", category: "Mueble", slot: "rug", cost: 4, currency: "plumillas", icon: "🪶", desc: "Suave para las pausas entre capítulos." },
+            { id: "home_desk", name: "Escritorio de nogal", category: "Mueble", slot: "desk", cost: 6, currency: "plumillas", icon: "🪑", desc: "La mesa donde Plumín prepara su próxima página." },
+            { id: "home_window", name: "Ventana de las historias", category: "Mueble", slot: "window", cost: 5, currency: "plumillas", icon: "🪟", desc: "Una ventana al mundo que estamos inventando." }
         ];
         const OWL_ACCESSORY_ART = {
-            head_gorro: '<path d="M12 36 128 2 244 36 128 72 12 36Z" fill="#49365f" stroke="#2d203e" stroke-width="7" stroke-linejoin="round"/><path d="M49 48v24c49 29 79 29 158 0V48l-79 25L49 48Z" fill="#68528b" stroke="#39294e" stroke-width="6" stroke-linejoin="round"/><path d="m26 53 102 32 102-32-102 40L26 53Z" fill="#d5b6ee" stroke="#39294e" stroke-width="5" stroke-linejoin="round"/><path d="M194 61v31" stroke="#e3b23d" stroke-width="5"/><circle cx="194" cy="96" r="7" fill="#e59a33" stroke="#78421d" stroke-width="3"/>',
-            head_corona: '<path d="m29 74 13-47 39 31 47-48 47 48 39-31 13 47v20H29V74Z" fill="#f2c744" stroke="#8b5c20" stroke-width="8" stroke-linejoin="round"/><path d="M39 75h178v19H39z" fill="#dc9e2e" stroke="#8b5c20" stroke-width="7"/><circle cx="82" cy="76" r="8" fill="#ee7660"/><circle cx="128" cy="76" r="9" fill="#76a9c6"/><circle cx="174" cy="76" r="8" fill="#a777b5"/><path d="m55 43 19 15M128 30v24m73-11-19 15" stroke="#fff1b2" stroke-width="5" stroke-linecap="round"/>',
-            face_gafas: '<g fill="#f7fbff" fill-opacity=".13" stroke="#503a2b" stroke-width="8"><circle cx="76" cy="49" r="39"/><circle cx="180" cy="49" r="39"/></g><path d="M115 47q13-11 26 0M37 43 14 34m205 9 23-9" fill="none" stroke="#503a2b" stroke-width="8" stroke-linecap="round"/><path d="M51 24q24-14 47 0m57 0q24-14 47 0" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="4" stroke-linecap="round"/>',
-            body_capa: '<path d="M67 7Q91 26 128 25q37 1 61-18l48 48-22 82q-44 10-87 8-43 2-87-8L39 55 17 62 67 7Z" fill="#66518d" stroke="#39294e" stroke-width="8" stroke-linejoin="round"/><path d="M68 17Q95 36 128 33q33 3 60-16l-21 37q-18 15-39 15T89 54L68 17Z" fill="#806bad" stroke="#49365f" stroke-width="5" stroke-linejoin="round"/><path d="M42 69q38 20 48 71M214 69q-38 20-48 71" fill="none" stroke="#c8b7e6" stroke-width="7" stroke-linecap="round"/><path d="m117 34 11 13 11-13-11-8-11 8Z" fill="#e2b643" stroke="#805c20" stroke-width="4"/>',
-            body_delantal: '<path d="M81 8h94l20 27 26 15-16 29-19-10-4 67q-54 12-108 0l-4-67-19 10-16-29 26-15L81 8Z" fill="#d7b779" stroke="#74542d" stroke-width="8" stroke-linejoin="round"/><path d="M83 10q11 34 45 35t45-35" fill="none" stroke="#4f7590" stroke-width="13" stroke-linecap="round"/><path d="M73 78q55 14 110 0v55q-55 13-110 0V78Z" fill="#b78d51" stroke="#74542d" stroke-width="6" stroke-linejoin="round"/><path d="M91 88v25m37-26v27m37-28v26" stroke="#ecd6a5" stroke-width="5" stroke-linecap="round"/><circle cx="128" cy="61" r="7" fill="#7b9b70" stroke="#3d5943" stroke-width="4"/>'
+            head_gorro: '<path d="M25 49Q34 22 82 10q42-12 82 0 42 12 67 39l-18 17q-86 29-170 0Z" fill="#59456f" stroke="#2d203e" stroke-width="8" stroke-linejoin="round"/><path d="M30 57q98 31 196 0l-5 21q-94 31-186 0z" fill="#806b99" stroke="#39294e" stroke-width="6"/><path d="M46 60q82 24 164 0M72 28q52-24 105 0" fill="none" stroke="#d7c1e4" stroke-width="5" stroke-linecap="round"/><path d="M206 52q4 31-2 47" stroke="#e3b23d" stroke-width="5"/><circle cx="202" cy="103" r="8" fill="#e59a33" stroke="#78421d" stroke-width="3"/>',
+            head_corona: '<path d="m23 77 16-53 48 39 41-53 43 53 48-39 16 53v17H23V77Z" fill="#f2c744" stroke="#8b5c20" stroke-width="8" stroke-linejoin="round"/><path d="M31 80q97 21 194 0v18q-97 24-194 0z" fill="#dc9e2e" stroke="#8b5c20" stroke-width="6"/><circle cx="77" cy="78" r="9" fill="#ee7660"/><circle cx="128" cy="77" r="10" fill="#76a9c6"/><circle cx="179" cy="78" r="9" fill="#a777b5"/><path d="m56 45 19 16M128 32v24m72-11-19 16" stroke="#fff1b2" stroke-width="5" stroke-linecap="round"/>',
+            face_gafas: '<path d="M18 48 4 39m248 9 14-9" fill="none" stroke="#503a2b" stroke-width="9" stroke-linecap="round"/><g fill="#e9f6f8" fill-opacity=".18" stroke="#49372d" stroke-width="8"><path d="M31 20q44-14 82 5v42q-40 18-78-3-12-18-4-44Z"/><path d="M143 25q39-19 82-5 8 26-4 44-38 21-78 3Z"/></g><path d="M112 43q16-11 32 0" fill="none" stroke="#49372d" stroke-width="9" stroke-linecap="round"/><path d="M43 30q25-11 47-2m124 2q-25-11-47-2" fill="none" stroke="#fff" stroke-opacity=".78" stroke-width="5" stroke-linecap="round"/><path d="M36 69q32 8 64 0m56 0q32 8 64 0" fill="none" stroke="#805b3b" stroke-width="4" stroke-linecap="round"/>',
+            body_capa: '<path d="M44 8q24 28 84 28t84-28l34 44-17 72q-40 13-101 13T27 124L10 52z" fill="#66518d" stroke="#39294e" stroke-width="8" stroke-linejoin="round"/><path d="M47 20q25 25 81 25t81-25l-23 32q-20 15-58 15T70 52z" fill="#806bad" stroke="#49365f" stroke-width="5" stroke-linejoin="round"/><path d="M39 69q38 27 42 58m136-58q-38 27-42 58" fill="none" stroke="#d5c5e9" stroke-width="7" stroke-linecap="round"/><path d="m117 48 11 15 11-15-11-8z" fill="#e2b643" stroke="#805c20" stroke-width="4"/>',
+            body_delantal: '<path d="M69 7h118l21 25 27 14-16 29-20-10-4 71q-63 13-126 0l-4-71-20 10-16-29 27-14z" fill="#d7b779" stroke="#74542d" stroke-width="8" stroke-linejoin="round"/><path d="M72 10q17 39 56 39t56-39" fill="none" stroke="#4f7590" stroke-width="14" stroke-linecap="round"/><path d="M64 75q64 15 128 0v55q-64 15-128 0V75Z" fill="#b78d51" stroke="#74542d" stroke-width="6" stroke-linejoin="round"/><path d="M80 87q48 11 96 0m-78 5v25m33-25v27m34-28v26" stroke="#ecd6a5" stroke-width="5" stroke-linecap="round"/><circle cx="128" cy="59" r="8" fill="#7b9b70" stroke="#3d5943" stroke-width="4"/>'
         };
+        const OWL_ACCESSORY_BACK_ART = {
+            body_capa: '<path d="M52 10Q85 32 128 32t76-22l43 54-27 120q-35 26-57 27-2-35-35-48-33 13-35 48-22-1-57-27L9 64z" fill="#615080" stroke="#35283f" stroke-width="8" stroke-linejoin="round"/><path d="M52 18q28 23 76 23t76-23l-18 38q-22 18-58 18T70 56z" fill="#7b68a3" stroke="#49365f" stroke-width="5"/>'
+        };
+        const owlAccessoryBackMarkup = item => OWL_ACCESSORY_BACK_ART[item.id]
+            ? `<svg class="owl-wearable slot-back" viewBox="0 0 256 210" role="img" aria-label="" focusable="false">${OWL_ACCESSORY_BACK_ART[item.id]}</svg>`
+            : '';
         const owlAccessoryMarkup = item => OWL_ACCESSORY_ART[item.id]
             ? `<svg class="owl-wearable slot-${item.slot}" viewBox="0 0 256 ${item.slot === 'face' ? '100' : item.slot === 'head' ? '112' : '150'}" role="img" aria-label="${escapeHTML(item.name)}" focusable="false">${OWL_ACCESSORY_ART[item.id]}</svg>`
             : '';
-        const owlPose = frame => `assets/plumin-poses-v2/pose-${String(frame).padStart(2, '0')}.png`;
+        const owlHomePieceMarkup = item => `<span class="home-piece home-piece-${item.slot}" role="img" aria-label="${escapeHTML(item.name)}" title="${escapeHTML(item.name)}">${item.icon}</span>`;
+        const owlPose = frame => `assets/plumin-poses-v3/pose-${String(frame).padStart(2, '0')}.webp`;
         const owlSequence = (anchors, extraStart) => anchors.flatMap((anchor, index) => [
             owlPose(anchor),
             ...Array.from({ length: 4 }, (_, offset) => owlPose(extraStart + index * 4 + offset))
@@ -909,7 +952,10 @@
             if (!owlFrameCache.has(path)) {
                 const image = new Image();
                 const loaded = new Promise(resolve => {
-                    image.onload = () => resolve(true);
+                    image.onload = () => {
+                        const decoded = typeof image.decode === 'function' ? image.decode().catch(() => undefined) : Promise.resolve();
+                        decoded.then(() => resolve(true));
+                    };
                     image.onerror = () => resolve(false);
                 });
                 image.src = path;
@@ -920,7 +966,8 @@
         const preloadOwlSequence = async frames => (await Promise.all(frames.map(preloadOwlFrame))).filter(Boolean);
         const DEFAULT_OWL_STATE = {
             owned: ["skin_grafito", "cage_roble"],
-            equipped: { skin: "skin_grafito", head: "", face: "", body: "", cage: "cage_roble" }
+            equipped: { skin: "skin_grafito", head: "", face: "", body: "", cage: "cage_roble", bookcase: "", lamp: "", plant: "", rug: "", desk: "", window: "" },
+            coins: 0, homeLevel: 1, totalWordsWritten: 0, rewardLedgers: {}
         };
 
         const tcgThemes = {
@@ -1064,7 +1111,27 @@
                 const item = OWL_SHOP_ITEMS.find(candidate => candidate.id === id);
                 if (id && (!item || item.slot !== slot || !safeOwned.includes(id))) equipped[slot] = DEFAULT_OWL_STATE.equipped[slot] || '';
             });
-            return { owned: safeOwned, equipped };
+            const source = raw && typeof raw === 'object' ? raw : {};
+            return {
+                owned: safeOwned, equipped,
+                coins: Math.max(0, Math.floor(Number(source.coins) || 0)),
+                homeLevel: Math.min(3, Math.max(1, Math.floor(Number(source.homeLevel) || 1))),
+                totalWordsWritten: Math.max(0, Math.floor(Number(source.totalWordsWritten) || 0)),
+                rewardLedgers: Object.fromEntries(Object.entries(source.rewardLedgers && typeof source.rewardLedgers === 'object' ? source.rewardLedgers : {})
+                    .filter(([id, words]) => id && id !== '__proto__' && id !== 'constructor' && id.length < 200 && Array.isArray(words))
+                    .map(([id, words]) => [id, Array.from({ length: 5 }, (_, index) => Math.max(0, Math.floor(Number(words[index]) || 0)))]))
+            };
+        }
+        function mergeOwlProgress(currentRaw, historicalRaw) {
+            const current = normalizeOwlState(currentRaw);
+            const historical = normalizeOwlState(historicalRaw);
+            const currentHasProgress = current.totalWordsWritten > 0 || current.coins > 0 || current.homeLevel > 1 || current.owned.length > DEFAULT_OWL_STATE.owned.length;
+            const primary = currentHasProgress ? current : historical;
+            const rewardLedgers = { ...historical.rewardLedgers };
+            Object.entries(current.rewardLedgers).forEach(([storyId, words]) => {
+                rewardLedgers[storyId] = Array.from({ length: 5 }, (_, index) => Math.max(words[index] || 0, rewardLedgers[storyId]?.[index] || 0));
+            });
+            return normalizeOwlState({ ...primary, owned: [...new Set([...current.owned, ...historical.owned])], rewardLedgers });
         }
         let state = cloneDefaultState();
         let companionPauseTimer = null;
@@ -1813,11 +1880,12 @@
                 if(!snapshot || !snapshot.stateData) { ui.showToast('No he podido reconstruir esta historia.', '⚠️'); return; }
                 archiveStore.upsert(snapshot);
                 const loadedState = snapshot.stateData;
+                const currentOwlProgress = normalizeOwlState(state.owl);
                 const base = cloneDefaultState();
                 state = { ...base, ...loadedState };
                 state.student = { ...base.student, ...(loadedState.student || {}) };
                 state.inventory = { ...base.inventory, ...(loadedState.inventory || {}) };
-                state.owl = normalizeOwlState(loadedState.owl);
+                state.owl = mergeOwlProgress(currentOwlProgress, loadedState.owl);
                 state.stats = { ...base.stats, ...(loadedState.stats || {}) };
                 state.itemUses = { ...base.itemUses, ...(loadedState.itemUses || {}) };
                 if(!state.storyId) state.storyId = snapshot.storyId;
@@ -1926,16 +1994,61 @@
                 }
             },
 
+            awardOwlWritingCoins: (words) => {
+                state.owl = normalizeOwlState(state.owl);
+                const owl = state.owl;
+                const storyId = String(state.storyId || state.sessionId || 'borrador').replace(/[^A-Za-z0-9:_-]/g, '_').slice(0, 180);
+                if (!Array.isArray(owl.rewardLedgers[storyId])) owl.rewardLedgers[storyId] = [0, 0, 0, 0, 0];
+                const phase = clamp(asNumber(state.currentPhase, 0), 0, 4);
+                const rewardedWords = owl.rewardLedgers[storyId];
+                const previous = rewardedWords[phase] || 0;
+                const highest = Math.max(previous, Number(words) || 0);
+                if (highest > previous) {
+                    const earned = Math.floor(highest / 10) - Math.floor(previous / 10);
+                    rewardedWords[phase] = highest;
+                    owl.totalWordsWritten += highest - previous;
+                    if (earned > 0) {
+                        owl.coins += earned;
+                        ui.showToast(`¡${earned} plumilla${earned === 1 ? '' : 's'} para el hogar de Plumín!`, '🪶');
+                        ui.renderOwlShop();
+                    }
+                    storage.save();
+                }
+                ui.updateOwlHomeStatus();
+            },
+
+            upgradeOwlHome: () => {
+                state.owl = normalizeOwlState(state.owl);
+                const owl = state.owl;
+                if (owl.homeLevel >= 3) {
+                    ui.showToast('El nido de Plumín ya está en su mejor versión.', '🏡');
+                    return;
+                }
+                const cost = owl.homeLevel === 1 ? 8 : 18;
+                if (owl.coins < cost) {
+                    ui.showToast(`A Plumín le faltan ${cost - owl.coins} plumillas para ampliar su casa.`, '🪶');
+                    return;
+                }
+                owl.coins -= cost;
+                owl.homeLevel += 1;
+                storage.save();
+                ui.renderOwl();
+                ui.renderOwlShop();
+                ui.showToast(owl.homeLevel === 2 ? '¡El nido se ha convertido en una habitación!' : '¡Plumín ya tiene un hogar en el árbol!', '🏡');
+            },
+
             buyOwlItem: (id) => {
                 const item = OWL_SHOP_ITEMS.find(candidate => candidate.id === id);
                 if (!item || item.included) return;
                 state.owl = normalizeOwlState(state.owl);
                 if (state.owl.owned.includes(id)) { game.equipOwlItem(id); return; }
-                if (state.tinteros < item.cost) {
-                    ui.showToast("A Plumín le encanta, pero aún faltan tinteros.", '✒️');
+                const balance = item.currency === 'plumillas' ? state.owl.coins : state.tinteros;
+                if (balance < item.cost) {
+                    ui.showToast(item.currency === 'plumillas' ? "A Plumín le faltan plumillas para ese mueble." : "A Plumín le encanta, pero aún faltan tinteros.", item.currency === 'plumillas' ? '🪶' : '✒️');
                     return;
                 }
-                state.tinteros -= item.cost;
+                if (item.currency === 'plumillas') state.owl.coins -= item.cost;
+                else state.tinteros -= item.cost;
                 state.owl.owned.push(id);
                 state.owl.equipped[item.slot] = id;
                 state.stats.items++;
@@ -2344,6 +2457,7 @@
 
                 cnt.innerText = `Palabras: ${c} / Mín: ${m}`;
                 cnt.style.background = c >= m ? 'var(--success)' : 'var(--danger)';
+                game.awardOwlWritingCoins(c);
                 ui.updateCompanion(typing, text, c);
             },
 
@@ -2426,17 +2540,22 @@
                     if (generation !== owlMotionGeneration || !loadedFrames.length) return;
                     let frameIndex = 0;
                     const showFrame = () => sprites.forEach(sprite => {
-                        const layers = [...sprite.querySelectorAll('.owl-frame-layer')];
-                        if (layers.length < 2) return;
-                        const active = layers.find(layer => layer.classList.contains('is-active')) || layers[0];
-                        const next = layers.find(layer => layer !== active);
-                        next.src = loadedFrames[frameIndex];
-                        next.classList.add('is-active');
-                        active.classList.remove('is-active');
+                        const frame = sprite.querySelector('.owl-frame');
+                        if (frame) frame.src = loadedFrames[frameIndex];
+                        const progress = loadedFrames.length > 1 ? frameIndex / (loadedFrames.length - 1) : 0;
+                        const wave = Math.sin(progress * Math.PI * 2);
+                        const headAngle = mode === 'think' ? wave * 5 : mode === 'talk' ? wave * 2.4 : mode === 'flap' ? wave * 1.6 : wave * 3.2;
+                        const headX = mode === 'think' ? wave * 2.5 : mode === 'talk' ? wave * 1.2 : 0;
+                        const headY = mode === 'flap' ? Math.sin(progress * Math.PI * 4) * 1.5 : Math.abs(wave) * 1.2;
+                        const bodyAngle = mode === 'flap' ? wave * 1.8 : mode === 'talk' ? wave * .8 : 0;
+                        sprite.style.setProperty('--owl-head-angle', headAngle + 'deg');
+                        sprite.style.setProperty('--owl-head-x', headX + 'px');
+                        sprite.style.setProperty('--owl-head-y', headY + 'px');
+                        sprite.style.setProperty('--owl-body-angle', bodyAngle + 'deg');
                     });
                     showFrame();
                     if (mode === 'idle' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-                    const frameDelay = mode === 'flap' ? 112 : 118;
+                    const frameDelay = mode === 'flap' ? 84 : mode === 'talk' ? 92 : 98;
                     owlFrameTimer = setInterval(() => {
                         if (frameIndex + 1 < loadedFrames.length) {
                             frameIndex += 1;
@@ -2462,19 +2581,44 @@
                     habitat.classList.remove(...OWL_SHOP_ITEMS.filter(item => item.slot === 'cage').map(item => item.cssClass));
                     habitat.classList.add(cage?.cssClass || 'cage-roble');
                 });
+                document.querySelectorAll('.owl-habitat').forEach(habitat => {
+                    habitat.classList.remove('home-level-1', 'home-level-2', 'home-level-3');
+                    habitat.classList.add(`home-level-${state.owl.homeLevel}`);
+                    const layer = habitat.querySelector('.home-furnishing');
+                    if (layer) layer.innerHTML = ['bookcase', 'lamp', 'plant', 'rug', 'desk', 'window'].map(slot => selected(slot)).filter(Boolean).map(owlHomePieceMarkup).join('');
+                });
                 document.querySelectorAll('.owl-sprite').forEach(sprite => {
                     sprite.classList.remove(...skinClasses);
                     if (skin?.cssClass) sprite.classList.add(skin.cssClass);
                     const overlays = ['head', 'face', 'body'].map(slot => selected(slot)).filter(item => item && OWL_ACCESSORY_ART[item.id]);
                     sprite.classList.add('has-frames');
-                    sprite.innerHTML = `<img class="owl-frame-layer is-active" src="${owlPose(4)}" alt="" aria-hidden="true" draggable="false"><img class="owl-frame-layer" src="${owlPose(4)}" alt="" aria-hidden="true" draggable="false">${overlays.map(owlAccessoryMarkup).join('')}`;
+                    const homePieces = ['bookcase', 'lamp', 'plant', 'rug', 'desk', 'window'].map(slot => selected(slot)).filter(Boolean);
+                    sprite.innerHTML = `${overlays.map(owlAccessoryBackMarkup).join('')}<img class="owl-frame" src="${owlPose(4)}" alt="" aria-hidden="true" draggable="false">${overlays.map(owlAccessoryMarkup).join('')}`;
                 });
                 const label = [skin, selected('head'), selected('face'), selected('body'), cage].filter(Boolean).map(item => item.name).join(' · ');
                 ['writing-owl-equipped', 'shop-owl-equipped'].forEach(id => {
                     const node = document.getElementById(id);
                     if (node) node.textContent = label;
                 });
+                ui.updateOwlHomeStatus();
                 ui.setOwlMotion('idle');
+                Object.values(OWL_FRAME_SEQUENCES).flat().forEach(preloadOwlFrame);
+            },
+
+            updateOwlHomeStatus: () => {
+                state.owl = normalizeOwlState(state.owl);
+                const owl = state.owl;
+                const bond = Math.min(10, 1 + Math.floor(owl.totalWordsWritten / 100));
+                [['writing-home-level', 'shop-home-level']].flat().forEach(id => { const node = document.getElementById(id); if (node) node.textContent = String(owl.homeLevel); });
+                [['writing-bond-level', 'shop-bond-level']].flat().forEach(id => { const node = document.getElementById(id); if (node) node.textContent = String(bond); });
+                [['writing-feathers', 'shop-feathers']].flat().forEach(id => { const node = document.getElementById(id); if (node) node.textContent = String(owl.coins); });
+                const nextCost = owl.homeLevel === 1 ? 8 : owl.homeLevel === 2 ? 18 : 0;
+                [['writing-home-upgrade', 'shop-home-upgrade']].flat().forEach(id => {
+                    const button = document.getElementById(id);
+                    if (!button) return;
+                    button.disabled = !nextCost || owl.coins < nextCost;
+                    button.textContent = nextCost ? `Ampliar · ${nextCost} 🪶` : 'Casa completa';
+                });
             },
 
             greetOwl: () => {
@@ -2492,17 +2636,22 @@
                 container.innerHTML = OWL_SHOP_ITEMS.map(item => {
                     const owned = state.owl.owned.includes(item.id);
                     const equipped = state.owl.equipped[item.slot] === item.id;
-                    const disabled = equipped || (!owned && state.tinteros < item.cost);
+                    const currency = item.currency === 'plumillas' ? '🪶' : '✒️';
+                    const balance = item.currency === 'plumillas' ? state.owl.coins : state.tinteros;
+                    const disabled = equipped || (!owned && balance < item.cost);
                     const action = owned
                         ? `game.equipOwlItem('${item.id}')`
                         : `game.buyOwlItem('${item.id}')`;
-                    const buttonText = equipped ? 'Equipado' : (owned ? 'Equipar' : (item.included ? 'Incluido' : `Comprar · ${item.cost} ✒️`));
-                    const preview = item.slot === 'skin'
-                        ? `<span class="owl-preview-sprite ${item.cssClass || ''}"></span>`
-                        : (item.slot === 'cage'
-                            ? `<span class="cage-preview ${item.cssClass || ''}">${item.icon}</span>`
-                            : `<span class="owl-preview-sprite"></span>${owlAccessoryMarkup(item)}`);
-                    const previewClass = item.slot === 'skin' ? '' : (item.slot === 'cage' ? '' : ' accessory-preview');
+                    const buttonText = equipped ? 'Equipado' : (owned ? 'Equipar' : (item.included ? 'Incluido' : `Comprar · ${item.cost} ${currency}`));
+                    const isFurniture = item.currency === 'plumillas';
+                    const preview = isFurniture
+                        ? `<span class="furniture-preview">${item.icon}</span>`
+                        : (item.slot === 'skin'
+                            ? `<span class="owl-preview-sprite ${item.cssClass || ''}"></span>`
+                            : (item.slot === 'cage'
+                                ? `<span class="cage-preview ${item.cssClass || ''}">${item.icon}</span>`
+                                : `<span class="owl-preview-sprite"></span>${owlAccessoryBackMarkup(item)}${owlAccessoryMarkup(item)}`));
+                    const previewClass = (item.slot === 'skin' || item.slot === 'cage' || isFurniture) ? '' : ' accessory-preview';
                     return `<article class="owl-shop-card">
                         <div class="owl-item-preview${previewClass}">${preview}</div>
                         <span class="owl-item-category">${escapeHTML(item.category)}</span>
