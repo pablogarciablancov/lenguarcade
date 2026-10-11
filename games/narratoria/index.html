@@ -320,6 +320,11 @@
         .owl-habitat.cage-noche { --cage-ink: #495278; --cage-back: #dce3f5; --cage-floor: #7d83a8; }
         .habitat-dome { position: absolute; left: 8%; right: 8%; top: 12px; height: 125px; border: 2px solid var(--cage-ink); border-bottom: 0; border-radius: 120px 120px 0 0; opacity: 0.72; }
         .habitat-perch { position: absolute; z-index: 1; left: 16%; right: 16%; bottom: 42px; height: 9px; border-radius: 10px; background: var(--cage-floor); box-shadow: 0 3px 4px rgba(43,29,14,0.18); }
+        .owl-writing-desk { position:absolute; z-index:3; left:8%; right:8%; bottom:48px; height:14px; border:1px solid #754a2b; border-radius:4px; background:linear-gradient(#c38b53,#895b34); box-shadow:0 3px 0 #624126; }
+        .owl-writing-desk::before,.owl-writing-desk::after { content:''; position:absolute; top:11px; width:7px; height:30px; background:#80532f; }
+        .owl-writing-desk::before { left:12%; } .owl-writing-desk::after { right:12%; }
+        .owl-desk-notebook { position:absolute; z-index:4; right:19%; bottom:55px; width:42px; height:27px; border:2px solid #596d4f; border-radius:3px; background:repeating-linear-gradient(0deg,#fff8e8 0 5px,#d9ceb2 6px 7px); box-shadow:0 2px 0 #43563c; transform:rotate(-5deg); }
+        .owl-desk-notebook::before { content:''; position:absolute; top:2px; bottom:2px; left:5px; border-left:1px solid #a98b5d; }
         .habitat-owl { position: absolute; z-index: 2; left: 50%; bottom: 44px; width: 192px; height: 192px; transform: translateX(-50%); }
         .habitat-bars { position: absolute; z-index: 3; inset: 13px 12px 28px; border-left: 2px solid color-mix(in srgb, var(--cage-ink) 75%, transparent); border-right: 2px solid color-mix(in srgb, var(--cage-ink) 75%, transparent); pointer-events: none; }
         .habitat-bars::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 23%, color-mix(in srgb, var(--cage-ink) 62%, transparent) 24% 25%, transparent 26% 48%); }
@@ -594,7 +599,9 @@
                             <div class="owl-home-status"><span>Nido <strong id="writing-home-level">1</strong> · vínculo <strong id="writing-bond-level">1</strong></span><span class="owl-feather-count">🪶 <strong id="writing-feathers">0</strong></span><button class="owl-home-upgrade" id="writing-home-upgrade" onclick="game.upgradeOwlHome()">Ampliar</button></div>
                             <div class="owl-habitat cage-roble home-level-1" id="writing-owl-habitat" aria-label="Hogar de Plumín">
                                 <div class="habitat-dome"></div>
-                                <div class="habitat-perch"></div>
+                                <div class="habitat-perch" aria-hidden="true"></div>
+                                <div class="owl-writing-desk" id="owl-writing-desk" aria-label="Escritorio de Plumín"></div>
+                                <div class="owl-desk-notebook" id="owl-desk-notebook" aria-label="Cuaderno abierto sobre el escritorio"></div>
                                 <div class="home-furnishing" aria-label="Muebles del hogar"></div>
                                 <div class="owl-notebook" id="owl-notebook" aria-label="Cuaderno de recuerdos de Plumín"><strong>Cuaderno</strong><span id="owl-last-memory" aria-live="polite">Esperando nuestra primera escena</span></div>
                                 <div class="habitat-owl"><span class="owl-sprite" id="plumin-writing-sprite"></span></div>
@@ -672,7 +679,7 @@
             <div class="shop-grid" id="shop-container"></div>
             <div class="owl-shop-section">
                 <h3 class="store-subtitle">Casa y vestuario de Plumín</h3>
-                <p class="teacher-small">Viste a Plumín con tinteros y gana plumillas escribiendo para ampliar su casa y amueblar su rincón.</p>
+                <p class="teacher-small">Viste a Plumín con tinteros y gana plumillas al completar fases de la historia para ampliar su casa y amueblar su rincón.</p>
                 <div class="owl-shop-layout">
                     <div class="owl-shop-showcase">
                         <h4>El hogar de Plumín</h4>
