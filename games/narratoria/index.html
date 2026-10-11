@@ -260,17 +260,38 @@
             background: linear-gradient(145deg, #fffdf7, #f7e8c6); box-shadow: 0 4px 12px rgba(50,31,13,0.09);
         }
         .owl-sprite {
-            position: relative; display: block; width: 100%; height: 100%;
+            position: relative; display: block; width: 100%; height: 100%; isolation: isolate;
             background: url("assets/plumin-poses-v2/pose-04.png") no-repeat center / contain;
         }
-        .owl-sprite.motion-flap, .owl-sprite.motion-talk, .owl-sprite.motion-cheer { animation: none; }
+        .owl-sprite.has-frames { background-image: none; }
+        .owl-frame-layer {
+            position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+            opacity: 0; transition: opacity 105ms ease-in-out; pointer-events: none;
+        }
+        .owl-frame-layer.is-active { opacity: 1; }
+        .owl-sprite.motion-flap, .owl-sprite.motion-talk, .owl-sprite.motion-think, .owl-sprite.motion-cheer { animation: none; }
         .owl-sprite.skin-nieve { filter: brightness(1.12) saturate(0.65); }
         .owl-sprite.skin-luna { filter: sepia(0.16) hue-rotate(155deg) saturate(0.82); }
         .owl-sprite.skin-cobre { filter: sepia(0.48) saturate(1.5) hue-rotate(-12deg); }
-        .owl-wearable { position: absolute; z-index: 2; line-height: 1; font-style: normal; filter: drop-shadow(0 1px 1px rgba(30,20,10,0.25)); }
-        .owl-wearable.slot-head { left: 50%; top: -7%; transform: translateX(-50%); font-size: 1.45rem; }
-        .owl-wearable.slot-face { left: 50%; top: 34%; transform: translateX(-50%); font-size: 1.25rem; }
-        .owl-wearable.slot-body { left: 50%; bottom: 10%; transform: translateX(-50%); font-size: 1.4rem; }
+        .owl-wearable {
+            position: absolute; z-index: 2; display: block; filter: drop-shadow(0 2px 2px rgba(30,20,10,0.35));
+            pointer-events: none; overflow: visible;
+        }
+        .owl-wearable svg { display: block; width: 100%; height: 100%; overflow: visible; }
+        .owl-wearable.slot-head { left: 50%; top: -2%; width: 92%; height: 39%; transform: translateX(-50%); }
+        .owl-wearable.slot-face { left: 50%; top: 22%; width: 91%; height: 38%; transform: translateX(-50%); }
+        .owl-wearable.slot-body { left: 50%; top: 44%; width: 100%; height: 53%; transform: translateX(-50%); }
+        .owl-item-preview.accessory-preview { position: relative; width: 84px; height: 84px; overflow: hidden; }
+        .owl-item-preview .owl-preview-sprite {
+            position: absolute; inset: 1px; width: auto; height: auto;
+            background: url("assets/plumin-poses-v2/pose-04.png") no-repeat center / contain;
+        }
+        .owl-item-preview .owl-wearable.slot-head { top: -1%; width: 96%; height: 42%; }
+        .owl-item-preview .owl-wearable.slot-face { top: 21%; width: 94%; height: 40%; }
+        .owl-item-preview .owl-wearable.slot-body { top: 43%; width: 102%; height: 55%; }
+        @media (prefers-reduced-motion: reduce) {
+            .owl-frame-layer { transition: none; }
+        }
         .writing-codex { min-width: 0; align-self: start; font-family: var(--font-ui); }
         .writing-codex > summary {
             min-height: 62px; display: flex; align-items: center; gap: 11px; padding: 8px 12px; list-style: none;
@@ -851,22 +872,37 @@
             { id: "skin_nieve", name: "Nieve de biblioteca", category: "Aspecto", slot: "skin", cost: 40, icon: "❄️", cssClass: "skin-nieve", desc: "Plumaje claro como las páginas recién estrenadas." },
             { id: "skin_luna", name: "Azul de medianoche", category: "Aspecto", slot: "skin", cost: 50, icon: "🌙", cssClass: "skin-luna", desc: "Un tono nocturno para historias de misterio." },
             { id: "skin_cobre", name: "Cobre antiguo", category: "Aspecto", slot: "skin", cost: 55, icon: "🍂", cssClass: "skin-cobre", desc: "Un brillo cálido de tinta y hojas de otoño." },
-            { id: "head_gorro", name: "Gorro de aprendiz", category: "Accesorio", slot: "head", cost: 35, icon: "🎓", overlay: "🎓", desc: "El uniforme oficial de los nuevos cronistas." },
-            { id: "head_corona", name: "Corona de papel", category: "Accesorio", slot: "head", cost: 65, icon: "👑", overlay: "👑", desc: "Para quien ya se siente rey del manuscrito." },
-            { id: "face_gafas", name: "Gafas de archivero", category: "Accesorio", slot: "face", cost: 30, icon: "🧐", overlay: "👓", desc: "Le ayudan a encontrar hasta las comas escondidas." },
-            { id: "body_capa", name: "Capa exploradora", category: "Traje", slot: "body", cost: 55, icon: "🧣", overlay: "🧣", desc: "Lista para acompañar a cualquier protagonista." },
-            { id: "body_delantal", name: "Chaleco de cronista", category: "Traje", slot: "body", cost: 50, icon: "🦺", overlay: "🦺", desc: "Bolsillos extra para plumas, mapas y buenas ideas." },
+            { id: "head_gorro", name: "Gorro de aprendiz", category: "Accesorio", slot: "head", cost: 35, icon: "🎓", art: "head_gorro", desc: "El uniforme oficial de los nuevos cronistas." },
+            { id: "head_corona", name: "Corona de papel", category: "Accesorio", slot: "head", cost: 65, icon: "👑", art: "head_corona", desc: "Para quien ya se siente rey del manuscrito." },
+            { id: "face_gafas", name: "Gafas de archivero", category: "Accesorio", slot: "face", cost: 30, icon: "🧐", art: "face_gafas", desc: "Le ayudan a encontrar hasta las comas escondidas." },
+            { id: "body_capa", name: "Capa exploradora", category: "Traje", slot: "body", cost: 55, icon: "🧣", art: "body_capa", desc: "Lista para acompañar a cualquier protagonista." },
+            { id: "body_delantal", name: "Chaleco de cronista", category: "Traje", slot: "body", cost: 50, icon: "🦺", art: "body_delantal", desc: "Bolsillos extra para plumas, mapas y buenas ideas." },
             { id: "cage_roble", name: "Nido de roble", category: "Jaula", slot: "cage", cost: 0, icon: "🪵", cssClass: "cage-roble", desc: "Su hogar original, sencillo y acogedor.", included: true },
             { id: "cage_jardin", name: "Invernadero del Gremio", category: "Jaula", slot: "cage", cost: 60, icon: "🌿", cssClass: "cage-jardin", desc: "Una pequeña jaula-jardín llena de calma." },
             { id: "cage_gremio", name: "Aviario dorado", category: "Jaula", slot: "cage", cost: 75, icon: "✨", cssClass: "cage-gremio", desc: "Un aviario brillante para una mascota célebre." },
             { id: "cage_noche", name: "Observatorio lunar", category: "Jaula", slot: "cage", cost: 80, icon: "🌌", cssClass: "cage-noche", desc: "Un refugio azul para vigilar las estrellas." }
         ];
+        const OWL_ACCESSORY_ART = {
+            head_gorro: '<path d="M12 36 128 2 244 36 128 72 12 36Z" fill="#49365f" stroke="#2d203e" stroke-width="7" stroke-linejoin="round"/><path d="M49 48v24c49 29 79 29 158 0V48l-79 25L49 48Z" fill="#68528b" stroke="#39294e" stroke-width="6" stroke-linejoin="round"/><path d="m26 53 102 32 102-32-102 40L26 53Z" fill="#d5b6ee" stroke="#39294e" stroke-width="5" stroke-linejoin="round"/><path d="M194 61v31" stroke="#e3b23d" stroke-width="5"/><circle cx="194" cy="96" r="7" fill="#e59a33" stroke="#78421d" stroke-width="3"/>',
+            head_corona: '<path d="m29 74 13-47 39 31 47-48 47 48 39-31 13 47v20H29V74Z" fill="#f2c744" stroke="#8b5c20" stroke-width="8" stroke-linejoin="round"/><path d="M39 75h178v19H39z" fill="#dc9e2e" stroke="#8b5c20" stroke-width="7"/><circle cx="82" cy="76" r="8" fill="#ee7660"/><circle cx="128" cy="76" r="9" fill="#76a9c6"/><circle cx="174" cy="76" r="8" fill="#a777b5"/><path d="m55 43 19 15M128 30v24m73-11-19 15" stroke="#fff1b2" stroke-width="5" stroke-linecap="round"/>',
+            face_gafas: '<g fill="#f7fbff" fill-opacity=".13" stroke="#503a2b" stroke-width="8"><circle cx="76" cy="49" r="39"/><circle cx="180" cy="49" r="39"/></g><path d="M115 47q13-11 26 0M37 43 14 34m205 9 23-9" fill="none" stroke="#503a2b" stroke-width="8" stroke-linecap="round"/><path d="M51 24q24-14 47 0m57 0q24-14 47 0" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="4" stroke-linecap="round"/>',
+            body_capa: '<path d="M67 7Q91 26 128 25q37 1 61-18l48 48-22 82q-44 10-87 8-43 2-87-8L39 55 17 62 67 7Z" fill="#66518d" stroke="#39294e" stroke-width="8" stroke-linejoin="round"/><path d="M68 17Q95 36 128 33q33 3 60-16l-21 37q-18 15-39 15T89 54L68 17Z" fill="#806bad" stroke="#49365f" stroke-width="5" stroke-linejoin="round"/><path d="M42 69q38 20 48 71M214 69q-38 20-48 71" fill="none" stroke="#c8b7e6" stroke-width="7" stroke-linecap="round"/><path d="m117 34 11 13 11-13-11-8-11 8Z" fill="#e2b643" stroke="#805c20" stroke-width="4"/>',
+            body_delantal: '<path d="M81 8h94l20 27 26 15-16 29-19-10-4 67q-54 12-108 0l-4-67-19 10-16-29 26-15L81 8Z" fill="#d7b779" stroke="#74542d" stroke-width="8" stroke-linejoin="round"/><path d="M83 10q11 34 45 35t45-35" fill="none" stroke="#4f7590" stroke-width="13" stroke-linecap="round"/><path d="M73 78q55 14 110 0v55q-55 13-110 0V78Z" fill="#b78d51" stroke="#74542d" stroke-width="6" stroke-linejoin="round"/><path d="M91 88v25m37-26v27m37-28v26" stroke="#ecd6a5" stroke-width="5" stroke-linecap="round"/><circle cx="128" cy="61" r="7" fill="#7b9b70" stroke="#3d5943" stroke-width="4"/>'
+        };
+        const owlAccessoryMarkup = item => OWL_ACCESSORY_ART[item.id]
+            ? `<svg class="owl-wearable slot-${item.slot}" viewBox="0 0 256 ${item.slot === 'face' ? '100' : item.slot === 'head' ? '112' : '150'}" role="img" aria-label="${escapeHTML(item.name)}" focusable="false">${OWL_ACCESSORY_ART[item.id]}</svg>`
+            : '';
         const owlPose = frame => `assets/plumin-poses-v2/pose-${String(frame).padStart(2, '0')}.png`;
+        const owlSequence = (anchors, extraStart) => anchors.flatMap((anchor, index) => [
+            owlPose(anchor),
+            ...Array.from({ length: 4 }, (_, offset) => owlPose(extraStart + index * 4 + offset))
+        ]);
         const OWL_FRAME_SEQUENCES = {
             idle: [owlPose(4)],
-            talk: [5, 6, 7, 8].map(owlPose),
-            flap: [9, 10, 11, 12].map(owlPose),
-            cheer: [13, 14, 15, 16].map(owlPose)
+            think: owlSequence([1, 2, 3, 4], 17),
+            talk: owlSequence([5, 6, 7, 8], 33),
+            flap: owlSequence([9, 10, 11, 12], 49),
+            cheer: owlSequence([13, 14, 15, 16], 65)
         };
         const owlFrameCache = new Map();
         const preloadOwlFrame = path => {
@@ -1962,11 +1998,13 @@
                 // EASTER EGGS CHECKERS FASE
                 if (w === 0) {
                     game.checkAchievement('a_empty');
+                    ui.setOwlMotion('think');
                     ui.showToast("No puedes evaluar una hoja en blanco.", '⚠️');
                     return;
                 }
 
                 if (w < state.difficulty.minWords) {
+                    ui.setOwlMotion('think');
                     ui.showToast(`Debes escribir un mínimo de ${state.difficulty.minWords} palabras.`, '📝');
                     return;
                 }
@@ -2377,7 +2415,7 @@
                 if (!sprites.length || (owlMotionMode === mode && mode !== 'talk' && mode !== 'cheer')) return;
                 owlMotionMode = mode;
                 sprites.forEach(sprite => {
-                    sprite.classList.remove('motion-flap', 'motion-talk', 'motion-cheer');
+                    sprite.classList.remove('motion-flap', 'motion-talk', 'motion-think', 'motion-cheer');
                     if (mode !== 'idle') sprite.classList.add(`motion-${mode}`);
                 });
                 clearTimeout(owlMotionTimer);
@@ -2388,11 +2426,17 @@
                     if (generation !== owlMotionGeneration || !loadedFrames.length) return;
                     let frameIndex = 0;
                     const showFrame = () => sprites.forEach(sprite => {
-                        sprite.style.backgroundImage = `url("${loadedFrames[frameIndex]}")`;
+                        const layers = [...sprite.querySelectorAll('.owl-frame-layer')];
+                        if (layers.length < 2) return;
+                        const active = layers.find(layer => layer.classList.contains('is-active')) || layers[0];
+                        const next = layers.find(layer => layer !== active);
+                        next.src = loadedFrames[frameIndex];
+                        next.classList.add('is-active');
+                        active.classList.remove('is-active');
                     });
                     showFrame();
                     if (mode === 'idle' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-                    const frameDelay = mode === 'flap' ? 125 : 145;
+                    const frameDelay = mode === 'flap' ? 112 : 118;
                     owlFrameTimer = setInterval(() => {
                         if (frameIndex + 1 < loadedFrames.length) {
                             frameIndex += 1;
@@ -2421,8 +2465,9 @@
                 document.querySelectorAll('.owl-sprite').forEach(sprite => {
                     sprite.classList.remove(...skinClasses);
                     if (skin?.cssClass) sprite.classList.add(skin.cssClass);
-                    const overlays = ['head', 'face', 'body'].map(slot => selected(slot)).filter(item => item?.overlay);
-                    sprite.innerHTML = overlays.map(item => `<i class="owl-wearable slot-${item.slot}" title="${escapeHTML(item.name)}">${escapeHTML(item.overlay)}</i>`).join('');
+                    const overlays = ['head', 'face', 'body'].map(slot => selected(slot)).filter(item => item && OWL_ACCESSORY_ART[item.id]);
+                    sprite.classList.add('has-frames');
+                    sprite.innerHTML = `<img class="owl-frame-layer is-active" src="${owlPose(4)}" alt="" aria-hidden="true" draggable="false"><img class="owl-frame-layer" src="${owlPose(4)}" alt="" aria-hidden="true" draggable="false">${overlays.map(owlAccessoryMarkup).join('')}`;
                 });
                 const label = [skin, selected('head'), selected('face'), selected('body'), cage].filter(Boolean).map(item => item.name).join(' · ');
                 ['writing-owl-equipped', 'shop-owl-equipped'].forEach(id => {
@@ -2454,9 +2499,12 @@
                     const buttonText = equipped ? 'Equipado' : (owned ? 'Equipar' : (item.included ? 'Incluido' : `Comprar · ${item.cost} ✒️`));
                     const preview = item.slot === 'skin'
                         ? `<span class="owl-preview-sprite ${item.cssClass || ''}"></span>`
-                        : (item.slot === 'cage' ? `<span class="cage-preview ${item.cssClass || ''}">${item.icon}</span>` : item.icon);
+                        : (item.slot === 'cage'
+                            ? `<span class="cage-preview ${item.cssClass || ''}">${item.icon}</span>`
+                            : `<span class="owl-preview-sprite"></span>${owlAccessoryMarkup(item)}`);
+                    const previewClass = item.slot === 'skin' ? '' : (item.slot === 'cage' ? '' : ' accessory-preview');
                     return `<article class="owl-shop-card">
-                        <div class="owl-item-preview">${preview}</div>
+                        <div class="owl-item-preview${previewClass}">${preview}</div>
                         <span class="owl-item-category">${escapeHTML(item.category)}</span>
                         <h4>${escapeHTML(item.name)}</h4>
                         <p>${escapeHTML(item.desc)}</p>
