@@ -17,6 +17,15 @@ assert.equal(prosody.aguda,10,"a final aguda adds one metric syllable");
 assert.equal(prosody.llana,7,"a llana ending adds nothing after sinalefa");
 assert.equal(prosody.esdrujula,6,"a final esdrújula subtracts one metric syllable");
 assert.equal(prosody.writtenMeter,true,"written-verse exercise accepts two octosyllables after final-stress adjustment");
+const assonant=await page.evaluate(()=>window.VersopolisProsody.evaluate("Siento las penas del mal","Brilla la luna en el mar"));
+assert.equal(assonant.rhymeMatches,true,"unspecified rhyme accepts assonance");
+assert.equal(assonant.rhymeMatchType,"asonante");
+const consonant=await page.evaluate(()=>window.VersopolisProsody.evaluate("Siento las penas del altar","Brilla la luna en el mar"));
+assert.equal(consonant.rhymeMatches,true,"unspecified rhyme also accepts consonance");
+assert.equal(consonant.rhymeMatchType,"consonante");
+assert.equal((await page.evaluate(()=>window.VersopolisProsody.evaluate("Siento las penas del sol","Brilla la luna en el mar"))).rhymeMatches,false,"unmatched vowels and consonants do not count as rhyme");
+assert.equal((await page.evaluate(()=>window.VersopolisProsody.evaluate("Siento las penas del mal","Brilla la luna en el mar","consonant"))).rhymeMatches,false,"explicit consonant-only mode stays strict");
+assert.equal((await page.evaluate(()=>window.VersopolisProsody.evaluate("Siento las penas del mal","Brilla la luna en el mar","assonant"))).rhymeMatches,true,"explicit assonant-only mode stays strict");
 await page.evaluate(()=>window.VersopolisGame.setProfile({studentId:'table-test'}));await page.click('#startBtn');await page.locator('.atlasCard').first().click();await page.locator('.museCard').first().click();
 for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1366,650],[1366,580],[1100,600]]){
  await page.setViewportSize({width,height});await page.waitForTimeout(220);
