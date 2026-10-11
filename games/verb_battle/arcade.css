@@ -1729,3 +1729,132 @@ button:disabled{cursor:not-allowed;opacity:.42}
   .moveCardArt{display:none!important}
   .moveName{font-size:7px!important}.movePrompt span{font-size:7px!important}
 }
+
+/* ---------- MENÚ: galería de personajes, sin una pelea en curso ---------- */
+.menuShowcase{
+  grid-template-rows:minmax(0,1fr)!important;
+  gap:0!important
+}
+.rosterCatalog{
+  min-width:0;min-height:0;height:100%;display:grid;
+  grid-template-rows:auto minmax(0,.88fr) minmax(0,1.12fr);gap:clamp(7px,1.2vh,13px);
+  padding:clamp(8px,1.25vw,18px);border:1px solid rgba(220,184,107,.36);border-radius:18px;
+  background:linear-gradient(145deg,rgba(5,16,32,.84),rgba(5,12,25,.91));
+  box-shadow:inset 0 0 0 1px rgba(255,231,179,.045),0 18px 40px rgba(0,0,0,.32);
+  backdrop-filter:blur(7px)
+}
+.rosterCatalogHead{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0}
+.rosterEyebrow{display:block;color:#72d9ff;font-size:clamp(8px,.62vw,10px);font-weight:950;letter-spacing:.2em}
+.rosterCatalogHead h1{margin:3px 0 0;color:#fff2d0;font:900 clamp(20px,2vw,30px)/1 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+.rosterCatalogHead p{margin:0;color:#c3cfe2;font-size:clamp(9px,.8vw,12px);text-align:right}
+.rosterFaction{min-width:0;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:5px}
+.rosterFactionTitle{display:flex;align-items:center;gap:8px;min-width:0;color:#f4d88e}
+.rosterFactionTitle>span{color:#7bdfff;font-size:8px;font-weight:950}
+.rosterFactionTitle>b{white-space:nowrap;font-size:clamp(8px,.72vw,10px);letter-spacing:.16em}
+.rosterFactionTitle>i{height:1px;flex:1;background:linear-gradient(90deg,rgba(221,178,88,.55),transparent)}
+.rosterFactionTitle>small{color:#aabbd2;font-size:clamp(7px,.6vw,9px);white-space:nowrap}
+.heroRosterGrid,.enemyRosterGrid{min-width:0;min-height:0;display:grid;gap:clamp(5px,.65vw,9px)}
+.heroRosterGrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.enemyRosterGrid{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr))}
+.rosterCard{
+  --class:#78caff;position:relative;min-width:0;min-height:0;overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--class) 58%,rgba(255,255,255,.2));border-radius:12px;
+  color:#f8f5eb;background:radial-gradient(circle at 50% 0,color-mix(in srgb,var(--class) 24%,transparent),transparent 62%),linear-gradient(155deg,rgba(27,43,65,.95),rgba(5,13,26,.98));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 9px 18px rgba(0,0,0,.28)
+}
+.heroRosterCard{
+  display:grid;grid-template-rows:minmax(0,1fr) auto;justify-items:center;padding:5px 7px 8px;
+  cursor:pointer;text-align:center;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease
+}
+.heroRosterCard.warrior{--class:#ff704e}.heroRosterCard.mage{--class:#a06afa}.heroRosterCard.archer{--class:#40ce91}.heroRosterCard.cleric{--class:#f0bd58}
+.heroRosterCard:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--class) 76%,white);box-shadow:0 12px 24px rgba(0,0,0,.34),0 0 20px color-mix(in srgb,var(--class) 22%,transparent)}
+.heroRosterCard.selected{border-color:#ffe69a;box-shadow:0 0 0 2px rgba(255,226,144,.72),0 9px 22px rgba(0,0,0,.36),0 0 22px color-mix(in srgb,var(--class) 32%,transparent)}
+.rosterCardArt{position:relative;min-height:0;width:100%;display:grid;place-items:end center;overflow:hidden}
+.rosterCardArt:after{content:"";position:absolute;left:8%;right:8%;bottom:2px;height:18%;border-radius:50%;background:color-mix(in srgb,var(--class) 24%,transparent);filter:blur(14px)}
+.rosterCardArt img{position:relative;z-index:1;display:block;height:122%;max-width:108%;object-fit:contain;object-position:center bottom;transform:translateY(8%);filter:drop-shadow(0 8px 8px rgba(0,0,0,.45))}
+.rosterCardInfo{position:relative;z-index:2;min-width:0;display:grid;justify-items:center;gap:2px;text-align:center}
+.rosterCardInfo>b{font:900 clamp(10px,.95vw,14px)/1.05 Georgia,"Times New Roman",serif;color:#fff4d8}
+.rosterCardInfo>small{max-width:100%;overflow:hidden;text-overflow:ellipsis;color:#c1cde0;font-size:clamp(7px,.63vw,9px);line-height:1.2;white-space:nowrap}
+.rosterCardInfo>em{margin-top:2px;color:color-mix(in srgb,var(--class) 72%,white);font-size:clamp(6px,.56vw,8px);font-style:normal;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.rosterSelectedMark{position:absolute;z-index:3;right:7px;top:7px;width:20px;height:20px;display:grid;place-items:center;border-radius:50%;color:#19243a;background:#ffe69a;font-size:12px;font-weight:1000;opacity:0;transform:scale(.7);transition:.15s}
+.heroRosterCard.selected .rosterSelectedMark{opacity:1;transform:scale(1)}
+.enemyRosterCard{--class:#67c8e0;display:grid;grid-template-rows:minmax(0,1fr) auto;justify-items:center;padding:3px 5px 5px}
+.enemyRosterCard:nth-child(4n+2){--class:#b27aff}.enemyRosterCard:nth-child(4n+3){--class:#7bd987}.enemyRosterCard:nth-child(4n){--class:#e99a62}
+.enemyRosterArt{position:relative;min-height:0;width:min(100%,clamp(90px,10vh,140px));max-height:100%;aspect-ratio:1;height:auto;display:grid;place-items:center;overflow:hidden}
+.enemyRosterArt:before{content:"";position:absolute;inset:13% 8% 3%;border-radius:50%;background:color-mix(in srgb,var(--class) 26%,transparent);filter:blur(13px)}
+.enemyRosterArt .enemySprite{position:relative;z-index:1;width:100%;height:100%;filter:drop-shadow(0 7px 6px rgba(0,0,0,.5))}
+.enemyRosterCard .rosterCardInfo>b{font-size:clamp(8px,.78vw,11px)}
+.enemyRosterCard .rosterCardInfo>small{color:#87d9f2;font-size:clamp(6px,.55vw,8px);text-transform:uppercase;letter-spacing:.12em}
+
+/* ---------- PRÁCTICA: aula propia y retos legibles ---------- */
+#gameScreen.practiceMode{background:linear-gradient(180deg,rgba(4,11,24,.6),rgba(4,9,19,.85)),url("./assets/arena/practice-academy.webp") center/cover no-repeat}
+#gameScreen.practiceMode .battleHud{background:linear-gradient(180deg,rgba(8,24,46,.93),rgba(4,14,29,.95))}
+#gameScreen.practiceMode .buffBadge{color:#f6d58d;border-color:rgba(217,174,88,.4);background:rgba(217,174,88,.1)}
+#gameScreen.practiceMode .battleStage{
+  background:linear-gradient(180deg,rgba(3,10,23,.22),rgba(3,8,18,.48)),url("./assets/arena/practice-academy.webp") center 60%/cover no-repeat!important;
+  border-color:rgba(217,177,92,.5)!important
+}
+#gameScreen.practiceMode .battleStage:after{background:linear-gradient(90deg,rgba(2,7,16,.28),transparent 18%,transparent 82%,rgba(2,7,16,.28)),linear-gradient(180deg,rgba(3,9,19,.04),transparent 54%,rgba(2,8,17,.24))!important}
+#gameScreen.practiceMode .vsMark{display:none!important}
+#gameScreen.practiceMode .fighterRight .fighterLabel{color:#ffe5a1;border-color:rgba(225,182,92,.5)}
+#gameScreen.practiceMode .fighterHudHead small{color:#8ce1f2}
+#gameScreen.practiceMode .commandSide{background:linear-gradient(180deg,rgba(8,24,43,.96),rgba(4,12,25,.98))!important}
+#gameScreen.practiceMode .commandSide h3{font-size:11px!important}
+#gameScreen.practiceMode .commandHint{font-size:9px!important;line-height:1.45}
+#gameScreen.practiceMode .logItem{font-size:8px!important}
+#gameScreen.practiceMode .moveCard{
+  grid-template-rows:42px minmax(74px,.46fr) 25px minmax(100px,1fr) 44px!important;
+  border-color:color-mix(in srgb,var(--move) 68%,#f3dca5)!important;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--move) 28%,#16243b),#07111f 42%,#07111f)!important
+}
+#gameScreen.practiceMode .moveCardHeader{grid-template-columns:38px minmax(0,1fr) 54px!important}
+#gameScreen.practiceMode .moveSigil{font-size:19px!important}
+#gameScreen.practiceMode .moveName{font-size:12px!important}
+#gameScreen.practiceMode .moveDamage b{font-size:18px!important}
+#gameScreen.practiceMode .moveDamage small{font-size:7px!important}
+#gameScreen.practiceMode .moveCardArt{height:100%!important}
+#gameScreen.practiceMode .moveCardArt img{width:104px!important;height:136px!important;bottom:-30px!important}
+#gameScreen.practiceMode .moveCategory,#gameScreen.practiceMode .moveDifficulty{font-size:8px!important}
+#gameScreen.practiceMode .difficultyPips i{width:9px!important;height:9px!important}
+#gameScreen.practiceMode .movePrompt{padding:11px 13px!important}
+#gameScreen.practiceMode .movePrompt span{font-size:clamp(14px,1vw,18px)!important;line-height:1.32!important}
+#gameScreen.practiceMode .moveCardFooter{grid-template-columns:34px minmax(0,1fr) auto!important;padding-right:9px!important}
+#gameScreen.practiceMode .moveFooterText b{font-size:9px!important}
+#gameScreen.practiceMode .moveFooterText small,#gameScreen.practiceMode .moveReward{font-size:7px!important}
+
+@media(max-height:800px) and (min-width:761px){
+  .rosterCatalog{grid-template-rows:auto minmax(0,.9fr) minmax(0,1.1fr)!important;gap:6px!important;padding:8px!important}
+  .heroRosterCard{padding:3px 5px 5px!important}
+  .rosterFaction{gap:3px!important}
+  .heroRosterGrid,.enemyRosterGrid{gap:5px!important}
+  .rosterCardArt img{height:116%!important}
+  .rosterCardInfo>b{font-size:10px!important}.rosterCardInfo>small{font-size:7px!important}.rosterCardInfo>em{font-size:6px!important}
+  .enemyRosterCard .rosterCardInfo>b{font-size:8px!important}
+  #gameScreen.practiceMode .battleShell{grid-template-rows:42px minmax(190px,.72fr) minmax(230px,1.28fr)!important}
+  #gameScreen.practiceMode .moveCard{grid-template-rows:32px minmax(52px,.4fr) 19px minmax(70px,1fr) 31px!important}
+  #gameScreen.practiceMode .movePrompt{padding:7px 9px!important}
+  #gameScreen.practiceMode .movePrompt span{font-size:clamp(12px,.95vw,15px)!important}
+  #gameScreen.practiceMode .moveName{font-size:10px!important}
+  #gameScreen.practiceMode .moveCategory,#gameScreen.practiceMode .moveDifficulty{font-size:7px!important}
+  #gameScreen.practiceMode .moveFooterText b{font-size:7px!important}
+  #gameScreen.practiceMode .moveFooterText small,#gameScreen.practiceMode .moveReward{font-size:6px!important}
+}
+@media(max-width:1050px) and (min-width:761px){
+  .rosterCardInfo>b{font-size:9px!important}.rosterCardInfo>small{font-size:7px!important}
+  .heroRosterCard{padding:4px!important}
+}
+@media(max-width:760px){
+  .menuShowcase{grid-template-rows:auto!important}
+  .rosterCatalog{height:auto;grid-template-rows:auto auto auto;gap:14px;padding:10px}
+  .rosterCatalogHead{align-items:flex-start}.rosterCatalogHead p{max-width:38%;line-height:1.35}
+  .rosterFaction{grid-template-rows:auto auto}
+  .heroRosterGrid,.enemyRosterGrid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none}
+  .heroRosterCard{min-height:145px}
+  .enemyRosterCard{min-height:108px}
+  .rosterCardInfo>b{font-size:11px!important}.rosterCardInfo>small{font-size:8px!important}
+  #gameScreen.practiceMode{overflow:auto}
+  #gameScreen.practiceMode .battleShell{grid-template-rows:40px minmax(185px,.7fr) minmax(320px,1.3fr)!important}
+  #gameScreen.practiceMode .vsMark{display:none!important}
+  #gameScreen.practiceMode .movePrompt span{font-size:10px!important}
+  #gameScreen.practiceMode .moveName{font-size:8px!important}
+}
