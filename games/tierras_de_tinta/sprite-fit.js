@@ -11,6 +11,7 @@
   const heroSelector = ".title-hero,.rest-hero,.hero-portrait,.hero-focus-art";
   const atlasLoads = new Map();
   const heroCells = new Map();
+  const heroAtlasCells = new Map();
   let sequence = 0;
 
   function loadAtlas(source) {
@@ -25,37 +26,32 @@
     return atlasLoads.get(source);
   }
 
-  function cleanCell(image, col, row, fallbackWidth, fallbackHeight, cols, rows) {
-    const cellWidth = image.naturalWidth / cols || fallbackWidth / cols;
-    const cellHeight = image.naturalHeight / rows || fallbackHeight / rows;
-    const width = Math.max(1, Math.round(cellWidth));
-    const height = Math.max(1, Math.round(cellHeight));
+  function extractHeroCells(image, cols, rows) {
+    const width = image.naturalWidth;
+    const height = image.naturalHeight;
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
     const context = canvas.getContext("2d", { willReadFrequently: true });
-    context.drawImage(image, col * cellWidth, row * cellHeight, cellWidth, cellHeight, 0, 0, width, height);
+    context.drawImage(image, 0, 0, width, height);
 
     const imageData = context.getImageData(0, 0, width, height);
     const pixels = imageData.data;
     const total = width * height;
     const labels = new Int32Array(total);
     const stack = new Int32Array(total);
-    const components = [];
+    const components = [null];
     const alphaThreshold = 24;
 
     for (let p = 0; p < total; p++) {
       const alphaIndex = p * 4 + 3;
-      if (pixels[alphaIndex] <= alphaThreshold) {
-        pixels[alphaIndex] = 0;
-      }
+      if (pixels[alphaIndex] <= alphaThreshold) pixels[alphaIndex] = 0;
     }
 
     for (let start = 0; start < total; start++) {
       if (labels[start] || pixels[start * 4 + 3] === 0) continue;
-      const label = components.length + 1;
+      const label = components.length;
       let top = 0;
-      let area = 0;
       let minX = width, minY = height, maxX = -1, maxY = -1;
       stack[top++] = start;
       labels[start] = label;
@@ -64,7 +60,6 @@
         const index = stack[--top];
         const x = index % width;
         const y = (index - x) / width;
-        area++;
         if (x < minX) minX = x;
         if (x > maxX) maxX = x;
         if (y < minY) minY = y;
@@ -85,37 +80,65 @@
           }
         }
       }
-      components.push({ label, area, minX, minY, maxX, maxY });
+
+      components.push({ minX, minY, maxX, maxY });
     }
 
-    if (components.length > 1) {
-      const core = components.reduce((largest, component) => component.area > largest.area ? component : largest);
-      const marginX = Math.round(width * 0.13);
-      const marginY = Math.round(height * 0.13);
-      const minX = core.minX - marginX, maxX = core.maxX + marginX;
-      const minY = core.minY - marginY, maxY = core.maxY + marginY;
-      const minimumArea = Math.max(18, Math.floor(total * 0.0012));
-      const keep = new Uint8Array(components.length + 1);
+    // One anchor per original portrait locates that hero's full silhouette,
+    // including connected parts that cross into a neighboring atlas cell.
+    const anchors = [
+      [0.52, 0.56], [0.47, 0.50], [0.59, 0.45], [0.43, 0.45],
+      [0.56, 0.47], [0.58, 0.44], [0.53, 0.47], [0.50, 0.47]
+    ];
+    const cellWidth = width / cols;
+    const cellHeight = height / rows;
+    const cells = new Map();
 
-      for (const component of components) {
-        const nearCore = component.maxX >= minX && component.minX <= maxX &&
-          component.maxY >= minY && component.minY <= maxY;
-        if (component.area >= minimumArea && nearCore) keep[component.label] = 1;
+    anchors.forEach(([anchorX, anchorY], index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      if (col >= cols || row >= rows) return;
+      const x = Math.min(width - 1, Math.floor((col + anchorX) * cellWidth));
+      const y = Math.min(height - 1, Math.floor((row + anchorY) * cellHeight));
+      const label = labels[y * width + x];
+      const bounds = components[label];
+      if (!label || !bounds) return;
+
+      const cropWidth = bounds.maxX - bounds.minX + 1;
+      const cropHeight = bounds.maxY - bounds.minY + 1;
+      const cropCanvas = document.createElement("canvas");
+      cropCanvas.width = cropWidth;
+      cropCanvas.height = cropHeight;
+      const cropContext = cropCanvas.getContext("2d", { willReadFrequently: true });
+      const crop = context.getImageData(bounds.minX, bounds.minY, cropWidth, cropHeight);
+      const cropPixels = crop.data;
+
+      for (let cy = 0; cy < cropHeight; cy++) {
+        const sourceRow = (bounds.minY + cy) * width + bounds.minX;
+        for (let cx = 0; cx < cropWidth; cx++) {
+          if (labels[sourceRow + cx] !== label) cropPixels[(cy * cropWidth + cx) * 4 + 3] = 0;
+        }
       }
 
-      for (let p = 0; p < total; p++) {
-        if (labels[p] && !keep[labels[p]]) pixels[p * 4 + 3] = 0;
-      }
-      context.putImageData(imageData, 0, 0);
-    }
+      cropContext.putImageData(crop, 0, 0);
+      cells.set(col + "|" + row, {
+        width: cropWidth,
+        height: cropHeight,
+        href: cropCanvas.toDataURL("image/png")
+      });
+    });
 
-    return { canvas, width, height, href: canvas.toDataURL("image/png") };
+    return cells;
   }
+
 
   function heroCell(source, col, row, width, height, cols, rows) {
     const key = source + "|" + col + "|" + row;
     if (!heroCells.has(key)) {
-      heroCells.set(key, loadAtlas(source).then(image => cleanCell(image, col, row, width, height, cols, rows)));
+      if (!heroAtlasCells.has(source)) {
+        heroAtlasCells.set(source, loadAtlas(source).then(image => extractHeroCells(image, cols, rows)));
+      }
+      heroCells.set(key, heroAtlasCells.get(source).then(cells => cells.get(col + "|" + row)));
     }
     return heroCells.get(key);
   }
@@ -142,6 +165,7 @@
     svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
     heroCell(source, col, row, width, height, cols, rows).then(cell => {
       if (!el.isConnected || svg.dataset.cleanCell !== key) return;
+      svg.setAttribute("viewBox", "0 0 " + cell.width + " " + cell.height);
       const image = document.createElementNS(ns, "image");
       image.setAttribute("width", cell.width);
       image.setAttribute("height", cell.height);
