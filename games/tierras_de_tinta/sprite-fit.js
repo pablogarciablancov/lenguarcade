@@ -90,18 +90,17 @@
 
     if (components.length > 1) {
       const core = components.reduce((largest, component) => component.area > largest.area ? component : largest);
-      const marginX = Math.round(width * 0.085);
-      const marginY = Math.round(height * 0.085);
+      const marginX = Math.round(width * 0.13);
+      const marginY = Math.round(height * 0.13);
       const minX = core.minX - marginX, maxX = core.maxX + marginX;
       const minY = core.minY - marginY, maxY = core.maxY + marginY;
       const minimumArea = Math.max(18, Math.floor(total * 0.0012));
-      const largeDetachedArea = Math.floor(total * 0.007);
       const keep = new Uint8Array(components.length + 1);
 
       for (const component of components) {
         const nearCore = component.maxX >= minX && component.minX <= maxX &&
           component.maxY >= minY && component.minY <= maxY;
-        if (component.area >= minimumArea && (nearCore || component.area >= largeDetachedArea)) keep[component.label] = 1;
+        if (component.area >= minimumArea && nearCore) keep[component.label] = 1;
       }
 
       for (let p = 0; p < total; p++) {
