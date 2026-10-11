@@ -1858,3 +1858,109 @@ button:disabled{cursor:not-allowed;opacity:.42}
   #gameScreen.practiceMode .movePrompt span{font-size:10px!important}
   #gameScreen.practiceMode .moveName{font-size:8px!important}
 }
+
+/* ==========================================================
+   RETRATOS Y CARTAS · V9
+   Encuadre completo y centrado de héroes y combatientes.
+   ========================================================== */
+.rosterCard{
+  border-radius:16px;
+  background:
+    radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--class) 25%,transparent),transparent 60%),
+    linear-gradient(155deg,rgba(24,42,66,.98),rgba(4,12,25,.99));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.055),inset 0 -26px 38px rgba(0,0,0,.17),0 12px 24px rgba(0,0,0,.3);
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,filter .18s ease
+}
+.heroRosterCard{
+  grid-template-rows:minmax(0,1fr) auto;
+  padding:7px 8px 8px;
+  background:
+    linear-gradient(180deg,color-mix(in srgb,var(--class) 17%,transparent),transparent 58%),
+    linear-gradient(160deg,rgba(19,35,57,.98),rgba(4,12,25,.99));
+}
+.heroRosterCard:before,.enemyRosterCard:before{
+  content:"";position:absolute;z-index:1;inset:5px;border:1px solid color-mix(in srgb,var(--class) 19%,transparent);
+  border-radius:12px;pointer-events:none
+}
+.rosterCardArt{
+  align-items:center;
+  margin:2px 1px 0;
+  border-radius:11px;
+  background:radial-gradient(ellipse at 50% 58%,color-mix(in srgb,var(--class) 19%,transparent),rgba(4,12,24,.08) 68%,transparent 100%);
+}
+.rosterCardArt:after{
+  left:16%;right:16%;bottom:5px;height:10%;
+  background:color-mix(in srgb,var(--class) 34%,transparent);filter:blur(16px)
+}
+.rosterCardArt img{
+  width:100%!important;height:100%!important;max-width:100%!important;
+  padding:7px 2px 5px;box-sizing:border-box;
+  object-fit:contain!important;object-position:center center!important;
+  transform:none!important;
+  filter:drop-shadow(0 9px 9px rgba(0,0,0,.52))
+}
+.rosterCardInfo{padding:6px 3px 2px;gap:3px}
+.rosterCardInfo>b{font-size:clamp(12px,1vw,15px);text-shadow:0 2px 8px rgba(0,0,0,.75)}
+.rosterCardInfo>small{font-size:clamp(8px,.67vw,10px)}
+.rosterCardInfo>em{margin-top:3px;padding:3px 8px;border:1px solid color-mix(in srgb,var(--class) 34%,transparent);border-radius:99px;background:color-mix(in srgb,var(--class) 11%,rgba(4,12,25,.8));font-size:clamp(7px,.56vw,8px)}
+.heroRosterCard.selected{
+  transform:translateY(-2px);
+  border-color:#ffe69a;
+  box-shadow:0 0 0 2px rgba(255,226,144,.68),0 14px 26px rgba(0,0,0,.4),0 0 28px color-mix(in srgb,var(--class) 34%,transparent)
+}
+.heroRosterCard.selected .rosterCardArt{background:radial-gradient(ellipse at 50% 58%,color-mix(in srgb,var(--class) 29%,transparent),rgba(4,12,24,.06) 68%,transparent 100%)}
+.enemyRosterCard{
+  grid-template-rows:minmax(0,1fr) auto;
+  padding:7px 7px 6px;
+  background:
+    linear-gradient(180deg,color-mix(in srgb,var(--class) 10%,transparent),transparent 64%),
+    linear-gradient(155deg,rgba(17,33,54,.98),rgba(4,12,25,.99));
+}
+.enemyRosterArt{
+  width:min(100%,clamp(96px,12vh,150px));
+  margin:3px 0 1px;
+  border:1px solid color-mix(in srgb,var(--class) 24%,transparent);
+  border-radius:50%;
+  background:radial-gradient(circle,color-mix(in srgb,var(--class) 17%,rgba(8,20,35,.8)),rgba(4,12,25,.42) 70%);
+  box-shadow:inset 0 0 20px rgba(0,0,0,.24),0 8px 16px rgba(0,0,0,.15)
+}
+.enemyRosterArt:before{inset:9%;background:color-mix(in srgb,var(--class) 35%,transparent);filter:blur(17px)}
+.enemyRosterArt .enemySprite{width:100%;height:100%;filter:drop-shadow(0 8px 7px rgba(0,0,0,.55))}
+.enemyRosterCard .rosterCardInfo{padding:5px 4px 2px}
+.enemyRosterCard .rosterCardInfo>b{font-size:clamp(9px,.82vw,12px);line-height:1.12}
+.enemyRosterCard .rosterCardInfo>small{font-size:clamp(7px,.57vw,9px)}
+.enemyRosterCard:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--class) 72%,white);box-shadow:0 14px 24px rgba(0,0,0,.37),0 0 20px color-mix(in srgb,var(--class) 20%,transparent)}
+
+/* El retrato ocupa el espacio central de la formación y conserva su proporción.
+   La tarjeta HUD queda debajo del personaje, sin taparlo ni empujarlo al borde. */
+.fighter{
+  top:4%!important;bottom:4%!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+  align-content:stretch!important;row-gap:2px!important
+}
+.fighterSprite{
+  align-self:center!important;margin:0!important;
+  width:clamp(132px,14vw,185px)!important;height:clamp(132px,14vw,185px)!important;
+  overflow:visible!important
+}
+.fighterSpriteImg{
+  width:100%!important;height:100%!important;max-width:100%!important;
+  object-fit:contain!important;object-position:center center!important;
+  transform:none!important
+}
+.fighterEnemyFrame .enemySprite{width:100%!important;height:100%!important}
+.fighterHud{margin-top:0!important;align-self:end!important}
+.fighterLeft .fighterHud,.fighterRight .fighterHud{justify-self:center!important}
+
+@media(max-height:800px) and (min-width:761px){
+  .rosterCardArt img{height:100%!important}
+  .fighterSprite{width:clamp(126px,14vw,170px)!important;height:clamp(126px,14vw,170px)!important}
+}
+@media(max-width:760px){
+  .heroRosterCard{min-height:164px}
+  .enemyRosterCard{min-height:124px}
+  .enemyRosterArt{width:min(100%,112px)}
+  .fighter{width:46%!important}
+  .fighterSprite{width:clamp(112px,30vw,170px)!important;height:clamp(112px,30vw,170px)!important}
+  .fighterHud{width:96%!important}
+}
