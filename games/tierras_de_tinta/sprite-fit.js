@@ -19,7 +19,12 @@
       const position = style.backgroundPosition.split(' ').map(parseFloat);
       const col = Math.round((position[0] || 0) * (cols - 1) / 100);
       const row = Math.round((position[1] || 0) * (rows - 1) / 100);
-      const viewBox = `${col * width / cols} ${row * height / rows} ${width / cols} ${height / rows}`;
+      const cellWidth = width / cols, cellHeight = height / rows;
+      // Hero art may touch atlas seams; crop a small safe margin around each character.
+      const heroCell = source.endsWith('/heroes-cartoon-v3.webp') && el.matches('.title-hero,.rest-hero,.hero-portrait,.hero-focus-art');
+      const insetX = heroCell ? cellWidth * 0.07 : 0;
+      const insetY = heroCell ? cellHeight * 0.025 : 0;
+      const viewBox = `${col * cellWidth + insetX} ${row * cellHeight + insetY} ${cellWidth - insetX * 2} ${cellHeight - insetY * 2}`;
       let svg = el.querySelector(':scope > .sprite-cell-art');
       if (!svg) {
         svg = document.createElementNS(ns, 'svg');
@@ -46,6 +51,8 @@
         const rect = svg.querySelector('clipPath rect');
         ['x', 'y', 'width', 'height'].forEach((key, i) => rect.setAttribute(key, viewBox.split(' ')[i]));
       }
+      const svgImage = svg.querySelector('image');
+      if (svgImage && svgImage.getAttribute('href') !== source) svgImage.setAttribute('href', source);
       if (style.position === 'static') el.style.position = 'relative';
       el.dataset.spriteSource = source;
       if (el.style.backgroundImage !== 'none') el.style.backgroundImage = 'none';
