@@ -658,13 +658,13 @@ function winDistrict(){
 }
 
 function showWriting(){
- show("writingScreen");var w=run.writingRound;$("writingAnchorA").textContent="1 · "+w.a;$("writingAnchorB").textContent="2 · "+w.b;$("writingA").value=w.draftA||"";$("writingB").value=w.draftB||"";$("writingFeedback").textContent="8 sílabas · ABAB · no repitas las palabras finales";
+ show("writingScreen");var w=run.writingRound;$("writingAnchorA").textContent="1 · "+w.a;$("writingAnchorB").textContent="2 · "+w.b;$("writingA").value=w.draftA||"";$("writingB").value=w.draftB||"";$("writingFeedback").textContent="8 sílabas · ABAB · rima consonante o asonante · finales distintos";
 }
 function submitWriting(event){
  event.preventDefault();if(!run||!run.writingRound||run.writingRound.done)return;
  var w=run.writingRound,first=$("writingA").value.trim(),second=$("writingB").value.trim(),a=window.VersopolisProsody.evaluate(first,w.a),b=window.VersopolisProsody.evaluate(second,w.b);
  w.draftA=first;w.draftB=second;run.stats.compositions++;var ok=a.meterMatches&&a.rhymeMatches&&b.meterMatches&&b.rhymeMatches;
- $("writingFeedback").textContent="Verso 3: "+a.syllables+" sílabas · "+(a.rhymeMatches?"rima ✓":"revisa la rima A")+". Verso 4: "+b.syllables+" sílabas · "+(b.rhymeMatches?"rima ✓":"revisa la rima B")+".";
+ $("writingFeedback").textContent="Verso 3: "+a.syllables+" sílabas · "+(a.rhymeMatches?"rima "+a.rhymeMatchType+" ✓":"revisa la medida o la rima A")+". Verso 4: "+b.syllables+" sílabas · "+(b.rhymeMatches?"rima "+b.rhymeMatchType+" ✓":"revisa la medida o la rima B")+".";
  if(ok){run.stats.contracts++;run.stats.structured++;run.runScore+=250;run.inspiration=Math.min(run.maxInspiration,run.inspiration+1);w.done=true;w.poem=[w.a,w.b,first,second];window.VersopolisPoems.capture(w.poem,{title:"Mi voz · estrofa ABAB",kind:"escrita",form:"ABAB",score:250,map:activeMap().name});saveCareer();showToast("ESTROFA SELLADA · +250 prestigio y +1 inspiración","ok");showEvent();}else{run.stats.failedContracts++;showToast("Revisa el cómputo y las palabras finales. Puedes volver a intentarlo.","bad");}
  bridgeCall("checkpoint","written_stanza");
 }

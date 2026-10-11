@@ -2,7 +2,31 @@ const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const root=process.cwd();const server=http.createServer((req,res)=>{const f=path.join(root,new URL(req.url,'http://local').pathname.replace(/\/$/,'/index.html'));try{const b=fs.readFileSync(f);res.setHeader('Content-Type',f.endsWith('.js')?'text/javascript':f.endsWith('.css')?'text/css':f.endsWith('.webp')?'image/webp':'text/html');res.end(b);}catch{res.statusCode=404;res.end();}});
-(async()=>{await new Promise(r=>server.listen(0,'127.0.0.1',r));const browser=await chromium.launch({headless:true,executablePath:process.env.VERSOPOLIS_CHROMIUM||undefined,args:["--no-sandbox","--disable-dev-shm-usage","--use-gl=angle","--use-angle=swiftshader","--single-process","--no-zygote"]});const page=await browser.newPage({viewport:{width:1366,height:768},hasTouch:true});const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('https://**',route=>route.abort());await page.route('**/app.js?*',async route=>{const r=await route.fetch();let s=await r.text();s=s.replace(/\}\)\(\);\s*$/,'window.__test={newRun,chooseMuse,witnessFor,currentChallenge,collectionCards,renderGame,playSelection,get run(){return run;}};})();');await route.fulfill({response:r,body:s});});await page.goto('http://127.0.0.1:'+server.address().port+'/games/versopolis/');await page.evaluate(()=>window.VersopolisGame.setProfile({studentId:'table-test'}));await page.click('#startBtn');await page.locator('.atlasCard').first().click();await page.locator('.museCard').first().click();
+(async()=>{await new Promise(r=>server.listen(0,'127.0.0.1',r));const browser=await chromium.launch({headless:true,executablePath:process.env.VERSOPOLIS_CHROMIUM||undefined,args:["--no-sandbox","--disable-dev-shm-usage","--use-gl=angle","--use-angle=swiftshader","--single-process","--no-zygote"]});const page=await browser.newPage({viewport:{width:1366,height:768},hasTouch:true});const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('https://**',route=>route.abort());await page.route('**/app.js?*',async route=>{const r=await route.fetch();let s=await r.text();s=s.replace(/\}\)\(\);\s*$/,'window.__test={newRun,chooseMuse,witnessFor,currentChallenge,collectionCards,renderGame,playSelection,get run(){return run;}};})();');await route.fulfill({response:r,body:s});});await page.goto('http://127.0.0.1:'+server.address().port+'/games/versopolis/');
+const prosody=await page.evaluate(()=>({
+ monosyllable:window.VersopolisProsody.scan("Siento las penas del mal").syllables,
+ imageMonosyllable:window.VersopolisProsody.scan("Brilla la luna en el mar").syllables,
+ aguda:window.VersopolisProsody.scan("Siento las penas del corazón").syllables,
+ llana:window.VersopolisProsody.scan("cuando no estás conmigo").syllables,
+ esdrujula:window.VersopolisProsody.scan("La música pálida").syllables,
+ writtenMeter:window.VersopolisProsody.evaluate("Siento las penas del mal","Brilla la luna en el mar").meterMatches
+}));
+assert.equal(prosody.imageMonosyllable,8,"sinalefa plus final monosyllable gives an octosyllable");
+assert.equal(prosody.monosyllable,8,"a final monosyllable adds one metric syllable");
+assert.equal(prosody.aguda,10,"a final aguda adds one metric syllable");
+assert.equal(prosody.llana,7,"a llana ending adds nothing after sinalefa");
+assert.equal(prosody.esdrujula,6,"a final esdrújula subtracts one metric syllable");
+assert.equal(prosody.writtenMeter,true,"written-verse exercise accepts two octosyllables after final-stress adjustment");
+const assonant=await page.evaluate(()=>window.VersopolisProsody.evaluate("Siento las penas del mal","Brilla la luna en el mar"));
+assert.equal(assonant.rhymeMatches,true,"unspecified rhyme accepts assonance");
+assert.equal(assonant.rhymeMatchType,"asonante");
+const consonant=await page.evaluate(()=>window.VersopolisProsody.evaluate("Siento las penas del altar","Brilla la luna en el mar"));
+assert.equal(consonant.rhymeMatches,true,"unspecified rhyme also accepts consonance");
+assert.equal(consonant.rhymeMatchType,"consonante");
+assert.equal((await page.evaluate(()=>window.VersopolisProsody.evaluate("Siento las penas del sol","Brilla la luna en el mar"))).rhymeMatches,false,"unmatched vowels and consonants do not count as rhyme");
+assert.equal((await page.evaluate(()=>window.VersopolisProsody.evaluate("Siento las penas del mal","Brilla la luna en el mar","consonant"))).rhymeMatches,false,"explicit consonant-only mode stays strict");
+assert.equal((await page.evaluate(()=>window.VersopolisProsody.evaluate("Siento las penas del mal","Brilla la luna en el mar","assonant"))).rhymeMatches,true,"explicit assonant-only mode stays strict");
+await page.evaluate(()=>window.VersopolisGame.setProfile({studentId:'table-test'}));await page.click('#startBtn');await page.locator('.atlasCard').first().click();await page.locator('.museCard').first().click();
 for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1366,650],[1366,580],[1100,600]]){
  await page.setViewportSize({width,height});await page.waitForTimeout(220);
  const layout=await page.evaluate(()=>({width:document.body.scrollWidth,height:document.body.scrollHeight,font:parseFloat(getComputedStyle(document.querySelector('.hand .verseText')).fontSize),cards:Array.from(document.querySelectorAll('#hand .verseCard')).map(e=>({text:e.textContent,scroll:e.scrollHeight,client:e.clientHeight}))}));
