@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
 import { createHash } from 'node:crypto';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -71,4 +72,17 @@ assert.equal(new Set(ids).size, ids.length, 'Hay identificadores HTML duplicados
 assert.ok(html.includes('head_gorro: \'<path') && html.includes('face_gafas: \'<path') && html.includes('body_capa: \'<path'), 'Los accesorios deben ser capas vectoriales y no emojis planos.');
 assert.ok(html.includes('height: 39%') && html.includes('height: 38%') && html.includes('height: 53%'), 'Los accesorios deben ocupar una escala visible sobre el cuerpo.');
 assert.ok(html.includes('.owl-item-preview { position: relative;') && html.includes('.owl-item-preview .owl-preview-sprite'), 'Las miniaturas deben quedarse dentro de su tarjeta.');
+assert.ok(html.includes('id="owl-notebook"') && html.includes('id="owl-last-memory"'), 'El hogar debe mostrar el cuaderno persistente.');
+assert.ok(html.includes('phaseRewardLedgers') && html.includes('registerOwlPhaseReward'), 'Las recompensas deben guardarse por historia y fase.');
+assert.ok(html.includes('game.trackOwlWritingProgress(c)') && !html.includes('game.awardOwlWritingCoins(c)'), 'Escribir palabras no debe conceder plumillas.');
+assert.ok(html.includes("companion.classList.toggle('is-thinking'") && html.includes("ui.setOwlMotion('think')"), 'Una pausa debe cambiar la postura de Plumín.');
+const rewardHelper = html.match(/function registerOwlPhaseReward\([\s\S]*?\n        }/)?.[0];
+assert.ok(rewardHelper, 'Falta la concesión idempotente de recompensas.');
+const registerOwlPhaseReward = vm.runInNewContext(`${rewardHelper}; registerOwlPhaseReward`);
+const owl = { phaseRewardLedgers: {}, memories: [], coins: 0 };
+const memory = { id: 'story-a:0', phaseName: 'Inicio', excerpt: 'Una escena' };
+assert.equal(registerOwlPhaseReward(owl, 'story-a', 0, memory), true);
+assert.equal(registerOwlPhaseReward(owl, 'story-a', 0, memory), false);
+assert.equal(owl.coins, 5, 'Una fase entrega cinco plumillas una sola vez.');
+assert.equal(owl.memories.length, 1, 'Una fase añade un único recuerdo.');
 console.log('Plumín OK · 80 WebP transparentes normalizados y verificados · swaps de fotograma sin solapes · accesorios anclados · hogar y economía persistentes.');
