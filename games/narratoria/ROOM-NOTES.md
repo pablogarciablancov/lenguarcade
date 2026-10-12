@@ -19,3 +19,9 @@ Habitación ampliada visible durante la escritura. «Decorar habitación» abre 
 3. Completar fases para ganar plumillas; comprar un cuadro, pared o suelo.
 4. Cerrar decoración, continuar escribiendo y recargar: comprobar historia y habitación.
 5. En la tienda, equipar un accesorio anterior y comprobarlo en la escritura.
+
+## Objetos ilustrados — 12/10/2026
+
+Rediseño de once ilustraciones vectoriales: volumen, materiales, libros individuales, costuras, marcos, follaje, mapa estelar y detalles de escritorio. Gradientes y patrones con identificadores únicos por instancia; las ilustraciones conservan sus proporciones al redimensionar. No cambia precios, compras, posiciones ni guardados.
+
+Validación: sintaxis y check-room; Chromium con arrastre, teclado, compras, recarga y migración; tres resoluciones sin scroll general. Revisión visual del catálogo completo y de la habitación.
