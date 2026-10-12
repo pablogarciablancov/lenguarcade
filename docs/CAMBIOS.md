@@ -1,3 +1,7 @@
+## 2026-10-12 — Botones de acceso del alumno
+
+- Los juegos disponibles muestran «Entrar en [nombre del juego]» tanto en el renderizado inicial como al refrescar el acceso de misiones. Se conservan los textos de bloqueo.
+
 ## 2026-10-07 · Modo jugador del profesor en el panel común
 
 - «Modo jugador» abre el panel de alumno existente, con el catálogo habitual y la identidad de profesor verificada por Google/Supabase. Está disponible en la barra lateral y en Alumnos.
