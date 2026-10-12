@@ -1264,8 +1264,8 @@ if(!token){
 .gameRunner{position:fixed;inset:0;z-index:120;display:none;flex-direction:column;background:#050712}
 .gameRunner.open{display:flex}
 .gameRunnerBar{min-height:58px;display:flex;align-items:center;gap:14px;padding:9px 14px;background:linear-gradient(90deg,#111a35,#1b1740);border-bottom:1px solid rgba(255,255,255,.14);color:#fff}
-.gameRunnerBar strong{font-size:16px}
-.gameRunnerStatus{margin-left:auto;color:#c7d2fe;font-size:12px;text-align:right}
+.gameRunnerBar strong{font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gameRunnerFrame{min-height:0}.gameRunnerBar{flex-wrap:wrap}.gameRunnerSave{overflow-wrap:anywhere}
+.gameRunnerXp{color:#ffd54f;font-size:14px;font-weight:900;white-space:nowrap;margin-left:auto}.gameRunnerSave{color:#aeb9d6;font-size:12px}.gameRunnerSave[data-state="saved"]{color:#70dda9}.gameRunnerSave[data-state="error"]{color:#ffbd85}.gameRunnerStatus{margin-left:0;color:#c7d2fe;font-size:12px;text-align:right}
 .gameRunnerBar button{width:auto;margin:0;padding:9px 13px}
 .gameRunnerFrame{width:100%;flex:1;border:0;background:#f8fafc}
 .gameRunnerSaving{position:absolute;right:18px;bottom:18px;padding:10px 14px;border-radius:14px;background:rgba(5,7,18,.9);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:12px;box-shadow:var(--shadow)}
@@ -1311,12 +1311,31 @@ const GAME_BRIDGE_NAMESPACE='lenguarcade-game';
 let activeGameRunner=null;
 const processedGameResults=new Set();
 
+function updateGameSaveHud(runner,state){
+  if(!runner||activeGameRunner!==runner)return;
+  runner.saveHudState=state;
+  const node=$('gameRunnerSave');if(!node)return;
+  node.dataset.state=state;
+  node.textContent=state==='saving'?(runner.closeRequested?'Guardando antes de volver…':'Guardando…'):state==='error'?'No se ha podido guardar · Reintentar':state==='saved'?'✓ Progreso guardado · '+new Intl.DateTimeFormat('es-ES',{hour:'2-digit',minute:'2-digit'}).format(new Date()):'Sin cambios guardados aún';
+}
+function confirmGameXpHud(runner,response,isPrimary){
+  if(!runner||activeGameRunner!==runner||!isPrimary)return;
+  const game=(response?.dashboard?.games||[]).find(item=>item.gameId===runner.game.gameId);
+  const xp=Number(response?.record?.xp??game?.progress?.xp);
+  if(!Number.isFinite(xp))return;
+  runner.confirmedGameXp=Math.max(Number(runner.confirmedGameXp??runner.initialGameXp??0),xp);
+  const earned=Math.max(0,runner.confirmedGameXp-Number(runner.initialGameXp||0));
+  const node=$('gameRunnerXp');if(node)node.textContent='+'+earned+' XP · esta sesión';
+}
+
 function mountGameRunner(){
   if($('gameRunner'))return;
   document.body.insertAdjacentHTML('beforeend',`
     <section class="gameRunner" id="gameRunner" aria-label="Juego abierto">
       <header class="gameRunnerBar">
         <strong id="gameRunnerTitle">Juego</strong>
+        <span class="gameRunnerXp" id="gameRunnerXp" aria-live="polite">+0 XP · esta sesión</span>
+        <span class="gameRunnerSave" id="gameRunnerSave" role="status" aria-live="polite">Sin cambios guardados aún</span>
         <span class="gameRunnerStatus" id="gameRunnerStatus">Cargando...</span>
         <button type="button" class="ghost hidden" id="gameRunnerRetry">Reintentar guardado</button>
         <button type="button" class="ghost" id="gameRunnerClose">Salir del juego</button>
@@ -1628,6 +1647,10 @@ function prepareEmbeddedGame(game){
   activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,explicitExitRequested:false,lastResultReason:'',pendingResult:null,saving:false,checkpointing:false,opponent:null,opponents:{},pendingOpponentRequest:null,opponentAuthBusy:false,accessClosing:false,accessClosureAt:'',accessClosureDeadline:0,accessCountdownTimer:null,accessFreezeTimer:null,accessExitSafetyTimer:null,accessSystemExitUntil:0,accessFinalizing:false,accessFinalCheckpointPending:false,accessFrozen:false,initialized:false,visible:false,loading:false,retries:0,initTimer:null,primarySessionCounted:false,opponentSessionCounted:false,sessionCountedByRole:{}};
   installGameBootstrapContext(activeGameRunner);
   $('gameRunnerTitle').textContent=game.nombre;
+  activeGameRunner.initialGameXp=Number(game.progress?.xp||0);
+  activeGameRunner.confirmedGameXp=activeGameRunner.initialGameXp;
+  $('gameRunnerXp').textContent='+0 XP · esta sesión';
+  updateGameSaveHud(activeGameRunner,'idle');
   $('gameRunnerStatus').textContent='Conectando con tu perfil...';
   $('gameRunnerBootText').textContent='Cargando datos del perfil...';
   $('gameRunnerBoot').style.setProperty('--boot-img',`url("${bannerUrl(game.gameId,game.banner).replace(/"/g,'')}")`);
@@ -2122,6 +2145,7 @@ async function persistGameResult(result){
   runner.saving=true;
   $('gameRunnerRetry').classList.add('hidden');
   $('gameRunnerSaving').classList.remove('hidden');
+  updateGameSaveHud(runner,'saving');
   $('gameRunnerStatus').textContent='Guardando el resultado en LenguArcade...';
   try{
     const participants=Array.isArray(result.players)&&result.players.length
@@ -2132,6 +2156,7 @@ async function persistGameResult(result){
       const context=getGameParticipantContext(runner,participant);
       const payload=buildGameProgressPayload(runner,result,participant,context);
       const response=await callServer('saveProgress',[payload]);
+      confirmGameXpHud(runner,response,context.isPrimary);
       if(payload.countSession)markRunnerSessionCounted(runner,context.isPrimary,context.role);
       if(response?.record){applySavedGameRecordToDashboard(runner,response.record,context.isPrimary,context.role);if(context.isPrimary)installGameBootstrapContext(runner);}
       if(context.isPrimary)primaryResponse=response;
@@ -2154,11 +2179,13 @@ async function persistGameResult(result){
       applySavedGameRecordToDashboard(runner,primaryResponse.record,true);
     }
     runner.pendingResult=null;
+    updateGameSaveHud(runner,runner.failedCheckpoint?'error':'saved');
     $('gameRunnerStatus').textContent='Progreso guardado.';
     sendToActiveGame('SAVE_CONFIRMED',{resultId:result.resultId});
     if(runner.closeRequested&&runner.explicitExitRequested&&!runner.accessFinalizing)setTimeout(()=>destroyGameRunner(true),250);
   }catch(error){
     processedGameResults.delete(result.resultId);
+    updateGameSaveHud(runner,'error');
     $('gameRunnerStatus').textContent='No se pudo guardar. Puedes reintentarlo.';
     $('gameRunnerRetry').classList.remove('hidden');
     sendToActiveGame('SAVE_FAILED',{message:error.message||String(error)});
@@ -2192,6 +2219,7 @@ async function persistGameCheckpoint(checkpoint){
   if(!participants.length)return;
   runner.checkpointing=true;
   $('gameRunnerSaving').classList.remove('hidden');
+  updateGameSaveHud(runner,'saving');
   $('gameRunnerStatus').textContent='Guardando partida...';
   try{
     for(const participant of participants){
@@ -2230,10 +2258,12 @@ async function persistGameCheckpoint(checkpoint){
         accessClosureAt:runner.accessClosing?closureAt:''
       };
       const response=await callServer('saveGameCheckpoint',[payload]);
+      confirmGameXpHud(runner,response,context.isPrimary);
       if(payload.countSession)markRunnerSessionCounted(runner,context.isPrimary,context.role);
       if(response?.record){applySavedGameRecordToDashboard(runner,response.record,context.isPrimary,context.role);if(context.isPrimary)installGameBootstrapContext(runner);}
     }
     runner.failedCheckpoint=null;
+    updateGameSaveHud(runner,runner.pendingResult?'error':'saved');
     $('gameRunnerRetry').classList.add('hidden');
     if(closureCheckpoint&&activeGameRunner===runner&&runner.accessClosing&&runner.accessClosureAt===closureAt)runner.accessFinalCheckpointPending=false;
     $('gameRunnerStatus').textContent=closureCheckpoint?'Último progreso guardado · volviendo a LenguArcade...':'Partida guardada.';
@@ -2241,6 +2271,7 @@ async function persistGameCheckpoint(checkpoint){
     if(runner.closeRequested&&runner.explicitExitRequested&&!runner.checkpointQueue?.length&&(!runner.accessFinalizing||closureCheckpoint))setTimeout(()=>{if(activeGameRunner===runner&&!runner.checkpointing&&!runner.checkpointQueue?.length&&!runner.failedCheckpoint)destroyGameRunner(true);},250);
   }catch(error){
     runner.failedCheckpoint=checkpoint;
+    updateGameSaveHud(runner,'error');
     $('gameRunnerRetry').classList.remove('hidden');
     if(closureCheckpoint&&activeGameRunner===runner&&runner.accessClosing&&runner.accessClosureAt===closureAt)runner.accessFinalCheckpointPending=false;
     $('gameRunnerStatus').textContent=closureCheckpoint?'No se pudo completar el último guardado. Volviendo a LenguArcade...':'No se pudo guardar la partida.';
