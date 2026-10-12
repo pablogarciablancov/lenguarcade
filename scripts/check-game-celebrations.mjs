@@ -1,6 +1,6 @@
 import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
 const html=fs.readFileSync('apps-script/LenguArcade_Alumno.html','utf8'),runner={},timers=[],node={textContent:'',classList:{remove(){},add(){}}};
-const context={activeGameRunner:runner,$:()=>node,setTimeout:fn=>{timers.push(fn);return timers.length},Map,Set,Date};vm.createContext(context);
+const context={activeGameRunner:runner,updateGameMissionHud(){},$:()=>node,setTimeout:fn=>{timers.push(fn);return timers.length},Map,Set,Date};vm.createContext(context);
 vm.runInContext(html.slice(html.indexOf('function initGameCelebrations('),html.indexOf('function refreshGameCelebrations(')),context);
 const initial={general:{level:4},missions:[{id:'old',title:'Antigua',completed:true},{id:'new',title:'Diez sustantivos',completed:false}]};
 context.initGameCelebrations(runner,initial);context.confirmGameCelebrations(runner,initial);assert.equal(timers.length,0);
