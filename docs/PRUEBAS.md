@@ -1,3 +1,9 @@
+## 2026-10-12 — Misión en la cabecera
+
+- `check-game-mission-hud.mjs`: progreso, filtro, selector, selección conservada, completada y ausencia de misiones. Regresión de celebraciones/checkpoints y comprobaciones generales.
+- Navegador local: cabecera, misión y área de juego en 1366×768, 1440×900, 1920×1080 y 390×844 sin desbordamiento horizontal.
+- Tras publicar Apps Script: jugar con varias misiones, cambiar la seleccionada y verificar avance confirmado/completada. Checkpoints refrescan como máximo cada 30 segundos; se actualiza al siguiente guardado elegible.
+
 ## 2026-10-12 — Celebraciones comunes
 
 - `npm run check` y `node scripts/check-game-celebrations.mjs`: verificar datos iniciales, misión antigua, nueva misión, subida de nivel, cola, duplicados y cierre.
