@@ -1498,11 +1498,19 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     var games=Array.isArray(outcome&&outcome.gameIds)?outcome.gameIds.map(String):[];
     return (preset&&Array.isArray(preset.gameIds)?preset.gameIds:[]).every(function(id){return games.indexOf(String(id))!==-1;});
   }
+  function orderedWorkshopRoutePresets(){
+    var outcomes=plannerOutcomesForClass();
+    return WORKSHOP_ROUTE_PRESETS.map(function(preset,index){
+      var plan=plannerPlan(routePlanId(preset.id,teacherCurrentClass()));
+      var used=!!(plan&&plan.usedAt)||outcomes.some(function(outcome){return plannerRouteMatchesOutcome(outcome,preset);});
+      return {preset:preset,used:used,index:index};
+    }).sort(function(a,b){return Number(a.used)-Number(b.used)||a.index-b.index;});
+  }
   function renderWorkshopRoute(){
     var host=document.getElementById('workshopRouteList');if(!host)return;
-    host.innerHTML=WORKSHOP_ROUTE_PRESETS.map(function(preset){
-      var used=plannerOutcomesForClass().some(function(outcome){return plannerRouteMatchesOutcome(outcome,preset);});
-      return '<article class="workshopRouteCard"><div class="workshopRouteNo">Taller '+preset.step+' de '+WORKSHOP_ROUTE_PRESETS.length+'</div><h4>'+sessionEsc(preset.title)+'</h4><p>'+sessionEsc(preset.focus)+'</p><div class="workshopRouteMeta"><span>🎯 '+sessionEsc(preset.targetXp)+' XP</span><span>🎮 '+sessionEsc(workshopRouteGameNames(preset))+'</span></div>'+(used?'<span class="workshopRouteDone">✓ REALIZADO EN ESTA CLASE</span>':'')+'<div class="workshopRouteActions"><button type="button" class="routePrepare" data-route-prepare="'+sessionEsc(preset.id)+'">Preparar / editar</button><button type="button" data-route-open="'+sessionEsc(preset.id)+'">▶ Abrir ahora</button></div></article>';
+    host.innerHTML=orderedWorkshopRoutePresets().map(function(item){
+      var preset=item.preset,used=item.used;
+      return '<article class="workshopRouteCard"><h4>'+sessionEsc(preset.title)+'</h4><p>'+sessionEsc(preset.focus)+'</p><div class="workshopRouteMeta"><span>🎯 '+sessionEsc(preset.targetXp)+' XP</span><span>🎮 '+sessionEsc(workshopRouteGameNames(preset))+'</span></div>'+(used?'<span class="workshopRouteDone">✓ REALIZADO EN ESTA CLASE</span>':'')+'<div class="workshopRouteActions"><button type="button" class="routePrepare" data-route-prepare="'+sessionEsc(preset.id)+'">Preparar / editar</button><button type="button" data-route-open="'+sessionEsc(preset.id)+'">▶ Abrir ahora</button></div></article>';
     }).join('');
     [].slice.call(host.querySelectorAll('[data-route-prepare]')).forEach(function(button){button.onclick=function(){prepareWorkshopRoutePreset(button.dataset.routePrepare);};});
     [].slice.call(host.querySelectorAll('[data-route-open]')).forEach(function(button){button.onclick=function(){openWorkshopRoutePreset(button.dataset.routeOpen);};});
@@ -1523,13 +1531,13 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       gameIds:preset.gameIds.slice(),
       classCodes:teacherCurrentClass()?[teacherCurrentClass()]:[]
     });
-    plannerStatus('Taller '+preset.step+' cargado. Puedes compartirlo con varias clases, editarlo o guardarlo tal cual.');
+    plannerStatus(preset.title+' cargado. Puedes compartirlo con varias clases, editarlo o guardarlo tal cual.');
     setTimeout(function(){var editor=document.querySelector('.workshopPlanEditor');if(editor)editor.scrollIntoView({block:'start',behavior:'smooth'});},0);
   }
   async function openWorkshopRoutePreset(id){
     if(teacherSessionBusy)return;
     var preset=workshopRoutePreset(id),classCode=teacherCurrentClass();if(!preset||!classCode)return;
-    setTeacherSessionBusy(true);plannerStatus('Abriendo Taller '+preset.step+'…');
+    setTeacherSessionBusy(true);plannerStatus('Abriendo '+preset.title+'…');
     try{
       var payload={
         planId:routePlanId(preset.id,classCode),
@@ -1546,7 +1554,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       var saved=await sessionCall('saveAndActivateWorkshopPlan',[classCode,payload,true]);
       await syncWorkshopSupabaseAccess(classCode,saved&&saved.activeSession);
       renderWorkshopPlanner(saved);
-      plannerStatus('Taller '+preset.step+' abierto para '+classCode+'. Solo quedan disponibles los juegos de esta sesión.');
+      plannerStatus(preset.title+' abierto para '+classCode+'. Solo quedan disponibles los juegos de esta sesión.');
     }catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo abrir el taller de la ruta: '+(error.message||error),true);}
   }
 
@@ -1563,7 +1571,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       }catch(historyError){console.warn('No se pudo reconstruir el historial provisional de talleres.',historyError);}
       var historyData=await edge('teacher-dashboard',{classCode:classCode,gameId:''});
       result.workshopOutcomes=Array.isArray(historyData.workshopOutcomes)?historyData.workshopOutcomes:[];
-      mount.innerHTML='<section class="workshopRouteSection"><div class="workshopRouteHead"><div><div class="sub">RUTA RECOMENDADA</div><h3>🚀 Ruta LenguArcade · 8 talleres en continuidad</h3><div class="sub">Empiezan con una toma de contacto y van subiendo el objetivo de XP mientras recorren ortografía, léxico, verbos, lectura, estrategia y escritura. Puedes abrir uno directamente o cargarlo en el editor.</div></div></div><div id="workshopRouteList" class="workshopRouteList"></div></section><div id="workshopActiveHost"></div><div class="workshopPlannerGrid"><section class="workshopPlanLibrary"><div class="workshopPanelTitle"><div><h3>Tus talleres</h3><div class="sub">Próximos, borradores y sesiones ya utilizadas.</div></div><button type="button" id="workshopNewPlan">＋ Crear taller</button></div><div class="workshopListSummary" id="workshopListSummary"></div><div class="workshopPlanTabs" id="workshopPlanTabs"></div><div id="workshopPlanList" class="workshopPlanList"></div></section><section class="workshopPlanEditor"><div class="workshopPanelTitle"><div><h3>Preparar la sesión</h3><div class="sub">Guardar no publica nada automáticamente.</div></div></div><div id="workshopPlanEditorBody" class="workshopPlanEditorBody"></div></section></div>';
+      mount.innerHTML='<section class="workshopRouteSection"><div class="workshopRouteHead"><div><div class="sub">RUTA RECOMENDADA</div><h3>🚀 Talleres preconfigurados</h3><div class="sub">Los pendientes aparecen primero y los realizados quedan al final según la clase seleccionada. Puedes abrir un taller directamente o cargarlo en el editor.</div></div></div><div id="workshopRouteList" class="workshopRouteList"></div></section><div id="workshopActiveHost"></div><div class="workshopPlannerGrid"><section class="workshopPlanLibrary"><div class="workshopPanelTitle"><div><h3>Tus talleres</h3><div class="sub">Próximos, borradores y sesiones ya utilizadas.</div></div><button type="button" id="workshopNewPlan">＋ Crear taller</button></div><div class="workshopListSummary" id="workshopListSummary"></div><div class="workshopPlanTabs" id="workshopPlanTabs"></div><div id="workshopPlanList" class="workshopPlanList"></div></section><section class="workshopPlanEditor"><div class="workshopPanelTitle"><div><h3>Preparar la sesión</h3><div class="sub">Guardar no publica nada automáticamente.</div></div></div><div id="workshopPlanEditorBody" class="workshopPlanEditorBody"></div></section></div>';
       document.getElementById('workshopNewPlan').onclick=newPlannerPlan;
       renderWorkshopPlanner(result);
       Promise.resolve(syncWorkshopSupabaseAccess(classCode,result&&result.activeSession)).catch(function(error){console.warn('No se pudo sincronizar el Taller en segundo plano.',error);});
