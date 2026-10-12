@@ -1300,6 +1300,7 @@ if(!token){
 <style>
 .gameRunner{position:fixed;inset:0;z-index:120;display:none;flex-direction:column;background:#050712}
 .gameRunner.open{display:flex}
+.gameRunnerMission{display:flex;align-items:center;gap:12px;padding:7px 14px;color:#dceaff;background:#101d32;border-bottom:1px solid rgba(255,255,255,.12);flex-shrink:0;font-size:14px;line-height:1.35}.gameRunnerMission span{flex:1;min-width:0;overflow-wrap:anywhere}.gameRunnerMission button{width:auto;margin:0;padding:6px 9px;font-size:12px;flex-shrink:0}
 .gameRunnerCelebration{flex-shrink:0;padding:9px 14px;background:linear-gradient(90deg,#42307d,#164759);color:#fff;font-size:15px;font-weight:800;line-height:1.3;overflow-wrap:anywhere;pointer-events:none;animation:laRewardIn .2s ease}
 @keyframes laRewardIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.gameRunnerCelebration{animation:none}}
@@ -1368,7 +1369,39 @@ function confirmGameXpHud(runner,response,isPrimary){
   const node=$('gameRunnerXp');if(node)node.textContent='+'+earned+' XP · esta sesión';
 }
 
+function updateGameMissionHud(runner,dashboard){
+  if(activeGameRunner!==runner)return;
+  const missions=(dashboard?.missions||[]).filter(m=>m.gameId===runner.game.gameId).slice().sort((a,b)=>{
+    if(!!a.completed!==!!b.completed)return a.completed?1:-1;
+    const deadline=(Date.parse(a.dueAt)||Infinity)-(Date.parse(b.dueAt)||Infinity);
+    if(deadline&&!Number.isNaN(deadline))return deadline;
+    if(!!a.featured!==!!b.featured)return a.featured?-1:1;
+    return Number(b.priority||0)-Number(a.priority||0);
+  });
+  runner.hudMissions=missions;
+  const key=m=>String(m.id||m.missionId||m.title);
+  const selected=missions.find(m=>key(m)===runner.hudMissionId)||missions[0];
+  runner.hudMissionId=selected?key(selected):'';
+  const bar=$('gameRunnerMission'),text=$('gameRunnerMissionText'),next=$('gameRunnerMissionNext');
+  if(!bar||!text||!next)return;
+  bar.classList.toggle('hidden',!selected);
+  if(!selected)return;
+  const target=Math.max(0,Number(selected.target||0)),progress=Math.max(0,Number(selected.progress||0));
+  const unit=selected.missionType==='accuracy'?'%':selected.missionType==='xp'?' XP':'';
+  text.textContent=(selected.completed?'✓ Completada · ':'🎯 ')+(selected.title||'Misión')+' · '+Math.round(Math.min(progress,target||progress))+unit+'/'+target+unit;
+  next.classList.toggle('hidden',missions.length<2);
+  next.textContent='Otra misión · '+(missions.indexOf(selected)+1)+'/'+missions.length;
+}
+function cycleGameMissionHud(){
+  const runner=activeGameRunner;if(!runner?.hudMissions?.length)return;
+  const missions=runner.hudMissions,key=m=>String(m.id||m.missionId||m.title);
+  const index=missions.findIndex(m=>key(m)===runner.hudMissionId);
+  runner.hudMissionId=key(missions[(index+1)%missions.length]);
+  updateGameMissionHud(runner,{missions});
+}
+
 function initGameCelebrations(runner,dashboard){
+  updateGameMissionHud(runner,dashboard);
   runner.celebrationLevel=Number(dashboard?.general?.level||0);
   runner.celebrationMissions=new Map((dashboard?.missions||[]).map(m=>[String(m.id||m.missionId||m.title),!!m.completed]));
   runner.celebrationSeen=new Set();runner.celebrationQueue=[];
@@ -1381,6 +1414,7 @@ function showNextGameCelebration(runner){
 }
 function confirmGameCelebrations(runner,dashboard){
   if(activeGameRunner!==runner||!dashboard||!runner.celebrationSeen)return;
+  updateGameMissionHud(runner,dashboard);
   const notices=[],level=Number(dashboard.general?.level||0);
   if(level>runner.celebrationLevel&&runner.celebrationLevel>0)notices.push(['level:'+level,'⬆ Nivel '+level+' alcanzado']);
   runner.celebrationLevel=Math.max(runner.celebrationLevel,level);
@@ -1413,6 +1447,7 @@ function mountGameRunner(){
         <button type="button" class="ghost hidden" id="gameRunnerRetry">Reintentar guardado</button>
         <button type="button" class="ghost" id="gameRunnerClose">Salir del juego</button>
       </header>
+      <div class="gameRunnerMission hidden" id="gameRunnerMission"><span id="gameRunnerMissionText" role="status" aria-live="polite"></span><button type="button" class="ghost hidden" id="gameRunnerMissionNext">Otra misión</button></div>
       <div class="gameRunnerCelebration hidden" id="gameRunnerCelebration" role="status" aria-live="polite"></div>
       <div class="gameRunnerAccessClosing hidden" id="gameRunnerAccessClosing" role="alert" aria-live="assertive">
         <div class="gameRunnerAccessClosingText"><strong>🔒 El profesor ha cerrado este juego</strong><span>Tienes un último minuto para terminar lo que estás haciendo. Tu progreso seguirá guardándose hasta que termine la cuenta atrás.</span></div>
@@ -1435,6 +1470,7 @@ function mountGameRunner(){
         <div class="gameOpponentStatus" id="gameOpponentStatus"></div>
       </div>
     </section>`);
+  $('gameRunnerMissionNext').onclick=cycleGameMissionHud;
   $('gameRunnerClose').onclick=requestCloseGameRunner;
   $('gameRunnerAccessExit').onclick=requestCloseGameRunner;
   $('gameRunnerRetry').onclick=()=>{
