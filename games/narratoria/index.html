@@ -505,6 +505,8 @@
         @keyframes popIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popOut { to { opacity: 0; transform: translateY(-20px); } }
     </style>
+    <link rel="stylesheet" href="room.css">
+    <script src="room.js"></script>
 </head>
 <body>
 
@@ -610,7 +612,7 @@
                             </div>
                             <p class="companion-dialogue" id="companion-dialogue" aria-live="polite"></p>
                             <p class="owl-equipped-label" id="writing-owl-equipped"></p>
-                            <button class="owl-greet" onclick="ui.greetOwl('writing')">Saludar a Plumín</button>
+                            <div class="room-actions"><button class="owl-greet" onclick="ui.greetOwl()">Saludar</button><button class="owl-greet" onclick="room.open()">Decorar habitación</button></div>
                             <div class="manuscript-label"><span>Manuscrito compartido</span><span id="manuscript-count">0 de 5 fases</span></div>
                             <div class="manuscript-pages" id="manuscript-pages" role="progressbar" aria-label="Progreso del manuscrito" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
                         </div>
@@ -691,7 +693,7 @@
                             <div class="habitat-bars"></div><div class="habitat-base">🌿</div>
                         </div>
                         <p class="owl-equipped-label" id="shop-owl-equipped"></p>
-                        <button class="owl-greet" onclick="ui.greetOwl('shop')">Saludar a Plumín</button>
+                        <div class="room-actions"><button class="owl-greet" onclick="ui.greetOwl()">Saludar</button><button class="owl-greet" onclick="room.open()">Decorar habitación</button></div>
                     </div>
                     <div class="owl-shop-grid" id="owl-shop-container"></div>
                 </div>
@@ -1125,6 +1127,7 @@
             const source = raw && typeof raw === 'object' ? raw : {};
             return {
                 owned: safeOwned, equipped,
+                room: normalizeRoom(source.room, equipped, safeOwned),
                 coins: Math.max(0, Math.floor(Number(source.coins) || 0)),
                 homeLevel: Math.min(3, Math.max(1, Math.floor(Number(source.homeLevel) || 1))),
                 totalWordsWritten: Math.max(0, Math.floor(Number(source.totalWordsWritten) || 0)),
@@ -1151,7 +1154,7 @@
         function mergeOwlProgress(currentRaw, historicalRaw) {
             const current = normalizeOwlState(currentRaw);
             const historical = normalizeOwlState(historicalRaw);
-            const currentHasProgress = current.totalWordsWritten > 0 || current.coins > 0 || current.homeLevel > 1 || current.owned.length > DEFAULT_OWL_STATE.owned.length;
+            const currentHasProgress = current.room.edited || current.totalWordsWritten > 0 || current.coins > 0 || current.homeLevel > 1 || current.owned.length > DEFAULT_OWL_STATE.owned.length;
             const primary = currentHasProgress ? current : historical;
             const rewardLedgers = { ...historical.rewardLedgers };
             Object.entries(current.rewardLedgers).forEach(([storyId, words]) => {
@@ -2071,6 +2074,7 @@
                 else state.tinteros -= item.cost;
                 state.owl.owned.push(id);
                 state.owl.equipped[item.slot] = id;
+                if (item.currency === 'plumillas') room.placeLegacy(item);
                 state.stats.items++;
                 if(state.stats.items >= 1) game.checkAchievement('a_shop_1');
                 if(state.stats.items >= 5) game.checkAchievement('a_shop_5');
@@ -2085,6 +2089,7 @@
                 state.owl = normalizeOwlState(state.owl);
                 if (!item || !state.owl.owned.includes(id)) return;
                 state.owl.equipped[item.slot] = id;
+                if (item.currency === 'plumillas') room.placeLegacy(item);
                 storage.save();
                 ui.renderOwl();
                 ui.renderShop();
@@ -2639,6 +2644,7 @@
                     if (node) node.textContent = label;
                 });
                 ui.updateOwlHomeStatus();
+                room.renderHabitats();
                 ui.setOwlMotion('idle');
                 Object.values(OWL_FRAME_SEQUENCES).flat().forEach(preloadOwlFrame);
             },
