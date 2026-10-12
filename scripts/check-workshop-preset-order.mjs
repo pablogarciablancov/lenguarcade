@@ -1,0 +1,18 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
+const s=fs.readFileSync('apps-script/LenguArcade_Profesor.html','utf8');
+const outcomes=[{title:'Primeros pasos · La aventura empieza',targetXp:100,gameIds:['battlegrafia']},{title:'Ortografía a toda velocidad',targetXp:150,gameIds:['battlegrafia','maniacgrafia']}];
+const ctx={plannerOutcomesForClass:()=>outcomes,plannerPlan:()=>null,teacherCurrentClass:()=> '2ESO_D'};
+vm.createContext(ctx);
+vm.runInContext(s.slice(s.indexOf('  var WORKSHOP_ROUTE_PRESETS='),s.indexOf('  var workshopPlannerState=')),ctx);
+vm.runInContext(s.slice(s.indexOf('  function plannerRouteMatchesOutcome('),s.indexOf('  function renderWorkshopRoute(')),ctx);
+const before=JSON.stringify(outcomes),presets=JSON.stringify(ctx.WORKSHOP_ROUTE_PRESETS);
+const rows=ctx.orderedWorkshopRoutePresets();
+assert.deepEqual(Array.from(rows,x=>x.preset.id),['route_03','route_04','route_05','route_06','route_07','route_08','route_01','route_02']);
+assert.equal(rows.filter(x=>x.used).length,2);assert.equal(JSON.stringify(outcomes),before);assert.equal(JSON.stringify(ctx.WORKSHOP_ROUTE_PRESETS),presets);
+assert.equal(ctx.routePlanId('route_01','2ESO_D'),'route_01__2ESO_D');
+ctx.plannerOutcomesForClass=()=>[];
+assert.equal(ctx.orderedWorkshopRoutePresets()[0].preset.id,'route_01');
+ctx.plannerPlan=id=>id==='route_02__2ESO_D'?{usedAt:'2026-10-10'}:null;
+assert.equal(ctx.orderedWorkshopRoutePresets().at(-1).preset.id,'route_02');
+assert.ok(!s.includes('Taller '+"'+preset.step+'"+' de '));
+console.log('Talleres: títulos/identidad e historial preservados, dos realizados al final, clase independiente y usedAt correctos.');
