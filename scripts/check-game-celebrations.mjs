@@ -1,0 +1,11 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
+const html=fs.readFileSync('apps-script/LenguArcade_Alumno.html','utf8'),runner={},timers=[],node={textContent:'',classList:{remove(){},add(){}}};
+const context={activeGameRunner:runner,$:()=>node,setTimeout:fn=>{timers.push(fn);return timers.length},Map,Set,Date};vm.createContext(context);
+vm.runInContext(html.slice(html.indexOf('function initGameCelebrations('),html.indexOf('function refreshGameCelebrations(')),context);
+const initial={general:{level:4},missions:[{id:'old',title:'Antigua',completed:true},{id:'new',title:'Diez sustantivos',completed:false}]};
+context.initGameCelebrations(runner,initial);context.confirmGameCelebrations(runner,initial);assert.equal(timers.length,0);
+const next={general:{level:5},missions:[{...initial.missions[0]},{...initial.missions[1],completed:true}]};context.confirmGameCelebrations(runner,next);
+assert.equal(node.textContent,'⬆ Nivel 5 alcanzado');assert.equal(runner.celebrationQueue.length,1);context.confirmGameCelebrations(runner,next);assert.equal(runner.celebrationQueue.length,1);
+timers.shift()();assert.equal(node.textContent,'🎯 Misión completada: Diez sustantivos');timers.shift()();assert.equal(runner.celebrationQueue.length,0);
+context.activeGameRunner={};context.confirmGameCelebrations(runner,{general:{level:6},missions:[]});assert.equal(timers.length,0);
+console.log('Celebraciones: saldo inicial, misiones antiguas, nivel nuevo, cola, duplicados y cierre correctos.');
