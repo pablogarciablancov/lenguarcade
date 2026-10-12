@@ -1,3 +1,8 @@
+## 2026-10-12 — Misiones desde Hoy en clase
+
+- Panel de misión activa con selector, juego, objetivo y recuentos sin empezar/en progreso/completados. Conserva la selección en refrescos.
+- Ver pendientes abre Misiones enfocada en el objetivo seleccionado y con filtro aplicado. Ver todas las misiones recupera la vista completa. Respeta el ámbito actual y excluye borradores/fechas fuera de vigencia.
+
 ## 2026-10-12 — Seguimiento individual de misiones del profesor
 
 - El seguimiento muestra todos los alumnos elegibles con Sin empezar / En progreso / Completada, progreso y última actividad en LenguArcade.

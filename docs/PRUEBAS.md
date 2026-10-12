@@ -1,3 +1,8 @@
+## 2026-10-12 — Inicio docente orientado a misiones
+
+- `check-teacher-home-missions.mjs`: misiones activas, borradores/futuras, recuentos, juego, selección y vacío. Comprobaciones generales y sintaxis.
+- Tras publicar: seleccionar clase y misión en Hoy, abrir Ver pendientes, comprobar objetivo y alumnado del mismo ámbito y regresar a todas las misiones. Comprobar selección tras refresco automático.
+
 ## 2026-10-12 — Seguimiento docente de misiones
 
 - `check-teacher-mission-tracking.mjs`: orden, filtro, estados, cifras, última actividad y conservación de la lista de datos original.
