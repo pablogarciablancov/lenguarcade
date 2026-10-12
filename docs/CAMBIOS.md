@@ -1,3 +1,8 @@
+## 2026-10-12 — Resumen al volver del juego
+
+- Aviso no modal durante 15 segundos al volver al panel, con XP confirmada, misiones completadas y nivel alcanzado en la sesión.
+- Reutiliza el refresco de salida para recoger objetivos finales; no cuenta recompensas antiguas ni misiones duplicadas. Indica progreso pendiente si falló el guardado.
+
 ## 2026-10-12 — Misión visible mientras se juega
 
 - Cabecera común con título y progreso confirmado de la misión vinculada al juego. Selección priorizada por pendientes/plazo/destacado/prioridad; botón para recorrer las demás.
