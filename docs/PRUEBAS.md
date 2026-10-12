@@ -1,3 +1,9 @@
+## 2026-10-12 — Tarjetas con reverso
+
+- `npm run check` y sintaxis: correctos.
+- Navegador local: giro, botón de entrada y Escape en 1366×768, 1440×900, 1920×1080 y 390×844; reverso inspeccionado.
+- Tras publicar: comprobar tarjetas con/sin progreso, misiones vinculadas, datos específicos y apertura/cierre en vivo por el profesor. El reverso usa scroll interno para información extensa.
+
 ## 2026-10-12 — HUD común de guardado y XP
 
 - `npm run check`: correcto. `check-checkpoint-lifecycle.mjs` verifica fallo/reintento/salida confirmada, XP incremental sobre saldo previo, confirmaciones repetidas y aislamiento del contrincante.
