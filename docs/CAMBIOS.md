@@ -1,3 +1,7 @@
+## 2026-10-12 — Talleres preconfigurados sin numeración
+
+- Solo título y datos útiles; pendientes antes de realizados según la clase. Conserva títulos almacenados, route_01…route_08, planId y todo el historial; no migra ni reescribe registros.
+
 ## 2026-10-12 — Misiones desde Hoy en clase
 
 - Panel de misión activa con selector, juego, objetivo y recuentos sin empezar/en progreso/completados. Conserva la selección en refrescos.
