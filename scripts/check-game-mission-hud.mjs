@@ -1,0 +1,10 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
+const h=fs.readFileSync('apps-script/LenguArcade_Alumno.html','utf8'),nodes=new Map(),runner={game:{gameId:'test'}};
+const context={activeGameRunner:runner,$:id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',hidden:false,classList:{toggle(name,value){nodes.get(id).hidden=value}}});return nodes.get(id)}};vm.createContext(context);vm.runInContext(h.slice(h.indexOf('function updateGameMissionHud('),h.indexOf('function initGameCelebrations(')),context);
+const a={id:'a',gameId:'test',title:'Diez aciertos',progress:6,target:10},b={id:'b',gameId:'test',title:'Dos partidas',progress:1,target:2};
+context.updateGameMissionHud(runner,{missions:[a,b,{id:'other',gameId:'other'}]});assert.match(nodes.get('gameRunnerMissionText').textContent,/6\/10/);assert.equal(runner.hudMissions.length,2);assert.equal(nodes.get('gameRunnerMissionNext').hidden,false);
+context.cycleGameMissionHud();assert.match(nodes.get('gameRunnerMissionText').textContent,/Dos partidas/);
+context.updateGameMissionHud(runner,{missions:[a,{...b,completed:true,progress:2}]});assert.match(nodes.get('gameRunnerMissionText').textContent,/✓ Completada/);
+context.updateGameMissionHud(runner,{missions:[]});assert.equal(nodes.get('gameRunnerMission').hidden,true);
+context.updateGameMissionHud(runner,{missions:[{...a,title:'<script>texto</script>'}]});assert.match(nodes.get('gameRunnerMissionText').textContent,/<script>texto/);
+console.log('Misión en juego: progreso, filtro por juego, selector, actualización, completada y estado vacío correctos.');
