@@ -1,3 +1,8 @@
+## 2026-10-12 — Orden de talleres preconfigurados
+
+- Sintaxis: 13 bloques de profesor correctos. Prueba con los dos primeros talleres realizados: aparecen al final, conservan datos e identificadores; otra clase sin historial mantiene los pendientes.
+- Ejecutar node scripts/check-workshop-preset-order.mjs. Tras publicar comprobar las clases C/D y que no aparece «1 de 8».
+
 ## 2026-10-12 — Inicio docente orientado a misiones
 
 - `check-teacher-home-missions.mjs`: misiones activas, borradores/futuras, recuentos, juego, selección y vacío. Comprobaciones generales y sintaxis.
