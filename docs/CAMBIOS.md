@@ -1,3 +1,9 @@
+## 2026-10-12 — Celebración de misiones y niveles
+
+- Avisos comunes de subida de nivel y misión completada, confirmados por datos del servidor, en cola durante 4,5 segundos y sin interacción obligatoria.
+- No anuncia objetivos anteriores ni repite confirmaciones. Cancela avisos al cerrar el juego.
+- Checkpoints consultan el resumen en segundo plano como máximo cada 30 segundos; un fallo en esa consulta no afecta al guardado.
+
 ## 2026-10-12 — Giro fluido y reverso sin scroll
 
 - Giro en dos mitades continuas con cambio de cara de canto, también al regresar. Bloquea giros simultáneos y respeta movimiento reducido.
