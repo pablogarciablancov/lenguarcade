@@ -2597,16 +2597,35 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
     if(!host){host=document.createElement('section');host.id=id;host.className='completionTracking';parent.appendChild(host);}
     host.dataset.title=title;host.dataset.subtitle=subtitle;return host;
   }
+  function sortMissionTrackingStudents(rows,pendingOnly){
+    return (Array.isArray(rows)?rows:[]).filter(function(row){return !pendingOnly||!row.completed;}).slice().sort(function(a,b){
+      var ap=Number(a.progress!=null?a.progress:a.xp||0),bp=Number(b.progress!=null?b.progress:b.xp||0);
+      var ar=a.completed?2:ap>0?1:0,br=b.completed?2:bp>0?1:0;
+      return ar-br||ap-bp||String(a.nombre||'').localeCompare(String(b.nombre||''),'es');
+    });
+  }
+  var missionPendingOnly=false;
+  function trackingStudentsHtml(rows,target,data){
+    var students=sortMissionTrackingStudents(rows,missionPendingOnly);
+    return students.length?'<div class="missionStudentList">'+students.map(function(row){
+      var profile=(data.students||[]).find(function(student){return String(student.studentId)===String(row.studentId);})||{};
+      var progress=Number(row.progress!=null?row.progress:row.xp||0),goal=Number(row.target!=null?row.target:target||0);
+      var state=row.completed?'Completada':progress>0?'En progreso':'Sin empezar';
+      return '<div class="missionStudentRow '+(row.completed?'done':'')+'"><strong>'+tEsc(row.nombre||'Alumno')+'</strong><span class="missionStudentState">'+state+'</span><b>'+tEsc(Math.min(progress,goal||progress))+' / '+tEsc(goal)+'</b><small>Última actividad en LenguArcade: '+tEsc(profile.lastActivity?formatDate(profile.lastActivity):'Sin actividad registrada')+'</small></div>';
+    }).join('')+'</div>':'<div class="completionEmpty">'+(missionPendingOnly?'No hay alumnos pendientes.':'No hay progreso individual disponible.')+'</div>';
+  }
   function renderMissionTracking(data){
     var parent=document.getElementById('misiones');if(!parent)return;
     var host=ensureTrackingHost(parent,'missionCompletionTracking','Seguimiento de misiones','Quién ha alcanzado cada objetivo en el ámbito seleccionado.');
     var missions=(data.missions||[]).filter(function(m){return m.publicationStatus!=='draft'&&m.completion&&Number(m.completion.eligibleCount||0)>0;}).slice(0,20);
-    host.innerHTML='<div class="completionTrackingHead"><div><h3>✅ Cumplimiento de misiones</h3><div class="sub">Quién ha alcanzado cada objetivo en el filtro actual.</div></div><span class="rosterPill">'+missions.length+' misiones</span></div>'+
+    host.innerHTML='<div class="completionTrackingHead"><div><h3>🎯 Seguimiento de misiones</h3><div class="sub">Sin empezar → En progreso → Completada. Datos confirmados en el último refresco.</div></div><button type="button" class="ghost missionPendingFilter" aria-pressed="'+missionPendingOnly+'">'+(missionPendingOnly?'Mostrar todos':'Ver pendientes')+'</button><span class="rosterPill">'+missions.length+' misiones</span></div>'+
       (missions.length?'<div class="completionTrackingGrid">'+missions.map(function(m){
         var c=m.completion||{},pct=Number(c.completionPercent||0),done=Array.isArray(c.completedStudents)?c.completedStudents:[];
-        return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(m.title||'Misión')+'</strong><div class="sub">'+tEsc(m.className||'Todas las clases')+(m.studentName?' · '+tEsc(m.studentName):'')+'</div></div><span class="completionPill">'+tEsc(c.completedCount||0)+' / '+tEsc(c.eligibleCount||0)+' completada</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'+namesHtml(done,'done')+'</article>';
+        return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(m.title||'Misión')+'</strong><div class="sub">'+tEsc(m.className||'Todas las clases')+(m.studentName?' · '+tEsc(m.studentName):'')+'</div></div><span class="completionPill">'+tEsc(c.completedCount||0)+' / '+tEsc(c.eligibleCount||0)+' completada</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'+trackingStudentsHtml(Array.isArray(c.students)?c.students:done,m.target,data)+'</article>';
       }).join('')+'</div>':'<div class="completionEmpty">No hay misiones publicadas con alumnos en este filtro.</div>');
+    bindMissionPendingFilter(data);
   }
+  function bindMissionPendingFilter(data){var host=document.getElementById('missionCompletionTracking');var button=host&&host.querySelector('.missionPendingFilter');if(button)button.onclick=function(){missionPendingOnly=!missionPendingOnly;renderMissionTracking(data);};}
   function renderWorkshopTracking(data){
     var parent=document.getElementById('taller');if(!parent)return;
     var host=ensureTrackingHost(parent,'workshopCompletionTracking','Objetivos de taller','Seguimiento del objetivo XP de la sesión publicada.');
@@ -2941,3 +2960,7 @@ body.light .teacherMonitorTable th{background:#fff}
 
 </body>
 </html>
+
+<style id="la-mission-student-tracking">
+.missionStudentList{display:grid;gap:7px;margin-top:12px}.missionStudentRow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:5px 12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.12);font-size:14px}.missionStudentRow small{grid-column:1/-1;color:var(--muted);font-size:12px}.missionStudentRow.done{border-color:rgba(54,211,153,.3)}.missionStudentState{font-size:12px;color:#ffd78e}.missionStudentRow.done .missionStudentState{color:#70dda9}.missionPendingFilter{width:auto;margin:0}.completionTrackingHead{flex-wrap:wrap}@media(max-width:600px){.missionStudentRow{grid-template-columns:1fr auto}.missionStudentState{grid-column:1;grid-row:2}.missionStudentRow b{grid-column:2;grid-row:1/3}}
+</style>
