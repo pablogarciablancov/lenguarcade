@@ -1300,6 +1300,9 @@ if(!token){
 <style>
 .gameRunner{position:fixed;inset:0;z-index:120;display:none;flex-direction:column;background:#050712}
 .gameRunner.open{display:flex}
+.gameRunnerCelebration{flex-shrink:0;padding:9px 14px;background:linear-gradient(90deg,#42307d,#164759);color:#fff;font-size:15px;font-weight:800;line-height:1.3;overflow-wrap:anywhere;pointer-events:none;animation:laRewardIn .2s ease}
+@keyframes laRewardIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.gameRunnerCelebration{animation:none}}
 .gameRunnerBar{min-height:58px;display:flex;align-items:center;gap:14px;padding:9px 14px;background:linear-gradient(90deg,#111a35,#1b1740);border-bottom:1px solid rgba(255,255,255,.14);color:#fff}
 .gameRunnerBar strong{font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gameRunnerFrame{min-height:0}.gameRunnerBar{flex-wrap:wrap}.gameRunnerSave{overflow-wrap:anywhere}
 .gameRunnerXp{color:#ffd54f;font-size:14px;font-weight:900;white-space:nowrap;margin-left:auto}.gameRunnerSave{color:#aeb9d6;font-size:12px}.gameRunnerSave[data-state="saved"]{color:#70dda9}.gameRunnerSave[data-state="error"]{color:#ffbd85}.gameRunnerStatus{margin-left:0;color:#c7d2fe;font-size:12px;text-align:right}
@@ -1365,6 +1368,39 @@ function confirmGameXpHud(runner,response,isPrimary){
   const node=$('gameRunnerXp');if(node)node.textContent='+'+earned+' XP · esta sesión';
 }
 
+function initGameCelebrations(runner,dashboard){
+  runner.celebrationLevel=Number(dashboard?.general?.level||0);
+  runner.celebrationMissions=new Map((dashboard?.missions||[]).map(m=>[String(m.id||m.missionId||m.title),!!m.completed]));
+  runner.celebrationSeen=new Set();runner.celebrationQueue=[];
+}
+function showNextGameCelebration(runner){
+  if(activeGameRunner!==runner||runner.celebrationTimer||!runner.celebrationQueue?.length)return;
+  const node=$('gameRunnerCelebration');if(!node)return;
+  node.textContent=runner.celebrationQueue.shift();node.classList.remove('hidden');
+  runner.celebrationTimer=setTimeout(()=>{runner.celebrationTimer=null;if(activeGameRunner!==runner)return;node.classList.add('hidden');showNextGameCelebration(runner);},4500);
+}
+function confirmGameCelebrations(runner,dashboard){
+  if(activeGameRunner!==runner||!dashboard||!runner.celebrationSeen)return;
+  const notices=[],level=Number(dashboard.general?.level||0);
+  if(level>runner.celebrationLevel&&runner.celebrationLevel>0)notices.push(['level:'+level,'⬆ Nivel '+level+' alcanzado']);
+  runner.celebrationLevel=Math.max(runner.celebrationLevel,level);
+  for(const mission of dashboard.missions||[]){
+    const id=String(mission.id||mission.missionId||mission.title);
+    if(mission.completed&&runner.celebrationMissions.get(id)===false)notices.push(['mission:'+id,'🎯 Misión completada: '+(mission.title||'Objetivo conseguido')]);
+    runner.celebrationMissions.set(id,!!mission.completed);
+  }
+  for(const [id,text] of notices){if(runner.celebrationSeen.has(id))continue;runner.celebrationSeen.add(id);runner.celebrationQueue.push(text);}
+  showNextGameCelebration(runner);
+}
+function refreshGameCelebrations(runner,response,isPrimary){
+  if(activeGameRunner!==runner||!isPrimary)return;
+  if(response?.dashboard){confirmGameCelebrations(runner,response.dashboard);return;}
+  // Checkpoints only return a record. Refresh at most every 30 s, off the save path.
+  if(runner.celebrationRefreshBusy||Date.now()-Number(runner.celebrationRefreshedAt||0)<30000)return;
+  runner.celebrationRefreshBusy=true;runner.celebrationRefreshedAt=Date.now();
+  callServer('getStudentDashboardByToken',[token]).then(dashboard=>{if(activeGameRunner===runner)confirmGameCelebrations(runner,dashboard);}).catch(()=>{}).finally(()=>{runner.celebrationRefreshBusy=false;});
+}
+
 function mountGameRunner(){
   if($('gameRunner'))return;
   document.body.insertAdjacentHTML('beforeend',`
@@ -1377,6 +1413,7 @@ function mountGameRunner(){
         <button type="button" class="ghost hidden" id="gameRunnerRetry">Reintentar guardado</button>
         <button type="button" class="ghost" id="gameRunnerClose">Salir del juego</button>
       </header>
+      <div class="gameRunnerCelebration hidden" id="gameRunnerCelebration" role="status" aria-live="polite"></div>
       <div class="gameRunnerAccessClosing hidden" id="gameRunnerAccessClosing" role="alert" aria-live="assertive">
         <div class="gameRunnerAccessClosingText"><strong>🔒 El profesor ha cerrado este juego</strong><span>Tienes un último minuto para terminar lo que estás haciendo. Tu progreso seguirá guardándose hasta que termine la cuenta atrás.</span></div>
         <strong class="gameRunnerAccessCountdown" id="gameRunnerAccessCountdown">1:00</strong>
@@ -1684,6 +1721,8 @@ function prepareEmbeddedGame(game){
   activeGameRunner={game,channel,iframe,url:url.toString(),gameWindow:null,sessionActive:false,closeRequested:false,explicitExitRequested:false,lastResultReason:'',pendingResult:null,saving:false,checkpointing:false,opponent:null,opponents:{},pendingOpponentRequest:null,opponentAuthBusy:false,accessClosing:false,accessClosureAt:'',accessClosureDeadline:0,accessCountdownTimer:null,accessFreezeTimer:null,accessExitSafetyTimer:null,accessSystemExitUntil:0,accessFinalizing:false,accessFinalCheckpointPending:false,accessFrozen:false,initialized:false,visible:false,loading:false,retries:0,initTimer:null,primarySessionCounted:false,opponentSessionCounted:false,sessionCountedByRole:{}};
   installGameBootstrapContext(activeGameRunner);
   $('gameRunnerTitle').textContent=game.nombre;
+  initGameCelebrations(activeGameRunner,currentDashboard);
+  $('gameRunnerCelebration').classList.add('hidden');
   activeGameRunner.initialGameXp=Number(game.progress?.xp||0);
   activeGameRunner.confirmedGameXp=activeGameRunner.initialGameXp;
   $('gameRunnerXp').textContent='+0 XP · esta sesión';
@@ -1759,6 +1798,8 @@ async function refreshDashboardAfterGame(){
 }
 function destroyGameRunner(refreshAfterClose){
   if(!$('gameRunner'))return;
+  if(activeGameRunner?.celebrationTimer)clearTimeout(activeGameRunner.celebrationTimer);
+  $('gameRunnerCelebration')?.classList.add('hidden');
   if(activeGameRunner?.connectionTimer)clearTimeout(activeGameRunner.connectionTimer);
   if(activeGameRunner?.accessCountdownTimer)clearInterval(activeGameRunner.accessCountdownTimer);
   if(activeGameRunner?.accessFreezeTimer)clearTimeout(activeGameRunner.accessFreezeTimer);
@@ -2194,6 +2235,7 @@ async function persistGameResult(result){
       const payload=buildGameProgressPayload(runner,result,participant,context);
       const response=await callServer('saveProgress',[payload]);
       confirmGameXpHud(runner,response,context.isPrimary);
+      refreshGameCelebrations(runner,response,context.isPrimary);
       if(payload.countSession)markRunnerSessionCounted(runner,context.isPrimary,context.role);
       if(response?.record){applySavedGameRecordToDashboard(runner,response.record,context.isPrimary,context.role);if(context.isPrimary)installGameBootstrapContext(runner);}
       if(context.isPrimary)primaryResponse=response;
@@ -2296,6 +2338,7 @@ async function persistGameCheckpoint(checkpoint){
       };
       const response=await callServer('saveGameCheckpoint',[payload]);
       confirmGameXpHud(runner,response,context.isPrimary);
+      refreshGameCelebrations(runner,response,context.isPrimary);
       if(payload.countSession)markRunnerSessionCounted(runner,context.isPrimary,context.role);
       if(response?.record){applySavedGameRecordToDashboard(runner,response.record,context.isPrimary,context.role);if(context.isPrimary)installGameBootstrapContext(runner);}
     }
