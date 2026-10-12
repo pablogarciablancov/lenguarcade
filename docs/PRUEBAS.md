@@ -1,3 +1,9 @@
+## 2026-10-12 — HUD común de guardado y XP
+
+- `npm run check`: correcto. `check-checkpoint-lifecycle.mjs` verifica fallo/reintento/salida confirmada, XP incremental sobre saldo previo, confirmaciones repetidas y aislamiento del contrincante.
+- Navegador local: cabecera de 58 px en 1366×768, 1440×900 y 1920×1080; adaptación móvil en 390×844 sin desbordamiento horizontal.
+- Tras publicar Apps Script: abrir un juego, provocar un checkpoint y comprobar el incremento confirmado de XP y la hora de guardado; cortar la conexión, reintentar y comprobar que la XP no se duplica.
+
 ## 2026-10-12 — Próxima misión en Inicio
 
 - Ejecutar `node scripts/check-student-home.mjs`: prioridad, progreso, acceso directo, bloqueo/reapertura, misiones generales, estados vacíos y escape.
