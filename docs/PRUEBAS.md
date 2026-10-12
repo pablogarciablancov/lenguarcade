@@ -1,3 +1,8 @@
+## 2026-10-12 — Resumen de sesión
+
+- `check-game-session-summary.mjs`: XP sobre saldo previo, nivel nuevo, misiones antiguas/duplicadas, fallo y sesión sin recompensa. Regresión de celebraciones y comprobaciones generales.
+- Tras publicar: salir de un juego con recompensa confirmada y comprobar el resumen durante 15 segundos; comenzar otro juego debe ocultarlo. El refresco final debe conservar objetivos completados sin duplicarlos.
+
 ## 2026-10-12 — Misión en la cabecera
 
 - `check-game-mission-hud.mjs`: progreso, filtro, selector, selección conservada, completada y ausencia de misiones. Regresión de celebraciones/checkpoints y comprobaciones generales.
