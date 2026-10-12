@@ -177,7 +177,7 @@ expect(
   "Una preparación debe poder compartirse entre varias clases sin mezclar el estado de realizado.",
 );
 expect(
-  html.includes("Ruta LenguArcade · 8 talleres en continuidad") &&
+  html.includes("Talleres preconfigurados") &&
   html.includes("WORKSHOP_ROUTE_PRESETS") &&
   html.includes("openWorkshopRoutePreset"),
   "Talleres debe incluir una ruta progresiva lista para seleccionar y activar.",
