@@ -1,3 +1,8 @@
+## 2026-10-12 — Giro fluido y reverso sin scroll
+
+- Giro en dos mitades continuas con cambio de cara de canto, también al regresar. Bloquea giros simultáneos y respeta movimiento reducido.
+- Reverso sin scroll interno, texto de 13–14 px y valores de 20 px. Ajusta la altura al contenido con ResizeObserver, sin recortar objetivos o estadísticas.
+
 ## 2026-10-12 — Reverso de las tarjetas de juegos
 
 - Pulsar la portada o «Tu progreso» muestra un reverso animado con objetivo, XP, partidas, aciertos, precisión, logros y última actividad.

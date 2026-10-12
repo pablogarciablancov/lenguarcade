@@ -1,3 +1,9 @@
+## 2026-10-12 — Giro fluido y contenido completo
+
+- Sintaxis y comprobaciones generales del núcleo correctas.
+- Navegador local: giro en ambas direcciones, acceso al juego, Escape y ausencia de overflow vertical en reverso/detalles en 1366×768, 1440×900, 1920×1080 y 390×844.
+- Tras publicar Apps Script: verificar objetivos largos y juegos con más métricas; las tarjetas crecen para alojar el contenido, manteniendo el botón de acceso.
+
 ## 2026-10-12 — Tarjetas con reverso
 
 - `npm run check` y sintaxis: correctos.
