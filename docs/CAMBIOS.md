@@ -1,3 +1,8 @@
+## 2026-10-12 — Seguimiento individual de misiones del profesor
+
+- El seguimiento muestra todos los alumnos elegibles con Sin empezar / En progreso / Completada, progreso y última actividad en LenguArcade.
+- Ordena primero los pendientes sin empezar y después por avance; botón Ver pendientes / Mostrar todos que conserva su estado al refrescar. No añade consultas ni modifica datos.
+
 ## 2026-10-12 — Resumen al volver del juego
 
 - Aviso no modal durante 15 segundos al volver al panel, con XP confirmada, misiones completadas y nivel alcanzado en la sesión.

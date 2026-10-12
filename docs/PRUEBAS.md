@@ -1,3 +1,9 @@
+## 2026-10-12 — Seguimiento docente de misiones
+
+- `check-teacher-mission-tracking.mjs`: orden, filtro, estados, cifras, última actividad y conservación de la lista de datos original.
+- Comprobaciones generales y sintaxis del núcleo.
+- Tras publicar: abrir Misiones como profesor, filtrar clase y pendientes, comprobar que los totales de la misión se mantienen y que Mostrar todos recupera a los alumnos que la completaron. La fecha es actividad de plataforma, no presencia en directo ni guardado exclusivo de la misión.
+
 ## 2026-10-12 — Resumen de sesión
 
 - `check-game-session-summary.mjs`: XP sobre saldo previo, nivel nuevo, misiones antiguas/duplicadas, fallo y sesión sin recompensa. Regresión de celebraciones y comprobaciones generales.
