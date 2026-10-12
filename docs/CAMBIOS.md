@@ -1,3 +1,9 @@
+## 2026-10-12 — Reverso de las tarjetas de juegos
+
+- Pulsar la portada o «Tu progreso» muestra un reverso animado con objetivo, XP, partidas, aciertos, precisión, logros y última actividad.
+- Añade datos específicos cuando existen en el guardado: expediciones, fases de escritura, monstruos y ronda/puntuación de FORJA. No inventa métricas ausentes.
+- El botón de entrada permanece disponible; vuelta mediante «Portada» o Escape, con foco e inert para teclado y movimiento reducido. Respeta los cierres en vivo.
+
 ## 2026-10-12 — Guardado y XP en la cabecera común
 
 - La cabecera de los juegos integrados muestra guardando, último guardado confirmado con hora y error con reintento existente.
