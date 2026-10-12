@@ -1,3 +1,9 @@
+## 2026-10-12 — Guardado y XP en la cabecera común
+
+- La cabecera de los juegos integrados muestra guardando, último guardado confirmado con hora y error con reintento existente.
+- XP ganada desde la apertura del juego basada en registros confirmados del alumno; no suma duplicados ni recompensas del contrincante. Reinicia el contador al abrir otro juego.
+- No cambia reglas de XP, almacenamiento ni permisos. La XP aumenta al confirmar los guardados que envía cada juego.
+
 ## 2026-10-12 — Inicio del alumno orientado a su próxima misión
 
 - «¿Qué toca hacer hoy?» destaca la primera misión pendiente por plazo, destacado y prioridad, con objetivo, descripción, progreso y acceso directo al juego.
