@@ -1,3 +1,8 @@
+## 2026-10-12 — Botones con nombre de juego
+
+- Verificado: sintaxis de los 19 bloques JavaScript del panel y renderizado de botones disponibles/bloqueados.
+- Prueba en el despliegue: entrar como alumno, comprobar los nombres en Juegos activos y abrir/cerrar una misión; al habilitarse y refrescarse una tarjeta debe conservar «Entrar en [nombre del juego]». Comprobar el nombre largo «Guardianes de la Biblioteca» en 1366×768.
+
 ## 2026-10-07 · Profesor en el panel común de jugador
 
 1. Actualizar `main` y publicar el despliegue estable: `npm.cmd run apps:publish -- "Modo jugador del profesor"`.

@@ -221,7 +221,7 @@ function browser(){
   ui.listeners.online();
   await ui.settle();
   assert.equal(ui.cards[0].items['.play'].disabled,false);
-  assert.equal(ui.cards[0].items['.play'].textContent,'Entrar');
+  assert.equal(ui.cards[0].items['.play'].textContent,'Entrar en battlegrafia');
   await ui.context.openGame('battlegrafia');
   assert.equal(ui.counts.baseOpens,1);
   ui.setHidden(true);
