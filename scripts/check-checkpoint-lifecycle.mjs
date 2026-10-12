@@ -7,7 +7,7 @@ const nodes=new Map(),timers=[],requests=[],messages=[],closes=[];
 const runner={game:{gameId:'test'},channel:'qa',initialized:false,initialGameXp:100,confirmedGameXp:100};
 let rejectSave=false;
 const box={activeGameRunner:runner,currentDashboard:{},GAME_BRIDGE_NAMESPACE:'lenguarcade-game',processedGameResults:new Set(),window:{addEventListener(type,fn){box.listener=fn}},
- $:id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',dataset:{},classList:{add(){},remove(){}}});return nodes.get(id)},
+ $:id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',dataset:{},classList:{add(){},remove(){},toggle(){}}});return nodes.get(id)},
  getGameParticipantContext:()=>({sessionToken:'qa',isPrimary:true,role:'primary',game:{}}),buildEvaluableSnapshot:()=>({}),runnerSessionAlreadyCounted:()=>true,buildCentralProgress:()=>({}),markRunnerSessionCounted(){},applySavedGameRecordToDashboard(){},installGameBootstrapContext(){},createGameChannel:()=> 'qa',
  callServer:async(fn,[payload])=>{if(fn==='getStudentDashboardByToken')return {};requests.push(payload);if(rejectSave)throw Error('offline');return {record:{xp:100+requests.length*6}}},sendToActiveGame:(type,payload)=>messages.push({type,payload}),postToGameWindow:(...args)=>messages.push({type:args[2]}),buildGameInitPayload:()=>({}),pulseGameInitHandshake(){},stopGameInitHandshake(){},destroyGameRunner:()=>closes.push(true),setTimeout:fn=>{timers.push(fn);return 1},clearTimeout(){},Date,console,token:'qa'};
 vm.createContext(box);vm.runInContext(source.slice(source.indexOf('function updateGameSaveHud('),source.indexOf('function mountGameRunner('))+source.slice(start,end),box);
