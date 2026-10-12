@@ -2604,7 +2604,8 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
       return ar-br||ap-bp||String(a.nombre||'').localeCompare(String(b.nombre||''),'es');
     });
   }
-  var missionPendingOnly=false;
+  var missionPendingOnly=false,missionFocusedId='';
+  window.laOpenMissionPending=function(id){missionFocusedId=String(id||'');missionPendingOnly=true;renderMissionTracking(currentTeacher||{});if(typeof window.laShowTeacherScreen==='function')window.laShowTeacherScreen('misiones');var host=document.getElementById('missionCompletionTracking');if(host)host.scrollIntoView({block:'start'});};
   function trackingStudentsHtml(rows,target,data){
     var students=sortMissionTrackingStudents(rows,missionPendingOnly);
     return students.length?'<div class="missionStudentList">'+students.map(function(row){
@@ -2617,13 +2618,14 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
   function renderMissionTracking(data){
     var parent=document.getElementById('misiones');if(!parent)return;
     var host=ensureTrackingHost(parent,'missionCompletionTracking','Seguimiento de misiones','Quién ha alcanzado cada objetivo en el ámbito seleccionado.');
-    var missions=(data.missions||[]).filter(function(m){return m.publicationStatus!=='draft'&&m.completion&&Number(m.completion.eligibleCount||0)>0;}).slice(0,20);
+    var missions=(data.missions||[]).filter(function(m){return m.publicationStatus!=='draft'&&m.completion&&Number(m.completion.eligibleCount||0)>0&&(!missionFocusedId||String(m.id)===missionFocusedId);}).slice(0,20);
     host.innerHTML='<div class="completionTrackingHead"><div><h3>🎯 Seguimiento de misiones</h3><div class="sub">Sin empezar → En progreso → Completada. Datos confirmados en el último refresco.</div></div><button type="button" class="ghost missionPendingFilter" aria-pressed="'+missionPendingOnly+'">'+(missionPendingOnly?'Mostrar todos':'Ver pendientes')+'</button><span class="rosterPill">'+missions.length+' misiones</span></div>'+
       (missions.length?'<div class="completionTrackingGrid">'+missions.map(function(m){
         var c=m.completion||{},pct=Number(c.completionPercent||0),done=Array.isArray(c.completedStudents)?c.completedStudents:[];
         return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(m.title||'Misión')+'</strong><div class="sub">'+tEsc(m.className||'Todas las clases')+(m.studentName?' · '+tEsc(m.studentName):'')+'</div></div><span class="completionPill">'+tEsc(c.completedCount||0)+' / '+tEsc(c.eligibleCount||0)+' completada</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'+trackingStudentsHtml(Array.isArray(c.students)?c.students:done,m.target,data)+'</article>';
       }).join('')+'</div>':'<div class="completionEmpty">No hay misiones publicadas con alumnos en este filtro.</div>');
     bindMissionPendingFilter(data);
+    if(missionFocusedId){var reset=document.createElement('button');reset.type='button';reset.className='ghost';reset.textContent='Ver todas las misiones';reset.onclick=function(){missionFocusedId='';renderMissionTracking(data);};host.querySelector('.completionTrackingHead').appendChild(reset);}
   }
   function bindMissionPendingFilter(data){var host=document.getElementById('missionCompletionTracking');var button=host&&host.querySelector('.missionPendingFilter');if(button)button.onclick=function(){missionPendingOnly=!missionPendingOnly;renderMissionTracking(data);};}
   function renderWorkshopTracking(data){
@@ -2858,6 +2860,19 @@ body.light .teacherMonitorTable th{background:#fff}
     return '<div class="teacherCommandPanel teacherMonitorPanel"><div class="teacherMonitorHead"><div><div class="teacherCommandEyebrow">ACTIVIDAD RECIENTE</div><h3 style="margin:3px 0 3px">Monitor de alumnos</h3><div class="sub">Ordenado por actividad. Pulsa un alumno para abrir su ficha.</div></div><div class="teacherMonitorLegend">🟢 actividad ≤ 5 min<br>🟡 actividad ≤ 15 min</div></div>'+
       '<div class="teacherMonitorWrap">'+(rows?'<table class="teacherMonitorTable"><thead><tr><th>Estado</th><th>Alumno</th><th>Último juego</th><th>Precisión</th><th>Nota</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>':'<div class="teacherMonitorEmpty">No hay alumnos en este ámbito.</div>')+'</div></div>';
   }
+  var todayMissionId='';
+  function todayActiveMissions(data){
+    var now=Date.now();return (data.missions||[]).filter(function(m){var from=Date.parse(m.activeFrom),to=Date.parse(m.activeTo);return m.publicationStatus==='published'&&m.completion&&(!Number.isFinite(from)||from<=now)&&(!Number.isFinite(to)||to>=now);});
+  }
+  function renderTodayMission(data){
+    var missions=todayActiveMissions(data),mission=missions.find(function(m){return String(m.id)===todayMissionId;})||missions[0];
+    if(!mission)return '<section class="teacherCommandPanel"><h3>Misiones de hoy</h3><div class="sub">No hay misiones activas en la clase seleccionada.</div></section>';
+    todayMissionId=String(mission.id);
+    var students=mission.completion.students||[],counts={start:0,progress:0,done:0};
+    students.forEach(function(row){counts[row.completed?'done':Number(row.progress||0)>0?'progress':'start']++;});
+    var game=(data.games||[]).find(function(g){return String(g.id)===String(mission.gameId);});
+    return '<section class="teacherCommandPanel"><div class="teacherCommandEyebrow">MISIÓN DE HOY</div><label for="todayMissionSelect" class="sub">Seleccionar misión</label><select id="todayMissionSelect">'+missions.map(function(m){return '<option value="'+safe(m.id)+'" '+(String(m.id)===todayMissionId?'selected':'')+'>'+safe(m.title)+'</option>';}).join('')+'</select><h3>'+safe(mission.title)+'</h3><div class="sub">'+safe(mission.className||'Ámbito seleccionado')+' · '+safe(game?game.name:'Cualquier juego')+' · Objetivo: '+safe(mission.target||0)+' '+safe(mission.typeLabel||mission.missionType||'')+'</div><div class="teacherMissionCounts"><span><b>'+counts.start+'</b>Sin empezar</span><span><b>'+counts.progress+'</b>En progreso</span><span><b>'+counts.done+'</b>Completados</span></div><button type="button" id="todayMissionPending">Ver pendientes</button></section>';
+  }
   function renderCommandCenter(data){
     var mount=ensureMount();if(!mount)return;
     var students=data.students||[];
@@ -2873,9 +2888,12 @@ body.light .teacherMonitorTable th{background:#fff}
         '<div class="teacherTodayKpi"><span>Necesitan mirada</span><strong>'+safe(attention)+'</strong><small>precisión global &lt; 60%</small></div>'+
       '</div>'+
       '<div class="teacherCommandGrid">'+renderSession(data)+renderQuick(data)+'</div>'+
+      '<div id="todayMissionPanel">'+renderTodayMission(data)+'</div>'+
       renderMonitor(data)+
       '<div class="sub" id="teacherCommandUpdated" style="text-align:right;padding:0 3px">Actualizado ahora.</div>';
 
+    var missionSelect=q('todayMissionSelect');if(missionSelect)missionSelect.onchange=function(){todayMissionId=missionSelect.value;renderCommandCenter(data);};
+    var pending=q('todayMissionPending');if(pending)pending.onclick=function(){if(typeof window.laOpenMissionPending==='function')window.laOpenMissionPending(todayMissionId);};
     var select=q('todayQuickGame');
     if(select&&previousQuickGame&&[].slice.call(select.options).some(function(option){return option.value===previousQuickGame;}))select.value=previousQuickGame;
     if(select)select.onchange=function(){previousQuickGame=select.value;};
@@ -2964,3 +2982,5 @@ body.light .teacherMonitorTable th{background:#fff}
 <style id="la-mission-student-tracking">
 .missionStudentList{display:grid;gap:7px;margin-top:12px}.missionStudentRow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:5px 12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.12);font-size:14px}.missionStudentRow small{grid-column:1/-1;color:var(--muted);font-size:12px}.missionStudentRow.done{border-color:rgba(54,211,153,.3)}.missionStudentState{font-size:12px;color:#ffd78e}.missionStudentRow.done .missionStudentState{color:#70dda9}.missionPendingFilter{width:auto;margin:0}.completionTrackingHead{flex-wrap:wrap}@media(max-width:600px){.missionStudentRow{grid-template-columns:1fr auto}.missionStudentState{grid-column:1;grid-row:2}.missionStudentRow b{grid-column:2;grid-row:1/3}}
 </style>
+
+<style>.teacherMissionCounts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}.teacherMissionCounts span{padding:10px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:13px}.teacherMissionCounts b{display:block;font-size:24px;color:var(--text)}#todayMissionSelect{width:100%;margin-top:7px}#todayMissionPending{width:auto}</style>
