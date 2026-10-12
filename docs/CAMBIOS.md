@@ -1,3 +1,8 @@
+## 2026-10-12 — Misión visible mientras se juega
+
+- Cabecera común con título y progreso confirmado de la misión vinculada al juego. Selección priorizada por pendientes/plazo/destacado/prioridad; botón para recorrer las demás.
+- Conserva la selección al refrescar, muestra completada y se oculta cuando no hay misiones. Reutiliza la consulta de celebraciones sin añadir peticiones.
+
 ## 2026-10-12 — Celebración de misiones y niveles
 
 - Avisos comunes de subida de nivel y misión completada, confirmados por datos del servidor, en cola durante 4,5 segundos y sin interacción obligatoria.
