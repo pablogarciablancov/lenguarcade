@@ -1,3 +1,10 @@
+## 2026-10-12 — Próxima misión en Inicio
+
+- Ejecutar `node scripts/check-student-home.mjs`: prioridad, progreso, acceso directo, bloqueo/reapertura, misiones generales, estados vacíos y escape.
+- `npm run check`: todas las comprobaciones pasan.
+- Navegador local con datos de prueba: 1366×768, 1440×900 y 1920×1080 sin scroll general; 390×844 sin desbordamiento horizontal. Acceso directo probado; captura del escritorio inspeccionada.
+- En producción, tras publicar Apps Script: entrar como alumno con misión pendiente, verificar progreso real, cerrar/reabrir el juego desde profesor y comprobar que el acceso cambia también en Inicio.
+
 ## 2026-10-12 — Botones con nombre de juego
 
 - Verificado: sintaxis de los 19 bloques JavaScript del panel y renderizado de botones disponibles/bloqueados.
