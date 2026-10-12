@@ -1,3 +1,9 @@
+## 2026-10-12 — Inicio del alumno orientado a su próxima misión
+
+- «¿Qué toca hacer hoy?» destaca la primera misión pendiente por plazo, destacado y prioridad, con objetivo, descripción, progreso y acceso directo al juego.
+- Mantiene los últimos juegos y el resumen personal. Los accesos se actualizan con los permisos en vivo y respetan los bloqueos.
+- Estados específicos para misiones generales, ausencia de misiones y objetivos completados. Diseño ajustado a la altura disponible y sin desbordamiento horizontal móvil.
+
 ## 2026-10-12 — Botones de acceso del alumno
 
 - Los juegos disponibles muestran «Entrar en [nombre del juego]» tanto en el renderizado inicial como al refrescar el acceso de misiones. Se conservan los textos de bloqueo.

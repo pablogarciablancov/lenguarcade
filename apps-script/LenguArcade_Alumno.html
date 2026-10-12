@@ -3452,6 +3452,19 @@ body.light .homeGameRow{background:rgba(94,53,177,.045);color:var(--text)}
 body.light .homeProgressMetric{background:rgba(94,53,177,.04)}
 .homeProgressMetric span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em}
 .homeProgressMetric b{display:block;font-size:20px;margin-top:3px}
+body.la-screen-nav[data-la-screen="inicio"] .main,body.la-screen-nav[data-la-screen="inicio"] .rail{min-width:0}
+.homeTodayCard{border-color:rgba(0,212,255,.35);background:linear-gradient(145deg,rgba(124,77,255,.18),rgba(0,212,255,.07))}
+.homeTodayMission h4{font-size:20px;line-height:1.25;margin:12px 0;overflow-wrap:anywhere}
+.homeTodayMeta{display:flex;flex-wrap:wrap;gap:6px 12px;color:var(--muted);font-size:12px}
+.homeTodayDescription{font-size:13px;line-height:1.5;margin:0 0 12px;max-height:4.5em;overflow:auto}
+.homeTodayProgress{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}
+.homeTodayProgress strong{font-size:20px}.homeTodayProgress span{color:var(--muted)}
+.homeTodayAction{width:100%;margin-top:14px;white-space:normal;overflow-wrap:anywhere}
+.homeTodayLocked{margin-top:14px;padding:10px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:13px}
+.homeOtherMissions{margin-top:10px;font-size:12px;padding:8px}
+.homeTodayEmpty{font-size:14px;line-height:1.5}.homeTodayEmpty p{color:var(--muted)}
+.homeMissionList{overflow:auto}.homeQuickCard{min-height:0}
+@media(min-width:1161px){body.la-screen-nav[data-la-screen="inicio"] #inicio{height:100%;grid-template-rows:auto minmax(0,1fr)}.homeOverview{min-height:0}.homeGameList{overflow:auto}}
 .homeQuickEmpty{color:var(--muted);font-size:12px;line-height:1.5;padding:8px 2px}
 
 body.la-screen-nav[data-la-screen="perfil"] #perfil{
@@ -3539,7 +3552,7 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
       var progress=g.progress||{};
       var detail=Number(progress.sessions||0)>0?Number(progress.sessions||0)+' partida'+(Number(progress.sessions||0)===1?'':'s'):homeDate(progress.lastActivity);
       return '<button type="button" class="homeGameRow" data-home-game="'+esc(g.gameId)+'"><span class="homeGameIcon">'+esc(g.icono||'🎮')+'</span><span><strong>'+esc(g.nombre||'Juego')+'</strong><small>'+esc(detail)+'</small></span><span class="homeGo">›</span></button>';
-    }).join(''):'<div class="homeQuickEmpty">En cuanto abras un juego, aparecerá aquí para continuar rápidamente.</div>';
+    }).join(''):'<div class="homeQuickEmpty">No hay juegos disponibles ahora mismo. Aparecerán aquí cuando tu profesor los habilite.</div>';
   }
   function bindHomeGames(host){
     [].slice.call(host.querySelectorAll('[data-home-game]')).forEach(function(button){
@@ -3547,11 +3560,29 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
     });
   }
   window.laRefreshHomeGameAccess=function(dashboard){
-    var list=document.querySelector('#homeOverview .homeGameList');
-    if(!list)return;
-    list.innerHTML=homeGameHtml(dashboard);
-    bindHomeGames(list);
+    renderHomeOverview(dashboard);
   };
+  function homePendingMissions(dashboard){
+    return (Array.isArray(dashboard.missions)?dashboard.missions:[]).filter(function(m){return !m.completed;}).slice().sort(function(a,b){
+      var ad=Date.parse(a.dueAt)||Infinity,bd=Date.parse(b.dueAt)||Infinity;
+      if(ad!==bd)return ad-bd;
+      if(!!a.featured!==!!b.featured)return a.featured?-1:1;
+      return Number(b.priority||0)-Number(a.priority||0);
+    });
+  }
+  function homeMissionHtml(dashboard){
+    var pending=homePendingMissions(dashboard),m=pending[0];
+    if(!m){
+      var completed=(dashboard.missions||[]).some(function(item){return item.completed;});
+      return '<div class="homeTodayEmpty"><strong>'+(completed?'¡Misiones completadas!':'Sin misiones pendientes')+'</strong><p>'+(completed?'Has terminado tus objetivos. Puedes seguir practicando en los juegos disponibles.':'Cuando tu profesor publique una misión, verás aquí qué tienes que hacer.')+'</p><button type="button" data-home-nav="juegos">Ver juegos disponibles</button></div>';
+    }
+    var progress=Math.max(0,Number(m.rawProgress!=null?m.rawProgress:m.progress||0)),target=Math.max(0,Number(m.target||0)),pct=homePct(progress,target);
+    var games=Array.isArray(dashboard.games)?dashboard.games:[],game=games.find(function(g){return g.gameId===m.gameId;});
+    var unit=m.missionType==='accuracy'?'%':m.missionType==='xp'?' XP':'';
+    var date=new Date(m.dueAt),deadline=m.dueAt&&!Number.isNaN(date.getTime())?'Hasta '+new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(date):'Sin fecha límite';
+    var action=game?(game.locked?'<div class="homeTodayLocked">🔒 '+esc(game.buttonLabel||'Juego cerrado por el profesor')+'</div>':'<button type="button" class="homeTodayAction" data-home-game="'+esc(game.gameId)+'">Entrar en '+esc(game.nombre)+'</button>'):'<button type="button" class="homeTodayAction" data-home-nav="juegos">Elegir un juego disponible</button>';
+    return '<article class="homeTodayMission"><div class="homeTodayMeta"><span>'+esc(game?game.nombre:m.gameName||'Objetivo en LenguArcade')+'</span><span>'+esc(deadline)+'</span></div><h4>'+esc(m.title||'Misión')+'</h4>'+(m.description?'<p class="homeTodayDescription">'+esc(m.description)+'</p>':'')+'<div class="homeTodayProgress"><strong>'+Math.round(Math.min(progress,target||progress))+unit+' / '+Math.round(target)+unit+'</strong><span>'+esc(m.typeLabel||({sessions:'Partidas',save:'Progreso guardado',variety:'Juegos distintos',xp:'XP conseguido',accuracy:'Precisión'})[m.missionType]||'Objetivo')+'</span></div><div class="homeMiniBar" role="progressbar" aria-label="Progreso de la misión" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><div class="homeMiniFill" style="width:'+pct+'%"></div></div>'+action+'</article>'+(pending.length>1?'<button type="button" class="ghost homeOtherMissions" data-home-nav="misiones">Ver las otras '+(pending.length-1)+' misiones pendientes</button>':'');
+  }
   function renderHomeOverview(dashboard){
     var inicio=document.getElementById('inicio');if(!inicio)return;
     var host=document.getElementById('homeOverview');
@@ -3563,17 +3594,13 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
     }
     var gameHtml=homeGameHtml(dashboard);
 
-    var pending=(dashboard&&Array.isArray(dashboard.missions)?dashboard.missions:[]).filter(function(m){return !m.completed;}).slice(0,2);
-    var missionHtml=pending.length?pending.map(function(m){
-      var progress=Number(m.rawProgress!=null?m.rawProgress:m.progress||0),target=Number(m.target||0),pct=homePct(progress,target);
-      return '<div class="homeMissionItem"><strong>'+esc(m.title||'Misión')+'</strong><div class="homeMissionMeta"><span>'+esc(m.typeLabel||'Objetivo')+'</span><span>'+Math.min(progress,target||progress)+' / '+target+'</span></div><div class="homeMiniBar"><div class="homeMiniFill" style="width:'+pct+'%"></div></div></div>';
-    }).join(''):'<div class="homeQuickEmpty">No tienes misiones pendientes. Buen momento para explorar otro juego.</div>';
+    var missionHtml=homeMissionHtml(dashboard);
 
     var general=(dashboard&&dashboard.general)||{};
     var grade=(dashboard&&dashboard.grade&&dashboard.grade.score)||0;
     host.innerHTML=
-      '<section class="homeQuickCard"><div class="homeQuickHead"><div><div class="sub">ACCESO RÁPIDO</div><h3>Seguir jugando</h3></div><span class="homeQuickIcon">🎮</span></div><div class="homeGameList">'+gameHtml+'</div></section>'+
-      '<section class="homeQuickCard"><div class="homeQuickHead"><div><div class="sub">RETOS</div><h3>Misiones pendientes</h3></div><span class="homeQuickIcon">🎯</span></div><div class="homeMissionList">'+missionHtml+'</div></section>'+
+      '<section class="homeQuickCard homeTodayCard"><div class="homeQuickHead"><div><div class="sub">TU PRÓXIMO OBJETIVO</div><h3>¿Qué toca hacer hoy?</h3></div><span class="homeQuickIcon">🎯</span></div><div class="homeMissionList">'+missionHtml+'</div></section>'+
+      '<section class="homeQuickCard"><div class="homeQuickHead"><div><div class="sub">ACCESO RÁPIDO</div><h3>Últimos juegos</h3></div><span class="homeQuickIcon">🎮</span></div><div class="homeGameList">'+gameHtml+'</div></section>'+
       '<section class="homeQuickCard"><div class="homeQuickHead"><div><div class="sub">RESUMEN</div><h3>Tu progreso</h3></div><span class="homeQuickIcon">⚡</span></div><div class="homeProgressList">'+
         '<div class="homeProgressMetric"><span>Partidas</span><b>'+Number(general.sessions||0)+'</b></div>'+
         '<div class="homeProgressMetric"><span>Juegos</span><b>'+Number(general.gamesPlayed||0)+'</b></div>'+
@@ -3582,6 +3609,9 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
       '</div></section>';
 
     bindHomeGames(host);
+    [].slice.call(host.querySelectorAll('[data-home-nav]')).forEach(function(button){
+      button.onclick=function(){var id=button.getAttribute('data-home-nav');var nav=document.querySelector('.nav button[data-target="'+id+'"]');if(nav)nav.click();else if(typeof jump==='function')jump(id);};
+    });
   }
 
   function arrangeProfileTools(){
