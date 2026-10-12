@@ -212,7 +212,20 @@ function bindGameCardFlips(){
   document.querySelectorAll('#games .game').forEach(card=>{
     const back=card.querySelector('.gameCardBack'),toggle=card.querySelector('.gameFlipToggle');
     if(!back||!toggle)return;
-    const flip=value=>{card.classList.toggle('is-flipped',value);back.inert=!value;toggle.setAttribute('aria-expanded',String(value));card.querySelectorAll(':scope > :not(.gameCardBack):not(.gameMeta)').forEach(node=>node.inert=value);(value?back.querySelector('button'):toggle).focus({preventScroll:true});};
+    let turning=false;
+    const flip=async value=>{
+      if(turning||card.classList.contains('is-flipped')===value)return;
+      turning=true;
+      const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if(!reduced)await card.animate([{transform:'rotateY(0deg)'},{transform:'rotateY(90deg)'}],{duration:180,easing:'ease-in',fill:'forwards'}).finished;
+      card.classList.toggle('is-flipped',value);back.inert=!value;toggle.setAttribute('aria-expanded',String(value));
+      card.querySelectorAll(':scope > :not(.gameCardBack):not(.gameMeta)').forEach(node=>node.inert=value);
+      if(!reduced){card.getAnimations().forEach(animation=>animation.cancel());await card.animate([{transform:'rotateY(-90deg)'},{transform:'rotateY(0deg)'}],{duration:180,easing:'ease-out'}).finished;}
+      (value?back.querySelector('button'):toggle).focus({preventScroll:true});turning=false;
+    };
+    const fit=()=>{const head=back.querySelector('.gameCardBackHead'),details=back.querySelector('.gameCardDetails'),footer=card.querySelector('.gameMeta');const height=Math.ceil(head.getBoundingClientRect().height+details.scrollHeight+footer.getBoundingClientRect().height+64);card.style.minHeight=Math.max(360,height)+'px';};
+    fit();if(typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(fit);observer.observe(back.querySelector('.gameCardDetails'));observer.observe(back.querySelector('.gameCardBackHead'));}
+
     toggle.onclick=()=>flip(true);back.querySelector('button').onclick=()=>flip(false);
     card.addEventListener('click',event=>{if(event.target.closest('button,a,input')||card.classList.contains('is-flipped'))return;flip(true);});
     card.addEventListener('keydown',event=>{if(event.key==='Escape'&&card.classList.contains('is-flipped')){event.preventDefault();flip(false);}});
@@ -4112,17 +4125,16 @@ body.light .rankCard,body.light .studentHistoryItem,body.light .generalAchieveme
 </html>
 
 <style id="la-game-card-flip">
-.games{perspective:1400px}.games .game{transform-style:preserve-3d;transition:transform .35s ease;cursor:pointer}
-.games .game.is-flipped{transform:none;animation:laCardTurn .32s ease}
-@keyframes laCardTurn{0%{transform:rotateY(0)}45%{transform:rotateY(85deg)}55%{transform:rotateY(-85deg)}100%{transform:rotateY(0)}}
+.games{perspective:1400px}.games .game{transform-style:preserve-3d;transition:box-shadow .2s ease;cursor:pointer}
+.games .game.is-flipped{transform:none}
 .games .game.is-flipped:before,.games .game.is-flipped:after{opacity:0}
 .games .game.is-flipped>.gameCoverHeader,.games .game.is-flipped>.gameArt,.games .game.is-flipped>.gameText,.games .game.is-flipped>.gameFlipToggle{visibility:hidden}
 .gameFlipToggle{align-self:flex-start;margin:0;padding:5px 9px;background:rgba(5,10,25,.8);color:#dbeafe;border:1px solid rgba(255,255,255,.25);font-size:12px;box-shadow:none}
 .gameCardBack{position:absolute;inset:0 0 65px;z-index:2;display:flex;flex-direction:column;padding:14px;gap:10px;background:linear-gradient(150deg,#182543,#11162f);border-radius:inherit;backface-visibility:hidden;visibility:hidden;cursor:default}
 .game.is-flipped>.gameCardBack{visibility:visible}.game.is-flipped>.gameMeta{z-index:3;background:#11162f;backface-visibility:hidden}
-.gameCardBackHead{display:flex;align-items:center;justify-content:space-between;gap:8px}.games .gameCardBackHead h3{font-size:17px;margin:0;overflow-wrap:anywhere}
-.gameFlipBack{font-size:11px;margin:0;padding:6px 8px;background:rgba(255,255,255,.1);color:#fff;box-shadow:none;flex-shrink:0}
-.gameCardDetails{overflow:auto;min-height:0;font-size:12px;color:#dbeafe;display:flex;flex-direction:column}.gameCardDetails dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:0 0 8px}.gameCardDetails dl>div{padding:5px;border:1px solid rgba(255,255,255,.13);border-radius:10px}.gameCardDetails dt{font-size:11px;color:#b8c7e3}.gameCardDetails dd{margin:2px 0 0;font-size:15px;font-weight:900;color:#fff}
-.gameCardGoal{order:-1;padding:7px;border-radius:10px;background:rgba(124,77,255,.18);margin-bottom:8px}.gameCardGoal small{color:#a5e9ff}.games .gameCardGoal p{font-size:12px;display:block;margin:4px 0;line-height:1.4}
+.gameCardBackHead{display:flex;align-items:center;justify-content:space-between;gap:8px}.games .gameCardBackHead h3{font-size:19px;margin:0;overflow-wrap:anywhere}
+.gameFlipBack{font-size:13px;margin:0;padding:8px 10px;background:rgba(255,255,255,.1);color:#fff;box-shadow:none;flex-shrink:0}
+.gameCardDetails{overflow:visible;flex-shrink:0;font-size:14px;color:#dbeafe;display:flex;flex-direction:column}.gameCardDetails dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:0 0 8px}.gameCardDetails dl>div{padding:5px;border:1px solid rgba(255,255,255,.13);border-radius:10px}.gameCardDetails dt{font-size:13px;color:#b8c7e3}.gameCardDetails dd{margin:2px 0 0;font-size:20px;font-weight:900;color:#fff}
+.gameCardGoal{flex-shrink:0;order:-1;padding:7px;border-radius:10px;background:rgba(124,77,255,.18);margin-bottom:8px}.gameCardGoal small{color:#a5e9ff}.games .gameCardGoal p{font-size:14px;display:block;margin:4px 0;line-height:1.4}
 @media(prefers-reduced-motion:reduce){.games .game{transition:none;animation:none}}
 </style>
