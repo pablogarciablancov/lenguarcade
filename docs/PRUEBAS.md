@@ -1,3 +1,8 @@
+## 2026-10-12 — Celebraciones comunes
+
+- `npm run check` y `node scripts/check-game-celebrations.mjs`: verificar datos iniciales, misión antigua, nueva misión, subida de nivel, cola, duplicados y cierre.
+- Tras publicar Apps Script: completar una misión y subir de nivel jugando; comprobar avisos sin detener el juego y que el siguiente guardado no los repite. En checkpoints la actualización puede tardar hasta el siguiente guardado tras 30 segundos.
+
 ## 2026-10-12 — Giro fluido y contenido completo
 
 - Sintaxis y comprobaciones generales del núcleo correctas.
