@@ -776,3 +776,11 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - `reviewed_at` permite retirar la advertencia de revisión sin convertir una reconstrucción histórica en una sesión premiable automáticamente.
 - Se marcaron como revisados los registros que representan las cuatro sesiones de 2º ESO C y D verificadas y puntuadas manualmente; dos tramos contiguos de la misma sesión de 2º C comparten la revisión.
 
+
+## 2026-10-14 · Conjuga y apuesta: reto inicial online y revancha
+
+- Las nuevas salas online comienzan con un mismo ejercicio simultáneo que decide el primer jugador. La solución se muestra tras recibir ambas respuestas o agotar el tiempo.
+- Empieza quien acierta primero según la recepción en el servidor; sin aciertos o con un empate exacto se sortea. El ejercicio inicial no modifica XP, fichas, estadísticas ni logros.
+- Después se conserva el combate por turnos: dificultad y apuesta individuales, ayudas, rescate, guardado y recompensas existentes. Las salas antiguas y el modo local siguen funcionando.
+- «Crear revancha» prepara una sala nueva con código para compartir y vuelve a exigir que ambos estén listos.
+- Publicación pendiente: actualizar juntos el juego en Pages y la función `conjuga-online`. No hay cambios de esquema ni de Apps Script.

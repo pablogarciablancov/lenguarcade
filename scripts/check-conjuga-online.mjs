@@ -48,3 +48,32 @@ const host=fs.readFileSync('apps-script/LenguArcade_Alumno.html','utf8');assert.
 const sql=fs.readFileSync(fs.readdirSync('supabase/migrations').filter(n=>n.endsWith('_conjuga_apuesta_online.sql')).map(n=>'supabase/migrations/'+n)[0],'utf8');assert.ok(sql.includes('security invoker'));assert.ok(sql.includes('from public,anon,authenticated'));
 console.log('Duelo online: turnos, apuestas, acierto, tildes, seguro, pista, timeout, rescate, duplicados, desconexión, final y privacidad correctos.');
 await import('./check-conjuga-online-access.mjs');
+// The simultaneous exercise only assigns the first turn; it never awards XP.
+function openingMatch(){
+  const s=createState({id:A,name:'Alumno A',save:normalizeSave(null)},{rounds:5,timerSeconds:20,openingDuel:true},now);
+  const save=normalizeSave(null);s.players.push({...makePlayer('Alumno B',1,save,'opponent'),profileId:B,baseSave:structuredClone(save),ready:false});s.lastSeen[B]=now;
+  cmd(s,A,'ready');cmd(s,B,'ready');assert.equal(s.phase,'opening');return s;
+}
+s=openingMatch();const initial=structuredClone(s.players);
+const openingAnswer=s.currentQuestion.respuesta;
+cmd(s,B,'answer',{answer:openingAnswer});assert.equal(s.phase,'opening');
+const openingPublic=publicState({id:'opening',code:'ABCD2345',version:1,state:s},A,now);
+assert.equal(openingPublic.state.openingAnswers,undefined);assert.equal(openingPublic.state.openingResult,null);
+assert.equal(openingPublic.state.currentQuestion.respuesta,undefined);assert.deepEqual(openingPublic.state.openingAnswered,[false,true]);
+assert.throws(()=>cmd(s,B,'answer',{answer:openingAnswer}),/already_answered/);
+assert.throws(()=>cmd(s,A,'hint'),/wrong_phase/);
+now+=100;cmd(s,A,'answer',{answer:'mal'});assert.equal(s.phase,'opening_result');assert.equal(s.startingPlayer,1);assert.deepEqual(s.players,initial);
+assert.equal(publicState({state:s},A,now).state.openingResult.answer,openingAnswer);
+now+=4001;advance(s,now);assert.equal(s.phase,'choose');assert.equal(s.currentPlayer,1);
+assert.throws(()=>cmd(s,A,'reveal',{tier:'basic',bet:10}),/not_your_turn/);
+for(let t=0;t<10;t++){
+  s.lastSeen[A]=s.lastSeen[B]=now;assert.equal(s.currentPlayer,(t+1)%2);
+  const actor=s.players[s.currentPlayer].profileId;
+  cmd(s,actor,'reveal',{tier:'basic',bet:10});cmd(s,actor,'answer',{answer:s.currentQuestion.respuesta});now+=2801;advance(s,now);
+}
+assert.equal(s.phase,'finished');assert.equal(s.players[0].correct,5);assert.equal(s.players[1].correct,5);
+s=openingMatch();cmd(s,A,'answer',{answer:s.currentQuestion.respuesta});now=s.deadline;advance(s,now);
+assert.equal(s.startingPlayer,0);assert.equal(s.openingAnswers[1].kind,'timeout');
+s=openingMatch();now=s.deadline;advance(s,now);assert.ok([0,1].includes(s.startingPlayer));assert.equal(s.phase,'opening_result');assert.equal(s.players[0].save.lifetime.attempts,0);
+s=openingMatch();cmd(s,B,'answer',{answer:s.currentQuestion.respuesta});now+=100;cmd(s,A,'answer',{answer:s.currentQuestion.respuesta});assert.equal(s.startingPlayer,1);
+console.log('Reto inicial: ambos responden, solución oculta, sin XP/fichas, primero correcto inicia, sorteo sin aciertos, timeout y diez turnos exclusivos correctos.');

@@ -790,3 +790,15 @@ Automatizado: `npm run check`, incluido `scripts/check-live-access.mjs`.
 - Marcar `reviewed_at` debe ocultar «Reconstrucción provisional · revisar» sin cambiar `is_provisional` ni conceder puntos automáticos.
 - Confirmar las cuatro sesiones revisadas de 2º ESO C/D; el objetivo de 400 XP de 2º C combina dos tramos reconstruidos contiguos.
 
+
+## Conjuga y apuesta · reto inicial online (2026-10-14)
+
+1. Crear y unir dos perfiles de la misma clase; ambos deben confirmar «Estoy listo».
+2. Ambos reciben la misma pregunta inicial. Tras enviar una respuesta, se bloquea ese formulario; el compañero sigue escribiendo y no ve la solución.
+3. El primer acierto determina el inicio; comprobar un único acierto, dos aciertos, ninguno y tiempo agotado. No cambian XP, fichas, aciertos, errores ni logros.
+4. Después solo el jugador en turno puede elegir dificultad, apostar y responder. Si empezó el invitado, la alternancia debe mantenerse durante toda la partida.
+5. Recargar en el reto inicial y en la batalla; recuperar la sala y el turno. Verificar seguro, resultados compartidos, abandono y guardado final.
+6. «Crear revancha» abre una sala nueva; compartir su código y confirmar de nuevo ambos jugadores.
+7. Comprobar 1366×768, 1440×900 y 1920×1080 con cabecera del host; en móvil, comprobar controles accesibles sin desbordamiento horizontal.
+
+Automáticas: `node scripts/check-conjuga-online.mjs`, `node scripts/check-conjuga-online-browser.mjs`, `node scripts/check-conjuga-online-db.mjs` y `npm run check`.

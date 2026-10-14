@@ -2,12 +2,14 @@
 window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAll,renderProfileHeader,log,sfx,request,commit,close}){
   let room=null,enabled=false,busy=false,poll=null,clock=null,offset=0,failures=0,resultKey='',inFlight=null,teacher=false,chooseClass=false;
   const messages={room_not_found:'No encuentro esa sala en tu clase. Revisa el código.',room_full:'La sala ya tiene dos jugadores.',
-    not_your_turn:'Ahora le toca a tu compañero.',game_access_closed:'El profesor ha cerrado este juego.',
+    already_answered:'Tu respuesta ya está enviada. Espera a tu compañero.',invalid_code:'El código debe tener ocho caracteres.',not_a_member:'Ya no perteneces a esta sala.',not_your_turn:'Ahora le toca a tu compañero.',game_access_closed:'El profesor ha cerrado este juego.',
     student_required:'El duelo necesita un alumno; no admite dos profesores.',forbidden:'Tu perfil no tiene permiso para jugar en esta clase.',no_classroom:'Necesitas pertenecer a la clase de esta sala.',room_expired:'La sala ha caducado. Crea otra.',already_in_room:'Ya estás en otra sala. Sal de ella antes de unirte.',
     session_expired:'Tu sesión ha caducado. Vuelve a entrar en LenguArcade.',stale_turn:'El turno ya ha cambiado.',
     online_unavailable:'El duelo online aún no está disponible en este panel.',connection_timeout:'La conexión está tardando. Puedes volver a intentarlo.'};
   const active=()=>!!room;
-  const mine=()=>room&&room.ownIndex===state.currentPlayer;
+  const opening=()=>room?.state.phase==='opening';
+  const mine=()=>room&&(opening()||room.ownIndex===state.currentPlayer);
+  const answered=()=>opening()&&room.state.openingAnswered?.[room.ownIndex];
   function stop(){clearTimeout(poll);clearInterval(clock);poll=null;clock=null;}
   function lockChoices(){
     if(!room)return;
@@ -16,11 +18,11 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
   }
   function controls(){
     if(!room)return;
-    lockChoices();const s=room.state,p=state.players[state.currentPlayer],can=mine()&&!busy&&s.phase==='question';
+    lockChoices();const s=room.state,p=state.players[state.currentPlayer],can=mine()&&!busy&&!answered()&&(s.phase==='question'||opening());
     $('revealBtn').disabled=busy||!mine()||s.phase!=='choose';
     $('answerInput').disabled=!can;$('submitBtn').disabled=!can;
-    $('hintBtn').disabled=!can||s.hintUsed||p.chips<5;
-    $('swapBtn').disabled=!can||p.swap<=0;$('insuranceBtn').disabled=!can||p.insurance<=0||s.insuranceActive;
+    $('hintBtn').disabled=!can||opening()||s.hintUsed||p.chips<5;
+    $('swapBtn').disabled=!can||opening()||p.swap<=0;$('insuranceBtn').disabled=!can||opening()||p.insurance<=0||s.insuranceActive;
     $('gameScreen').classList.toggle('onlineSpectator',!mine());
   }
   function schedule(){
@@ -38,7 +40,7 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
     },Math.min(10000,1500*(1+failures)));
   }
   function timer(){
-    clearInterval(clock);if(!room||room.state.phase!=='question')return;
+    clearInterval(clock);if(!room||!['question','opening'].includes(room.state.phase))return;
     const tick=()=>{state.timeLeft=Math.max(0,(room.state.deadline-Date.now()-offset)/1000);
       $('timerFill').style.width=Math.min(100,state.timeLeft/state.timerSeconds*100)+'%';};
     tick();clock=setInterval(tick,200);
@@ -46,12 +48,12 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
   function lobby(){
     $('setupScreen').classList.add('hidden');$('gameScreen').classList.add('hidden');$('endScreen').classList.add('hidden');
     $('onlineLobby').classList.remove('hidden');$('onlineTeacherClass').classList.toggle('hidden',!chooseClass||!!room);$('onlineConnect').classList.toggle('hidden',!!room);$('onlineRoom').classList.toggle('hidden',!room);
-    if(!room){$('onlineNotice').textContent='Usaremos las rondas y el banco elegidos en el menú. Tiempo mínimo: 20 segundos.';return;}
+    if(!room){$('onlineNotice').textContent='Primero un reto simultáneo decide quién empieza. Después, apuestas y respuestas por turnos. El reto inicial no da ni quita fichas o XP.';return;}
     $('onlineRoomCode').textContent=room.code;
     $('onlinePlayers').innerHTML=room.state.players.map((p,i)=>'<div class="onlinePlayer"><b>'+esc(p.name)+(i===room.ownIndex?' · Tú':'')+'</b><small>'+(p.ready?'✓ Listo':'Preparándose…')+'</small></div>').join('')+(room.state.players.length<2?'<div class="onlinePlayer">Esperando compañero…</div>':'');
     const ready=room.state.players[room.ownIndex].ready;
     $('onlineReady').disabled=busy||ready;$('onlineReady').textContent=ready?'Listo · esperando al compañero':'Estoy listo';
-    $('onlineNotice').textContent='Código de sala · '+room.state.rounds+' rondas · '+room.state.timerSeconds+' segundos por respuesta';
+    $('onlineNotice').textContent='Código de sala · '+room.state.rounds+' rondas · '+room.state.timerSeconds+' segundos por respuesta · '+(room.state.openingDuel?'Reto inicial y turnos':'Por turnos');
   }
   function result(s){
     const r=s.result;
@@ -63,7 +65,7 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
     if(resultKey!==key){resultKey=key;sfx(r.ok?'ok':'bad');}
   }
   function finished(s){
-    stop();state.running=false;state.ended=true;
+    stop();state.running=false;state.ended=true;$('rematchBtn').textContent='Crear revancha';
     $('onlineLobby').classList.add('hidden');$('gameScreen').classList.add('hidden');$('endScreen').classList.remove('hidden');
     const aborted=['abandoned','disconnected'].includes(s.reason);
     $('winnerTitle').textContent=aborted?'Duelo terminado':s.winner===-1?'Empate técnico':'¡'+s.players[s.winner].name+' gana!';
@@ -89,17 +91,22 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
     const q=s.currentQuestion;
     $('preQuestionState').classList.toggle('hidden',s.phase!=='choose');$('questionState').classList.toggle('hidden',s.phase==='choose');
     $('feedback').className='feedback hidden';
+    if(opening()||s.phase==='opening_result'){$('roundLabel').textContent='¿Quién empieza?';$('turnCounter').textContent='Reto inicial';$('specialFlag').classList.add('hidden');$('turnLabel').textContent=opening()?(answered()?'Respuesta enviada · esperando':'Los dos respondéis'):'Empieza '+s.players[s.startingPlayer].name;}
     if(q){
       $('verbTitle').textContent=q.verbo.toUpperCase();
       $('metaRow').innerHTML=[q.modo,q.tiempo,q.persona,TIERS[s.selectedTier].label].map(v=>'<span class="metaTag">'+esc(v)+'</span>').join('');
       $('prompt').textContent=q.modo==='forma no personal'?'Escribe el '+q.tiempo+' de «'+q.verbo+'».':'Conjuga «'+q.verbo+'» en '+q.persona+', '+q.tiempo+' de '+q.modo+'.';
       if(!preserve||prev?.state.currentQuestion?.id!==q.id)$('answerInput').value='';
-      $('statusLine').innerHTML='<span>Apuesta: '+s.selectedBet+'</span><span>×'+TIERS[s.selectedTier].mult+'</span>'+(s.insuranceActive?'<span>🛡️ Seguro activo</span>':'')+(s.hintUsed?'<span>Pista −25%</span>':'');
-      $('timerWrap').classList.toggle('hidden',s.phase!=='question');
+      $('statusLine').innerHTML=(opening()||s.phase==='opening_result')?'<span>Reto inicial · sin apuesta</span>':'<span>Apuesta: '+s.selectedBet+'</span><span>×'+TIERS[s.selectedTier].mult+'</span>'+(s.insuranceActive?'<span>🛡️ Seguro activo</span>':'')+(s.hintUsed?'<span>Pista −25%</span>':'');
+      $('timerWrap').classList.toggle('hidden',s.phase!=='question'&&!opening());
       if(s.phase==='result')result(s);
+      if(s.phase==='opening_result'){
+        $('feedback').className='feedback ok';
+        $('feedback').innerHTML='<div class="resultCopy"><strong>Empieza '+esc(s.players[s.startingPlayer].name)+'</strong><div class="resultAnswer">Forma correcta: <b>'+esc(s.openingResult.answer)+'</b></div></div><div class="resultDetails">'+s.players.map((p,i)=>esc(p.name)+': '+(s.openingResult.players[i].ok?'✓ Correcto':'✗ '+(s.openingResult.players[i].kind==='timeout'?'Sin respuesta':'Incorrecto'))).join(' · ')+' · Sin apuestas ni XP en este reto</div>';
+      }
       if(s.hint&&(!prev?.state.hintUsed||prev?.state.currentQuestion?.id!==q.id))toast('Pista',s.hint);
     }
-    controls();timer();log(mine()?'🌐 Tu turno. El resultado se comparte con tu compañero.':'👀 Observa el turno de <b>'+esc(state.players[state.currentPlayer].name)+'</b>.');
+    controls();timer();log(opening()?(answered()?'✓ Respuesta enviada. Esperando a tu compañero…':'El primero en acertar empieza; si ninguno acierta, se sortea.'):s.phase==='opening_result'?'El duelo continúa por turnos. Cada jugador elige su dificultad y apuesta.':mine()?'🌐 Tu turno. El resultado se comparte con tu compañero.':'👀 Observa el turno de <b>'+esc(state.players[state.currentPlayer].name)+'</b>.');
   }
   async function send(action,extra={}){
     const payload={action,roomId:room?.id,turnNo:room?.state.turnNo,questionId:room?.state.currentQuestion?.id||'',requestId:crypto.randomUUID(),...extra};
@@ -123,7 +130,7 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
     busy=true;
     $('onlineCreate').disabled=true;$('onlineJoin').disabled=true;$('onlineNotice').textContent='Conectando…';
     try{
-      await send(action,{code:$('onlineCodeInput').value,classCode:teacher?$('onlineClassInput').value:undefined,options:{rounds:Number($('rounds').value),timerSeconds:Number($('timer').value),bankMode:$('bankMode').value}});
+      await send(action,{code:$('onlineCodeInput').value,classCode:teacher?$('onlineClassInput').value:undefined,options:{rounds:Number($('rounds').value),timerSeconds:Number($('timer').value),bankMode:$('bankMode').value,openingDuel:true}});
       schedule();
     }catch(e){$('onlineNotice').textContent=messages[e.message]||'No se pudo conectar. Vuelve a intentarlo.';}
     finally{busy=false;$('onlineCreate').disabled=false;$('onlineJoin').disabled=false;if(room?.state.phase==='waiting')lobby();}
@@ -131,7 +138,7 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
   async function back(){
     if(busy)return;
     if(room&&room.state.phase!=='finished'){await act('leave');if(room.state.phase!=='finished')return;}
-    stop();room=null;$('gameScreen').classList.remove('onlineSpectator');state.players=[];state.running=false;state.ended=false;
+    stop();room=null;resultKey='';$('rematchBtn').textContent='Revancha';$('gameScreen').classList.remove('onlineSpectator');state.players=[];state.running=false;state.ended=false;
     $('onlineLobby').classList.add('hidden');$('gameScreen').classList.add('hidden');$('endScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');renderProfileHeader();
   }
   async function leave(){
@@ -142,7 +149,7 @@ window.createConjugaOnline=function({$,state,TIERS,escapeHtml:esc,toast,renderAl
   $('onlineReady').onclick=()=>act('ready');$('onlineBack').onclick=back;
   window.addEventListener('online',()=>{failures=0;schedule();});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();});
-  return {active,ownIndex:()=>room?.ownIndex||0,lockChoices,act,leave,back,
+  return {active,rematch:async()=>{await back();lobby();await connect('create');},ownIndex:()=>room?.ownIndex||0,lockChoices,act,leave,back,
     configure:async (available,practice=false,selectClass=false)=>{
       teacher=practice;chooseClass=selectClass;
       if(enabled||!available)return;enabled=true;if(!chooseClass)$('onlineBtn').classList.remove('hidden');

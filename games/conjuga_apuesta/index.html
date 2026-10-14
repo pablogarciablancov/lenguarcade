@@ -735,7 +735,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
 </div>
 <div class="toastStack" id="toastStack"></div>
 
-<script src="online.js?v=20261007-player"></script>
+<script src="online.js?v=20261014-opening"></script>
 <script>
 (function(){
   'use strict';
@@ -1451,7 +1451,7 @@ body:has(#gameScreen:not(.hidden)) .topbar .btn{padding:8px 11px;border-radius:1
     renderAll();log('⚔️ Empieza el duelo. <b>'+escapeHtml(n1)+'</b> abre la partida.');Bridge.sessionStarted();
   }
   function rematch(){
-    if(Online.active())return Online.back();
+    if(Online.active())return Online.rematch();
     $('endScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');startMatch();
   }
   function newMatch(){
