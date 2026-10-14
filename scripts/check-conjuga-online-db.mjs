@@ -19,9 +19,11 @@ export async function put(room){return (await db.query('select commit_conjuga_on
 export async function insert(state,code='ABCDEFGH'){
  return (await db.query('insert into multiplayer_rooms(game_id,organization_id,classroom_id,host_profile_id,guest_profile_id,code,state) values ($1,$2,$3,$4,$5,$6,$7) returning *',['conjuga_apuesta',ORG,CLASS,A,state.players.length===2?B:null,code,JSON.stringify(state)])).rows[0];
 }
-const s=newState();const room=await insert(s);
+const s=newState();s.openingDuel=true;const room=await insert(s);
 const cmd=(actor,action,extra={})=>command(s,actor,action,{requestId:'db'+(++n),...extra},now);
-cmd(A,'ready');cmd(B,'ready');
+cmd(A,'ready');cmd(B,'ready');assert.equal(s.phase,'opening');
+cmd(B,'answer',{answer:s.currentQuestion.respuesta});cmd(A,'answer',{answer:'incorrecto'});assert.equal(s.startingPlayer,1);
+now+=4001;advance(s,now);assert.equal(s.currentPlayer,1);
 for(let t=0;t<10;t++){
  const actor=s.players[s.currentPlayer].profileId;s.lastSeen[A]=s.lastSeen[B]=now;
  cmd(actor,'reveal',{tier:'basic',bet:10});cmd(actor,'answer',{answer:s.currentQuestion.respuesta});now+=2801;advance(s,now);

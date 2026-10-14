@@ -5,7 +5,7 @@ export class RoomError extends Error {
 }
 const fail=(code,status)=>{throw new RoomError(code,status);};
 export function createState(player,options={},now=Date.now()){
-  return {phase:'waiting',rounds:[5,8,10].includes(Number(options.rounds))?Number(options.rounds):8,
+  return {openingDuel:options.openingDuel===true,phase:'waiting',rounds:[5,8,10].includes(Number(options.rounds))?Number(options.rounds):8,
     timerSeconds:[20,30,45].includes(Number(options.timerSeconds))?Number(options.timerSeconds):30,
     bankMode:options.bankMode==='course'?'course':'complete',turnNo:0,currentPlayer:0,
     selectedTier:'basic',selectedBet:10,currentQuestion:null,questionOpen:false,
@@ -24,6 +24,15 @@ function question(s,now){
   s.used=[...a.work.used];s.usedAnswers=[...a.work.usedAnswers];
   s.questionOpen=true;s.phase='question';s.insuranceActive=false;s.hintUsed=false;
   s.deadline=now+s.timerSeconds*1000;s.openedAt=now;
+}
+function openDuel(s,now){
+  s.selectedTier='basic';question(s,now);s.phase='opening';s.openingAnswers=[null,null];
+}
+function closeDuel(s,now){
+  const answers=s.openingAnswers;
+  const good=answers.map((a,i)=>a?.ok?i:-1).filter(i=>i>=0);
+  s.startingPlayer=good.length===1?good[0]:good.length===2?(answers[0].elapsed===answers[1].elapsed?(Math.random()<.5?0:1):answers[0].elapsed<answers[1].elapsed?0:1):(Math.random()<.5?0:1);
+  s.currentPlayer=s.startingPlayer;s.phase='opening_result';s.questionOpen=false;s.advanceAt=now+4000;
 }
 function finish(s,reason){
   if(s.phase==='finished')return;
@@ -75,12 +84,18 @@ export function advance(s,now=Date.now()){
   if(s.players.length<2)return false;
   if(s.phase==='finished')return false;
   if(s.players.some(p=>now-(s.lastSeen[p.profileId]||s.createdAt)>90000)){finish(s,'disconnected');return true;}
+  if(s.phase==='opening'&&now>=s.deadline){
+    s.openingAnswers=s.openingAnswers.map(a=>a||{ok:false,kind:'timeout',elapsed:s.timerSeconds*1000});closeDuel(s,now);return true;
+  }
+  if(s.phase==='opening_result'&&now>=s.advanceAt){
+    s.phase='choose';s.currentQuestion=null;s.selectedBet=Math.min(10,s.players[s.currentPlayer].chips);s.chooseDeadline=now+60000;return true;
+  }
   if(s.phase==='question'&&now>=s.deadline){resolve(s,'',true,now);return true;}
   if(s.phase==='result'&&now>=s.advanceAt){
     if(s.bankrupt){finish(s,'bankrupt');return true;}
     s.turnNo++;
     if(s.turnNo>=s.rounds*2){finish(s,'complete');return true;}
-    s.currentPlayer=s.turnNo%2;s.selectedTier='basic';s.selectedBet=Math.min(10,s.players[s.currentPlayer].chips);
+    s.currentPlayer=((s.startingPlayer||0)+s.turnNo)%2;s.selectedTier='basic';s.selectedBet=Math.min(10,s.players[s.currentPlayer].chips);
     s.currentQuestion=null;s.phase='choose';s.result=null;s.insuranceActive=false;s.hintUsed=false;
     s.chooseDeadline=now+60000;return true;
   }
@@ -102,7 +117,13 @@ export function command(s,actor,action,payload={},now=Date.now()){
   if(action==='leave'){finish(s,'abandoned');}
   else if(action==='ready'){
     if(s.phase!=='waiting')fail('already_started');p.ready=true;
-    if(s.players.length===2&&s.players.every(x=>x.ready)){s.phase='choose';s.chooseDeadline=now+60000;}
+    if(s.players.length===2&&s.players.every(x=>x.ready)){if(s.openingDuel)openDuel(s,now);else {s.phase='choose';s.chooseDeadline=now+60000;}}
+  }else if(s.phase==='opening'){
+    if(action!=='answer')fail('wrong_phase');
+    if(s.openingAnswers[i])fail('already_answered');
+    const checked=checkAnswer(s.currentQuestion,String(payload.answer||'').slice(0,160));
+    s.openingAnswers[i]={ok:checked.ok,kind:checked.kind||'',elapsed:Math.max(0,now-s.openedAt)};
+    if(s.openingAnswers.every(Boolean))closeDuel(s,now);
   }else{
     if(s.phase==='finished')fail('match_finished');
     if(i!==s.currentPlayer)fail('not_your_turn',403);
@@ -130,7 +151,9 @@ export function publicState(room,actor,now=Date.now()){
   if(index<0)fail('not_a_member',403);
   const q=s.currentQuestion;
   return {id:room.id,code:room.code,version:room.version,serverNow:now,ownIndex:index,
-    state:{...s,used:undefined,usedAnswers:undefined,recentVerbs:undefined,requests:undefined,lastSeen:undefined,
+    state:{...s,openingAnswers:undefined,
+      openingAnswered:(s.openingAnswers||[]).map(Boolean),
+      openingResult:s.phase==='opening_result'?{answer:q.respuesta,players:s.openingAnswers,startingPlayer:s.startingPlayer}:null,used:undefined,usedAnswers:undefined,recentVerbs:undefined,requests:undefined,lastSeen:undefined,
       players:s.players.map((p,i)=>({...p,baseSave:undefined,save:i===index?p.save:{xp:p.save.xp,achievements:[]}})),
       currentQuestion:q?{id:q.id,verbo:q.verbo,modo:q.modo,tiempo:q.tiempo,persona:q.persona}:null,
       newUnlocks:s.newUnlocks.filter(x=>x.player===s.players[index].name),

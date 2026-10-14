@@ -81,6 +81,14 @@ try{
  await fa.locator('#onlineBtn').click();await fa.locator('#onlineCreate').click();await fa.locator('#onlineRoomCode').waitFor({state:'visible'});
  await fb.locator('#onlineBtn').click();await fb.locator('#onlineCodeInput').fill(room.code);await fb.locator('#onlineJoin').click();await fb.locator('#onlineReady').click();await fa.locator('#onlineReady').click();
  await fa.locator('#gameScreen').waitFor({state:'visible'});await fb.locator('#gameScreen').waitFor({state:'visible'});
+ await fa.locator('#answerInput').waitFor({state:'visible'});await fb.locator('#answerInput').waitFor({state:'visible'});
+ assert.equal(room.state.phase,'opening');assert.equal(await fa.locator('#hintBtn').isDisabled(),true);
+ await fa.locator('#answerInput').fill('respuesta en curso');await a.waitForTimeout(1900);assert.equal(await fa.locator('#answerInput').inputValue(),'respuesta en curso');
+ await fa.locator('#answerInput').fill(room.state.currentQuestion.respuesta);await fa.locator('#submitBtn').click();
+ assert.equal(await fa.locator('#answerInput').isDisabled(),true);assert.equal(await fa.locator('#feedback').isVisible(),false);
+ await fb.locator('#answerInput').fill('incorrecto');await fb.locator('#submitBtn').click();await fb.locator('#feedback.ok').waitFor({state:'visible'});
+ assert.equal(room.state.players[0].correct,0);assert.equal(room.state.players[1].errors,0);
+ await a.waitForTimeout(5500);
  assert.equal(await fb.locator('#revealBtn').isDisabled(),true);
  await fa.locator('#revealBtn').click();await fa.locator('#answerInput').waitFor({state:'visible'});
  await fa.locator('#answerInput').fill('texto que no se debe borrar');await a.waitForTimeout(1900);assert.equal(await fa.locator('#answerInput').inputValue(),'texto que no se debe borrar');
@@ -101,6 +109,9 @@ try{
  // finish through the server, verify both end screens arrive via polling.
  command(room.state,'A','leave',{requestId:'testleave'},Date.now());room.version++;
  await fa.locator('#endScreen').waitFor({state:'visible'});await fb.locator('#endScreen').waitFor({state:'visible'});
+ await fa.locator('#rematchBtn').click();await fa.locator('#onlineRoomCode').waitFor({state:'visible'});
+ assert.equal(room.state.phase,'waiting');assert.equal(room.state.openingDuel,true);assert.equal(room.state.players[0].correct,0);
+ command(room.state,'A','leave',{requestId:'revancha-leave'},Date.now());room.version++;
  // The teacher enters the actual common player panel through its navigation button.
  const teacherPanel=await browser.newPage({viewport:{width:1366,height:768}});teacherPanel.on('pageerror',e=>errors.push(e.message));
  await teacherPanel.route('**/*',route=>route.request().url().startsWith('http://127.0.0.1:8765/')?route.continue():route.abort());
@@ -122,12 +133,16 @@ try{
  assert.equal(room.state.players[0].profileRole,'teacher');
  await b.reload();await fb.locator('#onlineBtn').click();await fb.locator('#onlineCodeInput').fill(room.code);await fb.locator('#onlineJoin').click();
  await fb.locator('#onlineReady').click();await ft.locator('#onlineReady').click();
+ await ft.locator('#answerInput').waitFor({state:'visible'});await fb.locator('#answerInput').waitFor({state:'visible'});
+ await ft.locator('#answerInput').fill(room.state.currentQuestion.respuesta);await ft.locator('#submitBtn').click();
+ await fb.locator('#answerInput').fill('incorrecto');await fb.locator('#submitBtn').click();await ft.locator('#feedback.ok').waitFor({state:'visible'});
+ await b.waitForTimeout(5500);
  await ft.locator('#revealBtn').click();await ft.locator('#questionState').waitFor({state:'visible'});await ft.locator('#answerInput').fill(room.state.currentQuestion.respuesta);await ft.locator('#submitBtn').click();
  await fb.locator('#feedback.ok').waitFor({state:'visible'});
  await b.waitForTimeout(4000);assert.equal(await ft.locator('#revealBtn').isDisabled(),true);
  await fb.locator('#revealBtn').click();await fb.locator('#questionState').waitFor({state:'visible'});await fb.locator('#answerInput').fill(room.state.currentQuestion.respuesta);await fb.locator('#submitBtn').click();await ft.locator('#feedback.ok').waitFor({state:'visible'});
  const matchId=room.id;const teacherFrame=teacher.frames().find(f=>f.url().includes('/games/'));await teacherFrame.goto(teacherFrame.url());await ft.locator('#gameScreen').waitFor({state:'visible'});assert.equal(room.id,matchId);
- command(room.state,'A' in room.state.lastSeen?'A':'T','leave',{requestId:'teacher-end'},Date.now());room.version++;
+ command(room.state,room.state.players[0].profileId,'leave',{requestId:'teacher-end'},Date.now());room.version++;
  await ft.locator('#endScreen').waitFor({state:'visible'});
  await teacher.evaluate(()=>destroyGameRunner(false));
  await teacher.locator('#teacherReturnPanelBtn').click();await teacher.waitForURL('**/teacher?page=profesor');

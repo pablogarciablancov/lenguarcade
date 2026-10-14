@@ -3,6 +3,10 @@
   "name": "Conjuga y apuesta",
   "integration": "embedded",
   "entry": "games/conjuga_apuesta/index.html",
-  "requires": {"studentRunner": true, "onlineMultiplayer": true, "backendFunction": "conjuga-online"},
-  "notes": "Duelo online 1v1 entre alumnos o profesor–alumno desde el catálogo y runner comunes. El INIT teacherPractice conserva la identidad del profesor y habilita la selección de su clase mediante la acción context, autorizada por el servidor. El runner intermedia ONLINE_REQUEST/ONLINE_REPLY sin entregar credenciales al juego. Guardado y recompensas online transaccionales en servidor; no enviar RESULT local para una sala online. Publicar juntos migración, función y panel Apps Script estable. Modo local intacto."
+  "requires": {
+    "studentRunner": true,
+    "onlineMultiplayer": true,
+    "backendFunction": "conjuga-online"
+  },
+  "notes": "Duelo online 1v1 entre alumnos o profesor–alumno desde el catálogo y runner comunes. El INIT teacherPractice conserva la identidad del profesor y habilita la selección de su clase mediante la acción context, autorizada por el servidor. El runner intermedia ONLINE_REQUEST/ONLINE_REPLY sin entregar credenciales al juego. Guardado y recompensas online transaccionales en servidor; no enviar RESULT local para una sala online. Publicar juntos migración, función y panel Apps Script estable. Modo local intacto. Las nuevas salas solicitan openingDuel:true: reto inicial simultáneo sin recompensas y combate posterior por turnos. Publicar conjuntamente online.js y conjuga-online/engine.js; compatible con salas anteriores, sin migración ni cambios del host."
 }
