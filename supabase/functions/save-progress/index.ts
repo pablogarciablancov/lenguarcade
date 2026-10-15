@@ -1,3 +1,4 @@
+import {isForjaObjective, workshopVictory, forjaVictory} from "../_shared/workshop-objective.js";
 import {snapshotProgress, XP_REWARD_GUIDE, capProgressionAward} from "../_shared/progression.js";
 import {
   boundedNumber,
@@ -35,11 +36,11 @@ async function sendCompletedWorkshopAwards(
 
   try {
     const { data:sessions, error } = await admin.from("workshop_runs")
-      .select("run_id,classroom_id,title,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,is_provisional")
+      .select("run_id,classroom_id,title,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,is_provisional")
       .in("classroom_id", classroomIds)
       .eq("published", true)
       .eq("is_provisional", false)
-      .gt("target_xp", 0);
+      .or("target_xp.gt.0,objective_type.eq.forja_easy_win");
     if (error) throw error;
 
     for (const session of sessions || []) {
@@ -64,9 +65,10 @@ async function sendCompletedWorkshopAwards(
       const pageSize = 1000;
       let offset = 0;
       let xp = 0;
+      let won = false;
       while (true) {
         let query = admin.from("game_events")
-          .select("id,event_type,xp_delta,occurred_at")
+          .select("id,game_id,event_type,xp_delta,occurred_at,details")
           .eq("profile_id", profileId)
           .neq("event_type", "teacher_adjustment")
           .gte("occurred_at", startedAt)
@@ -78,12 +80,13 @@ async function sendCompletedWorkshopAwards(
         const { data:events, error:eventError } = await query;
         if (eventError) throw eventError;
         const page = events || [];
+        won = won || page.some((event: any) => workshopVictory(session, event));
         xp += page.reduce((sum: number, event: Record<string, unknown>) =>
           sum + Math.max(0, Number(event.xp_delta || 0)), 0);
         if (page.length < pageSize) break;
         offset += pageSize;
       }
-      if (xp < targetXp) continue;
+      if (isForjaObjective(session) ? !won : xp < targetXp) continue;
 
       const awardSeed = [
         String(session.classroom_id || ""),
@@ -484,6 +487,8 @@ Deno.serve(async (request) => {
       .upsert(record, { onConflict:"profile_id,game_id" });
     if (progressError) throw progressError;
 
+    const victory = forjaVictory(gameId, save);
+    if (victory) shouldWriteEvent = true;
     if (shouldWriteEvent) {
       const { error:eventError } = await admin.from("game_events").insert({
         result_id:resultId || crypto.randomUUID(),
@@ -495,6 +500,7 @@ Deno.serve(async (request) => {
         accuracy:record.accuracy,
         details:{
           ...(body.details && typeof body.details === "object" ? body.details : {}),
+          forjaVictory:victory,
           sessionCounted:shouldCountSession,
           xpAward:{
             reason:XP_REWARD_GUIDE[gameId] || "Progreso de juego validado por el servidor.",

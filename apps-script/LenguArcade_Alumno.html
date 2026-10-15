@@ -3150,10 +3150,11 @@ body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionS
     if(!s||!s.published){if(existing)existing.remove();return;}
     if(!existing){existing=document.createElement('div');existing.id='studentMissionCard';existing.className='studentMissionCard';section.insertBefore(existing,section.firstChild);}
     var meta=[];
+    if(s.objectiveType==='forja_easy_win')meta.push('<span>🎯 Ganar en Forja · Fácil (7 rondas)</span>');
     if(s.targetXp>0)meta.push('<span>🎯 Objetivo: '+sessionEsc(s.targetXp)+' XP</span>');
     if(s.gameIds&&s.gameIds.length)meta.push('<span>🎮 '+sessionEsc(s.gameIds.length)+' juegos</span>');
     if(s.homeEnabled)meta.push('<span>🏠 '+sessionEsc(missionWindowText(s))+'</span>');
-    var progress='';
+    var progress=s.objectiveType==='forja_easy_win'?'<div class="studentMissionProgress">'+(s.completed?'✓ RETO COMPLETADO · 1/1 victoria':'0/1 victorias · Gana las 7 rondas en Fácil')+'</div>':'';
     if(Number(s.targetXp||0)>0){
       var current=Math.max(0,Number(s.progressXp||0));
       var target=Math.max(1,Number(s.targetXp||1));
@@ -3218,7 +3219,7 @@ body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionS
   }
 
   function teacherCurrentClass(){var select=document.getElementById('workshopClassSelect');var value=select?String(select.value||''):'';return value==='*'?'':value;}
-  function teacherSessionPayload(){var editor=document.getElementById('workshopSessionEditor');return {title:(document.getElementById('workshopSessionTitle')||{}).value||'',message:(document.getElementById('workshopSessionMessage')||{}).value||'',targetXp:Number((document.getElementById('workshopSessionXp')||{}).value||0),homeEnabled:!!((document.getElementById('workshopHomeEnabled')||{}).checked),homeStart:(document.getElementById('workshopHomeStart')||{}).value||'',homeEnd:(document.getElementById('workshopHomeEnd')||{}).value||'',gameIds:editor?[].slice.call(editor.querySelectorAll('[data-session-game]:checked')).map(function(input){return input.value;}):[]};}
+  function teacherSessionPayload(){var editor=document.getElementById('workshopSessionEditor');return {objectiveType:workshopSessionState&&workshopSessionState.session&&workshopSessionState.session.objectiveType||'xp',title:(document.getElementById('workshopSessionTitle')||{}).value||'',message:(document.getElementById('workshopSessionMessage')||{}).value||'',targetXp:Number((document.getElementById('workshopSessionXp')||{}).value||0),homeEnabled:!!((document.getElementById('workshopHomeEnabled')||{}).checked),homeStart:(document.getElementById('workshopHomeStart')||{}).value||'',homeEnd:(document.getElementById('workshopHomeEnd')||{}).value||'',gameIds:editor?[].slice.call(editor.querySelectorAll('[data-session-game]:checked')).map(function(input){return input.value;}):[]};}
   function setTeacherSessionStatus(text,isError){var status=document.getElementById('workshopSessionStatus');if(status){status.textContent=text||'';status.style.color=isError?'#ff9b9b':'';}}
   function setTeacherSessionBusy(busy){teacherSessionBusy=!!busy;var editor=document.getElementById('workshopSessionEditor');if(!editor)return;[].slice.call(editor.querySelectorAll('button')).forEach(function(button){button.disabled=!!busy;});}
 
@@ -3842,7 +3843,7 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
   }
   function sameWorkshop(oldSession,newSession){
     if(!oldSession||!newSession)return oldSession===newSession;
-    return ['classroomId','startedAt','planId','title','message','targetXp','published',
+    return ['classroomId','startedAt','planId','title','message','objectiveType','targetXp','published',
       'classroomOpen','homeEnabled','homeStart','homeEnd','mode','active','updatedAt']
       .every(function(key){return oldSession[key]===newSession[key];})&&
       JSON.stringify(oldSession.gameIds||[])===JSON.stringify(newSession.gameIds||[]);
@@ -3885,13 +3886,14 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
     var previousSession=currentDashboard.workshopSession||null;
     var session=state.workshopSession;
     var sameIdentity=previousSession&&session&&
+      String(previousSession.objectiveType||'xp')===String(session.objectiveType||'xp')&&
       previousSession.classroomId===session.classroomId&&
       previousSession.startedAt===session.startedAt&&previousSession.planId===session.planId;
     var xp=sameIdentity?Math.max(0,Number(previousSession.progressXp||0)):0;
     currentDashboard.workshopSession=session?Object.assign({},session,{
       progressXp:xp,
-      progressPercent:session.targetXp>0?Math.min(100,Math.round(xp/session.targetXp*100)):0,
-      completed:session.targetXp>0&&xp>=session.targetXp
+      progressPercent:session.objectiveType==='forja_easy_win'?(sameIdentity&&previousSession.completed?100:0):session.targetXp>0?Math.min(100,Math.round(xp/session.targetXp*100)):0,
+      completed:session.objectiveType==='forja_easy_win'?!!(sameIdentity&&previousSession.completed):session.targetXp>0&&xp>=session.targetXp
     }):null;
     var cards=document.querySelectorAll('#games .game');
     var changedGames=false;

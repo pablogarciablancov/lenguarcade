@@ -821,3 +821,12 @@ Empaquetado de la función: incluir `supabase/functions/lexitrama-online/`, `_sh
 - Restaurar un guardado con CASA solo en diagonal y comprobar que se repone una solución ortogonal sin cambiar XP, estrellas, identificador, puntuación o progreso.
 - En la captura de sustantivos siguen existiendo cinco rutas ortogonales; lodo, rosa y silo ya no tienen ruta válida en esa disposición. El banco sigue aceptando esos sustantivos cuando se trazan con la regla nueva.
 - Navegador individual y dos navegadores cooperativos: teclado, arrastre, recarga, guardado y responsive. Publicación: Pages y nueva versión de lexitrama-online; no requiere republicar Apps Script ni migraciones.
+
+## 2026-10-15 · Forja: ganar en Fácil
+
+- Ejecutar `node games/forja/smoke-test.mjs`, `node --no-warnings scripts/check-forja-workshop.mjs` y `npm run check`.
+- Tras publicar, abrir «La primera gran forja» en una clase de prueba. Guardar/cerrar/reabrir y comprobar que conserva «Ganar en Forja · Fácil».
+- Perder, salir antes de terminar o ganar en Normal no cumple. Superar las 7 rondas en Fácil durante el taller sí cumple. Continuar en infinito y recargar conserva la victoria.
+- Comprobar 1/1 en alumno y «Objetivo conseguido» en profesor. El marcador recibe una sola concesión de 5 puntos CAT1 por alumno/taller, aunque haya varios guardados o victorias.
+- Abrir otro taller: una victoria anterior no lo completa. Comprobar que los talleres por XP mantienen sus resultados e historial.
+- Verificar editor y paneles a 1366×768, 1440×900 y 1920×1080. La prueba visual local queda pendiente: no hay Chromium instalado y su descarga en este entorno ha fallado.

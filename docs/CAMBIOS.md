@@ -800,3 +800,10 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Selección, rutas, pistas y validaciones del servidor usan la misma regla. Las serpientes que generan tableros ya son ortogonales y siguen garantizando soluciones.
 - Al recuperar una expedición individual, se comprueba que quede una solución ortogonal; solo si hace falta se reponen letras, manteniendo identidad, puntuación, progreso y carrera. Los hallazgos ya confirmados en salas compartidas se conservan.
 - Actualizados ayuda, textos y versiones de caché del juego. Sin cambios de guardado, recompensas, Apps Script o esquema.
+
+## 2026-10-15 · Misión de victoria en Forja
+
+- Nuevo objetivo de taller `forja_easy_win`, disponible en «La primera gran forja» y en el editor: ganar las 7 rondas en Fácil. Los talleres existentes mantienen el objetivo por XP.
+- Forja guarda la fecha y la identidad de la victoria; se conservan al continuar en infinito. Partidas antiguas sin evidencia fechada, derrotas y otras dificultades no cumplen el reto.
+- Alumno, profesor y envío al marcador comparten el criterio temporal. Se reutilizan los 5 puntos de CAT1 y la clave idempotente del taller/alumno, incluso al reintentar.
+- Requiere publicación coordinada: migración aditiva `20261015081030_workshop_forja_objective.sql`, funciones save-progress, teacher-dashboard, student-dashboard, student-access-state y núcleo Apps Script. No se ha aplicado a producción ni se ha abierto ninguna clase.

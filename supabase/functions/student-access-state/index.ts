@@ -31,7 +31,7 @@ Deno.serve(async (request) => {
         .eq("profile_id", profileId)
         .eq("active", true),
       admin.from("workshop_sessions")
-        .select("classroom_id,title,message,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
+        .select("classroom_id,title,message,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
         .eq("organization_id", organizationId)
         .eq("published", true),
     ]);
@@ -58,6 +58,7 @@ Deno.serve(async (request) => {
       classroomId:String(sessionRow.classroom_id || ""),
       title:String(sessionRow.title || "Taller"),
       message:String(sessionRow.message || ""),
+      objectiveType:sessionRow.objective_type || "xp",
       targetXp:Math.max(0, Number(sessionRow.target_xp || 0)),
       startedAt:sessionRow.started_at || sessionRow.updated_at || null,
       published:sessionRow.published === true,

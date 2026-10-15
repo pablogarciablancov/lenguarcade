@@ -1,3 +1,4 @@
+import {isForjaObjective, workshopVictory} from "../_shared/workshop-objective.js";
 import {assessedMissions} from "../_shared/mission-grade.js";
 import {levelProgress,learningGrade} from "../_shared/progression.js";
 import {
@@ -31,7 +32,7 @@ async function loadActivityEvents(admin: any, profileIds: string[], fromIso: str
 
 function collapseProvisionalWorkshopRuns(sessions: any[]) {
   const candidates = (sessions || [])
-    .filter(session => Number(session.target_xp || 0) > 0)
+    .filter(session => isForjaObjective(session) || Number(session.target_xp || 0) > 0)
     .slice()
     .sort((a, b) => Date.parse(String(a.started_at || a.active_from || "")) - Date.parse(String(b.started_at || b.active_from || "")));
   const visible: any[] = [];
@@ -51,6 +52,7 @@ function collapseProvisionalWorkshopRuns(sessions: any[]) {
       String(previous.classroom_id || "") === String(session.classroom_id || "") &&
       String(previous.title || "") === String(session.title || "") &&
       Number(previous.target_xp || 0) === Number(session.target_xp || 0) &&
+      String(previous.objective_type || "xp") === String(session.objective_type || "xp") &&
       gameKey(previous) === gameKey(session) &&
       Number.isFinite(previousEnd) && Number.isFinite(start) && start >= previousEnd && start - previousEnd <= 60_000;
     if (sameReconstructedGoal) {
@@ -736,6 +738,8 @@ async function handleWorkshopGameAccess(
     return jsonResponse({ ok:false, error:"workshop_game_not_found", gameIds:invalidIds }, 400);
   }
 
+  if (isForjaObjective(session) && !requestedIds.includes("lexoma")) return jsonResponse({ok:false,error:"forja_objective_requires_forja"},400);
+
   const parseIso = (value: unknown) => {
     const text = String(value || "").trim();
     if (!text) return null;
@@ -764,7 +768,7 @@ async function handleWorkshopGameAccess(
 
   const incomingPlanId = String(session.planId || "").trim().slice(0, 160);
   const { data:existingSession, error:existingSessionError } = await admin.from("workshop_sessions")
-    .select("plan_id,started_at,published")
+    .select("plan_id,started_at,published,objective_type")
     .eq("classroom_id", classroom.id)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -772,6 +776,7 @@ async function handleWorkshopGameAccess(
   const samePublishedPlan = Boolean(
     existingSession?.published &&
     existingSession?.started_at &&
+    String(existingSession.objective_type || "xp") === String(session.objectiveType || "xp") &&
     String(existingSession.plan_id || "") === incomingPlanId
   );
   if (existingSession?.started_at && !samePublishedPlan) {
@@ -796,6 +801,7 @@ async function handleWorkshopGameAccess(
     plan_id:incomingPlanId,
     title:String(session.title || "").trim().slice(0, 180),
     message:String(session.message || "").trim().slice(0, 800),
+    objective_type:session.objectiveType === "forja_easy_win" ? "forja_easy_win" : "xp",
     target_xp:Math.max(0, Math.min(100000, Math.round(Number(session.targetXp || 0)))),
     published:true,
     classroom_open:classroomOpen,
@@ -816,6 +822,7 @@ async function handleWorkshopGameAccess(
     organization_id:organizationId,
     title:String(session.title || "").trim().slice(0, 180),
     message:String(session.message || "").trim().slice(0, 800),
+    objective_type:session.objectiveType === "forja_easy_win" ? "forja_easy_win" : "xp",
     target_xp:Math.max(0, Math.min(100000, Math.round(Number(session.targetXp || 0)))),
     published:true,
     classroom_open:classroomOpen,
@@ -1016,11 +1023,11 @@ Deno.serve(async (request) => {
         .order("updated_at", { ascending:false })
         .limit(250),
       admin.from("workshop_sessions")
-        .select("classroom_id,title,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
+        .select("classroom_id,title,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
         .eq("organization_id", organizationId)
         .eq("published", true),
       admin.from("workshop_runs")
-        .select("run_id,classroom_id,title,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,updated_at,is_provisional,reviewed_at")
+        .select("run_id,classroom_id,title,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,updated_at,is_provisional,reviewed_at")
         .eq("organization_id", organizationId)
         .order("started_at", { ascending:false })
         .limit(500),
@@ -1399,14 +1406,14 @@ Deno.serve(async (request) => {
           let completedAt: string | null = null;
           for (const event of events) {
             xp += Math.max(0, Number(event.xp_delta || 0));
-            if (!completedAt && targetXp > 0 && xp >= targetXp) completedAt = String(event.occurred_at || "") || null;
+            if (!completedAt && (isForjaObjective(session) ? workshopVictory(session, event) : targetXp > 0 && xp >= targetXp)) completedAt = String(event.occurred_at || "") || null;
           }
           return {
             studentId:String(profile.id),
             nombre:studentNameById.get(String(profile.id)) || String(profile.email || "Alumno"),
             xp,
             targetXp,
-            completed:targetXp > 0 && xp >= targetXp,
+            completed:isForjaObjective(session) ? Boolean(completedAt) : targetXp > 0 && xp >= targetXp,
             completedAt,
           };
         }).sort((a, b) => {
@@ -1423,6 +1430,7 @@ Deno.serve(async (request) => {
           planId:String(session.plan_id || ""),
           runId:String(session.run_id || ""),
           title:String(session.title || "Taller"),
+          objectiveType:session.objective_type || "xp",
           targetXp,
           startedAt:session.started_at || session.active_from || null,
           updatedAt:session.updated_at || null,

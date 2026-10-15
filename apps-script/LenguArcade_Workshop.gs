@@ -167,7 +167,7 @@ function getWorkshopAccessForCurrentUser() {
 var LA_WORKSHOP_SESSION_CONFIG_ = {
   SHEET: 'TallerSesiones',
   HEADERS: [
-    'classCode','title','message','targetXp','published','classroomOpen',
+    'classCode','title','message','objectiveType','targetXp','published','classroomOpen',
     'homeEnabled','homeStart','homeEnd','gameIds','planId','updatedAt','updatedBy'
   ]
 };
@@ -265,6 +265,7 @@ function workshopSessionPublic_(row) {
     classCode:String(row.classCode || ''),
     title:String(row.title || 'Sesión LenguArcade'),
     message:String(row.message || ''),
+    objectiveType:workshopObjectiveType_(row.objectiveType),
     targetXp:Math.max(0, Number(row.targetXp || 0)),
     published:published,
     classroomOpen:classroomOpen,
@@ -290,6 +291,7 @@ function getWorkshopSessionAdmin(classCode) {
     classCode:cleanClass,
     title:'',
     message:'',
+    objectiveType:workshopObjectiveType_('xp'),
     targetXp:0,
     published:false,
     classroomOpen:false,
@@ -341,6 +343,7 @@ function saveWorkshopSession(classCode, payload) {
     classCode:cleanClass,
     title:String(payload.title || '').trim() || 'Sesión LenguArcade',
     message:String(payload.message || '').trim(),
+    objectiveType:workshopObjectiveType_(payload.objectiveType),
     targetXp:Math.max(0, Math.round(Number(payload.targetXp || 0))),
     published:published,
     classroomOpen:classroomOpen,
@@ -374,6 +377,7 @@ function retireWorkshopSession(classCode) {
     classCode:cleanClass,
     title:String(existing.title || 'Sesión LenguArcade'),
     message:String(existing.message || ''),
+    objectiveType:workshopObjectiveType_(existing.objectiveType),
     targetXp:Number(existing.targetXp || 0),
     published:false,
     classroomOpen:false,
@@ -393,7 +397,7 @@ function retireWorkshopSession(classCode) {
 var LA_WORKSHOP_PLAN_CONFIG_ = {
   SHEET: 'TallerPlanes',
   HEADERS: [
-    'planId','classCode','classCodes','title','message','targetXp','plannedAt',
+    'planId','classCode','classCodes','title','message','objectiveType','targetXp','plannedAt',
     'homeEnabled','homeStart','homeEnd','gameIds','usedAt','usedByClass',
     'createdAt','updatedAt','updatedBy'
   ]
@@ -467,6 +471,7 @@ function workshopPlanPublic_(row, activeSession, viewerClassCode) {
     classCodes:classCodes,
     title:String(row.title || 'Sesión del taller'),
     message:String(row.message || ''),
+    objectiveType:workshopObjectiveType_(row.objectiveType),
     targetXp:Math.max(0, Number(row.targetXp || 0)),
     plannedAt:workshopSessionNormalizeLocalDateTime_(row.plannedAt || ''),
     homeEnabled:workshopSessionBool_(row.homeEnabled),
@@ -491,6 +496,7 @@ function workshopPlanValidatePayload_(payload) {
   payload = payload || {};
   var catalogIds = workshopPlannerCatalogIds_();
   var gameIds = workshopSessionGameIds_(payload.gameIds).filter(function(id){ return catalogIds[id]; });
+  if (payload.objectiveType === 'forja_easy_win' && gameIds.indexOf('lexoma') === -1) throw new Error('Selecciona Forja para este objetivo.');
   if (!gameIds.length) throw new Error('Selecciona al menos un juego para esta sesión.');
 
   var plannedAt = workshopSessionNormalizeLocalDateTime_(payload.plannedAt || '');
@@ -507,6 +513,7 @@ function workshopPlanValidatePayload_(payload) {
   return {
     title:String(payload.title || '').trim() || 'Sesión del taller',
     message:String(payload.message || '').trim(),
+    objectiveType:workshopObjectiveType_(payload.objectiveType),
     targetXp:Math.max(0, Math.round(Number(payload.targetXp || 0))),
     plannedAt:plannedAt,
     homeEnabled:homeEnabled,
@@ -569,6 +576,7 @@ function saveWorkshopPlan(classCode, payload) {
     classCodes:JSON.stringify(selectedClasses),
     title:clean.title,
     message:clean.message,
+    objectiveType:workshopObjectiveType_(clean.objectiveType),
     targetXp:clean.targetXp,
     plannedAt:clean.plannedAt,
     homeEnabled:clean.homeEnabled,
@@ -606,6 +614,7 @@ function saveWorkshopPlanFast(classCode, payload) {
     classCodes:JSON.stringify(selectedClasses),
     title:clean.title,
     message:clean.message,
+    objectiveType:workshopObjectiveType_(clean.objectiveType),
     targetXp:clean.targetXp,
     plannedAt:clean.plannedAt,
     homeEnabled:clean.homeEnabled,
@@ -647,6 +656,7 @@ function saveAndActivateWorkshopPlan(classCode, payload, openNow) {
     classCodes:JSON.stringify(selectedClasses),
     title:clean.title,
     message:clean.message,
+    objectiveType:workshopObjectiveType_(clean.objectiveType),
     targetXp:clean.targetXp,
     plannedAt:clean.plannedAt,
     homeEnabled:clean.homeEnabled,
@@ -666,6 +676,7 @@ function saveAndActivateWorkshopPlan(classCode, payload, openNow) {
     classCode:cleanClass,
     title:clean.title,
     message:clean.message,
+    objectiveType:workshopObjectiveType_(clean.objectiveType),
     targetXp:clean.targetXp,
     published:true,
     classroomOpen:!!openNow,
@@ -765,6 +776,7 @@ function activateWorkshopPlan(classCode, planId, openNow) {
     classCode:cleanClass,
     title:plan.title,
     message:plan.message,
+    objectiveType:workshopObjectiveType_(plan.objectiveType),
     targetXp:plan.targetXp,
     published:true,
     classroomOpen:!!openNow,
@@ -783,6 +795,7 @@ function activateWorkshopPlan(classCode, planId, openNow) {
     classCodes:JSON.stringify(plan.classCodes&&plan.classCodes.length?plan.classCodes:[cleanClass]),
     title:plan.title,
     message:plan.message,
+    objectiveType:workshopObjectiveType_(plan.objectiveType),
     targetXp:plan.targetXp,
     plannedAt:plan.plannedAt,
     homeEnabled:plan.homeEnabled,
@@ -809,6 +822,7 @@ function closeWorkshopPlannerSession(classCode) {
   setWorkshopClassroomSessionOpen(cleanClass, false, {
     title:String(existing.title || ''),
     message:String(existing.message || ''),
+    objectiveType:workshopObjectiveType_(existing.objectiveType),
     targetXp:Number(existing.targetXp || 0),
     homeEnabled:workshopSessionBool_(existing.homeEnabled),
     homeStart:String(existing.homeStart || ''),
@@ -853,3 +867,5 @@ function getWorkshopSessionForCurrentUser() {
     session:workshopSessionPublic_(row)
   };
 }
+
+function workshopObjectiveType_(value) { return value === 'forja_easy_win' ? value : 'xp'; }

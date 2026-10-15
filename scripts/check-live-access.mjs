@@ -79,7 +79,7 @@ const edgeContext={
       assert.ok(Object.hasOwn(tables,table),`Consulta inesperada a ${table}`);
       tableCalls.push(table);
       const filters=[];
-      const builder={select(fields){assert.ok(fields.split(',').length<=13);return this;},eq(column,value){filters.push([column,value]);return this;},order(){return this;},
+      const builder={select(fields){assert.ok(fields.split(',').length<=14);return this;},eq(column,value){filters.push([column,value]);return this;},order(){return this;},
         then(resolve,reject){return Promise.resolve({data:tables[table].filter(row=>filters.every(([key,value])=>row[key]===value)),error:null}).then(resolve,reject);}};
       return builder;
     }},profileId,organizationId:'org1'};
