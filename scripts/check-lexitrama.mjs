@@ -11,7 +11,8 @@ assert.equal(C.worlds.length,5);assert(C.achievements.length>=30);
 assert.equal(C.byWord.get('cantábamos').tense,'pretérito imperfecto');assert.equal(C.byWord.get('cantábamos').number,'plural');assert(C.byWord.get('vivíamos').tags.includes('hiato'));
 assert(!C.byWord.get('buzo').tags.includes('hiato'));assert(!C.byWord.get('búho').tags.includes('esdrújula'));assert(!C.byWord.get('rápido').tags.includes('llana'));
 E.initialize({},null);
-const solve=()=>{const s=E.state;const candidates=C.words.filter(w=>E.mission().test(w)&&!s.used.includes(w.word));for(const word of candidates){const route=E.route(word.word);if(route){const r=E.submit(route);assert(r.ok,`Ruta garantizada rechazada: ${word.word}`);return r;}}assert.fail('Tablero sin solución objetivo');};
+const orthogonal=(path,size)=>path.every((n,k)=>!k||Math.abs(Math.floor(n/size)-Math.floor(path[k-1]/size))+Math.abs(n%size-path[k-1]%size)===1);
+const solve=()=>{const s=E.state;const candidates=C.words.filter(w=>E.mission().test(w)&&!s.used.includes(w.word));for(const word of candidates){const route=E.route(word.word);if(route){assert(orthogonal(route,s.size));const r=E.submit(route);assert(r.ok,`Ruta garantizada rechazada: ${word.word}`);return r;}}assert.fail('Tablero sin solución objetivo');};
 let levels=0,turns=0;
 for(const level of C.levels)for(let seed=0;seed<10;seed++){
   E.create({levelId:level.id,seed:`test-${seed}`});
@@ -66,10 +67,10 @@ assert(!C.byWord.has('árbols'));assert(!C.byWord.has('atúns'));assert(!belongs
 E.abandon();E.create({levelId:'bosque_2',seed:'seto-screenshot'});
 const capture=['E','R','B','R','L','O','O','T','?','I','E','E','E','V','R','S'];
 E.state.board.forEach((tile,i)=>Object.assign(tile,{letter:capture[i],kind:i===8?'wild':'normal',hits:1}));
-const screenshotAnswer=E.submit([15,10,7,6]);assert(screenshotAnswer.ok&&screenshotAnswer.goal);assert.equal(screenshotAnswer.word,'seto');assert.equal(E.state.errors,0);assert.equal(E.state.progress,1);
+const screenshotAnswer=E.submit([15,11,7,6]);assert(screenshotAnswer.ok&&screenshotAnswer.goal);assert.equal(screenshotAnswer.word,'seto');assert.equal(E.state.errors,0);assert.equal(E.state.progress,1);
 // El diccionario ampliado funciona sin regenerar la partida guardada anterior.
 const oldSave=E.snapshot();oldSave.run.completed=false;oldSave.run.board.forEach((tile,i)=>Object.assign(tile,{letter:capture[i],kind:i===8?'wild':'normal'}));oldSave.run.used=[];
-const boardBefore=JSON.stringify(oldSave.run.board);E.initialize({studentId:'expanded-fields'},oldSave,true);assert.equal(JSON.stringify(E.state.board),boardBefore);assert(E.submit([15,10,7,6]).goal);
+const boardBefore=JSON.stringify(oldSave.run.board);E.initialize({studentId:'expanded-fields'},oldSave,true);assert.equal(JSON.stringify(E.state.board),boardBefore);assert(E.submit([15,11,7,6]).goal);
 console.log('Campos y flexiones OK: SETO en el tablero de la captura, categorías compartidas, plurales, homógrafos, ortografía y guardados anteriores.');
 
 // Host simulado: escrituras serializadas, aislamiento del canal y salida confirmada.
@@ -95,10 +96,11 @@ console.log('Fichas, tildes, misión y bridge OK: cola de guardado, resultado es
 
 // Regresión: respuestas espontáneas del tablero real, no solo la incrustada.
 const captureLetters='VELPUERTIPSLOSALIIDAEABOC';
-for(const word of ['losa','piso','lodo','rosa','silo','sol','boca','pupitre']) {
+for(const word of ['losa','piso','sol','boca','pupitre']) {
   E.abandon();E.create({mode:'mastery',mission:'sustantivo',size:5,seed:'noun-capture'});
   E.state.goal=8;E.state.guaranteed='pupitre';
   E.state.board.forEach((tile,i)=>Object.assign(tile,{letter:captureLetters[i],kind:i===6?'ice':i===16?'gold':'normal',hits:i===6?2:1}));
+  for(const diagonalOnly of ['lodo','rosa','silo'])assert.equal(E.route(diagonalOnly),null,`${diagonalOnly} necesita una diagonal en esta captura`);
   const route=E.route(word);assert(route,`Falta ruta en la captura: ${word}`);
   const before=E.snapshot();E.initialize({},before,true);
   const result=E.submit(route);
@@ -113,4 +115,19 @@ for(const word of ['losa','piso','techo','pared','puerta','pelo','hilo','risa','
 for(const word of ['losas','pisos','techos','paredes','puertas','pelos','hilos','risas','rosas','cosas','lodos','pilas','silos'])assert(C.missions.find(m=>m.id==='sustantivo').test(C.byWord.get(word)));
 assert(!C.missions.find(m=>m.id==='sustantivo').test(C.byWord.get('cantamos')));
 assert.equal(C.missions.find(m=>m.id==='bosque').test(C.byWord.get('piso')),false);
-console.log('Captura de sustantivos OK: ocho respuestas, plurales, hielo/dorada, dominio y restauración del guardado.');
+console.log('Captura de sustantivos OK: cinco rutas ortogonales, plurales, hielo/dorada, dominio y restauración del guardado.');
+
+// Legacy diagonal-only layouts must be repaired without resetting their progress.
+E.abandon();E.create({mode:'mastery',mission:'sustantivo',size:5,seed:'legacy-diagonals'});
+E.state.board.forEach(t=>Object.assign(t,{letter:'X',kind:'normal'}));
+[0,6,12,18].forEach((i,k)=>E.state.board[i].letter='CASA'[k]);
+assert.equal(E.route('casa'),null);assert(!E.submit([0,6,12,18]).ok);
+assert(!E.neighbors(0).includes(6));assert(!E.neighbors(4).includes(5));
+assert(E.neighbors(0).includes(1)&&E.neighbors(0).includes(5));
+E.state.progress=2;E.state.score=500;E.state.correct=2;
+const legacy=E.snapshot();
+E.initialize({studentId:'legacy-no-diagonal'},legacy,true);
+assert.equal(E.state.id,legacy.run.id);assert.equal(E.state.progress,2);assert.equal(E.state.score,500);assert.equal(E.state.correct,2);
+assert.equal(E.career.xp,legacy.career.xp);assert.equal(JSON.stringify(E.career.stars),JSON.stringify(legacy.career.stars));
+const repaired=E.route(E.state.guaranteed);assert(repaired&&orthogonal(repaired,5));
+console.log('Sin diagonales: rutas ortogonales, sin salto de fila y guardado antiguo reparado sin perder progreso.');

@@ -37,11 +37,13 @@ const touchPage=await browser.newPage({hasTouch:true,viewport:{width:390,height:
 // Regresión de la captura: trazar SETO con el ratón debe cumplir la misión bosque.
 const categoryPage=await browser.newPage({viewport:{width:1366,height:768}});categoryPage.on('pageerror',e=>errors.push(e.message));await categoryPage.goto('http://127.0.0.1:8765/games/lexitrama/');
 await categoryPage.evaluate(()=>{const E=LexitramaEngine;E.create({levelId:'bosque_2',seed:'seto-capture'});const letters=['E','R','B','R','L','O','O','T','?','I','E','E','E','V','R','S'];E.state.board.forEach((tile,i)=>Object.assign(tile,{letter:letters[i],kind:i===8?'wild':'normal',hits:1}));});await categoryPage.click('[data-action=continue]');
-for(const [step,i] of [15,10,7,6].entries()){const b=await categoryPage.locator(`[data-tile="${i}"]`).boundingBox();await categoryPage.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:5});if(step===0)await categoryPage.mouse.down();}await categoryPage.mouse.up();await categoryPage.waitForTimeout(350);
+// An attempted diagonal does not extend the local selection.
+await categoryPage.locator('[data-tile="15"]').focus();await categoryPage.keyboard.press('Space');await categoryPage.locator('[data-tile="10"]').focus();await categoryPage.keyboard.press('Space');assert.equal(await categoryPage.locator('#word').textContent(),'S');await categoryPage.click('[data-action=cancel]');
+for(const [step,i] of [15,11,7,6].entries()){const b=await categoryPage.locator(`[data-tile="${i}"]`).boundingBox();await categoryPage.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:5});if(step===0)await categoryPage.mouse.down();}await categoryPage.mouse.up();await categoryPage.waitForTimeout(350);
 assert.deepEqual(await categoryPage.evaluate(()=>({word:LexitramaEngine.state.used.at(-1),progress:LexitramaEngine.state.progress,errors:LexitramaEngine.state.errors})),{word:'seto',progress:1,errors:0});assert.deepEqual(errors,[]);
 console.log('Captura SETO: arrastre real, palabra aceptada como bosque, +1 objetivo y ningún error.');
 // Reproducir la nueva captura con arrastre real, incluyendo respuestas no incrustadas.
-for(const word of ['losa','piso','lodo','rosa','silo','sol','boca','pupitre']) {
+for(const word of ['losa','piso','sol','boca','pupitre']) {
   await categoryPage.click('#brand');
   await categoryPage.evaluate(()=>{
     const E=LexitramaEngine;E.abandon();E.create({mode:'mastery',mission:'sustantivo',size:5,seed:'noun-capture'});
@@ -59,7 +61,7 @@ for(const word of ['losa','piso','lodo','rosa','silo','sol','boca','pupitre']) {
   assert.deepEqual(await categoryPage.evaluate(()=>({word:LexitramaEngine.state.used.at(-1),progress:LexitramaEngine.state.progress,errors:LexitramaEngine.state.errors})),{word,progress:1,errors:0});
 }
 assert.deepEqual(errors,[]);
-console.log('Captura sustantivos: ocho respuestas aceptadas con arrastre real, +1 objetivo y ningún error.');
+console.log('Captura sustantivos: cinco rutas ortogonales aceptadas con arrastre real, +1 objetivo y ningún error.');
 
 console.log('Host iframe, restauración central simulada, cierre confirmado, teclado y gesto táctil OK.');
 console.log('Browser OK: arrastre real, victoria, recarga/guardado, jefe, 3 resoluciones + iframe 620px + móvil; sin errores JS.');

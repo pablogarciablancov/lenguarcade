@@ -813,3 +813,11 @@ Automáticas: `node scripts/check-conjuga-online.mjs`, `node scripts/check-conju
 Tras publicar de forma coordinada: abrir Lexitrama desde el `/exec` estable con dos cuentas de la misma clase; elegir «Cooperativo online», crear/unir y confirmar ambos. Comprobar que una cuenta ajena no puede unirse, que cerrar el juego impide seguir y que los aciertos quedan en el perfil correcto al salir.
 
 Empaquetado de la función: incluir `supabase/functions/lexitrama-online/`, `_shared/lenguarcade.ts`, `_shared/student-access.ts` y `games/lexitrama/content.js`, conservando sus rutas relativas desde la raíz. Entrypoint `supabase/functions/lexitrama-online/index.ts`, `verify_jwt=true`. No requiere copiar ni mantener otro banco.
+
+## Lexitrama sin diagonales · 2026-10-15
+
+- Las 300 campañas/semillas y sus cascadas deben mantener soluciones usando exclusivamente vecinas horizontales y verticales. Las pistas y los tableros cooperativos deben cumplir la misma regla.
+- Intentar seleccionar 0→6 en tablero 5×5 y 0→8 en 7×7: no debe añadirse la diagonal. El servidor debe rechazar 0→8 aunque se envíe directamente. Tampoco se admite pasar del final de una fila al principio de otra.
+- Restaurar un guardado con CASA solo en diagonal y comprobar que se repone una solución ortogonal sin cambiar XP, estrellas, identificador, puntuación o progreso.
+- En la captura de sustantivos siguen existiendo cinco rutas ortogonales; lodo, rosa y silo ya no tienen ruta válida en esa disposición. El banco sigue aceptando esos sustantivos cuando se trazan con la regla nueva.
+- Navegador individual y dos navegadores cooperativos: teclado, arrastre, recarga, guardado y responsive. Publicación: Pages y nueva versión de lexitrama-online; no requiere republicar Apps Script ni migraciones.

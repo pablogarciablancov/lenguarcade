@@ -53,6 +53,7 @@ try{
  await fb.locator('[data-action=cooperative]').click();await fb.locator('#coopCode').fill(room.code);await fb.locator('[data-coop=join]').click();await fb.locator('#coopReady').click();await fa.locator('#coopReady').click();
  await fa.locator('#coopBoard').waitFor({state:'visible'});await fb.locator('#coopBoard').waitFor({state:'visible'});
  assert.equal(await fa.locator('[data-coop-tile]').count(),49);
+ await fa.locator('[data-coop-tile="0"]').focus();await fa.locator('[data-coop-tile="0"]').press('Space');await fa.locator('[data-coop-tile="8"]').focus();await fa.locator('[data-coop-tile="8"]').press('Space');assert.equal(await fa.locator('[data-coop-tile].selected').count(),1);await fa.locator('[data-coop=clear]').click();
  const paths=solutions(room.state);
  async function select(frame,path){await frame.locator('[data-coop=clear]').click();await frame.locator('[data-coop-tile="'+path[0]+'"]').focus();for(const i of path){await frame.locator('[data-coop-tile="'+i+'"]').focus();await frame.locator('[data-coop-tile="'+i+'"]').press('Space');}}
  // A poll must preserve an in-progress keyboard selection.

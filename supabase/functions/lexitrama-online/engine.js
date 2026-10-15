@@ -38,7 +38,7 @@ export function command(s,actor,action,body={},now=Date.now()){
  }else if(action==='submit'){
   if(s.phase!=='playing')fail('wrong_phase');
   const path=body.path;
-  if(!Array.isArray(path)||path.length<2||path.length>49||new Set(path).size!==path.length||path.some((n,k)=>!Number.isInteger(n)||n<0||n>=49||(k&&Math.max(Math.abs(Math.floor(n/7)-Math.floor(path[k-1]/7)),Math.abs(n%7-path[k-1]%7))!==1)))fail('invalid_path',400);
+  if(!Array.isArray(path)||path.length<2||path.length>49||new Set(path).size!==path.length||path.some((n,k)=>!Number.isInteger(n)||n<0||n>=49||(k&&(Math.abs(Math.floor(n/7)-Math.floor(path[k-1]/7))+Math.abs(n%7-path[k-1]%7))!==1)))fail('invalid_path',400);
   const word=path.map(i=>s.board[i]).join('').toLowerCase(),w=C.byWord.get(word),mission=C.missions.find(m=>m.id===s.mission);
   if(s.found.some(f=>f.word===word)){response={ok:false,code:'already_found'};}
   else if(!w||!mission.test(w)){p.errors++;response={ok:false,code:w?'wrong_content':'unknown_word'};}
