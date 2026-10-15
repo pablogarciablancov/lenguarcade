@@ -540,3 +540,26 @@ const AGENCY_CASES=[
     }
   }
 ];
+
+// Short, explicit training case; uses the same save and deduction engine.
+AGENCY_CASES.unshift({
+ id:'agency_tutorial',number:'00',title:'El libro viajero',place:'Academia de detectives',difficulty:'Iniciación guiada',agency:true,tutorial:true,xp:30,
+ objective:'Un libro ha cambiado de sala. Descubre quién lo trasladó y aprende a justificarlo con dos fuentes.',
+ people:[
+  {id:'p0',name:'Ada',role:'Bibliotecaria',initial:'El libro estaba en la mesa. Vi a alguien llevarse un libro rojo, pero no distinguí cuál.',questions:[{q:'¿Qué viste?',a:'Vi un libro rojo. El color no basta para identificarlo.'}]},
+  {id:'p1',name:'Nora',role:'Ayudante',initial:'Llevé un libro a la sala de lectura para una actividad. Dejé allí el recibo.',questions:[{q:'¿Qué hiciste?',a:'Trasladé un libro a la sala de lectura.'}]},
+  {id:'p2',name:'Teo',role:'Lector',initial:'Mi libro también es rojo. Lo traje de casa y lo conservé en mi mochila.',questions:[{q:'¿Qué libro llevabas?',a:'Mi ejemplar personal, sin etiqueta de la biblioteca.'}]}
+ ],
+ docs:[
+  {id:'d0',title:'Tu primera investigación',type:'Guía',body:'<h2>El libro viajero</h2><p>No ha habido un robo: alguien ha llevado un libro a otra sala. Vamos a reconstruir el traslado paso a paso.</p><p>Sigue la nota dorada del tablero. Puedes salir y continuar más tarde.</p>'},
+  {id:'d1',title:'Fotografía de la puerta',type:'Fotografía',body:'<h2>Fotografía de la puerta</h2><p>La fotografía muestra a Nora entrando en la sala de lectura con el libro de la biblioteca cuya etiqueta es B-17.</p>'},
+  {id:'d2',title:'Recibo de entrega',type:'Registro firmado',body:'<h2>Recibo de entrega</h2><p>El responsable de la sala anotó: «Recibido el libro B-17, entregado por Nora». El recibo está firmado por ambos.</p>'}
+ ],
+ clues:[
+  {id:'c0',doc:'d1',text:'La fotografía muestra a Nora entrando en la sala de lectura con el libro de la biblioteca cuya etiqueta es B-17.',important:true,kind:'Fotografía',skill:'observation'},
+  {id:'c1',doc:'d2',text:'El responsable de la sala anotó: «Recibido el libro B-17, entregado por Nora». El recibo está firmado por ambos.',important:true,kind:'Registro',skill:'connection'}
+ ],
+ keyConnections:[{a:'c0',b:'c1',rel:'confirma'}],
+ tasks:[{id:'t0',title:'Identificar el libro',q:'¿Qué identifica el ejemplar?',options:['El color rojo.','La etiqueta B-17.','El tamaño.'],correct:1,skill:'observation'}],
+ solution:{responsible:'p1',proofs:['c0','c1'],redHerring:'p2',what:'Nora trasladó el libro B-17. La fotografía la sitúa con ese ejemplar y el recibo confirma su entrega. El color rojo no bastaba: Teo también tenía un libro rojo.'}
+});

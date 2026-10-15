@@ -3,10 +3,10 @@ const dir=__dirname,html=zlib.gunzipSync(Buffer.from([1,2,3,4].map(i=>fs.readFil
 const nodes=new Map(),storage=new Map(),messages=[];
 function node(id){if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',value:'',dataset:{},classList:{add(){},remove(){},toggle(){}},insertAdjacentHTML(){},querySelector(){return node('nested')},querySelectorAll(){return []}});return nodes.get(id)}
 const sandbox={console,URLSearchParams,location:{search:''},setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,clearInterval(){},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},document:{getElementById:node,querySelector:node,querySelectorAll:()=>[],documentElement:node('html'),body:node('body')},window:{addEventListener(){},scrollTo(){},getSelection(){return null}}};
-vm.createContext(sandbox);const run=s=>vm.runInContext(s,sandbox);
+Object.assign(sandbox,sandbox.window);sandbox.window=sandbox;vm.createContext(sandbox);const run=s=>vm.runInContext(s,sandbox);
 for(const [,attrs,body] of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)){if(!attrs.includes('src='))run(body)}
 run(fs.readFileSync(path.join(dir,'agency-cases.js'),'utf8'));run(fs.readFileSync(path.join(dir,'agency.js'),'utf8'));
-for(const id of run('AGENCY_CASES.map(c=>c.id)')){
+for(const id of run('AGENCY_CASES.filter(c=>!c.tutorial).map(c=>c.id)')){
  run(`startCase('${id}');collectAgencyClue('c0');collectAgencyClue('c1');markPerson('p1','Sospechoso');saveState();state=null;startCase('${id}')`);
  assert.equal(run("state.found.length"),2);assert.equal(run("state.personMarks.p1"),'Sospechoso');
  run("openSolve();document.getElementById('solveWho').value=cases[state.caseId].solution.responsible;document.getElementById('solveP1').value='c0';document.getElementById('solveP2').value='c0';submitSolve()");assert.equal(run('state.finalAttempts'),0);
@@ -15,6 +15,17 @@ for(const id of run('AGENCY_CASES.map(c=>c.id)')){
  const xp=run('profile.xp');assert.ok(xp>0);
  run(`startCase('${id}');collectAgencyClue('c0');collectAgencyClue('c1');openSolve();document.getElementById('solveWho').value=cases[state.caseId].solution.responsible;document.getElementById('solveP1').value='c0';document.getElementById('solveP2').value='c1';submitSolve()`);assert.equal(run('profile.xp'),xp);
 }
+run("startCase('agency_tutorial')");assert.equal(run('academyStage()'),0);
+run('openSolve()');assert.equal(run('state.finalAttempts'),0);
+run("selectPerson('p0')");assert.equal(run('academyStage()'),1);
+run("openDocument('d1');collectAgencyClue('c0')");assert.equal(run('academyStage()'),2);
+run("openDocument('d2');collectAgencyClue('c1')");assert.equal(run('academyStage()'),3);
+run("markPerson('p1','Sospechoso');saveState();state=null;startCase('agency_tutorial')");assert.equal(run('academyStage()'),4);
+run("selectedEvidence=['c0','c1'];document.getElementById('relationSelect').value='confirma';createConnection()");assert.equal(run('academyStage()'),5);
+run("openSolve();document.getElementById('solveWho').value='p2';submitSolve()");assert.equal(run('state.finalAttempts'),0);
+run("document.getElementById('solveWho').value='p1';document.getElementById('solveP1').value='c0';document.getElementById('solveP2').value='c1';submitSolve()");assert.equal(run('academyStage()'),6);
+const tutorialXP=run('profile.xp');
+run("startCase('agency_tutorial');selectPerson('p0');openDocument('d1');collectAgencyClue('c0');openDocument('d2');collectAgencyClue('c1');markPerson('p1','Sospechoso');selectedEvidence=['c0','c1'];document.getElementById('relationSelect').value='confirma';createConnection();openSolve();document.getElementById('solveWho').value='p1';document.getElementById('solveP1').value='c0';document.getElementById('solveP2').value='c1';submitSolve()");assert.equal(run('profile.xp'),tutorialXP);
 run("startCase('case001')");assert.equal(run('cases[state.caseId].title'),'El aula vacía');
 run("integrated=true;bridgeChannel='test';bridgeInitialized=true;bridgeHostWindow={postMessage:m=>console.log(m.type)};sendBridgeResult(true,0,{})");
 console.log('✓ Three cases: restore, marks, proof validation, wrong accusation, resolution, replay XP, original case and RESULT bridge.');
