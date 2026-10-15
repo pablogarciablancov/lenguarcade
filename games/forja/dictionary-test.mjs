@@ -27,9 +27,14 @@ assert.equal(E.validate('talar').analysis.category,'verb');
 assert.equal(E.validate('jardin').word,'jardín');
 assert.equal(E.validate('rapido').analysis.category,'adj');
 assert.ok(E.validate('ñandú').ok);assert.notEqual(E.validate('nandu').word,'ñandú','N no se convierte en Ñ');
-for(const w of ['zzqqzz','qwertyuiop','talar/RED','x','mesa123'])assert.equal(E.validate(w).ok,false,w);
+for(const w of ['phi','PHI','xi','XI','xvi','XVI','xxiv','zzqqzz','qwertyuiop','talar/RED','x','mesa123'])assert.equal(E.validate(w).ok,false,w);
+for(const w of ['ñu','ÑU','ñus','ÑUS','ñúes','mil','civil','dividir','vi','mi','sí'])assert.ok(E.validate(w).ok,w);
 E.start('normal',42);E.leaveShop();E.run.hand=[...'TALAR'].map((char,i)=>({id:100+i,char,style:'normal'}));E.run.selected=E.run.hand.map(t=>({id:t.id,char:t.char}));
 assert.ok(E.play().ok,'TALAR se juega y puntúa');assert.equal(E.run.words.at(-1),'talar');assert.ok(E.restore(E.snapshot()));
 const fallback=await engine(['base']);assert.ok(fallback.E.validate('talar').ok);assert.ok(fallback.E.validate('abedul').ok);
 const local=await engine(['base','extra']);assert.ok(local.E.validate('talar').ok);assert.equal(local.E.validate('talar').analysis.category,'verb');
+assert.ok(local.E.validate('ñu').ok);assert.equal(local.E.validate('XI').ok,false);
+E.run.hand=[...'ÑU'].map((char,i)=>({id:200+i,char,style:'normal'}));E.run.selected=E.run.hand.map(t=>({id:t.id,char:t.char}));
+assert.ok(E.play().ok,'ÑU se juega y puntúa');assert.equal(E.run.words.at(-1),'ñu');
+for(const w of ['PHI','XI','XVI']){const before=E.run.totalScore;assert.equal(E.score(w).valid,false);assert.equal(E.run.totalScore,before);}
 console.log('Diccionario flexionado OK:',status,'· palabras, tildes, Ñ, juego, guardado y fallbacks.');

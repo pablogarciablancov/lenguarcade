@@ -148,14 +148,16 @@ function rerollLetters(){
 }
 async function loadDictionary(onStatus){
  dictionaryReady=false;onStatus?.('Cargando diccionario…');
- // Carga independiente: un fallo de la lista compartida no anula el banco de Forja.
- const sources=await Promise.allSettled(['../word_play/dictionary-es-50k.txt','dictionary-es-extra.txt?v=20261005-inflections'].map(async url=>{
+ // Solo fuentes léxicas: la lista de frecuencia compartida contiene ruido y siglas.
+ const sources=await Promise.allSettled(['dictionary-es-extra.txt?v=20261015-lexical-validation'].map(async url=>{
   const res=await fetch(url,{cache:'force-cache'});if(!res.ok)throw new Error('HTTP '+res.status);return res.text();
  }));
- dictionary=new Set([...L.lexicon.keys()].map(key));
+ dictionary=new Set([...L.lexicon.keys(),'ñu','ñus','ñúes'].map(key));
  for(const source of sources)if(source.status==='fulfilled')for(const raw of source.value.split(/\r?\n/)){
   const word=key(raw.trim());if(/^[a-záéíóúüñ]{2,}$/u.test(word))dictionary.add(word);
  }
+ // Exclusiones del juego: grafías extranjeras y nombre de letra griega no jugable.
+ for(const word of ['phi','xi','xvi'])dictionary.delete(word);
  // Alias solo de acentos: Ñ y Ü conservan su identidad. Lookup O(1) por jugada.
  dictionaryAliases=new Map();for(const word of dictionary)if(!dictionaryAliases.has(strip(word)))dictionaryAliases.set(strip(word),word);
  dictionaryReady=true;const loaded=sources.some(s=>s.status==='fulfilled');
@@ -165,7 +167,9 @@ async function loadDictionary(onStatus){
 function validate(raw){
  const display=String(raw||'').toUpperCase(),lexical=display.replace(/!/g,'');if(lexical.length<2)return{ok:false,message:'Forma una palabra de al menos 2 letras.'};
  if(display.includes('!')&&!display.endsWith('!'))return{ok:false,message:'La exclamación especial solo puede cerrar la palabra.'};
- const w=key(lexical),alias=dictionaryAliases.get(strip(w));
+ const w=key(lexical);
+ if(!/^[a-záéíóúüñ]{2,}$/u.test(w)||['phi','xi','xvi'].includes(w))return{ok:false,message:'«'+lexical+'» no es una palabra admitida en Forja.'};
+ const alias=dictionaryAliases.get(strip(w));
  const canonical=L.lookup(w).length?w:L.lookup(alias).length?alias:dictionary.has(w)?w:alias;
  if(!canonical)return{ok:false,message:'«'+lexical+'» no está en el diccionario de Forja.'};
  return{ok:true,word:canonical,display,analysis:L.lookup(canonical)[0]||null};
