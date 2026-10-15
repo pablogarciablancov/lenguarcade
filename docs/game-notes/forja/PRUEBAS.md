@@ -1,3 +1,7 @@
+## 2026-10-15 — Diccionario de Forja
+
+Ejecutar node games/forja/dictionary-test.mjs, smoke-test.mjs y feedback-test.mjs (cada uno con su ruta). Verificar ÑU jugable, PHI/XI/XVI sin puntos y conservación de mil/civil/vi, conjugaciones, tildes y guardado. Prueba de navegador pendiente: Chromium no está instalado en este entorno.
+
 # Pruebas de LEXOMA
 
 ## Automáticas

@@ -1,3 +1,7 @@
+## 2026-10-15 — Diccionario de Forja
+
+Se elimina la lista de frecuencia como autoridad en Forja; se admiten ñu/ñus/ñúes y se excluyen PHI, XI y XVI. Sin cambios de guardado ni puntuación.
+
 # LEXOMA — MVP · 4 de octubre de 2026
 
 Juego nuevo aislado en `games/forja/`. 1.300 formas locales con análisis morfológico, ocho categorías, selección de análisis ambiguos y tildes que cambian formas. Diccionario delimitado: una forma desconocida se informa como fuera del léxico, no como necesariamente inexistente.

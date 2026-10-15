@@ -50,3 +50,7 @@ Regeneración reproducible: `python games/forja/build-dictionary.py`. Lee exclus
 Pruebas: `node games/forja/dictionary-test.mjs`, `node games/forja/smoke-test.mjs` y `node games/forja/integration-browser-test.cjs` (Playwright). Incluyen familias de ceñir, construir, hacer, tener, decir e ir, derivados/plurales, tildes y Ñ, rechazo de formas inventadas, y jugar CIÑO/guardar/restaurar en el runner. El análisis local de ceñir distingue ciño (presente) y ciñó (pretérito). La ampliación de aceptación no pretende etiquetar morfológicamente todas las formas ni elimina las ambigüedades al jugar sin tildes.
 
 Los alias sin acento preservan Ñ y Ü; las cartas reciben el análisis de la forma canónica. La portada del catálogo y del manifest es `assets/forja-cover-v1.webp`.
+
+## Validación léxica (2026-10-15)
+
+La lista compartida de frecuencia deja de autorizar palabras: contiene cadenas como phi y xvi. Se conserva RLA-ES flexionado y el léxico local, con ñu y sus plurales ñus/ñúes como suplemento. XI se excluye por criterio del juego (nombre de letra griega), aunque existe como entrada léxica. No se aplica un veto general a letras romanas: mil, civil y vi siguen admitidas. Se conserva la distinción Ñ/N y el sistema de alias de tildes.
