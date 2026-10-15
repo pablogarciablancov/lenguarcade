@@ -1,3 +1,7 @@
+## 2026-10-15 — Nota lateral de vocabulario
+
+Definición en nota de papel amarilla en el lateral derecho, cinta, esquina doblada, palabra destacada y animación con respeto a movimiento reducido. Sin enlaces externos; atribución de Wikcionario en texto. En ≤850 px la nota pasa al tablero, conservando los controles.
+
 ## 2026-10-15 — Revisión general y definiciones
 
 Banco general de español RLA-ES fijado, +48.606 formas; regresión por grupos y auditoría nativa completa. XI admitida, palabras de una letra y validación de tildes explícitas. Definición breve posterior a jugada, Wikcionario con atribución, timeout, caché y errores sin bloquear. Sin cambios de progreso ni puntuación.

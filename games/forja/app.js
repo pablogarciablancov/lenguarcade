@@ -125,17 +125,30 @@ function openEngrave(style){
 function closeDialog(){choiceState=null;$('choiceDialog').close();}
 let definitionRequest=0;
 function clearDefinition(){definitionRequest++;$('wordDefinition').hidden=true;$('wordDefinition').replaceChildren();}
+function placeDefinitionNote(){
+ const box=$('wordDefinition'),rail=document.querySelector?.('.right-rail'),feedback=$('feedback');
+ if(!rail)return;
+ const anchor=window.innerWidth<=850?feedback:$('historyBtn');
+ if(box.nextElementSibling!==anchor)anchor.before(box);
+}
+function drawDefinition(word,text,loaded=false){
+ const box=$('wordDefinition');box.replaceChildren();
+ for(const [tag,className,content] of [['small','note-label','PALABRA FORJADA'],['strong','note-word',word],['p','note-meaning',text],['small','note-source',loaded?'Wikcionario · CC BY-SA':'']]){
+  if(!content)continue;const node=document.createElement(tag);node.className=className;node.textContent=content;box.append(node);
+ }
+ placeDefinitionNote();box.hidden=false;
+ box.classList.remove('note-arrival');void box.offsetWidth;box.classList.add('note-arrival');
+}
 async function showDefinition(score){
- const request=++definitionRequest,box=$('wordDefinition');
- box.hidden=false;box.textContent=score.display.replace(/!/g,'')+' · Consultando significado…';
+ const request=++definitionRequest,word=score.display.replace(/!/g,'');
+ drawDefinition(word,'Buscando su significado…');
  let value=await window.ForjaDefinitions.lookup(score.word);
  const lemma=score.analysis?.lemma;
  if(!value&&lemma&&lemma!==score.word)value=await window.ForjaDefinitions.lookup(lemma);
  if(request!==definitionRequest)return;
- box.replaceChildren();
- const text=document.createElement('span');text.textContent=score.display.replace(/!/g,'')+' · '+(value?.text||'Definición no disponible.');box.append(text);
- const source=document.createElement('a');source.href=value?.url||'https://es.wiktionary.org/wiki/'+encodeURIComponent(lemma||score.word);source.target='_blank';source.rel='noopener noreferrer';source.textContent=value?'Wikcionario · CC BY-SA':'Consultar Wikcionario';box.append(source);
+ drawDefinition(word,value?.text||'El significado no está disponible ahora.',!!value);
 }
+window.addEventListener('resize',placeDefinitionNote);
 function finishScoreAnimation(q){
  showDefinition(q.score);
  scoringAnimation={score:q.score};lastMessage=q.score.display.toUpperCase()+' · '+fmt(q.score.points)+' × '+fmt(q.score.multis)+' = '+fmt(q.score.total);render();tone('score');
