@@ -802,3 +802,14 @@ Automatizado: `npm run check`, incluido `scripts/check-live-access.mjs`.
 7. Comprobar 1366×768, 1440×900 y 1920×1080 con cabecera del host; en móvil, comprobar controles accesibles sin desbordamiento horizontal.
 
 Automáticas: `node scripts/check-conjuga-online.mjs`, `node scripts/check-conjuga-online-browser.mjs`, `node scripts/check-conjuga-online-db.mjs` y `npm run check`.
+
+## Lexitrama compartida · 2026-10-15
+
+- `node --no-warnings scripts/check-lexitrama-online.mjs`: seis soluciones por contenido, rutas, duplicados, reparto 4+2, privacidad, permisos de clase, reloj y desconexión. Incluido en `npm run check`.
+- `PGLITE_MODULE=<ruta del paquete> node --no-warnings scripts/check-lexitrama-online-db.mjs`: migración en Postgres local; XP individual 24/12 para cuatro/dos aciertos, conservación de campaña y estrellas, cierre idempotente y exclusión de premios al profesor.
+- `CHROMIUM_EXECUTABLE=<ruta a Chromium> node --no-warnings scripts/check-lexitrama-online-browser.mjs`: dos navegadores usando el proxy real del runner; código/listos, arrastre, teclado, selección conservada al refrescar, palabra repetida, recarga, victoria, retorno a expedición local, resoluciones 1366×768/1440×900/1920×1080 con cabecera 90px y móvil sin desbordamiento horizontal.
+- `CHROMIUM_PATH=<ruta a Chromium> node games/lexitrama/browser-test.cjs`: modos individuales, cascadas, campaña, guardado, cierre y controles existentes.
+
+Tras publicar de forma coordinada: abrir Lexitrama desde el `/exec` estable con dos cuentas de la misma clase; elegir «Cooperativo online», crear/unir y confirmar ambos. Comprobar que una cuenta ajena no puede unirse, que cerrar el juego impide seguir y que los aciertos quedan en el perfil correcto al salir.
+
+Empaquetado de la función: incluir `supabase/functions/lexitrama-online/`, `_shared/lenguarcade.ts`, `_shared/student-access.ts` y `games/lexitrama/content.js`, conservando sus rutas relativas desde la raíz. Entrypoint `supabase/functions/lexitrama-online/index.ts`, `verify_jwt=true`. No requiere copiar ni mantener otro banco.

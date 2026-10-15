@@ -9,7 +9,9 @@
   "requires": {
     "studentRunner": true,
     "saveProgress": true,
-    "supabaseCatalog": true
+    "supabaseCatalog": true,
+    "onlineMultiplayer": true,
+    "backendFunction": "lexitrama-online"
   },
   "catalogEntry": {
     "id": "lexitrama",
@@ -34,5 +36,5 @@
     "integration": "embedded",
     "sortOrder": 14
   },
-  "notes": "Procesado desde integration/2026-10-05-lexitrama: catálogo canónico, portada ilustrada, runner genérico y guardado central autoritativo. Sin cambios de autenticación ni esquema. Publicación estable de Apps Script y verificación /exec requeridas."
+  "notes": "Procesado desde integration/2026-10-05-lexitrama: catálogo canónico, portada ilustrada, runner genérico y guardado central autoritativo. Sin cambios de autenticación ni esquema. Publicación estable de Apps Script y verificación /exec requeridas. Cooperativo 1v1 con tablero fijo, seis palabras y al menos dos por jugador. Requiere migración lexitrama_coop, función lexitrama-online (JWT obligatorio) y runner con ONLINE_REQUEST para Lexitrama. Publicar juntos frontend, backend y panel estable; no activar solo el juego. El banco canónico games/lexitrama/content.js se incluye como dependencia del backend."
 }
