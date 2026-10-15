@@ -8,3 +8,10 @@
 - Sin cambios en el núcleo ni en datos remotos.
 
 Pendiente de revisión visual real: no se pudo instalar Chromium en este entorno. Retratos vectoriales iniciales; aún no hay campaña encadenada ni generación procedural.
+
+## Iniciación guiada
+
+- Caso 00 «El libro viajero», destacado antes del archivo de casos y siempre opcional.
+- Tres personajes y dos fuentes, con seis pasos derivados de las acciones guardadas.
+- Enseña interrogatorio, archivo, contraste, hipótesis, conexión e informe.
+- Errores del informe sin penalización; guía repetible sin XP adicional.

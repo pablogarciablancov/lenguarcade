@@ -6,7 +6,7 @@ const center=document.querySelector('.center');
 center.insertAdjacentHTML('afterbegin','<section id="suspectBoard" aria-label="Personas de la investigación"></section>');
 document.querySelector('.hero h1').innerHTML='ENTRE <span>LÍNEAS</span>';
 document.querySelector('.hero-grid').insertAdjacentHTML('beforebegin','<div class="agency-heading"><span>ARCHIVO DE CASOS</span><small>Lee. Contrasta. Demuestra.</small></div><div id="agencyCases"></div>');
-function renderAgencyCases(){document.getElementById('agencyCases').innerHTML=AGENCY_CASES.map((c,i)=>{const s=loadState(c.id);return `<button class="folder" onclick="startCase('${c.id}')"><span class="folder-number">0${i+1} / ${escapeText(c.place)}</span><strong>${escapeText(c.title)}</strong><span>${escapeText(c.difficulty)} · 6 personas · 5–8 min</span><b>${s?.completed?(profile.history.some(h=>h.caseId===c.id&&h.success)?'RESUELTO · Volver a investigar':'REABRIR EXPEDIENTE'):s?'CONTINUAR INVESTIGACIÓN':'ABRIR EXPEDIENTE'} ↗</b></button>`}).join('')}
+function renderAgencyCases(){document.getElementById('agencyCases').innerHTML=AGENCY_CASES.filter(c=>!c.tutorial).map((c,i)=>{const s=loadState(c.id);return `<button class="folder" onclick="startCase('${c.id}')"><span class="folder-number">0${i+1} / ${escapeText(c.place)}</span><strong>${escapeText(c.title)}</strong><span>${escapeText(c.difficulty)} · 6 personas · 5–8 min</span><b>${s?.completed?(profile.history.some(h=>h.caseId===c.id&&h.success)?'RESUELTO · Volver a investigar':'REABRIR EXPEDIENTE'):s?'CONTINUAR INVESTIGACIÓN':'ABRIR EXPEDIENTE'} ↗</b></button>`}).join('')}
 const oldRefreshHeader=refreshHeader;
 refreshHeader=function(){oldRefreshHeader();renderAgencyCases()};
 function portrait(i){const colors=['#bd7e65','#76968b','#c1a06b','#839bb1','#af8194','#93946c'];return `<svg viewBox="0 0 120 110" aria-hidden="true"><path fill="${colors[i%6]}" opacity=".22" d="M0 0h120v110H0z"/><circle cx="92" cy="25" r="32" fill="${colors[i%6]}" opacity=".25"/><path d="M18 110q4-35 42-35t42 35" fill="${colors[i%6]}"/><path d="m44 80 16 20 16-20" fill="#e9debe"/><path d="M40 37q0-23 21-23t20 23v20q-3 23-21 23T40 57" fill="#dec2a0"/><path d="M36 43q-5-31 24-33 30 1 25 36L73 30 40 42" fill="#252e31"/><path d="M50 51h4m14 0h4M56 66q5 3 10 0" stroke="#343337" stroke-width="3" stroke-linecap="round"/>${i%2===0?'<path d="M31 29h57l8 9H25zM43 16h33l6 16H38z" fill="#334247"/>':'<path d="M43 50h15v10H43zm20 0h15v10H63zM58 54h5" fill="none" stroke="#3b4140" stroke-width="2"/>'}</svg>`}
@@ -26,3 +26,58 @@ requestHint=function(){if(!cases[state.caseId].agency)return oldRequestHint();st
 const oldCreateConnection=createConnection;
 createConnection=function(){if(state.completed)return;const [a,b]=selectedEvidence,rel=document.getElementById('relationSelect').value;if(state.connections.some(x=>((x.a===a&&x.b===b)||(x.a===b&&x.b===a))&&x.rel===rel)){toast('Esta relación ya está anotada.');return}oldCreateConnection()};
 const oldShowHome=showHome;showHome=function(){oldShowHome();renderAgencyCases()};
+
+// Guided onboarding advances only after real actions; progress is derived from saved state.
+document.getElementById('agencyCases').insertAdjacentHTML('beforebegin','<section id="academyEntry"></section>');
+center.insertAdjacentHTML('afterbegin','<section id="academyGuide" aria-label="Guía de aprendizaje" aria-live="polite" hidden></section>');
+function academyStage(){
+ if(!state||!cases[state.caseId]?.tutorial)return -1;
+ if(state.completed)return 6;
+ if(!state.witnessAsked.p0?.length)return 0;
+ if(!state.found.includes('c0'))return 1;
+ if(!state.found.includes('c1'))return 2;
+ if(state.personMarks?.p1!=='Sospechoso')return 3;
+ if(!state.connections.some(x=>isKeyConnection(x.a,x.b,x.rel)))return 4;
+ return 5;
+}
+const academySteps=[
+ ['Escucha antes de sospechar','Pulsa el retrato de Ada y lee su declaración. Ver un libro rojo no identifica un ejemplar concreto.','Interrogar a Ada'],
+ ['Archiva tu primera prueba','Abre la fotografía, lee la etiqueta B-17 y pulsa «Archivar como prueba» al pie del documento.','Abrir fotografía'],
+ ['Busca una fuente independiente','Abre el recibo y archívalo. Comprueba que habla del mismo libro y de la misma persona.','Abrir recibo'],
+ ['Formula una hipótesis','En la tarjeta de Nora, cambia «Pendiente» a «Sospechoso». Es una hipótesis provisional, no una acusación.','Ver a Nora'],
+ ['Relaciona las dos pruebas','En el tablero de la derecha, selecciona las dos pruebas. Elige «confirma» y pulsa «Crear conexión». Ambas fuentes encajan.','Localizar las pruebas'],
+ ['Presenta lo que puedes demostrar','Pulsa «Presentar informe». Elige quién trasladó el libro y las dos pruebas que has contrastado.','Preparar informe'],
+ ['Ya sabes investigar','Has escuchado, archivado, contrastado y justificado. Ahora puedes investigar un expediente sin guía.','Volver a la agencia']
+];
+function renderAcademy(){
+ const saved=loadState('agency_tutorial');
+ document.getElementById('academyEntry').innerHTML=`<div><span class="eyebrow">ACADEMIA / CASO 00</span><h2>¿Tu primera investigación?</h2><p>Aprende jugando con «El libro viajero»: tres personas, dos pruebas y una guía paso a paso.</p></div><button class="btn primary" onclick="startCase('agency_tutorial')">${saved?.agencySolved?'Repetir aprendizaje':saved&&!saved.completed?'Continuar aprendizaje':'Aprender a jugar'} →</button><small>Opcional · unos 3 minutos · puedes ir directamente a cualquier expediente</small>`;
+ const guide=document.getElementById('academyGuide'),stage=academyStage();guide.hidden=stage<0;document.body.classList.toggle('academy-mode',stage>=0);
+ if(stage<0)return;
+ const [title,text,action]=academySteps[stage];
+ guide.innerHTML=`<div class="academy-step">${stage===6?'INICIACIÓN COMPLETADA':`PASO ${stage+1} DE 6`}</div><div><strong>${title}</strong><p>${text}</p></div><button class="btn small primary" onclick="academyAction()">${action} →</button><button class="btn small ghost" onclick="showHome()">Salir de la guía</button>`;
+}
+function academyAction(){
+ switch(academyStage()){
+ case 0:selectPerson('p0');break;
+ case 1:openDocument('d1');break;
+ case 2:openDocument('d2');break;
+ case 3:selectPerson('p1');break;
+ case 4:document.getElementById('relationSelect').focus();document.getElementById('evidenceList').scrollIntoView({block:'nearest',behavior:'smooth'});break;
+ case 5:openSolve();break;
+ case 6:showHome();break;
+ }
+}
+for(const name of ['startCase','selectPerson','openDocument','collectAgencyClue','markPerson','createConnection','refreshHeader']){
+ const original=window[name];window[name]=function(...args){const result=original(...args);renderAcademy();return result};
+}
+const academyOldHome=showHome;showHome=function(){academyOldHome();document.getElementById('academyGuide').hidden=true;document.body.classList.remove('academy-mode')};
+const academyOldSolve=openSolve;openSolve=function(){if(cases[state.caseId]?.tutorial&&academyStage()<5){toast('Completa primero los pasos de la nota dorada. Te ayudarán a justificar la solución.');return}academyOldSolve()};
+const academyOldSubmit=submitSolve;submitSolve=function(){
+ if(cases[state.caseId]?.tutorial){
+  const who=document.getElementById('solveWho').value,p1=document.getElementById('solveP1').value,p2=document.getElementById('solveP2').value;
+  if(who!=='p1'||p1===p2||![p1,p2].every(p=>state.found.includes(p))){toast('Revisa la fotografía y el recibo: identifica la etiqueta B-17 y quién entrega el libro. Elige las dos fuentes distintas. Puedes intentarlo sin penalización.');return}
+ }
+ academyOldSubmit();renderAcademy();
+};
+renderAcademy();
