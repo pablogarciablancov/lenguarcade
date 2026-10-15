@@ -345,7 +345,7 @@ function leaveShop(){
 function advanceRound(){
  run.round++;run.roundScore=0;run.target=Math.round(targetForRound(run.round)*run.nextTargetFactor);run.status='play';run.energy=roundEnergy()+run.nextEnergyBonus;run.activeBounty=run.nextBounty;run.nextTargetFactor=1;run.nextBounty=0;run.nextEnergyBonus=0;run.categorySeenRound=[];run.targetLength=4+Math.floor(random()*5);run.selected=[];run.rerollSelection=[];run.efficiencyReward=0;run.lastIncome=null;replenish();
 }
-function end(won){run.status=won?'victory':'defeat';run.finished=true;run.shop=null;run.resultId=run.id+'_result';if(won)career.wins++;career.bestScore=Math.max(career.bestScore,run.totalScore);unlock();save();}
+function end(won){run.status=won?'victory':'defeat';run.finished=true;run.shop=null;run.resultId=run.id+'_result';if(won){career.wins++;if(!run.victory)run.victory={runId:run.id,mode:run.mode,rounds:totalRounds(),at:new Date().toISOString()};}career.bestScore=Math.max(career.bestScore,run.totalScore);unlock();save();}
 function continueEndless(){
  if(!run?.finished||run.status!=='victory')return false;
  run.endless=true;run.finished=false;run.status='play';run.round++;run.roundScore=0;run.target=Math.round((run.target||mode().targets.at(-1))*1.35);run.energy=roundEnergy();run.rerolls+=1;run.categorySeenRound=[];run.resultId=null;run.shop=null;replenish();save();return true;

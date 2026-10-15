@@ -101,3 +101,15 @@ assert.equal(E.run.round,C.modes.normal.rounds+1);
 E.run.target=1;setHand('EL');E.select(100);E.select(101);assert.ok(E.play().ok);
 assert.equal(E.run.status,'shop','En infinito, superar una ronda posterior al límite debe ir a tienda, no terminar otra vez.');
 console.log('Cierre OK: modo infinito continúa más allá del límite normal.');
+
+// A real final-round play records a dated victory, preserved in saves/endless.
+E.start('easy',777);E.leaveShop();E.run.round=7;E.run.target=1;
+setHand('EL');E.select(100);E.select(101);assert.ok(E.play().ok);
+assert.equal(E.run.status,'victory');
+assert.equal(E.run.victory.mode,'easy');assert.equal(E.run.victory.rounds,7);
+assert.ok(Number.isFinite(Date.parse(E.run.victory.at)));
+const wonAt=E.run.victory.at, victoryId=E.run.victory.runId;
+assert.equal(E.restore(E.snapshot()),true);assert.equal(E.run.victory.at,wonAt);
+assert.equal(E.continueEndless(),true);assert.equal(E.run.victory.runId,victoryId);
+E.start('easy',778);assert.equal(E.run.victory,undefined);
+console.log('Victoria de misión OK: 7 rondas en fácil, fecha, guardado, infinito y nueva partida.');

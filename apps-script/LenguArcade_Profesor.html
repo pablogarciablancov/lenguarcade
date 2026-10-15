@@ -1297,6 +1297,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     }catch(error){return [];}
   }
   var WORKSHOP_ROUTE_PRESETS=[
+    {id:'route_forja_easy',title:'La primera gran forja',message:'Gana una partida completa de Forja en dificultad Fácil: supera sus 7 rondas.',objectiveType:'forja_easy_win',targetXp:0,gameIds:['lexoma'],focus:'Formación de palabras · victoria en fácil'},
     {id:'route_01',step:1,title:'Primeros pasos · La aventura empieza',message:'Empieza tu recorrido por LenguArcade. Entra en Battlegrafía, completa tus primeros combates y alcanza el objetivo de experiencia.',targetXp:100,gameIds:['battlegrafia'],focus:'Ortografía + adaptación a LenguArcade'},
     {id:'route_02',step:2,title:'Ortografía a toda velocidad',message:'Alterna precisión y rapidez. Juega a Battlegrafía y Maniacgrafía hasta alcanzar el nuevo objetivo de XP.',targetXp:150,gameIds:['battlegrafia','maniacgrafia'],focus:'Ortografía y agilidad'},
     {id:'route_03',step:3,title:'Laboratorio de palabras',message:'Amplía vocabulario y juega con las palabras. Combina Scrabble y Word Play para superar el reto.',targetXp:175,gameIds:['scrabble','word_play'],focus:'Léxico y formación de palabras'},
@@ -1336,6 +1337,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
   function plannerSameGoal(plan,outcome){
     if(!plan||!outcome)return false;
     var clean=function(value){return String(value||'').trim().toLocaleLowerCase();};
+    if(String(plan.objectiveType||'xp')!==String(outcome.objectiveType||'xp'))return false;
     if(clean(plan.title)!==clean(outcome.title)||Number(plan.targetXp||0)!==Number(outcome.targetXp||0))return false;
     var planGames=Array.isArray(plan.gameIds)?plan.gameIds.map(String).sort():[];
     var outcomeGames=Array.isArray(outcome.gameIds)?outcome.gameIds.map(String).sort():[];
@@ -1343,7 +1345,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
   }
   function plannerVisiblePlans(){
     var all=workshopPlannerState&&Array.isArray(workshopPlannerState.plans)?workshopPlannerState.plans:[];
-    var outcomes=plannerOutcomesForClass().filter(function(row){return Number(row.targetXp||0)>0;});
+    var outcomes=plannerOutcomesForClass().filter(function(row){return row.objectiveType==='forja_easy_win'||Number(row.targetXp||0)>0;});
     var used=[],usedIds={};
     outcomes.forEach(function(outcome){
       var plan=all.find(function(item){return !!item.usedAt&&String(item.planId)===String(outcome.planId||'');})||
@@ -1389,6 +1391,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       return;
     }
     var meta=['<span>🎮 '+sessionEsc(plannerGameCountLabel(s.gameIds))+'</span>'];
+    if(s.objectiveType==='forja_easy_win')meta.push('<span>🎯 Ganar en Forja · Fácil</span>');
     if(Number(s.targetXp||0)>0)meta.push('<span>🎯 '+sessionEsc(s.targetXp)+' XP</span>');
     if(s.homeEnabled)meta.push('<span>🏠 Horario de casa configurado</span>');
     var openButton=s.classroomOpen?'':'<button type="button" id="workshopActiveOpen">▶ Abrir en clase</button>';
@@ -1418,6 +1421,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     list.innerHTML=plans.map(function(plan){
       var classes='workshopPlanCard'+(plan.active?' isActive':'')+(String(plan.planId)===String(workshopEditingPlanId)?' isEditing':'');
       var meta=['<span>🎮 '+sessionEsc(plannerGameCountLabel(plan.gameIds))+'</span>'];
+      if(plan.objectiveType==='forja_easy_win')meta.push('<span>🎯 Ganar en Forja · Fácil</span>');
       if(Number(plan.targetXp||0)>0)meta.push('<span>🎯 '+sessionEsc(plan.targetXp)+' XP</span>');
       if(plan.homeEnabled)meta.push('<span>🏠 Casa</span>');
       if(Array.isArray(plan.classCodes)&&plan.classCodes.length>1)meta.push('<span>👥 '+sessionEsc(plan.classCodes.length)+' clases</span>');
@@ -1444,7 +1448,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     var classes=plannerClasses();
     var catalog=workshopPlannerState&&workshopPlannerState.catalog||[];
     body.innerHTML='<div class="workshopEditorIntro"><div><h3>'+(plan.planId?'Editar sesión':'Nueva sesión')+'</h3><div class="sub">'+(plan.planId?'Los cambios quedan guardados en esta preparación. No afectan a los alumnos hasta que la abras.':'Elige una plantilla o prepara la sesión desde cero.')+'</div></div>'+(plan.planId?'<span class="workshopSessionState closed">Preparada</span>':'')+'</div><input id="workshopPlanId" type="hidden" value="'+sessionEsc(plan.planId||'')+'"><div class="workshopTemplateBar"><button type="button" class="workshopTemplateBtn" data-workshop-template="game"><strong>🎮 Sesión de juego</strong><span>Selecciona juegos y abre la clase cuando llegue el momento.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="xp"><strong>🎯 Reto de XP</strong><span>Prepara una sesión con objetivo visible de progreso.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="home"><strong>🏠 Trabajo en casa</strong><span>Deja preparado un horario de acceso fuera del aula.</span></button></div><div id="workshopTemplateFeedback" class="workshopTemplateFeedback">Elige una plantilla para rellenar automáticamente los campos principales.</div><div class="workshopEditorSteps">'+
-      '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">1</span><div><strong>Identifica y comparte la sesión</strong><span>Prepara el taller una sola vez y asígnalo a todas las clases que lo vayan a utilizar.</span></div></div><div class="workshopFormGrid"><div class="field wide"><label>Clases que comparten esta preparación</label><div id="workshopPlanClasses" class="workshopClassPicker">'+classes.map(function(row){return '<label class="workshopClassChoice"><input type="checkbox" data-plan-class value="'+sessionEsc(row.classCode)+'" '+(selectedClasses[row.classCode]?'checked':'')+'> '+sessionEsc(row.nombreVisible)+'</label>';}).join('')+'</div><div class="workshopClassTools"><button type="button" id="workshopClassOnlyCurrent">Solo esta clase</button><button type="button" id="workshopClassAll">Seleccionar todas</button></div><div class="workshopClassShareHint">Compartir la preparación no abre el taller en todas a la vez: cada clase lo activa cuando le toca.</div></div><div class="field"><label>Título de la sesión</label><input id="workshopSessionTitle" type="text" maxlength="80" placeholder="Ej.: Taller 3 · Cazadores de tildes" value="'+sessionEsc(plan.title||'')+'"></div><div class="field"><label>Fecha prevista <span class="sub">(solo organización)</span></label><input id="workshopPlannedAt" type="datetime-local" value="'+sessionEsc(plan.plannedAt||'')+'"></div><div class="field wide"><label>Mensaje / instrucciones para los alumnos</label><textarea id="workshopSessionMessage" maxlength="400" placeholder="Ej.: Hoy trabajamos ortografía. Completa dos partidas y trata de superar el reto de XP.">'+sessionEsc(plan.message||'')+'</textarea></div><div class="field"><label>Reto de esta sesión · objetivo de XP (opcional)</label><input id="workshopSessionXp" type="number" min="0" step="25" value="'+sessionEsc(Number(plan.targetXp||0))+'"></div></div></section>'+
+      '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">1</span><div><strong>Identifica y comparte la sesión</strong><span>Prepara el taller una sola vez y asígnalo a todas las clases que lo vayan a utilizar.</span></div></div><div class="workshopFormGrid"><div class="field wide"><label>Clases que comparten esta preparación</label><div id="workshopPlanClasses" class="workshopClassPicker">'+classes.map(function(row){return '<label class="workshopClassChoice"><input type="checkbox" data-plan-class value="'+sessionEsc(row.classCode)+'" '+(selectedClasses[row.classCode]?'checked':'')+'> '+sessionEsc(row.nombreVisible)+'</label>';}).join('')+'</div><div class="workshopClassTools"><button type="button" id="workshopClassOnlyCurrent">Solo esta clase</button><button type="button" id="workshopClassAll">Seleccionar todas</button></div><div class="workshopClassShareHint">Compartir la preparación no abre el taller en todas a la vez: cada clase lo activa cuando le toca.</div></div><div class="field"><label>Título de la sesión</label><input id="workshopSessionTitle" type="text" maxlength="80" placeholder="Ej.: Taller 3 · Cazadores de tildes" value="'+sessionEsc(plan.title||'')+'"></div><div class="field"><label>Fecha prevista <span class="sub">(solo organización)</span></label><input id="workshopPlannedAt" type="datetime-local" value="'+sessionEsc(plan.plannedAt||'')+'"></div><div class="field wide"><label>Mensaje / instrucciones para los alumnos</label><textarea id="workshopSessionMessage" maxlength="400" placeholder="Ej.: Hoy trabajamos ortografía. Completa dos partidas y trata de superar el reto de XP.">'+sessionEsc(plan.message||'')+'</textarea></div><div class="field"><label>Tipo de objetivo</label><select id="workshopObjectiveType"><option value="xp" '+(plan.objectiveType!=='forja_easy_win'?'selected':'')+'>Alcanzar XP</option><option value="forja_easy_win" '+(plan.objectiveType==='forja_easy_win'?'selected':'')+'>Ganar en Forja · Fácil (7 rondas)</option></select></div><div class="field"><label>Objetivo de XP (solo para retos de XP)</label><input id="workshopSessionXp" type="number" min="0" step="25" value="'+sessionEsc(Number(plan.targetXp||0))+'"></div></div></section>'+
       '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">2</span><div><strong>Elige los juegos de esta sesión</strong><span>Al abrirla, solo estos juegos quedarán disponibles para la clase.</span></div></div><div id="workshopSessionGames" class="workshopGamePicker">'+catalog.map(function(game){var image=typeof bannerUrl==='function'?bannerUrl(game.gameId):'';return '<label class="workshopPick"><span class="workshopPickArt" style="--pick-img:url(\''+sessionEsc(image)+'\')">'+sessionEsc(teacherGameIcon(game.gameId,game.icono))+'</span><span><strong>'+sessionEsc(game.nombre)+'</strong><small>'+sessionEsc(game.categoria||game.subtitulo||'LenguArcade')+'</small></span><input type="checkbox" data-session-game value="'+sessionEsc(game.gameId)+'" '+(selected[String(game.gameId)]?'checked':'')+'></label>';}).join('')+'</div></section>'+
       '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">3</span><div><strong>Acceso opcional desde casa</strong><span>Úsalo solo si quieres que esta misma sesión esté disponible durante un horario concreto fuera del colegio.</span></div></div><div class="workshopHomeBox"><div class="workshopHomeHead"><div><strong>🏠 Permitir acceso en casa</strong><div class="sub">El horario se activa y caduca automáticamente.</div></div><label><input id="workshopHomeEnabled" type="checkbox" '+(plan.homeEnabled?'checked':'')+'> Activar</label></div><div id="workshopHomeTimes" class="workshopHomeTimes '+(plan.homeEnabled?'':'isDisabled')+'"><div class="field"><label>Desde</label><input id="workshopHomeStart" type="datetime-local" value="'+sessionEsc(plan.homeStart||'')+'"></div><div class="field"><label>Hasta</label><input id="workshopHomeEnd" type="datetime-local" value="'+sessionEsc(plan.homeEnd||'')+'"></div></div></div></section>'+
       '</div><div class="workshopEditorActions"><button type="button" id="workshopPlanSave">💾 Guardar preparación</button><button type="button" id="workshopPlanSaveOpen">▶ Guardar y abrir ahora</button><button type="button" class="homeAction" id="workshopPlanSaveHome">🏠 Guardar y activar horario de casa</button><button type="button" class="secondaryAction" id="workshopPlanCancel">Limpiar editor</button></div><div class="workshopPlannerStatus" id="workshopPlannerStatus"></div>';
@@ -1477,7 +1481,8 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       planId:(document.getElementById('workshopPlanId')||{}).value||'',
       title:(document.getElementById('workshopSessionTitle')||{}).value||'',
       message:(document.getElementById('workshopSessionMessage')||{}).value||'',
-      targetXp:Number((document.getElementById('workshopSessionXp')||{}).value||0),
+      objectiveType:(document.getElementById('workshopObjectiveType')||{}).value||'xp',
+      targetXp:(document.getElementById('workshopObjectiveType')||{}).value==='forja_easy_win'?0:Number((document.getElementById('workshopSessionXp')||{}).value||0),
       plannedAt:(document.getElementById('workshopPlannedAt')||{}).value||'',
       homeEnabled:!!((document.getElementById('workshopHomeEnabled')||{}).checked),
       homeStart:(document.getElementById('workshopHomeStart')||{}).value||'',
@@ -1494,6 +1499,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
   function plannerRouteMatchesOutcome(outcome,preset){
     var clean=function(value){return String(value||'').trim().toLocaleLowerCase();};
     if(clean(outcome&&outcome.title)!==clean(preset&&preset.title))return false;
+    if(String(outcome&&outcome.objectiveType||'xp')!==String(preset&&preset.objectiveType||'xp'))return false;
     if(Number(outcome&&outcome.targetXp||0)<Number(preset&&preset.targetXp||0))return false;
     var games=Array.isArray(outcome&&outcome.gameIds)?outcome.gameIds.map(String):[];
     return (preset&&Array.isArray(preset.gameIds)?preset.gameIds:[]).every(function(id){return games.indexOf(String(id))!==-1;});
@@ -1510,7 +1516,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     var host=document.getElementById('workshopRouteList');if(!host)return;
     host.innerHTML=orderedWorkshopRoutePresets().map(function(item){
       var preset=item.preset,used=item.used;
-      return '<article class="workshopRouteCard"><h4>'+sessionEsc(preset.title)+'</h4><p>'+sessionEsc(preset.focus)+'</p><div class="workshopRouteMeta"><span>🎯 '+sessionEsc(preset.targetXp)+' XP</span><span>🎮 '+sessionEsc(workshopRouteGameNames(preset))+'</span></div>'+(used?'<span class="workshopRouteDone">✓ REALIZADO EN ESTA CLASE</span>':'')+'<div class="workshopRouteActions"><button type="button" class="routePrepare" data-route-prepare="'+sessionEsc(preset.id)+'">Preparar / editar</button><button type="button" data-route-open="'+sessionEsc(preset.id)+'">▶ Abrir ahora</button></div></article>';
+      return '<article class="workshopRouteCard"><h4>'+sessionEsc(preset.title)+'</h4><p>'+sessionEsc(preset.focus)+'</p><div class="workshopRouteMeta"><span>🎯 '+(preset.objectiveType==='forja_easy_win'?'Ganar en fácil':sessionEsc(preset.targetXp)+' XP')+'</span><span>🎮 '+sessionEsc(workshopRouteGameNames(preset))+'</span></div>'+(used?'<span class="workshopRouteDone">✓ REALIZADO EN ESTA CLASE</span>':'')+'<div class="workshopRouteActions"><button type="button" class="routePrepare" data-route-prepare="'+sessionEsc(preset.id)+'">Preparar / editar</button><button type="button" data-route-open="'+sessionEsc(preset.id)+'">▶ Abrir ahora</button></div></article>';
     }).join('');
     [].slice.call(host.querySelectorAll('[data-route-prepare]')).forEach(function(button){button.onclick=function(){prepareWorkshopRoutePreset(button.dataset.routePrepare);};});
     [].slice.call(host.querySelectorAll('[data-route-open]')).forEach(function(button){button.onclick=function(){openWorkshopRoutePreset(button.dataset.routeOpen);};});
@@ -1523,7 +1529,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       planId:'',
       title:preset.title,
       message:preset.message,
-      targetXp:preset.targetXp,
+      objectiveType:preset.objectiveType||'xp',targetXp:preset.targetXp,
       plannedAt:'',
       homeEnabled:false,
       homeStart:'',
@@ -1543,7 +1549,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
         planId:routePlanId(preset.id,classCode),
         title:preset.title,
         message:preset.message,
-        targetXp:preset.targetXp,
+        objectiveType:preset.objectiveType||'xp',targetXp:preset.targetXp,
         plannedAt:'',
         homeEnabled:false,
         homeStart:'',
@@ -1566,7 +1572,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       workshopEditingPlanId='';
       var result=await sessionCall('getWorkshopPlannerAdmin',[classCode]);
       try{
-        var usedPlans=(result.plans||[]).filter(function(plan){return !!plan.usedAt;}).map(function(plan){return {planId:plan.planId,title:plan.title,message:plan.message,targetXp:plan.targetXp,gameIds:plan.gameIds,usedAt:plan.usedAt};});
+        var usedPlans=(result.plans||[]).filter(function(plan){return !!plan.usedAt;}).map(function(plan){return {planId:plan.planId,title:plan.title,message:plan.message,objectiveType:plan.objectiveType||'xp',targetXp:plan.targetXp,gameIds:plan.gameIds,usedAt:plan.usedAt};});
         if(usedPlans.length){var rebuilt=await edge('teacher-dashboard',{action:'reconstructWorkshopHistory',classCode:classCode,plans:usedPlans});if(Number(rebuilt&&rebuilt.imported||0)>0)await loadTeacher(false);}
       }catch(historyError){console.warn('No se pudo reconstruir el historial provisional de talleres.',historyError);}
       var historyData=await edge('teacher-dashboard',{classCode:classCode,gameId:''});
@@ -1653,7 +1659,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       session:{
         title:session.title||'',
         message:session.message||'',
-        targetXp:Number(session.targetXp||0),
+        objectiveType:session.objectiveType||'xp',targetXp:Number(session.targetXp||0),
         published:!!session.published,
         classroomOpen:!!session.classroomOpen,
         homeEnabled:!!session.homeEnabled,
@@ -1730,7 +1736,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     var s=workshopPlannerState&&workshopPlannerState.activeSession;if(!s)return;
     if(s.planId)return activatePreparedPlan(s.planId,true);
     setTeacherSessionBusy(true);try{
-      var payload={title:s.title,message:s.message,targetXp:s.targetXp,homeEnabled:s.homeEnabled,homeStart:s.homeStart,homeEnd:s.homeEnd,gameIds:s.gameIds,planId:s.planId||''};
+      var payload={title:s.title,message:s.message,objectiveType:s.objectiveType||'xp',targetXp:s.targetXp,homeEnabled:s.homeEnabled,homeStart:s.homeStart,homeEnd:s.homeEnd,gameIds:s.gameIds,planId:s.planId||''};
       var classCode=teacherCurrentClass();
       var result=await sessionCall('setWorkshopClassroomSessionOpen',[classCode,true,payload]);
       await syncWorkshopSupabaseAccess(classCode,result&&result.session);
@@ -2643,10 +2649,10 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
     host.innerHTML='<div class="completionTrackingHead"><div><h3>🎯 Objetivos de los talleres</h3><div class="sub">Cada alumno aparece una sola vez por sesión, con su XP y el estado del objetivo. Las sesiones reconstruidas no conceden puntos automáticos para evitar duplicar puntuaciones manuales.</div></div><span class="rosterPill">'+rows.length+' sesiones</span></div>'+
       (rows.length?'<div class="completionTrackingGrid">'+rows.map(function(w){
         var pct=Number(w.completionPercent||0);
-        var progress=(w.students||[]).map(function(row){return '<span class="completionName '+(row.completed?'done':'')+'">'+tEsc(row.nombre)+' · '+tEsc(row.xp)+'/'+tEsc(w.targetXp)+' XP · '+(row.completed?'✅ Objetivo conseguido':'Pendiente')+'</span>';});
+        var progress=(w.students||[]).map(function(row){return '<span class="completionName '+(row.completed?'done':'')+'">'+tEsc(row.nombre)+' · '+(w.objectiveType==='forja_easy_win'?(row.completed?'1/1 victoria':'0/1 victorias'):tEsc(row.xp)+'/'+tEsc(w.targetXp)+' XP')+' · '+(row.completed?'✅ Objetivo conseguido':'Pendiente')+'</span>';});
         var provisional=w.provisional?'<span class="workshopSessionState closed">Reconstrucción provisional · revisar</span>':'';
         var range=(w.startedAt?' · Desde '+tEsc(formatDate(w.startedAt)):'')+(w.endedAt?' · Hasta '+tEsc(formatDate(w.endedAt)):'');
-        return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(w.title||'Taller')+'</strong><div class="sub">'+tEsc(w.className||w.classCode||'Clase')+' · Reto: '+tEsc(w.targetXp||0)+' XP'+range+'</div>'+provisional+'</div><span class="completionPill">'+tEsc(w.completedCount||0)+' / '+tEsc(w.eligibleCount||0)+' objetivo</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'+(progress.length?'<div class="completionNames" style="margin-top:7px">'+progress.join('')+'</div>':'<div class="completionEmpty">No hay alumnos para mostrar.</div>')+'</article>';
+        return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(w.title||'Taller')+'</strong><div class="sub">'+tEsc(w.className||w.classCode||'Clase')+' · Reto: '+(w.objectiveType==='forja_easy_win'?'Ganar en Forja · Fácil':tEsc(w.targetXp||0)+' XP')+range+'</div>'+provisional+'</div><span class="completionPill">'+tEsc(w.completedCount||0)+' / '+tEsc(w.eligibleCount||0)+' objetivo</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'+(progress.length?'<div class="completionNames" style="margin-top:7px">'+progress.join('')+'</div>':'<div class="completionEmpty">No hay alumnos para mostrar.</div>')+'</article>';
       }).join('')+'</div>':'<div class="completionEmpty">No hay ningún taller publicado en el ámbito actual.</div>');
   }
   function renderTracking(data){renderSortedStudentRows(data||{});renderMissionTracking(data||{});renderWorkshopTracking(data||{});}
@@ -2829,7 +2835,7 @@ body.light .teacherMonitorTable th{background:#fff}
     var pct=Math.max(0,Math.min(100,Number(session.completionPercent||0)));
     return '<div class="teacherCommandPanel"><div class="teacherCommandPanelHead"><div><div class="teacherCommandEyebrow">ACTIVIDAD ABIERTA</div><h3>Sesión de clase</h3></div><span class="teacherSessionBadge">● EN CLASE</span></div>'+
       '<div class="teacherSessionTitle">'+safe(session.title||'Taller LenguArcade')+'</div>'+
-      '<div class="sub">'+safe(session.className||session.classCode||classLabel(data))+' · objetivo '+safe(session.targetXp||0)+' XP</div>'+
+      '<div class="sub">'+safe(session.className||session.classCode||classLabel(data))+' · objetivo '+(session.objectiveType==='forja_easy_win'?'Ganar en Forja · Fácil':safe(session.targetXp||0)+' XP')+'</div>'+
       '<div class="teacherSessionGames">'+(games||'<span class="teacherSessionGame">Juegos seleccionados</span>')+'</div>'+
       '<div class="teacherSessionProgress"><div class="teacherSessionProgressBar"><span style="width:'+pct+'%"></span></div><strong>'+safe(session.completedCount||0)+'/'+safe(session.eligibleCount||0)+'</strong></div>'+
       '<div class="sub">'+pct+'% ha alcanzado el objetivo del taller.</div>'+

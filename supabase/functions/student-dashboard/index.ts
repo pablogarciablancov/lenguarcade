@@ -1,3 +1,4 @@
+import {isForjaObjective, workshopVictory} from "../_shared/workshop-objective.js";
 import {levelProgress,learningGrade,platformMilestones} from "../_shared/progression.js";
 import {
   corsHeaders,
@@ -168,7 +169,7 @@ Deno.serve(async (request) => {
         .select("game_id,enabled")
         .eq("profile_id", profileId),
       admin.from("workshop_sessions")
-        .select("classroom_id,title,message,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
+        .select("classroom_id,title,message,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
         .eq("organization_id", organizationId)
         .eq("published", true),
     ]);
@@ -234,15 +235,16 @@ Deno.serve(async (request) => {
         }, 0)
       : 0;
     const workshopTargetXp = Math.max(0, Number(workshopSessionRow?.target_xp || 0));
-    const workshopCompleted = Boolean(workshopSessionRow && workshopTargetXp > 0 && workshopXp >= workshopTargetXp);
+    const workshopCompleted = Boolean(workshopSessionRow && (isForjaObjective(workshopSessionRow) ? (missionEventsResult.data || []).some(event => workshopVictory(workshopSessionRow, event)) : workshopTargetXp > 0 && workshopXp >= workshopTargetXp));
     const workshopSession = workshopSessionRow ? {
       classCode:String(classroom?.legacy_class_code || ""),
       classroomId:String(workshopSessionRow.classroom_id || ""),
       title:String(workshopSessionRow.title || "Taller"),
       message:String(workshopSessionRow.message || ""),
+      objectiveType:workshopSessionRow.objective_type || "xp",
       targetXp:workshopTargetXp,
       progressXp:workshopXp,
-      progressPercent:workshopTargetXp > 0 ? Math.min(100, Math.round(workshopXp / workshopTargetXp * 100)) : 0,
+      progressPercent:isForjaObjective(workshopSessionRow) ? (workshopCompleted ? 100 : 0) : workshopTargetXp > 0 ? Math.min(100, Math.round(workshopXp / workshopTargetXp * 100)) : 0,
       completed:workshopCompleted,
       startedAt:workshopStartedAt,
       published:workshopSessionRow.published === true,

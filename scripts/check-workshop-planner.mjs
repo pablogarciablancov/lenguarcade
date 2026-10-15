@@ -85,7 +85,7 @@ expect(
 );
 expect(
   teacherDashboard.includes("function collapseProvisionalWorkshopRuns(") &&
-    teacherDashboard.includes(".filter(session => Number(session.target_xp || 0) > 0)") &&
+    teacherDashboard.includes(".filter(session => isForjaObjective(session) || Number(session.target_xp || 0) > 0)") &&
     teacherDashboard.includes("end - start < 60_000") &&
     teacherDashboard.includes("start - previousEnd <= 60_000") &&
     /const workshopOutcomes = collapseProvisionalWorkshopRuns\([\s\S]*?\)\s*\.filter\(session => !classCode/.test(teacherDashboard),
@@ -194,7 +194,7 @@ expect(
   "Eliminar taller debe mostrarse como una acción destructiva visible.",
 );
 expect(
-  html.includes("Reto de esta sesión · objetivo de XP") &&
+  html.includes("Objetivo de XP (solo para retos de XP)") &&
     html.includes("objetivo, juegos y resultados queden unidos") &&
     !html.includes("data-plan-mission"),
   "El reto de XP y sus juegos deben gestionarse dentro del taller, sin crear una misión duplicada.",
