@@ -1,4 +1,4 @@
-import {isForjaObjective, workshopVictory} from "../_shared/workshop-objective.js";
+import {isForjaObjective, workshopVictory, groupWorkshops, workshopProgress} from "../_shared/workshop-objective.js";
 import {assessedMissions} from "../_shared/mission-grade.js";
 import {levelProgress,learningGrade} from "../_shared/progression.js";
 import {
@@ -703,7 +703,7 @@ async function handleWorkshopGameAccess(
         .update({ classroom_open:false, closed_at:new Date().toISOString(), updated_at:new Date().toISOString() })
         .eq("classroom_id", classroom.id)
         .eq("plan_id", String(existing.plan_id || ""))
-        .eq("started_at", String(existing.started_at));
+        .eq("started_at", String(existing.started_at)).is("closed_at", null);
       if (closeRunError) throw closeRunError;
     }
     const { error:deleteError } = await admin.from("workshop_sessions")
@@ -767,14 +767,21 @@ async function handleWorkshopGameAccess(
   }
 
   const incomingPlanId = String(session.planId || "").trim().slice(0, 160);
+  const {data:priorRuns,error:priorError}=await admin.from("workshop_runs").select("workshop_key,published")
+    .eq("organization_id",organizationId).eq("classroom_id",classroom.id).eq("plan_id",incomingPlanId)
+    .order("started_at",{ascending:false}).limit(1);
+  if(priorError)throw priorError;
+  if(priorRuns?.[0]?.published===false)return jsonResponse({ok:false,error:"workshop_deleted_create_new_edition"},409);
+  const workshopKey=String(priorRuns?.[0]?.workshop_key || incomingPlanId);
   const { data:existingSession, error:existingSessionError } = await admin.from("workshop_sessions")
-    .select("plan_id,started_at,published,objective_type")
+    .select("plan_id,started_at,published,objective_type,classroom_open,home_enabled")
     .eq("classroom_id", classroom.id)
     .eq("organization_id", organizationId)
     .maybeSingle();
   if (existingSessionError) throw existingSessionError;
   const samePublishedPlan = Boolean(
     existingSession?.published &&
+    !(classroomOpen && !existingSession.classroom_open && !existingSession.home_enabled) &&
     existingSession?.started_at &&
     String(existingSession.objective_type || "xp") === String(session.objectiveType || "xp") &&
     String(existingSession.plan_id || "") === incomingPlanId
@@ -784,7 +791,7 @@ async function handleWorkshopGameAccess(
       .update({ classroom_open:false, closed_at:new Date().toISOString(), updated_at:new Date().toISOString() })
       .eq("classroom_id", classroom.id)
       .eq("plan_id", String(existingSession.plan_id || ""))
-      .eq("started_at", String(existingSession.started_at));
+      .eq("started_at", String(existingSession.started_at)).is("closed_at", null);
     if (closePreviousError) throw closePreviousError;
   }
   const startedAt = samePublishedPlan
@@ -796,6 +803,7 @@ async function handleWorkshopGameAccess(
 
   const { error:runError } = await admin.from("workshop_runs").upsert({
     run_id:runId,
+    workshop_key:workshopKey,
     organization_id:organizationId,
     classroom_id:String(classroom.id),
     plan_id:incomingPlanId,
@@ -895,7 +903,7 @@ async function reconstructWorkshopHistory(
   ).sort((a: Record<string, unknown>, b: Record<string, unknown>) => Number(a.startedMs)-Number(b.startedMs));
 
   const { data:existing, error:existingError } = await admin.from("workshop_runs")
-    .select("run_id,plan_id,started_at,closed_at,is_provisional")
+    .select("run_id,plan_id,started_at,closed_at,is_provisional,published")
     .eq("organization_id", organizationId)
     .eq("classroom_id", classroom.id);
   if (existingError) throw existingError;
@@ -906,6 +914,7 @@ async function reconstructWorkshopHistory(
   let imported = 0;
   for (let index=0; index<candidates.length; index++) {
     const plan = candidates[index];
+    if ((existing || []).some(row => row.plan_id === plan.planId && row.published === false)) continue;
     const key = `${plan.planId}|${plan.startedMs}`;
     const next = candidates.slice(index+1).find((candidate: Record<string, unknown>) => Number(candidate.startedMs) > Number(plan.startedMs));
     const existingRun = existingByKey.get(key);
@@ -971,6 +980,23 @@ Deno.serve(async (request) => {
     if (action === "setBulkGameAccess") {
       return await handleBulkGameAccess(admin, organizationId, teacherProfileId, body);
     }
+    if (action === "deleteWorkshopHistory") {
+      const {data:run,error} = await admin.from("workshop_runs").select("run_id,classroom_id,plan_id,workshop_key")
+        .eq("organization_id",organizationId).eq("run_id",String(body.runId || "")).maybeSingle();
+      if(error)throw error;
+      if(!run)return jsonResponse({ok:false,error:"workshop_not_found"},404);
+      const key=String(run.workshop_key || run.plan_id || "");
+      if(key && !/^[A-Za-z0-9_-]+$/.test(key))return jsonResponse({ok:false,error:"invalid_workshop_key"},400);
+      const {data:periods,error:periodError}=await admin.from("workshop_runs").select("plan_id").eq("organization_id",organizationId).eq("classroom_id",run.classroom_id).or(`plan_id.eq.${key},workshop_key.eq.${key}`);
+      if(periodError)throw periodError;
+      let query=admin.from("workshop_runs").update({published:false,classroom_open:false,home_enabled:false,updated_by:teacherProfileId,updated_at:new Date().toISOString()})
+        .eq("organization_id",organizationId).eq("classroom_id",run.classroom_id);
+      query=key?query.or(`plan_id.eq.${key},workshop_key.eq.${key}`):query.eq("run_id",run.run_id);
+      const {error:hideError}=await query;if(hideError)throw hideError;
+      const {error:clearError}=await admin.from("workshop_sessions").delete().eq("organization_id",organizationId).eq("classroom_id",run.classroom_id).in("plan_id",(periods || []).map(p=>p.plan_id));
+      if(clearError)throw clearError;
+      return jsonResponse({ok:true,action:"deleteWorkshopHistory",scoresUnchanged:true});
+    }
     if (action === "setWorkshopGameAccess") {
       return await handleWorkshopGameAccess(admin, organizationId, teacherProfileId, body);
     }
@@ -1027,7 +1053,7 @@ Deno.serve(async (request) => {
         .eq("organization_id", organizationId)
         .eq("published", true),
       admin.from("workshop_runs")
-        .select("run_id,classroom_id,title,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,updated_at,is_provisional,reviewed_at")
+        .select("run_id,workshop_key,classroom_id,title,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,updated_at,is_provisional,reviewed_at")
         .eq("organization_id", organizationId)
         .order("started_at", { ascending:false })
         .limit(500),
@@ -1379,8 +1405,8 @@ Deno.serve(async (request) => {
     }
 
     const workshopOutcomes = collapseProvisionalWorkshopRuns(workshopRunsResult.data || workshopSessionsResult.data || [])
-      .filter(session => !classCode || selectedClassroomIds.has(String(session.classroom_id || "")))
-      .map(session => {
+      .filter(session => !classCode || selectedClassroomIds.has(String(session.classroom_id || "")));
+    const groupedWorkshopOutcomes = groupWorkshops(workshopOutcomes).map(session => {
         const classroomId = String(session.classroom_id || "");
         const targetXp = Math.max(0, Number(session.target_xp || 0));
         const startMs = Date.parse(String(session.started_at || session.active_from || session.updated_at || ""));
@@ -1391,23 +1417,8 @@ Deno.serve(async (request) => {
         );
         const eligible = profiles.filter(profile => (enrollmentsByProfile.get(profile.id) || []).includes(classroomId));
         const studentsProgress = eligible.map(profile => {
-          const events = eventRows
-            .filter(event => {
-              if (String(event.profile_id) !== String(profile.id)) return false;
-              if (String(event.event_type || "") === "teacher_adjustment") return false;
-              if (selectedGames.size && !selectedGames.has(String(event.game_id || ""))) return false;
-              const eventMs = Date.parse(String(event.occurred_at || ""));
-              return Number.isFinite(eventMs) &&
-                (!Number.isFinite(startMs) || eventMs >= startMs) &&
-                (!Number.isFinite(endMs) || eventMs <= endMs);
-            })
-            .sort((a, b) => Date.parse(String(a.occurred_at || "")) - Date.parse(String(b.occurred_at || "")));
-          let xp = 0;
-          let completedAt: string | null = null;
-          for (const event of events) {
-            xp += Math.max(0, Number(event.xp_delta || 0));
-            if (!completedAt && (isForjaObjective(session) ? workshopVictory(session, event) : targetXp > 0 && xp >= targetXp)) completedAt = String(event.occurred_at || "") || null;
-          }
+          const result = workshopProgress(session, eventRows.filter(event => String(event.profile_id) === String(profile.id)));
+          const {xp,completedAt} = result;
           return {
             studentId:String(profile.id),
             nombre:studentNameById.get(String(profile.id)) || String(profile.email || "Alumno"),
@@ -1429,6 +1440,8 @@ Deno.serve(async (request) => {
           className:String(classroom?.name || ""),
           planId:String(session.plan_id || ""),
           runId:String(session.run_id || ""),
+          openingCount:session.periods.length,
+          planIds:[...new Set(session.periods.map(period => String(period.plan_id || "")))],
           title:String(session.title || "Taller"),
           objectiveType:session.objective_type || "xp",
           targetXp,
@@ -1501,7 +1514,7 @@ Deno.serve(async (request) => {
           students:[],
         },
       })),
-      workshopOutcomes,
+      workshopOutcomes:groupedWorkshopOutcomes,
       classes:classrooms.map(row => ({
         classCode:row.legacy_class_code || row.id,
         nombreVisible:row.name,

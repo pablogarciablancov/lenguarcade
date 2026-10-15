@@ -110,9 +110,9 @@ expect(
   "Todos los juegos seleccionados deben sumar XP al mismo objetivo y enviar la asignatura LenguArcade al marcador.",
 );
 expect(
-  html.includes("action:'reconstructWorkshopHistory'") &&
+  !html.includes("action:'reconstructWorkshopHistory'") &&
     html.includes("loadTeacher(false)"),
-  "Al abrir el planificador deben importarse activaciones históricas y refrescarse los resultados.",
+  "Abrir el planificador no debe reconstruir talleres borrados ni crear aperturas.",
 );
 expect(
   studentDashboard.includes('from("workshop_sessions")') &&
@@ -195,7 +195,7 @@ expect(
 );
 expect(
   html.includes("Objetivo de XP (solo para retos de XP)") &&
-    html.includes("objetivo, juegos y resultados queden unidos") &&
+    html.includes("El taller ya incluye su objetivo, sus juegos y sus resultados") &&
     !html.includes("data-plan-mission"),
   "El reto de XP y sus juegos deben gestionarse dentro del taller, sin crear una misión duplicada.",
 );

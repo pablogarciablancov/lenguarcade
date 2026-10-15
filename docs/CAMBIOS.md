@@ -1,3 +1,11 @@
+## 2026-10-15 — Continuidad e historial de talleres
+
+- Reabrir y continuar reúne las aperturas del mismo taller y conserva sus ganadores. Nueva edición crea un reto independiente. Los intervalos cerrados no cuentan.
+- Eliminar del historial oculta el taller sin borrar partidas ni descontar premios concedidos. No se reconstruye automáticamente el historial eliminado.
+- Cerrado indica disponibilidad, no éxito; el objetivo pertenece al taller. Las misiones independientes se presentan como Retos extra.
+- Los premios conservan el identificador de la apertura original para evitar duplicados. Nueva columna workshop_key, sin cambiar los identificadores existentes.
+- Publicar los HTML en Apps Script para disponer de los botones nuevos.
+
 ## 2026-10-12 — Talleres preconfigurados sin numeración
 
 - Solo título y datos útiles; pendientes antes de realizados según la clase. Conserva títulos almacenados, route_01…route_08, planId y todo el historial; no migra ni reescribe registros.

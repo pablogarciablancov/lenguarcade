@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {forjaVictory,workshopVictory,isForjaObjective} from '../supabase/functions/_shared/workshop-objective.js';
+import {forjaVictory,workshopVictory,isForjaObjective,groupWorkshops,workshopProgress} from '../supabase/functions/_shared/workshop-objective.js';
 const session={objective_type:'forja_easy_win',started_at:'2026-10-15T08:00:00Z',closed_at:'2026-10-15T09:00:00Z'};
 const run={id:'test',mode:'easy',round:7,finished:true,status:'victory',victory:{runId:'test',mode:'easy',rounds:7,at:'2026-10-15T08:30:00Z'}};
 const win=forjaVictory('lexoma',{run});
@@ -25,7 +25,7 @@ const source=readFileSync('supabase/functions/save-progress/index.ts','utf8');
 const sender=source.slice(source.indexOf('async function sendCompletedWorkshopAwards('),source.indexOf('Deno.serve('));
 let events=[event], deliveries=[];
 const workshop={...session,run_id:'run:today',classroom_id:'C',published:true,is_provisional:false,game_ids:['lexoma'],target_xp:0};
-const context={isForjaObjective,workshopVictory,console,Date,crypto,TextEncoder,AbortSignal,
+const context={isForjaObjective,workshopVictory,groupWorkshops,workshopProgress,console,Date,crypto,TextEncoder,AbortSignal,
  Deno:{env:{get:()=> 'configured'}},
  fetch:async(url,opts)=>{deliveries.push(JSON.parse(opts.body));return {ok:true,json:async()=>({ok:true})}}};
 vm.runInNewContext(stripTypeScriptTypes(sender)+';globalThis.send=sendCompletedWorkshopAwards;',context);
