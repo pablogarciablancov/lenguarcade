@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 const E=window.LexomaEngine,L=window.LexomaLanguage,C=window.LexomaContent,B=window.LexomaBridge,$=id=>document.getElementById(id);
-let title=true,rerollMode=false,sound=false,audio=null,lastMessage='',collectionMode='bonuses',selectedPulseId=null,scoringAnimation=null,playingNow=false,choiceState=null;
+let title=true,rerollMode=false,sound=false,audio=null,lastMessage='',feedbackDraft='',collectionMode='bonuses',selectedPulseId=null,scoringAnimation=null,playingNow=false,choiceState=null;
 const fmt=n=>Number(n||0).toLocaleString('es-ES',{maximumFractionDigits:1});
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function tone(kind='click'){if(!sound)return;try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.connect(g);g.connect(audio.destination);o.type=kind==='score'?'triangle':'sine';o.frequency.value={click:300,select:430,score:720,error:130,reward:880,card:620,coin:960}[kind]||320;g.gain.setValueAtTime(.045,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.18);o.start();o.stop(audio.currentTime+.19);}catch{}}
@@ -52,6 +52,9 @@ function renderHand(r){
 }
 function renderGame(){
  const r=E.run;if(!r)return;const raw=E.draft(),validation=raw?E.validate(raw):null,livePreview=raw?E.score(raw,true):{points:0,multis:1,total:0,effects:[]},preview=scoringAnimation?.score||livePreview;
+ // A new draft replaces the previous result/error, including drag and accents.
+ if(!scoringAnimation&&raw!==feedbackDraft)lastMessage='';
+ feedbackDraft=raw;
  $('roundLabel').textContent=r.round+' / '+E.totalRounds();$('modeLabel').textContent=(C.modes[r.mode]?.name||r.mode).toUpperCase();$('runTotal').textContent=fmt(r.totalScore);$('walletValue').textContent=fmt(r.coins)+' ◉';
  $('pointsValue').textContent=fmt(preview.points||0);$('multisValue').textContent=fmt(preview.multis||1);$('scoreValue').textContent=fmt(r.roundScore);$('targetValue').textContent=fmt(r.target);$('goalBig').textContent=fmt(r.target);$('energyValue').textContent=Math.max(0,r.energy);$('rerollCount').textContent=r.rerolls+' ↻';$('bagCount').textContent=r.bag.length;$('scoreProgress').style.width=Math.min(100,r.roundScore/Math.max(1,r.target)*100)+'%';
  $('targetHint').textContent=(r.activeBounty?'APUESTA +'+r.activeBounty+' ◉ · ':'')+'BONUS OBJETIVO · '+r.targetLength+' LETRAS';

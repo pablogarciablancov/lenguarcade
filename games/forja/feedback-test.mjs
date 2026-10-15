@@ -1,0 +1,18 @@
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+const src=readFileSync(new URL('./app.js',import.meta.url),'utf8');
+const render=src.slice(src.indexOf('function renderGame(){'),src.indexOf('function shopCard('));
+const nodes=new Map();let word='';
+const box={E:{run:{round:1,mode:'easy',bag:[],rerollSelection:[],selected:[],target:100},draft:()=>word,validate:raw=>({ok:raw!=='xx',message:'No válida',analysis:{}}),score:()=>({points:12,multis:2,total:24}),totalRounds:()=>7,storageOK:true},C:{modes:{}},B:{embedded:false},scoringAnimation:null,lastMessage:'',feedbackDraft:'',rerollMode:false,fmt:String,esc:String,categoryText:()=> 'Sustantivo',renderBonusStack(){},renderScoringWord(){},renderWord(){},renderHand(){},renderOverlay(){},$:id=>{if(!nodes.has(id))nodes.set(id,{style:{},classList:{toggle(){}}});return nodes.get(id);}};
+vm.createContext(box);vm.runInContext(render,box);
+box.scoringAnimation={score:{display:'gana',points:24,multis:10.8,total:259}};box.lastMessage='GANA · 24 × 10.8 = 259';box.renderGame();
+assert.match(nodes.get('feedback').textContent,/GANA/);
+box.scoringAnimation=null;box.renderGame();assert.match(nodes.get('feedback').textContent,/GANA/);
+word='casa';box.renderGame();assert.match(nodes.get('feedback').textContent,/CASA.*12 × 2 = 24/);
+box.lastMessage='Error de jugada';box.renderGame();assert.equal(nodes.get('feedback').textContent,'Error de jugada');
+word='xx';box.renderGame();assert.equal(nodes.get('feedback').textContent,'No válida');
+word='';box.renderGame();assert.match(nodes.get('feedback').textContent,/Arrastra/);
+word='casa';box.renderGame();assert.match(nodes.get('feedback').textContent,/CASA/);
+word='casá';box.renderGame();assert.match(nodes.get('feedback').textContent,/CASÁ/);
+console.log('Forja: anterior resultado, nueva palabra, error, borrado y acento OK.');
