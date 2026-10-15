@@ -63,3 +63,5 @@ Pendiente de validación final tras integración: guardado en el servidor real, 
 Escenario ilustrado propio (`assets/atlas-scene.webp`) generado para el juego: un Atlas mágico en un bosque nocturno, con espacio oscuro para los controles. Menú de expediciones con acción principal, iconos vectoriales, perfil y estadísticas compactas; regiones con hitos y rutas de etapas; HUD con contexto de mundo y tablero de fichas talladas con marco metálico. Solo cambia presentación y marcado de las vistas; motor, banco y protocolo de guardado se conservan.
 
 Validado con `browser-test.cjs`: selección con ratón, teclado y táctil, victoria, jefe, guardado/restauración y cierre confirmado en host simulado, tres resoluciones de escritorio, contenedor de 620 px y móvil. También se comprobó el HTML autónomo por `file://`, con assets incrustados, selección, guardado/recarga y menú responsive.
+
+Las palabras se trazan solo en horizontal y vertical, con giros y sin repetir casillas. Esta regla se aplica también al cooperativo, las pistas y la validación del servidor.

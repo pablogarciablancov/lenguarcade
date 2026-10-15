@@ -793,3 +793,10 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Salas con versión y reintento de conflictos; cierre y progreso individual en una transacción idempotente. Sin premios para la práctica docente.
 - La expedición individual se guarda antes de conectar y queda pausada; el cooperativo no consume ni reemplaza sus letras, estrellas o estado.
 - Integración acotada del runner para enrutar Lexitrama a su propia función, conservando Conjuga. Requiere migración, nueva Edge Function, Pages y actualización del despliegue estable de Apps Script.
+
+## 2026-10-15 · Lexitrama sin diagonales
+
+- Todas las palabras se trazan solo en horizontal y vertical en individual y cooperativo; se conservan los giros y se prohíben los saltos de fila.
+- Selección, rutas, pistas y validaciones del servidor usan la misma regla. Las serpientes que generan tableros ya son ortogonales y siguen garantizando soluciones.
+- Al recuperar una expedición individual, se comprueba que quede una solución ortogonal; solo si hace falta se reponen letras, manteniendo identidad, puntuación, progreso y carrera. Los hallazgos ya confirmados en salas compartidas se conservan.
+- Actualizados ayuda, textos y versiones de caché del juego. Sin cambios de guardado, recompensas, Apps Script o esquema.

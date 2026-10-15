@@ -7,7 +7,7 @@ window.LexitramaEngine = (() => {
   function hash(text){let h=2166136261;for(const ch of String(text))h=Math.imul(h^ch.charCodeAt(0),16777619);return h>>>0;}
   function random(){state.rng=(state.rng+0x6D2B79F5)>>>0;let t=state.rng;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;}
   function shuffled(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-  function neighbors(index,size=state.size){const r=Math.floor(index/size),c=index%size,out=[];for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const nr=r+dr,nc=c+dc;if(nr>=0&&nr<size&&nc>=0&&nc<size)out.push(nr*size+nc);}return out;}
+  function neighbors(index,size=state.size,diagonals=false){const r=Math.floor(index/size),c=index%size,out=[];for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if((!dr&&!dc)||(!diagonals&&Math.abs(dr)+Math.abs(dc)!==1))continue;const nr=r+dr,nc=c+dc;if(nr>=0&&nr<size&&nc>=0&&nc<size)out.push(nr*size+nc);}return out;}
   function mission(){return C.missions.find(m=>m.id===state.mission);}
   function candidates(){return C.words.filter(w=>w.word.length<=state.size*state.size&&mission().test(w));}
   function tile(letter){return {letter,kind:'normal',hits:1,age:0,uid:++state.uid};}
@@ -81,7 +81,10 @@ window.LexitramaEngine = (() => {
     career=Object.assign(freshCareer(),copy(localNewer?local:incoming?.version===1?incoming:freshCareer()));
     career.stats=Object.assign(freshCareer().stats,career.stats||{});
     const run=localNewer?career.active:(raw?.run||career.active);
-    state=validRun(run)?copy(run):null;ready=true;persist();notify();return !!state;
+    state=validRun(run)?copy(run):null;ready=true;
+    // Legacy saves keep their progress; replace letters only if no orthogonal solution remains.
+    if(state&&!state.completed&&ensureSolvable())state.revision++;
+    persist();notify();return !!state;
   }
   function validRun(s){return !!(s&&s.version===1&&[3,4,5,7].includes(s.size)&&C.missions.some(m=>m.id===s.mission)&&Array.isArray(s.board)&&s.board.length===s.size**2&&s.board.every(t=>t&&typeof t.letter==='string'&&t.letter.length===1)&&Array.isArray(s.used)&&Number.isFinite(s.rng));}
   function create(options={}){
@@ -110,7 +113,7 @@ window.LexitramaEngine = (() => {
   }
   function submit(path){
     if(!ready||!state||state.completed)return {ok:false,message:'La partida ha terminado.'};
-    if(!validatePath(path))return {ok:false,message:'Conecta al menos dos casillas vecinas sin repetirlas.'};
+    if(!validatePath(path))return {ok:false,message:'Conecta al menos dos casillas en horizontal o vertical, sin repetirlas.'};
     state.moves--;state.revision++;
     const w=resolve(path);
     if(!w||state.used.includes(w.word)){
@@ -124,7 +127,7 @@ window.LexitramaEngine = (() => {
     const points=Math.round((w.word.length**2*4+w.difficulty*12+(goal?70:0))*multiplier()*(gold?3:1));state.score+=points;
     if(goal){state.progress++;if(state.boss)state.boss.hp=Math.max(0,state.boss.hp-10);}
     const removal=new Set();
-    for(const i of path){const t=state.board[i];if(t.kind==='ice'&&--t.hits>0){t.kind='ice';}else removal.add(i);if(t.kind==='bomb')for(const j of neighbors(i))removal.add(j);}
+    for(const i of path){const t=state.board[i];if(t.kind==='ice'&&--t.hits>0){t.kind='ice';}else removal.add(i);if(t.kind==='bomb')for(const j of neighbors(i,state.size,true))removal.add(j);}
     if(goal)for(const t of state.board)if(t.kind==='sealed')t.kind='normal';
     for(const t of state.board)if(t.kind==='corrupt'){t.age++;if(t.age>=4){state.score=Math.max(0,state.score-20);t.kind='normal';}}
     const animation=collapse([...removal]);
