@@ -6,7 +6,7 @@
   const embedded=params.get('lenguarcade')==='1'||params.get('la')==='1';
   const channel=params.get('channel')||'';
   let initialized=false,profile={},exitCheckpoint='',changeTimer=null,inFlight=null;
-  const outbox=[],confirmedResults=new Set();
+  const outbox=[],confirmedResults=new Set(),onlinePending=new Map(),flushWaiters=new Map();
   function post(type,payload={}) {
     if(!embedded||!channel)return;
     let target=window;
@@ -38,13 +38,13 @@
     outbox.push(event);pump();
   }
   function checkpoint(reason='autosave') {
-    if(!initialized)return '';
+    if(!initialized||window.LexitramaCoop?.active())return '';
     const checkpointId=`lexitrama_cp_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     queue({type:'CHECKPOINT',payload:{checkpointId,matchId:E.state?.id||'lexitrama_profile',reason,players:[participant()]}});
     return checkpointId;
   }
   function result(){
-    const s=E.state;if(!initialized||!s?.completed)return;
+    const s=E.state;if(!initialized||!s?.completed||window.LexitramaCoop?.active())return;
     const id=`${s.id}_result`;
     if(confirmedResults.has(id)||inFlight?.payload.resultId===id||outbox.some(e=>e.payload.resultId===id))return;
     queue({type:'RESULT',payload:{resultId:id,matchId:s.id,outcome:s.won?'win':'finished',players:[participant(s.won?'win':'finished')]}});
@@ -55,8 +55,10 @@
     const restored=E.initialize(profile,payload.save||null,true);initialized=true;
     post('INITIALIZED',{profileId:profile.studentId||profile.email||'',restored});
     status('Perfil conectado · guardado central');
+    window.LexitramaCoop?.configure(payload);
   }
   function saveAndExit(){
+    if(window.LexitramaCoop?.active()){window.LexitramaCoop.exit().then(()=>saveAndExit()).catch(()=>status('No se ha podido cerrar la sala. Reintenta.'));return;}
     E.persist();
     if(!embedded){window.dispatchEvent(new CustomEvent('lexitrama:menu'));return;}
     if(!initialized){status('Esperando conexión con LenguArcade.');return;}
@@ -71,6 +73,7 @@
     if(inFlight?.type!==type||id!==(type==='RESULT'?inFlight.payload.resultId:inFlight.payload.checkpointId))return;
     if(type==='RESULT')confirmedResults.add(id);
     inFlight=null;status('Progreso guardado en LenguArcade.');
+    if(flushWaiters.has(id)){flushWaiters.get(id).resolve();flushWaiters.delete(id);}
     if(exitCheckpoint===id){exitCheckpoint='';post('CLOSE_READY',{saved:true,checkpointId:id});}
     pump();
   }
@@ -80,6 +83,7 @@
     status('No se pudo guardar en LenguArcade. Pulsa Guardar para reintentar.');
   }
   function retry(){
+    if(window.LexitramaCoop?.active()){window.LexitramaCoop.refresh();return;}
     if(inFlight){inFlight.failed=false;post(inFlight.type,inFlight.payload);status('Reintentando guardado…');}
     else{checkpoint('manual');result();}
   }
@@ -87,6 +91,7 @@
     const m=event.data||{};
     if(!embedded||!ancestor(event.source)||m.namespace!=='lenguarcade-host'||m.channel!==channel)return;
     if(m.type==='INIT')initialize(m.payload);
+    if(m.type==='ONLINE_REPLY'){const pending=onlinePending.get(m.payload?.requestId);if(pending){clearTimeout(pending.timer);onlinePending.delete(m.payload.requestId);m.payload.error?pending.reject(new Error(m.payload.error)):pending.resolve(m.payload.data);}}
     if(m.type==='REQUEST_CHECKPOINT')checkpoint('host_request');
     if(m.type==='REQUEST_EXIT'){
       if(inFlight?.failed)retry();
@@ -104,7 +109,18 @@
   });
   window.addEventListener('lexitrama:finish',result);
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&!exitCheckpoint)checkpoint('visibility_hidden');});
-  window.addEventListener('pagehide',()=>{E.persist();if(!exitCheckpoint)checkpoint('pagehide');});
+  window.addEventListener('pagehide',()=>{if(window.LexitramaCoop?.active())return;E.persist();if(!exitCheckpoint)checkpoint('pagehide');});
+  function onlineRequest(payload){return new Promise((resolve,reject)=>{
+    const requestId=payload.requestId||crypto.randomUUID(),timer=setTimeout(()=>{onlinePending.delete(requestId);reject(new Error('connection_timeout'));},12000);
+    onlinePending.set(requestId,{resolve,reject,timer});post('ONLINE_REQUEST',{...payload,requestId});
+  });}
+  function flush(){return new Promise((resolve,reject)=>{
+    clearTimeout(changeTimer);const id=checkpoint('coop_prepare');if(!id){reject(new Error('save_unavailable'));return;}
+    const timer=setTimeout(()=>{flushWaiters.delete(id);reject(new Error('save_unavailable'));},15000);
+    flushWaiters.set(id,{resolve:()=>{clearTimeout(timer);resolve();}});
+    if(inFlight?.failed)retry();
+  });}
+  window.LexitramaBridge={embedded,onlineRequest,flush,checkpoint,result,retry,saveAndExit,get initialized(){return initialized;},get profile(){return profile;},get exiting(){return !!exitCheckpoint;}};
   if(embedded){
     let bootstrap=null;
     try{const b=JSON.parse(window.name||'null');if(b?.namespace==='lenguarcade-bootstrap'&&b.channel===channel&&b.gameId==='lexitrama'){bootstrap=b.payload;window.name='';}}catch{}
@@ -115,5 +131,5 @@
   }else{
     E.initialize({},null,false);status('Prueba local · progreso guardado en este navegador');
   }
-  window.LexitramaBridge={embedded,checkpoint,result,retry,saveAndExit,get initialized(){return initialized;},get profile(){return profile;},get exiting(){return !!exitCheckpoint;}};
+
 })();

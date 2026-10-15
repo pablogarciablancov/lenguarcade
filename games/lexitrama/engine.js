@@ -150,7 +150,8 @@ window.LexitramaEngine = (() => {
   function hint(){if(!state||state.completed||state.mode==='hardcore'||state.ink<=0)return null;state.ink--;state.hints++;ensureSolvable();const path=route(state.guaranteed);persist();return {word:state.guaranteed,path};}
   function reshuffle(){if(!state||state.completed||state.ink<=0)return false;state.ink--;state.reshuffles++;state.moves--;state.revision++;generate();checkEnd();persist();notify();return true;}
   function snapshot(){persist();return {version:1,gameId:'lexitrama',run:state?copy(state):null,career:copy(career)};}
+  function syncCoopCareer(save){if(save?.career?.version!==1)return;career=Object.assign(freshCareer(),copy(save.career));career.stats=Object.assign(freshCareer().stats,career.stats||{});persist();notify();}
   function isUnlocked(level){return level.unlock===0||!!career.stars[C.levels[level.unlock-1].id];}
   function abandon(){if(state&&!state.completed)finish(false,'Expedición terminada');}
-  return {get state(){return state;},get career(){return career;},get ready(){return ready;},initialize,create,neighbors,route,resolve,submit,multiplier,mission,accuracy,thirdMet,tick,hint,reshuffle,persist,snapshot,isUnlocked,abandon,validRun};
+  return {get state(){return state;},get career(){return career;},get ready(){return ready;},initialize,syncCoopCareer,create,neighbors,route,resolve,submit,multiplier,mission,accuracy,thirdMet,tick,hint,reshuffle,persist,snapshot,isUnlocked,abandon,validRun};
 })();

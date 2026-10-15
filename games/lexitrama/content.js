@@ -1,5 +1,5 @@
 /* Lexitrama: banco pedagógico propio. Flexiones generadas solo de verbos regulares. */
-window.LexitramaContent = (() => {
+(typeof window === 'undefined' ? globalThis : window).LexitramaContent = (() => {
   'use strict';
   const words = new Map();
   function add(word, type, extra = {}) {

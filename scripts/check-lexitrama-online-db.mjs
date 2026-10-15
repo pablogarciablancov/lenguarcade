@@ -1,0 +1,45 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+const {PGlite}=await import(process.env.PGLITE_MODULE||'@electric-sql/pglite');
+import {createState,makePlayer,command} from '../supabase/functions/lexitrama-online/engine.js';
+import {solutions} from './check-lexitrama-online.mjs';
+const db=new PGlite(),A='aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',B='bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb',ORG='cccccccc-cccc-4ccc-cccc-cccccccccccc',CLASS='dddddddd-dddd-4ddd-dddd-dddddddddddd';
+await db.exec('create role anon;create role authenticated;create role service_role bypassrls;create table organizations(id uuid primary key);create table profiles(id uuid primary key,role text);create table classrooms(id uuid primary key);create table games(id text primary key);');
+const src=fs.readFileSync('supabase/migrations/202606120001_initial_lenguarcade.sql','utf8');
+for(const name of ['game_progress','game_events','achievement_definitions','player_achievements','game_saves']){const a=src.indexOf('create table public.'+name+' ('),b=src.indexOf('\n);',a)+3;await db.exec(src.slice(a,b));}
+await db.exec(fs.readFileSync('supabase/migrations/20261007163618_conjuga_apuesta_online.sql','utf8'));
+await db.exec(fs.readFileSync('supabase/migrations/20261015072205_lexitrama_coop.sql','utf8'));
+await db.query('insert into organizations values($1)',[ORG]);await db.query('insert into classrooms values($1)',[CLASS]);await db.query("insert into profiles values($1,'student'),($2,'student')",[A,B]);await db.exec("insert into games values('lexitrama');");
+const original={version:1,gameId:'lexitrama',run:{id:'paused-expedition',board:['preserve']},career:{version:1,xp:100,stars:{bosque_1:3},active:{id:'paused-expedition'},stats:{words:8,longest:9},discovered:{casa:true},mastery:{verbo:9}}};
+await db.query("insert into game_saves(profile_id,game_id,slot,save_data) values($1,'lexitrama','main',$2)",[A,JSON.stringify(original)]);
+let now=Date.now(),n=0;const s=createState({id:A,name:'Ana'},{},now);s.players.push(makePlayer({id:B,name:'Bruno'}));s.lastSeen[B]=now;
+const r=(await db.query('select create_lexitrama_online_room($1,$2,$3,$4,$5) as room',[A,ORG,CLASS,'ABC23456',JSON.stringify(s)])).rows[0].room;
+r.guest_profile_id=B;r.state=s;
+const commit=async(v,state)=> (await db.query('select commit_lexitrama_online_room($1,$2,$3,$4) as room',[r.id,v,B,JSON.stringify(state)])).rows[0].room;
+const cmd=(actor,action,extra={})=>command(s,actor,action,{requestId:'db'+(++n),...extra},now);
+cmd(A,'ready');cmd(B,'ready');const found=solutions(s);for(let i=0;i<6;i++)cmd(i<4?A:B,'submit',{path:found[i].path});
+assert.equal(s.won,true);const saved=await commit(0,s);assert.equal(saved.version,1);
+const rows=(await db.query('select * from game_progress order by profile_id')).rows;assert.equal(rows.length,2);assert.equal(rows[0].xp,24);assert.equal(rows[1].xp,12);assert.equal(rows[0].attempts,4);assert.equal(rows[1].attempts,2);
+const own=(await db.query("select save_data from game_saves where profile_id=$1 and game_id='lexitrama'",[A])).rows[0].save_data;
+assert.deepEqual(own.run,original.run);assert.deepEqual(own.career.stars,original.career.stars);assert.deepEqual(own.career.active,original.career.active);assert.equal(own.career.xp,158);assert.equal(own.career.stats.words,12);assert.equal(own.career.mastery.verbo,9);
+assert.equal((await db.query('select count(*) from game_events')).rows[0].count,2);assert.equal(await commit(0,s),null);await commit(1,s);assert.equal((await db.query('select sum(xp) as xp from game_progress')).rows[0].xp,36);
+const roles=(await db.query("select has_function_privilege('authenticated','commit_lexitrama_online_room(uuid,integer,uuid,jsonb)','execute') as allowed")).rows[0];assert.equal(roles.allowed,false);
+// Creation retries rejoin the existing room, and one player cannot occupy two active rooms.
+const fresh=createState({id:A,name:'Ana'},{},now);const c=(await db.query('select create_lexitrama_online_room($1,$2,$3,$4,$5) as room',[A,ORG,CLASS,'ABC34567',JSON.stringify(fresh)])).rows[0].room;
+const again=(await db.query('select create_lexitrama_online_room($1,$2,$3,$4,$5) as room',[A,ORG,CLASS,'ABC45678',JSON.stringify(fresh)])).rows[0].room;assert.equal(c.id,again.id);
+await db.query("update profiles set role='teacher' where id=$1",[A]);
+const teacher=createState({id:A,name:'Profe',profileRole:'student'},{},now);teacher.players.push(makePlayer({id:B,name:'Bruno'}));teacher.lastSeen[B]=now;
+command(teacher,A,'ready',{requestId:'t1'},now);command(teacher,B,'ready',{requestId:'t2'},now);for(const [i,p] of solutions(teacher).slice(0,6).entries())command(teacher,i<4?A:B,'submit',{requestId:'t'+(i+3),path:p.path},now);
+await db.query('select commit_lexitrama_online_room($1,$2,$3,$4)',[c.id,c.version,B,JSON.stringify(teacher)]);
+assert.equal((await db.query('select xp from game_progress where profile_id=$1',[A])).rows[0].xp,24);assert.equal((await db.query('select xp from game_progress where profile_id=$1',[B])).rows[0].xp,24);
+// Simulate two concurrent submissions: a stale writer must reload and replay.
+await db.exec('delete from multiplayer_rooms;');
+const concurrent=createState({id:A,name:'Ana'},{},now);concurrent.players.push(makePlayer({id:B,name:'Bruno'}));concurrent.lastSeen[B]=now;
+command(concurrent,A,'ready',{requestId:'c-ready-a'},now);command(concurrent,B,'ready',{requestId:'c-ready-b'},now);
+const cr=(await db.query('select create_lexitrama_online_room($1,$2,$3,$4,$5) as room',[A,ORG,CLASS,'CONC2345',JSON.stringify(concurrent)])).rows[0].room;
+const left=structuredClone(concurrent),right=structuredClone(concurrent),sp=solutions(concurrent);
+command(left,A,'submit',{requestId:'concurrent-a',path:sp[0].path},now);command(right,B,'submit',{requestId:'concurrent-b',path:sp[1].path},now);
+const cp=async(version,state)=>(await db.query('select commit_lexitrama_online_room($1,$2,$3,$4) as room',[cr.id,version,B,JSON.stringify(state)])).rows[0].room;
+const winner=await cp(0,left);assert.equal(await cp(0,right),null);
+const retried=winner.state;command(retried,B,'submit',{requestId:'concurrent-b',path:sp[1].path},now);
+const together=await cp(1,retried);assert.equal(together.state.found.length,2);assert.equal(together.state.players[0].correct,1);assert.equal(together.state.players[1].correct,1);
+await db.close();console.log('Lexitrama Postgres: XP 4+2 individual, historial sin cambios, campaña preservada, doble cierre idempotente, permisos y profesor sin premios correctos.');

@@ -784,3 +784,12 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Después se conserva el combate por turnos: dificultad y apuesta individuales, ayudas, rescate, guardado y recompensas existentes. Las salas antiguas y el modo local siguen funcionando.
 - «Crear revancha» prepara una sala nueva con código para compartir y vuelve a exigir que ambos estén listos.
 - Publicación pendiente: actualizar juntos el juego en Pages y la función `conjuga-online`. No hay cambios de esquema ni de Apps Script.
+
+## 2026-10-15 · Lexitrama compartida (preparado, sin publicar)
+
+- Cooperativo para dos alumnos o profesor y alumno de la misma clase: código de sala, preparación de ambos y recuperación tras recargar.
+- Tablero fijo 7×7 y un objetivo elegido del banco pedagógico actual. Seis palabras compartidas en tres o cinco minutos; mínimo dos por jugador y máximo cuatro para que ambos aporten. Se admiten todas las palabras del banco que cumplan el objetivo, no solo las incrustadas.
+- Rutas verificadas en servidor, autor visible en hallazgos y colores por jugador. Las palabras repetidas no suman ni penalizan.
+- Salas con versión y reintento de conflictos; cierre y progreso individual en una transacción idempotente. Sin premios para la práctica docente.
+- La expedición individual se guarda antes de conectar y queda pausada; el cooperativo no consume ni reemplaza sus letras, estrellas o estado.
+- Integración acotada del runner para enrutar Lexitrama a su propia función, conservando Conjuga. Requiere migración, nueva Edge Function, Pages y actualización del despliegue estable de Apps Script.

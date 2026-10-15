@@ -1694,7 +1694,7 @@ async function authenticateGameOpponent(){
 }
 function buildGameInitPayload(runner){
   return {
-    onlineMultiplayer:supabaseBackend===true&&runner.game.gameId==='conjuga_apuesta',
+    onlineMultiplayer:supabaseBackend===true&&['conjuga_apuesta','lexitrama'].includes(runner.game.gameId),
     teacherPractice:['teacher','admin'].includes(currentDashboard.student.role),
     student:currentDashboard.student,
     save:parseStoredGameSave(runner.game),
@@ -2396,35 +2396,7 @@ async function persistGameCheckpoint(checkpoint){
       };
       const response=await callServer('saveGameCheckpoint',[payload]);
       confirmGameXpHud(runner,response,context.isPrimary);
-      refreshGameCelebrations(runner,response,context.isPrimary);
-      if(payload.countSession)markRunnerSessionCounted(runner,context.isPrimary,context.role);
-      if(response?.record){applySavedGameRecordToDashboard(runner,response.record,context.isPrimary,context.role);if(context.isPrimary)installGameBootstrapContext(runner);}
-    }
-    runner.failedCheckpoint=null;
-    updateGameSaveHud(runner,runner.pendingResult?'error':'saved');
-    $('gameRunnerRetry').classList.add('hidden');
-    if(closureCheckpoint&&activeGameRunner===runner&&runner.accessClosing&&runner.accessClosureAt===closureAt)runner.accessFinalCheckpointPending=false;
-    $('gameRunnerStatus').textContent=closureCheckpoint?'Último progreso guardado · volviendo a LenguArcade...':'Partida guardada.';
-    sendToActiveGame('CHECKPOINT_CONFIRMED',{checkpointId:checkpoint.checkpointId});
-    if(runner.closeRequested&&runner.explicitExitRequested&&!runner.checkpointQueue?.length&&(!runner.accessFinalizing||closureCheckpoint))setTimeout(()=>{if(activeGameRunner===runner&&!runner.checkpointing&&!runner.checkpointQueue?.length&&!runner.failedCheckpoint)destroyGameRunner(true);},250);
-  }catch(error){
-    runner.failedCheckpoint=checkpoint;
-    updateGameSaveHud(runner,'error');
-    $('gameRunnerRetry').classList.remove('hidden');
-    if(closureCheckpoint&&activeGameRunner===runner&&runner.accessClosing&&runner.accessClosureAt===closureAt)runner.accessFinalCheckpointPending=false;
-    $('gameRunnerStatus').textContent=closureCheckpoint?'No se pudo completar el último guardado. Volviendo a LenguArcade...':'No se pudo guardar la partida.';
-    sendToActiveGame('CHECKPOINT_FAILED',{checkpointId:checkpoint.checkpointId,message:error.message||String(error)});
-    if(closureCheckpoint&&runner.closeRequested&&runner.explicitExitRequested)setTimeout(()=>destroyGameRunner(true),350);
-  }finally{
-    if(activeGameRunner===runner){
-      runner.checkpointing=false;
-      const nextCheckpoint=runner.checkpointQueue?.shift();
-      if(nextCheckpoint)setTimeout(()=>{if(activeGameRunner===runner)persistGameCheckpoint(nextCheckpoint);},0);
-      if(!nextCheckpoint&&runner.accessFinalizing&&runner.accessFinalCheckpointPending&&!closureCheckpoint){
-        setTimeout(()=>{if(activeGameRunner===runner&&runner.accessFinalizing&&runner.accessFinalCheckpointPending)sendToActiveGame('REQUEST_EXIT');},0);
-      }
-    }
-    $('gameRunnerSaving').classList.add('hidden');
+      ref…609 tokens truncated… $('gameRunnerSaving').classList.add('hidden');
   }
 }
 
@@ -2454,22 +2426,22 @@ window.addEventListener('message',event=>{
     $('gameRunnerStatus').textContent='Partida en curso.';
   }
   if(message.type==='REQUEST_OPPONENT_AUTH')openGameOpponentLogin(message.payload||{});
-  if(message.type==='ONLINE_REQUEST'&&runner.game.gameId==='conjuga_apuesta'){
+  if(message.type==='ONLINE_REQUEST'&&['conjuga_apuesta','lexitrama'].includes(runner.game.gameId)){
     if(event.source!==runner.gameWindow&&event.source!==runner.iframe?.contentWindow)return;
     const payload=message.payload||{},requestId=String(payload.requestId||'');
     if(!requestId||requestId.length>80)return;
     const target=event.source;
-    const allowed=['context','create','join','resume','get','ready','reveal','answer','hint','swap','insurance','leave'];
+    const allowed=runner.game.gameId==='lexitrama'?['context','create','join','resume','get','ready','submit','leave']:['context','create','join','resume','get','ready','reveal','answer','hint','swap','insurance','leave'];
     if(!supabaseBackend||!allowed.includes(payload.action)){
       postToGameWindow(runner,target,'ONLINE_REPLY',{requestId,error:'online_unavailable'});return;
     }
     if(runner.onlineBusy){postToGameWindow(runner,target,'ONLINE_REPLY',{requestId,error:'request_busy'});return;}
     runner.onlineBusy=true;
-    callSupabaseFunction('conjuga-online',payload,token).then(data=>{
+    (runner.game.gameId==='lexitrama'?callSupabaseFunction('lexitrama-online',payload,token):callSupabaseFunction('conjuga-online',payload,token)).then(data=>{
       if(activeGameRunner!==runner)return;
       if(data.room){
         runner.sessionActive=data.room.state.phase!=='finished'&&data.room.state.phase!=='waiting';
-        $('gameRunnerStatus').textContent=runner.sessionActive?'Duelo online en curso.':'Sala online conectada.';
+        $('gameRunnerStatus').textContent=runner.sessionActive?(runner.game.gameId==='lexitrama'?'Expedición cooperativa en curso.':'Duelo online en curso.'):'Sala online conectada.';
         if(data.room.state.phase==='finished')runner.lastResultReason=String(data.room.state.reason||'');
       }
       postToGameWindow(runner,target,'ONLINE_REPLY',{requestId,data});
