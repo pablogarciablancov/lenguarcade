@@ -3161,7 +3161,7 @@ body.light .workshopSessionState.open{color:#176b4a}body.light .workshopSessionS
       var pct=Math.max(0,Math.min(100,Number(s.progressPercent||Math.round(current/target*100))));
       progress='<div class="studentMissionProgress"><div class="studentMissionProgressHead"><span>'+sessionEsc(current)+' / '+sessionEsc(target)+' XP</span>'+(s.completed?'<span class="studentMissionDone">✓ RETO COMPLETADO</span>':'<span>'+pct+'%</span>')+'</div><div class="studentMissionProgressTrack"><div class="studentMissionProgressFill" style="width:'+pct+'%"></div></div></div>';
     }
-    existing.innerHTML='<div class="studentMissionHead"><div><div class="sub">MISIÓN ACTUAL</div><h2>'+sessionEsc(s.title||'Sesión LenguArcade')+'</h2></div><span class="studentMissionBadge '+sessionModeClass(s)+'">'+sessionEsc(sessionModeLabel(s))+'</span></div>'+(s.message?'<div class="studentMissionMessage">'+sessionEsc(s.message)+'</div>':'')+'<div class="studentMissionMeta">'+meta.join('')+'</div>'+progress;
+    existing.innerHTML='<div class="studentMissionHead"><div><div class="sub">TALLER ACTUAL</div><h2>'+sessionEsc(s.title||'Sesión LenguArcade')+'</h2></div><span class="studentMissionBadge '+sessionModeClass(s)+'">'+sessionEsc(sessionModeLabel(s))+'</span></div>'+(s.message?'<div class="studentMissionMessage">'+sessionEsc(s.message)+'</div>':'')+'<div class="studentMissionMeta">'+meta.join('')+'</div>'+progress;
   }
 
   function applyStudentSessionToCards(){

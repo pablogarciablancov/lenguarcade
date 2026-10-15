@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {groupWorkshops,workshopProgress} from '../supabase/functions/_shared/workshop-objective.js';
+const first={run_id:'old-award-run',classroom_id:'C',plan_id:'first-plan',objective_type:'forja_easy_win',target_xp:0,game_ids:['lexoma'],published:true,started_at:'2026-10-15T10:00:00Z',closed_at:'2026-10-15T11:00:00Z'};
+const second={...first,run_id:'second-award-run',plan_id:'duplicate-plan',workshop_key:'first-plan',started_at:'2026-10-15T12:00:00Z',closed_at:'2026-10-15T13:00:00Z'};
+const win=(at,id='win')=>({id,game_id:'lexoma',event_type:'victory',occurred_at:at,xp_delta:10,details:{forjaVictory:{mode:'easy',rounds:7,runId:id,at}}});
+const groups=groupWorkshops([second,first]);assert.equal(groups.length,1);assert.equal(groups[0].periods.length,2);assert.equal(groups[0].plan_id,'first-plan');
+const a=win('2026-10-15T10:30:00Z','a'),b=win('2026-10-15T12:30:00Z','b');
+assert.equal(workshopProgress(groups[0],[a,b]).awardRun.run_id,first.run_id,'An already awarded student retains the original idempotency seed');
+assert.equal(workshopProgress(groups[0],[b]).awardRun.run_id,second.run_id,'A later winner retains the second original award');
+assert.equal(workshopProgress(groups[0],[win('2026-10-15T11:30:00Z')]).completed,false,'Closed gap excluded');
+assert.equal(workshopProgress(groups[0],[a,a]).xp,10,'Repeated events counted once');
+assert.equal(groupWorkshops([{...first,published:false}]).length,0,'Deleted history hidden');
+assert.equal(groupWorkshops([first,{...second,workshop_key:null,plan_id:'new-edition'}]).length,2,'New edition separate');
+assert.equal(groupWorkshops([first,{...second,classroom_id:'D'}]).length,2,'Classes separate');
+const xp=groupWorkshops([{...first,objective_type:'xp',target_xp:20},{...second,objective_type:'xp',target_xp:20}])[0];
+assert.equal(workshopProgress(xp,[a]).completed,false);assert.equal(workshopProgress(xp,[a,b]).completed,true);assert.equal(workshopProgress(xp,[a,b]).awardRun.run_id,second.run_id);
+console.log('Workshop continuation: cumulative results, closed gaps, classes, new editions, deletion and original award IDs OK.');

@@ -1,4 +1,4 @@
-import {isForjaObjective, workshopVictory} from "../_shared/workshop-objective.js";
+import {isForjaObjective, workshopVictory, groupWorkshops, workshopProgress} from "../_shared/workshop-objective.js";
 import {levelProgress,learningGrade,platformMilestones} from "../_shared/progression.js";
 import {
   corsHeaders,
@@ -223,19 +223,20 @@ Deno.serve(async (request) => {
     const workshopStartedAt = workshopSessionRow?.started_at || workshopSessionRow?.updated_at || null;
     const workshopStartedMs = workshopStartedAt ? Date.parse(String(workshopStartedAt)) : Number.NaN;
     const workshopEndsMs = workshopSessionRow?.active_to ? Date.parse(String(workshopSessionRow.active_to)) : Number.NaN;
-    const workshopXp = workshopSessionRow
-      ? (missionEventsResult.data || []).reduce((sum, row) => {
-          const occurredAt = Date.parse(String(row.occurred_at || ""));
-          if (!Number.isFinite(occurredAt)) return sum;
-          if (Number.isFinite(workshopStartedMs) && occurredAt < workshopStartedMs) return sum;
-          if (Number.isFinite(workshopEndsMs) && occurredAt > workshopEndsMs) return sum;
-          if (!workshopSelectedGameIds.has(String(row.game_id || ""))) return sum;
-          if (String(row.event_type || "") === "teacher_adjustment") return sum;
-          return sum + Math.max(0, Number(row.xp_delta || 0));
-        }, 0)
-      : 0;
+    let workshopPeriods: any[] = [];
+    if(workshopSessionRow){
+      const {data,error}=await admin.from("workshop_runs").select("*")
+        .eq("classroom_id",workshopSessionRow.classroom_id).eq("published",true);
+      if(error)throw error;
+      const activePeriod=(data || []).find(row=>row.plan_id===workshopSessionRow.plan_id&&row.started_at===workshopSessionRow.started_at);
+      const key=activePeriod?.workshop_key || workshopSessionRow.plan_id;
+      workshopPeriods=(data || []).filter(row=>(row.workshop_key || row.plan_id)===key);
+    }
+    const grouped=groupWorkshops(workshopPeriods).find(row=>row.objective_type===workshopSessionRow?.objective_type&&Number(row.target_xp)===Number(workshopSessionRow?.target_xp)&&JSON.stringify([...(row.game_ids||[])].sort())===JSON.stringify([...(workshopSessionRow?.game_ids||[])].sort()));
+    const result=workshopProgress(grouped || workshopSessionRow || {},missionEventsResult.data || []);
+    const workshopXp=result.xp;
     const workshopTargetXp = Math.max(0, Number(workshopSessionRow?.target_xp || 0));
-    const workshopCompleted = Boolean(workshopSessionRow && (isForjaObjective(workshopSessionRow) ? (missionEventsResult.data || []).some(event => workshopVictory(workshopSessionRow, event)) : workshopTargetXp > 0 && workshopXp >= workshopTargetXp));
+    const workshopCompleted=result.completed;
     const workshopSession = workshopSessionRow ? {
       classCode:String(classroom?.legacy_class_code || ""),
       classroomId:String(workshopSessionRow.classroom_id || ""),

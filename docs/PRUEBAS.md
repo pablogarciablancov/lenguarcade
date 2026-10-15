@@ -1,3 +1,9 @@
+## 2026-10-15 — Continuidad de talleres
+
+- npm run check: comprobaciones completas correctas. check-workshop-continuation cubre aperturas agrupadas, huecos cerrados, premio original, edición nueva, clases separadas y eliminación lógica.
+- Sintaxis de los tres Edge Functions comprobada. Prueba del emisor de premios de Forja correcta.
+- Pendiente tras publicación de Apps Script: comprobar Reabrir y continuar, Nueva edición y Eliminar del historial con sesión docente. No se dispuso de navegador autenticado en esta ejecución.
+
 ## 2026-10-12 — Orden de talleres preconfigurados
 
 - Sintaxis: 13 bloques de profesor correctos. Prueba con los dos primeros talleres realizados: aparecen al final, conservan datos e identificadores; otra clase sin historial mantiene los pendientes.

@@ -1361,7 +1361,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     return used.concat(pending);
   }
   function plannerBucketLabel(plan){
-    return ({active:'Activa',upcoming:'Próxima',draft:'Borrador',used:'Realizada'})[plannerBucket(plan)]||'Sesión';
+    return ({active:'Activa',upcoming:'Próxima',draft:'Borrador',used:'Ya abierto'})[plannerBucket(plan)]||'Sesión';
   }
   function plannerCounts(){
     var counts={upcoming:0,draft:0,used:0};
@@ -1426,8 +1426,8 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       if(plan.homeEnabled)meta.push('<span>🏠 Casa</span>');
       if(Array.isArray(plan.classCodes)&&plan.classCodes.length>1)meta.push('<span>👥 '+sessionEsc(plan.classCodes.length)+' clases</span>');
       if(plan.usedAt)meta.push('<span>✓ Ya utilizada en esta clase</span>');
-      var openButton=plan.usedAt?'':'<button type="button" data-plan-open="'+sessionEsc(plan.planId)+'">▶ Abrir ahora</button>';
-      return '<article class="'+classes+'" data-plan-card="'+sessionEsc(plan.planId)+'"><div class="workshopPlanCardTop"><div><strong>'+sessionEsc(plan.title||'Sesión del taller')+'</strong><div class="workshopPlanDate">📅 '+sessionEsc(plannerDateText(plan.plannedAt))+'</div><span class="workshopPlanKind">'+sessionEsc(plannerBucketLabel(plan))+'</span></div>'+(plan.active?'<span class="workshopSessionState '+plannerSessionModeClass(workshopPlannerState.activeSession)+'">Activa</span>':'')+'</div><div class="workshopPlanMeta">'+meta.join('')+'</div><div class="workshopPlanCardActions"><button type="button" class="ghostPlan" data-plan-edit="'+sessionEsc(plan.planId)+'">Editar</button>'+openButton+'<button type="button" class="ghostPlan" data-plan-duplicate="'+sessionEsc(plan.planId)+'">Duplicar</button>'+(plan.active?'':'<button type="button" class="dangerPlan" data-plan-delete="'+sessionEsc(plan.planId)+'">🗑 Eliminar taller</button>')+'</div></article>';
+      var openButton='<button type="button" data-plan-open="'+sessionEsc(plan.planId)+'">'+(plan.usedAt?'▶ Reabrir y continuar':'▶ Abrir ahora')+'</button>';
+      return '<article class="'+classes+'" data-plan-card="'+sessionEsc(plan.planId)+'"><div class="workshopPlanCardTop"><div><strong>'+sessionEsc(plan.title||'Sesión del taller')+'</strong><div class="workshopPlanDate">📅 '+sessionEsc(plannerDateText(plan.plannedAt))+'</div><span class="workshopPlanKind">'+sessionEsc(plannerBucketLabel(plan))+'</span></div>'+(plan.active?'<span class="workshopSessionState '+plannerSessionModeClass(workshopPlannerState.activeSession)+'">Activa</span>':'')+'</div><div class="workshopPlanMeta">'+meta.join('')+'</div><div class="workshopPlanCardActions"><button type="button" class="ghostPlan" data-plan-edit="'+sessionEsc(plan.planId)+'">Editar</button>'+openButton+'<button type="button" class="ghostPlan" data-plan-duplicate="'+sessionEsc(plan.planId)+'">Nueva edición</button>'+(plan.active?'':'<button type="button" class="dangerPlan" data-plan-delete="'+sessionEsc(plan.planId)+'">🗑 Eliminar taller</button>')+'</div></article>';
     }).join('');
     [].slice.call(list.querySelectorAll('[data-plan-edit]')).forEach(function(button){button.onclick=function(event){event.stopPropagation();editPlannerPlan(button.dataset.planEdit);};});
     [].slice.call(list.querySelectorAll('[data-plan-open]')).forEach(function(button){button.onclick=function(event){event.stopPropagation();activatePreparedPlan(button.dataset.planOpen,true);};});
@@ -1508,7 +1508,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     var outcomes=plannerOutcomesForClass();
     return WORKSHOP_ROUTE_PRESETS.map(function(preset,index){
       var plan=plannerPlan(routePlanId(preset.id,teacherCurrentClass()));
-      var used=!!(plan&&plan.usedAt)||outcomes.some(function(outcome){return plannerRouteMatchesOutcome(outcome,preset);});
+      var used=outcomes.some(function(outcome){return plannerRouteMatchesOutcome(outcome,preset);});
       return {preset:preset,used:used,index:index};
     }).sort(function(a,b){return Number(a.used)-Number(b.used)||a.index-b.index;});
   }
@@ -1516,7 +1516,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     var host=document.getElementById('workshopRouteList');if(!host)return;
     host.innerHTML=orderedWorkshopRoutePresets().map(function(item){
       var preset=item.preset,used=item.used;
-      return '<article class="workshopRouteCard"><h4>'+sessionEsc(preset.title)+'</h4><p>'+sessionEsc(preset.focus)+'</p><div class="workshopRouteMeta"><span>🎯 '+(preset.objectiveType==='forja_easy_win'?'Ganar en fácil':sessionEsc(preset.targetXp)+' XP')+'</span><span>🎮 '+sessionEsc(workshopRouteGameNames(preset))+'</span></div>'+(used?'<span class="workshopRouteDone">✓ REALIZADO EN ESTA CLASE</span>':'')+'<div class="workshopRouteActions"><button type="button" class="routePrepare" data-route-prepare="'+sessionEsc(preset.id)+'">Preparar / editar</button><button type="button" data-route-open="'+sessionEsc(preset.id)+'">▶ Abrir ahora</button></div></article>';
+      return '<article class="workshopRouteCard"><h4>'+sessionEsc(preset.title)+'</h4><p>'+sessionEsc(preset.focus)+'</p><div class="workshopRouteMeta"><span>🎯 '+(preset.objectiveType==='forja_easy_win'?'Ganar en fácil':sessionEsc(preset.targetXp)+' XP')+'</span><span>🎮 '+sessionEsc(workshopRouteGameNames(preset))+'</span></div>'+(used?'<span class="workshopRouteDone">YA ABIERTO EN ESTA CLASE</span>':'')+'<div class="workshopRouteActions"><button type="button" class="routePrepare" data-route-prepare="'+sessionEsc(preset.id)+'">Preparar / editar</button><button type="button" data-route-open="'+sessionEsc(preset.id)+'">'+(used?'▶ Reabrir y continuar':'▶ Abrir ahora')+'</button></div></article>';
     }).join('');
     [].slice.call(host.querySelectorAll('[data-route-prepare]')).forEach(function(button){button.onclick=function(){prepareWorkshopRoutePreset(button.dataset.routePrepare);};});
     [].slice.call(host.querySelectorAll('[data-route-open]')).forEach(function(button){button.onclick=function(){openWorkshopRoutePreset(button.dataset.routeOpen);};});
@@ -1543,10 +1543,12 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
   async function openWorkshopRoutePreset(id){
     if(teacherSessionBusy)return;
     var preset=workshopRoutePreset(id),classCode=teacherCurrentClass();if(!preset||!classCode)return;
+    var previous=plannerOutcomesForClass().find(function(row){return plannerRouteMatchesOutcome(row,preset);});
+    if(previous)return window.laResumeWorkshop(previous);
     setTeacherSessionBusy(true);plannerStatus('Abriendo '+preset.title+'…');
     try{
       var payload={
-        planId:routePlanId(preset.id,classCode),
+        planId:'',
         title:preset.title,
         message:preset.message,
         objectiveType:preset.objectiveType||'xp',targetXp:preset.targetXp,
@@ -1571,16 +1573,11 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     try{
       workshopEditingPlanId='';
       var result=await sessionCall('getWorkshopPlannerAdmin',[classCode]);
-      try{
-        var usedPlans=(result.plans||[]).filter(function(plan){return !!plan.usedAt;}).map(function(plan){return {planId:plan.planId,title:plan.title,message:plan.message,objectiveType:plan.objectiveType||'xp',targetXp:plan.targetXp,gameIds:plan.gameIds,usedAt:plan.usedAt};});
-        if(usedPlans.length){var rebuilt=await edge('teacher-dashboard',{action:'reconstructWorkshopHistory',classCode:classCode,plans:usedPlans});if(Number(rebuilt&&rebuilt.imported||0)>0)await loadTeacher(false);}
-      }catch(historyError){console.warn('No se pudo reconstruir el historial provisional de talleres.',historyError);}
       var historyData=await edge('teacher-dashboard',{classCode:classCode,gameId:''});
       result.workshopOutcomes=Array.isArray(historyData.workshopOutcomes)?historyData.workshopOutcomes:[];
-      mount.innerHTML='<section class="workshopRouteSection"><div class="workshopRouteHead"><div><div class="sub">RUTA RECOMENDADA</div><h3>🚀 Talleres preconfigurados</h3><div class="sub">Los pendientes aparecen primero y los realizados quedan al final según la clase seleccionada. Puedes abrir un taller directamente o cargarlo en el editor.</div></div></div><div id="workshopRouteList" class="workshopRouteList"></div></section><div id="workshopActiveHost"></div><div class="workshopPlannerGrid"><section class="workshopPlanLibrary"><div class="workshopPanelTitle"><div><h3>Tus talleres</h3><div class="sub">Próximos, borradores y sesiones ya utilizadas.</div></div><button type="button" id="workshopNewPlan">＋ Crear taller</button></div><div class="workshopListSummary" id="workshopListSummary"></div><div class="workshopPlanTabs" id="workshopPlanTabs"></div><div id="workshopPlanList" class="workshopPlanList"></div></section><section class="workshopPlanEditor"><div class="workshopPanelTitle"><div><h3>Preparar la sesión</h3><div class="sub">Guardar no publica nada automáticamente.</div></div></div><div id="workshopPlanEditorBody" class="workshopPlanEditorBody"></div></section></div>';
+      mount.innerHTML='<section class="workshopRouteSection"><div class="workshopRouteHead"><div><div class="sub">RUTA RECOMENDADA</div><h3>🚀 Talleres preconfigurados</h3><div class="sub">Los talleres todavía no abiertos aparecen primero. Reabrir continúa el mismo taller; Nueva edición crea otro independiente. Puedes abrir un taller directamente o cargarlo en el editor.</div></div></div><div id="workshopRouteList" class="workshopRouteList"></div></section><div id="workshopActiveHost"></div><div class="workshopPlannerGrid"><section class="workshopPlanLibrary"><div class="workshopPanelTitle"><div><h3>Tus talleres</h3><div class="sub">Próximos, borradores y sesiones ya utilizadas.</div></div><button type="button" id="workshopNewPlan">＋ Crear taller</button></div><div class="workshopListSummary" id="workshopListSummary"></div><div class="workshopPlanTabs" id="workshopPlanTabs"></div><div id="workshopPlanList" class="workshopPlanList"></div></section><section class="workshopPlanEditor"><div class="workshopPanelTitle"><div><h3>Preparar la sesión</h3><div class="sub">Guardar no publica nada automáticamente.</div></div></div><div id="workshopPlanEditorBody" class="workshopPlanEditorBody"></div></section></div>';
       document.getElementById('workshopNewPlan').onclick=newPlannerPlan;
       renderWorkshopPlanner(result);
-      Promise.resolve(syncWorkshopSupabaseAccess(classCode,result&&result.activeSession)).catch(function(error){console.warn('No se pudo sincronizar el Taller en segundo plano.',error);});
     }catch(error){mount.innerHTML='<div class="workshopPlannerEmpty"><strong>No se pudieron cargar las sesiones</strong>'+sessionEsc(error.message||error)+'</div>';}
   }
   function newPlannerPlan(){workshopEditingPlanId='';workshopTemplateKind='';renderPlannerList();renderPlannerEditor(plannerEditorPlan());}
@@ -1713,6 +1710,8 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
   }
   async function activatePreparedPlan(planId,openNow){
     if(teacherSessionBusy)return;var classCode=teacherCurrentClass();if(!classCode)return;
+    var previous=plannerOutcomesForClass().find(function(row){return row.planId===planId;});
+    if(openNow&&previous)return window.laResumeWorkshop(previous);
     setTeacherSessionBusy(true);plannerStatus(openNow?'Abriendo la sesión…':'Publicando la sesión…');
     try{
       var result=await sessionCall('activateWorkshopPlan',[classCode,planId,!!openNow]);
@@ -1724,6 +1723,38 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       refreshAdvancedWorkshopStateIfOpen(classCode);
     }catch(error){setTeacherSessionBusy(false);plannerStatus('No se pudo activar: '+(error.message||error),true);}
   }
+  window.laResumeWorkshop=async function(row){
+    if(teacherSessionBusy)return;
+    setTeacherSessionBusy(true);
+    try{
+      var existing=await sessionCall('getWorkshopPlannerAdmin',[row.classCode]);
+      var prepared=(existing.plans||[]).find(function(p){return p.planId===row.planId;});
+      var saved=prepared?await sessionCall('activateWorkshopPlan',[row.classCode,row.planId,true]):await sessionCall('saveAndActivateWorkshopPlan',[row.classCode,{
+        planId:row.planId,title:row.title,message:'Continúa el taller y consigue su objetivo. Se conserva tu progreso anterior.',
+        objectiveType:row.objectiveType||'xp',targetXp:row.targetXp||0,gameIds:row.gameIds||[],classCodes:[row.classCode],homeEnabled:false
+      },true]);
+      await syncWorkshopSupabaseAccess(row.classCode,saved.activeSession);
+      await loadTeacher(false);await loadWorkshopPlanner();
+      plannerStatus('Taller reabierto. Continúan los resultados anteriores; los premios no se repiten.');
+    }catch(error){plannerStatus('No se pudo reabrir: '+(error.message||error),true);}
+    finally{setTeacherSessionBusy(false);}
+  };
+  window.laDeleteWorkshopHistory=async function(row){
+    if(teacherSessionBusy)return;
+    if(!window.confirm('¿Eliminar «'+row.title+'» del historial de '+(row.className||row.classCode)+'?\n\nSe conservan las partidas y los puntos ya concedidos en Flotas. No se restarán puntos.'))return;
+    setTeacherSessionBusy(true);
+    try{
+      var current=await sessionCall('getWorkshopPlannerAdmin',[row.classCode]);
+      if(current.activeSession&&(row.planIds||[row.planId]).indexOf(current.activeSession.planId)!==-1){
+        await sessionCall('retireWorkshopPlannerSession',[row.classCode]);
+        await syncWorkshopSupabaseAccess(row.classCode,null);
+      }
+      await edge('teacher-dashboard',{action:'deleteWorkshopHistory',runId:row.runId});
+      await loadTeacher(false);await loadWorkshopPlanner();
+      plannerStatus('Taller eliminado del historial de esta clase.');
+    }catch(error){plannerStatus('No se pudo eliminar: '+(error.message||error),true);}
+    finally{setTeacherSessionBusy(false);}
+  };
   async function deletePreparedPlan(planId){
     if(teacherSessionBusy)return;var plan=plannerPlan(planId);if(!plan||plan.active)return;
     var shared=Array.isArray(plan.classCodes)&&plan.classCodes.length>1;
@@ -2329,7 +2360,7 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
     var existing=document.getElementById('misiones');if(existing)return existing;
     var section=document.createElement('section');section.id='misiones';section.className='card';
     section.innerHTML=
-      '<div class="missionAdminIntro"><div><div class="sub">ACTIVIDADES DE CLASE · RETOS Y MISIONES</div><h2>Retos y misiones</h2><p class="sub">Gestiona misiones generales o individuales. Los retos de XP ligados a una sesión se configuran dentro del Taller para que objetivo, juegos y resultados queden unidos.</p></div><div class="missionTopActions"><button type="button" class="ghost" id="missionQuickBtn">⚡ Misión rápida</button><button type="button" class="ghost" onclick="window.laShowTeacherScreen?window.laShowTeacherScreen(\'taller\'):document.getElementById(\'taller\')?.scrollIntoView({behavior:\'smooth\',block:\'start\'})">🧩 Planificar taller</button><button type="button" id="missionNewBtn">＋ Nueva misión</button></div></div>'+
+      '<div class="missionAdminIntro"><div><div class="sub">RETOS EXTRA · FUERA DEL TALLER</div><h2>Retos extra</h2><p class="sub">El taller ya incluye su objetivo, sus juegos y sus resultados: no crees aquí otra misión para la misma actividad. Esta sección es opcional, para retos independientes o individuales.</p></div><div class="missionTopActions"><button type="button" class="ghost" id="missionQuickBtn">⚡ Misión rápida</button><button type="button" class="ghost" onclick="window.laShowTeacherScreen?window.laShowTeacherScreen(\'taller\'):document.getElementById(\'taller\')?.scrollIntoView({behavior:\'smooth\',block:\'start\'})">🧩 Planificar taller</button><button type="button" id="missionNewBtn">＋ Nueva misión</button></div></div>'+
       '<div class="missionSummaryStrip" id="missionSummaryStrip"></div>'+
       '<div class="missionQuickPanel" id="missionQuickPanel"><div class="missionQuickHead"><div><h3>⚡ Publicar una misión en segundos</h3><div class="sub">Elige grupo, juego y objetivo. Podrás editarla después.</div></div><button type="button" class="ghost" id="missionQuickClose">Cerrar</button></div><div class="missionQuickGrid"><div class="field"><label>Clase</label><select id="missionQuickClass"></select></div><div class="field"><label>Alumno <span class="sub">(opcional)</span></label><select id="missionQuickStudent"></select></div><div class="field"><label>Juego</label><select id="missionQuickGame"></select></div><div class="field"><label>Objetivo</label><select id="missionQuickType"><option value="sessions">Partidas</option><option value="xp">XP</option><option value="accuracy">Precisión</option><option value="save">Guardar progreso</option></select></div><div class="field"><label>Cantidad</label><input id="missionQuickTarget" type="number" min="1" value="3"></div><div class="field"><label>Título</label><input id="missionQuickTitle" maxlength="180" placeholder="Se genera automáticamente"></div><button type="button" id="missionQuickPublish">Publicar</button></div><div class="status" id="missionQuickStatus"></div></div>'+
       '<div class="missionWorkspace"><div class="missionLibrary"><div class="missionLibraryHead"><div><h3>Misiones del curso</h3><div class="sub">Filtra, duplica o pausa sin perder la configuración.</div></div><div class="field missionClassFilter"><label>Clase</label><select id="missionListClass"></select></div></div><div class="missionTabs" id="missionTabs"></div><div id="missionActiveList" class="missionActiveList"></div></div>'+
@@ -2470,7 +2501,7 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
       var scope=m.studentName?('👤 '+m.studentName):(m.className||'Todas las clases');var game=m.gameName||'Todo LenguArcade';var bucket=missionBucket(m);
       var secondary=bucket==='paused'?'<button type="button" class="ghost" data-status-mission="'+mEsc(m.id)+'" data-status-value="published">Reanudar</button>':(bucket==='draft'?'<button type="button" data-status-mission="'+mEsc(m.id)+'" data-status-value="published">Publicar</button>':((bucket==='active'||bucket==='scheduled')?'<button type="button" class="ghost" data-status-mission="'+mEsc(m.id)+'" data-status-value="paused">Pausar</button>':''));
       var close=(bucket==='closed')?'':'<button type="button" class="dangerAction" data-archive-mission="'+mEsc(m.id)+'">Cerrar</button>';
-      return '<article class="missionAdminCard '+(m.featured?'featured':'')+'"><div class="missionAdminHead"><div><div class="sub">'+(m.featured?'⭐ DESTACADA · ':'')+mEsc(scope)+'</div><h3>'+mEsc(m.title)+'</h3><div class="missionAdminDesc">'+mEsc(m.description||'Sin instrucciones adicionales.')+'</div></div><span class="missionStatusPill '+mEsc(m.status)+'">'+mEsc(missionStatusLabel(m.status))+'</span></div><div class="missionAdminMeta"><span>🎯 '+mEsc(m.typeLabel)+' · '+mEsc(m.target)+'</span><span>🎮 '+mEsc(game)+'</span><span>⏰ '+mEsc(deadline)+'</span></div><div class="missionAdminActions"><button type="button" class="ghost" data-edit-mission="'+mEsc(m.id)+'">Editar</button><button type="button" class="ghost" data-duplicate-mission="'+mEsc(m.id)+'">Duplicar</button>'+secondary+close+'</div></article>';
+      return '<article class="missionAdminCard '+(m.featured?'featured':'')+'"><div class="missionAdminHead"><div><div class="sub">'+(m.featured?'⭐ DESTACADA · ':'')+mEsc(scope)+'</div><h3>'+mEsc(m.title)+'</h3><div class="missionAdminDesc">'+mEsc(m.description||'Sin instrucciones adicionales.')+'</div></div><span class="missionStatusPill '+mEsc(m.status)+'">'+mEsc(missionStatusLabel(m.status))+'</span></div><div class="missionAdminMeta"><span>🎯 '+mEsc(m.typeLabel)+' · '+mEsc(m.target)+'</span><span>🎮 '+mEsc(game)+'</span><span>⏰ '+mEsc(deadline)+'</span></div><div class="missionAdminActions"><button type="button" class="ghost" data-edit-mission="'+mEsc(m.id)+'">Editar</button><button type="button" class="ghost" data-duplicate-mission="'+mEsc(m.id)+'">Nueva edición</button>'+secondary+close+'</div></article>';
     }).join('');
     [].slice.call(host.querySelectorAll('[data-edit-mission]')).forEach(function(button){button.onclick=function(){var mission=(data.missions||[]).find(function(m){return m.id===button.dataset.editMission;});if(mission)fillMissionEditor(mission,data);};});
     [].slice.call(host.querySelectorAll('[data-duplicate-mission]')).forEach(function(button){button.onclick=function(){var mission=(data.missions||[]).find(function(m){return m.id===button.dataset.duplicateMission;});if(!mission)return;var copy=Object.assign({},mission,{id:'',title:(mission.title||'Misión')+' · copia',activeFrom:new Date().toISOString(),publicationStatus:'draft',status:'draft'});fillMissionEditor(copy,data);editingMissionId='';document.getElementById('missionAdminStatus').textContent='Copia preparada como borrador. Ajusta lo necesario antes de publicarla.';};});
@@ -2646,14 +2677,16 @@ body.la-teacher-screen-nav #appContent>[data-la-tools-group="1"]>.card{width:100
     var parent=document.getElementById('taller');if(!parent)return;
     var host=ensureTrackingHost(parent,'workshopCompletionTracking','Objetivos de taller','Seguimiento del objetivo XP de la sesión publicada.');
     var rows=Array.isArray(data.workshopOutcomes)?data.workshopOutcomes:[];
-    host.innerHTML='<div class="completionTrackingHead"><div><h3>🎯 Objetivos de los talleres</h3><div class="sub">Cada alumno aparece una sola vez por sesión, con su XP y el estado del objetivo. Las sesiones reconstruidas no conceden puntos automáticos para evitar duplicar puntuaciones manuales.</div></div><span class="rosterPill">'+rows.length+' sesiones</span></div>'+
+    host.innerHTML='<div class="completionTrackingHead"><div><h3>🎯 Objetivos de los talleres</h3><div class="sub">Un taller reúne todas sus aperturas. Cada alumno aparece una sola vez con su progreso acumulado. Cerrado no significa objetivo conseguido. Las sesiones reconstruidas no conceden puntos automáticos para evitar duplicar puntuaciones manuales.</div></div><span class="rosterPill">'+rows.length+' sesiones</span></div>'+
       (rows.length?'<div class="completionTrackingGrid">'+rows.map(function(w){
         var pct=Number(w.completionPercent||0);
         var progress=(w.students||[]).map(function(row){return '<span class="completionName '+(row.completed?'done':'')+'">'+tEsc(row.nombre)+' · '+(w.objectiveType==='forja_easy_win'?(row.completed?'1/1 victoria':'0/1 victorias'):tEsc(row.xp)+'/'+tEsc(w.targetXp)+' XP')+' · '+(row.completed?'✅ Objetivo conseguido':'Pendiente')+'</span>';});
         var provisional=w.provisional?'<span class="workshopSessionState closed">Reconstrucción provisional · revisar</span>':'';
         var range=(w.startedAt?' · Desde '+tEsc(formatDate(w.startedAt)):'')+(w.endedAt?' · Hasta '+tEsc(formatDate(w.endedAt)):'');
-        return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(w.title||'Taller')+'</strong><div class="sub">'+tEsc(w.className||w.classCode||'Clase')+' · Reto: '+(w.objectiveType==='forja_easy_win'?'Ganar en Forja · Fácil':tEsc(w.targetXp||0)+' XP')+range+'</div>'+provisional+'</div><span class="completionPill">'+tEsc(w.completedCount||0)+' / '+tEsc(w.eligibleCount||0)+' objetivo</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'+(progress.length?'<div class="completionNames" style="margin-top:7px">'+progress.join('')+'</div>':'<div class="completionEmpty">No hay alumnos para mostrar.</div>')+'</article>';
+        return '<article class="completionCard"><div class="completionTop"><div><strong>'+tEsc(w.title||'Taller')+'</strong><div class="sub">'+tEsc(w.className||w.classCode||'Clase')+' · Reto: '+(w.objectiveType==='forja_easy_win'?'Ganar en Forja · Fácil':tEsc(w.targetXp||0)+' XP')+range+' · '+(w.classroomOpen?'Abierto':'Cerrado')+'</div>'+provisional+'</div><span class="completionPill">'+tEsc(w.completedCount||0)+' / '+tEsc(w.eligibleCount||0)+' objetivo</span></div><div class="completionBar"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'+(progress.length?'<div class="completionNames" style="margin-top:7px">'+progress.join('')+'</div>':'<div class="completionEmpty">No hay alumnos para mostrar.</div>')+'<div class="workshopPlanCardActions"><button type="button" data-history-reopen="'+tEsc(w.runId)+'">Reabrir y continuar</button><button type="button" class="dangerPlan" data-history-delete="'+tEsc(w.runId)+'">Eliminar del historial</button></div></article>';
       }).join('')+'</div>':'<div class="completionEmpty">No hay ningún taller publicado en el ámbito actual.</div>');
+    host.querySelectorAll('[data-history-reopen]').forEach(function(button){button.onclick=function(){var row=rows.find(function(r){return r.runId===button.dataset.historyReopen;});if(row)window.laResumeWorkshop(row);};});
+    host.querySelectorAll('[data-history-delete]').forEach(function(button){button.onclick=function(){var row=rows.find(function(r){return r.runId===button.dataset.historyDelete;});if(row)window.laDeleteWorkshopHistory(row);};});
   }
   function renderTracking(data){renderSortedStudentRows(data||{});renderMissionTracking(data||{});renderWorkshopTracking(data||{});}
   function install(){

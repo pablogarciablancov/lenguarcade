@@ -1,4 +1,4 @@
-import {isForjaObjective, workshopVictory, forjaVictory} from "../_shared/workshop-objective.js";
+import {isForjaObjective, workshopVictory, forjaVictory, groupWorkshops, workshopProgress} from "../_shared/workshop-objective.js";
 import {snapshotProgress, XP_REWARD_GUIDE, capProgressionAward} from "../_shared/progression.js";
 import {
   boundedNumber,
@@ -36,14 +36,14 @@ async function sendCompletedWorkshopAwards(
 
   try {
     const { data:sessions, error } = await admin.from("workshop_runs")
-      .select("run_id,classroom_id,title,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,is_provisional")
+      .select("run_id,workshop_key,classroom_id,title,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,is_provisional")
       .in("classroom_id", classroomIds)
       .eq("published", true)
       .eq("is_provisional", false)
       .or("target_xp.gt.0,objective_type.eq.forja_easy_win");
     if (error) throw error;
 
-    for (const session of sessions || []) {
+    for (const session of groupWorkshops(sessions || [])) {
       const targetXp = Math.max(0, Number(session.target_xp || 0));
       const selectedGames = Array.isArray(session.game_ids)
         ? session.game_ids.map((value: unknown) => String(value || "")).filter(Boolean)
@@ -65,7 +65,7 @@ async function sendCompletedWorkshopAwards(
       const pageSize = 1000;
       let offset = 0;
       let xp = 0;
-      let won = false;
+      const workshopEvents: any[] = [];
       while (true) {
         let query = admin.from("game_events")
           .select("id,game_id,event_type,xp_delta,occurred_at,details")
@@ -80,18 +80,20 @@ async function sendCompletedWorkshopAwards(
         const { data:events, error:eventError } = await query;
         if (eventError) throw eventError;
         const page = events || [];
-        won = won || page.some((event: any) => workshopVictory(session, event));
+        workshopEvents.push(...page);
         xp += page.reduce((sum: number, event: Record<string, unknown>) =>
           sum + Math.max(0, Number(event.xp_delta || 0)), 0);
         if (page.length < pageSize) break;
         offset += pageSize;
       }
-      if (isForjaObjective(session) ? !won : xp < targetXp) continue;
+      const result=workshopProgress(session,workshopEvents);
+      if (!result.completed || !result.awardRun) continue;
+      const awardRun=result.awardRun;
 
       const awardSeed = [
         String(session.classroom_id || ""),
-        String(session.run_id || session.plan_id || ""),
-        String(Date.parse(startedAt)),
+        String(awardRun.run_id || awardRun.plan_id || ""),
+        String(Date.parse(awardRun.started_at || awardRun.active_from)),
         profileId,
       ].join(":");
       const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(awardSeed));
