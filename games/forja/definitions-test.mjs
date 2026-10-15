@@ -18,9 +18,9 @@ vm.runInContext(src,box);assert.equal((await box.window.ForjaDefinitions.lookup(
 // Respuestas tardías no sobrescriben la definición de una jugada posterior.
 const app=fs.readFileSync(new URL('app.js',import.meta.url),'utf8');
 const methods=app.slice(app.indexOf('let definitionRequest='),app.indexOf('function finishScoreAnimation'));
-let resolveFirst;const results=new Map();const panel={hidden:true,textContent:'',children:[],replaceChildren(){this.children=[];},append(n){this.children.push(n);}};
-const ui={window:{ForjaDefinitions:{lookup:w=>w==='casa'?new Promise(r=>resolveFirst=r):Promise.resolve({text:'Astro luminoso.',url:'https://es.wiktionary.org/wiki/sol'})}},document:{createElement:()=>({})},$:()=>panel};
+let resolveFirst;const results=new Map();const panel={classList:{remove(){},add(){}},hidden:true,textContent:'',children:[],replaceChildren(){this.children=[];},append(n){this.children.push(n);}};
+const ui={window:{addEventListener(){},ForjaDefinitions:{lookup:w=>w==='casa'?new Promise(r=>resolveFirst=r):Promise.resolve({text:'Astro luminoso.',url:'https://es.wiktionary.org/wiki/sol'})}},document:{createElement:()=>({})},$:()=>panel};
 vm.createContext(ui);vm.runInContext(methods,ui);
-const first=ui.showDefinition({word:'casa',display:'CASA'});await ui.showDefinition({word:'sol',display:'SOL'});resolveFirst({text:'Vivienda.'});await first;assert.match(panel.children[0].textContent,/SOL.*Astro/);
+const first=ui.showDefinition({word:'casa',display:'CASA'});await ui.showDefinition({word:'sol',display:'SOL'});resolveFirst({text:'Vivienda.'});await first;assert.equal(panel.children.find(n=>n.className==='note-word').textContent,'SOL');assert.match(panel.children.find(n=>n.className==='note-meaning').textContent,/Astro/);assert.ok(!panel.children.some(n=>n.href),'La nota no tiene enlaces');
 ui.clearDefinition();assert.equal(panel.hidden,true);
 console.log('Definiciones OK: idioma español, limpieza, caché, errores, concurrencia y cierre.');

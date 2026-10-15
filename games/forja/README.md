@@ -66,3 +66,6 @@ Se conserva la tolerancia a omitir tildes; una tilde escrita incorrectamente ya 
 Después de una jugada, `definitions.js` consulta la primera acepción española de Wikcionario (Action API con CORS), con atribución y enlace CC BY-SA. Si falta la forma flexionada, consulta el lema cuando el análisis local lo conoce. Timeout de 4,5 s, peticiones simultáneas deduplicadas y caché persistente de hasta 200 entradas. Solo se extrae texto, nunca se inserta HTML remoto. Un error, falta de cobertura o bloqueo de red muestra «Definición no disponible» y no afecta a puntos ni guardado. La definición es una acepción posible, no una interpretación contextual de la jugada.
 
 Pruebas: `dictionary-test.mjs`, `smoke-test.mjs`, `feedback-test.mjs`, `definitions-test.mjs` (DOMParser de linkedom mediante FORJA_DOM_MODULE en Node), `browser-test.mjs` e `integration-browser-test.cjs`.
+
+### Presentación de definiciones
+Nota de papel en el lateral derecho; en pantallas estrechas pasa al tablero. No hay enlaces de salida: la atribución Wikcionario · CC BY-SA se presenta como texto. Se conservan consulta, caché, tolerancia a fallos y puntuación.

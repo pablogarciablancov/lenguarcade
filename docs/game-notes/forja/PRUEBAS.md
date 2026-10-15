@@ -1,3 +1,7 @@
+## 2026-10-15 — Nota lateral de vocabulario
+
+Definiciones: concurrencia, ausencia de enlaces, caché y errores correctos. Chromium: nota con definición larga en 1366×768, 1440×900, 1920×1080 y 800×600, sin scroll general. Browser-test: arrastre, tienda, responsive, checkpoint, restauración y salida correctos.
+
 ## 2026-10-15 — Revisión general y definiciones
 
 Diccionario: contrastadas 707.796 formas con libhunspell, suplemento documentado por separado. Regresión de cobertura, negativos, Ñ/Ü/tildes, puntuación, tienda, carrera y guardado. Definiciones: sección española, eliminación de referencias/ejemplos, caché persistente, deduplicación, fallo de red y respuesta tardía. Consultas reales de ñu disponibles en Wikcionario. Verificación real en Chromium: jugada ÑU y definición española con respuesta reproducible de Wikcionario; sin errores ni scroll general en 1366×768, 1440×900 y 1920×1080. browser-test.mjs correcto: arrastre, tienda, responsive, checkpoint, restauración y salida.
