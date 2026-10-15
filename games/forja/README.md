@@ -54,3 +54,15 @@ Los alias sin acento preservan Ñ y Ü; las cartas reciben el análisis de la fo
 ## Validación léxica (2026-10-15)
 
 La lista compartida de frecuencia deja de autorizar palabras: contiene cadenas como phi y xvi. Se conserva RLA-ES flexionado y el léxico local, con ñu y sus plurales ñus/ñúes como suplemento. XI se excluye por criterio del juego (nombre de letra griega), aunque existe como entrada léxica. No se aplica un veto general a letras romanas: mil, civil y vi siguen admitidas. Se conserva la distinción Ñ/N y el sistema de alias de tildes.
+
+## Revisión general y significados (2026-10-15)
+
+Sustituye el criterio de la revisión anterior: XI vuelve a admitirse, como nombre español de letra griega. El banco incluye 707.808 formas, 48.606 más que el original: snapshot del español general de RLA-ES (España y América), con reglas de flexión, licencia y commit fijados en `dictionary-source/README.md`. No se utiliza la frecuencia para autorizar palabras. El suplemento y las exclusiones tienen motivos documentados en JSON. Se admiten también las palabras españolas de una letra. Las palabras desconocidas se describen como fuera del diccionario, no necesariamente inexistentes.
+
+`python games/forja/build-dictionary.py --verify-all` contrasta las 707.796 formas generadas no incluidas en el suplemento con libhunspell. Los casos en que el analizador nativo rechaza una forma válida se documentan en el suplemento. No se supone que un corrector sea una garantía de cobertura total ni de corrección semántica. El banco de regresión `dictionary-coverage.json` cubre léxico cotidiano, asignaturas, conjugaciones, enclíticos y palabras cortas; también se prueban cadenas inventadas y falsas regularizaciones. Todas las formas del analizador local deben existir en el banco aprobado.
+
+Se conserva la tolerancia a omitir tildes; una tilde escrita incorrectamente ya no se elimina para buscar otra palabra. Ñ y Ü siguen conservando su identidad.
+
+Después de una jugada, `definitions.js` consulta la primera acepción española de Wikcionario (Action API con CORS), con atribución y enlace CC BY-SA. Si falta la forma flexionada, consulta el lema cuando el análisis local lo conoce. Timeout de 4,5 s, peticiones simultáneas deduplicadas y caché persistente de hasta 200 entradas. Solo se extrae texto, nunca se inserta HTML remoto. Un error, falta de cobertura o bloqueo de red muestra «Definición no disponible» y no afecta a puntos ni guardado. La definición es una acepción posible, no una interpretación contextual de la jugada.
+
+Pruebas: `dictionary-test.mjs`, `smoke-test.mjs`, `feedback-test.mjs`, `definitions-test.mjs` (DOMParser de linkedom mediante FORJA_DOM_MODULE en Node), `browser-test.mjs` e `integration-browser-test.cjs`.

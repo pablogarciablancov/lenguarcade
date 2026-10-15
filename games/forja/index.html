@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#9acfe0">
 <title>FORJA · LenguArcade</title>
-<link rel="stylesheet" href="styles.css?v=20261008-drag-cards">
+<link rel="stylesheet" href="styles.css?v=20261015-definitions">
 </head>
 <body>
 <main id="app">
@@ -73,6 +73,7 @@
         <button id="playBtn" class="play-word-btn">JUGAR PALABRA</button>
       </div>
 
+      <div id="wordDefinition" class="word-definition" hidden aria-live="polite"></div>
       <div id="feedback" class="feedback">Selecciona letras de tu mano.</div>
     </section>
 
@@ -149,8 +150,9 @@
 </main>
 <script src="linguistics.js?v=20261005-inflections"></script>
 <script src="content.js?v=20261005-inflections"></script>
-<script src="engine.js?v=20261015-lexical-validation"></script>
+<script src="engine.js?v=20261015-general-es"></script>
 <script src="bridge.js?v=20261005-inflections"></script>
-<script src="app.js?v=20261015-live-preview"></script>
+<script src="definitions.js?v=20261015"></script>
+<script src="app.js?v=20261015-definitions"></script>
 </body>
 </html>

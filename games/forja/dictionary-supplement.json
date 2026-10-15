@@ -1,0 +1,49 @@
+{
+  "ñu": {
+    "lemma": "ñu",
+    "definition": "Antílope africano de cabeza grande y cuernos curvos."
+  },
+  "ñus": {
+    "lemma": "ñu"
+  },
+  "ñúes": {
+    "lemma": "ñu"
+  },
+  "vámonos": {
+    "lemma": "ir",
+    "source": "https://www.rae.es/gramática/sintaxis/perífrasis-de-gerundio-ii-el-auxiliar-ir"
+  },
+  "fi": {
+    "lemma": "fi",
+    "source": "https://dle.rae.es/fi"
+  },
+  "haiga": {
+    "lemma": "haiga",
+    "source": "https://dle.rae.es/haiga",
+    "note": "Sustantivo: automóvil ostentoso; no valida una conjugación de haber."
+  },
+  "deshice": {
+    "source": "https://dle.rae.es/deshacer",
+    "note": "Forma válida; el análisis inverso de Hunspell no la reconoce, aunque la expansión la produce."
+  },
+  "deshizo": {
+    "source": "https://dle.rae.es/deshacer",
+    "note": "Forma válida; el análisis inverso de Hunspell no la reconoce, aunque la expansión la produce."
+  },
+  "échala": {
+    "source": "https://dle.rae.es/echar",
+    "note": "Forma válida; el análisis inverso de Hunspell no la reconoce, aunque la expansión la produce."
+  },
+  "échalas": {
+    "source": "https://dle.rae.es/echar",
+    "note": "Forma válida; el análisis inverso de Hunspell no la reconoce, aunque la expansión la produce."
+  },
+  "échalo": {
+    "source": "https://dle.rae.es/echar",
+    "note": "Forma válida; el análisis inverso de Hunspell no la reconoce, aunque la expansión la produce."
+  },
+  "échalos": {
+    "source": "https://dle.rae.es/echar",
+    "note": "Forma válida; el análisis inverso de Hunspell no la reconoce, aunque la expansión la produce."
+  }
+}
