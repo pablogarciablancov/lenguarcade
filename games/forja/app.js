@@ -123,13 +123,27 @@ function openEngrave(style){
  openDialog('<h2>'+labels[style]+'</h2><p class="replace-copy">Elige una ficha de tu mano. La mejora permanecerá en esa ficha cuando vuelva a la bolsa.</p><div class="tile-choice">'+tiles.map(t=>'<button data-engrave="'+t.id+'" '+(E.run.coins<cost?'disabled':'')+'>'+tileStyleLabel(t)+'<strong>'+esc(t.char)+'</strong><small>'+esc(t.style)+'</small></button>').join('')+'</div>',{type:'engrave',style});
 }
 function closeDialog(){choiceState=null;$('choiceDialog').close();}
+let definitionRequest=0;
+function clearDefinition(){definitionRequest++;$('wordDefinition').hidden=true;$('wordDefinition').replaceChildren();}
+async function showDefinition(score){
+ const request=++definitionRequest,box=$('wordDefinition');
+ box.hidden=false;box.textContent=score.display.replace(/!/g,'')+' · Consultando significado…';
+ let value=await window.ForjaDefinitions.lookup(score.word);
+ const lemma=score.analysis?.lemma;
+ if(!value&&lemma&&lemma!==score.word)value=await window.ForjaDefinitions.lookup(lemma);
+ if(request!==definitionRequest)return;
+ box.replaceChildren();
+ const text=document.createElement('span');text.textContent=score.display.replace(/!/g,'')+' · '+(value?.text||'Definición no disponible.');box.append(text);
+ const source=document.createElement('a');source.href=value?.url||'https://es.wiktionary.org/wiki/'+encodeURIComponent(lemma||score.word);source.target='_blank';source.rel='noopener noreferrer';source.textContent=value?'Wikcionario · CC BY-SA':'Consultar Wikcionario';box.append(source);
+}
 function finishScoreAnimation(q){
+ showDefinition(q.score);
  scoringAnimation={score:q.score};lastMessage=q.score.display.toUpperCase()+' · '+fmt(q.score.points)+' × '+fmt(q.score.multis)+' = '+fmt(q.score.total);render();tone('score');
  setTimeout(()=>{document.querySelectorAll('.mini-bonus').forEach((el,i)=>{el.style.setProperty('--score-i',i);el.classList.add('card-trigger');});},330);
  setTimeout(()=>{scoringAnimation=null;render();B.checkpoint('word');B.result();},1150);
 }
 function playCurrent(){if(scoringAnimation)return;playingNow=true;const q=E.play();playingNow=false;if(!q.ok){lastMessage=q.message;tone('error');render();return;}finishScoreAnimation(q);}
-function start(mode){title=false;rerollMode=false;lastMessage='';scoringAnimation=null;closeCollection();E.newRun(mode);B.start();tone('reward');render();}
+function start(mode){clearDefinition();title=false;rerollMode=false;lastMessage='';scoringAnimation=null;closeCollection();E.newRun(mode);B.start();tone('reward');render();}
 function shopActionResult(q,success){lastMessage=q?.message||success||'';tone(q?.ok?'coin':'error');if(q?.ok)B.checkpoint('shop');render();}
 
 let draggedTile=null;
@@ -168,7 +182,7 @@ window.addEventListener('dragend',clearDrag);
 
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>start(b.dataset.mode)));
 $('continueBtn').addEventListener('click',()=>{title=false;lastMessage='';B.start();render();});
-function returnToTitle(){clearDrag();closeDialog();title=true;rerollMode=false;scoringAnimation=null;E.save();B.checkpoint('menu');render();}
+function returnToTitle(){clearDefinition();clearDrag();closeDialog();title=true;rerollMode=false;scoringAnimation=null;E.save();B.checkpoint('menu');render();}
 $('menuBtn').addEventListener('click',returnToTitle);
 $('soundBtn').addEventListener('click',()=>{sound=!sound;$('soundBtn').textContent='♫ '+(sound?'Sí':'No');tone();});
 $('hand').addEventListener('click',e=>{const b=e.target.closest('[data-tile]');if(!b||!E.run||scoringAnimation)return;const id=Number(b.dataset.tile),t=E.run.hand.find(x=>x.id===id);tone('select');if(rerollMode){E.toggleReroll(id);return;}selectedPulseId=id;if(t?.style==='wild'||t?.char==='*')openWild(id);else E.select(id);setTimeout(()=>{selectedPulseId=null;},260);});

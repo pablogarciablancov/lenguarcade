@@ -8,16 +8,17 @@ from pathlib import Path
 import re
 import sys
 import hashlib
+import json
 
 HERE = Path(__file__).resolve().parent
-SOURCE = HERE.parent / 'word_play' / 'hunspell'
-VALID = re.compile(r'[a-záéíóúüñ]{2,}')
+SOURCE = HERE / 'dictionary-source'
+VALID = re.compile(r'[a-záéíóúüñ]{1,}')
 
 
 def read_rules():
     rules = {'PFX': {}, 'SFX': {}}
     cross = {}
-    for line in (SOURCE / 'es_ES.aff').read_text(encoding='utf-8').splitlines():
+    for line in (SOURCE / 'es.aff').read_text(encoding='utf-8').splitlines():
         fields = line.split()
         if not fields or fields[0].startswith('#'):
             continue
@@ -88,9 +89,9 @@ def verify_native(words):
     lib.Hunspell_create.restype = ctypes.c_void_p
     lib.Hunspell_spell.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
     lib.Hunspell_destroy.argtypes = [ctypes.c_void_p]
-    handle = lib.Hunspell_create(str(SOURCE / 'es_ES.aff').encode(), str(SOURCE / 'es_ES.dic').encode())
+    handle = lib.Hunspell_create(str(SOURCE / 'es.aff').encode(), str(SOURCE / 'es.dic').encode())
     try:
-        sample = words[::max(1, len(words) // 2000)]
+        sample = words if '--verify-all' in sys.argv else words[::max(1, len(words) // 2000)]
         failures = [w for w in sample if not lib.Hunspell_spell(handle, w.encode())]
         if failures:
             raise ValueError(f'Native Hunspell rejects generated words: {failures[:20]}')
@@ -102,15 +103,19 @@ def verify_native(words):
 def main():
     rules, cross = read_rules()
     words = set()
-    for line in (SOURCE / 'es_ES.dic').read_text(encoding='utf-8').splitlines()[1:]:
+    for line in (SOURCE / 'es.dic').read_text(encoding='utf-8').splitlines()[1:]:
         entry = line.split()[0]
         word, _, flags = entry.partition('/')
         # Preserve the earlier exclusion of proper names, acronyms and punctuation.
         if VALID.fullmatch(word):
             words.update(form for form in expand(word, flags, rules, cross) if VALID.fullmatch(form))
+    supplement = json.loads((HERE / 'dictionary-supplement.json').read_text(encoding='utf-8'))
+    exclusions = json.loads((HERE / 'dictionary-exclusions.json').read_text(encoding='utf-8'))
+    words.difference_update(exclusions)
+    if '--verify-native' in sys.argv or '--verify-all' in sys.argv:
+        verify_native(sorted(words - supplement.keys()))
+    words.update(supplement)
     ordered = sorted(words)
-    if '--verify-native' in sys.argv:
-        verify_native(ordered)
     output = '\n'.join(ordered) + '\n'
     (HERE / 'dictionary-es-extra.txt').write_text(output, encoding='utf-8')
     print(f'{len(words):,} forms; {len(output.encode()):,} bytes; SHA256 {hashlib.sha256(output.encode()).hexdigest()}')

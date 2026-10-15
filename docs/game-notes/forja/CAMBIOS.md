@@ -1,3 +1,7 @@
+## 2026-10-15 — Revisión general y definiciones
+
+Banco general de español RLA-ES fijado, +48.606 formas; regresión por grupos y auditoría nativa completa. XI admitida, palabras de una letra y validación de tildes explícitas. Definición breve posterior a jugada, Wikcionario con atribución, timeout, caché y errores sin bloquear. Sin cambios de progreso ni puntuación.
+
 ## 2026-10-15 — Diccionario de Forja
 
 Se elimina la lista de frecuencia como autoridad en Forja; se admiten ñu/ñus/ñúes y se excluyen PHI, XI y XVI. Sin cambios de guardado ni puntuación.

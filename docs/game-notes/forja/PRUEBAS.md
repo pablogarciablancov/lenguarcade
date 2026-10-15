@@ -1,3 +1,9 @@
+## 2026-10-15 — Revisión general y definiciones
+
+Diccionario: contrastadas 707.796 formas con libhunspell, suplemento documentado por separado. Regresión de cobertura, negativos, Ñ/Ü/tildes, puntuación, tienda, carrera y guardado. Definiciones: sección española, eliminación de referencias/ejemplos, caché persistente, deduplicación, fallo de red y respuesta tardía. Consultas reales de ñu disponibles en Wikcionario. Verificación real en Chromium: jugada ÑU y definición española con respuesta reproducible de Wikcionario; sin errores ni scroll general en 1366×768, 1440×900 y 1920×1080. browser-test.mjs correcto: arrastre, tienda, responsive, checkpoint, restauración y salida.
+
+La prueba antigua integration-browser-test.cjs no supera el fixture del catálogo (#games .game), antes de abrir Forja; no se afirma validación del runner de producción. La prueba independiente browser-test.mjs sí valida el bridge, checkpoints y restauración.
+
 ## 2026-10-15 — Diccionario de Forja
 
 Ejecutar node games/forja/dictionary-test.mjs, smoke-test.mjs y feedback-test.mjs (cada uno con su ruta). Verificar ÑU jugable, PHI/XI/XVI sin puntos y conservación de mil/civil/vi, conjugaciones, tildes y guardado. Prueba de navegador pendiente: Chromium no está instalado en este entorno.
