@@ -17,3 +17,5 @@ Pendientes en navegador antes de publicar:
 El ensayo Playwright no pudo arrancar: falta Chromium y su descarga no produjo un archivo válido. Las pruebas de lógica usan un DOM simulado y no validan el diseño.
 
 La prueba `check-agency.cjs` cubre además los seis pasos del tutorial, bloqueo de informe anticipado, recuperación del paso tras reabrir, corrección sin gastar intentos y repetición sin XP.
+
+El prototipo del trofeo se verifica también en `check-agency.cjs`: requisitos de acceso al almacén, confrontaciones, guardado y reanudación, precinto incorrecto/correcto, informe incompleto, resolución y repetición sin XP. Revisar manualmente arrastre y selección por clic, y adaptación a los tres tamaños de escritorio.

@@ -29,3 +29,22 @@ run("startCase('agency_tutorial');selectPerson('p0');openDocument('d1');collectA
 run("startCase('case001')");assert.equal(run('cases[state.caseId].title'),'El aula vacía');
 run("integrated=true;bridgeChannel='test';bridgeInitialized=true;bridgeHostWindow={postMessage:m=>console.log(m.type)};sendBridgeResult(true,0,{})");
 console.log('✓ Three cases: restore, marks, proof validation, wrong accusation, resolution, replay XP, original case and RESULT bridge.');
+
+run("integrated=false;state=null");
+run(fs.readFileSync(path.join(dir,'trophy.js'),'utf8'));
+run("startCase('agency_trophy')");assert.equal(run('state.trophy.brunoAdmission'),false);
+run('trophyWarehouse()');assert.equal(run('state.trophy.warehouse'),false);
+run("trophyTalk('celia');trophyConfront('bruno','celia')");assert.equal(run('state.trophy.brunoAdmission'),true);
+run("trophyInspect('photo');trophyConfront('bruno','photo')");assert.equal(run('state.trophy.timing'),true);
+run("trophyInspect('label');trophyConfront('nora','label')");assert.equal(run('state.trophy.noraAdmission'),true);
+run("saveState();state=null;startCase('agency_trophy')");assert.equal(run('state.trophy.timing && state.trophy.noraAdmission'),true);
+run("trophyConfront('celia','photo')");assert.equal(run('state.completed'),false);
+run("trophyInspect('receipt');trophyInspect('dispatch');trophyWarehouse()");assert.equal(run('state.trophy.warehouse'),true);
+run('trophyOpenBox(12)');assert.equal(run('state.trophy.recovered'),false);
+run('trophyOpenBox(28)');assert.equal(run('state.trophy.recovered'),true);
+run('trophyReconstruct();trophySubmit()');assert.equal(run('state.completed'),false);
+run("['move','box','trip'].forEach((v,i)=>document.getElementById('trophyEvent'+i).value=v);['bruno','nora','transport'].forEach((v,i)=>document.getElementById('trophyProof'+i).value=v);trophySubmit()");assert.equal(run('state.completed'),true);
+const trophyXP=run('profile.xp');
+run("startCase('agency_trophy');trophyTalk('celia');trophyConfront('bruno','celia');trophyInspect('photo');trophyConfront('bruno','photo');trophyInspect('label');trophyConfront('nora','label');trophyInspect('receipt');trophyInspect('dispatch');trophyWarehouse();trophyOpenBox(28);trophyReconstruct();trophySubmit()");assert.equal(run('profile.xp'),trophyXP);
+run("startCase('agency_manuscrito')");assert.equal(run('state.caseId'),'agency_manuscrito');
+console.log('✓ Interactive trophy: confrontations, unlocks, restoration, warehouse, reconstruction, replay XP and return to existing cases.');
