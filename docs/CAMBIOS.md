@@ -807,3 +807,8 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Forja guarda la fecha y la identidad de la victoria; se conservan al continuar en infinito. Partidas antiguas sin evidencia fechada, derrotas y otras dificultades no cumplen el reto.
 - Alumno, profesor y envío al marcador comparten el criterio temporal. Se reutilizan los 5 puntos de CAT1 y la clave idempotente del taller/alumno, incluso al reintentar.
 - Requiere publicación coordinada: migración aditiva `20261015081030_workshop_forja_objective.sql`, funciones save-progress, teacher-dashboard, student-dashboard, student-access-state y núcleo Apps Script. No se ha aplicado a producción ni se ha abierto ninguna clase.
+
+## 2026-10-15 · Forja lista y previsión de cada palabra
+
+- El mensaje de la jugada anterior se retira cuando cambia el borrador, para mostrar el cálculo actual. Se conserva la animación del resultado y los errores hasta la siguiente edición.
+- Forja pasa a `listo` por decisión del profesor. Catálogo canónico y manifiesto sincronizados, sin modificar progreso, puntuaciones ni guardados.

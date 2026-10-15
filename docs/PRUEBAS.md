@@ -830,3 +830,10 @@ Empaquetado de la función: incluir `supabase/functions/lexitrama-online/`, `_sh
 - Comprobar 1/1 en alumno y «Objetivo conseguido» en profesor. El marcador recibe una sola concesión de 5 puntos CAT1 por alumno/taller, aunque haya varios guardados o victorias.
 - Abrir otro taller: una victoria anterior no lo completa. Comprobar que los talleres por XP mantienen sus resultados e historial.
 - Verificar editor y paneles a 1366×768, 1440×900 y 1920×1080. La prueba visual local queda pendiente: no hay Chromium instalado y su descarga en este entorno ha fallado.
+
+## Forja · previsión de palabra y estado listo
+
+- `node games/forja/feedback-test.mjs`: resultado anterior, segunda palabra, error, borrado y acentos.
+- `node games/forja/smoke-test.mjs`: mecánica, tienda, guardado, victoria e infinito.
+- `npm run catalog:check` y `npm run check`.
+- En aula: jugar una palabra, formar la siguiente con clic/arrastre y comprobar que aparece su cálculo. El estado del catálogo debe ser «listo».

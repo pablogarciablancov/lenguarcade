@@ -2,7 +2,7 @@
   "$schema": "lenguarcade-integration-v1",
   "gameId": "lexoma",
   "name": "FORJA",
-  "status": "en pruebas",
+  "status": "listo",
   "integration": "embedded",
   "entry": "games/forja/index.html",
   "banner": "https://pablogarciablancov.github.io/lenguarcade/games/forja/assets/forja-cover-v1.webp",
@@ -25,7 +25,7 @@
       "estrategia",
       "toma de decisiones"
     ],
-    "status": "en pruebas",
+    "status": "listo",
     "color": "#9dd8e7",
     "icon": "F",
     "entry": "games/forja/",
