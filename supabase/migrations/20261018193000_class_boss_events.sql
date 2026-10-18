@@ -16,7 +16,7 @@ create table if not exists public.class_boss_events (
   created_by uuid references public.profiles(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  unique (classroom_id, workshop_run_id),
+  unique (classroom_id, workshop_key),
   constraint class_boss_valid_interval check (jsonb_typeof(intervals) = 'array')
 );
 create index if not exists class_boss_class_created_idx
