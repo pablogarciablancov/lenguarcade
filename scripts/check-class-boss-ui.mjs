@@ -21,8 +21,11 @@ for(const privateName of [
 
 function node(id){
   const classes=new Set();
+  const attributes=new Map();
   return {
     id,innerHTML:'',textContent:'',value:'',disabled:false,style:{},
+    setAttribute(name,value){attributes.set(name,value)},
+    getAttribute(name){return attributes.get(name)},
     classList:{
       add(name){classes.add(name)},remove(name){classes.delete(name)},
       contains(name){return classes.has(name)},
@@ -49,7 +52,7 @@ const ctx={
   Promise,
   edge:async(name,request)=>{
     requests.push({name,request});
-    if(request.action==='start')return {event:{
+    if(request.action==='start'||(request.action==='status'&&requests.some(r=>r.request.action==='start')))return {event:{
       id:'synthetic',state:'active',workshopOpen:true,health:232,totalHealth:240,
       remainingSeconds:1500,combos:0,damage:8,gameIds:['battlegrafia','lexoma','maniacgrafia']
     }};
@@ -72,7 +75,8 @@ assert.equal(ctx.window.laBossWorkshopBridge.activeSession(),null);
 
 // This used to throw ReferenceError: workshopPlannerState is not defined,
 // which made loadWorkshopPlanner display 'No se pudieron cargar las sesiones'.
-vm.runInNewContext(bossSource,ctx,{filename:'class-boss-controller.js'});
+vm.runInNewContext(bossSource.replace('  window.classBossRenderPanel=renderPanel;',
+  '  window.__paintBossForTest=paint;window.classBossRenderPanel=renderPanel;'),ctx,{filename:'class-boss-controller.js'});
 assert.equal(typeof ctx.window.classBossRenderPanel,'function');
 ctx.window.__setPlannerForTest({activeSession:null});
 assert.doesNotThrow(()=>ctx.window.classBossRenderPanel());
@@ -91,4 +95,37 @@ assert.ok(requests.some(r=>r.name==='class-boss'&&r.request.action==='start'&&r.
   'Boss start did not use the selected workshop class');
 assert.equal(getElementById('classBossHealth').textContent,'232 / 240 de vida');
 assert.equal(getElementById('classBossClock').textContent,'25:00');
-console.log('Class boss UI: private planner state bridged, workshop loading safe, starting battle and scoreboard OK.');
+// Render confirmed snapshots at every boundary, without changing combat rules.
+const paint=ctx.window.__paintBossForTest;
+const event={id:'synthetic',state:'active',workshopOpen:true,totalHealth:100,
+  remainingSeconds:1400,combos:0,damage:8};
+for(const [health,phase] of [[100,1],[71,1],[70,2],[36,2],[35,3],[11,3],[10,4],[1,4],[0,4]]){
+  paint({...event,health});
+  assert.equal(getElementById('classBossMonster').getAttribute('data-phase'),String(phase));
+  assert.equal(getElementById('classBossHealthBar').style.width,health+'%');
+  assert.match(getElementById('classBossPhase').textContent,/Fase/);
+}
+paint({...event,health:70,damage:9});
+assert.ok(getElementById('classBossMonster').classList.contains('hurt'));
+assert.equal(getElementById('classBossImpact').textContent,'−1');
+paint({...event,health:35,damage:14,combos:1});
+assert.ok(getElementById('classBossMonster').classList.contains('combo'));
+assert.equal(getElementById('classBossImpact').textContent,'¡COMBO! −5');
+paint({...event,health:35,damage:14,combos:1,state:'paused'});
+assert.equal(getElementById('classBossClock').textContent,'23:20');
+assert.equal(getElementById('classBossPause').textContent,'▶ Reanudar');
+for(const outcome of ['victory','defeat']){
+  paint({...event,health:outcome==='victory'?0:10,state:'finished',outcome});
+  assert.equal(getElementById('classBossStage').getAttribute('data-outcome'),outcome);
+  assert.ok(getElementById('classBossOutcome').classList.contains('show'));
+  assert.ok(getElementById('classBossPause').disabled);
+  assert.ok(getElementById('classBossFinish').disabled);
+}
+paint({...event,id:'another-battle',health:100,damage:25});
+assert.equal(getElementById('classBossStage').getAttribute('data-outcome'),'');
+assert.equal(getElementById('classBossMonster').getAttribute('data-phase'),'1');
+assert.ok(!getElementById('classBossMonster').classList.contains('hurt'),'New events must not replay old damage');
+paint(null);
+assert.ok(!getElementById('classBossOutcome').classList.contains('show'));
+assert.equal(getElementById('classBossHealth').textContent,'—');
+console.log('Class boss UI: workshop bridge, start, four health phases, impacts, combos, outcomes and reset OK.');
