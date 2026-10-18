@@ -107,7 +107,7 @@ Deno.serve(async(request)=>{
     const body=await request.json().catch(()=>({}));
     const action=String(body.action||"status");
     if(action==="studentStatus"){
-      const {admin,profileId,organizationId}=await requireProfileSession(request);
+      const {admin,profileId,organizationId}=await requireProfileSession(request,{gatewayVerifiedJwt:true});
       const {data:memberships,error:membershipError}=await admin.from("classroom_enrollments")
         .select("classroom_id").eq("profile_id",profileId).eq("active",true);
       if(membershipError)throw membershipError;
