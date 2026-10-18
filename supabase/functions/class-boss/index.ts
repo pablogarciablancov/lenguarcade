@@ -30,6 +30,15 @@ function withClosedInterval(battle:any,at:string){
     Math.max(0,(Date.parse(at)-Date.parse(battle.active_since))/1000):0);
   return {intervals,elapsed_seconds:Math.round(elapsed),active_since:null,updated_at:at};
 }
+async function getWorkshopForBoss(admin:any,battle:any,workshop:any){
+  if(!workshop)return false;
+  const {data,error}=await admin.from("workshop_runs")
+    .select("workshop_key,plan_id").eq("organization_id",battle.organization_id)
+    .eq("classroom_id",battle.classroom_id).eq("plan_id",workshop.plan_id)
+    .eq("started_at",workshop.started_at).eq("published",true).is("closed_at",null).maybeSingle();
+  if(error)throw error;
+  return data&&String(data.workshop_key||data.plan_id)===String(battle.workshop_key);
+}
 async function battleSummary(admin:any,battle:any,workshop:any){
   if(!battle)return null;
   const now=Date.now();
@@ -88,8 +97,14 @@ Deno.serve(async(request)=>{
         if(!workshop)continue;
         const battle=await latestBoss(admin,organizationId,member.classroom_id);
         if(!battle||battle.state==="finished"||!battle.game_ids?.length)continue;
-        const data=await battleSummary(admin,battle,workshop);
-        if(data&&data.workshopOpen&&data.state!=="finished")return jsonResponse({ok:true,event:data});
+        const {data:currentRun,error:runError}=await admin.from("workshop_runs")
+          .select("run_id,workshop_key,plan_id,closed_at").eq("organization_id",organizationId)
+          .eq("classroom_id",member.classroom_id).eq("plan_id",workshop.plan_id)
+          .eq("started_at",workshop.started_at).eq("published",true).is("closed_at",null).maybeSingle();
+        if(runError)throw runError;
+        if(currentRun&&String(currentRun.workshop_key||currentRun.plan_id)===String(battle.workshop_key)&&
+          battleClock(battle)>0)return jsonResponse({ok:true,event:{id:battle.id,title:"El Devorapalabras",state:battle.state}});
+
       }
       return jsonResponse({ok:true,event:null});
     }
@@ -131,7 +146,7 @@ Deno.serve(async(request)=>{
       battle=data;
     }else if(action!=="status"){
       if(!battle)return fail("boss_not_found",404);
-      if(action==="resume"&&!workshop)return fail("open_workshop_first",409);
+      if(action==="resume"&&(!workshop||!(await getWorkshopForBoss(admin,battle,workshop))))return fail("open_same_workshop_first",409);
       if(action!=="finish"&&(battle.state==="finished"||battleClock(battle)<=0))return fail("boss_finished",409);
       if(action==="pause"&&battle.state==="active"){
         const at=isoNow(); const {data,error}=await admin.from("class_boss_events")
