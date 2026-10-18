@@ -3121,6 +3121,7 @@ body.light .teacherMonitorTable th{background:#fff}
   var last=null,timer=null,requesting=false,stage=$('classBossStage'),lastDamage=0,lastCombos=0,visualEventId=null;
   // Twelve original frames per phase; atlas files live in lenguarcade-assets.
   var spriteSheets=[{"file":"dragon-healthy-idle-v1.webp","anchors":[[187.5,352],[188.5,352],[181.0,352],[180.0,352],[184.5,351],[181.0,351],[181.0,351],[180.5,351],[188.5,351],[181.0,351],[181.0,351],[179.5,351]]},{"file":"dragon-cracked-idle-v1.webp","anchors":[[190.5,362],[181.0,362],[181.0,362],[178.0,362],[184.5,362],[181.0,362],[181.0,362],[179.5,362],[190.0,358],[181.0,358],[181.0,358],[179.5,358]]},{"file":"dragon-torn-idle-v1.webp","anchors":[[188.0,345],[186.0,345],[181.0,345],[177.0,345],[188.0,345],[181.0,345],[181.0,345],[177.0,345],[187.0,338],[181.0,338],[186.0,338],[177.5,338]]},{"file":"dragon-critical-idle-v1.webp","anchors":[[189.5,351],[191.0,351],[192.0,351],[182.0,351],[186.0,337],[181.0,337],[180.0,340],[187.0,340],[191.5,330],[180.5,330],[185.5,331],[184.5,331]]}];
+  var spriteAssetVersion='861c1b46f71d94b1b8ee92c3aaea6ea628d45b37';
   var spriteImages=[],spritePhase=1,spriteFrame=0,spriteRaf=0,spriteAt=0;
   var spriteReduced=typeof window.matchMedia==='function'?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
   function drawBossSprite(){
@@ -3162,10 +3163,10 @@ body.light .teacherMonitorTable th{background:#fff}
         var img=new Image(),fallback=false;spriteImages[index]=img;
         img.onload=function(){if(spritePhase===index+1)drawBossSprite();};
         img.onerror=function(){
-          if(!fallback){fallback=true;img.src='https://cdn.jsdelivr.net/gh/pablogarciablancov/lenguarcade-assets@main/assets/events/devorapalabras/'+sheet.file;}
+          if(!fallback){fallback=true;img.src='https://cdn.jsdelivr.net/gh/pablogarciablancov/lenguarcade-assets@'+spriteAssetVersion+'/assets/events/devorapalabras/'+sheet.file;}
           else if(spritePhase===index+1)$('classBossSpriteStatus').textContent='No se ha podido cargar el dragón. El combate sigue activo.';
         };
-        img.src='https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/main/assets/events/devorapalabras/'+sheet.file;
+        img.src='https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/'+spriteAssetVersion+'/assets/events/devorapalabras/'+sheet.file;
       });
       drawBossSprite();
       if(spriteReduced&&spriteReduced.matches||stage.getAttribute('data-outcome')==='victory')stopBossSprite();
