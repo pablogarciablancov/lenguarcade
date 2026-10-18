@@ -1474,7 +1474,11 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     if(workshopEditingPlanId&&!plannerPlan(workshopEditingPlanId))workshopEditingPlanId='';
     renderPlannerEditor(plannerEditorPlan());
     setTeacherSessionBusy(false);
-    if(window.classBossRenderPanel)window.classBossRenderPanel();
+    // The optional event must never prevent existing workshops from loading.
+    if(typeof window.classBossRenderPanel==='function'){
+      try{window.classBossRenderPanel();}
+      catch(error){console.error('No se pudo mostrar El Devorapalabras; Talleres sigue disponible.',error);}
+    }
   }
   // Minimal bridge: the cooperative boss is in a later <script>, while the
   // workshop planner and its methods intentionally live inside this IIFE.
