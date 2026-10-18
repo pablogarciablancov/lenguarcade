@@ -23,4 +23,11 @@ assert.equal(crowded.health,190,'Collective damage ignores duplicate deliveries'
 const reopening={...run,started_at:new Date(t+120000).toISOString(),closed_at:null};
 const previousRun={...run,classroom_open:false,closed_at:new Date(t+60000).toISOString()};
 assert.equal(countBossDamage([...events,ev('gap','d','lexoma',90),ev('after','e','lexoma',130)],battle,[previousRun,reopening],t+150000).hits,4);
+// Reopening a workshop the following day must not consume the boss timer.
+const nextDay=t+86400000;
+const firstWindow={...run,classroom_open:false,closed_at:new Date(t+60000).toISOString()};
+const reopenedWindow={...run,started_at:new Date(nextDay).toISOString(),closed_at:null};
+const reopenedNow=nextDay+20000;
+assert.equal(battleClock(battle,reopenedNow,[firstWindow,reopenedWindow]),820);
+assert.equal(countBossDamage([...events,ev('reopened','z','lexoma',86410)],battle,[firstWindow,reopenedWindow],reopenedNow).hits,4);
 console.log('Class boss: unique events, cooldown, combo, closed windows, pause and timer and 30-player simulation OK.');
