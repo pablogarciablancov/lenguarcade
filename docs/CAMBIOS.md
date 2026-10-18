@@ -1,3 +1,9 @@
+## 2026-10-18 — Fotogramas aislados del Devorapalabras
+
+- Corrige fragmentos del dragón vecino: se sustituyen los recortes por celdas por 48 archivos independientes, extraídos de los contornos completos y con margen transparente.
+- Cada imagen es de 512×512, con los pies alineados; el portal dibuja el archivo completo, sin rectángulos de origen ni posibilidad de tomar la celda contigua.
+- Conserva los 12 fotogramas por fase, umbrales de vida, impactos, finales y lógica del evento. Precarga con cuatro peticiones simultáneas como máximo.
+
 ## 2026-10-18 — Devorapalabras pixel art animado
 
 - Sustituye el SVG por cuatro atlas originales de 12 fotogramas, ligados a los umbrales de vida del 70 %, 35 % y 10 %. Respiración, alas, cabeza, cola y parpadeo se reproducen en canvas sin suavizar los píxeles.

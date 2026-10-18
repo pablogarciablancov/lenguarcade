@@ -49,7 +49,7 @@ const ctx={
     requestAnimationFrame(fn){frames.set(++frameId,fn);return frameId},
     cancelAnimationFrame(id){frames.delete(id)}},
   Image:class {
-    complete=true;naturalWidth=1448;naturalHeight=1086;
+    complete=true;naturalWidth=512;naturalHeight=512;
     set src(value){this.url=value;this.onload?.()}
   },
   document:{getElementById,hidden:false,addEventListener(name,fn){listeners.set(name,fn)}},
@@ -137,7 +137,7 @@ assert.ok(!getElementById('classBossMonster').classList.contains('hurt'),'New ev
 paint(null);
 assert.ok(!getElementById('classBossOutcome').classList.contains('show'));
 assert.equal(getElementById('classBossHealth').textContent,'—');
-// The actual canvas renderer loads four atlases and cycles all twelve cells.
+// The renderer loads standalone frames and never crops a neighboring cell.
 paint({...event,id:'animated',health:100});
 const sprite=getElementById('classBossSprite');
 assert.equal(sprite.getAttribute('data-phase'),'1');
@@ -155,8 +155,12 @@ for(const [health,phase] of [[70,2],[35,3],[10,4]]){
   assert.equal(sprite.getAttribute('data-frame'),'0');
 }
 assert.ok(draws.length>12);
-for(const [img,x,y,w,h] of draws){
-  assert.ok(x>=0&&y>=0&&x+w<=img.naturalWidth&&y+h<=img.naturalHeight,'Frame cropped outside atlas');
+for(const args of draws){
+  assert.equal(args.length,5,'Must draw the complete isolated image, never an atlas source rectangle');
+  const [img,x,y,w,h]=args;
+  assert.equal(img.naturalWidth,512);assert.equal(img.naturalHeight,512);
+  assert.deepEqual([x,y,w,h],[0,0,512,512]);
+  assert.match(img.url,/frames-v2\/(healthy|cracked|torn|critical)-\d{2}\.webp$/);
 }
 motion.matches=true;listeners.get('motion')();
 assert.equal(frames.size,0,'Reduced motion must cancel animation');
@@ -169,4 +173,4 @@ ctx.document.hidden=false;listeners.get('visibilitychange')();
 assert.equal(frames.size,1);
 getElementById('classBossClose').onclick();
 assert.equal(frames.size,0,'Closing projection must cancel animation');
-console.log('Class boss UI: twelve atlas frames, visibility/motion lifecycle, workshop bridge, start, four health phases, impacts, combos, outcomes and reset OK.');
+console.log('Class boss UI: twelve isolated frames, visibility/motion lifecycle, workshop bridge, start, four health phases, impacts, combos, outcomes and reset OK.');
