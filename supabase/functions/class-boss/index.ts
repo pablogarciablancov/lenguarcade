@@ -124,7 +124,8 @@ Deno.serve(async(request)=>{
         .eq("published",true).is("closed_at",null).maybeSingle();
       if(runError)throw runError;
       if(!run)return fail("workshop_run_missing",409);
-      const previous=battle&&String(battle.workshop_run_id)===String(run.run_id)?battle:null;
+      const logicalKey=String(run.workshop_key||run.plan_id);
+      const previous=battle&&String(battle.workshop_key)===logicalKey?battle:null;
       if(previous)return jsonResponse({ok:true,event:await battleSummary(admin,previous,workshop),reused:true});
       if(battle&&battle.state!=="finished"&&battleClock(battle)>0)return fail("finish_previous_event",409);
       const {count,error:countError}=await admin.from("classroom_enrollments")
