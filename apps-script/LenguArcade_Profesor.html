@@ -3119,24 +3119,44 @@ body.light .teacherMonitorTable th{background:#fff}
 <script id="la-class-boss-controller">
 (function(){
   var last=null,timer=null,requesting=false,stage=$('classBossStage'),lastDamage=0,lastCombos=0,visualEventId=null;
-  // Twelve original frames per phase; atlas files live in lenguarcade-assets.
-  var spriteSheets=[{"file":"dragon-healthy-idle-v1.webp","anchors":[[187.5,352],[188.5,352],[181.0,352],[180.0,352],[184.5,351],[181.0,351],[181.0,351],[180.5,351],[188.5,351],[181.0,351],[181.0,351],[179.5,351]]},{"file":"dragon-cracked-idle-v1.webp","anchors":[[190.5,362],[181.0,362],[181.0,362],[178.0,362],[184.5,362],[181.0,362],[181.0,362],[179.5,362],[190.0,358],[181.0,358],[181.0,358],[179.5,358]]},{"file":"dragon-torn-idle-v1.webp","anchors":[[188.0,345],[186.0,345],[181.0,345],[177.0,345],[188.0,345],[181.0,345],[181.0,345],[177.0,345],[187.0,338],[181.0,338],[186.0,338],[177.5,338]]},{"file":"dragon-critical-idle-v1.webp","anchors":[[189.5,351],[191.0,351],[192.0,351],[182.0,351],[186.0,337],[181.0,337],[180.0,340],[187.0,340],[191.5,330],[180.5,330],[185.5,331],[184.5,331]]}];
-  var spriteAssetVersion='861c1b46f71d94b1b8ee92c3aaea6ea628d45b37';
-  var spriteImages=[],spritePhase=1,spriteFrame=0,spriteRaf=0,spriteAt=0;
+  // Each animation frame is a separate, padded 512px image: never crop a grid.
+  var spritePhases=['healthy','cracked','torn','critical'];
+  var spriteAssetVersion='4c1509da99e34cc3cdf4dc2de1179cc4e017ca24';
+  var spriteImages=[[],[],[],[]],spritePhase=1,spriteFrame=0,spriteRaf=0,spriteAt=0;
+  var spriteQueue=[],spriteLoading=0,spriteStarted=false;
   var spriteReduced=typeof window.matchMedia==='function'?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
   function drawBossSprite(){
-    var canvas=$('classBossSprite'),sheet=spriteSheets[spritePhase-1],img=spriteImages[spritePhase-1];
-    if(!canvas||!img||!img.complete||!img.naturalWidth)return;
+    var canvas=$('classBossSprite'),phaseImages=spriteImages[spritePhase-1];
+    var frame=spriteReduced&&spriteReduced.matches?0:spriteFrame,img=phaseImages[frame];
+    if(!img||!img.complete||!img.naturalWidth){
+      frame=phaseImages.findIndex(function(candidate){return candidate&&candidate.complete&&candidate.naturalWidth;});
+      img=phaseImages[frame];
+    }
+    if(!canvas||!img)return;
     var context=canvas.getContext('2d');if(!context)return;
-    var frame=spriteReduced&&spriteReduced.matches?0:spriteFrame;
-    var x=Math.floor((frame%4)*img.naturalWidth/4),y=Math.floor(Math.floor(frame/4)*img.naturalHeight/3);
-    var width=Math.floor((frame%4+1)*img.naturalWidth/4)-x;
-    var height=Math.floor((Math.floor(frame/4)+1)*img.naturalHeight/3)-y;
-    var anchor=sheet.anchors[frame],scale=1.18;
     context.clearRect(0,0,512,512);context.imageSmoothingEnabled=false;
-    context.drawImage(img,x,y,width,height,256-anchor[0]*scale,470-anchor[1]*scale,width*scale,height*scale);
+    context.drawImage(img,0,0,512,512);
     $('classBossSpriteStatus').textContent='';
     canvas.setAttribute('data-phase',String(spritePhase));canvas.setAttribute('data-frame',String(frame));
+  }
+  function loadBossSpriteQueue(){
+    // Bound concurrent requests; initial phase comes first, others preload.
+    while(spriteLoading<4&&spriteQueue.length){
+      (function(job){
+        var img=new Image(),fallback=false;spriteImages[job.phase][job.frame]=img;spriteLoading++;
+        var file=spritePhases[job.phase]+'-'+String(job.frame).padStart(2,'0')+'.webp';
+        function done(){spriteLoading--;loadBossSpriteQueue();}
+        img.onload=function(){if(spritePhase===job.phase+1)drawBossSprite();done();};
+        img.onerror=function(){
+          if(!fallback){fallback=true;img.src='https://cdn.jsdelivr.net/gh/pablogarciablancov/lenguarcade-assets@'+spriteAssetVersion+'/assets/events/devorapalabras/frames-v2/'+file;}
+          else{
+            if(spritePhase===job.phase+1&&!spriteImages[job.phase].some(function(candidate){return candidate&&candidate.complete&&candidate.naturalWidth;}))$('classBossSpriteStatus').textContent='No se ha podido cargar el dragón. El combate sigue activo.';
+            done();
+          }
+        };
+        img.src='https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/'+spriteAssetVersion+'/assets/events/devorapalabras/frames-v2/'+file;
+      })(spriteQueue.shift());
+    }
   }
   function stopBossSprite(){
     if(spriteRaf&&typeof window.cancelAnimationFrame==='function')window.cancelAnimationFrame(spriteRaf);
@@ -3158,16 +3178,13 @@ body.light .teacherMonitorTable th{background:#fff}
     // Visual loading/animation must never break the workshop controller.
     try{
       if(typeof Image!=='function')return;
-      spriteSheets.forEach(function(sheet,index){
-        if(spriteImages[index])return;
-        var img=new Image(),fallback=false;spriteImages[index]=img;
-        img.onload=function(){if(spritePhase===index+1)drawBossSprite();};
-        img.onerror=function(){
-          if(!fallback){fallback=true;img.src='https://cdn.jsdelivr.net/gh/pablogarciablancov/lenguarcade-assets@'+spriteAssetVersion+'/assets/events/devorapalabras/'+sheet.file;}
-          else if(spritePhase===index+1)$('classBossSpriteStatus').textContent='No se ha podido cargar el dragón. El combate sigue activo.';
-        };
-        img.src='https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/'+spriteAssetVersion+'/assets/events/devorapalabras/'+sheet.file;
-      });
+      if(!spriteStarted){
+        spriteStarted=true;
+        var order=[spritePhase-1];
+        for(var p=0;p<4;p++)if(p!==spritePhase-1)order.push(p);
+        order.forEach(function(phaseIndex){for(var frame=0;frame<12;frame++)spriteQueue.push({phase:phaseIndex,frame:frame});});
+        loadBossSpriteQueue();
+      }
       drawBossSprite();
       if(spriteReduced&&spriteReduced.matches||stage.getAttribute('data-outcome')==='victory')stopBossSprite();
       else if(!spriteRaf&&!document.hidden&&typeof window.requestAnimationFrame==='function')spriteRaf=window.requestAnimationFrame(animateBossSprite);

@@ -1,3 +1,9 @@
+## 2026-10-18 — Regresión de contaminación entre sprites
+
+- Recursos: `python scripts/check-devorapalabras-frames.py` verifica 48 archivos válidos, 512×512, margen transparente >=24px y una única figura principal por archivo. La extracción usa componentes alfa, no divisiones de cuadrícula.
+- UI: `node scripts/check-class-boss-ui.mjs` exige dibujar la imagen individual completa, sin rectángulo de recorte, y conserva las pruebas de fases, golpes, finales y ciclo de animación.
+- Navegador: comprobados los 48 fotogramas reales (incluido healthy-06, el parpadeo de la captura), el margen de cada canvas, los cuatro estados de vida y los finales. Sin desbordamientos en 1366×768, 1440×900, 1920×1080 y 390×844.
+
 ## 2026-10-18 — Sprites del evento cooperativo
 
 - `node scripts/check-class-boss-ui.mjs`: carga de Talleres, inicio del evento, fases y límites de salud, dibujo de los 12 fotogramas dentro de cada atlas, golpes, combos, finales, movimiento reducido y cancelación al ocultar/cerrar.
