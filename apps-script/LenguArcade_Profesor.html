@@ -1476,6 +1476,21 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     setTeacherSessionBusy(false);
     if(window.classBossRenderPanel)window.classBossRenderPanel();
   }
+  // Minimal bridge: the cooperative boss is in a later <script>, while the
+  // workshop planner and its methods intentionally live inside this IIFE.
+  // Never expose writable planner state or move the workshop's existing logic.
+  window.laBossWorkshopBridge={
+    selectedClass:teacherCurrentClass,
+    activeSession:function(){return workshopPlannerState&&workshopPlannerState.activeSession||null;},
+    prepare:async function(classCode,payload){
+      if(!classCode||classCode!==teacherCurrentClass())throw new Error('Selecciona primero una clase válida.');
+      var saved=await sessionCall('saveAndActivateWorkshopPlan',[classCode,payload,true]);
+      await syncWorkshopSupabaseAccess(classCode,saved&&saved.activeSession);
+      // Do not replace the panel of a different class if the selector moved.
+      if(classCode===teacherCurrentClass())renderWorkshopPlanner(saved);
+      return saved;
+    }
+  };
   function plannerPayload(){
     var editor=document.getElementById('workshopPlanEditorBody');
     return {
@@ -3088,7 +3103,8 @@ body.light .teacherMonitorTable th{background:#fff}
 <script id="la-class-boss-controller">
 (function(){
   var last=null,timer=null,requesting=false,stage=$('classBossStage'),lastDamage=0;
-  function getClass(){return typeof teacherCurrentClass==='function'?teacherCurrentClass():'';}
+  function bossWorkshop(){return window.laBossWorkshopBridge||null;}
+  function getClass(){var bridge=bossWorkshop();return bridge?bridge.selectedClass():'';}
   function fmt(seconds){var n=Math.max(0,Math.ceil(Number(seconds)||0));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
   function msg(code){var messages={
     open_workshop_first:'Abre primero un taller para esta clase.',
@@ -3101,7 +3117,7 @@ body.light .teacherMonitorTable th{background:#fff}
   function status(s){var node=$('classBossPanelStatus');if(node)node.textContent=s||'';var screen=$('classBossStageStatus');if(screen)screen.textContent=s||'';}
   function renderPanel(){
     var root=$('classBossPanel');if(!root)return;
-    var s=workshopPlannerState&&workshopPlannerState.activeSession;
+    var bridge=bossWorkshop();var s=bridge?bridge.activeSession():null;
     var gameIds=s&&s.gameIds||[];
     var ready=!!(s&&s.classroomOpen&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
     root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Toda la clase combate desde Battlegrafía, Forja y Maniacgrafía. Tenéis un máximo de 25 minutos para derrotarlo: cerrar el taller o pausar ataques no detiene el reloj. No se duplican misiones ni XP.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚔️ Iniciar combate':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
@@ -3111,14 +3127,13 @@ body.light .teacherMonitorTable th{background:#fff}
   }
   async function prepare(){
     var classCode=getClass();if(!classCode){status('Selecciona primero una clase.');return;}
-    var s=workshopPlannerState&&workshopPlannerState.activeSession;
+    var bridge=bossWorkshop();var s=bridge?bridge.activeSession():null;
     if(s&&s.classroomOpen&&!window.confirm('Se cerrará la sesión de taller que está abierta para preparar el evento cooperativo. ¿Continuar?'))return;
     status('Preparando los tres juegos…');
     try{
       var payload={title:'El Devorapalabras · La defensa del Gran Archivo',message:'Juega y contribuye a la victoria colectiva de tu clase.',targetXp:0,objectiveType:'xp',gameIds:['battlegrafia','lexoma','maniacgrafia'],classCodes:[classCode]};
-      var saved=await sessionCall('saveAndActivateWorkshopPlan',[classCode,payload,true]);
-      await syncWorkshopSupabaseAccess(classCode,saved&&saved.activeSession);
-      renderWorkshopPlanner(saved);
+      var bridge=bossWorkshop();if(!bridge)throw new Error('El planificador no está disponible. Recarga la página.');
+      await bridge.prepare(classCode,payload);
       await act('start');
     }catch(e){status('No se pudo preparar: '+msg(e.code||e.message));}
   }
