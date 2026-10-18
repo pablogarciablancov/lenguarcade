@@ -17,7 +17,7 @@ export function battleIntervals(battle, nowMs=Date.now()) {
 export function countBossDamage(events, battle, workshopRuns, nowMs=Date.now()) {
   const windows=battleIntervals(battle,nowMs);
   const games = new Set(battle.game_ids || []);
-  const runs=(workshopRuns||[]).filter(r=>r.published!==false && r.classroom_open===true);
+  const runs=(workshopRuns||[]).filter(r=>r.published!==false && (r.classroom_open===true || Boolean(r.closed_at)));
   const lastByStudent=new Map(),comboBuckets=new Map(),hits=[];
   const unique=new Set();
   const sorted=[...events].sort((a,b)=>Date.parse(a.occurred_at)-Date.parse(b.occurred_at)||String(a.id).localeCompare(String(b.id)));
