@@ -1,3 +1,10 @@
+## 2026-10-18 — Devorapalabras pixel art animado
+
+- Sustituye el SVG por cuatro atlas originales de 12 fotogramas, ligados a los umbrales de vida del 70 %, 35 % y 10 %. Respiración, alas, cabeza, cola y parpadeo se reproducen en canvas sin suavizar los píxeles.
+- Conserva golpes, combos, victoria y derrota, y toda la lógica del evento. Alinea cada fotograma por su apoyo inferior y centro visible.
+- Carga los recursos de `lenguarcade-assets/assets/events/devorapalabras/`, con alternativa jsDelivr. Solo carga al abrir la proyección; detiene el dibujo al cerrar u ocultar la pestaña y respeta movimiento reducido.
+- Publicar primero los cuatro atlas en el repositorio de recursos, después publicar el HTML actualizado de Apps Script. No requiere cambios en Supabase.
+
 ## 2026-10-15 — Continuidad e historial de talleres
 
 - Reabrir y continuar reúne las aperturas del mismo taller y conserva sus ganadores. Nueva edición crea un reto independiente. Los intervalos cerrados no cuentan.

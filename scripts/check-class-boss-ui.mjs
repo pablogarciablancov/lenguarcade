@@ -23,6 +23,7 @@ function node(id){
   const classes=new Set();
   const attributes=new Map();
   return {
+    getContext(){return {clearRect(){},drawImage(...args){draws.push(args)}}},
     id,innerHTML:'',textContent:'',value:'',disabled:false,style:{},
     setAttribute(name,value){attributes.set(name,value)},
     getAttribute(name){return attributes.get(name)},
@@ -33,6 +34,8 @@ function node(id){
     }
   };
 }
+const draws=[],frames=new Map(),listeners=new Map();let frameId=0;
+const motion={matches:false,addEventListener(name,fn){listeners.set('motion',fn)}};
 const nodes=new Map();
 const getElementById=id=>{
   if(id==='games')return null;
@@ -42,8 +45,14 @@ const getElementById=id=>{
 getElementById('workshopClassSelect').value='TEST-C';
 const requests=[];
 const ctx={
-  window:{confirm:()=>true},
-  document:{getElementById},
+  window:{confirm:()=>true,matchMedia:()=>motion,
+    requestAnimationFrame(fn){frames.set(++frameId,fn);return frameId},
+    cancelAnimationFrame(id){frames.delete(id)}},
+  Image:class {
+    complete=true;naturalWidth=1448;naturalHeight=1086;
+    set src(value){this.url=value;this.onload?.()}
+  },
+  document:{getElementById,hidden:false,addEventListener(name,fn){listeners.set(name,fn)}},
   setInterval(){return 1},
   clearInterval(){},
   setTimeout(){return 1},
@@ -128,4 +137,36 @@ assert.ok(!getElementById('classBossMonster').classList.contains('hurt'),'New ev
 paint(null);
 assert.ok(!getElementById('classBossOutcome').classList.contains('show'));
 assert.equal(getElementById('classBossHealth').textContent,'—');
-console.log('Class boss UI: workshop bridge, start, four health phases, impacts, combos, outcomes and reset OK.');
+// The actual canvas renderer loads four atlases and cycles all twelve cells.
+paint({...event,id:'animated',health:100});
+const sprite=getElementById('classBossSprite');
+assert.equal(sprite.getAttribute('data-phase'),'1');
+assert.equal(sprite.getAttribute('data-frame'),'0');
+const seen=new Set();
+for(let step=0;step<14;step++){
+  const pending=[...frames.entries()];frames.clear();
+  for(const [,fn] of pending)fn(1000+step*120);
+  seen.add(sprite.getAttribute('data-frame'));
+}
+assert.equal(seen.size,12,'Must display all twelve original animation frames');
+for(const [health,phase] of [[70,2],[35,3],[10,4]]){
+  paint({...event,id:'animated',health});
+  assert.equal(sprite.getAttribute('data-phase'),String(phase));
+  assert.equal(sprite.getAttribute('data-frame'),'0');
+}
+assert.ok(draws.length>12);
+for(const [img,x,y,w,h] of draws){
+  assert.ok(x>=0&&y>=0&&x+w<=img.naturalWidth&&y+h<=img.naturalHeight,'Frame cropped outside atlas');
+}
+motion.matches=true;listeners.get('motion')();
+assert.equal(frames.size,0,'Reduced motion must cancel animation');
+assert.equal(sprite.getAttribute('data-frame'),'0');
+motion.matches=false;listeners.get('motion')();
+assert.equal(frames.size,1);
+ctx.document.hidden=true;listeners.get('visibilitychange')();
+assert.equal(frames.size,0,'Hidden tabs must stop drawing');
+ctx.document.hidden=false;listeners.get('visibilitychange')();
+assert.equal(frames.size,1);
+getElementById('classBossClose').onclick();
+assert.equal(frames.size,0,'Closing projection must cancel animation');
+console.log('Class boss UI: twelve atlas frames, visibility/motion lifecycle, workshop bridge, start, four health phases, impacts, combos, outcomes and reset OK.');

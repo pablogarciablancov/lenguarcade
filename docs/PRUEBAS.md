@@ -1,3 +1,9 @@
+## 2026-10-18 — Sprites del evento cooperativo
+
+- `node scripts/check-class-boss-ui.mjs`: carga de Talleres, inicio del evento, fases y límites de salud, dibujo de los 12 fotogramas dentro de cada atlas, golpes, combos, finales, movimiento reducido y cancelación al ocultar/cerrar.
+- Revisión con Chromium y los cuatro WebP originales servidos localmente: carga y dibujo reales, animación, impactos, cuatro fases, dos finales y ausencia de desbordamientos en 1366×768, 1440×900, 1920×1080 y 390×844.
+- Pendiente de publicación: comprobar los cuatro recursos por sus URL públicas y actualizar Apps Script; verificar el combate proyectado desde `/exec` con sesión docente real. No se han creado batallas ni modificado datos de alumnos.
+
 ## 2026-10-15 — Continuidad de talleres
 
 - npm run check: comprobaciones completas correctas. check-workshop-continuation cubre aperturas agrupadas, huecos cerrados, premio original, edición nueva, clases separadas y eliminación lógica.
