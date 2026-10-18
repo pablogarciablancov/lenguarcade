@@ -1,6 +1,6 @@
 # Evento cooperativo de clase · El Devorapalabras
 
-**Estado:** diseño aprobado para preparar la implementación. **No está implementado ni publicado.**
+**Estado:** MVP implementado en la PR #172; pendiente de integración/publicación y validación autenticada con alumnos. No equivale a un despliegue en producción.
 
 **Alcance inicial:** un evento para LenguArcade, clase de aproximadamente 25–30 alumnos de 2.º ESO, 12–15 minutos, integrado en **Talleres** y en la infraestructura de Supabase. No debe convertirse en una misión o sistema de puntuación independiente.
 
@@ -102,3 +102,30 @@ Diseño aditivo orientativo (nombres a confirmar durante implementación):
 Partidas PVP, chat de alumnos, tablas de clasificación individual, nuevas monedas, avatares, recompensas permanentes, nuevos eventos por juego, modificación profunda de Battlegrafía/Forja/Lexitrama y refactorizaciones ajenas a este evento.
 
 **Siguiente paso técnico:** validar el Apps Script publicado y, solo después, preparar una PR de implementación que comience por Entrega A; no implementar a ciegas una nueva capa de misiones.
+
+
+## Implementación MVP (18 de octubre)
+
+El primer corte funcional de la PR #172 consta de:
+- `supabase/migrations/20261018193000_class_boss_events.sql`: una batalla por taller lógico y clase, vinculada a la apertura real de `workshop_runs`, sin tocar misiones ni XP.
+- `supabase/functions/class-boss/index.ts`: acciones docentes `start/status/pause/resume/finish` y consulta mínima `studentStatus` validada con matrícula activa.
+- `supabase/functions/_shared/class-boss-engine.js`: daño deducido **solo** de `game_events` auténticos; un golpe por alumno/30 segundos y combo cuando aparecen los tres juegos en una misma franja fija de 90 segundos.
+- `apps-script/LenguArcade_Profesor.html`: preparación de taller y pantalla proyectable con monstruo SVG animado, contador, fases y controles.
+- `apps-script/LenguArcade_Alumno.html`: indicador discreto al jugar.
+- `scripts/check-class-boss.mjs`: simulación de 30 alumnos, duplicados, intervalos cerrados, reapertura otro día y pausas; incluida en `npm run check`.
+
+**Decisiones de implementación distintas del diseño inicial:**
+- En el MVP no existe la tabla de contribuciones propuesta: los IDs originales de `game_events` permiten un cálculo determinista sin duplicados, y se evitan escrituras adicionales por cada guardado.
+- El panel crea un taller con los tres juegos o reutiliza uno abierto. La duración inicial del panel es de 15 minutos; el backend también acepta 12 minutos, aún sin selector visual.
+- El daño y los combos se representan como impactos sobre el jefe; sprites especializados por juego, música y recompensas cosméticas quedan para el acabado posterior.
+- El reloj mide tiempo **de batalla y taller abierto**. No cuenta horas con el taller cerrado; los datos y el tiempo sobreviven a una reapertura del mismo `workshop_key`.
+
+**Validación antes del aula:**
+1. Esperar CI de la PR #172 y revisar errores.
+2. Migrar tabla de forma aditiva; desplegar Edge Function con JWT verificado; comprobar sin activar un evento real que el estado vacío devuelve `event:null`.
+3. Publicar HTML del profesor y del alumno con `npm.cmd run apps:publish -- "Evento cooperativo de clase"` desde un checkout de `main` actualizado y con `clasp` autorizado.
+4. En una clase de prueba, abrir Talleres → Preparar taller cooperativo → Proyectar, jugar en los tres juegos, comprobar cambio de vida y combo.
+5. Pausar, cerrar taller, reabrir al día siguiente y confirmar que mantiene la vida y el reloj. Probar finalización y aislamiento entre clases.
+6. No recompensar ni migrar los seis registros provisionales antiguos. No lanzar una primera batalla real hasta completar la prueba autenticada.
+
+**Estado no verificado:** navegador de profesor/alumnos auténticos, rendimiento en 30 Chromebooks y publicación de Apps Script.
