@@ -1,6 +1,12 @@
 // Cooperative boss: server-observed saved XP, fair shared cooldown and no double hits.
 export const BOSS_GAMES = Object.freeze(['battlegrafia','lexoma','maniacgrafia']);
 export const BOSS_DURATION_SECONDS = 25 * 60;
+// A class encounter must never collapse to eight HP in a one-account test.
+export function initialBossHealth(studentCount) {
+  const roster=Math.max(1,Math.floor(Number(studentCount)||0));
+  return Math.max(1000,Math.min(5000,roster*40));
+}
+
 const ms=value=>Date.parse(value||'');
 const localDay = timestamp => {
   const fields = new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit'})

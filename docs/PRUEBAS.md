@@ -1,3 +1,10 @@
+## 2026-10-18 — Equilibrio de clase y dragón ampliado
+
+- `node scripts/check-class-boss.mjs`: nueva vida mínima, tamaños de clase y límite de 5.000; un jugador solo con XP enorme produce 50 golpes en 25 minutos y no vence al jefe de 1.000. Conserva tiempo, duplicados y periodos del taller.
+- `node scripts/check-class-boss-balance.mjs`: simulaciones con 25/28/30 alumnos y guardados cada 30/60/30 segundos por juego; victorias a los 22:12, 22:17 y 22:41. Una clase muy rápida vence a los 19:08; con 15 de 30 participantes quedan 507 puntos de vida. Son ritmos simulados, no una garantía de duración real.
+- Chromium: 48 fotogramas completos, margen transparente de 24px en el canvas ampliado, fases y finales, sin desbordamientos en 1366×768, 1440×900, 1920×1080 y 390×844.
+- Verificar tras desplegar class-boss que initialBossHealth está publicado y JWT sigue obligatorio. La prueba real previa (8 HP) queda histórica; no se han creado pruebas ni puntuaciones en producción.
+
 ## 2026-10-18 — Regresión de contaminación entre sprites
 
 - Recursos: `python scripts/check-devorapalabras-frames.py` verifica 48 archivos válidos, 512×512, margen transparente >=24px y una única figura principal por archivo. La extracción usa componentes alfa, no divisiones de cuadrícula.

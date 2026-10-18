@@ -1,3 +1,10 @@
+## 2026-10-18 — Resistencia y tamaño del Devorapalabras
+
+- Las nuevas batallas tienen mínimo 1.000 puntos de vida y 40 por alumno (28 alumnos: 1.120; 30: 1.200), con el máximo existente de 5.000. Evita el anterior jefe de 8 puntos al probar con una cuenta.
+- Conserva un daño por progreso confirmado, enfriamiento de 30 segundos por alumno, combos, reloj de 25 minutos y las batallas históricas. Una batalla terminada no cambia su vida; abrir Nueva edición para aplicar el ajuste.
+- Dragón más grande en la proyección: cabecera compacta, más altura para la escena y zoom de la imagen individual completa sobre sus márgenes transparentes. Mantiene los 48 sprites separados.
+- Desplegar class-boss tras fusionar; después publicar Apps Script para el nuevo tamaño. No requiere migraciones ni ajustes de datos.
+
 ## 2026-10-18 — Fotogramas aislados del Devorapalabras
 
 - Corrige fragmentos del dragón vecino: se sustituyen los recortes por celdas por 48 archivos independientes, extraídos de los contornos completos y con margen transparente.
