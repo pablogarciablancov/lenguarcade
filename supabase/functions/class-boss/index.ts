@@ -23,6 +23,21 @@ async function latestBoss(admin:any,org:string,classId:string){
   if(error)throw error;
   return data?.[0]||null;
 }
+async function currentBoss(admin:any,org:string,classId:string,workshop:any){
+  if(!workshop)return latestBoss(admin,org,classId);
+  const {data:run,error:runError}=await admin.from("workshop_runs")
+    .select("workshop_key,plan_id").eq("organization_id",org).eq("classroom_id",classId)
+    .eq("plan_id",workshop.plan_id).eq("started_at",workshop.started_at)
+    .eq("published",true).is("closed_at",null).maybeSingle();
+  if(runError)throw runError;
+  if(!run)return null;
+  const key=String(run.workshop_key||run.plan_id);
+  const {data,error}=await admin.from("class_boss_events")
+    .select("*").eq("organization_id",org).eq("classroom_id",classId)
+    .eq("workshop_key",key).maybeSingle();
+  if(error)throw error;
+  return data||null;
+}
 function withClosedInterval(battle:any,at:string){
   const intervals=Array.isArray(battle.intervals)?[...battle.intervals]:[];
   if(battle.state==="active"&&battle.active_since)intervals.push({from:battle.active_since,to:at});
@@ -99,7 +114,7 @@ Deno.serve(async(request)=>{
       for(const member of memberships||[]){
         const workshop=await getActiveWorkshop(admin,organizationId,member.classroom_id);
         if(!workshop)continue;
-        const battle=await latestBoss(admin,organizationId,member.classroom_id);
+        const battle=await currentBoss(admin,organizationId,member.classroom_id,workshop);
         if(!battle||battle.state==="finished"||!battle.game_ids?.length)continue;
         const {data:currentRun,error:runError}=await admin.from("workshop_runs")
           .select("run_id,workshop_key,plan_id,closed_at").eq("organization_id",organizationId)
@@ -117,7 +132,7 @@ Deno.serve(async(request)=>{
     const classroom=await resolveClass(admin,organizationId,String(body.classCode||""));
     if(!classroom)return fail("class_not_found",404);
     const workshop=await getActiveWorkshop(admin,organizationId,classroom.id);
-    let battle=await latestBoss(admin,organizationId,classroom.id);
+    let battle=await currentBoss(admin,organizationId,classroom.id,workshop);
     if(action==="start"){
       if(!workshop)return fail("open_workshop_first",409);
       if(!BOSS_GAMES.every(id=>(workshop.game_ids||[]).includes(id)))return fail("select_boss_games_in_workshop",409);
