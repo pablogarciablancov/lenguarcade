@@ -3061,30 +3061,22 @@ body.light .teacherMonitorTable th{background:#fff}
 .laBossMain{position:relative;display:flex;flex:1;min-height:0;flex-direction:column;align-items:center;justify-content:center;padding:16px 4vw}
 .laBossTitle{text-align:center;margin-bottom:0;font-family:Georgia,serif;font-size:clamp(25px,4vw,55px);color:#ffe4bd;text-shadow:0 4px 16px #000}
 .laBossLegend{text-align:center;color:#e2d2ea;margin:4px 0 10px}
-.laBossMonster{position:relative;width:min(76vh,76vw,850px);flex:1;min-height:0;max-height:54vh;filter:drop-shadow(0 12px 26px #080317)}
-.laBossMonster svg{display:block;width:100%;height:100%;overflow:visible}
-.laBossDragon{transform-origin:400px 360px;animation:laBossFloat 4s ease-in-out infinite;transition:opacity 1s,filter .6s}
-.laBossAura{--laBossAura:.6;opacity:var(--laBossAura);transform-origin:400px 270px;animation:laBossAura 5s ease-in-out infinite;transition:opacity .7s}
-.laBossWing{transition:opacity .6s}.laBossWound,.laBossTear,.laBossLoosePage{opacity:0;transition:opacity .6s}
-.laBossMonster[data-phase="2"] .laBossWound.first,.laBossMonster[data-phase="3"] .laBossWound,.laBossMonster[data-phase="4"] .laBossWound,
-.laBossMonster[data-phase="3"] .laBossTear,.laBossMonster[data-phase="4"] .laBossTear,
-.laBossMonster[data-phase="2"] .laBossLoosePage.first,.laBossMonster[data-phase="3"] .laBossLoosePage,.laBossMonster[data-phase="4"] .laBossLoosePage{opacity:1}
-.laBossMonster[data-phase="2"] .laBossHornTip,.laBossMonster[data-phase="3"] .laBossHornTip,.laBossMonster[data-phase="4"] .laBossHornTip{opacity:0}
-.laBossMonster[data-phase="3"] .laBossWing{opacity:.7}.laBossMonster[data-phase="4"] .laBossWing{opacity:.4}
-.laBossMonster[data-phase="3"] .laBossAura{--laBossAura:.4}.laBossMonster[data-phase="4"] .laBossAura{--laBossAura:.2}
-.laBossMonster[data-phase="3"] .laBossDragon{animation:laBossWeaken 3s ease-in-out infinite}
-.laBossMonster[data-phase="4"] .laBossDragon{animation:laBossWeaken 1.6s ease-in-out infinite}
-.laBossMonster[data-phase="4"] .laBossEyeFar{opacity:.2}
-.laBossLoosePage{animation:laBossPages 3s ease-in-out infinite;transform-origin:center}.laBossLoosePage:nth-last-child(2){animation-delay:-1.5s}
+.laBossMonster{position:relative;width:min(58vh,80vw,600px);flex:1;min-height:0;max-height:54vh;filter:drop-shadow(0 12px 26px #080317)}
+.laBossDragon{position:absolute;inset:0;transform-origin:50% 85%;transition:opacity 1s,filter .6s}
+.laBossSpriteSurface{width:100%;height:100%}
+.laBossSprite{display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+.laBossAura{position:absolute;inset:4%;border-radius:50%;background:radial-gradient(ellipse,#bc79fb35,transparent 65%);pointer-events:none;animation:laBossAura 5s ease-in-out infinite}
+.laBossMonster[data-phase="3"] .laBossAura{opacity:.6}.laBossMonster[data-phase="4"] .laBossAura{opacity:.35}
+.laBossSpriteStatus{position:absolute;bottom:5%;left:0;right:0;text-align:center;color:#e2d2ea;font-size:13px}
+.laBossSpriteStatus:empty{display:none}
 .laBossImpact{position:absolute;left:50%;top:32%;color:#fff1bb;font-size:clamp(30px,5vw,64px);font-weight:1000;text-shadow:0 3px 0 #561a65,0 0 20px #ffcf70;opacity:0;pointer-events:none;white-space:nowrap}
-.laBossMonster.hurt svg{animation:laBossHit .4s ease-in-out}
+.laBossMonster.hurt .laBossSpriteSurface{animation:laBossHit .4s ease-in-out}
 .laBossMonster.hurt .laBossImpact{animation:laBossDamage .9s ease-out both}
 .laBossMonster.combo.hurt .laBossAura{animation:laBossCombo .9s ease-out}
 .laBossCurtain[data-outcome="victory"] .laBossDragon{animation:laBossCollapse 1.8s ease-out forwards}
-.laBossCurtain[data-outcome="victory"] .laBossLoosePage{opacity:1;animation:laBossRelease 3s ease-out infinite}
-.laBossCurtain[data-outcome="victory"] .laBossAura{fill:#8fffe1;--laBossAura:.5}
+.laBossCurtain[data-outcome="victory"] .laBossAura{background:radial-gradient(ellipse,#8fffe155,transparent 65%)}
 .laBossCurtain[data-outcome="defeat"] .laBossDragon{animation:laBossRoar 2.5s ease-in-out infinite}
-.laBossCurtain[data-outcome="defeat"] .laBossAura{fill:#ff5f99;--laBossAura:.8}
+.laBossCurtain[data-outcome="defeat"] .laBossAura{background:radial-gradient(ellipse,#ff5f9955,transparent 65%)}
 .laBossBar{width:min(780px,85vw);border-radius:20px;background:#080d1b;border:2px solid #9279ae;padding:5px;box-shadow:0 10px 25px #0009}
 .laBossBarFill{height:clamp(16px,2.2vh,25px);width:100%;border-radius:13px;background:linear-gradient(90deg,#f06778,#c83377,#9743e9);box-shadow:0 0 20px #f03b8c99;transition:width .5s ease}
 .laBossStats{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;margin-top:12px;font-weight:900;font-size:clamp(14px,1.7vw,22px)}
@@ -3096,15 +3088,11 @@ body.light .teacherMonitorTable th{background:#fff}
 .laBossOutcome p{font-size:clamp(13px,1.4vw,20px);color:#fff;margin:0}
 .laBossPhase{font-size:11px;letter-spacing:2px;font-weight:800;color:#e7c38e;margin:3px 0 6px;text-transform:uppercase;flex:none}
 .laBossMain>*:not(.laBossMonster){flex-shrink:0}.laBossTop,.laBossFoot{flex-shrink:0}
-@keyframes laBossFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
-@keyframes laBossAura{50%{transform:scale(1.06);opacity:calc(var(--laBossAura)*.6)}}
-@keyframes laBossWeaken{0%,100%{transform:translateY(17px) rotate(3deg)}50%{transform:translateY(23px) rotate(5deg)}}
-@keyframes laBossPages{50%{transform:translate(5px,-12px) rotate(4deg)}}
+@keyframes laBossAura{50%{transform:scale(1.06);opacity:.6}}
 @keyframes laBossHit{0%,100%{transform:translateX(0)}22%,65%{transform:translateX(-10px) rotate(-2deg);filter:brightness(1.8)}43%,85%{transform:translateX(10px)}}
-@keyframes laBossCombo{25%{fill:#ffe1a1;opacity:1;filter:brightness(2)}100%{filter:none}}
+@keyframes laBossCombo{25%{opacity:1;filter:brightness(3)}100%{filter:none}}
 @keyframes laBossDamage{0%{opacity:0;transform:translate(-50%,10px)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-60px)}}
 @keyframes laBossCollapse{to{transform:translateY(12px) rotate(10deg) scale(.85);opacity:.25;filter:grayscale(.8)}}
-@keyframes laBossRelease{to{transform:translateY(-100px) rotate(35deg);opacity:0}}
 @keyframes laBossRoar{50%{transform:translateY(-12px) scale(1.04)}}
 @media(prefers-reduced-motion:reduce){#classBossStage .laBossMonster *{animation:none;transition:none}.laBossCurtain[data-outcome="victory"] .laBossDragon{opacity:.25;transform:translateY(8px) rotate(8deg) scale(.9)}.laBossBarFill{transition:none}}
 @media(max-height:720px){.laBossMain{padding:4px 3vw}.laBossTitle{font-size:25px}.laBossLegend{font-size:13px;margin-bottom:4px}.laBossMonster{max-height:44vh}.laBossStats{margin-top:6px}.laBossFoot{padding:8px 20px}}
@@ -3117,51 +3105,9 @@ body.light .teacherMonitorTable th{background:#fff}
     <p class="laBossLegend" id="classBossLegend">Un solo día · 25 minutos como máximo. ¡Salvad el Gran Archivo!</p>
     <div class="laBossPhase" id="classBossPhase" aria-live="polite">Fase I · Guardián de tinta</div>
     <div class="laBossMonster" id="classBossMonster" data-phase="1" aria-hidden="true">
-      <svg viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="laBossInk" x2=".7" y2="1"><stop stop-color="#75528d"/><stop offset=".5" stop-color="#302341"/><stop offset="1" stop-color="#100e23"/></linearGradient>
-          <linearGradient id="laBossPaper" x2=".3" y2="1"><stop stop-color="#fff0c2"/><stop offset=".5" stop-color="#c3a584"/><stop offset="1" stop-color="#705978"/></linearGradient>
-          <radialGradient id="laBossHalo"><stop stop-color="#d795ff" stop-opacity=".35"/><stop offset="1" stop-color="#ab67e9" stop-opacity="0"/></radialGradient>
-          <pattern id="laBossScript" width="32" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)"><path d="M2 5h22m-20 5h16" stroke="#49364a" stroke-width="2" opacity=".35"/></pattern>
-        </defs>
-        <ellipse cx="400" cy="444" rx="255" ry="20" fill="#070514" opacity=".6"/>
-        <ellipse cx="400" cy="255" rx="330" ry="220" fill="url(#laBossHalo)"/>
-        <g class="laBossAura" fill="#bc79fb" opacity=".6"><path d="M400 25l12 20-12 20-12-20zM95 224l8 15-8 15-8-15zM700 207l10 18-10 18-10-18z"/><circle cx="400" cy="263" r="180" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2 18" color="#dca9ff"/></g>
-        <g class="laBossDragon" stroke-linejoin="round">
-          <!-- A broad parchment wing silhouette stays legible on a projector. -->
-          <g class="laBossWing" fill="url(#laBossPaper)" stroke="#261c38" stroke-width="7">
-            <path d="M355 283Q287 94 83 53L110 117 49 100 96 171 49 182 111 224 79 251Q218 201 293 344Z"/>
-            <path d="M447 282Q514 89 715 53L689 117 751 100 704 171 751 182 689 224 721 251Q582 204 507 344Z"/>
-            <path d="M355 283Q287 94 83 53L110 117 49 100 96 171 49 182 111 224 79 251Q218 201 293 344ZM447 282Q514 89 715 53L689 117 751 100 704 171 751 182 689 224 721 251Q582 204 507 344Z" fill="url(#laBossScript)" stroke="none"/>
-            <path d="M101 77Q228 143 319 301M100 174Q217 168 319 301M699 77Q572 143 483 301M700 174Q583 168 483 301" fill="none" stroke="#59435f" stroke-width="5"/>
-          </g>
-          <g class="laBossTear" fill="#20162e" stroke="#da9ee6" stroke-width="2"><path d="M166 110l47 27-24 17 31 16-21 26 49 22-59-9-13-35-27-12 29-19zM627 114l-40 28 18 25-35 8 15 32-48 29 66-17 9-33 31-14-27-26zM105 220l44-7-12 26-39 7zM682 214l-31 3 12 25 41 3z"/></g>
-          <path d="M460 363Q559 433 635 359Q672 320 637 298Q703 310 685 366Q650 472 479 419" fill="url(#laBossInk)" stroke="#a57ab9" stroke-width="6"/>
-          <path d="M640 302l-1-40 32 30-14 28z" fill="url(#laBossPaper)" stroke="#382744" stroke-width="5"/>
-          <path d="M317 279Q289 340 310 402L282 431 354 431 375 402 425 402 445 431 519 431 491 400Q514 330 475 275Z" fill="url(#laBossInk)" stroke="#b58ac6" stroke-width="6"/>
-          <g fill="url(#laBossPaper)" stroke="#69516c" stroke-width="3"><path d="M373 280l53 0 20 28-47 19-43-18zM356 320l43 17 47-17-6 29-41 19-39-20zM362 361l37 16 40-16-9 29-31 18-30-20z"/><path d="M287 429l13-22 10 22 11-24 10 24M467 430l12-24 10 24 12-23 15 23"/></g>
-          <path d="M325 278L270 320 240 379 274 389 311 349 347 330M471 279L524 319 558 375 526 391 490 347 456 329" fill="url(#laBossInk)" stroke="#ac7fbe" stroke-width="6"/>
-          <g fill="#ead8b6" stroke="#6b526f" stroke-width="3"><path d="M240 379l-13 23 27-10 0 17 20-20M558 375l14 25-28-8 0 17-18-18"/></g>
-          <!-- Horns are folded book covers; one tip breaks after phase I. -->
-          <path d="M328 174L287 131 302 112 350 132M453 159L512 105 506 63 443 121" fill="url(#laBossPaper)" stroke="#382744" stroke-width="6"/>
-          <path class="laBossHornTip" d="M287 131L277 120 287 73 318 102 302 112Z" fill="#fff0ca" stroke="#382744" stroke-width="4"/>
-          <path d="M301 171L351 116 407 104 461 136 487 184 465 244 428 286 360 280 322 246Z" fill="url(#laBossInk)" stroke="#c399cf" stroke-width="7"/>
-          <path d="M351 116l28 30 28-42 21 47 33-15-17 45-41-12-49 14z" fill="#ac86a8" stroke="#34243f" stroke-width="4"/>
-          <path d="M321 191l57 12-15 23-37-11z" fill="#fff0b8" stroke="#fb79d1" stroke-width="4"/>
-          <path class="laBossEyeFar" d="M422 203l48-17-6 28-33 14z" fill="#fff0b8" stroke="#fb79d1" stroke-width="4"/>
-          <path d="M323 184l58 16M422 200l51-24" stroke="#171226" stroke-width="12"/>
-          <path d="M354 235l44-16 44 15-10 36-34 20-36-23z" fill="#171023" stroke="#ab7caa" stroke-width="4"/>
-          <path d="M363 240l11 20 10-24 16 27 13-27 13 18 6-17M373 272l10-12 13 20 15-20 10 12" fill="#f9dfaf"/>
-          <path d="M388 223l10 5 11-6" fill="none" stroke="#ed9bd3" stroke-width="3"/>
-          <g class="laBossWound first" fill="none" stroke="#f5b4ef" stroke-width="4"><path d="M340 157l14 31-13 14 17 36M319 300l19 24-12 28 22 19"/><path d="M292 105l10 6-11 9" stroke="#fff1cb"/></g>
-          <g class="laBossWound" fill="none" stroke="#f5b4ef" stroke-width="4"><path d="M451 148l-19 34 13 18-13 28M469 303l-20 26 12 22-19 29M398 305l-11 24 22 25-17 31"/></g>
-        </g>
-        <g fill="url(#laBossPaper)" stroke="#6f527a" stroke-width="2">
-          <path class="laBossLoosePage first" d="M193 319l35-12 11 35-35 8z"/><path class="laBossLoosePage first" d="M573 267l33 9-9 38-35-12z"/>
-          <path class="laBossLoosePage" d="M251 185l25 13-12 31-27-13z"/><path class="laBossLoosePage" d="M529 389l32-12 14 29-35 14z"/>
-          <path class="laBossLoosePage" d="M358 61l27-9 10 28-24 10z"/>
-        </g>
-      </svg>
+      <div class="laBossAura"></div>
+      <div class="laBossDragon"><div class="laBossSpriteSurface"><canvas class="laBossSprite" id="classBossSprite" width="512" height="512"></canvas></div></div>
+      <span class="laBossSpriteStatus" id="classBossSpriteStatus">Preparando el dragón…</span>
       <span class="laBossImpact" id="classBossImpact"></span>
     </div>
     <div class="laBossBar" aria-label="Vida del jefe"><div class="laBossBarFill" id="classBossHealthBar"></div></div>
@@ -3173,6 +3119,62 @@ body.light .teacherMonitorTable th{background:#fff}
 <script id="la-class-boss-controller">
 (function(){
   var last=null,timer=null,requesting=false,stage=$('classBossStage'),lastDamage=0,lastCombos=0,visualEventId=null;
+  // Twelve original frames per phase; atlas files live in lenguarcade-assets.
+  var spriteSheets=[{"file":"dragon-healthy-idle-v1.webp","anchors":[[187.5,352],[188.5,352],[181.0,352],[180.0,352],[184.5,351],[181.0,351],[181.0,351],[180.5,351],[188.5,351],[181.0,351],[181.0,351],[179.5,351]]},{"file":"dragon-cracked-idle-v1.webp","anchors":[[190.5,362],[181.0,362],[181.0,362],[178.0,362],[184.5,362],[181.0,362],[181.0,362],[179.5,362],[190.0,358],[181.0,358],[181.0,358],[179.5,358]]},{"file":"dragon-torn-idle-v1.webp","anchors":[[188.0,345],[186.0,345],[181.0,345],[177.0,345],[188.0,345],[181.0,345],[181.0,345],[177.0,345],[187.0,338],[181.0,338],[186.0,338],[177.5,338]]},{"file":"dragon-critical-idle-v1.webp","anchors":[[189.5,351],[191.0,351],[192.0,351],[182.0,351],[186.0,337],[181.0,337],[180.0,340],[187.0,340],[191.5,330],[180.5,330],[185.5,331],[184.5,331]]}];
+  var spriteAssetVersion='861c1b46f71d94b1b8ee92c3aaea6ea628d45b37';
+  var spriteImages=[],spritePhase=1,spriteFrame=0,spriteRaf=0,spriteAt=0;
+  var spriteReduced=typeof window.matchMedia==='function'?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
+  function drawBossSprite(){
+    var canvas=$('classBossSprite'),sheet=spriteSheets[spritePhase-1],img=spriteImages[spritePhase-1];
+    if(!canvas||!img||!img.complete||!img.naturalWidth)return;
+    var context=canvas.getContext('2d');if(!context)return;
+    var frame=spriteReduced&&spriteReduced.matches?0:spriteFrame;
+    var x=Math.floor((frame%4)*img.naturalWidth/4),y=Math.floor(Math.floor(frame/4)*img.naturalHeight/3);
+    var width=Math.floor((frame%4+1)*img.naturalWidth/4)-x;
+    var height=Math.floor((Math.floor(frame/4)+1)*img.naturalHeight/3)-y;
+    var anchor=sheet.anchors[frame],scale=1.18;
+    context.clearRect(0,0,512,512);context.imageSmoothingEnabled=false;
+    context.drawImage(img,x,y,width,height,256-anchor[0]*scale,470-anchor[1]*scale,width*scale,height*scale);
+    $('classBossSpriteStatus').textContent='';
+    canvas.setAttribute('data-phase',String(spritePhase));canvas.setAttribute('data-frame',String(frame));
+  }
+  function stopBossSprite(){
+    if(spriteRaf&&typeof window.cancelAnimationFrame==='function')window.cancelAnimationFrame(spriteRaf);
+    spriteRaf=0;spriteAt=0;
+  }
+  function animateBossSprite(now){
+    spriteRaf=0;
+    if(!stage.classList.contains('open')||document.hidden)return;
+    if(spriteReduced&&spriteReduced.matches){drawBossSprite();return;}
+    if(!spriteAt||now-spriteAt>=110){
+      if(spriteAt)spriteFrame=(spriteFrame+1)%12;
+      spriteAt=now;drawBossSprite();
+    }
+    if(!(spriteReduced&&spriteReduced.matches)&&stage.getAttribute('data-outcome')!=='victory')spriteRaf=window.requestAnimationFrame(animateBossSprite);
+  }
+  function syncBossSprite(phase){
+    if(phase!==spritePhase){spritePhase=phase;spriteFrame=0;spriteAt=0;}
+    if(!stage.classList.contains('open'))return;
+    // Visual loading/animation must never break the workshop controller.
+    try{
+      if(typeof Image!=='function')return;
+      spriteSheets.forEach(function(sheet,index){
+        if(spriteImages[index])return;
+        var img=new Image(),fallback=false;spriteImages[index]=img;
+        img.onload=function(){if(spritePhase===index+1)drawBossSprite();};
+        img.onerror=function(){
+          if(!fallback){fallback=true;img.src='https://cdn.jsdelivr.net/gh/pablogarciablancov/lenguarcade-assets@'+spriteAssetVersion+'/assets/events/devorapalabras/'+sheet.file;}
+          else if(spritePhase===index+1)$('classBossSpriteStatus').textContent='No se ha podido cargar el dragón. El combate sigue activo.';
+        };
+        img.src='https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/'+spriteAssetVersion+'/assets/events/devorapalabras/'+sheet.file;
+      });
+      drawBossSprite();
+      if(spriteReduced&&spriteReduced.matches||stage.getAttribute('data-outcome')==='victory')stopBossSprite();
+      else if(!spriteRaf&&!document.hidden&&typeof window.requestAnimationFrame==='function')spriteRaf=window.requestAnimationFrame(animateBossSprite);
+    }catch(error){console.warn('[Devorapalabras] No se pudo mostrar el sprite.',error);}
+  }
+  if(spriteReduced&&typeof spriteReduced.addEventListener==='function')spriteReduced.addEventListener('change',function(){stopBossSprite();syncBossSprite(spritePhase);});
+  if(typeof document.addEventListener==='function')document.addEventListener('visibilitychange',function(){if(document.hidden)stopBossSprite();else syncBossSprite(spritePhase);});
   function bossWorkshop(){return window.laBossWorkshopBridge||null;}
   function getClass(){var bridge=bossWorkshop();return bridge?bridge.selectedClass():'';}
   function fmt(seconds){var n=Math.max(0,Math.ceil(Number(seconds)||0));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
@@ -3221,7 +3223,7 @@ body.light .teacherMonitorTable th{background:#fff}
   function paint(b){
     var monster=$('classBossMonster');
     if(!b){
-      stage.setAttribute('data-outcome','');monster.setAttribute('data-phase','1');
+      stage.setAttribute('data-outcome','');monster.setAttribute('data-phase','1');syncBossSprite(1);
       monster.classList.remove('hurt');monster.classList.remove('combo');
       $('classBossOutcome').classList.remove('show');
       $('classBossPhase').textContent='Fase I · Guardián de tinta';
@@ -3236,6 +3238,7 @@ body.light .teacherMonitorTable th{background:#fff}
     var sameEvent=visualEventId===b.id;
     monster.setAttribute('data-phase',String(phase));
     stage.setAttribute('data-outcome',b.state==='finished'?(b.outcome==='victory'?'victory':'defeat'):'');
+    syncBossSprite(phase);
     $('classBossPhase').textContent=['Fase I · Guardián de tinta','Fase II · El pergamino se agrieta','Fase III · Alas desgarradas','Fase IV · La tinta se desvanece'][phase-1];
     if(!sameEvent){monster.classList.remove('hurt');monster.classList.remove('combo');}
 
@@ -3267,7 +3270,7 @@ body.light .teacherMonitorTable th{background:#fff}
     finally{requesting=false;}
   }
   function openStage(){stage.classList.add('open');paint(last);refresh();if(timer)clearInterval(timer);timer=setInterval(refresh,3000);}
-  function closeStage(){stage.classList.remove('open');if(timer)clearInterval(timer);timer=null;}
+  function closeStage(){stage.classList.remove('open');stopBossSprite();if(timer)clearInterval(timer);timer=null;}
   $('classBossClose').onclick=closeStage;
   $('classBossPause').onclick=function(){act(last&&last.state==='paused'?'resume':'pause');};
   $('classBossFinish').onclick=function(){if(window.confirm('¿Finalizar la batalla cooperativa? El progreso de juego seguirá intacto.'))act('finish');};
