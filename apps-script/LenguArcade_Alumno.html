@@ -1466,6 +1466,7 @@ function mountGameRunner(){
         <button type="button" class="ghost hidden" id="gameRunnerRetry">Reintentar guardado</button>
         <button type="button" class="ghost" id="gameRunnerClose">Salir del juego</button>
       </header>
+      <div class="laStudentBoss hidden" id="studentClassBossNotice" role="status" aria-live="polite"></div>
       <div class="gameRunnerMission hidden" id="gameRunnerMission"><span id="gameRunnerMissionText" role="status" aria-live="polite"></span><button type="button" class="ghost hidden" id="gameRunnerMissionNext">Otra misión</button></div>
       <div class="gameRunnerCelebration hidden" id="gameRunnerCelebration" role="status" aria-live="polite"></div>
       <div class="gameRunnerAccessClosing hidden" id="gameRunnerAccessClosing" role="alert" aria-live="assertive">
@@ -4224,6 +4225,31 @@ body.light .rankCard,body.light .studentHistoryItem,body.light .generalAchieveme
 })();
 </script>
 
+
+<style>
+.laStudentBoss{position:relative;z-index:3;padding:5px 16px;text-align:center;font-size:12px;font-weight:850;letter-spacing:.02em;color:#f6eaff;background:linear-gradient(90deg,#382151,#6841a0,#382151);border-top:1px solid #f4b7ff44;border-bottom:1px solid #f4b7ff44;box-shadow:inset 0 0 18px #130b36}
+.laStudentBoss.hidden{display:none!important}
+</style>
+<script id="la-student-boss-status">
+(function(){
+  var checking=false;
+  async function refresh(){
+    if(checking||!token||!document.getElementById('gameRunner')?.classList.contains('open'))return;
+    var notice=document.getElementById('studentClassBossNotice');if(!notice)return;
+    checking=true;
+    try{
+      var result=await callSupabaseFunction('class-boss',{action:'studentStatus'},token);
+      if(result&&result.event){
+        notice.textContent='⚔️ El Devorapalabras · ¡Estás ayudando a toda la clase! Tus progresos confirmados cuentan para el combate.';
+        notice.classList.remove('hidden');
+      }else notice.classList.add('hidden');
+    }catch(e){notice.classList.add('hidden');}
+    finally{checking=false;}
+  }
+  window.refreshStudentClassBossNotice=refresh;
+  setInterval(refresh,16000);
+})();
+</script>
 </body>
 </html>
 
