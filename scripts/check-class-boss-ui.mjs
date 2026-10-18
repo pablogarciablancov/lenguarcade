@@ -84,6 +84,9 @@ ctx.window.__setPlannerForTest({activeSession:{
 assert.doesNotThrow(()=>ctx.window.classBossRenderPanel());
 assert.match(getElementById('classBossPanel').innerHTML,/Iniciar combate/);
 await getElementById('classBossPrepare').onclick();
+// The click handler schedules an async request without returning its Promise.
+// Flush the event loop so the fake Edge response can paint the HUD.
+await new Promise(resolve=>setImmediate(resolve));
 assert.ok(requests.some(r=>r.name==='class-boss'&&r.request.action==='start'&&r.request.classCode==='TEST-C'),
   'Boss start did not use the selected workshop class');
 assert.equal(getElementById('classBossHealth').textContent,'232 / 240 de vida');
