@@ -2,7 +2,7 @@
 
 **Estado:** MVP implementado en la PR #172; pendiente de integración/publicación y validación autenticada con alumnos. No equivale a un despliegue en producción.
 
-**Alcance inicial:** un evento para LenguArcade, clase de aproximadamente 25–30 alumnos de 2.º ESO, 12–15 minutos, integrado en **Talleres** y en la infraestructura de Supabase. No debe convertirse en una misión o sistema de puntuación independiente.
+**Alcance inicial:** un evento para LenguArcade, clase de aproximadamente 25–30 alumnos de 2.º ESO, 25 minutos como máximo, en una sola jornada, integrado en **Talleres** y en la infraestructura de Supabase. No debe convertirse en una misión o sistema de puntuación independiente.
 
 ## 0. Dependencia previa: consolidación de Talleres
 
@@ -31,7 +31,7 @@ Estética: criatura gigantesca hecha de tinta y papel desgarrado, biblioteca en 
 
 **Profesor, desde Talleres:**
 - Elegir clase y una preparación de taller o abrir una preparación preconfigurada de «Evento cooperativo».
-- Seleccionar juegos compatibles (MVP propuesto: Battlegrafía, Forja y Lexitrama), duración 12 o 15 minutos y dificultad «Normal» o «Épica».
+- Seleccionar juegos compatibles (MVP propuesto: Battlegrafía, Forja y Maniacgrafía), duración fija máxima de 25 minutos desde el inicio real, sin prórrogas.
 - Abrir los juegos mediante el flujo existente de `workshop_sessions`; crear una única instancia de evento vinculada a esa ejecución lógica, nunca una misión duplicada.
 - Pulsar «Iniciar batalla» y abrir «Proyectar batalla». El panel permite Pausar, Reanudar y Finalizar. Cerrar el taller no debe borrar resultados.
 
@@ -72,7 +72,7 @@ Diseño aditivo orientativo (nombres a confirmar durante implementación):
 - RLS o acceso de servicio restringido: jamás aceptar `classroom_id`, `profile_id`, puntos o cambios de HP arbitrarios del cliente como autorización suficiente.
 - La emisión de efectos visuales puede hacerse por actualizaciones periódicas moderadas o Realtime; si falla el canal visual, la actividad y el guardado siguen funcionando.
 - Fallos del evento **nunca** deben impedir `save-progress` ni alterar guardados existentes.
-- Eliminar del historial oculta/finaliza el evento correspondiente sin borrar `game_events`, progreso ni premios pasados. «Nueva edición» crea evento distinto; «Reabrir y continuar» debe recuperar el mismo estado si se pausó.
+- Eliminar del historial oculta/finaliza el evento correspondiente sin borrar `game_events`, progreso ni premios pasados. «Nueva edición» crea evento distinto; «Reabrir y continuar» conserva la batalla solo mientras no haya vencido su plazo absoluto de 25 minutos y siga siendo el mismo día.
 
 ## 5. Implementación por entregas
 
@@ -99,7 +99,7 @@ Diseño aditivo orientativo (nombres a confirmar durante implementación):
 
 ## 7. Fuera del MVP
 
-Partidas PVP, chat de alumnos, tablas de clasificación individual, nuevas monedas, avatares, recompensas permanentes, nuevos eventos por juego, modificación profunda de Battlegrafía/Forja/Lexitrama y refactorizaciones ajenas a este evento.
+Partidas PVP, chat de alumnos, tablas de clasificación individual, nuevas monedas, avatares, recompensas permanentes, nuevos eventos por juego, modificación profunda de Battlegrafía/Forja/Maniacgrafía y refactorizaciones ajenas a este evento.
 
 **Siguiente paso técnico:** validar el Apps Script publicado y, solo después, preparar una PR de implementación que comience por Entrega A; no implementar a ciegas una nueva capa de misiones.
 
@@ -112,20 +112,24 @@ El primer corte funcional de la PR #172 consta de:
 - `supabase/functions/_shared/class-boss-engine.js`: daño deducido **solo** de `game_events` auténticos; un golpe por alumno/30 segundos y combo cuando aparecen los tres juegos en una misma franja fija de 90 segundos.
 - `apps-script/LenguArcade_Profesor.html`: preparación de taller y pantalla proyectable con monstruo SVG animado, contador, fases y controles.
 - `apps-script/LenguArcade_Alumno.html`: indicador discreto al jugar.
-- `scripts/check-class-boss.mjs`: simulación de 30 alumnos, duplicados, intervalos cerrados, reapertura otro día y pausas; incluida en `npm run check`.
+- `scripts/check-class-boss.mjs`: simulación de 30 alumnos, duplicados, intervalos cerrados, rechazo de reapertura al día siguiente y pausas con reloj en marcha; incluida en `npm run check`.
 
 **Decisiones de implementación distintas del diseño inicial:**
 - En el MVP no existe la tabla de contribuciones propuesta: los IDs originales de `game_events` permiten un cálculo determinista sin duplicados, y se evitan escrituras adicionales por cada guardado.
-- El panel crea un taller con los tres juegos o reutiliza uno abierto. La duración inicial del panel es de 15 minutos; el backend también acepta 12 minutos, aún sin selector visual.
+- El panel crea un taller con los tres juegos o reutiliza uno abierto. El panel y el backend fijan 25 minutos como máximo desde el inicio. El servidor ignora cualquier petición del cliente que intente ampliarlos.
 - El daño y los combos se representan como impactos sobre el jefe; sprites especializados por juego, música y recompensas cosméticas quedan para el acabado posterior.
-- El reloj mide tiempo **de batalla y taller abierto**. No cuenta horas con el taller cerrado; los datos y el tiempo sobreviven a una reapertura del mismo `workshop_key`.
+- El reloj mide **tiempo real desde el comienzo**, nunca más de 25 minutos y sin pasar de la medianoche de Madrid. Ni pausar ataques, cerrar el taller o reabrirlo permite alargar la batalla. Al terminar, es definitiva: una nueva batalla exige una nueva edición del taller.
 
 **Validación antes del aula:**
 1. Esperar CI de la PR #172 y revisar errores.
 2. Migrar tabla de forma aditiva; desplegar Edge Function con JWT verificado; comprobar sin activar un evento real que el estado vacío devuelve `event:null`.
 3. Publicar HTML del profesor y del alumno con `npm.cmd run apps:publish -- "Evento cooperativo de clase"` desde un checkout de `main` actualizado y con `clasp` autorizado.
 4. En una clase de prueba, abrir Talleres → Preparar taller cooperativo → Proyectar, jugar en los tres juegos, comprobar cambio de vida y combo.
-5. Pausar, cerrar taller, reabrir al día siguiente y confirmar que mantiene la vida y el reloj. Probar finalización y aislamiento entre clases.
+5. Pausar ataques y cerrar el taller, comprobar que el reloj sigue descendiendo y que al cabo de 25 minutos el evento termina. Intentar reabrir al día siguiente no debe reactivar la batalla. Probar finalización y aislamiento entre clases.
 6. No recompensar ni migrar los seis registros provisionales antiguos. No lanzar una primera batalla real hasta completar la prueba autenticada.
 
 **Estado no verificado:** navegador de profesor/alumnos auténticos, rendimiento en 30 Chromebooks y publicación de Apps Script.
+
+## Ajuste de reglas (18 de octubre de 2026)
+
+Por decisión docente, el evento usa **Battlegrafía, Forja (ID `lexoma`) y Maniacgrafía (ID `maniacgrafia`)**, no Lexitrama. Es un desafío de **un solo día con 25 minutos máximos de reloj real**, desde el inicio del encuentro, o hasta la medianoche de Madrid si se inicia muy tarde. Los cierres y las pausas impiden sumar golpes, pero nunca amplían el límite. El profesor puede consultar después el resultado final, que no reinicia el mismo taller. Las pruebas automatizadas verifican esos supuestos y simulan 30 alumnos.

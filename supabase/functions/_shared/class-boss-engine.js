@@ -1,43 +1,61 @@
 // Cooperative boss: server-observed saved XP, fair shared cooldown and no double hits.
-export const BOSS_GAMES = Object.freeze(['battlegrafia','lexoma','lexitrama']);
+export const BOSS_GAMES = Object.freeze(['battlegrafia','lexoma','maniacgrafia']);
+export const BOSS_DURATION_SECONDS = 25 * 60;
 const ms=value=>Date.parse(value||'');
+const localDay = timestamp => {
+  const fields = new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit'})
+    .formatToParts(new Date(timestamp));
+  return ['year','month','day'].map(type=>fields.find(field=>field.type===type)?.value).join('-');
+};
+// The event expires 25 real minutes after starting, or at Madrid midnight if sooner.
+export function battleDeadlineMs(battle) {
+  const start=ms(battle.started_at);
+  if(!Number.isFinite(start))return NaN;
+  const requested=Number(battle.duration_seconds);
+  const duration=Number.isFinite(requested)&&requested>0?Math.min(BOSS_DURATION_SECONDS,requested):BOSS_DURATION_SECONDS;
+  const end=start+duration*1000;
+  if(localDay(start)===localDay(end-1))return end;
+  let lower=start,upper=end;
+  const day=localDay(start);
+  while(upper-lower>1) {
+    const mid=Math.floor((lower+upper)/2);
+    if(localDay(mid)===day)lower=mid;
+    else upper=mid;
+  }
+  return upper;
+}
 function rawWindows(battle,nowMs) {
   const periods=Array.isArray(battle.intervals)?battle.intervals.slice():[];
   if(battle.state==='active' && battle.active_since)periods.push({from:battle.active_since,to:new Date(nowMs).toISOString()});
   return periods.map(p=>({from:ms(p.from),to:ms(p.to)})).filter(p=>Number.isFinite(p.from)&&Number.isFinite(p.to)&&p.to>p.from);
 }
-// The timer is counted only inside workshop openings. Long closed gaps cost no time.
+// Attacks require an open workshop; closing it or pausing cannot extend the deadline.
 export function eligibleBattleWindows(battle,runs,nowMs=Date.now()) {
-  const active=rawWindows(battle,nowMs);
+  const deadline=battleDeadlineMs(battle);
+  const until=Math.min(nowMs,deadline);
+  if(!Number.isFinite(until))return [];
+  const active=rawWindows(battle,until);
   const intervals=[];
   for(const a of active)for(const r of runs||[]){
     if(r.published===false||(!r.classroom_open&&!r.closed_at))continue;
     const from=Math.max(a.from,ms(r.started_at),ms(battle.started_at));
-    const to=Math.min(a.to,r.closed_at?ms(r.closed_at):nowMs,nowMs);
+    const to=Math.min(a.to,r.closed_at?ms(r.closed_at):until,until);
     if(Number.isFinite(from)&&Number.isFinite(to)&&to>from)intervals.push({from,to});
   }
   intervals.sort((a,b)=>a.from-b.from);
   const merged=[];
   for(const p of intervals){const last=merged[merged.length-1];if(last&&p.from<=last.to)last.to=Math.max(last.to,p.to);else merged.push({...p});}
-  let budget=Number(battle.duration_seconds||900)*1000;
-  const result=[];
-  for(const p of merged){if(budget<=0)break;const to=Math.min(p.to,p.from+budget);result.push({from:new Date(p.from).toISOString(),to:new Date(to).toISOString()});budget-=to-p.from;}
-  return result;
+  return merged.map(p=>({from:new Date(p.from).toISOString(),to:new Date(p.to).toISOString()}));
 }
-export function battleClock(battle,nowMs=Date.now(),runs) {
-  if(Array.isArray(runs)){
-    const used=eligibleBattleWindows(battle,runs,nowMs).reduce((total,p)=>total+ms(p.to)-ms(p.from),0);
-    return Math.max(0,Math.ceil((Number(battle.duration_seconds||900)*1000-used)/1000));
-  }
-  // Fallback for legacy/test callers without the workshop timeline.
-  const elapsed=Number(battle.elapsed_seconds||0)+(battle.state==='active'&&battle.active_since?Math.max(0,(nowMs-ms(battle.active_since))/1000):0);
-  return Math.max(0,Math.ceil(Number(battle.duration_seconds||900)-elapsed));
+export function battleClock(battle,nowMs=Date.now(),_runs) {
+  const deadline=battleDeadlineMs(battle);
+  return Number.isFinite(deadline)?Math.max(0,Math.ceil((deadline-nowMs)/1000)):0;
 }
 export function battleIntervals(battle,nowMs=Date.now()) {
   const periods=Array.isArray(battle.intervals)?battle.intervals.slice():[];
-  if(battle.state==='active'&&battle.active_since){
-    const start=ms(battle.active_since),end=Math.min(nowMs,start+battleClock(battle,start)*1000);
-    if(Number.isFinite(start)&&end>=start)periods.push({from:new Date(start).toISOString(),to:new Date(end).toISOString()});
+  if(battle.state==='active'&&battle.active_since) {
+    const end=Math.min(nowMs,battleDeadlineMs(battle));
+    if(end>ms(battle.active_since))periods.push({from:battle.active_since,to:new Date(end).toISOString()});
   }
   return periods;
 }

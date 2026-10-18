@@ -3064,7 +3064,7 @@ body.light .teacherMonitorTable th{background:#fff}
   <header class="laBossTop"><div><small>LENGUARCADE · EVENTO COOPERATIVO</small><strong>La defensa del Gran Archivo</strong></div><button type="button" id="classBossClose">✕ Volver al profesor</button></header>
   <main class="laBossMain">
     <h1 class="laBossTitle">EL DEVORAPALABRAS</h1>
-    <p class="laBossLegend" id="classBossLegend">La clase está reuniendo sus poderes…</p>
+    <p class="laBossLegend" id="classBossLegend">Un solo día · 25 minutos como máximo. ¡Salvad el Gran Archivo!</p>
     <div class="laBossMonster" id="classBossMonster" aria-hidden="true">
       <svg viewBox="0 0 600 520" xmlns="http://www.w3.org/2000/svg">
         <defs><radialGradient id="laBossInk"><stop stop-color="#4c315c"/><stop offset="1" stop-color="#110c24"/></radialGradient><filter id="laBossGlow"><feGaussianBlur stdDeviation="7"/></filter></defs>
@@ -3080,7 +3080,7 @@ body.light .teacherMonitorTable th{background:#fff}
       </svg>
     </div>
     <div class="laBossBar" aria-label="Vida del jefe"><div class="laBossBarFill" id="classBossHealthBar"></div></div>
-    <div class="laBossStats"><span id="classBossHealth">—</span><span id="classBossClock">15:00</span><span id="classBossCombos">Combos: 0</span></div>
+    <div class="laBossStats"><span id="classBossHealth">—</span><span id="classBossClock">25:00</span><span id="classBossCombos">Combos: 0</span></div>
     <div id="classBossOutcome" class="laBossOutcome" aria-live="polite"><h2 id="classBossOutcomeTitle">¡VICTORIA!</h2><p id="classBossOutcomeText">Habéis salvado el Gran Archivo.</p></div>
   </main>
   <footer class="laBossFoot"><span id="classBossStageStatus">Esperando los progresos confirmados de la clase.</span><div class="laBossActions"><button type="button" class="laBossPause" id="classBossPause">Pausar</button><button type="button" class="laBossEnd" id="classBossFinish">Finalizar</button></div></footer>
@@ -3092,7 +3092,7 @@ body.light .teacherMonitorTable th{background:#fff}
   function fmt(seconds){var n=Math.max(0,Math.ceil(Number(seconds)||0));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
   function msg(code){var messages={
     open_workshop_first:'Abre primero un taller para esta clase.',
-    select_boss_games_in_workshop:'El taller debe incluir Battlegrafía, Forja y Lexitrama.',
+    select_boss_games_in_workshop:'El taller debe incluir Battlegrafía, Forja y Maniacgrafía.',
     event_already_exists_reload:'El evento ya existe. Actualiza el panel.',
     finish_previous_event:'Finaliza primero el combate anterior.',
     boss_finished:'La batalla ha terminado. Usa una nueva edición del taller.',
@@ -3103,8 +3103,8 @@ body.light .teacherMonitorTable th{background:#fff}
     var root=$('classBossPanel');if(!root)return;
     var s=workshopPlannerState&&workshopPlannerState.activeSession;
     var gameIds=s&&s.gameIds||[];
-    var ready=!!(s&&s.classroomOpen&&['battlegrafia','lexoma','lexitrama'].every(function(id){return gameIds.includes(id);}));
-    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Toda la clase combate contra el monstruo del Gran Archivo desde Battlegrafía, Forja y Lexitrama. Cada avance confirmado suma al equipo, sin crear misiones ni XP duplicadas.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚔️ Iniciar combate':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
+    var ready=!!(s&&s.classroomOpen&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
+    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Toda la clase combate desde Battlegrafía, Forja y Maniacgrafía. Tenéis un máximo de 25 minutos para derrotarlo: cerrar el taller o pausar ataques no detiene el reloj. No se duplican misiones ni XP.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚔️ Iniciar combate':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
     $('classBossPrepare').onclick=function(){ready?act('start'):prepare();};
     $('classBossProject').onclick=function(){openStage();};
     refresh();
@@ -3115,7 +3115,7 @@ body.light .teacherMonitorTable th{background:#fff}
     if(s&&s.classroomOpen&&!window.confirm('Se cerrará la sesión de taller que está abierta para preparar el evento cooperativo. ¿Continuar?'))return;
     status('Preparando los tres juegos…');
     try{
-      var payload={title:'El Devorapalabras · La defensa del Gran Archivo',message:'Juega y contribuye a la victoria colectiva de tu clase.',targetXp:0,objectiveType:'xp',gameIds:['battlegrafia','lexoma','lexitrama'],classCodes:[classCode]};
+      var payload={title:'El Devorapalabras · La defensa del Gran Archivo',message:'Juega y contribuye a la victoria colectiva de tu clase.',targetXp:0,objectiveType:'xp',gameIds:['battlegrafia','lexoma','maniacgrafia'],classCodes:[classCode]};
       var saved=await sessionCall('saveAndActivateWorkshopPlan',[classCode,payload,true]);
       await syncWorkshopSupabaseAccess(classCode,saved&&saved.activeSession);
       renderWorkshopPlanner(saved);
@@ -3126,7 +3126,7 @@ body.light .teacherMonitorTable th{background:#fff}
     var classCode=getClass();if(!classCode){status('Selecciona una clase.');return;}
     status('Actualizando batalla…');
     try{
-      var result=await edge('class-boss',{action:action,classCode:classCode,durationMinutes:15});
+      var result=await edge('class-boss',{action:action,classCode:classCode,durationMinutes:25});
       last=result.event||null;paint(last);
       if(action==='start')openStage();
       if(action==='finish')status('El combate ha terminado. El progreso de los alumnos se conserva.');
@@ -3139,13 +3139,13 @@ body.light .teacherMonitorTable th{background:#fff}
     $('classBossClock').textContent=fmt(b.remainingSeconds);
     $('classBossCombos').textContent='Combos: '+b.combos;
     $('classBossHealthBar').style.width=Math.max(0,Math.min(100,b.health/b.totalHealth*100))+'%';
-    $('classBossLegend').textContent=!b.workshopOpen?'El taller está cerrado: la batalla conserva su tiempo y su progreso.':b.state==='paused'?'El tiempo se ha detenido.':b.health/b.totalHealth>.7?'La criatura ha despertado en el Gran Archivo…':b.health/b.totalHealth>.35?'¡Sus páginas están temblando!':'¡Última fase! Las palabras están regresando.';
+    $('classBossLegend').textContent=!b.workshopOpen?'El taller está cerrado, pero la cuenta atrás continúa.':b.state==='paused'?'Ataques en pausa; el reloj sigue avanzando.':b.health/b.totalHealth>.7?'La criatura ha despertado en el Gran Archivo…':b.health/b.totalHealth>.35?'¡Sus páginas están temblando!':'¡Última fase! Las palabras están regresando.';
     var finish=b.state==='finished';
     $('classBossOutcome').classList.toggle('show',finish);
     $('classBossOutcomeTitle').textContent=b.outcome==='victory'?'¡VICTORIA DE LA CLASE!':'FIN DE LA BATALLA';
     $('classBossOutcomeText').textContent=b.outcome==='victory'?'¡Habéis salvado juntos el Gran Archivo!':'Habéis resistido juntos. El Archivo os espera para una nueva aventura.';
     $('classBossPause').disabled=finish||!b.workshopOpen;
-    $('classBossPause').textContent=b.state==='paused'?'▶ Reanudar':'⏸ Pausar';
+    $('classBossPause').textContent=b.state==='paused'?'▶ Reanudar':'⏸ Pausar ataques';
     $('classBossFinish').disabled=finish;
     if(b.damage>lastDamage&&stage.classList.contains('open')){
       var node=$('classBossMonster');node.classList.remove('hurt');void node.offsetWidth;node.classList.add('hurt');

@@ -1,4 +1,4 @@
-import {BOSS_GAMES,battleClock,countBossDamage} from "../_shared/class-boss-engine.js";
+import {BOSS_GAMES,BOSS_DURATION_SECONDS,battleClock,countBossDamage} from "../_shared/class-boss-engine.js";
 import {corsHeaders,jsonResponse,requireTeacherSession,requireProfileSession} from "../_shared/lenguarcade.ts";
 
 function fail(message:string,status=400){return jsonResponse({ok:false,error:message},status);}
@@ -149,7 +149,7 @@ Deno.serve(async(request)=>{
       const {count,error:countError}=await admin.from("classroom_enrollments")
         .select("profile_id",{count:"exact",head:true}).eq("classroom_id",classroom.id).eq("active",true);
       if(countError)throw countError;
-      const duration=Number(body.durationMinutes)===12?720:900;
+      const duration=BOSS_DURATION_SECONDS; // Server-enforced limit; ignore client duration parameters.
       const initialHealth=Math.max(8,Math.min(5000,Math.max(1,count||0)*8));
       const now=isoNow();
       const {data, error}=await admin.from("class_boss_events")
@@ -186,12 +186,11 @@ Deno.serve(async(request)=>{
       }
     }
     const summary=await battleSummary(admin,battle,workshop);
-    if(action==="status"&&battle&&battle.state==="active"&&summary?.state==="finished"&&
-       summary.workshopOpen&&summary.outcome){
+    if(action==="status"&&battle&&battle.state!=="finished"&&summary?.state==="finished"&&summary.outcome){
       const now=isoNow();
       const {error}=await admin.from("class_boss_events")
         .update({...withClosedInterval(battle,now),state:"finished"})
-        .eq("id",battle.id).eq("state","active");
+        .eq("id",battle.id).eq("state",battle.state);
       if(error)console.error("class-boss automatic finish failed",error);
     }
     return jsonResponse({ok:true,event:summary});
