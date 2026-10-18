@@ -13,4 +13,14 @@ assert.equal(countBossDamage(events,{...battle,state:'paused',active_since:null,
 assert.equal(battleClock({...battle,state:'paused',active_since:null,elapsed_seconds:65},t+200000),835);
 assert.equal(battleClock({...battle,elapsed_seconds:890,active_since:new Date(t+100000).toISOString()},t+115000),0);
 assert.equal(countBossDamage(events,{...battle,game_ids:['battlegrafia']},[run],t+60000).damage,1);
-console.log('Class boss: unique events, cooldown, combo, closed windows, pause and timer OK.');
+// Load simulation: 30 pupils saving at nearly the same time, across all three games.
+const classEvents=Array.from({length:30},(_,i)=>ev('event-'+i,'student-'+i,battle.game_ids[i%3],24+i%6));
+const crowded=countBossDamage([...classEvents,...classEvents],battle,[run],t+60000);
+assert.equal(crowded.hits,30,'All 30 simultaneous pupils contribute once');
+assert.equal(crowded.combos,1,'One cross-game combo per time window');
+assert.equal(crowded.health,190,'Collective damage ignores duplicate deliveries');
+// A reopened workshop interval retains contributions but not those saved in a closed gap.
+const reopening={...run,started_at:new Date(t+120000).toISOString(),closed_at:null};
+const previousRun={...run,classroom_open:false,closed_at:new Date(t+60000).toISOString()};
+assert.equal(countBossDamage([...events,ev('gap','d','lexoma',90),ev('after','e','lexoma',130)],battle,[previousRun,reopening],t+150000).hits,4);
+console.log('Class boss: unique events, cooldown, combo, closed windows, pause and timer and 30-player simulation OK.');
