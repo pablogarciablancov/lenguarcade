@@ -115,7 +115,7 @@ Deno.serve(async(request)=>{
         const workshop=await getActiveWorkshop(admin,organizationId,member.classroom_id);
         if(!workshop)continue;
         const battle=await currentBoss(admin,organizationId,member.classroom_id,workshop);
-        if(!battle||battle.state==="finished"||!battle.game_ids?.length)continue;
+        if(!battle||battle.state!=="active"||!battle.game_ids?.length)continue;
         const {data:currentRun,error:runError}=await admin.from("workshop_runs")
           .select("run_id,workshop_key,plan_id,closed_at").eq("organization_id",organizationId)
           .eq("classroom_id",member.classroom_id).eq("plan_id",workshop.plan_id)
@@ -185,7 +185,16 @@ Deno.serve(async(request)=>{
         if(error)throw error;battle=data;
       }
     }
-    return jsonResponse({ok:true,event:await battleSummary(admin,battle,workshop)});
+    const summary=await battleSummary(admin,battle,workshop);
+    if(action==="status"&&battle&&battle.state==="active"&&summary?.state==="finished"&&
+       summary.workshopOpen&&summary.outcome){
+      const now=isoNow();
+      const {error}=await admin.from("class_boss_events")
+        .update({...withClosedInterval(battle,now),state:"finished"})
+        .eq("id",battle.id).eq("state","active");
+      if(error)console.error("class-boss automatic finish failed",error);
+    }
+    return jsonResponse({ok:true,event:summary});
   }catch(error){
     if(error instanceof Response)return error;
     console.error("class-boss error",error);
