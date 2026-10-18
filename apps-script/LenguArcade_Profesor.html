@@ -3139,12 +3139,12 @@ body.light .teacherMonitorTable th{background:#fff}
     $('classBossClock').textContent=fmt(b.remainingSeconds);
     $('classBossCombos').textContent='Combos: '+b.combos;
     $('classBossHealthBar').style.width=Math.max(0,Math.min(100,b.health/b.totalHealth*100))+'%';
-    $('classBossLegend').textContent=b.state==='paused'?'El tiempo se ha detenido.':b.health/b.totalHealth>.7?'La criatura ha despertado en el Gran Archivo…':b.health/b.totalHealth>.35?'¡Sus páginas están temblando!':'¡Última fase! Las palabras están regresando.';
+    $('classBossLegend').textContent=!b.workshopOpen?'El taller está cerrado: la batalla conserva su tiempo y su progreso.':b.state==='paused'?'El tiempo se ha detenido.':b.health/b.totalHealth>.7?'La criatura ha despertado en el Gran Archivo…':b.health/b.totalHealth>.35?'¡Sus páginas están temblando!':'¡Última fase! Las palabras están regresando.';
     var finish=b.state==='finished';
     $('classBossOutcome').classList.toggle('show',finish);
     $('classBossOutcomeTitle').textContent=b.outcome==='victory'?'¡VICTORIA DE LA CLASE!':'FIN DE LA BATALLA';
     $('classBossOutcomeText').textContent=b.outcome==='victory'?'¡Habéis salvado juntos el Gran Archivo!':'Habéis resistido juntos. El Archivo os espera para una nueva aventura.';
-    $('classBossPause').disabled=finish;
+    $('classBossPause').disabled=finish||!b.workshopOpen;
     $('classBossPause').textContent=b.state==='paused'?'▶ Reanudar':'⏸ Pausar';
     $('classBossFinish').disabled=finish;
     if(b.damage>lastDamage&&stage.classList.contains('open')){
