@@ -1474,6 +1474,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     if(workshopEditingPlanId&&!plannerPlan(workshopEditingPlanId))workshopEditingPlanId='';
     renderPlannerEditor(plannerEditorPlan());
     setTeacherSessionBusy(false);
+    if(window.classBossRenderPanel)window.classBossRenderPanel();
   }
   function plannerPayload(){
     var editor=document.getElementById('workshopPlanEditorBody');
@@ -1575,7 +1576,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       var result=await sessionCall('getWorkshopPlannerAdmin',[classCode]);
       var historyData=await edge('teacher-dashboard',{classCode:classCode,gameId:''});
       result.workshopOutcomes=Array.isArray(historyData.workshopOutcomes)?historyData.workshopOutcomes:[];
-      mount.innerHTML='<section class="workshopRouteSection"><div class="workshopRouteHead"><div><div class="sub">RUTA RECOMENDADA</div><h3>🚀 Talleres preconfigurados</h3><div class="sub">Los talleres todavía no abiertos aparecen primero. Reabrir continúa el mismo taller; Nueva edición crea otro independiente. Puedes abrir un taller directamente o cargarlo en el editor.</div></div></div><div id="workshopRouteList" class="workshopRouteList"></div></section><div id="workshopActiveHost"></div><div class="workshopPlannerGrid"><section class="workshopPlanLibrary"><div class="workshopPanelTitle"><div><h3>Tus talleres</h3><div class="sub">Próximos, borradores y sesiones ya utilizadas.</div></div><button type="button" id="workshopNewPlan">＋ Crear taller</button></div><div class="workshopListSummary" id="workshopListSummary"></div><div class="workshopPlanTabs" id="workshopPlanTabs"></div><div id="workshopPlanList" class="workshopPlanList"></div></section><section class="workshopPlanEditor"><div class="workshopPanelTitle"><div><h3>Preparar la sesión</h3><div class="sub">Guardar no publica nada automáticamente.</div></div></div><div id="workshopPlanEditorBody" class="workshopPlanEditorBody"></div></section></div>';
+      mount.innerHTML='<section class="workshopRouteSection"><div class="workshopRouteHead"><div><div class="sub">RUTA RECOMENDADA</div><h3>🚀 Talleres preconfigurados</h3><div class="sub">Los talleres todavía no abiertos aparecen primero. Reabrir continúa el mismo taller; Nueva edición crea otro independiente. Puedes abrir un taller directamente o cargarlo en el editor.</div></div></div><div id="workshopRouteList" class="workshopRouteList"></div></section><div id="workshopActiveHost"></div><section id="classBossPanel" class="laBossPanel"></section><div class="workshopPlannerGrid"><section class="workshopPlanLibrary"><div class="workshopPanelTitle"><div><h3>Tus talleres</h3><div class="sub">Próximos, borradores y sesiones ya utilizadas.</div></div><button type="button" id="workshopNewPlan">＋ Crear taller</button></div><div class="workshopListSummary" id="workshopListSummary"></div><div class="workshopPlanTabs" id="workshopPlanTabs"></div><div id="workshopPlanList" class="workshopPlanList"></div></section><section class="workshopPlanEditor"><div class="workshopPanelTitle"><div><h3>Preparar la sesión</h3><div class="sub">Guardar no publica nada automáticamente.</div></div></div><div id="workshopPlanEditorBody" class="workshopPlanEditorBody"></div></section></div>';
       document.getElementById('workshopNewPlan').onclick=newPlannerPlan;
       renderWorkshopPlanner(result);
     }catch(error){mount.innerHTML='<div class="workshopPlannerEmpty"><strong>No se pudieron cargar las sesiones</strong>'+sessionEsc(error.message||error)+'</div>';}
@@ -3023,6 +3024,149 @@ body.light .teacherMonitorTable th{background:#fff}
 })();
 </script>
 
+
+<style>
+.laBossPanel{border:1px solid #705ba0;border-radius:22px;overflow:hidden;margin:14px 0;background:radial-gradient(ellipse at 85% -25%,rgba(170,99,236,.32),transparent 60%),linear-gradient(135deg,#181127,#271b3d 60%,#111a31);color:#f9f2ff;padding:20px;box-shadow:0 16px 32px #08061555}
+.laBossPanelHead{display:flex;justify-content:space-between;gap:20px;align-items:center}
+.laBossPanel h3{font-size:24px;margin:6px 0}.laBossPanel p{color:#dacbec;max-width:720px;margin:5px 0 12px;font-size:14px;line-height:1.5}
+.laBossPanel .laBossEyebrow{font-size:11px;font-weight:900;letter-spacing:2px;color:#eacbff}
+.laBossActions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}.laBossActions button{width:auto;background:linear-gradient(110deg,#9753c2,#534dc4);padding:10px 18px}
+.laBossActions button.ghost{border:1px solid #877099;background:#ffffff12}
+.laBossPanel .laBossStatus{font-size:12px;color:#e8d4fe;margin-top:11px}
+.laBossCurtain{position:fixed;inset:0;z-index:1000;display:none;flex-direction:column;overflow:hidden;background:radial-gradient(ellipse at center 65%,#44254f 0,#1f1531 45%,#090a1c 90%);color:#fff;font-family:Inter,system-ui,sans-serif}
+.laBossCurtain.open{display:flex}
+.laBossCurtain::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(110deg,transparent 0 75px,#fff1 76px 77px,transparent 78px 140px);opacity:.13;pointer-events:none}
+.laBossTop{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;background:#050b1ba8;border-bottom:1px solid #b7a0d033}
+.laBossTop small{display:block;letter-spacing:2px;font-size:11px;color:#d7baff;font-weight:800}.laBossTop strong{font-size:clamp(20px,2vw,32px)}
+.laBossTop button{width:auto;background:#251a40;color:#fff;border:1px solid #fff4;padding:8px 14px}
+.laBossMain{position:relative;display:flex;flex:1;min-height:0;flex-direction:column;align-items:center;justify-content:center;padding:16px 4vw}
+.laBossTitle{text-align:center;margin-bottom:0;font-family:Georgia,serif;font-size:clamp(25px,4vw,55px);color:#ffe4bd;text-shadow:0 4px 16px #000}
+.laBossLegend{text-align:center;color:#e2d2ea;margin:4px 0 10px}
+.laBossMonster{width:min(47vh,48vw,560px);max-height:55vh;flex:1;filter:drop-shadow(0 12px 26px #080317);animation:laBossFloat 3s ease-in-out infinite}
+.laBossMonster svg{width:100%;height:100%;overflow:visible}
+.laBossMonster.hurt{animation:laBossHit .4s ease-in-out}
+.laBossBar{width:min(780px,85vw);border-radius:20px;background:#080d1b;border:2px solid #9279ae;padding:5px;box-shadow:0 10px 25px #0009}
+.laBossBarFill{height:clamp(16px,2.2vh,25px);width:100%;border-radius:13px;background:linear-gradient(90deg,#f06778,#c83377,#9743e9);box-shadow:0 0 20px #f03b8c99;transition:width .5s ease}
+.laBossStats{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;margin-top:12px;font-weight:900;font-size:clamp(14px,1.7vw,22px)}
+.laBossFoot{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 24px;background:#080c1ecc;border-top:1px solid #b7a0d033}
+.laBossFoot button{width:auto;padding:10px 18px}.laBossFoot .laBossEnd{background:#83364b}
+.laBossFoot .laBossPause{background:#55438f}
+.laBossOutcome{position:absolute;inset:25% 12%;z-index:3;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:#110f2ce6;border:2px solid #e8c587;border-radius:30px;box-shadow:0 0 0 100vmax #0b061755}
+.laBossOutcome.show{display:flex}.laBossOutcome h2{font:900 clamp(28px,5vw,64px) Georgia,serif;color:#ffe2a8;margin:0 0 10px}
+.laBossOutcome p{font-size:clamp(17px,2vw,26px);color:#fff;padding:0 20px}
+@keyframes laBossFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-12px) rotate(1deg)}}
+@keyframes laBossHit{0%,100%{transform:translateX(0)}22%,65%{transform:translateX(-14px) rotate(-3deg);filter:brightness(2)}43%,85%{transform:translateX(14px)}}
+@media(prefers-reduced-motion:reduce){.laBossMonster,.laBossMonster.hurt{animation:none}.laBossBarFill{transition:none}}
+@media(max-height:720px){.laBossMain{padding:4px 3vw}.laBossTitle{font-size:25px}.laBossMonster{max-height:39vh}.laBossFoot{padding:8px 20px}}
+@media(max-width:700px){.laBossPanelHead{display:block}.laBossTop,.laBossFoot{padding:8px 12px}.laBossStats{gap:12px}.laBossMonster{width:70vw}}
+</style>
+<div id="classBossStage" class="laBossCurtain" role="dialog" aria-label="Batalla cooperativa de clase" aria-modal="true">
+  <header class="laBossTop"><div><small>LENGUARCADE · EVENTO COOPERATIVO</small><strong>La defensa del Gran Archivo</strong></div><button type="button" id="classBossClose">✕ Volver al profesor</button></header>
+  <main class="laBossMain">
+    <h1 class="laBossTitle">EL DEVORAPALABRAS</h1>
+    <p class="laBossLegend" id="classBossLegend">La clase está reuniendo sus poderes…</p>
+    <div class="laBossMonster" id="classBossMonster" aria-hidden="true">
+      <svg viewBox="0 0 600 520" xmlns="http://www.w3.org/2000/svg">
+        <defs><radialGradient id="laBossInk"><stop stop-color="#4c315c"/><stop offset="1" stop-color="#110c24"/></radialGradient><filter id="laBossGlow"><feGaussianBlur stdDeviation="7"/></filter></defs>
+        <ellipse cx="305" cy="480" rx="220" ry="24" fill="#000" opacity=".35"/>
+        <path d="M194 306Q75 278 65 382Q112 341 154 405Q191 340 221 369M391 290Q510 230 565 355Q485 310 475 425Q430 360 382 364" fill="#1c102f" stroke="#b75ca5" stroke-width="5"/>
+        <path d="M141 210Q120 105 244 91Q295 16 362 102Q471 65 466 216Q512 285 440 356Q439 450 349 452Q274 499 211 430Q125 414 141 328Q89 279 141 210Z" fill="url(#laBossInk)" stroke="#b069b5" stroke-width="9"/>
+        <path d="M187 199L256 221L231 245L181 231ZM357 218L429 188L420 223L368 246Z" fill="#ff51aa" filter="url(#laBossGlow)"/>
+        <path d="M187 199L256 221L231 245L181 231ZM357 218L429 188L420 223L368 246Z" fill="#ffe3ed" stroke="#ff4ba6" stroke-width="3"/>
+        <path d="M236 329Q305 369 387 319L358 388L318 361L294 402L277 360L253 391Z" fill="#09051a" stroke="#e45c9b" stroke-width="5"/>
+        <path d="M93 94L208 126L165 180L81 153Z M418 112L505 73L537 169L466 185Z" fill="#e1c99e" stroke="#a77b65" stroke-width="7"/>
+        <path d="M85 119L164 142M451 139L509 117" stroke="#897269" stroke-width="6"/>
+        <path d="M112 436Q59 468 38 430M465 442Q541 493 564 425" fill="none" stroke="#a664ae" stroke-width="21" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="laBossBar" aria-label="Vida del jefe"><div class="laBossBarFill" id="classBossHealthBar"></div></div>
+    <div class="laBossStats"><span id="classBossHealth">—</span><span id="classBossClock">15:00</span><span id="classBossCombos">Combos: 0</span></div>
+    <div id="classBossOutcome" class="laBossOutcome" aria-live="polite"><h2 id="classBossOutcomeTitle">¡VICTORIA!</h2><p id="classBossOutcomeText">Habéis salvado el Gran Archivo.</p></div>
+  </main>
+  <footer class="laBossFoot"><span id="classBossStageStatus">Esperando los progresos confirmados de la clase.</span><div class="laBossActions"><button type="button" class="laBossPause" id="classBossPause">Pausar</button><button type="button" class="laBossEnd" id="classBossFinish">Finalizar</button></div></footer>
+</div>
+<script id="la-class-boss-controller">
+(function(){
+  var last=null,timer=null,requesting=false,stage=$('classBossStage'),lastDamage=0;
+  function getClass(){return typeof teacherCurrentClass==='function'?teacherCurrentClass():'';}
+  function fmt(seconds){var n=Math.max(0,Math.ceil(Number(seconds)||0));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
+  function msg(code){var messages={
+    open_workshop_first:'Abre primero un taller para esta clase.',
+    select_boss_games_in_workshop:'El taller debe incluir Battlegrafía, Forja y Lexitrama.',
+    event_already_exists_reload:'El evento ya existe. Actualiza el panel.',
+    finish_previous_event:'Finaliza primero el combate anterior.',
+    boss_finished:'La batalla ha terminado. Usa una nueva edición del taller.',
+    workshop_run_missing:'No se ha encontrado la apertura del taller. Recarga el planificador.'
+  };return messages[code]||code||'No se pudo conectar con el combate.';}
+  function status(s){var node=$('classBossPanelStatus');if(node)node.textContent=s||'';var screen=$('classBossStageStatus');if(screen)screen.textContent=s||'';}
+  function renderPanel(){
+    var root=$('classBossPanel');if(!root)return;
+    var s=workshopPlannerState&&workshopPlannerState.activeSession;
+    var gameIds=s&&s.gameIds||[];
+    var ready=!!(s&&s.classroomOpen&&['battlegrafia','lexoma','lexitrama'].every(function(id){return gameIds.includes(id);}));
+    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Toda la clase combate contra el monstruo del Gran Archivo desde Battlegrafía, Forja y Lexitrama. Cada avance confirmado suma al equipo, sin crear misiones ni XP duplicadas.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚔️ Iniciar combate':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
+    $('classBossPrepare').onclick=function(){ready?act('start'):prepare();};
+    $('classBossProject').onclick=function(){openStage();};
+    refresh();
+  }
+  async function prepare(){
+    var classCode=getClass();if(!classCode){status('Selecciona primero una clase.');return;}
+    var s=workshopPlannerState&&workshopPlannerState.activeSession;
+    if(s&&s.classroomOpen&&!window.confirm('Se cerrará la sesión de taller que está abierta para preparar el evento cooperativo. ¿Continuar?'))return;
+    status('Preparando los tres juegos…');
+    try{
+      var payload={title:'El Devorapalabras · La defensa del Gran Archivo',message:'Juega y contribuye a la victoria colectiva de tu clase.',targetXp:0,objectiveType:'xp',gameIds:['battlegrafia','lexoma','lexitrama'],classCodes:[classCode]};
+      var saved=await sessionCall('saveAndActivateWorkshopPlan',[classCode,payload,true]);
+      await syncWorkshopSupabaseAccess(classCode,saved&&saved.activeSession);
+      renderWorkshopPlanner(saved);
+      await act('start');
+    }catch(e){status('No se pudo preparar: '+msg(e.code||e.message));}
+  }
+  async function act(action){
+    var classCode=getClass();if(!classCode){status('Selecciona una clase.');return;}
+    status('Actualizando batalla…');
+    try{
+      var result=await edge('class-boss',{action:action,classCode:classCode,durationMinutes:15});
+      last=result.event||null;paint(last);
+      if(action==='start')openStage();
+      if(action==='finish')status('El combate ha terminado. El progreso de los alumnos se conserva.');
+      else status(last?'Combate '+(last.state==='active'?'en curso':last.state==='paused'?'en pausa':'finalizado')+'.':'Todavía no hay combate.');
+    }catch(e){status('No se pudo actualizar: '+msg(e.code||e.message));}
+  }
+  function paint(b){
+    if(!b){$('classBossLegend').textContent='Prepara un taller cooperativo y empieza el combate.';return;}
+    $('classBossHealth').textContent=b.health+' / '+b.totalHealth+' de vida';
+    $('classBossClock').textContent=fmt(b.remainingSeconds);
+    $('classBossCombos').textContent='Combos: '+b.combos;
+    $('classBossHealthBar').style.width=Math.max(0,Math.min(100,b.health/b.totalHealth*100))+'%';
+    $('classBossLegend').textContent=!b.workshopOpen?'El taller está cerrado: la batalla conserva su tiempo y su progreso.':b.state==='paused'?'El tiempo se ha detenido.':b.health/b.totalHealth>.7?'La criatura ha despertado en el Gran Archivo…':b.health/b.totalHealth>.35?'¡Sus páginas están temblando!':'¡Última fase! Las palabras están regresando.';
+    var finish=b.state==='finished';
+    $('classBossOutcome').classList.toggle('show',finish);
+    $('classBossOutcomeTitle').textContent=b.outcome==='victory'?'¡VICTORIA DE LA CLASE!':'FIN DE LA BATALLA';
+    $('classBossOutcomeText').textContent=b.outcome==='victory'?'¡Habéis salvado juntos el Gran Archivo!':'Habéis resistido juntos. El Archivo os espera para una nueva aventura.';
+    $('classBossPause').disabled=finish||!b.workshopOpen;
+    $('classBossPause').textContent=b.state==='paused'?'▶ Reanudar':'⏸ Pausar';
+    $('classBossFinish').disabled=finish;
+    if(b.damage>lastDamage&&stage.classList.contains('open')){
+      var node=$('classBossMonster');node.classList.remove('hurt');void node.offsetWidth;node.classList.add('hurt');
+    }
+    lastDamage=b.damage;
+  }
+  async function refresh(){
+    if(requesting||!getClass()||!$('classBossPanel'))return;requesting=true;
+    try{var r=await edge('class-boss',{action:'status',classCode:getClass()});last=r.event||null;paint(last);
+      status(last?'Batalla: '+(last.state==='active'?'en curso':last.state==='paused'?'pausada':'terminada')+'. Daño confirmado: '+last.damage+'.':'No hay batalla creada todavía.');
+    }catch(e){status('Servicio del combate no disponible: '+msg(e.code||e.message));}
+    finally{requesting=false;}
+  }
+  function openStage(){stage.classList.add('open');paint(last);refresh();if(timer)clearInterval(timer);timer=setInterval(refresh,3000);}
+  function closeStage(){stage.classList.remove('open');if(timer)clearInterval(timer);timer=null;}
+  $('classBossClose').onclick=closeStage;
+  $('classBossPause').onclick=function(){act(last&&last.state==='paused'?'resume':'pause');};
+  $('classBossFinish').onclick=function(){if(window.confirm('¿Finalizar la batalla cooperativa? El progreso de juego seguirá intacto.'))act('finish');};
+  window.classBossRenderPanel=renderPanel;
+})();
+</script>
 </body>
 </html>
 
