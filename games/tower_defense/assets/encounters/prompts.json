@@ -1,0 +1,21 @@
+{
+  "generator": "Built-in image_gen",
+  "format": "Independent transparent pixel art sprites; nearest-neighbour engine normalization to 96×96 with fixed foot baseline, no sprite sheet.",
+  "assets": [
+    {
+      "id": "runner",
+      "path": "assets/encounters/runner.webp",
+      "prompt": "Use case: stylized-concept. Asset type: independent sprite for a fantasy pixel art educational tower defense game, Guardianes de la Biblioteca. Primary request: ONE single full-body a nimble malicious parchment goblin courier, orange hood and scarf, ink-black face, bright amber eyes, oversized running boots, holding a rolled scroll, dynamic running pose facing right. Style: carefully crafted retro 16-bit pixel art, chunky square pixels, strong dark outline, hand-shaded compact forms, readable silhouette at 40 pixels tall, medieval manuscript fantasy, slightly menacing but suitable for school. Palette: amber orange, parchment cream, dark brown, muted crimson. Transparent background, no ground, no backdrop, no shadows outside character, no labels, no letters, no UI. Composition: one character only, centered, full body entirely visible, generous transparent padding on every side, square canvas. No sprite sheet, no additional poses, no duplication, no separate floating objects. All equipment belongs to and touches this one character. Sprite should have clear feet at bottom and face toward the right."
+    },
+    {
+      "id": "protector",
+      "path": "assets/encounters/protector.webp",
+      "prompt": "Use case: stylized-concept. Asset type: independent sprite for a fantasy pixel art educational tower defense game, Guardianes de la Biblioteca. Primary request: ONE single full-body a squat blue ink-and-stone magical sentinel monster carrying a massive open book-shaped shield, broad shoulders, glowing cyan runes, tiny head with two glowing eyes, facing right, protective guardian pose. Style: carefully crafted retro 16-bit pixel art, chunky square pixels, strong dark outline, hand-shaded compact forms, readable silhouette at 40 pixels tall, medieval manuscript fantasy, slightly menacing but suitable for school. Palette: deep slate blue, teal cyan, old gold, dark navy. Transparent background, no ground, no backdrop, no shadows outside character, no labels, no letters, no UI. Composition: one character only, centered, full body entirely visible, generous transparent padding on every side, square canvas. No sprite sheet, no additional poses, no duplication, no separate floating objects. All equipment belongs to and touches this one character. Sprite should have clear feet at bottom and face toward the right."
+    },
+    {
+      "id": "devourer",
+      "path": "assets/encounters/devourer.webp",
+      "prompt": "Use case: stylized-concept. Asset type: independent sprite for a fantasy pixel art educational tower defense game, Guardianes de la Biblioteca. Primary request: ONE single full-body a mischievous purple ink-eating imp monster with a round belly like an ink bottle, two small horns, an oversized mouth stained with blue ink, gripping a small stolen ink pot, facing right, hunched walking pose. Style: carefully crafted retro 16-bit pixel art, chunky square pixels, strong dark outline, hand-shaded compact forms, readable silhouette at 40 pixels tall, medieval manuscript fantasy, slightly menacing but suitable for school. Palette: deep violet, magenta accents, cobalt blue ink, parchment cream. Transparent background, no ground, no backdrop, no shadows outside character, no labels, no letters, no UI. Composition: one character only, centered, full body entirely visible, generous transparent padding on every side, square canvas. No sprite sheet, no additional poses, no duplication, no separate floating objects. All equipment belongs to and touches this one character. Sprite should have clear feet at bottom and face toward the right."
+    }
+  ]
+}
