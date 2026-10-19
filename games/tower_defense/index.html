@@ -314,6 +314,7 @@ html,body{height:100%;overflow:hidden}
 .tower-level-preview span{display:block!important;color:#4f3d20!important;font-size:10px!important;font-weight:900!important}
 @media(max-width:900px){.tower-guide-visuals{grid-template-columns:repeat(3,1fr)!important}.tower-level-preview img{width:76px!important;height:94px!important}.tower-level-preview{min-height:112px!important}}
 </style>
+<link rel="stylesheet" href="guardians.css">
 </head>
 <body>
 <div id="app">
@@ -831,7 +832,7 @@ class Game{
   upgradeSelectedTower(){const t=this.selectedTower;if(!t)return;const up=t.nextUpgrade();if(!up)return;if(this.ink<up.cost){this.log('No tienes tinta suficiente.');return}this.ink-=up.cost;t.level++;this.log(`⬆️ ${t.cfg.name} sube a nivel ${t.level}.`);this.ui.updateHUD()}
   sellSelectedTower(){const t=this.selectedTower;if(!t)return;const refund=Math.floor(t.investment()*.65);this.ink+=refund;this.towers=this.towers.filter(x=>x!==t);this.selectedTower=null;this.log(`💰 Torre vendida. +${refund} tinta.`);this.ui.updateHUD()}
   openQuestion(enemy){this.currentEnemy=enemy;this.questionOpenedAt=performance.now();this.questionActive=true;this.ui.showQuestion(enemy)}
-  answerQuestion(raw){const enemy=this.currentEnemy;if(!enemy||!enemy.alive||!enemy.shieldActive)return;const q=enemy.question,elapsed=performance.now()-this.questionOpenedAt,fast=elapsed<=5000,ok=normalize(raw)===normalize(q.answer);this.stats.attempts++;this.stats.responseMs+=elapsed;if(!this.stats.byCategory[q.cat])this.stats.byCategory[q.cat]={attempts:0,correct:0};this.stats.byCategory[q.cat].attempts++;if(ok){this.stats.correct++;this.stats.byCategory[q.cat].correct++;this.streak++;this.maxStreak=Math.max(this.maxStreak,this.streak);let reward=fast?16:12;if(this.streak>=3)reward=Math.round(reward*1.1);if(this.streak>0&&this.streak%5===0)reward+=15;this.ink+=reward;this.score+=fast?80:55;const fullyBroken=enemy.correct(q,fast);const shieldMsg=fullyBroken?(fast?'⚡ ¡ESCUDO ROTO!':'✅ ¡ESCUDO ROTO!'):`💥 ¡CAPA ROTA! Quedan ${enemy.shieldLayers}`;this.ui.feedback(`${shieldMsg} · +${reward} tinta`,true,q.explain);this.floatText(enemy.x,enemy.y,fast?'⚡ +'+reward:'✅ +'+reward,'#70e5a1');this.log(`✅ ${q.cat}: ${q.answer}. ${q.explain}`);setTimeout(()=>this.closeQuestion(),800)}else{this.stats.wrong++;this.streak=0;enemy.wrong();this.ui.feedback('❌ EL ERROR RESISTE · ¡Se acelera!',false,'Vuelve a intentarlo con otro ejemplo de la misma regla.');this.floatText(enemy.x,enemy.y,'❌ +velocidad','#ff8585');this.log(`❌ Fallo en ${q.cat}. El enemigo se acelera.`);setTimeout(()=>{if(enemy.alive&&enemy.shieldActive){enemy.question=this.questionEngine.generate(enemy.cfg.category);enemy.displayText=enemy.question.display;this.questionOpenedAt=performance.now();this.ui.showQuestion(enemy)}else this.closeQuestion()},900)}this.ui.updateHUD()}
+  answerQuestion(raw){const enemy=this.currentEnemy;if(!enemy||!enemy.alive||!enemy.shieldActive)return;const q=enemy.question,elapsed=performance.now()-this.questionOpenedAt,fast=elapsed<=5000,ok=normalize(raw)===normalize(q.answer);this.stats.attempts++;this.stats.responseMs+=elapsed;if(!this.stats.byCategory[q.cat])this.stats.byCategory[q.cat]={attempts:0,correct:0};this.stats.byCategory[q.cat].attempts++;if(ok){this.stats.correct++;this.stats.byCategory[q.cat].correct++;this.streak++;this.maxStreak=Math.max(this.maxStreak,this.streak);let reward=fast?16:12;if(this.streak>=3)reward=Math.round(reward*1.1);if(this.streak>0&&this.streak%5===0)reward+=15;this.ink+=reward;this.score+=fast?80:55;const fullyBroken=enemy.correct(q,fast);const shieldMsg=fullyBroken?(fast?'⚡ ¡ESCUDO ROTO!':'✅ ¡ESCUDO ROTO!'):`💥 ¡CAPA ROTA! Quedan ${enemy.shieldLayers}`;this.ui.feedback(`${shieldMsg} · +${reward} tinta`,true,q.explain);this.floatText(enemy.x,enemy.y,fast?'⚡ +'+reward:'✅ +'+reward,'#70e5a1');this.log(`✅ ${q.cat}: ${q.answer}. ${q.explain}`);setTimeout(()=>this.closeQuestion(),800)}else{this.stats.wrong++;this.streak=0;enemy.wrong();this.ui.feedback('❌ EL ERROR RESISTE · ¡Se acelera!',false,`La respuesta era «${q.answer}». ${q.explain}`);this.floatText(enemy.x,enemy.y,'❌ +velocidad','#ff8585');this.log(`❌ Fallo en ${q.cat}. El enemigo se acelera.`);setTimeout(()=>{if(enemy.alive&&enemy.shieldActive){enemy.question=this.questionEngine.generate(enemy.cfg.category);enemy.displayText=enemy.question.display;this.questionOpenedAt=performance.now();this.ui.showQuestion(enemy)}else this.closeQuestion()},900)}this.ui.updateHUD()}
   closeQuestion(){this.questionActive=false;this.currentEnemy=null;this.ui.closeQuestion()}
   toggleSpeed(){this.gameSpeed=this.gameSpeed===1?2:1;this.ui.speedBtn.textContent=`⏩ x${this.gameSpeed}`}
   pause(){if(!this.running)return;this.paused=true;this.ui.pauseModal.classList.remove('hidden')}
@@ -1226,9 +1227,9 @@ class PixelRenderer{
   }
   render(ctx){
     ctx.imageSmoothingEnabled=false;this.tilemap.renderBase(ctx);this.drawBuildSites(ctx);this.drawEntrance(ctx);
-    const scene=[...this.tilemap.sceneDecor(),...this.game.towers.map(t=>({kind:'tower',obj:t,sortY:t.getPos().y})),...this.game.enemies.filter(e=>e.alive).map(e=>({kind:'enemy',obj:e,sortY:e.y})),{kind:'library',sortY:286,x:505,y:286}];
+    const scene=[...this.tilemap.sceneDecor(),...this.game.towers.map(t=>({kind:'tower',obj:t,sortY:t.getPos().y})),...this.game.enemies.filter(e=>e.alive).map(e=>({kind:'enemy',obj:e,sortY:e.y})),...(this.game.getGuardian?.()?[{kind:'guardian',obj:this.game.getGuardian(),sortY:this.game.getGuardian().y}]:[]),{kind:'library',sortY:286,x:505,y:286}];
     scene.sort((a,b)=>a.sortY-b.sortY);
-    for(const item of scene){if(item.kind==='decor')this.drawDecor(ctx,item);else if(item.kind==='tower')this.drawTower(ctx,item.obj);else if(item.kind==='enemy')this.drawEnemy(ctx,item.obj);else if(item.kind==='library')this.drawGoal(ctx,item)}
+    for(const item of scene){if(item.kind==='decor')this.drawDecor(ctx,item);else if(item.kind==='tower')this.drawTower(ctx,item.obj);else if(item.kind==='enemy')this.drawEnemy(ctx,item.obj);else if(item.kind==='guardian')this.drawGuardian(ctx,item.obj);else if(item.kind==='library')this.drawGoal(ctx,item)}
     this.drawProjectiles(ctx);if(this.game.particles)this.game.particles.render(ctx);for(const e of this.game.enemies)if(e.alive)this.drawEntityOverlay(ctx,e);
   }
 }
@@ -1256,13 +1257,13 @@ PixelRenderer.prototype.drawEntrance=function(ctx){if(this.game.mapPreset&&this.
 PixelRenderer.prototype.render=function(ctx){
   this.tilemap.setPreset(this.game.mapPreset);
   ctx.imageSmoothingEnabled=false;this.tilemap.renderBase(ctx);this.drawBuildSites(ctx);this.drawEntrance(ctx);
-  const scene=[...this.tilemap.sceneDecor(),...this.game.towers.map(t=>({kind:'tower',obj:t,sortY:t.getPos().y})),...this.game.enemies.filter(e=>e.alive).map(e=>({kind:'enemy',obj:e,sortY:e.y}))];
+  const scene=[...this.tilemap.sceneDecor(),...this.game.towers.map(t=>({kind:'tower',obj:t,sortY:t.getPos().y})),...this.game.enemies.filter(e=>e.alive).map(e=>({kind:'enemy',obj:e,sortY:e.y})),...(this.game.getGuardian?.()?[{kind:'guardian',obj:this.game.getGuardian(),sortY:this.game.getGuardian().y}]:[])];
   if(!(this.game.mapPreset&&this.game.mapPreset.bakedGoal)){
     const gp=this.game.mapPreset&&this.game.mapPreset.goal?this.game.mapPreset.goal:{x:505,y:286};
     scene.push({kind:'library',sortY:gp.y,x:gp.x,y:gp.y});
   }
   scene.sort((a,b)=>a.sortY-b.sortY);
-  for(const item of scene){if(item.kind==='decor')this.drawDecor(ctx,item);else if(item.kind==='tower')this.drawTower(ctx,item.obj);else if(item.kind==='enemy')this.drawEnemy(ctx,item.obj);else if(item.kind==='library')this.drawGoal(ctx,item)}
+  for(const item of scene){if(item.kind==='decor')this.drawDecor(ctx,item);else if(item.kind==='tower')this.drawTower(ctx,item.obj);else if(item.kind==='enemy')this.drawEnemy(ctx,item.obj);else if(item.kind==='guardian')this.drawGuardian(ctx,item.obj);else if(item.kind==='library')this.drawGoal(ctx,item)}
   this.drawProjectiles(ctx);if(this.game.particles)this.game.particles.render(ctx);for(const e of this.game.enemies)if(e.alive)this.drawEntityOverlay(ctx,e);
   if(new URLSearchParams(location.search).has('calibrate')){
     ctx.save();
@@ -2762,7 +2763,8 @@ body{background:#07111c!important}
 
   /* Captura antes del listener clásico: una peana vacía abre el menú radial. */
   canvas.addEventListener('click',function(e){
-    if(!game.running||game.questionActive)return;
+    if(game.guardianPointerClick)game.guardianPointerClick(e);
+    if(e.cancelBubble||!game.running||game.paused||game.questionActive)return;
     var p=game.canvasPoint(e);
     var nearest=BUILD_SITES.map(function(s,i){return {i:i,d:dist(p,s)};}).sort(function(a,b){return a.d-b.d;})[0];
     if(!nearest||nearest.d>16){hideRadial();return;}
@@ -2795,10 +2797,10 @@ body{background:#07111c!important}
   var abilityDock=document.createElement('div');
   abilityDock.id='guardianAbilityDock';abilityDock.className='guardian-ability-dock';
   abilityDock.innerHTML=
-    '<div class="guardian-portrait" title="Guardián de la Biblioteca">G</div>'+
-    '<button class="guardian-spell" data-spell="storm" title="Tormenta de Tinta: daña solo enemigos cuyo escudo ya has roto."><span class="spell-glyph">✦</span><span class="spell-cost">80</span><span class="spell-cd"></span></button>'+
-    '<button class="guardian-spell" data-spell="bind" title="Palabra Encadenada: ralentiza durante 5 s a los enemigos en pantalla."><span class="spell-glyph">≈</span><span class="spell-cost">65</span><span class="spell-cd"></span></button>'+
-    '<button class="guardian-spell" data-spell="ward" title="Página Protectora: recupera 2 vidas de la Biblioteca."><span class="spell-glyph">+</span><span class="spell-cost">95</span><span class="spell-cd"></span></button>';
+    '<button type="button" class="guardian-portrait" title="Desplegar guardián"></button>'+
+    '<button class="guardian-spell" data-spell="storm" title="Tormenta de Tinta: daña solo enemigos cuyo escudo ya has roto."><img class="spell-art" src="assets/guardians/storm.png" alt=""><span class="spell-cost">80</span><span class="spell-cd"></span></button>'+
+    '<button class="guardian-spell" data-spell="bind" title="Palabra Encadenada: ralentiza durante 5 s a los enemigos en pantalla."><img class="spell-art" src="assets/guardians/bind.png" alt=""><span class="spell-cost">65</span><span class="spell-cd"></span></button>'+
+    '<button class="guardian-spell" data-spell="ward" title="Página Protectora: recupera 2 vidas de la Biblioteca."><img class="spell-art" src="assets/guardians/ward.png" alt=""><span class="spell-cost">95</span><span class="spell-cd"></span></button>';
   shell.appendChild(abilityDock);
   game.guardianCooldowns={storm:0,bind:0,ward:0};
   var spellCfg={storm:{cost:80,cd:18000},bind:{cost:65,cd:22000},ward:{cost:95,cd:30000}};
@@ -2810,7 +2812,7 @@ body{background:#07111c!important}
   }
   function castSpell(id){
     var cfg=spellCfg[id],now=performance.now();
-    if(!cfg||now<(game.guardianCooldowns[id]||0))return;
+    if(!game.running||game.paused||game.questionActive||!cfg||now<(game.guardianCooldowns[id]||0))return;
     if(game.ink<cfg.cost){showGuardianToast('No tienes suficiente tinta.');return;}
     if(id==='storm'){
       var targets=game.enemies.filter(function(e){return e.alive&&!e.shieldActive;});
@@ -2841,7 +2843,7 @@ body{background:#07111c!important}
     abilityDock.querySelectorAll('.guardian-spell').forEach(function(btn){
       var id=btn.dataset.spell,cfg=spellCfg[id],left=Math.max(0,(game.guardianCooldowns[id]||0)-now);
       var contextual=(id==='ward'&&game.lives>=GAME_CONFIG.maxLives);
-      btn.disabled=game.ink<cfg.cost||left>0||!game.running||contextual;
+      btn.disabled=game.ink<cfg.cost||left>0||!game.running||game.paused||game.questionActive||contextual;
       btn.classList.toggle('cooling',left>0);
       var cd=btn.querySelector('.spell-cd');if(cd)cd.textContent=left>0?Math.ceil(left/1000):'';
     });
@@ -2933,5 +2935,7 @@ body{background:#07111c!important}
 })();
 </script>
 
+<script src="guardian-core.js"></script>
+<script src="guardians.js"></script>
 </body>
 </html>
