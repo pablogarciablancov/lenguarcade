@@ -1,0 +1,12 @@
+#monsterGuideGrid.has-tactics{overflow-y:auto!important;display:block!important;min-height:0!important}
+.encounter-bestiary{padding:12px;color:#fff0c7;font:14px/1.5 system-ui,sans-serif}
+.encounter-bestiary h3{font-size:18px;margin:0 0 12px;color:#ffe5a2}
+.encounter-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.encounter-card{padding:14px;background:#142b42;border:2px solid #98713c;border-radius:8px}
+.encounter-card img{display:block;width:112px;height:112px;image-rendering:pixelated;margin:0 auto;background:#081d2b66;border-radius:8px}
+.encounter-card h4{font-size:17px;color:#ffe9b6;margin:10px 0 4px}
+.encounter-card span{font-size:12px;color:#a7ddeb}
+.encounter-card p{margin:9px 0}
+.adaptive-review-label{font:600 12px/1.5 system-ui,sans-serif;padding:5px 9px;margin-bottom:8px;border:1px solid #89bda0;border-radius:5px;color:#d7ffe4;background:#1c4938}
+.strategy-enemy img.encounter-preview-art{width:64px;height:64px;image-rendering:pixelated;float:right;margin:0 0 6px 6px}
+@media(max-width:700px){.encounter-cards{grid-template-columns:1fr}.encounter-card img{float:right;width:90px;height:90px;margin:0 0 10px 10px}.encounter-card{font-size:14px}.encounter-card h4{font-size:16px}}
