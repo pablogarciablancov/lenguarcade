@@ -1,0 +1,20 @@
+/* Strategy controls share the parchment and blue palette of the battlefield. */
+#strategyPreviewBtn{background:#244d70!important;color:#fff3cb!important;border-color:#d5b567!important;font-size:11px!important}
+.strategy-modal{position:fixed;inset:0;z-index:22;display:flex;align-items:center;justify-content:center;padding:14px;background:#081422c9}
+.strategy-modal[hidden]{display:none}
+.strategy-panel{box-sizing:border-box;width:min(690px,100%);max-height:calc(100dvh - 28px);overflow:auto;padding:20px;border:3px solid #89602b;border-radius:10px;background:#f0dfb7;color:#35260f;box-shadow:0 14px 60px #0008;font:14px/1.5 system-ui,sans-serif}
+.strategy-panel h2{margin:0;font-size:21px;color:#30230e}
+.strategy-panel h3{margin:0 0 6px;color:#30230e;font-size:16px}
+.strategy-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.strategy-panel button{min-height:40px;background:#235c83;color:#fff6d8;border:2px solid #795021;border-radius:5px;padding:8px 12px;font:600 13px system-ui;cursor:pointer}
+.strategy-panel button:disabled{opacity:.5;cursor:default}
+.strategy-panel button:focus-visible,#strategyPreviewBtn:focus-visible{outline:3px solid #ca610a;outline-offset:3px}
+.strategy-enemies,.strategy-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.strategy-enemy,.strategy-option{padding:12px;border:1px solid #b59359;border-radius:6px;background:#fff5d57d}
+.strategy-enemy p,.strategy-option p{margin:5px 0}
+.strategy-route-map{display:block;width:100%;height:auto;max-height:245px;object-fit:contain;background:#233c45;border:2px solid #92703d;border-radius:5px;image-rendering:pixelated}
+.strategy-summary{font-weight:650}
+.strategy-foot{margin-top:16px;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.strategy-spec-label{display:block;margin-top:4px;font-weight:700;color:#714606}
+#specializeTowerBtn{background:linear-gradient(#316b9d,#204a73)!important;color:#fff4d2!important}
+@media(max-width:520px){.strategy-panel{padding:13px}.strategy-enemies,.strategy-options{grid-template-columns:1fr}.strategy-panel h2{font-size:18px}#strategyPreviewBtn{font-size:10px!important;padding:6px!important;min-width:0!important}.overlay-buttons{gap:4px!important;flex-wrap:wrap}}

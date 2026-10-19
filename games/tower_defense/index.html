@@ -316,6 +316,8 @@ html,body{height:100%;overflow:hidden}
 </style>
 <link rel="stylesheet" href="guardians.css">
 <link rel="stylesheet" href="expansion.css">
+<link rel="stylesheet" href="strategy.css">
+<script src="strategy-core.js"></script>
 <script src="branching-routes.js"></script>
 <script src="eso-lessons.js"></script>
 </head>
@@ -1555,7 +1557,7 @@ Game.prototype.saveCheckpoint=function(){
     score:this.score,
     unlocked:[...this.unlockedTowers],
     stats:this.stats,
-    towers:this.towers.map(t=>({type:t.type,siteIndex:t.siteIndex,level:t.level,kills:t.kills||0}))
+    towers:this.towers.map(t=>({type:t.type,siteIndex:t.siteIndex,level:t.level,kills:t.kills||0,specialization:t.specialization||null}))
   };
   SaveManager.save(payload);
   return payload;
@@ -1573,7 +1575,7 @@ Game.prototype.restoreCheckpoint=function(){
   this.towers=[];
   if(Array.isArray(s.towers))for(const raw of s.towers){
     if(!TOWER_TYPES[raw.type]||!BUILD_SITES[raw.siteIndex]||this.towers.some(t=>t.siteIndex===raw.siteIndex))continue;
-    const t=new Tower(this,raw.type,raw.siteIndex);t.level=Math.max(1,Math.min(3,Number(raw.level)||1));t.kills=Number(raw.kills)||0;this.towers.push(t);
+    const t=new Tower(this,raw.type,raw.siteIndex);t.level=Math.max(1,Math.min(3,Number(raw.level)||1));t.kills=Number(raw.kills)||0;t.specialization=t.level>=2&&GuardianStrategy.option(raw.type,raw.specialization)?raw.specialization:null;this.towers.push(t);
   }
   this.waveManager.active=false;this.waveManager.queue=[];this.enemies=[];this.projectiles=[];this.buildType=null;this.selectedTower=null;
   this.unlockByWave();
@@ -2944,5 +2946,6 @@ body{background:#07111c!important}
 <script src="guardian-core.js"></script>
 <script src="expansion-runtime.js"></script>
 <script src="guardians.js"></script>
+<script src="strategy-runtime.js"></script>
 </body>
 </html>
