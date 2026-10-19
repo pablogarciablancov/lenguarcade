@@ -1,0 +1,41 @@
+{
+  "purpose": "Pixel-art terrain and transparent map props for Guardianes de la Biblioteca. Exact roads are rendered from branching-routes.js.",
+  "reference": "Existing tower_defense art; library and gate extracted with image_gen from existing sprites.",
+  "assets": [
+    {
+      "id": "bosque-bifurcado",
+      "mode": "image_gen built-in",
+      "prompt": "Use case: stylized-concept. Asset: new landscape terrain background for pixel art tower defense Guardianes de la Biblioteca. Input image is STYLE REFERENCE ONLY, create a different scene. Subject: ancient emerald woodland, dense trees and mossy stone arches along outer edges, warm afternoon light, small pale flowers. Match the reference's polished 16-bit fantasy game pixel art, crisp square pixels, rich colors, top-down slightly oblique orthographic gameplay map. Wide landscape frame. CRITICAL: keep the whole central 85% of the canvas flat, unobstructed and calm terrain, no roads or paths anywhere, no bridges, no buildings, no water crossing the center, no platforms, no units, no UI, no text. Detailed scenery is restricted to the outermost 5% border, because an exact branching path network and towers will be drawn by game code over the open center. The center must still have subtly textured natural terrain, never a featureless solid color. No vignette, no perspective horizon."
+    },
+    {
+      "id": "marisma",
+      "mode": "image_gen built-in",
+      "prompt": "Use case: stylized-concept. Asset: new landscape terrain background for pixel art tower defense Guardianes de la Biblioteca. Input image is STYLE REFERENCE ONLY, create a different scene. Subject: enchanted marsh at dusk, teal reeds and willow trees, violet fireflies, dark ponds confined to outermost margins, flat mossy clearing. Match the reference's polished 16-bit fantasy game pixel art, crisp square pixels, rich colors, top-down slightly oblique orthographic gameplay map. Wide landscape frame. CRITICAL: keep the whole central 85% of the canvas flat, unobstructed and calm terrain, no roads or paths anywhere, no bridges, no buildings, no water crossing the center, no platforms, no units, no UI, no text. Detailed scenery is restricted to the outermost 5% border, because an exact branching path network and towers will be drawn by game code over the open center. The center must still have subtly textured natural terrain, never a featureless solid color. No vignette, no perspective horizon."
+    },
+    {
+      "id": "cumbres",
+      "mode": "image_gen built-in",
+      "prompt": "Use case: stylized-concept. Asset: new landscape terrain background for pixel art tower defense Guardianes de la Biblioteca. Input image is STYLE REFERENCE ONLY, create a different scene. Subject: alpine scriptorium valley, snow-covered spruce trees and gray blue mountain rocks along outer edges, wintry frosted grass clearing, turquoise ice crystals at margins. Match the reference's polished 16-bit fantasy game pixel art, crisp square pixels, rich colors, top-down slightly oblique orthographic gameplay map. Wide landscape frame. CRITICAL: keep the whole central 85% of the canvas flat, unobstructed and calm terrain, no roads or paths anywhere, no bridges, no buildings, no water crossing the center, no platforms, no units, no UI, no text. Detailed scenery is restricted to the outermost 5% border, because an exact branching path network and towers will be drawn by game code over the open center. The center must still have subtly textured natural terrain, never a featureless solid color. No vignette, no perspective horizon."
+    },
+    {
+      "id": "caldera",
+      "mode": "image_gen built-in",
+      "prompt": "Use case: stylized-concept. Asset: new landscape terrain background for pixel art tower defense Guardianes de la Biblioteca. Input image is STYLE REFERENCE ONLY, create a different scene. Subject: volcanic archive valley, purple dark basalt boulders and red glowing fissures along outer edges, center is flat muted volcanic ash clearing, golden embers. Match the reference's polished 16-bit fantasy game pixel art, crisp square pixels, rich colors, top-down slightly oblique orthographic gameplay map. Wide landscape frame. CRITICAL: keep the whole central 85% of the canvas flat, unobstructed and calm terrain, no roads or paths anywhere, no bridges, no buildings, no water crossing the center, no platforms, no units, no UI, no text. Detailed scenery is restricted to the outermost 5% border, because an exact branching path network and towers will be drawn by game code over the open center. The center must still have subtly textured natural terrain, never a featureless solid color. No vignette, no perspective horizon."
+    },
+    {
+      "id": "library-cutout",
+      "mode": "image_gen built-in",
+      "prompt": "Use case: background-extraction. Edit target: the attached low resolution pixel art blue-roof library castle sprite. Remove ALL background, including black/dark rectangular area, grass, flowers, path, terrain and trees. Keep only the complete castle building, its attached banners, decorative open book sign, towers, windows, door and stone threshold. Preserve its exact pixel art style, colors and proportions. Clean fully transparent background. No floor patch, no shadows extending outside building, no invented extra objects. Center whole castle in square canvas with transparent padding, nothing cropped."
+    },
+    {
+      "id": "entrance-cutout",
+      "mode": "image_gen built-in",
+      "prompt": "Use case: background-extraction. Edit target: attached pixel art stone archway entrance. Remove all grass, forest, path, stones on ground and dark background. Keep only the complete stone gate arch, attached blue banners and door opening, preserving exact pixel art style, colors and architecture. Fully transparent background and transparent opening through arch, no ground patch. Center complete gate in square canvas with generous transparent padding, nothing cropped."
+    },
+    {
+      "id": "stone-platform",
+      "mode": "image_gen built-in",
+      "prompt": "Use case: stylized-concept. One isolated small tower construction foundation for medieval fantasy pixel art tower defense. A low circular or octagonal disk of worn pale sandstone blocks, seen from top down slightly oblique 3/4 view. Wide shallow stone base with neatly arranged beveled stone segments, darker rim, subtle moss in cracks. No tower, no text, no plus symbol, no icon, no pedestal column, no grass square, fully transparent background. Crisp handcrafted 16-bit pixel art, dark outlines, limited palette, readable at 25x18 logical pixels. Entire platform centered, generous transparent margin."
+    }
+  ]
+}
