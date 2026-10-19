@@ -1,0 +1,17 @@
+.start-map-panel{max-height:calc(100dvh - 24px);overflow:auto}
+.start-map-panel .start-map-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.start-map-panel .start-map-card{aspect-ratio:1.75;min-height:0}
+.branch-map-tag{position:absolute;z-index:3;left:7px;top:6px;padding:4px 6px;border:1px solid #e5c48080;border-radius:5px;background:#102236e8;color:#ffdfa0;font:800 10px/1.2 system-ui;font-style:normal}
+.branch-brief{position:absolute;right:9px;top:9px;z-index:4;padding:5px 8px;border:1px solid #dcb36d80;border-radius:6px;background:#11253cd9;color:#ffe6b4;font:700 10px/1.3 system-ui;pointer-events:none}
+#qEnemyWord{font-size:clamp(16px,2vw,24px);line-height:1.35;overflow-wrap:anywhere}
+@media(max-width:980px){.start-map-panel .start-map-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.branch-brief{top:49px;font-size:9px;max-width:55%}}
+@media(max-width:500px){.start-map-panel .start-map-grid{grid-template-columns:1fr 1fr}.start-map-card b{font-size:11px}.start-map-card small{font-size:9px}.branch-map-tag{font-size:8px;padding:2px 4px}.start-map-panel{padding:10px}.start-map-head{grid-template-columns:65px 1fr}.start-map-head h1{font-size:20px}}
+
+.start-map-head>span{display:none}
+.start-map-head .guardian-camp-btn{grid-column:3;grid-row:1;justify-content:center}
+@media(max-width:500px){.start-map-head .guardian-camp-btn{grid-column:1;grid-row:2;padding:3px;font-size:9px}}
+
+/* Contextual sentences need a viewport-sized card, independent of map height. */
+#questionCard{position:fixed!important;max-height:calc(100dvh - 28px)!important;z-index:18;display:flex;flex-direction:column}
+#questionCard .question-body{min-height:0;overflow-y:auto}
+#questionCard .answer-btn{font-size:14px!important}
