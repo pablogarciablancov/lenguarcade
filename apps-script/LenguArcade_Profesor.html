@@ -3055,13 +3055,13 @@ body.light .teacherMonitorTable th{background:#fff}
 .laBossCurtain{position:fixed;inset:0;z-index:1000;display:none;flex-direction:column;overflow:hidden;background:radial-gradient(ellipse at center 65%,#44254f 0,#1f1531 45%,#090a1c 90%);color:#fff;font-family:Inter,system-ui,sans-serif}
 .laBossCurtain.open{display:flex}
 .laBossCurtain::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(110deg,transparent 0 75px,#fff1 76px 77px,transparent 78px 140px);opacity:.13;pointer-events:none}
-.laBossTop{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;background:#050b1ba8;border-bottom:1px solid #b7a0d033}
-.laBossTop small{display:block;letter-spacing:2px;font-size:11px;color:#d7baff;font-weight:800}.laBossTop strong{font-size:clamp(20px,2vw,32px)}
+.laBossTop{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 20px;background:#050b1ba8;border-bottom:1px solid #b7a0d033}
+.laBossTop small{display:block;letter-spacing:2px;font-size:11px;color:#d7baff;font-weight:800}.laBossTop strong{font-size:clamp(18px,1.6vw,24px)}
 .laBossTop button{width:auto;background:#251a40;color:#fff;border:1px solid #fff4;padding:8px 14px}
-.laBossMain{position:relative;display:flex;flex:1;min-height:0;flex-direction:column;align-items:center;justify-content:center;padding:16px 4vw}
-.laBossTitle{text-align:center;margin-bottom:0;font-family:Georgia,serif;font-size:clamp(25px,4vw,55px);color:#ffe4bd;text-shadow:0 4px 16px #000}
-.laBossLegend{text-align:center;color:#e2d2ea;margin:4px 0 10px}
-.laBossMonster{position:relative;width:min(58vh,80vw,600px);flex:1;min-height:0;max-height:54vh;filter:drop-shadow(0 12px 26px #080317)}
+.laBossMain{position:relative;display:flex;flex:1;min-height:0;flex-direction:column;align-items:center;justify-content:center;padding:6px 3vw}
+.laBossTitle{text-align:center;margin-bottom:0;font-family:Georgia,serif;font-size:clamp(23px,2.6vw,40px);color:#ffe4bd;text-shadow:0 4px 16px #000}
+.laBossLegend{text-align:center;color:#e2d2ea;margin:3px 0 4px;font-size:14px}
+.laBossMonster{position:relative;width:min(92vh,96vw,1080px);flex:1;min-height:0;max-height:70vh;filter:drop-shadow(0 12px 26px #080317)}
 .laBossDragon{position:absolute;inset:0;transform-origin:50% 85%;transition:opacity 1s,filter .6s}
 .laBossSpriteSurface{width:100%;height:100%}
 .laBossSprite{display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
@@ -3079,14 +3079,14 @@ body.light .teacherMonitorTable th{background:#fff}
 .laBossCurtain[data-outcome="defeat"] .laBossAura{background:radial-gradient(ellipse,#ff5f9955,transparent 65%)}
 .laBossBar{width:min(780px,85vw);border-radius:20px;background:#080d1b;border:2px solid #9279ae;padding:5px;box-shadow:0 10px 25px #0009}
 .laBossBarFill{height:clamp(16px,2.2vh,25px);width:100%;border-radius:13px;background:linear-gradient(90deg,#f06778,#c83377,#9743e9);box-shadow:0 0 20px #f03b8c99;transition:width .5s ease}
-.laBossStats{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;margin-top:12px;font-weight:900;font-size:clamp(14px,1.7vw,22px)}
-.laBossFoot{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 24px;background:#080c1ecc;border-top:1px solid #b7a0d033}
-.laBossFoot button{width:auto;padding:10px 18px}.laBossFoot .laBossEnd{background:#83364b}
+.laBossStats{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;margin-top:8px;font-weight:900;font-size:clamp(14px,1.7vw,22px)}
+.laBossFoot{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 20px;background:#080c1ecc;border-top:1px solid #b7a0d033}
+.laBossFoot button{width:auto;padding:8px 14px}.laBossFoot .laBossEnd{background:#83364b}
 .laBossFoot .laBossPause{background:#55438f}
 .laBossOutcome{display:none;text-align:center;flex:none;margin-top:8px;padding:8px 24px;border:1px solid #e8c58770;border-radius:18px;background:#110f2ce6}
 .laBossOutcome.show{display:block}.laBossOutcome h2{font:900 clamp(20px,2.5vw,36px) Georgia,serif;color:#ffe2a8;margin:0 0 4px}
 .laBossOutcome p{font-size:clamp(13px,1.4vw,20px);color:#fff;margin:0}
-.laBossPhase{font-size:11px;letter-spacing:2px;font-weight:800;color:#e7c38e;margin:3px 0 6px;text-transform:uppercase;flex:none}
+.laBossPhase{font-size:11px;letter-spacing:2px;font-weight:800;color:#e7c38e;margin:2px 0 4px;text-transform:uppercase;flex:none}
 .laBossMain>*:not(.laBossMonster){flex-shrink:0}.laBossTop,.laBossFoot{flex-shrink:0}
 @keyframes laBossAura{50%{transform:scale(1.06);opacity:.6}}
 @keyframes laBossHit{0%,100%{transform:translateX(0)}22%,65%{transform:translateX(-10px) rotate(-2deg);filter:brightness(1.8)}43%,85%{transform:translateX(10px)}}
@@ -3095,7 +3095,7 @@ body.light .teacherMonitorTable th{background:#fff}
 @keyframes laBossCollapse{to{transform:translateY(12px) rotate(10deg) scale(.85);opacity:.25;filter:grayscale(.8)}}
 @keyframes laBossRoar{50%{transform:translateY(-12px) scale(1.04)}}
 @media(prefers-reduced-motion:reduce){#classBossStage .laBossMonster *{animation:none;transition:none}.laBossCurtain[data-outcome="victory"] .laBossDragon{opacity:.25;transform:translateY(8px) rotate(8deg) scale(.9)}.laBossBarFill{transition:none}}
-@media(max-height:720px){.laBossMain{padding:4px 3vw}.laBossTitle{font-size:25px}.laBossLegend{font-size:13px;margin-bottom:4px}.laBossMonster{max-height:44vh}.laBossStats{margin-top:6px}.laBossFoot{padding:8px 20px}}
+@media(max-height:720px){.laBossMain{padding:4px 3vw}.laBossTitle{font-size:25px}.laBossLegend{font-size:13px;margin-bottom:4px}.laBossMonster{max-height:64vh}.laBossStats{margin-top:6px}.laBossFoot{padding:8px 20px}}
 @media(max-width:700px){.laBossPanelHead{display:block}.laBossTop,.laBossFoot{padding:8px 12px}.laBossTop strong{font-size:18px}.laBossTop small{font-size:9px}.laBossStats{gap:12px}.laBossMonster{width:90vw}.laBossFoot{flex-wrap:wrap}.laBossFoot>span{font-size:12px}.laBossFoot .laBossActions{margin-top:0}}
 </style>
 <div id="classBossStage" class="laBossCurtain" role="dialog" aria-label="Batalla cooperativa de clase" aria-modal="true">
@@ -3106,7 +3106,7 @@ body.light .teacherMonitorTable th{background:#fff}
     <div class="laBossPhase" id="classBossPhase" aria-live="polite">Fase I · Guardián de tinta</div>
     <div class="laBossMonster" id="classBossMonster" data-phase="1" aria-hidden="true">
       <div class="laBossAura"></div>
-      <div class="laBossDragon"><div class="laBossSpriteSurface"><canvas class="laBossSprite" id="classBossSprite" width="512" height="512"></canvas></div></div>
+      <div class="laBossDragon"><div class="laBossSpriteSurface"><canvas class="laBossSprite" id="classBossSprite" width="512" height="448"></canvas></div></div>
       <span class="laBossSpriteStatus" id="classBossSpriteStatus">Preparando el dragón…</span>
       <span class="laBossImpact" id="classBossImpact"></span>
     </div>
@@ -3134,8 +3134,10 @@ body.light .teacherMonitorTable th{background:#fff}
     }
     if(!canvas||!img)return;
     var context=canvas.getContext('2d');if(!context)return;
-    context.clearRect(0,0,512,512);context.imageSmoothingEnabled=false;
-    context.drawImage(img,0,0,512,512);
+    context.clearRect(0,0,512,448);context.imageSmoothingEnabled=false;
+    // Zoom the whole isolated frame, using only its known transparent margins.
+    // All 48 opaque silhouettes remain inside a clear 24px canvas border.
+    context.drawImage(img,-25.6,-102.4,563.2,563.2);
     $('classBossSpriteStatus').textContent='';
     canvas.setAttribute('data-phase',String(spritePhase));canvas.setAttribute('data-frame',String(frame));
   }

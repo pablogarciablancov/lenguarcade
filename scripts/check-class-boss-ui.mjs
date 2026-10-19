@@ -159,7 +159,7 @@ for(const args of draws){
   assert.equal(args.length,5,'Must draw the complete isolated image, never an atlas source rectangle');
   const [img,x,y,w,h]=args;
   assert.equal(img.naturalWidth,512);assert.equal(img.naturalHeight,512);
-  assert.deepEqual([x,y,w,h],[0,0,512,512]);
+  assert.deepEqual([x,y,w,h],[-25.6,-102.4,563.2,563.2]);
   assert.match(img.url,/frames-v2\/(healthy|cracked|torn|critical)-\d{2}\.webp$/);
 }
 motion.matches=true;listeners.get('motion')();

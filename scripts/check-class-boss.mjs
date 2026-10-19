@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {
-  BOSS_GAMES,BOSS_DURATION_SECONDS,battleClock,battleDeadlineMs,countBossDamage
+  BOSS_GAMES,BOSS_DURATION_SECONDS,initialBossHealth,battleClock,battleDeadlineMs,countBossDamage
 } from '../supabase/functions/_shared/class-boss-engine.js';
 
 const started='2026-10-18T10:00:00.000Z',t=Date.parse(started);
@@ -12,6 +12,13 @@ const ev=(id,student,game,sec,xp=6)=>({id,profile_id:student,game_id:game,xp_del
 
 assert.deepEqual(BOSS_GAMES,['battlegrafia','lexoma','maniacgrafia']);
 assert.equal(BOSS_DURATION_SECONDS,25*60);
+for(const [students,health] of [[0,1000],[1,1000],[25,1000],[28,1120],[30,1200],[200,5000]])assert.equal(initialBossHealth(students),health);
+assert.equal(initialBossHealth(undefined),1000);
+// Even perfect solo play at the 30s cooldown cannot defeat a class boss.
+const solo=Array.from({length:50},(_,i)=>ev('solo-'+i,'one','battlegrafia',1+i*30,1000000));
+const soloTally=countBossDamage(solo,{...battle,health_total:initialBossHealth(1)},[run],t+1500000);
+assert.equal(soloTally.damage,50);assert.equal(soloTally.health,950);
+
 assert.equal(battleClock(battle,t),1500);
 assert.equal(battleClock(battle,t+25*60*1000),0);
 assert.equal(battleClock(battle,t+24*60*1000),60);
@@ -67,3 +74,5 @@ assert.equal(battleClock(nightBattle,Date.parse('2026-10-18T21:55:00.000Z')),300
 assert.equal(battleClock(nightBattle,Date.parse('2026-10-18T22:00:00.000Z')),0);
 
 console.log('Class boss: Maniacgrafía, 25-minute hard deadline, same-day expiry, cooldown, 30 pupils, pause and closed workshop OK.');
+
+await import('./check-class-boss-balance.mjs');

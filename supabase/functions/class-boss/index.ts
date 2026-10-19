@@ -1,4 +1,4 @@
-import {BOSS_GAMES,BOSS_DURATION_SECONDS,battleClock,countBossDamage} from "../_shared/class-boss-engine.js";
+import {BOSS_GAMES,BOSS_DURATION_SECONDS,initialBossHealth,battleClock,countBossDamage} from "../_shared/class-boss-engine.js";
 import {corsHeaders,jsonResponse,requireTeacherSession,requireProfileSession} from "../_shared/lenguarcade.ts";
 
 function fail(message:string,status=400){return jsonResponse({ok:false,error:message},status);}
@@ -150,7 +150,7 @@ Deno.serve(async(request)=>{
         .select("profile_id",{count:"exact",head:true}).eq("classroom_id",classroom.id).eq("active",true);
       if(countError)throw countError;
       const duration=BOSS_DURATION_SECONDS; // Server-enforced limit; ignore client duration parameters.
-      const initialHealth=Math.max(8,Math.min(5000,Math.max(1,count||0)*8));
+      const initialHealth=initialBossHealth(count);
       const now=isoNow();
       const {data, error}=await admin.from("class_boss_events")
         .insert({organization_id:organizationId,classroom_id:classroom.id,
