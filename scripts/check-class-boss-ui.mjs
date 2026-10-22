@@ -179,6 +179,8 @@ const leaders=[{name:'Alumno <script>',damage:8},{name:'Segundo',damage:7},{name
 const round={index:0,final:false,victory:true,leaderboard:leaders};
 paint({...event,health:100,encounter:{phase:'rest',latest:round,current:null,next:{index:1},secondsToNext:90,finished:false,config,rounds:[round,{}],leaderboard:leaders}});
 assert.equal(getElementById('classBossMonster').style.visibility,'hidden');
+assert.equal(getElementById('classBossClock').textContent,'');
+assert.doesNotMatch(getElementById('classBossLegend').textContent,/1:30|Próxima aparición en/);
 assert.match(getElementById('classBossPodiumHost').innerHTML,/Alumno &lt;script&gt;/);
 assert.match(getElementById('classBossPodiumHost').innerHTML,/\+150 XP/);
 paint({...event,health:100,encounter:{phase:'combat',current:{index:1,final:true},secondsToNext:0,combatSeconds:120,finished:false,config,rounds:[round,{}],leaderboard:leaders}});
@@ -189,3 +191,7 @@ paint({...event,state:'finished',outcome:'victory',health:0,encounter:{phase:'fi
 assert.match(getElementById('classBossPodiumHost').innerHTML,/PODIO FINAL/);
 assert.match(getElementById('classBossPodiumHost').innerHTML,/\+300 XP/);
 console.log('Encounter UI: monster hidden in rests, final fight, escaped names, per-round and final podium rewards OK.');
+
+const studentHtml=fs.readFileSync(new URL('../apps-script/LenguArcade_Alumno.html',import.meta.url),'utf8');
+const noticeSource=studentHtml.match(/<script id="la-student-boss-status">([\s\S]*?)<\/script>/)[1];
+assert.doesNotMatch(noticeSource,/secondsToNext|Próximo combate en|El monstruo se acerca/);

@@ -1,3 +1,8 @@
+## 2026-10-22 — Apariciones sorpresa
+
+- Sin cuenta atrás ni aviso previo durante los descansos, tanto en alumno como en proyección. El reloj solo aparece durante el combate. Se conservan calendario interno, premios y Flotas.
+- Validación: comprobar el descanso sin tiempos ni alertas y el combate con su reloj; pruebas de interfaz y sintaxis correctas.
+
 ## 2026-10-22 · Rayuela: galería y valoración entre compañeros
 
 - Galería por clase separada de «Mis historias», con modo jugador sin edición ni cambios en el guardado o XP del lector.

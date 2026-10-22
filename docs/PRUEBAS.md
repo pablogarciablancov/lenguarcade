@@ -1,3 +1,8 @@
+## 2026-10-22 — Apariciones sorpresa
+
+- Sin cuenta atrás ni aviso previo durante los descansos, tanto en alumno como en proyección. El reloj solo aparece durante el combate. Se conservan calendario interno, premios y Flotas.
+- Validación: comprobar el descanso sin tiempos ni alertas y el combate con su reloj; pruebas de interfaz y sintaxis correctas.
+
 ## 2026-10-22 · Galería Rayuela
 
 - Validación realizada en Chromium con host simulado: ocho tarjetas reales, recorrido de una historia del lote, formulario de voto, XP y biblioteca propios intactos, modo local, importación docente y publicación con autores. Comprobados 1366×768, 1440×900, 1920×1080 y 390×844 sin desbordamiento horizontal. La integración con la base de datos viva queda para la aceptación tras despliegue.
