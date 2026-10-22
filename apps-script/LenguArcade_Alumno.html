@@ -4281,7 +4281,7 @@ body.light .rankCard,body.light .studentHistoryItem,body.light .generalAchieveme
         var e=b.encounter;
         if(!e)notice.textContent='⚔️ El Devorapalabras · Tus progresos confirmados cuentan para el combate.';
         else{
-          var active=e.phase==='combat',label=active?(e.current.final?'⚔️ COMBATE FINAL':'⚔️ Aparición '+(e.current.index+1)+'/'+e.rounds.length):e.finished?'🏆 Evento terminado':e.phase==='paused'?'⏸ Ataques en pausa':(e.secondsToNext<=15?'⚠️ El monstruo se acerca · ':'📜 Próximo combate en ')+clock(e.secondsToNext);
+          var active=e.phase==='combat',label=active?(e.current.final?'⚔️ COMBATE FINAL':'⚔️ Aparición '+(e.current.index+1)+'/'+e.rounds.length):e.finished?'🏆 Evento terminado':e.phase==='paused'?'⏸ Ataques en pausa':'📜 El Devorapalabras puede volver en cualquier momento';
           var ratio=b.totalHealth?b.health/b.totalHealth:1,phase=ratio>.7?'healthy':ratio>.35?'cracked':ratio>.1?'torn':'critical';
           notice.innerHTML=(active?'<img alt="" src="https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/4c1509da99e34cc3cdf4dc2de1179cc4e017ca24/assets/events/devorapalabras/frames-v2/'+phase+'-00.webp">':'')+esc(label)+(active?' · '+b.health+'/'+b.totalHealth+' de vida · '+clock(e.combatSeconds):' · Sigue jugando')+(e.latest||e.finished?'<button type="button" id="studentBossViewPodium">Ver podio</button>':'');
           var view=document.getElementById('studentBossViewPodium');if(view)view.onclick=function(){podium(lastEvent,true);};

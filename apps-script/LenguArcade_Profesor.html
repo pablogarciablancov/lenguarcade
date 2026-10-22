@@ -3324,9 +3324,9 @@ body.light .teacherMonitorTable th{background:#fff}
     if(b.encounter){
       var enc=b.encounter,active=enc.phase==='combat',latest=enc.latest;
       monster.style.visibility=active?'visible':'hidden';if(!active)stopBossSprite();
-      $('classBossClock').textContent=fmt(active?enc.combatSeconds:enc.secondsToNext||b.remainingSeconds);
+      $('classBossClock').textContent=active?fmt(enc.combatSeconds):'';
       $('classBossPhase').textContent=active?(enc.current.final?'⚔️ COMBATE FINAL':'Aparición '+(enc.current.index+1)+' de '+enc.rounds.length):enc.finished?'LA DEFENSA DEL GRAN ARCHIVO':enc.phase==='paused'?'ATAQUES EN PAUSA':'EL MONSTRUO VOLVERÁ';
-      $('classBossLegend').textContent=active?'¡Tus aciertos causan daño! Sesión: '+fmt(b.remainingSeconds)+' restantes.':enc.finished?'Daño total de todas las apariciones.':enc.phase==='paused'?'El reloj de la sesión sigue avanzando.':'Sigue jugando. Próxima aparición en '+fmt(enc.secondsToNext)+'.';
+      $('classBossLegend').textContent=active?'¡Tus aciertos causan daño! Sesión: '+fmt(b.remainingSeconds)+' restantes.':enc.finished?'Daño total de todas las apariciones.':enc.phase==='paused'?'El reloj de la sesión sigue avanzando.':'Sigue jugando. El Devorapalabras puede volver en cualquier momento.';
       var rows=enc.finished?enc.leaderboard:latest&&latest.victory?latest.leaderboard:null;
       var cfg=enc.config,won=enc.finished?b.outcome==='victory':latest&&latest.victory;
       if(!active&&rows&&rows.length){
