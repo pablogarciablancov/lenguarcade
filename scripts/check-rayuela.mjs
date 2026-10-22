@@ -81,7 +81,7 @@ const profesor = fs.readFileSync(path.resolve("apps-script","LenguArcade_Profeso
 const evaluation = fs.readFileSync(path.resolve("supabase","functions","teacher-rayuela-evaluation","index.ts"),"utf8");
 const dashboard = fs.readFileSync(path.resolve("supabase","functions","student-dashboard","index.ts"),"utf8");
 const saveProgress = fs.readFileSync(path.resolve("supabase","functions","save-progress","index.ts"),"utf8");
-const migrations = fs.readdirSync(path.resolve("supabase","migrations")).filter(name => name.includes("rayuela"));
+const migrations = fs.readdirSync(path.resolve("supabase","migrations")).filter(name => name.includes("add_rayuela"));
 
 if (!alumno.includes("gameRecord?.gameId==='rayuela'") || !alumno.includes("projectXp-Number(old.xp||0)")) {
   throw new Error("Rayuela: falta la integración de XP idempotente en el host del alumno.");

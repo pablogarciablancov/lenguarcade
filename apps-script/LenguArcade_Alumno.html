@@ -1695,6 +1695,7 @@ async function authenticateGameOpponent(){
 }
 function buildGameInitPayload(runner){
   return {
+    galleryAvailable:supabaseBackend===true&&runner.game.gameId==='rayuela',
     onlineMultiplayer:supabaseBackend===true&&['conjuga_apuesta','lexitrama'].includes(runner.game.gameId),
     teacherPractice:['teacher','admin'].includes(currentDashboard.student.role),
     student:currentDashboard.student,
@@ -2454,6 +2455,18 @@ window.addEventListener('message',event=>{
     runner.sessionActive=true;
     $('gameRunnerStatus').textContent='Partida en curso.';
   }
+  if(message.type==='GALLERY_REQUEST'&&runner.game.gameId==='rayuela'){
+    if(event.source!==runner.gameWindow&&event.source!==runner.iframe?.contentWindow)return;
+    const payload=message.payload||{},requestId=String(payload.requestId||''),target=event.source;
+    if(!requestId||requestId.length>80)return;
+    if(!supabaseBackend||!['list','context','get','complete','rate','import','update'].includes(payload.action)){
+      postToGameWindow(runner,target,'GALLERY_REPLY',{requestId,error:'gallery_unavailable'});return;
+    }
+    callSupabaseFunction('rayuela-gallery',payload,token).then(data=>{
+      if(activeGameRunner===runner)postToGameWindow(runner,target,'GALLERY_REPLY',{requestId,data});
+    }).catch(error=>{if(activeGameRunner===runner)postToGameWindow(runner,target,'GALLERY_REPLY',{requestId,error:error.code||'gallery_unavailable'});});
+  }
+
   if(message.type==='REQUEST_OPPONENT_AUTH')openGameOpponentLogin(message.payload||{});
   if(message.type==='ONLINE_REQUEST'&&['conjuga_apuesta','lexitrama'].includes(runner.game.gameId)){
     if(event.source!==runner.gameWindow&&event.source!==runner.iframe?.contentWindow)return;

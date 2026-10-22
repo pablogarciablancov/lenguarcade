@@ -1,3 +1,12 @@
+## 2026-10-22 · Rayuela: galería y valoración entre compañeros
+
+- Galería por clase separada de «Mis historias», con modo jugador sin edición ni cambios en el guardado o XP del lector.
+- El profesor abre «Galería de Rayuela» en Juegos, importa un JSON de proyecto o biblioteca (hasta 30 historias / 2 MB), asigna uno o varios autores y publica o retira historias. Reimportar el mismo proyecto en la misma clase conserva la instantánea, los autores y los votos.
+- Tras llegar a un final, el lector valora creatividad, historia/coherencia y decisiones/consecuencias de 1 a 5. Puede corregir su valoración; la clave única por historia y alumno impide duplicar votos.
+- Autoría oculta en las tarjetas del alumno, voto propio bloqueado en servidor, resultados individuales y medias solo para el profesor. Se exige asignar autores antes de publicar.
+- Tres tablas con RLS y sin acceso directo de anon/authenticated; la función `rayuela-gallery` comprueba sesión, organización, pertenencia a clase y acceso al juego. El recorrido completo se valida antes de habilitar el voto.
+- Publicación coordinada pendiente: aplicar la migración propia, desplegar la función y actualizar el Apps Script estable tras fusionar y publicar Pages. No se modifican datos de producción durante la implementación.
+
 ## 2026-10-18 — Resistencia y tamaño del Devorapalabras
 
 - Las nuevas batallas tienen mínimo 1.000 puntos de vida y 40 por alumno (28 alumnos: 1.120; 30: 1.200), con el máximo existente de 5.000. Evita el anterior jefe de 8 puntos al probar con una cuenta.
