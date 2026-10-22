@@ -1,3 +1,4 @@
+import {platformXpEvents} from "../_shared/platform-xp.js";
 import {assessedMissions} from "../_shared/mission-grade.js";
 import {levelProgress,learningGrade} from "../_shared/progression.js";
 import {
@@ -171,12 +172,7 @@ Deno.serve(async (request) => {
         .eq("profile_id", studentId)
         .order("occurred_at", { ascending:false })
         .limit(500),
-      admin.from("game_events")
-        .select("xp_delta,feathers_delta,details,occurred_at")
-        .eq("profile_id", studentId)
-        .eq("event_type", "teacher_adjustment")
-        .order("occurred_at", { ascending:false })
-        .limit(100),
+      platformXpEvents(admin,[studentId]),
       admin.from("player_achievements")
         .select("game_id,achievement_id,unlocked_at,achievement_definitions(title,description,xp_reward)")
         .eq("profile_id", studentId)
@@ -216,9 +212,10 @@ Deno.serve(async (request) => {
     const successes = rows.reduce((sum, row) => sum + Number(row.successes || 0), 0);
     const baseXp = rows.reduce((sum, row) => sum + Number(row.xp || 0), 0);
     const baseFeathers = rows.reduce((sum, row) => sum + Number(row.feathers || 0), 0);
-    const manualXp = adjustments.reduce((sum, row) => sum + Number(row.xp_delta || 0), 0);
+    const bonusXp = adjustments.filter(row=>row.event_type==="class_boss_reward").reduce((sum,row)=>sum+Number(row.xp_delta||0),0);
+    const manualXp = adjustments.filter(row=>row.event_type!=="class_boss_reward").reduce((sum, row) => sum + Number(row.xp_delta || 0), 0);
     const manualFeathers = adjustments.reduce((sum, row) => sum + Number(row.feathers_delta || 0), 0);
-    const xp = Math.max(0, baseXp + manualXp);
+    const xp = Math.max(0, baseXp + manualXp + bonusXp);
     const feathers = Math.max(0, baseFeathers + manualFeathers);
     const enrollment = (enrollmentsResult.data || [])[0]?.classrooms;
     const classroom = Array.isArray(enrollment) ? enrollment[0] : enrollment || null;
@@ -272,6 +269,7 @@ Deno.serve(async (request) => {
       general:{
         xp,
         baseXp,
+        bonusXp,
         manualXp,
         level:levelProgress(xp).level,
         plumas:feathers,
@@ -298,7 +296,7 @@ Deno.serve(async (request) => {
         enabled:accessByGame.get(String(game.id))?.enabled !== false,
         updatedAt:accessByGame.get(String(game.id))?.updated_at || null,
       })),
-      adjustments:adjustments.map(row => ({
+      adjustments:adjustments.filter(row=>row.event_type!=="class_boss_reward").slice(0,100).map(row => ({
         xpDelta:Number(row.xp_delta || 0),
         plumasDelta:Number(row.feathers_delta || 0),
         reason:String(row.details?.reason || ""),

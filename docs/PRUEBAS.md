@@ -1,3 +1,15 @@
+## 2026-10-22 — Evento cooperativo por apariciones
+
+1. Ejecutar `npm run check`. Incluye calendario de 10/25/60 minutos y 2–6 rondas, simulación de 25 alumnos, aciertos fuera de ventana, pausa, taller cerrado, enfriamiento, duplicados, resultados congelados, recompensas reservadas y aislamiento de Flotas.
+2. En profesor → Talleres, preparar una nueva edición del Devorapalabras, revisar el objetivo puntuable (400 XP por defecto), duración y premios. Iniciar: empieza un descanso, no un combate continuo. Las opciones se aplican al evento nuevo; reabrir uno existente conserva sus ajustes.
+3. Con 25 minutos y cuatro apariciones, comprobar las ventanas 3:00–5:00, 9:00–11:00, 15:00–17:00 y 21:00–25:00. Los progresos entre ventanas siguen dando XP de juego, pero no daño. Durante los últimos 15 s del descanso el alumno recibe aviso.
+4. En cada victoria intermedia, comprobar los tres primeros por daño de esa ronda y sus premios. El resto que haya causado daño recibe el premio de participación. Un empate se resuelve por primera aportación; no se cuenta daño después de la victoria. Si se agota el tiempo no se concede premio de victoria.
+5. En el combate final comprobar mayor vida, podio por daño acumulado de todas las rondas y aportación/puesto propios. Si se pierde, el podio sigue visible y no concede la bonificación final. El alumno puede cerrar y volver a abrir el podio; los intermedios desaparecen solos a los 12 s.
+6. Recargar profesor y alumno y abrir varios sondeos simultáneos: los premios no se repiten. Revisar XP general y ranking frente a XP de juego: la bonificación aparece solo en el total general y en el historial como class_boss_reward.
+7. Con un alumno de prueba autorizado para Flotas, alcanzar el objetivo del taller con XP real. Comprobar una única concesión y el mismo awardId al reintentar/reabrir; las bonificaciones del podio no completan el objetivo ni producen otra concesión. La integración real con el marcador se verifica tras publicación; no se han enviado puntos reales durante estas pruebas.
+8. Comprobar proyección, panel y podio alumno en 1366×768, 1440×900 y 1920×1080; conservar navegación, cierre, foco del teclado y sprites independientes. Pausar ataques no amplía el tiempo; al cerrar el taller no se admiten ataques nuevos.
+9. Verificar que un evento histórico sigue usando el combate clásico de 25 minutos y que la nueva sesión no sobrescribe sus resultados. Para volver a empezar, crear Nueva edición del taller.
+
 ## 2026-10-18 — Equilibrio de clase y dragón ampliado
 
 - `node scripts/check-class-boss.mjs`: nueva vida mínima, tamaños de clase y límite de 5.000; un jugador solo con XP enorme produce 50 golpes en 25 minutos y no vence al jefe de 1.000. Conserva tiempo, duplicados y periodos del taller.
