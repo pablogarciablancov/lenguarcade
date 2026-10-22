@@ -419,3 +419,6 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 # Cooperative Lexitrama uses the existing profile-session authorization.
 [functions.lexitrama-online]
 verify_jwt = true
+
+[functions.rayuela-gallery]
+verify_jwt = true

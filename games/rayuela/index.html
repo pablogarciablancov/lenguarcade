@@ -188,6 +188,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 
 </style>
 <link rel="stylesheet" href="./readability.css?v=20260930">
+<link rel="stylesheet" href="./gallery.css?v=1">
 </head>
 <body>
 <div id="libraryHome" class="libraryHome">
@@ -202,6 +203,9 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
     </div>
   </header>
   <main class="libraryMain">
+    <nav id="galleryNav" class="galleryNav hidden" aria-label="Biblioteca"><button class="ghostBtn" data-personal aria-pressed="true">Mis historias</button><button class="ghostBtn" data-gallery aria-pressed="false">🧭 Galería de clase</button></nav>
+    <section id="classGallery" class="hidden" aria-label="Galería de clase"></section>
+    <div id="personalLibrary">
     <section class="libraryHero">
       <div>
         <div class="eyebrow">Tu biblioteca narrativa</div>
@@ -234,6 +238,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
         <div id="librarySubmitted" class="storyLibraryGrid"></div>
       </div>
     </section>
+    </div>
   </main>
 </div>
 <div class="app" id="editorApp" style="display:none">
@@ -484,11 +489,12 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 
 <div id="toastStack" class="toastStack" aria-live="polite"></div>
 
+<script src="./gallery.js?v=1"></script>
 <script>
 (function(){
 "use strict";
 var GAME_ID="rayuela";
-var GAME_VERSION="1.3.3-beta";
+var GAME_VERSION="1.4.0-beta";
 var STORAGE_KEY="LA_RAYUELA_PROJECT_V1";
 var LIBRARY_STORAGE_KEY="LA_RAYUELA_LIBRARY_V1";
 var DISCOVERY_KEY="LA_RAYUELA_DISCOVERIES_V1";
@@ -515,6 +521,10 @@ var historyStack=[];
 var futureStack=[];
 var historyLock=false;
 var playState=null;
+var gallerySession=null;
+var gallery=null;
+var galleryAvailable=false;
+var galleryOnly=false;
 var tutorialIndex=0;
 var dragState=null;
 var CELL_W=210;
@@ -712,6 +722,7 @@ function loadLocal(){
   }catch(error){console.warn("No se pudo cargar Rayuela",error);library=defaultLibrary();project=defaultProject();}
 }
 function localPersist(){
+  if(gallerySession)return;
   syncProjectIntoLibrary();
   try{
     localStorage.setItem(LIBRARY_STORAGE_KEY,JSON.stringify(libraryPayload()));
@@ -721,6 +732,7 @@ function localPersist(){
 }
 function setSaveStatus(cls,text){var el=$("saveBadge");el.className="saveBadge "+cls;el.textContent=text;}
 function scheduleSave(reason){
+  if(gallerySession)return;
   setSaveStatus("saving","Guardando…");
   clearTimeout(autosaveTimer);
   autosaveTimer=setTimeout(function(){localPersist();if(integrated)scheduleCheckpoint(reason||"autosave");},450);
@@ -763,6 +775,7 @@ function startBridge(){
   }
 }
 function applyHostInit(payload){
+  galleryAvailable=payload.galleryAvailable===true;galleryOnly=payload.galleryOnly===true;
   var student=payload.student||{};
   var label=student.nombre||student.name||student.displayName||student.email||"Autor conectado";
   $("profileBadge").textContent="👤 "+label+(student.clase?" · "+student.clase:"");
@@ -784,7 +797,8 @@ window.addEventListener("message",function(event){
   var msg=event.data||{};
   if(!integrated||msg.namespace!==BRIDGE_NS_HOST||msg.channel!==channel)return;
   if(hostWindow&&event.source!==hostWindow)return;
-  if(msg.type==="INIT"){hostWindow=event.source;applyHostInit(msg.payload||{});}
+  if(msg.type==="INIT"&&!bridgeInitialized){hostWindow=event.source;applyHostInit(msg.payload||{});}
+  if(msg.type==="GALLERY_REPLY"&&gallery)gallery.reply(msg.payload||{});
   if(msg.type==="REQUEST_EXIT"){if(currentView==="editor"){sendCheckpoint("exit",true);setTimeout(function(){postToHost("CLOSE_READY",{});},500);}else{postToHost("CLOSE_READY",{});}}
   if(msg.type==="CHECKPOINT_CONFIRMED"){
     var id=msg.payload&&msg.payload.checkpointId;var list=checkpointInFlight[id]||[];
@@ -801,6 +815,7 @@ function buildAchievementPayload(ids){
   return ids.map(function(id){var a=ACHIEVEMENTS.find(function(x){return x.id===id;});return a?{id:a.id,title:a.title,description:a.desc,xpReward:a.xp,hidden:!!a.secret}:null;}).filter(Boolean);
 }
 function sendCheckpoint(reason,force){
+  if(gallerySession)return;
   if(!integrated)return;
   var checkpointId="ray_cp_"+Date.now()+"_"+Math.random().toString(36).slice(2,6);
   var ids=Array.from(pendingAchievementIds);
@@ -828,6 +843,7 @@ function toast(title,text,kind){
   setTimeout(function(){el.remove();},3600);
 }
 function awardAchievement(id){
+  if(gallerySession)return;
   if(project.unlockedAchievements.indexOf(id)!==-1)return false;
   var a=ACHIEVEMENTS.find(function(x){return x.id===id;});if(!a)return false;
   project.unlockedAchievements.push(id);project.xp+=Number(a.xp||0);pendingAchievementIds.add(id);
@@ -835,6 +851,7 @@ function awardAchievement(id){
   scheduleSave("achievement");return true;
 }
 function awardObjective(id,xp){
+  if(gallerySession)return;
   if(project.objectiveRewards.indexOf(id)!==-1)return;
   project.objectiveRewards.push(id);project.xp+=Number(xp||0);toast("🧭 Objetivo completado","+"+xp+" XP");scheduleSave("objective");
 }
@@ -1294,8 +1311,10 @@ function choiceLockReason(c,inventory,vars){
 function choiceAllowed(c,inventory,vars){return !choiceLockReason(c,inventory,vars);}
 function startPlay(nodeId){
   var start=getNode(nodeId)||getStart();if(!start)return;
+  if(!gallerySession){
   if(project.status!=="submitted")project.status="testing";
   project.playTests++;ensureBridgeSession();awardAchievement("playtest");scheduleSave("playtest");
+  }
   playState={nodeId:start.id,path:[start.id],inventory:[],vars:clone(project.variables||{}),startedAt:now(),testStart:nodeId||""};$("playModal").classList.add("open");$("playProjectTitle").textContent=project.title||"Rayuela";updateInventoryButton();renderPlayNode();
 }
 function applyNodeEffects(n){
@@ -1333,9 +1352,21 @@ function renderEnding(n){
   project.playthroughs++;var s=computeStats();if(s.endings&&project.discoveredEndings.length>=s.endings)awardAchievement("all_endings_found");
   var et=ENDING_TYPES[n.endingType]||ENDING_TYPES.good;var dots=project.nodes.filter(isEnding).map(function(e){var found=project.discoveredEndings.indexOf(e.id)!==-1;return '<span class="endingDot '+(found?'found':'locked')+'">'+(found?esc(e.title||"Final"):"?????")+'</span>';}).join("");
   $("playContent").innerHTML='<article class="storyCard endingBox"><div class="endingIcon">'+et.icon+'</div><div class="storyEyebrow">Has descubierto</div><h1>'+esc(n.title||et.label)+'</h1><div class="storyText">'+esc(n.text||"Aquí termina este camino.")+'</div><div class="endingCollection">'+dots+'</div><div class="editorActionRow" style="justify-content:center"><button id="replayBtn" class="mainBtn">↻ Volver a jugar</button><button id="closeEndingBtn" class="ghostBtn">Salir</button></div></article>';
+  if(gallerySession)gallery.finished(gallerySession.id,playState.path.slice(),$("playContent").querySelector(".storyCard"));
   $("playEndingLabel").textContent=project.discoveredEndings.length+" de "+s.endings+" finales descubiertos";$("replayBtn").onclick=function(){startPlay();};$("closeEndingBtn").onclick=closePlay;
 }
-function closePlay(){closeInventory();$("playModal").classList.remove("open");playState=null;renderAll();}
+function closePlay(){
+  closeInventory();$("playModal").classList.remove("open");playState=null;
+  if(gallerySession){project=gallerySession.project;selectedNodeId=gallerySession.selectedNodeId;gallerySession=null;currentView="library";gallery.closed();return;}
+  renderAll();
+}
+function openGalleryStory(snapshot,id){
+  if(gallerySession)closePlay();
+  if(currentView==="editor"||autosaveTimer||checkpointTimer){localPersist();sendCheckpoint("before_reading",true);}
+  clearTimeout(autosaveTimer);clearTimeout(checkpointTimer);autosaveTimer=null;checkpointTimer=null;
+  gallerySession={id:id,project:project,selectedNodeId:selectedNodeId};
+  project=normalizeProject(snapshot);currentView="gallery";startPlay();
+}
 
 function openInspector(){
   var issues=validateStory(),s=computeStats(),score=qualityScore(issues,s);$("qualityRing").style.setProperty("--score",score);$("qualityScore").textContent=score;
@@ -1450,6 +1481,7 @@ function bindUi(){
   $("mobileRightBtn").onclick=function(){$("rightPanel").classList.toggle("mobileOpen");$("leftPanel").classList.remove("mobileOpen");};
   window.addEventListener("resize",applyLeftPanelPreference);
   window.addEventListener("keydown",function(e){
+    if(gallerySession){if(e.key==="Escape")closePlay();return;}
     if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();e.shiftKey?redo():undo();}
     if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();redo();}
     if(e.key==="Escape"){closeInventory();cancelModes();["projectModal","inspectorModal","achievementsModal","submitModal","tutorialModal"].forEach(closeModal);}
@@ -1458,11 +1490,13 @@ function bindUi(){
 }
 function bootProject(){
   bindUi();
+  if(!gallery)gallery=window.RayuelaGallery({escape:esc,post:postToHost,play:openGalleryStory,personal:function(show){$("personalLibrary").classList.toggle("hidden",!show);}});
   if(library.projects.length){
     var active=library.projects.find(function(p){return p.id===library.activeProjectId;})||library.projects[0];project=normalizeProject(active);library.activeProjectId=project.id;
   }
   if($("libraryProfileBadge"))$("libraryProfileBadge").textContent=$("profileBadge").textContent||"👤 Autor";
   showLibraryHome();
+  gallery.setAvailable(galleryAvailable,galleryOnly);
   $("footerStatus").textContent=integrated?"Perfil conectado a LenguArcade · biblioteca y guardado automático activados":"Modo local · tus historias se guardan en este navegador";
 }
 startBridge();

@@ -1,3 +1,14 @@
+## 2026-10-22 · Galería Rayuela
+
+- Validación realizada en Chromium con host simulado: ocho tarjetas reales, recorrido de una historia del lote, formulario de voto, XP y biblioteca propios intactos, modo local, importación docente y publicación con autores. Comprobados 1366×768, 1440×900, 1920×1080 y 390×844 sin desbordamiento horizontal. La integración con la base de datos viva queda para la aceptación tras despliegue.
+- Ejecutar `node --no-warnings scripts/check-rayuela-gallery.mjs`: importación idempotente, saneado de la instantánea, destinos, final, condiciones/objetos, aislamiento de clase/organización, permisos de profesor, autoría obligatoria, veto al voto propio, lectura previa, modificación de voto sin duplicado, privacidad del listado y retirada. Usa adaptador de datos en memoria y el handler real; no escribe en producción.
+- Ejecutar `node scripts/check-rayuela.mjs`, `node scripts/check-syntax.mjs` y `npm run check`.
+- Prueba de aceptación tras despliegue: profesor → Juegos → Galería de Rayuela → seleccionar clase → importar `Rayuelas_2ESO_importar.json` → asignar autores/parejas → marcar Publicar → Guardar.
+- Entrar como alumno de esa clase, abrir Rayuela → Galería de clase → jugar hasta un final → puntuar los tres criterios. Cambiar la valoración y comprobar que sigue habiendo un solo voto. El autor puede jugar pero no votar.
+- El profesor ve medias, cantidad de votos, lectores y lista de alumnos pendientes. Retirar una publicación debe ocultarla a los alumnos y mantener votos. Reimportar el archivo no debe duplicar historias ni reemplazar contenido votado.
+- Probar otra clase, el acceso cerrado y una sesión caducada. Verificar Mis historias, editor, guardados y XP antes y después de leer otra rayuela.
+- Responsive: 1366×768, 1440×900, 1920×1080 y móvil. La biblioteca/galería conserva su desplazamiento vertical; sin desbordamiento horizontal.
+
 ## 2026-10-22 — Evento cooperativo por apariciones
 
 1. Ejecutar `npm run check`. Incluye calendario de 10/25/60 minutos y 2–6 rondas, simulación de 25 alumnos, aciertos fuera de ventana, pausa, taller cerrado, enfriamiento, duplicados, resultados congelados, recompensas reservadas y aislamiento de Flotas.

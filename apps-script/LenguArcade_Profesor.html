@@ -273,6 +273,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
               </div>
             </div>
             <div class="gameControlQuick">
+              <button type="button" id="openRayuelaGalleryBtn">🧭 Galería de Rayuela</button>
               <button type="button" id="openAllGamesBtn">🔓 Abrir todos</button>
               <button type="button" class="dangerAction" id="closeAllGamesBtn">🔒 Cerrar todos</button>
               <span class="rosterPill" id="gameAccessScopeSummary">Cargando...</span>
@@ -846,6 +847,29 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       }
     }
 
+    function openRayuelaGallery(){
+      const overlay=document.createElement('div');overlay.className='modal open';overlay.style.cssText='display:flex;position:fixed;inset:0;z-index:20000;background:#172033cc;padding:12px';
+      const dialog=document.createElement('div');dialog.style.cssText='display:flex;flex-direction:column;width:100%;height:100%;background:white;border-radius:18px;overflow:hidden';
+      const close=document.createElement('button');close.textContent='Cerrar galería';close.style.cssText='align-self:flex-end;margin:6px 12px';
+      const iframe=document.createElement('iframe'),channel='rayuela_gallery_'+crypto.randomUUID();
+      const url=new URL('https://pablogarciablancov.github.io/lenguarcade/games/rayuela/');url.searchParams.set('lenguarcade','1');url.searchParams.set('channel',channel);
+      iframe.src=url.toString();iframe.title='Galería de Rayuela';iframe.style.cssText='flex:1;border:0;width:100%;min-height:0';
+      async function receive(event){
+        const msg=event.data||{};
+        if(event.source!==iframe.contentWindow||msg.namespace!=='lenguarcade-game'||msg.gameId!=='rayuela'||msg.channel!==channel)return;
+        const send=(type,payload)=>iframe.contentWindow?.postMessage({namespace:'lenguarcade-host',channel,gameId:'rayuela',type,payload},url.origin);
+        if(msg.type==='READY')send('INIT',{galleryAvailable:true,galleryOnly:true,teacherPractice:true,student:{nombre:'Profesor'},save:{schema:'rayuela-library-v1',projects:[]}});
+        if(msg.type==='GALLERY_REQUEST'){
+          const payload=msg.payload||{},requestId=String(payload.requestId||'');
+          if(!requestId||requestId.length>80)return;
+          try{const data=await edge('rayuela-gallery',payload);if(overlay.isConnected)send('GALLERY_REPLY',{requestId,data});}
+          catch(error){if(overlay.isConnected)send('GALLERY_REPLY',{requestId,error:error.code||'gallery_unavailable'});}
+        }
+      }
+      close.onclick=()=>{window.removeEventListener('message',receive);overlay.remove();};window.addEventListener('message',receive);
+      dialog.append(close,iframe);overlay.append(dialog);document.body.append(overlay);
+    }
+
     async function openTeacherPlayerMode(){
       // Open during the click so an embedded Apps Script panel can create the tab.
       const popup=window.open('about:blank','_blank');
@@ -890,6 +914,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       $('studentModalClose').onclick=()=>{$('studentModal').classList.remove('open');currentPlayerDetailId='';currentPlayerDetailFocus='';};
       $('applyPlayerAdjustmentBtn').onclick=applyPlayerAdjustment;
       $('resetPlayerProgressBtn').onclick=resetPlayerProgress;
+      $('openRayuelaGalleryBtn').onclick=openRayuelaGallery;
       $('teacherOnlineBtn').onclick=openTeacherPlayerMode;
       $('teacherPlayerModeBtn').onclick=openTeacherPlayerMode;
       $('teacherPlayerBtn').onclick=()=>{const player=currentTeacher?.teacherPlayer;if(player)openStudentDetail(player.studentId);};

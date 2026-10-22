@@ -1,3 +1,12 @@
+## 2026-10-22 · Rayuela: galería y valoración entre compañeros
+
+- Galería por clase separada de «Mis historias», con modo jugador sin edición ni cambios en el guardado o XP del lector.
+- El profesor abre «Galería de Rayuela» en Juegos, importa un JSON de proyecto o biblioteca (hasta 30 historias / 2 MB), asigna uno o varios autores y publica o retira historias. Reimportar el mismo proyecto en la misma clase conserva la instantánea, los autores y los votos.
+- Tras llegar a un final, el lector valora creatividad, historia/coherencia y decisiones/consecuencias de 1 a 5. Puede corregir su valoración; la clave única por historia y alumno impide duplicar votos.
+- Autoría oculta en las tarjetas del alumno, voto propio bloqueado en servidor, resultados individuales y medias solo para el profesor. Se exige asignar autores antes de publicar.
+- Tres tablas con RLS y sin acceso directo de anon/authenticated; la función `rayuela-gallery` comprueba sesión, organización, pertenencia a clase y acceso al juego. El recorrido completo se valida antes de habilitar el voto.
+- Publicación coordinada pendiente: aplicar la migración propia, desplegar la función y actualizar el Apps Script estable tras fusionar y publicar Pages. No se modifican datos de producción durante la implementación.
+
 ## 2026-10-22 — Apariciones del Devorapalabras, podios y XP extra
 
 - Los nuevos eventos permiten sesiones de 10–60 minutos, 2–6 apariciones, combates de 30–180 s (se ajustan si es necesario para dejar descansos) y un combate final del doble de duración y mayor resistencia. El ajuste inicial de 25 minutos incluye apariciones en 3:00, 9:00, 15:00 y 21:00. El reloj sigue avanzando al pausar ataques y el evento caduca a medianoche en Madrid.
