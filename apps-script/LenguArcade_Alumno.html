@@ -4243,24 +4243,59 @@ body.light .rankCard,body.light .studentHistoryItem,body.light .generalAchieveme
 .laStudentBoss{position:relative;z-index:3;padding:5px 16px;text-align:center;font-size:12px;font-weight:850;letter-spacing:.02em;color:#f6eaff;background:linear-gradient(90deg,#382151,#6841a0,#382151);border-top:1px solid #f4b7ff44;border-bottom:1px solid #f4b7ff44;box-shadow:inset 0 0 18px #130b36}
 .laStudentBoss.hidden{display:none!important}
 </style>
+<div id="studentBossPodium" class="laStudentBossPodium hidden" role="dialog" aria-modal="true" aria-label="Podio del combate" tabindex="-1"><div class="laStudentBossResults"><button type="button" id="studentBossDismiss">Continuar jugando ✕</button><h2 id="studentBossPodiumTitle"></h2><div id="studentBossPodiumRows"></div><p id="studentBossOwnResult"></p></div></div>
+<style>
+.laStudentBossPodium{position:fixed;inset:0;z-index:3000;display:grid;place-items:center;background:#0b0715df;padding:20px;box-sizing:border-box}.laStudentBossPodium.hidden{display:none}.laStudentBossResults{width:min(680px,100%);max-height:90vh;overflow:auto;padding:24px;border:1px solid #a27fcd;border-radius:24px;background:radial-gradient(ellipse at top,#49315d,#161126);color:#fff;text-align:center;box-sizing:border-box}.laStudentBossResults h2{color:#ffe6a6;font-size:clamp(20px,3vw,32px)}#studentBossDismiss{display:block;margin-left:auto;padding:8px 14px;background:#40344f;border:1px solid #9e80bb;border-radius:10px;color:#fff;cursor:pointer}#studentBossPodiumRows{display:flex;align-items:flex-end;gap:10px;margin-top:20px}.laStudentBossWinner{display:flex;flex:1;flex-direction:column;min-width:0;gap:8px;padding:16px 8px;border:1px solid #ac97c9;border-radius:16px;background:#251e38}.laStudentBossWinner.first{padding-top:36px;border-color:#ffd16d;background:#4b3a34}.laStudentBossWinner span{font-size:32px}.laStudentBossWinner strong{overflow-wrap:anywhere}.laStudentBossWinner small{color:#ddcee9}.laStudentBossWinner b{color:#ffe49e}.laStudentBoss img{width:46px;height:38px;object-fit:contain;vertical-align:middle;image-rendering:pixelated}.laStudentBoss button{font:inherit;background:#ffffff20;color:inherit;border:1px solid #fff5;border-radius:8px;padding:4px 9px;margin-left:8px;cursor:pointer}
+@media(max-width:500px){.laStudentBossResults{padding:14px}.laStudentBossWinner{font-size:12px;gap:5px}.laStudentBossWinner.first{padding-top:25px}}
+</style>
 <script id="la-student-boss-status">
 (function(){
-  var checking=false;
+  var checking=false,seen={},lastEvent=null,popupTimer=null,previousFocus=null;
+  function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function clock(seconds){var n=Math.max(0,Math.ceil(Number(seconds)||0));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
+  function close(){var popup=document.getElementById('studentBossPodium');if(popup.classList.contains('hidden'))return;popup.classList.add('hidden');if(popupTimer)clearTimeout(popupTimer);popupTimer=null;var focus=previousFocus;previousFocus=null;if(focus&&focus.focus)focus.focus();}
+  function podium(b,force){
+    var e=b.encounter;if(!e)return;
+    var r=e.latest,final=e.finished;
+    if(!final&&(!r||!r.victory||(!force&&e.phase==='combat')))return;
+    var key=b.id+':'+(final?'final':r.index),stored=false;
+    try{stored=sessionStorage.getItem('bossPodium:'+key)==='seen';}catch(ignore){}
+    if(!force&&(seen[key]||stored))return;
+    var rows=final?e.leaderboard:r.leaderboard;if(!rows.length)return;
+    seen[key]=true;try{sessionStorage.setItem('bossPodium:'+key,'seen');}catch(ignore){}
+    var reward=final?(b.outcome==='victory'?e.config.finalRewards:[0,0,0]):e.config.roundRewards;
+    document.getElementById('studentBossPodiumTitle').textContent=final?'🏆 Podio final · Daño total':'¡Monstruo derrotado! · Aparición '+(r.index+1);
+    document.getElementById('studentBossPodiumRows').innerHTML=[1,0,2].map(function(i){var p=rows[i];return p?'<article class="laStudentBossWinner '+(i===0?'first':'')+'"><span>'+['🥇','🥈','🥉'][i]+'</span><strong>'+esc(p.name)+'</strong><small>'+p.damage+' de daño</small><b>+'+Number(reward[i]||0)+' XP</b></article>':'';}).join('');
+    var own=b.ownContribution,award=e.rewards.filter(function(x){return own&&x.profileId===own.profileId;}).reduce(function(sum,x){return sum+x.xp;},0);
+    document.getElementById('studentBossOwnResult').textContent=own?'Tu aportación total: '+own.damage+' de daño · Puesto '+own.position+' · +'+award+' XP extra.':'Cada acierto ayuda a la clase. ¡Seguimos juntos!';
+    previousFocus=document.activeElement;document.getElementById('studentBossPodium').classList.remove('hidden');document.getElementById('studentBossDismiss').focus();
+    if(popupTimer)clearTimeout(popupTimer);if(!final)popupTimer=setTimeout(close,12000);
+  }
   async function refresh(){
-    if(checking||!token||!document.getElementById('gameRunner')?.classList.contains('open'))return;
-    var notice=document.getElementById('studentClassBossNotice');if(!notice)return;
+    var notice=document.getElementById('studentClassBossNotice');if(checking||!token||!notice||document.hidden)return;
     checking=true;
     try{
-      var result=await callSupabaseFunction('class-boss',{action:'studentStatus'},token);
-      if(result&&result.event){
-        notice.textContent='⚔️ El Devorapalabras · ¡Estás ayudando a toda la clase! Tus progresos confirmados cuentan para el combate.';
+      var result=await callSupabaseFunction('class-boss',{action:'studentStatus'},token),b=result&&result.event;
+      lastEvent=b;
+      if(b){
+        var e=b.encounter;
+        if(!e)notice.textContent='⚔️ El Devorapalabras · Tus progresos confirmados cuentan para el combate.';
+        else{
+          var active=e.phase==='combat',label=active?(e.current.final?'⚔️ COMBATE FINAL':'⚔️ Aparición '+(e.current.index+1)+'/'+e.rounds.length):e.finished?'🏆 Evento terminado':e.phase==='paused'?'⏸ Ataques en pausa':(e.secondsToNext<=15?'⚠️ El monstruo se acerca · ':'📜 Próximo combate en ')+clock(e.secondsToNext);
+          var ratio=b.totalHealth?b.health/b.totalHealth:1,phase=ratio>.7?'healthy':ratio>.35?'cracked':ratio>.1?'torn':'critical';
+          notice.innerHTML=(active?'<img alt="" src="https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/4c1509da99e34cc3cdf4dc2de1179cc4e017ca24/assets/events/devorapalabras/frames-v2/'+phase+'-00.webp">':'')+esc(label)+(active?' · '+b.health+'/'+b.totalHealth+' de vida · '+clock(e.combatSeconds):' · Sigue jugando')+(e.latest||e.finished?'<button type="button" id="studentBossViewPodium">Ver podio</button>':'');
+          var view=document.getElementById('studentBossViewPodium');if(view)view.onclick=function(){podium(lastEvent,true);};
+          podium(b,false);
+        }
         notice.classList.remove('hidden');
-      }else notice.classList.add('hidden');
+      }else{notice.classList.add('hidden');close();}
     }catch(e){notice.classList.add('hidden');}
     finally{checking=false;}
   }
+  document.getElementById('studentBossDismiss').onclick=close;
+  document.getElementById('studentBossPodium').addEventListener('keydown',function(e){if(e.key==='Escape'){close();return;}if(e.key==='Tab'){e.preventDefault();document.getElementById('studentBossDismiss').focus();}});
   window.refreshStudentClassBossNotice=refresh;
-  setInterval(refresh,16000);
+  setInterval(refresh,8000);
 })();
 </script>
 </body>

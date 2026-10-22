@@ -35,7 +35,7 @@ export function workshopProgress(session, events) {
   let xp=0, completedAt=null, awardRun=null;
   const seen=new Set();
   for (const event of [...events].sort((a,b)=>Date.parse(a.occurred_at)-Date.parse(b.occurred_at))) {
-    if (event.event_type === 'teacher_adjustment') continue;
+    if (['teacher_adjustment','class_boss_reward'].includes(event.event_type)) continue;
     const id=event.id || event.result_id;
     if(id && seen.has(id))continue;
     if(id)seen.add(id);

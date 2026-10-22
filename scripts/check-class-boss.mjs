@@ -76,3 +76,6 @@ assert.equal(battleClock(nightBattle,Date.parse('2026-10-18T22:00:00.000Z')),0);
 console.log('Class boss: Maniacgrafía, 25-minute hard deadline, same-day expiry, cooldown, 30 pupils, pause and closed workshop OK.');
 
 await import('./check-class-boss-balance.mjs');
+
+await import('./check-class-boss-encounters.mjs');
+await import('./check-class-boss-security.mjs');
