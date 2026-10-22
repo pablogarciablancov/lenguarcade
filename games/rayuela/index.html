@@ -188,7 +188,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 
 </style>
 <link rel="stylesheet" href="./readability.css?v=20260930">
-<link rel="stylesheet" href="./gallery.css?v=1">
+<link rel="stylesheet" href="./gallery.css?v=2">
 </head>
 <body>
 <div id="libraryHome" class="libraryHome">
@@ -489,7 +489,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 
 <div id="toastStack" class="toastStack" aria-live="polite"></div>
 
-<script src="./gallery.js?v=1"></script>
+<script src="./gallery.js?v=2"></script>
 <script>
 (function(){
 "use strict";
@@ -1342,9 +1342,10 @@ function renderPlayNode(){
     if(reason)return '<button class="storyChoice locked" type="button" disabled><span>🔒 '+esc(c.text||"Continuar")+'</span><small>'+esc(reason)+'</small></button>';
     return '<button class="storyChoice" data-choice="'+esc(c.id)+'">'+esc(c.text||"Continuar")+'</button>';
   }).join("");
-  if(!valid.length)choices='<div class="muted" style="margin-top:20px">Este camino se ha quedado sin salida. Vuelve al editor y revisa sus conexiones.</div>';
+  if(!valid.length)choices=gallerySession?'<div class="muted" style="margin-top:20px">Esta parte está pendiente de escribir. Prueba otro camino para descubrir un final.</div><button class="mainBtn" id="pendingRestart">Volver al inicio</button>':'<div class="muted" style="margin-top:20px">Este camino se ha quedado sin salida. Vuelve al editor y revisa sus conexiones.</div>';
   else if(valid.every(function(c){return !!choiceLockReason(c,playState.inventory,playState.vars);}))choices+='<div class="lockedChoicesHint">🔐 Todos los caminos están bloqueados ahora. Busca otra ruta para conseguir lo que necesitas.</div>';
   $("playContent").innerHTML='<article class="storyCard">'+img+'<div class="storyEyebrow">'+esc(n.chapter||typeDef(n).label)+'</div><h1>'+esc(n.title||"Escena")+'</h1><div class="storyText">'+esc(n.text||"Esta escena todavía no tiene texto.")+'</div><div class="storyChoices">'+choices+'</div></article>';
+  var pendingRestart=$("pendingRestart");if(pendingRestart)pendingRestart.onclick=function(){startPlay();};
   $("playContent").querySelectorAll("[data-choice]").forEach(function(btn){btn.onclick=function(){var c=getChoice(n,btn.dataset.choice);if(!c)return;var reason=choiceLockReason(c,playState.inventory,playState.vars);if(reason){toast("🔒 Camino bloqueado",reason);return;}if(String(c.text||"").trim().toLowerCase()==="no pulses aquí"){awardAchievement("secret_phrase");toast("💥 Lo has pulsado","Tiza te mira con profunda decepción.","achievement");}playState.nodeId=c.targetId;playState.path.push(c.targetId);renderPlayNode();};});
 }
 function renderEnding(n){
