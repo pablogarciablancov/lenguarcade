@@ -3226,7 +3226,7 @@ body.light .teacherMonitorTable th{background:#fff}
   if(typeof document.addEventListener==='function')document.addEventListener('visibilitychange',function(){if(document.hidden)stopBossSprite();else syncBossSprite(spritePhase);});
   var encounterSettings={sessionMinutes:25,appearanceCount:4,combatSeconds:120,roundRewards:[150,100,75],finalRewards:[300,200,150],participationXp:25},fleetTarget=400;
   function safeBoss(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-  function podiumMarkup(rows,rewards){return '<div class="laBossPodium">'+[1,0,2].map(function(index){var p=rows[index];return p?'<article class="laBossWinner place'+(index+1)+'"><span>'+['🥇','🥈','🥉'][index]+'</span><strong>'+safeBoss(p.name)+'</strong><small>'+p.damage+' de daño</small><b>+'+Number(rewards[index]||0)+' XP</b><em>'+(index+1)+'º</em></article>':'';}).join('')+'</div>';}
+  function podiumMarkup(rows,rewards){return '<div class="laBossPodium">'+[1,0,2].map(function(index){var p=rows[index];return p?'<article class="laBossWinner place'+(index+1)+'"><span>'+['🥇','🥈','🥉'][index]+'</span><strong>'+safeBoss(p.name)+'</strong><small>'+p.hits+' ataques · '+p.damage+' de daño</small><b>+'+Number(rewards[index]||0)+' XP</b><em>'+(index+1)+'º</em></article>':'';}).join('')+'</div>';}
   function bossWorkshop(){return window.laBossWorkshopBridge||null;}
   function getClass(){var bridge=bossWorkshop();return bridge?bridge.selectedClass():'';}
   function fmt(seconds){var n=Math.max(0,Math.ceil(Number(seconds)||0));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
@@ -3326,7 +3326,7 @@ body.light .teacherMonitorTable th{background:#fff}
       monster.style.visibility=active?'visible':'hidden';if(!active)stopBossSprite();
       $('classBossClock').textContent=active?fmt(enc.combatSeconds):'';
       $('classBossPhase').textContent=active?(enc.current.final?'⚔️ COMBATE FINAL':'Aparición '+(enc.current.index+1)+' de '+enc.rounds.length):enc.finished?'LA DEFENSA DEL GRAN ARCHIVO':enc.phase==='paused'?'ATAQUES EN PAUSA':'EL MONSTRUO VOLVERÁ';
-      $('classBossLegend').textContent=active?'¡Tus aciertos causan daño! Sesión: '+fmt(b.remainingSeconds)+' restantes.':enc.finished?'Daño total de todas las apariciones.':enc.phase==='paused'?'El reloj de la sesión sigue avanzando.':'Sigue jugando. El Devorapalabras puede volver en cualquier momento.';
+      $('classBossLegend').textContent=active?'Cada acierto = 1 ataque. Sesión: '+fmt(b.remainingSeconds)+' restantes.':enc.finished?'Daño total de todas las apariciones.':enc.phase==='paused'?'El reloj de la sesión sigue avanzando.':'Sigue jugando. El Devorapalabras puede volver en cualquier momento.';
       var rows=enc.finished?enc.leaderboard:latest&&latest.victory?latest.leaderboard:null;
       var cfg=enc.config,won=enc.finished?b.outcome==='victory':latest&&latest.victory;
       if(!active&&rows&&rows.length){

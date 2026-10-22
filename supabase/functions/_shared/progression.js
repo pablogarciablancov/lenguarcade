@@ -253,6 +253,14 @@ export function snapshotProgress(gameId,save,previous,old={},raw={},previousRaw=
     const adventureProgress=adventureCompleted?100:Math.max(0,(world-1)/11*100);
     const metrics=metricsOf(raw);
     raw={...raw,metrics:{...metrics,percentage:Math.max(n(metrics.percentage),wordProgress,adventureProgress)}};
+    if(stats.totalWords!==undefined||summary.totalWords!==undefined){
+      const priorWords=Math.max(n(previous.stats?.totalWords),n(previous.summary?.totalWords));
+      const cap=context?.checkpoint===true?24:60;
+      const dc=Math.min(cap,Math.max(0,words-priorWords));
+      const de=capDelta(metrics.errors,metricsOf(previousRaw).errors,cap);
+      const featherGain=Math.min(context?.checkpoint===true?8:16,Math.max(0,Math.floor((n(old.successes)+dc)/8)-Math.floor(n(old.successes)/8)));
+      return baseResult(old,dc+de,dc,de,Math.max(n(metrics.percentage),wordProgress,adventureProgress),Math.min(context?.checkpoint===true?150:320,dc*6),featherGain);
+    }
   }
 
   let attempts=0,correct=0,score=0,pct=0,priorAttempts=0,priorCorrect=0,priorScore=0;

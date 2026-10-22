@@ -128,3 +128,9 @@ const fallback=legacyContext.calculateAuthoritativeProgress_('sopa_de_tinta',{ch
 for(const field of ['xp','attempts','successes','errors','percentage','accuracy'])assert.equal(fallback[field],sopa[field],'Paridad Apps Script/Supabase: '+field);
 assert.equal(fallback.plumas,sopa.feathers);
 console.log('XP integrity checks: OK');
+
+const maniacBefore={stats:{totalWords:100}};
+const maniacAfter={stats:{totalWords:103}};
+const liveManiac=snapshotProgress('maniacgrafia',maniacAfter,maniacBefore,old,{metrics:{correct:3,errors:0}},{metrics:{correct:20,errors:0}},{checkpoint:true});
+assert.equal(liveManiac.successes,Number(old.successes||0)+3,'Lifetime words count across session reset');
+assert.equal(snapshotProgress('maniacgrafia',maniacAfter,maniacAfter,old,{metrics:{correct:99}},genericPrior,{checkpoint:true}).successes,Number(old.successes||0),'Shop/save without new words gives no correct answers');

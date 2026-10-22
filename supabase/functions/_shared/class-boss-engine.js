@@ -93,7 +93,7 @@ export function countBossDamage(events,battle,workshopRuns,nowMs=Date.now()) {
 export function encounterConfig(input={}) {
   const integer=(v,f,min,max)=>Number.isFinite(Number(v))?Math.max(min,Math.min(max,Math.round(Number(v)))):f;
   const reward=(values,defaults)=>defaults.map((n,i)=>integer(values?.[i],n,0,1000));
-  return {version:1,sessionMinutes:integer(input.sessionMinutes,25,10,60),
+  return {version:input.version===1?1:2,sessionMinutes:integer(input.sessionMinutes,25,10,60),
     appearanceCount:integer(input.appearanceCount,4,2,6),combatSeconds:integer(input.combatSeconds,120,30,180),
     roundRewards:reward(input.roundRewards,[150,100,75]),participationXp:integer(input.participationXp,25,0,250),
     finalRewards:reward(input.finalRewards,[300,200,150])};
@@ -106,11 +106,11 @@ export function encounterSchedule(config,studentCount) {
     const final=i===n-1,length=final?finalSeconds:seconds;
     const from=final?duration-finalSeconds:Math.round(duration*(n===2?.12:.12+i*.48/(n-2)));
     const roster=Math.max(12,Math.min(100,Number(studentCount)||12));
-    return {index:i,final,from,to:from+length,health:Math.max(8,Math.ceil(roster*(length/30)*(final?.75:.65)))};
+    return {index:i,final,from,to:from+length,health:Math.max(8,Math.ceil(roster*(length/30)*(final?.75:.65)*(c.version>=2?3:1)))};
   });
 }
-function ranked(contributions) {
-  return [...contributions.values()].sort((a,b)=>b.damage-a.damage||a.firstAt-b.firstAt||a.profileId.localeCompare(b.profileId))
+function ranked(contributions,byHits=false) {
+  return [...contributions.values()].sort((a,b)=>(byHits?b.hits-a.hits:b.damage-a.damage)||a.firstAt-b.firstAt||a.profileId.localeCompare(b.profileId))
     .map((p,i)=>({...p,position:i+1}));
 }
 export function countEncounter(events,battle,runs,nowMs=Date.now()) {
@@ -118,6 +118,16 @@ export function countEncounter(events,battle,runs,nowMs=Date.now()) {
   const end=battleDeadlineMs(battle),until=Math.min(nowMs,end);
   const c=encounterConfig(battle.encounter_config);
   const sorted=[...events].sort((a,b)=>ms(a.occurred_at)-ms(b.occurred_at)||String(a.id).localeCompare(String(b.id)));
+  // Cumulative server ranges deduplicate concurrent saves, retries and XP-capped answers.
+  const watermarks=new Map(),fresh=new Map(),learningIds=new Set();
+  for(const e of sorted){
+    if(!e.id||learningIds.has(e.id))continue;learningIds.add(e.id);
+    const learning=e.details?.learning,key=String(e.profile_id)+'/'+e.game_id;
+    if(learning?.version!==1||!Number.isSafeInteger(learning.correctBefore)||!Number.isSafeInteger(learning.correctAfter)||learning.correctBefore<0||learning.correctAfter<learning.correctBefore)continue;
+    const previous=watermarks.get(key)??learning.correctBefore;
+    fresh.set(e,Math.max(0,learning.correctAfter-Math.max(previous,learning.correctBefore)));
+    watermarks.set(key,Math.max(previous,learning.correctAfter));
+  }
   const rounds=(battle.encounter_rounds||[]).map(round=>{
     const saved=(battle.round_results||[]).find(r=>r.index===round.index);
     if(saved)return saved;
@@ -128,24 +138,25 @@ export function countEncounter(events,battle,runs,nowMs=Date.now()) {
       const at=ms(e.occurred_at),id=String(e.id||''),student=String(e.profile_id||'');
       if(damage>=round.health)break;
       if(!id||seen.has(id)||!student||!Number.isFinite(at)||at<from||at>=to||at>until||
-        !(battle.game_ids||[]).includes(e.game_id)||['teacher_adjustment','class_boss_reward'].includes(e.event_type)||Number(e.xp_delta)<=0||
-        !windows.some(w=>at>=ms(w.from)&&at<=ms(w.to))||at-(last.get(student)??-Infinity)<30000)continue;
+        !(battle.game_ids||[]).includes(e.game_id)||['teacher_adjustment','class_boss_reward'].includes(e.event_type)||(c.version>=2?!(fresh.get(e)>0):Number(e.xp_delta)<=0)||
+        !windows.some(w=>at>=ms(w.from)&&at<=ms(w.to))||(c.version<2&&at-(last.get(student)??-Infinity)<30000))continue;
       seen.add(id);last.set(student,at);
       const bucket=Math.floor((at-from)/90000),games=buckets.get(bucket)||new Set();
       const wasCombo=BOSS_GAMES.every(g=>games.has(g));games.add(e.game_id);buckets.set(bucket,games);
       const combo=!wasCombo&&BOSS_GAMES.every(g=>games.has(g));
-      const dealt=Math.min(round.health-damage,combo?5:1);
-      damage+=dealt;hits++;if(combo)combos++;
-      const p=players.get(student)||{profileId:student,damage:0,hits:0,firstAt:at};p.damage+=dealt;p.hits++;players.set(student,p);
+      const attacks=c.version>=2?Math.min(fresh.get(e),round.health-damage):1;
+      const dealt=Math.min(round.health-damage,attacks+(combo?4:0));
+      damage+=dealt;hits+=attacks;if(combo)combos++;
+      const p=players.get(student)||{profileId:student,damage:0,hits:0,firstAt:at};p.damage+=dealt;p.hits+=attacks;players.set(student,p);
       if(damage>=round.health)defeatedAt=new Date(at).toISOString();
     }
     const complete=!!defeatedAt||until>=to||battle.state==='finished';
     return {...round,damage,hits,combos,healthRemaining:Math.max(0,round.health-damage),defeatedAt,
-      complete,victory:!!defeatedAt,leaderboard:ranked(players)};
+      complete,victory:!!defeatedAt,leaderboard:ranked(players,c.version>=2)};
   });
   const all=new Map();
   for(const r of rounds)for(const p of r.leaderboard){const total=all.get(p.profileId)||{profileId:p.profileId,damage:0,hits:0,firstAt:p.firstAt};total.damage+=p.damage;total.hits+=p.hits;total.firstAt=Math.min(total.firstAt,p.firstAt);all.set(p.profileId,total);}
-  const leaderboard=ranked(all),elapsed=(nowMs-start)/1000;
+  const leaderboard=ranked(all,c.version>=2),elapsed=(nowMs-start)/1000;
   const current=rounds.find(r=>!r.complete&&elapsed>=r.from&&elapsed<r.to)||null;
   const next=rounds.find(r=>!r.complete&&r.from>elapsed)||null;
   const finished=battle.state==='finished'||nowMs>=end||rounds.every(r=>r.complete);

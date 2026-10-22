@@ -23,11 +23,13 @@ window.addEventListener('message',e=>{const m=e.data||{};if(m.namespace!=='lengu
  if(m.type==='INIT'){hostWindow=e.source;initialize(m.payload||{});}
  if(m.type==='REQUEST_CHECKPOINT')checkpoint('host_request');
  if(m.type==='REQUEST_EXIT')saveAndExit();
- if(m.type==='CHECKPOINT_CONFIRMED'){if(pending?.id===m.payload?.checkpointId){signature=pending.sig;pending=null;}if(exitId===m.payload?.checkpointId)closeReady(true);}
+ if(m.type==='CHECKPOINT_CONFIRMED'){if(pending?.id===m.payload?.checkpointId){signature=pending.sig;pending=null;checkpoint();}if(exitId===m.payload?.checkpointId)closeReady(true);}
  if(m.type==='CHECKPOINT_FAILED'){pending=null;signature='';if(exitId===m.payload?.checkpointId)closeReady(false);}
  if(m.type==='SAVE_FAILED')lastResult='';
 });
 try{const b=JSON.parse(window.name||'null');if(embedded&&b?.namespace==='lenguarcade-bootstrap'&&b.channel===channel&&b.gameId==='lexoma'){window.name='';initialize(b.payload||{});}}catch{}
+let changeTimer;
+window.addEventListener('lexoma:change',()=>{clearTimeout(changeTimer);changeTimer=setTimeout(()=>checkpoint(),500);});
 window.addEventListener('pagehide',()=>checkpoint('pagehide'));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')checkpoint('visibility_hidden');});
 setInterval(()=>{if(embedded&&!initialized)post('READY',{version:1});else if(embedded){checkpoint();result();}},12000);

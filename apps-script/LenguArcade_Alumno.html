@@ -4265,9 +4265,9 @@ body.light .rankCard,body.light .studentHistoryItem,body.light .generalAchieveme
     seen[key]=true;try{sessionStorage.setItem('bossPodium:'+key,'seen');}catch(ignore){}
     var reward=final?(b.outcome==='victory'?e.config.finalRewards:[0,0,0]):e.config.roundRewards;
     document.getElementById('studentBossPodiumTitle').textContent=final?'🏆 Podio final · Daño total':'¡Monstruo derrotado! · Aparición '+(r.index+1);
-    document.getElementById('studentBossPodiumRows').innerHTML=[1,0,2].map(function(i){var p=rows[i];return p?'<article class="laStudentBossWinner '+(i===0?'first':'')+'"><span>'+['🥇','🥈','🥉'][i]+'</span><strong>'+esc(p.name)+'</strong><small>'+p.damage+' de daño</small><b>+'+Number(reward[i]||0)+' XP</b></article>':'';}).join('');
+    document.getElementById('studentBossPodiumRows').innerHTML=[1,0,2].map(function(i){var p=rows[i];return p?'<article class="laStudentBossWinner '+(i===0?'first':'')+'"><span>'+['🥇','🥈','🥉'][i]+'</span><strong>'+esc(p.name)+'</strong><small>'+p.hits+' ataques · '+p.damage+' de daño</small><b>+'+Number(reward[i]||0)+' XP</b></article>':'';}).join('');
     var own=b.ownContribution,award=e.rewards.filter(function(x){return own&&x.profileId===own.profileId;}).reduce(function(sum,x){return sum+x.xp;},0);
-    document.getElementById('studentBossOwnResult').textContent=own?'Tu aportación total: '+own.damage+' de daño · Puesto '+own.position+' · +'+award+' XP extra.':'Cada acierto ayuda a la clase. ¡Seguimos juntos!';
+    document.getElementById('studentBossOwnResult').textContent=own?'Tu aportación total: '+own.hits+' ataques · '+own.damage+' de daño · Puesto '+own.position+' · +'+award+' XP extra.':'Cada acierto confirmado = 1 ataque. ¡Seguimos juntos!';
     previousFocus=document.activeElement;document.getElementById('studentBossPodium').classList.remove('hidden');document.getElementById('studentBossDismiss').focus();
     if(popupTimer)clearTimeout(popupTimer);if(!final)popupTimer=setTimeout(close,12000);
   }
