@@ -139,6 +139,9 @@ Deno.serve(async (request) => {
   try {
     const { admin, profileId } = await requireProfileSession(request);
     const body = await request.json().catch(() => ({}));
+    if (["teacher_adjustment","class_boss_reward"].includes(String(body.eventType || "").trim().toLowerCase())) {
+      return jsonResponse({ok:false,error:"reserved_event_type"},400);
+    }
     const gameId = String(body.gameId || "").trim().slice(0, 80);
     const resultId = String(body.resultId || "").trim().slice(0, 180);
     if (!gameId) return jsonResponse({ ok:false, error:"missing_game_id" }, 400);

@@ -596,6 +596,7 @@ html.la-teacher-direct-fallback #loginCard{display:block!important}
       $('studentDetailStats').innerHTML=[
         ['XP',general.xp||0],
         ['Ajuste XP',signedValue(general.manualXp||0,'')],
+        ['XP de eventos',Number(general.bonusXp||0)],
         ['Nivel',general.level||1],
         ['Plumas',general.plumas||0],
         ['Sesiones',general.sessions||0],
@@ -3098,11 +3099,14 @@ body.light .teacherMonitorTable th{background:#fff}
 @media(max-height:720px){.laBossMain{padding:4px 3vw}.laBossTitle{font-size:25px}.laBossLegend{font-size:13px;margin-bottom:4px}.laBossMonster{max-height:64vh}.laBossStats{margin-top:6px}.laBossFoot{padding:8px 20px}}
 @media(max-width:700px){.laBossPanelHead{display:block}.laBossTop,.laBossFoot{padding:8px 12px}.laBossTop strong{font-size:18px}.laBossTop small{font-size:9px}.laBossStats{gap:12px}.laBossMonster{width:90vw}.laBossFoot{flex-wrap:wrap}.laBossFoot>span{font-size:12px}.laBossFoot .laBossActions{margin-top:0}}
 </style>
+<style>
+.laBossSettings{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px}.laBossSettings label,.laBossRewardSettings label{display:grid;gap:6px;font-size:12px;color:#d6c8ee}.laBossSettings input,.laBossRewardSettings input{box-sizing:border-box;width:100%;padding:9px;border-radius:9px;border:1px solid #8864bb66;background:#171328;color:#fff;font:inherit;font-size:15px}.laBossRewardSettings{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px}.laBossRewardSettings fieldset{display:flex;flex:1;gap:10px;border:1px solid #8864bb66;border-radius:12px;padding:12px;min-width:220px}.laBossRewardSettings legend{font-size:12px;color:#dfc8ff}.laBossRewardSettings label{flex:1;min-width:0}.laBossConfigHint{font-size:12px;color:#beacd4}.laBossPodiumHost{position:absolute;inset:8% 4% 12%;z-index:4;pointer-events:none;display:flex;flex-direction:column;justify-content:center;text-align:center}.laBossPodiumHost:empty{display:none}.laBossPodiumHost h2{color:#ffe59e;font-size:clamp(20px,3.8vh,38px)}.laBossPodium{display:flex;justify-content:center;align-items:flex-end;gap:12px;margin:12px auto;width:min(700px,100%)}.laBossWinner{display:flex;flex:1;min-width:0;flex-direction:column;gap:8px;padding:18px 10px;border:1px solid #bba8da;background:linear-gradient(#352c4d,#171326);border-radius:18px 18px 6px 6px;box-shadow:0 12px 30px #0005}.laBossWinner.place1{padding-top:35px;border-color:#ffd66a;background:linear-gradient(#57462a,#231c30)}.laBossWinner>span{font-size:35px}.laBossWinner strong{overflow-wrap:anywhere;color:#fff}.laBossWinner small{color:#daccec}.laBossWinner b{color:#ffe59e}.laBossWinner em{font-style:normal;font-size:28px;color:#daccec}.laBossPodiumHost p{color:#e1d5ed}@media(max-height:700px){.laBossWinner{padding:8px;gap:4px}.laBossWinner.place1{padding-top:20px}.laBossPodiumHost h2{margin:5px}.laBossWinner>span{font-size:25px}}
+</style>
 <div id="classBossStage" class="laBossCurtain" role="dialog" aria-label="Batalla cooperativa de clase" aria-modal="true">
   <header class="laBossTop"><div><small>LENGUARCADE · EVENTO COOPERATIVO</small><strong>La defensa del Gran Archivo</strong></div><button type="button" id="classBossClose">✕ Volver al profesor</button></header>
   <main class="laBossMain">
     <h1 class="laBossTitle">EL DEVORAPALABRAS</h1>
-    <p class="laBossLegend" id="classBossLegend">Un solo día · 25 minutos como máximo. ¡Salvad el Gran Archivo!</p>
+    <p class="laBossLegend" id="classBossLegend">Varias apariciones · Un gran combate final. ¡Salvad el Gran Archivo!</p>
     <div class="laBossPhase" id="classBossPhase" aria-live="polite">Fase I · Guardián de tinta</div>
     <div class="laBossMonster" id="classBossMonster" data-phase="1" aria-hidden="true">
       <div class="laBossAura"></div>
@@ -3112,6 +3116,7 @@ body.light .teacherMonitorTable th{background:#fff}
     </div>
     <div class="laBossBar" aria-label="Vida del jefe"><div class="laBossBarFill" id="classBossHealthBar"></div></div>
     <div class="laBossStats"><span id="classBossHealth">—</span><span id="classBossClock">25:00</span><span id="classBossCombos">Combos: 0</span></div>
+    <div id="classBossPodiumHost" class="laBossPodiumHost" aria-live="polite"></div>
     <div id="classBossOutcome" class="laBossOutcome" aria-live="polite"><h2 id="classBossOutcomeTitle">¡VICTORIA!</h2><p id="classBossOutcomeText">Habéis salvado el Gran Archivo.</p></div>
   </main>
   <footer class="laBossFoot"><span id="classBossStageStatus">Esperando los progresos confirmados de la clase.</span><div class="laBossActions"><button type="button" class="laBossPause" id="classBossPause">Pausar</button><button type="button" class="laBossEnd" id="classBossFinish">Finalizar</button></div></footer>
@@ -3194,6 +3199,9 @@ body.light .teacherMonitorTable th{background:#fff}
   }
   if(spriteReduced&&typeof spriteReduced.addEventListener==='function')spriteReduced.addEventListener('change',function(){stopBossSprite();syncBossSprite(spritePhase);});
   if(typeof document.addEventListener==='function')document.addEventListener('visibilitychange',function(){if(document.hidden)stopBossSprite();else syncBossSprite(spritePhase);});
+  var encounterSettings={sessionMinutes:25,appearanceCount:4,combatSeconds:120,roundRewards:[150,100,75],finalRewards:[300,200,150],participationXp:25},fleetTarget=400;
+  function safeBoss(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function podiumMarkup(rows,rewards){return '<div class="laBossPodium">'+[1,0,2].map(function(index){var p=rows[index];return p?'<article class="laBossWinner place'+(index+1)+'"><span>'+['🥇','🥈','🥉'][index]+'</span><strong>'+safeBoss(p.name)+'</strong><small>'+p.damage+' de daño</small><b>+'+Number(rewards[index]||0)+' XP</b><em>'+(index+1)+'º</em></article>':'';}).join('')+'</div>';}
   function bossWorkshop(){return window.laBossWorkshopBridge||null;}
   function getClass(){var bridge=bossWorkshop();return bridge?bridge.selectedClass():'';}
   function fmt(seconds){var n=Math.max(0,Math.ceil(Number(seconds)||0));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
@@ -3210,8 +3218,16 @@ body.light .teacherMonitorTable th{background:#fff}
     var root=$('classBossPanel');if(!root)return;
     var bridge=bossWorkshop();var s=bridge?bridge.activeSession():null;
     var gameIds=s&&s.gameIds||[];
-    var ready=!!(s&&s.classroomOpen&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
-    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Toda la clase combate desde Battlegrafía, Forja y Maniacgrafía. Tenéis un máximo de 25 minutos para derrotarlo: cerrar el taller o pausar ataques no detiene el reloj. No se duplican misiones ni XP.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚔️ Iniciar combate':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
+    var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
+    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Varias apariciones, descansos entre combates y un gran enfrentamiento final. Los podios conceden XP extra. Flotas mantiene un único objetivo por alumno y taller.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚔️ Iniciar combate':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
+    var controls='<div class="laBossSettings">';
+    [['sessionMinutes','Sesión · minutos',10,60],['appearanceCount','Apariciones',2,6],['combatSeconds','Combate · segundos',30,180],['participationXp','XP por participar en victoria',0,250]].forEach(function(field){controls+='<label>'+field[1]+'<input type="number" id="bossSetting_'+field[0]+'" min="'+field[2]+'" max="'+field[3]+'" value="'+encounterSettings[field[0]]+'"></label>';});
+    controls+='<label>Objetivo al preparar taller · XP<input type="number" id="bossFleetTarget" min="1" max="5000" value="'+fleetTarget+'"></label></div><div class="laBossRewardSettings">';
+    ['roundRewards','finalRewards'].forEach(function(key){controls+='<fieldset><legend>'+ (key==='roundRewards'?'Podio por victoria · XP':'Podio final · XP')+'</legend>';encounterSettings[key].forEach(function(value,i){controls+='<label>'+['🥇','🥈','🥉'][i]+'<input type="number" id="bossSetting_'+key+i+'" min="0" max="1000" value="'+value+'"></label>';});controls+='</fieldset>';});
+    controls+='</div><p class="laBossConfigHint">La última aparición dura el doble y tiene más vida. Los cambios se aplican a la próxima sesión; pausar ataques no detiene el reloj.</p>';
+    root.innerHTML+=controls;
+    Object.keys(encounterSettings).forEach(function(key){if(Array.isArray(encounterSettings[key]))encounterSettings[key].forEach(function(v,i){$('bossSetting_'+key+i).onchange=function(){encounterSettings[key][i]=Math.max(0,Math.min(1000,Number(this.value)||0));};});else $('bossSetting_'+key).onchange=function(){encounterSettings[key]=Number(this.value);};});
+    $('bossFleetTarget').onchange=function(){fleetTarget=Math.max(1,Math.min(5000,Number(this.value)||400));};
     $('classBossPrepare').onclick=function(){ready?act('start'):prepare();};
     $('classBossProject').onclick=function(){openStage();};
     refresh();
@@ -3222,7 +3238,7 @@ body.light .teacherMonitorTable th{background:#fff}
     if(s&&s.classroomOpen&&!window.confirm('Se cerrará la sesión de taller que está abierta para preparar el evento cooperativo. ¿Continuar?'))return;
     status('Preparando los tres juegos…');
     try{
-      var payload={title:'El Devorapalabras · La defensa del Gran Archivo',message:'Juega y contribuye a la victoria colectiva de tu clase.',targetXp:0,objectiveType:'xp',gameIds:['battlegrafia','lexoma','maniacgrafia'],classCodes:[classCode]};
+      var payload={title:'El Devorapalabras · La defensa del Gran Archivo',message:'Juega y contribuye a la victoria colectiva de tu clase.',targetXp:fleetTarget,objectiveType:'xp',gameIds:['battlegrafia','lexoma','maniacgrafia'],classCodes:[classCode]};
       var bridge=bossWorkshop();if(!bridge)throw new Error('El planificador no está disponible. Recarga la página.');
       await bridge.prepare(classCode,payload);
       await act('start');
@@ -3232,7 +3248,7 @@ body.light .teacherMonitorTable th{background:#fff}
     var classCode=getClass();if(!classCode){status('Selecciona una clase.');return;}
     status('Actualizando batalla…');
     try{
-      var result=await edge('class-boss',{action:action,classCode:classCode,durationMinutes:25});
+      var result=await edge('class-boss',{action:action,classCode:classCode,encounterConfig:encounterSettings});
       last=result.event||null;paint(last);
       if(action==='start')openStage();
       if(action==='finish')status('El combate ha terminado. El progreso de los alumnos se conserva.');
@@ -3241,6 +3257,7 @@ body.light .teacherMonitorTable th{background:#fff}
   }
   function paint(b){
     var monster=$('classBossMonster');
+    $('classBossPodiumHost').innerHTML='';monster.style.visibility='visible';
     if(!b){
       stage.setAttribute('data-outcome','');monster.setAttribute('data-phase','1');syncBossSprite(1);
       monster.classList.remove('hurt');monster.classList.remove('combo');
@@ -3278,6 +3295,19 @@ body.light .teacherMonitorTable th{background:#fff}
       monster.classList.toggle('combo',b.combos>lastCombos);
       $('classBossImpact').textContent=(b.combos>lastCombos?'¡COMBO! ':'')+'−'+(b.damage-lastDamage);
       monster.classList.add('hurt');
+    }
+    if(b.encounter){
+      var enc=b.encounter,active=enc.phase==='combat',latest=enc.latest;
+      monster.style.visibility=active?'visible':'hidden';if(!active)stopBossSprite();
+      $('classBossClock').textContent=fmt(active?enc.combatSeconds:enc.secondsToNext||b.remainingSeconds);
+      $('classBossPhase').textContent=active?(enc.current.final?'⚔️ COMBATE FINAL':'Aparición '+(enc.current.index+1)+' de '+enc.rounds.length):enc.finished?'LA DEFENSA DEL GRAN ARCHIVO':enc.phase==='paused'?'ATAQUES EN PAUSA':'EL MONSTRUO VOLVERÁ';
+      $('classBossLegend').textContent=active?'¡Tus aciertos causan daño! Sesión: '+fmt(b.remainingSeconds)+' restantes.':enc.finished?'Daño total de todas las apariciones.':enc.phase==='paused'?'El reloj de la sesión sigue avanzando.':'Sigue jugando. Próxima aparición en '+fmt(enc.secondsToNext)+'.';
+      var rows=enc.finished?enc.leaderboard:latest&&latest.victory?latest.leaderboard:null;
+      var cfg=enc.config,won=enc.finished?b.outcome==='victory':latest&&latest.victory;
+      if(!active&&rows&&rows.length){
+        $('classBossOutcome').classList.remove('show');
+        $('classBossPodiumHost').innerHTML='<h2>'+(enc.finished?'🏆 PODIO FINAL': '¡MONSTRUO DERROTADO!')+'</h2>'+podiumMarkup(rows,won?(enc.finished?cfg.finalRewards:cfg.roundRewards):[0,0,0])+'<p>'+(enc.finished?'Clasificación por daño acumulado.':('Aparición '+(latest.index+1)+' · +'+cfg.participationXp+' XP para los demás participantes.'))+'</p>';
+      }
     }
     visualEventId=b.id;lastDamage=b.damage;lastCombos=b.combos;
   }

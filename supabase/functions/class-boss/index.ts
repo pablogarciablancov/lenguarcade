@@ -1,4 +1,4 @@
-import {BOSS_GAMES,BOSS_DURATION_SECONDS,initialBossHealth,battleClock,countBossDamage} from "../_shared/class-boss-engine.js";
+import {BOSS_GAMES,battleClock,countBossDamage,encounterConfig,encounterSchedule,countEncounter} from "../_shared/class-boss-engine.js";
 import {corsHeaders,jsonResponse,requireTeacherSession,requireProfileSession} from "../_shared/lenguarcade.ts";
 
 function fail(message:string,status=400){return jsonResponse({ok:false,error:message},status);}
@@ -73,7 +73,7 @@ async function battleSummary(admin:any,battle:any,workshop:any){
   const periods=await getBossPeriods(admin,battle);
   const events:any[]=[];
   if(members.length&&periods.length){
-    for(let offset=0;offset<5000;offset+=1000){
+    for(let offset=0;;offset+=1000){
       const {data,error}=await admin.from("game_events")
         .select("id,profile_id,game_id,event_type,xp_delta,occurred_at")
         .in("profile_id",members).in("game_id",battle.game_ids)
@@ -85,6 +85,33 @@ async function battleSummary(admin:any,battle:any,workshop:any){
       events.push(...(data||[]));
       if((data||[]).length<1000)break;
     }
+  }
+  if(battle.encounter_config){
+    let encounter=countEncounter(events,battle,periods,now);
+    // Commit completed encounters in order so the final aggregate includes every round.
+    for(const round of encounter.rounds){
+      if(!round.complete||(battle.round_results||[]).some((r:any)=>r.index===round.index))continue;
+      const {data,error}=await admin.rpc("settle_class_boss_round",{p_battle_id:battle.id,p_result:round,
+        p_rewards:encounter.rewards.filter((r:any)=>r.round===round.index)});
+      if(error)throw error;
+      battle.round_results=data;
+      encounter=countEncounter(events,battle,periods,now);
+    }
+    const {data:names,error:namesError}=await admin.from("profiles").select("id,first_name,last_name")
+      .eq("organization_id",battle.organization_id).in("id",encounter.leaderboard.map((p:any)=>p.profileId).concat(members));
+    if(namesError)throw namesError;
+    const displayNames=new Map((names||[]).map((p:any)=>[p.id,`${p.first_name||""} ${p.last_name||""}`.trim()]));
+    const named=(rows:any[])=>rows.map(p=>({...p,name:displayNames.get(p.profileId)||"Alumno"}));
+    const shown=encounter.current||encounter.latest||encounter.rounds[0];
+    const workshopOpen=Boolean(await getWorkshopForBoss(admin,battle,workshop));
+    return {id:battle.id,title:"El Devorapalabras",state:encounter.finished?"finished":workshopOpen?battle.state:"paused",
+      outcome:encounter.outcome,health:shown?.healthRemaining??shown?.health??0,totalHealth:shown?.health||0,
+      damage:shown?.damage||0,hits:shown?.hits||0,combos:shown?.combos||0,
+      remainingSeconds:battleClock(battle,now),workshopOpen,gameIds:battle.game_ids,startedAt:battle.started_at,
+      encounter:{...encounter,phase:!workshopOpen&&!encounter.finished?"paused":encounter.phase,
+        leaderboard:named(encounter.leaderboard),rounds:encounter.rounds.map((r:any)=>({...r,leaderboard:named(r.leaderboard)})),
+        latest:encounter.latest?{...encounter.latest,leaderboard:named(encounter.latest.leaderboard)}:null,
+        config:battle.encounter_config}};
   }
   const tally=countBossDamage(events,battle,periods,now);
   const remainingSeconds=battleClock(battle,now,periods);
@@ -115,14 +142,13 @@ Deno.serve(async(request)=>{
         const workshop=await getActiveWorkshop(admin,organizationId,member.classroom_id);
         if(!workshop)continue;
         const battle=await currentBoss(admin,organizationId,member.classroom_id,workshop);
-        if(!battle||battle.state!=="active"||!battle.game_ids?.length)continue;
-        const {data:currentRun,error:runError}=await admin.from("workshop_runs")
-          .select("run_id,workshop_key,plan_id,closed_at").eq("organization_id",organizationId)
-          .eq("classroom_id",member.classroom_id).eq("plan_id",workshop.plan_id)
-          .eq("started_at",workshop.started_at).eq("published",true).is("closed_at",null).maybeSingle();
-        if(runError)throw runError;
-        if(currentRun&&String(currentRun.workshop_key||currentRun.plan_id)===String(battle.workshop_key)&&
-          battleClock(battle,Date.now(),await getBossPeriods(admin,battle))>0)return jsonResponse({ok:true,event:{id:battle.id,title:"El Devorapalabras",state:battle.state}});
+        if(!battle||!battle.game_ids?.length)continue;
+        if(battle.encounter_config){
+          const summary=await battleSummary(admin,battle,workshop);
+          return jsonResponse({ok:true,event:summary?{...summary,ownContribution:summary.encounter.leaderboard.find((p:any)=>p.profileId===profileId)||null}:null});
+        }
+        if(battle.state==="active"&&battleClock(battle,Date.now())>0)
+          return jsonResponse({ok:true,event:{id:battle.id,title:"El Devorapalabras",state:battle.state}});
 
       }
       return jsonResponse({ok:true,event:null});
@@ -149,14 +175,16 @@ Deno.serve(async(request)=>{
       const {count,error:countError}=await admin.from("classroom_enrollments")
         .select("profile_id",{count:"exact",head:true}).eq("classroom_id",classroom.id).eq("active",true);
       if(countError)throw countError;
-      const duration=BOSS_DURATION_SECONDS; // Server-enforced limit; ignore client duration parameters.
-      const initialHealth=initialBossHealth(count);
+      const config=encounterConfig(body.encounterConfig||{});
+      const rounds=encounterSchedule(config,count);
+      const duration=config.sessionMinutes*60;
+      const initialHealth=rounds[0].health;
       const now=isoNow();
       const {data, error}=await admin.from("class_boss_events")
         .insert({organization_id:organizationId,classroom_id:classroom.id,
           workshop_run_id:run.run_id,workshop_key:run.workshop_key||run.plan_id,
           game_ids:BOSS_GAMES,state:"active",duration_seconds:duration,health_total:initialHealth,
-          started_at:now,active_since:now,created_by:profileId})
+          started_at:now,active_since:now,created_by:profileId,encounter_config:config,encounter_rounds:rounds})
         .select("*").single();
       if(error){
         if(error.code==="23505")return fail("event_already_exists_reload",409);

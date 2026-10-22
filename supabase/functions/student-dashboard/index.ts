@@ -1,3 +1,4 @@
+import {platformXpEvents} from "../_shared/platform-xp.js";
 import {isForjaObjective, workshopVictory, groupWorkshops, workshopProgress} from "../_shared/workshop-objective.js";
 import {levelProgress,learningGrade,platformMilestones} from "../_shared/progression.js";
 import {
@@ -35,7 +36,7 @@ function missionProgressValue(
 
   if (Number.isFinite(activeFrom)) {
     const events = missionEvents.filter(row => {
-      if (String(row.event_type || "") === "teacher_adjustment") return false;
+      if (["teacher_adjustment","class_boss_reward"].includes(String(row.event_type || ""))) return false;
       if (gameId && String(row.game_id) !== gameId) return false;
       const occurredAt = Date.parse(String(row.occurred_at || ""));
       if (!Number.isFinite(occurredAt) || occurredAt < activeFrom) return false;
@@ -85,7 +86,7 @@ function missionFinishedAt(mission: any, events: any[]) {
   const to = mission.active_to ? Date.parse(String(mission.active_to)) : Infinity;
   const rows = (events || []).filter(event => {
     const at = Date.parse(String(event.occurred_at || ""));
-    return event.event_type !== "teacher_adjustment" &&
+    return !["teacher_adjustment","class_boss_reward"].includes(event.event_type) &&
       (!gameId || String(event.game_id) === gameId) &&
       Number.isFinite(at) && at >= from && at <= to;
   }).sort((a,b)=>Date.parse(a.occurred_at)-Date.parse(b.occurred_at));
@@ -156,12 +157,7 @@ Deno.serve(async (request) => {
         .eq("profile_id", profileId)
         .order("occurred_at", { ascending:false })
         .limit(5000),
-      admin.from("game_events")
-        .select("xp_delta,feathers_delta,occurred_at")
-        .eq("profile_id", profileId)
-        .eq("event_type", "teacher_adjustment")
-        .order("occurred_at", { ascending:false })
-        .limit(1000),
+      platformXpEvents(admin,[profileId]),
       admin.from("evaluations")
         .select("scope,game_id,score,breakdown,updated_at")
         .eq("profile_id", profileId),
@@ -211,9 +207,10 @@ Deno.serve(async (request) => {
     const baseXp = progress.reduce((sum, row) => sum + Number(row.xp || 0), 0);
     const baseFeathers = progress.reduce((sum, row) => sum + Number(row.feathers || 0), 0);
     const adjustments = adjustmentsResult.data || [];
-    const manualXp = adjustments.reduce((sum, row) => sum + Number(row.xp_delta || 0), 0);
+    const bonusXp = adjustments.filter(row=>row.event_type==="class_boss_reward").reduce((sum,row)=>sum+Number(row.xp_delta||0),0);
+    const manualXp = adjustments.filter(row=>row.event_type!=="class_boss_reward").reduce((sum, row) => sum + Number(row.xp_delta || 0), 0);
     const manualFeathers = adjustments.reduce((sum, row) => sum + Number(row.feathers_delta || 0), 0);
-    const xp = Math.max(0, baseXp + manualXp);
+    const xp = Math.max(0, baseXp + manualXp + bonusXp);
     const feathers = Math.max(0, baseFeathers + manualFeathers);
     const sessions = progress.reduce((sum, row) => sum + Number(row.sessions || 0), 0);
     const leveling = levelProgress(xp);
@@ -406,7 +403,7 @@ Deno.serve(async (request) => {
         const [profilesRank,progressRank,adjustRank]=await Promise.all([
           admin.from("profiles").select("id,first_name,last_name,source").in("id",ids).eq("role","student").eq("active",true),
           admin.from("game_progress").select("profile_id,xp").in("profile_id",ids),
-          admin.from("game_events").select("profile_id,xp_delta").in("profile_id",ids).eq("event_type","teacher_adjustment").limit(5000),
+          platformXpEvents(admin,ids),
         ]);
         const rankFailure=[profilesRank.error,progressRank.error,adjustRank.error].find(Boolean);
         if(rankFailure)throw rankFailure;
@@ -449,6 +446,7 @@ Deno.serve(async (request) => {
       general:{
         xp,
         baseXp,
+        bonusXp,
         manualXp,
         level,
         ...leveling,

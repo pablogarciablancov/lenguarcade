@@ -1,3 +1,15 @@
+## 2026-10-22 — Apariciones del Devorapalabras, podios y XP extra
+
+- Los nuevos eventos permiten sesiones de 10–60 minutos, 2–6 apariciones, combates de 30–180 s (se ajustan si es necesario para dejar descansos) y un combate final del doble de duración y mayor resistencia. El ajuste inicial de 25 minutos incluye apariciones en 3:00, 9:00, 15:00 y 21:00. El reloj sigue avanzando al pausar ataques y el evento caduca a medianoche en Madrid.
+- Cada aparición solo acepta progresos confirmados de los tres juegos durante su ventana y con el enfriamiento de 30 s por alumno. Los combos se atribuyen al alumno que los activa. Se deja de contar daño al derrotarlo; los empates se resuelven por primera aportación y después por identificador estable.
+- Podios individuales por victoria (150/100/75 XP y 25 XP para el resto que causó daño), y podio final por daño acumulado (300/200/150 XP si cae el jefe final). Premios configurables, aportación y puesto propios, botón para volver a ver el podio y cierre automático del podio intermedio a los 12 s.
+- Cada resultado se congela y concede sus recompensas en una transacción con bloqueo por evento e identificadores únicos. Recargas, sondeos simultáneos y reintentos no vuelven a conceder XP. No se permite fabricar recompensas desde save-progress.
+- La XP extra se suma a los totales/niveles y ranking general, separada de los juegos y de los ajustes del profesor. No causa ataques, no cuenta como sesión y no completa misiones ni objetivos de Flotas.
+- El taller cooperativo nuevo se prepara con objetivo de 400 XP (editable); un taller puntuable ya abierto conserva su propio objetivo. Se reutilizan agrupación y claves de concesión de Flotas: una puntuación por alumno/taller, sin una misión por aparición.
+- Los eventos históricos mantienen sus reglas originales. Aplicar únicamente a una nueva edición del taller para comenzar un evento nuevo.
+- Validado: npm run check; simulación con 25 alumnos y varias configuraciones; transacción SQL en PostgreSQL embebido (repetición, concurrencia, reversión y permisos); panel, proyección y podio alumno a 1366×768, 1440×900 y 1920×1080.
+- Publicación pendiente: tras fusionar, aplicar migración class_boss_encounters, desplegar juntas class-boss, save-progress, student-dashboard, teacher-dashboard y teacher-student-detail con sus dependencias, y publicar el Apps Script estable. Verificar en /exec con cuentas de prueba antes del siguiente taller. No se ha modificado la base de datos de producción.
+
 ## 2026-10-18 — Resistencia y tamaño del Devorapalabras
 
 - Las nuevas batallas tienen mínimo 1.000 puntos de vida y 40 por alumno (28 alumnos: 1.120; 30: 1.200), con el máximo existente de 5.000. Evita el anterior jefe de 8 puntos al probar con una cuenta.

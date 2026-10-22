@@ -92,7 +92,7 @@ assert.doesNotThrow(()=>ctx.window.classBossRenderPanel());
 assert.match(getElementById('classBossPanel').innerHTML,/Preparar taller cooperativo/);
 
 ctx.window.__setPlannerForTest({activeSession:{
-  classroomOpen:true,gameIds:['battlegrafia','lexoma','maniacgrafia']
+  classroomOpen:true,targetXp:400,gameIds:['battlegrafia','lexoma','maniacgrafia']
 }});
 assert.doesNotThrow(()=>ctx.window.classBossRenderPanel());
 assert.match(getElementById('classBossPanel').innerHTML,/Iniciar combate/);
@@ -174,3 +174,18 @@ assert.equal(frames.size,1);
 getElementById('classBossClose').onclick();
 assert.equal(frames.size,0,'Closing projection must cancel animation');
 console.log('Class boss UI: twelve isolated frames, visibility/motion lifecycle, workshop bridge, start, four health phases, impacts, combos, outcomes and reset OK.');
+const config={roundRewards:[150,100,75],finalRewards:[300,200,150],participationXp:25};
+const leaders=[{name:'Alumno <script>',damage:8},{name:'Segundo',damage:7},{name:'Tercero',damage:6}];
+const round={index:0,final:false,victory:true,leaderboard:leaders};
+paint({...event,health:100,encounter:{phase:'rest',latest:round,current:null,next:{index:1},secondsToNext:90,finished:false,config,rounds:[round,{}],leaderboard:leaders}});
+assert.equal(getElementById('classBossMonster').style.visibility,'hidden');
+assert.match(getElementById('classBossPodiumHost').innerHTML,/Alumno &lt;script&gt;/);
+assert.match(getElementById('classBossPodiumHost').innerHTML,/\+150 XP/);
+paint({...event,health:100,encounter:{phase:'combat',current:{index:1,final:true},secondsToNext:0,combatSeconds:120,finished:false,config,rounds:[round,{}],leaderboard:leaders}});
+assert.equal(getElementById('classBossMonster').style.visibility,'visible');
+assert.equal(getElementById('classBossPodiumHost').innerHTML,'');
+assert.match(getElementById('classBossPhase').textContent,/COMBATE FINAL/);
+paint({...event,state:'finished',outcome:'victory',health:0,encounter:{phase:'finished',finished:true,latest:round,secondsToNext:0,config,rounds:[round,{}],leaderboard:leaders}});
+assert.match(getElementById('classBossPodiumHost').innerHTML,/PODIO FINAL/);
+assert.match(getElementById('classBossPodiumHost').innerHTML,/\+300 XP/);
+console.log('Encounter UI: monster hidden in rests, final fight, escaped names, per-round and final podium rewards OK.');

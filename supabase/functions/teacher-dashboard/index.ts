@@ -1,3 +1,4 @@
+import {platformXpEvents} from "../_shared/platform-xp.js";
 import {isForjaObjective, workshopVictory, groupWorkshops, workshopProgress} from "../_shared/workshop-objective.js";
 import {assessedMissions} from "../_shared/mission-grade.js";
 import {levelProgress,learningGrade} from "../_shared/progression.js";
@@ -189,7 +190,7 @@ function missionProgressValue(
 
   if (Number.isFinite(activeFrom)) {
     const recent = events.filter(event => {
-      if (String(event.event_type || "") === "teacher_adjustment") return false;
+      if (["teacher_adjustment","class_boss_reward"].includes(String(event.event_type || ""))) return false;
       if (gameId && String(event.game_id) !== gameId) return false;
       const occurredAt = Date.parse(String(event.occurred_at || ""));
       if (!Number.isFinite(occurredAt) || occurredAt < activeFrom) return false;
@@ -246,7 +247,7 @@ function missionCompletionAt(
 
   const recent = events
     .filter(event => {
-      if (String(event.event_type || "") === "teacher_adjustment") return false;
+      if (["teacher_adjustment","class_boss_reward"].includes(String(event.event_type || ""))) return false;
       if (gameId && String(event.game_id) !== gameId) return false;
       const ms = Date.parse(String(event.occurred_at || ""));
       return Number.isFinite(ms) && ms >= from && ms <= to;
@@ -1133,12 +1134,7 @@ Deno.serve(async (request) => {
             .in("profile_id", profileIds)
         : Promise.resolve(emptyResult),
       activityProfileIds.length
-        ? admin.from("game_events")
-            .select("profile_id,xp_delta,feathers_delta,occurred_at")
-            .in("profile_id", activityProfileIds)
-            .eq("event_type", "teacher_adjustment")
-            .order("occurred_at", { ascending:false })
-            .limit(5000)
+        ? platformXpEvents(admin,activityProfileIds)
         : Promise.resolve(emptyResult),
       profileIds.length
         ? admin.from("profile_game_access")
@@ -1158,10 +1154,11 @@ Deno.serve(async (request) => {
     ].find(Boolean);
     if (activityFailure) throw activityFailure;
 
-    const adjustmentByProfile = new Map<string, { xp:number; feathers:number }>();
+    const adjustmentByProfile = new Map<string, { xp:number; feathers:number; bonusXp?:number }>();
     for (const row of adjustmentsResult.data || []) {
-      const current = adjustmentByProfile.get(row.profile_id) || { xp:0, feathers:0 };
+      const current = adjustmentByProfile.get(row.profile_id) || { xp:0, feathers:0, bonusXp:0 };
       current.xp += Number(row.xp_delta || 0);
+      if(row.event_type==="class_boss_reward")current.bonusXp=(current.bonusXp||0)+Number(row.xp_delta||0);
       current.feathers += Number(row.feathers_delta || 0);
       adjustmentByProfile.set(row.profile_id, current);
     }
@@ -1182,7 +1179,7 @@ Deno.serve(async (request) => {
     );
     const latestEventByProfile = new Map<string, Record<string, unknown>>();
     for (const event of eventsResult.data || []) {
-      if (String(event.event_type || "") === "teacher_adjustment") continue;
+      if (["teacher_adjustment","class_boss_reward"].includes(String(event.event_type || ""))) continue;
       const profileId = String(event.profile_id || "");
       if (!profileIdSet.has(profileId)) continue;
       if (gameId && String(event.game_id || "") !== gameId) continue;
@@ -1194,7 +1191,7 @@ Deno.serve(async (request) => {
       const attempts = rows.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
       const successes = rows.reduce((sum, row) => sum + Number(row.successes || 0), 0);
       const baseXp = rows.reduce((sum, row) => sum + Number(row.xp || 0), 0);
-      const manual = gameId ? { xp:0, feathers:0 } : (adjustmentByProfile.get(profile.id) || { xp:0, feathers:0 });
+      const manual = gameId ? { xp:0, feathers:0, bonusXp:0 } : (adjustmentByProfile.get(profile.id) || { xp:0, feathers:0, bonusXp:0 });
       const xp = Math.max(0, baseXp + manual.xp);
       const classroomIds = enrollmentsByProfile.get(profile.id) || [];
       const classroom = classCode
@@ -1236,7 +1233,8 @@ Deno.serve(async (request) => {
         pinConfigured:true,
         xp,
         baseXp,
-        manualXp:manual.xp,
+        manualXp:manual.xp-Number(manual.bonusXp||0),
+        bonusXp:Number(manual.bonusXp||0),
         level:levelProgress(xp).level,
         percentage:Math.round(average(rows.map(row => Number(row.percentage || 0)))),
         accuracy:attempts ? Math.round((successes / attempts) * 100) : 0,
@@ -1317,7 +1315,7 @@ Deno.serve(async (request) => {
       : [];
 
     const eventCount = (eventsResult.data || []).filter(row =>
-      row.event_type !== "teacher_adjustment" && Date.parse(row.occurred_at)>=today.getTime() && row.details?.sessionCounted!==false && (!gameId || row.game_id === gameId)
+      !["teacher_adjustment","class_boss_reward"].includes(row.event_type) && Date.parse(row.occurred_at)>=today.getTime() && row.details?.sessionCounted!==false && (!gameId || row.game_id === gameId)
     ).length;
     const achievementCount = (achievementsResult.data || []).filter(row =>
       !gameId || row.game_id === gameId
@@ -1328,7 +1326,7 @@ Deno.serve(async (request) => {
     const teacherAttempts = teacherRows.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
     const teacherSuccesses = teacherRows.reduce((sum, row) => sum + Number(row.successes || 0), 0);
     const teacherBaseXp = teacherRows.reduce((sum, row) => sum + Number(row.xp || 0), 0);
-    const teacherManual = adjustmentByProfile.get(teacherProfileId) || { xp:0, feathers:0 };
+    const teacherManual = adjustmentByProfile.get(teacherProfileId) || { xp:0, feathers:0, bonusXp:0 };
     const teacherXp = Math.max(0, teacherBaseXp + teacherManual.xp);
     const teacherPlayer = teacherProfile ? {
       studentId:teacherProfile.id,
@@ -1338,7 +1336,8 @@ Deno.serve(async (request) => {
       isTeacherPlayer:true,
       xp:teacherXp,
       baseXp:teacherBaseXp,
-      manualXp:teacherManual.xp,
+      manualXp:teacherManual.xp-Number(teacherManual.bonusXp||0),
+      bonusXp:Number(teacherManual.bonusXp||0),
       level:levelProgress(teacherXp).level,
       sessions:teacherRows.reduce((sum, row) => sum + Number(row.sessions || 0), 0),
       gamesPlayed:teacherRows.filter(row => Number(row.sessions || 0) > 0).length,
