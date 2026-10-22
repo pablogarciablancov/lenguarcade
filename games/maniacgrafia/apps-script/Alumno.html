@@ -600,6 +600,7 @@
                 console.error('No se pudo guardar la copia local.', e);
                 if (showNotice && !integrated) alert('No se ha podido guardar en este navegador. Revisa si el almacenamiento está bloqueado.');
             }
+            if (integrated && typeof window.requestManiacCheckpoint === 'function') window.requestManiacCheckpoint();
             if (!integrated && !options.localOnly) syncToCloud(!!options.forceCloud || showNotice, showNotice);
         }
         function syncToCloud(force = false, showNotice = false) {
@@ -1576,6 +1577,20 @@
                 post('SESSION_STARTED', { mode:state.mode });
             }
 
+            let checkpointTimer=null, pendingCheckpoint=null, confirmedWords=null;
+            function checkpoint() {
+                if (!enabled || !initialized || !sessionActive) return;
+                if(pendingCheckpoint && Date.now()-pendingCheckpoint.at<20000) return;
+                const words=Number(userStats.totalWords||0);
+                if (words===confirmedWords) return;
+                const checkpointId='maniac_checkpoint_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+                pendingCheckpoint={id:checkpointId,words,at:Date.now()};
+                post('CHECKPOINT',{checkpointId,players:[{role:'primary',correct:Number(state.sessionCorrect||0),errors:Number(state.sessionErrors||0),save:buildSaveData()}]});
+            }
+            window.requestManiacCheckpoint=()=>{
+                clearTimeout(checkpointTimer);checkpointTimer=setTimeout(checkpoint,500);
+            };
+
             function result(outcome) {
                 if (!enabled || !sessionActive) return;
                 sessionActive = false;
@@ -1612,6 +1627,11 @@
                     pendingContext = message.payload || {};
                     if (runtimeReady) applyContext(pendingContext);
                 }
+                if (message.type === 'REQUEST_CHECKPOINT') checkpoint();
+                if (message.type === 'CHECKPOINT_CONFIRMED' && pendingCheckpoint?.id===message.payload?.checkpointId) {
+                    confirmedWords=pendingCheckpoint.words;pendingCheckpoint=null;checkpoint();
+                }
+                if (message.type === 'CHECKPOINT_FAILED') {pendingCheckpoint=null;clearTimeout(checkpointTimer);checkpointTimer=setTimeout(checkpoint,3000);}
                 if (message.type === 'REQUEST_EXIT') {
                     if (sessionActive) exitToMenu();
                     else post('CLOSE_READY');

@@ -890,3 +890,12 @@ Empaquetado de la función: incluir `supabase/functions/lexitrama-online/`, `_sh
 - `node games/forja/smoke-test.mjs`: mecánica, tienda, guardado, victoria e infinito.
 - `npm run catalog:check` y `npm run check`.
 - En aula: jugar una palabra, formar la siguiente con clic/arrastre y comprobar que aparece su cálculo. El estado del catálogo debe ser «listo».
+
+## Un acierto = un ataque (22-10-2026)
+
+- Ejecutar `npm run check`. Las pruebas de encuentros verifican 50 aciertos rápidos, lotes, eventos duplicados, intervalos solapados, aciertos sin XP, compras sin aciertos, descansos y pausa. Las pruebas de integridad comprueban palabras acumuladas de Maniacgrafía entre sesiones.
+- Crear una **nueva** sesión del Devorapalabras: debe tener más vida que antes (tres veces, misma clase y duración). Las sesiones ya iniciadas conservan su configuración.
+- Con el taller y combate activos, acertar varias preguntas seguidas en Battlegrafía, Forja y Maniacgrafía. Todos los aciertos confirmados deben sumarse como ataques, sin esperar 30 segundos. En Forja/Maniacgrafía no hay que salir de la partida para enviarlos.
+- Repetir guardado, comprar objetos y obtener logros sin responder: no deben causar daño. Hacer aciertos en descanso o pausa tampoco debe atacar después de reanudar.
+- Comparar alumnos con distinto número de ataques: más ataques implica mejor puesto, también en el total final. Comprobar los premios del podio y que el progreso normal de juegos sigue en el marcador de Flotas.
+- Cerrar y abrir una partida de Maniacgrafía: no repetir los ataques ni los XP de palabras ya guardadas. Comprobar que sigue registrando errores y avance de aventura.

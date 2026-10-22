@@ -75,9 +75,9 @@ async function battleSummary(admin:any,battle:any,workshop:any){
   if(members.length&&periods.length){
     for(let offset=0;;offset+=1000){
       const {data,error}=await admin.from("game_events")
-        .select("id,profile_id,game_id,event_type,xp_delta,occurred_at")
+        .select("id,profile_id,game_id,event_type,xp_delta,occurred_at,details")
         .in("profile_id",members).in("game_id",battle.game_ids)
-        .gt("xp_delta",0).gte("occurred_at",battle.started_at)
+        .gte("occurred_at",battle.started_at)
         .lte("occurred_at",new Date(now).toISOString())
         .order("occurred_at",{ascending:true}).order("id",{ascending:true})
         .range(offset,offset+999);

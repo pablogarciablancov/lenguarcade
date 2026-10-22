@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {encounterConfig,encounterSchedule,countEncounter,BOSS_GAMES,battleClock} from '../supabase/functions/_shared/class-boss-engine.js';
 import {workshopProgress} from '../supabase/functions/_shared/workshop-objective.js';
 const start=Date.parse('2026-10-22T10:00:00Z'),iso=s=>new Date(start+s*1000).toISOString();
-const config=encounterConfig(),rounds=encounterSchedule(config,25);
+const config=encounterConfig({version:1}),rounds=encounterSchedule(config,25);
 assert.deepEqual(rounds.map(r=>[r.from,r.to]),[[180,300],[540,660],[900,1020],[1260,1500]]);
 assert.ok(rounds.at(-1).health>rounds[0].health*2);
 for(const minutes of [10,25,60])for(const count of [2,3,4,5,6])for(const seconds of [30,120,180]){
@@ -51,3 +51,19 @@ const mock={from(){return {select(){return this},in(){return this},order(){retur
 const lifetime=await platformXpEvents(mock,['student']);assert.equal(lifetime.data.length,2005);assert.equal(pages,3);
 assert.equal(lifetime.data.reduce((sum,e)=>sum+e.xp_delta,0),50125);
 console.log('Platform XP: lifetime totals include more than 2,000 rewards across every page.');
+
+// V2: every confirmed correct answer attacks, including XP-capped checkpoints.
+const v2=encounterConfig();assert.equal(v2.version,2);
+assert.equal(encounterSchedule(v2,25)[0].health,rounds[0].health*3);
+const modern={...battle,encounter_config:v2,encounter_rounds:[{index:0,from:180,to:300,health:1000,final:false}]};
+const answer=(id,p,s,before,after,xp=0)=>({...event(id,p,'battlegrafia',s,xp),details:{learning:{version:1,correctBefore:before,correctAfter:after}}});
+const rapid=Array.from({length:50},(_,i)=>answer('rapid-'+i,'quick',181+i/10,i,i+1));
+let result=at(rapid,200,modern);assert.equal(result.rounds[0].hits,50);assert.equal(result.rounds[0].damage,50);
+assert.deepEqual(at([...rapid,...rapid],200,modern),result);
+result=at([answer('batch','slow',181,0,5),answer('overlap','slow',182,0,6),event('shop','shopper','battlegrafia',183,1000)],200,modern);
+assert.equal(result.rounds[0].hits,6);assert.equal(result.leaderboard.length,1);
+assert.equal(at([answer('rest','p',100,0,5),answer('replay','p',181,0,6)],200,modern).rounds[0].hits,1);
+assert.equal(at(rapid,200,{...modern,state:'paused',active_since:null}).rounds[0].hits,0);
+const contenders=at([...rapid,answer('less','other',190,0,10)],301,modern);
+assert.equal(contenders.leaderboard[0].profileId,'quick');
+console.log('V2: 50 rapid answers = 50 attacks; batches, overlapping saves, retries, zero-XP answers, shop exclusion and pauses OK.');

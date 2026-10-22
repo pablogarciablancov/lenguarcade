@@ -866,3 +866,11 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 
 - El mensaje de la jugada anterior se retira cuando cambia el borrador, para mostrar el cálculo actual. Se conserva la animación del resultado y los errores hasta la siguiente edición.
 - Forja pasa a `listo` por decisión del profesor. Catálogo canónico y manifiesto sincronizados, sin modificar progreso, puntuaciones ni guardados.
+
+## 2026-10-22 — Un acierto, un ataque al Devorapalabras
+
+- Nuevas sesiones de combate (configuración v2): cada acierto nuevo confirmado por el servidor causa un ataque, sin espera de 30 segundos. Un checkpoint con varios aciertos cuenta todos; comprar, desbloquear logros y recibir XP extra no causa daño.
+- Vida de cada aparición multiplicada por tres respecto al equilibrio anterior. Clasificaciones de ronda y final ordenadas por ataques; conservan los premios extra de los tres primeros y la integración existente con Flotas.
+- Los eventos guardan intervalos acumulados de aciertos calculados por el servidor. Los intervalos solapados, reintentos y eventos duplicados no añaden ataques repetidos; los aciertos cuentan aunque el límite de XP retrase su recompensa.
+- Forja y Maniacgrafía envían checkpoints tras los cambios (500 ms de agrupación y una petición pendiente), sin esperar 12 segundos o al fin de partida. Maniacgrafía usa las palabras correctas acumuladas para no repetir aciertos al terminar o reiniciar una partida.
+- Se mantienen las sesiones v1 y los resultados históricos. Las apariciones siguen ocultas hasta el combate. No se recalculan premios ni puntuaciones ya concedidas.

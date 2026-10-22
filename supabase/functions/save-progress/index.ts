@@ -487,7 +487,7 @@ Deno.serve(async (request) => {
 
     // Any XP or feather payout must have an auditable event even when a client
     // requested a silent autosave. This is also the source for challenge tracking.
-    if(record.xp>oldXp||record.feathers>oldFeathers||record.attempts>Number(old?.attempts||0))shouldWriteEvent=true;
+    if(record.xp>oldXp||record.feathers>oldFeathers||record.attempts>Number(old?.attempts||0)||record.successes>Number(old?.successes||0))shouldWriteEvent=true;
     const { error:progressError } = await admin.from("game_progress")
       .upsert(record, { onConflict:"profile_id,game_id" });
     if (progressError) throw progressError;
@@ -505,6 +505,7 @@ Deno.serve(async (request) => {
         accuracy:record.accuracy,
         details:{
           ...(body.details && typeof body.details === "object" ? body.details : {}),
+          learning:{version:1,correctBefore:Number(old?.successes||0),correctAfter:record.successes},
           forjaVictory:victory,
           sessionCounted:shouldCountSession,
           xpAward:{
