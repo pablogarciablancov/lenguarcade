@@ -1,3 +1,10 @@
+## 2026-10-22 · Rayuela: historias de clase y rúbrica 1–10
+
+- `node --no-warnings scripts/check-rayuela-gallery.mjs`: validación de campos 1–10, rechazo de cero/fracciones/cadenas, voto único con identidad de sesión, rechazo de autor, rúbrica antigua, nota ortográfica independiente y mínimo cero, CRLF, decisiones narrativas.
+- Chromium con host simulado y los 23 proyectos actuales: recorrido real hasta final en cada historia; envío de cinco campos sin selector de identidad ni campo votable de ortografía. Sin errores JS ni desbordamiento horizontal en 1366×768, 1440×900, 1920×1080 y 390×844.
+- Las flechas a casillas vacías llevan a «Camino pendiente» y permiten volver al inicio, sin habilitar la valoración por ese recorrido.
+- Aceptación en producción: entrar como alumno de C y D, verificar la galería propia; valorar al llegar a un final y modificar el voto; comprobar que la nota de ortografía permanece igual. En profesor, desplegar revisión ortográfica y verificar autores conservados.
+
 ## 2026-10-22 — Apariciones sorpresa
 
 - Sin cuenta atrás ni aviso previo durante los descansos, tanto en alumno como en proyección. El reloj solo aparece durante el combate. Se conservan calendario interno, premios y Flotas.

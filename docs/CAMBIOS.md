@@ -1,3 +1,11 @@
+## 2026-10-22 · Rayuela: lectura, rúbrica y revisión ortográfica
+
+- La galería se abre al entrar con cuenta de LenguArcade. Decisiones narrativas en lugar de botones de dirección; conversor de hojas con soporte de flechas antes y después del texto y ramas pendientes sin finales inventados.
+- El alumno conectado puntúa diversión, opciones, originalidad, historia y final de 1 a 10. Identidad fijada por sesión, sin selector de votante ni votos propios. Los votos antiguos conservan su escala y se normalizan para consultar resultados.
+- Ortografía separada de la votación: revisión con evidencia por escena y nota `máx(0, 10 − 0,2 × faltas)`. Los lectores no pueden modificar esta nota; el profesor puede consultar las correcciones.
+- Preparado el lote de las dos carpetas de clase: 13 historias C y 10 D; siete documentos vacíos excluidos. Autoría contrastada con revisiones y cuentas de la clase; se conservan parejas previamente asignadas. Textos y datos de alumnos permanecen en el almacenamiento privado de clase, fuera del repositorio público.
+- Corregida la prueba de galería para los saltos de línea CRLF de Windows.
+
 ## 2026-10-22 — Apariciones sorpresa
 
 - Sin cuenta atrás ni aviso previo durante los descansos, tanto en alumno como en proyección. El reloj solo aparece durante el combate. Se conservan calendario interno, premios y Flotas.
