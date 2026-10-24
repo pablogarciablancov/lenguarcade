@@ -1423,7 +1423,9 @@ Deno.serve(async (request) => {
             nombre:studentNameById.get(String(profile.id)) || String(profile.email || "Alumno"),
             xp,
             targetXp,
-            completed:isForjaObjective(session) ? Boolean(completedAt) : targetXp > 0 && xp >= targetXp,
+            completed:result.completed,
+            completionRoute:result.completionRoute,
+            practiceProgress:result.support,
             completedAt,
           };
         }).sort((a, b) => {

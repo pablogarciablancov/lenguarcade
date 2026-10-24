@@ -93,7 +93,7 @@ export function countBossDamage(events,battle,workshopRuns,nowMs=Date.now()) {
 export function encounterConfig(input={}) {
   const integer=(v,f,min,max)=>Number.isFinite(Number(v))?Math.max(min,Math.min(max,Math.round(Number(v)))):f;
   const reward=(values,defaults)=>defaults.map((n,i)=>integer(values?.[i],n,0,1000));
-  return {version:input.version===1?1:2,sessionMinutes:integer(input.sessionMinutes,25,10,60),
+  return {version:input.version===1?1:input.version===2?2:3,sessionMinutes:integer(input.sessionMinutes,25,10,60),
     appearanceCount:integer(input.appearanceCount,4,2,6),combatSeconds:integer(input.combatSeconds,120,30,180),
     roundRewards:reward(input.roundRewards,[150,100,75]),participationXp:integer(input.participationXp,25,0,250),
     finalRewards:reward(input.finalRewards,[300,200,150])};
@@ -106,7 +106,7 @@ export function encounterSchedule(config,studentCount) {
     const final=i===n-1,length=final?finalSeconds:seconds;
     const from=final?duration-finalSeconds:Math.round(duration*(n===2?.12:.12+i*.48/(n-2)));
     const roster=Math.max(12,Math.min(100,Number(studentCount)||12));
-    return {index:i,final,from,to:from+length,health:Math.max(8,Math.ceil(roster*(length/30)*(final?.75:.65)*(c.version>=2?3:1)))};
+    return {index:i,final,from,to:from+length,health:Math.max(8,Math.ceil(roster*(length/30)*(final?.75:.65)*(c.version>=3?4:c.version>=2?3:1)))};
   });
 }
 function ranked(contributions,byHits=false) {
@@ -144,19 +144,35 @@ export function countEncounter(events,battle,runs,nowMs=Date.now()) {
       const bucket=Math.floor((at-from)/90000),games=buckets.get(bucket)||new Set();
       const wasCombo=BOSS_GAMES.every(g=>games.has(g));games.add(e.game_id);buckets.set(bucket,games);
       const combo=!wasCombo&&BOSS_GAMES.every(g=>games.has(g));
-      const attacks=c.version>=2?Math.min(fresh.get(e),round.health-damage):1;
-      const dealt=Math.min(round.health-damage,attacks+(combo?4:0));
+      let attacks=c.version>=2?Math.min(fresh.get(e),round.health-damage):1;
+      // V3 preserves every attack but values its educational effort. Never use paid XP,
+      // shop bonuses or old policy metadata to infer a stronger hit.
+      const learning=e.details?.learning;
+      const totalAnswers=learning?learning.correctAfter-learning.correctBefore:0;
+      const rewards=learning?.policyVersion===2&&Array.isArray(learning.actionXp)&&learning.actionXp.length===totalAnswers?learning.actionXp:[];
+      const unit=e.game_id==='maniacgrafia'?1:4;
+      const freshRewards=rewards.slice(totalAnswers-fresh.get(e));
+      let weighted=attacks;
+      if(c.version>=3){
+        weighted=0;attacks=0;
+        const values=freshRewards.length===fresh.get(e)?freshRewards:Array(fresh.get(e)).fill(unit*3);
+        for(const value of values){
+          if(weighted>=round.health-damage)break;
+          weighted+=Math.max(unit,Math.min(e.game_id==='lexoma'?8:unit,(Number(value)||0)/3));attacks++;
+        }
+      }
+      const dealt=Math.min(round.health-damage,weighted+(combo?4:0));
       damage+=dealt;hits+=attacks;if(combo)combos++;
       const p=players.get(student)||{profileId:student,damage:0,hits:0,firstAt:at};p.damage+=dealt;p.hits+=attacks;players.set(student,p);
       if(damage>=round.health)defeatedAt=new Date(at).toISOString();
     }
     const complete=!!defeatedAt||until>=to||battle.state==='finished';
     return {...round,damage,hits,combos,healthRemaining:Math.max(0,round.health-damage),defeatedAt,
-      complete,victory:!!defeatedAt,leaderboard:ranked(players,c.version>=2)};
+      complete,victory:!!defeatedAt,leaderboard:ranked(players,c.version===2)};
   });
   const all=new Map();
   for(const r of rounds)for(const p of r.leaderboard){const total=all.get(p.profileId)||{profileId:p.profileId,damage:0,hits:0,firstAt:p.firstAt};total.damage+=p.damage;total.hits+=p.hits;total.firstAt=Math.min(total.firstAt,p.firstAt);all.set(p.profileId,total);}
-  const leaderboard=ranked(all,c.version>=2),elapsed=(nowMs-start)/1000;
+  const leaderboard=ranked(all,c.version===2),elapsed=(nowMs-start)/1000;
   const current=rounds.find(r=>!r.complete&&elapsed>=r.from&&elapsed<r.to)||null;
   const next=rounds.find(r=>!r.complete&&r.from>elapsed)||null;
   const finished=battle.state==='finished'||nowMs>=end||rounds.every(r=>r.complete);

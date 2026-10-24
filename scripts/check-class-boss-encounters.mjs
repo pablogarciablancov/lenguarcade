@@ -53,7 +53,7 @@ assert.equal(lifetime.data.reduce((sum,e)=>sum+e.xp_delta,0),50125);
 console.log('Platform XP: lifetime totals include more than 2,000 rewards across every page.');
 
 // V2: every confirmed correct answer attacks, including XP-capped checkpoints.
-const v2=encounterConfig();assert.equal(v2.version,2);
+const v2=encounterConfig({version:2});assert.equal(v2.version,2);
 assert.equal(encounterSchedule(v2,25)[0].health,rounds[0].health*3);
 const modern={...battle,encounter_config:v2,encounter_rounds:[{index:0,from:180,to:300,health:1000,final:false}]};
 const answer=(id,p,s,before,after,xp=0)=>({...event(id,p,'battlegrafia',s,xp),details:{learning:{version:1,correctBefore:before,correctAfter:after}}});

@@ -1,3 +1,12 @@
+## 2026-10-24 · XP equilibrada y segunda vía del taller
+
+- Ejecutar `npm run check`; `check-fair-xp.mjs` verifica recompensas, cambios de run, duplicados, conservación del histórico, paridad Apps Script, pendientes, precisión, tiempo activo, pausas de taller, podio por daño y compatibilidad v2.
+- Preparar un nuevo taller de 400 XP. Comprobar las reglas de XP y la vía de práctica en alumno; preparar no inicia cronómetro.
+- Con una cuenta de prueba: palabra Maniacgrafía +3; frase Battlegrafía +12 (monstruo +25); palabras Forja de 3/5/7 letras +12/+18/+24. Guardar repetido, visitar tienda, salir y restaurar: no duplica XP.
+- Completar práctica sin 400 XP y revisar alumno/profesor/Flotas: un premio de 5 puntos. Superar después 400 XP no entrega otro. No usar cuentas reales para una simulación.
+- Iniciar batalla nueva v3, comparar daño de juegos distintos, podios por daño, pausa y cuatro apariciones. Revisar una batalla antigua: sus resultados/recompensas deben permanecer iguales.
+- Revisar medianas por juego después de la próxima sesión real; no tratar las pruebas sintéticas como prueba de carga de producción.
+
 ## 2026-10-22 · Rayuela: historias de clase y rúbrica 1–10
 
 - `node --no-warnings scripts/check-rayuela-gallery.mjs`: validación de campos 1–10, rechazo de cero/fracciones/cadenas, voto único con identidad de sesión, rechazo de autor, rúbrica antigua, nota ortográfica independiente y mínimo cero, CRLF, decisiones narrativas.

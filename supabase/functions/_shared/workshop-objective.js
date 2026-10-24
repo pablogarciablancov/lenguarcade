@@ -32,7 +32,14 @@ export function groupWorkshops(rows) {
 }
 export function workshopProgress(session, events) {
   const periods = session.periods || [session];
-  let xp=0, completedAt=null, awardRun=null;
+  let xp=0, completedAt=null, awardRun=null, completionRoute=null;
+  const weights={maniacgrafia:3,battlegrafia:12,lexoma:12};
+  const target=Math.max(0,Number(session.target_xp)||0);
+  const support={available:!isForjaObjective(session)&&target>0&&(session.game_ids||[]).some(id=>weights[id]),
+    points:0,target:Math.ceil(target*.75),activeSeconds:0,requiredSeconds:Math.max(300,Math.min(1200,Math.round(target/400*600))),
+    correct:0,errors:0,accuracy:0,byGame:{},targets:{},completed:false};
+  for(const id of session.game_ids||[])if(weights[id])support.targets[id]=Math.ceil(support.target/weights[id]);
+  const learningWatermarks=new Map();let lastWorkAt=null,lastPeriod=null;
   const seen=new Set();
   for (const event of [...events].sort((a,b)=>Date.parse(a.occurred_at)-Date.parse(b.occurred_at))) {
     if (['teacher_adjustment','class_boss_reward'].includes(event.event_type)) continue;
@@ -47,8 +54,28 @@ export function workshopProgress(session, events) {
     });
     if(!period)continue;
     xp+=Math.max(0,Number(event.xp_delta||0));
-    const complete=isForjaObjective(session)?workshopVictory(period,event):Number(session.target_xp)>0&&xp>=Number(session.target_xp);
-    if(!completedAt&&complete){completedAt=event.occurred_at;awardRun=period;}
+    // Only new server policy records can use the support route; old results stay unchanged.
+    const learning=event.details?.learning;
+    if(support.available&&weights[event.game_id]&&learning?.policyVersion===2&&learning.version===1&&
+       Number.isSafeInteger(learning.correctBefore)&&Number.isSafeInteger(learning.correctAfter)&&learning.correctBefore>=0&&learning.correctAfter>=learning.correctBefore&&
+       Number.isSafeInteger(learning.errorsBefore)&&Number.isSafeInteger(learning.errorsAfter)&&learning.errorsBefore>=0&&learning.errorsAfter>=learning.errorsBefore){
+      const prior=learningWatermarks.get(event.game_id)||{correct:learning.correctBefore,errors:learning.errorsBefore};
+      const correct=Math.max(0,learning.correctAfter-Math.max(prior.correct,learning.correctBefore));
+      const errors=Math.max(0,learning.errorsAfter-Math.max(prior.errors,learning.errorsBefore));
+      learningWatermarks.set(event.game_id,{correct:Math.max(prior.correct,learning.correctAfter),errors:Math.max(prior.errors,learning.errorsAfter)});
+      support.correct+=correct;support.errors+=errors;
+      support.byGame[event.game_id]=(support.byGame[event.game_id]||0)+correct;
+      support.points+=correct*weights[event.game_id];
+      if(correct>0){
+        if(lastWorkAt!==null&&lastPeriod===period&&at-lastWorkAt<=90000)support.activeSeconds+=(at-lastWorkAt)/1000;
+        lastWorkAt=at;lastPeriod=period;
+      }
+      support.accuracy=support.correct+support.errors?Math.floor(100*support.correct/(support.correct+support.errors)):0;
+      support.completed=support.points>=support.target&&support.activeSeconds>=support.requiredSeconds&&support.accuracy>=70;
+    }
+    const xpComplete=target>0&&xp>=target;
+    const complete=isForjaObjective(session)?workshopVictory(period,event):xpComplete||support.completed;
+    if(!completedAt&&complete){completedAt=event.occurred_at;awardRun=period;completionRoute=isForjaObjective(session)?'forja_easy_win':xpComplete?'xp':'practice';}
   }
-  return {xp,completed:!!completedAt,completedAt,awardRun};
+  return {xp,completed:!!completedAt,completedAt,awardRun,completionRoute,support};
 }

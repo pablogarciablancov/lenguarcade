@@ -1,13 +1,13 @@
 // Platform XP is retained. Only the cost of each successive level changes.
 export const XP_REWARD_GUIDE = Object.freeze({
-  battlegrafia:"6 XP por respuesta correcta nueva y 25 XP por monstruo derrotado; límite 360 XP por guardado (180 en checkpoint).",
+  battlegrafia:"12 XP por frase correcta nueva y 25 XP por monstruo derrotado.",
   sopa_de_tinta:"6 XP por palabra nueva correcta; límite 320 XP por guardado (150 en checkpoint).",
   rayuela:"3 XP por elemento nuevo de estructura y 60 XP por primera entrega válida; límite 360 XP (150 en checkpoint).",
   entre_lineas:"6 XP por respuesta correcta nueva y 60 XP por caso nuevo (máximo 3 por guardado); límite 360 XP (180 en checkpoint).",
   versopolis:"6 XP por composición correcta nueva y XP adicional según la puntuación nueva de la partida; límite 360 XP (180 en checkpoint).",
   lexaria:"6 XP por respuesta correcta nueva, 12 por victoria de carrera, 6 por victoria de duelo y 2 por derrota de duelo; límite 360 XP (180 en checkpoint).",
   tierras_de_tinta:"6 XP por respuesta correcta nueva y 30 por victoria nueva; límite 360 XP (180 en checkpoint).",
-  maniacgrafia:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  maniacgrafia:"3 XP por palabra correcta nueva.",
   narratoria:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
   scrabble:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
   conjuga_apuesta:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
@@ -15,8 +15,23 @@ export const XP_REWARD_GUIDE = Object.freeze({
   tower_defense:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
   word_play:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
   lexitrama:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
-  lexoma:"6 XP por respuesta correcta nueva; límite 320 XP (150 en checkpoint).",
+  lexoma:"12 XP por palabra de hasta 4 letras, 18 por 5–6 y 24 por 7 o más.",
 });
+// Rebalance only future deltas. These values never multiply historical totals.
+export function actionRewards(gameId,save,previous,count){
+  count=Math.min(60,Math.max(0,Math.floor(Number(count)||0)));
+  if(gameId==='lexoma'){
+    const run=save?.run,prior=previous?.run;
+    const offset=run?.id&&run.id===prior?.id?(prior.words?.length||0):0;
+    return Array.from({length:count},(_,i)=>{
+      const word=run?.words?.[offset+i]||run?.wordLog?.[offset+i]?.word||'';
+      const length=Array.from(String(word).normalize('NFC').replace(/[^a-záéíóúüñ]/gi,'')).length;
+      return length>=7?24:length>=5?18:12;
+    });
+  }
+  return Array(count).fill(gameId==='maniacgrafia'?3:gameId==='battlegrafia'?12:6);
+}
+
 export function capProgressionAward(requestedXp,requestedFeathers,minuteXp,tenMinuteXp,minuteFeathers,tenMinuteFeathers){
  const xp=Math.max(0,Math.round(Number(requestedXp)||0)),feathers=Math.max(0,Math.round(Number(requestedFeathers)||0));
  const awardedXp=Math.max(0,Math.min(xp,360-Math.max(0,Number(minuteXp)||0),2400-Math.max(0,Number(tenMinuteXp)||0)));
@@ -155,7 +170,7 @@ function battlegrafiaSnapshot(save,prior,old,context){
   const defeatedDelta=Math.min(rawDefeatedDelta,Math.max(1,dc+1));
   const total=n(save?.totalMonsters);
   const pct=total?defeatedCount(save)/total*100:n(save?.percentage);
-  const xpGain=Math.min(checkpoint?180:360,dc*6+defeatedDelta*25);
+  const xpGain=dc*12+defeatedDelta*25;
   const oldCorrect=n(old.successes),newCorrect=oldCorrect+dc;
   const featherGain=Math.min(checkpoint?10:20,
     Math.max(0,Math.floor(newCorrect/8)-Math.floor(oldCorrect/8))+defeatedDelta
@@ -207,7 +222,7 @@ function entreLineasSnapshot(save,prior,old,raw,priorRaw,context){
   return baseResult(old,dc+de,dc,de,pct,xpGain,featherGain);
 }
 
-function genericMetricsSnapshot(raw,priorRaw,old,context){
+function genericMetricsSnapshot(raw,priorRaw,old,context,gameId){
   const metrics=metricsOf(raw),previous=metricsOf(priorRaw);
   const checkpoint=context?.checkpoint===true;
   const answerCap=checkpoint?24:60;
@@ -219,7 +234,7 @@ function genericMetricsSnapshot(raw,priorRaw,old,context){
   const da=Math.min(checkpoint?36:100,Math.max(dc+de,observedAttempts));
   const safeCorrect=Math.min(dc,da);
   const safeErrors=Math.max(de,da-safeCorrect);
-  const xpGain=Math.min(checkpoint?150:320,safeCorrect*6);
+  const xpGain=['maniacgrafia','lexoma'].includes(gameId)?safeCorrect*(gameId==='maniacgrafia'?3:12):Math.min(checkpoint?150:320,safeCorrect*6);
   const oldCorrect=n(old.successes),newCorrect=oldCorrect+safeCorrect;
   const featherGain=Math.min(checkpoint?8:16,
     Math.max(0,Math.floor(newCorrect/8)-Math.floor(oldCorrect/8))
@@ -239,6 +254,17 @@ export function snapshotProgress(gameId,save,previous,old={},raw={},previousRaw=
   if(gameId==='battlegrafia')return battlegrafiaSnapshot(save,previous,old,context);
   if(gameId==='rayuela')return rayuelaSnapshot(save,previous,old,context);
   if(gameId==='entre_lineas')return entreLineasSnapshot(save,previous,old,raw,previousRaw,context);
+  if(gameId==='lexoma'&&Array.isArray(save?.run?.words)){
+    const run=save.run,prior=previous?.run;
+    const same=run.id&&run.id===prior?.id;
+    const cap=context?.checkpoint===true?24:60;
+    const dc=Math.min(cap,Math.max(0,run.words.length-(same?(prior.words?.length||0):0)));
+    const de=Math.min(cap,Math.max(0,n(run.errors)-(same?n(prior.errors):0)));
+    const rewards=actionRewards(gameId,save,previous,dc);
+    const feathers=Math.min(context?.checkpoint===true?8:16,Math.max(0,Math.floor((n(old.successes)+dc)/8)-Math.floor(n(old.successes)/8)));
+    return baseResult(old,dc+de,dc,de,metricsOf(raw).percentage,rewards.reduce((a,b)=>a+b,0),feathers);
+  }
+
 
   // Maniacgrafía guarda sus estadísticas dentro de `save.stats` y no envía
   // `metrics.percentage`. Sin esta adaptación, XP y partidas se guardan pero
@@ -259,7 +285,7 @@ export function snapshotProgress(gameId,save,previous,old={},raw={},previousRaw=
       const dc=Math.min(cap,Math.max(0,words-priorWords));
       const de=capDelta(metrics.errors,metricsOf(previousRaw).errors,cap);
       const featherGain=Math.min(context?.checkpoint===true?8:16,Math.max(0,Math.floor((n(old.successes)+dc)/8)-Math.floor(n(old.successes)/8)));
-      return baseResult(old,dc+de,dc,de,Math.max(n(metrics.percentage),wordProgress,adventureProgress),Math.min(context?.checkpoint===true?150:320,dc*6),featherGain);
+      return baseResult(old,dc+de,dc,de,Math.max(n(metrics.percentage),wordProgress,adventureProgress),dc*3,featherGain);
     }
   }
 
@@ -281,10 +307,10 @@ export function snapshotProgress(gameId,save,previous,old={},raw={},previousRaw=
       attempts=n(c.stats?.asked);correct=n(c.stats?.correct);priorAttempts=n(p.stats?.asked);priorCorrect=n(p.stats?.correct);
       score=sum(c.victories)*30;priorScore=sum(p.victories)*30;pct=Object.values(c.victories||{}).filter(value=>n(value)>0).length/7*100;
     }else{
-      return genericMetricsSnapshot(raw,previousRaw,old,context);
+      return genericMetricsSnapshot(raw,previousRaw,old,context,gameId);
     }
   }else{
-    return genericMetricsSnapshot(raw,previousRaw,old,context);
+    return genericMetricsSnapshot(raw,previousRaw,old,context,gameId);
   }
 
   const checkpoint=context?.checkpoint===true;
