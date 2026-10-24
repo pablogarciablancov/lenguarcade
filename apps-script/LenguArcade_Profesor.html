@@ -1509,16 +1509,41 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
   // Minimal bridge: the cooperative boss is in a later <script>, while the
   // workshop planner and its methods intentionally live inside this IIFE.
   // Never expose writable planner state or move the workshop's existing logic.
+  function bossPreparedPlan(){
+    var plans=workshopPlannerState&&workshopPlannerState.plans||[];
+    return plans.find(function(plan){
+      return plan&&!plan.usedAt&&!plan.active&&!plan.deletedAt&&
+        String(plan.title||'').indexOf('El Devorapalabras · La defensa del Gran Archivo')===0&&
+        Number(plan.targetXp)>0&&
+        ['battlegrafia','lexoma','maniacgrafia'].every(function(id){return (plan.gameIds||[]).includes(id);});
+    })||null;
+  }
   window.laBossWorkshopBridge={
     selectedClass:teacherCurrentClass,
     activeSession:function(){return workshopPlannerState&&workshopPlannerState.activeSession||null;},
+    preparedPlan:bossPreparedPlan,
     prepare:async function(classCode,payload){
       if(!classCode||classCode!==teacherCurrentClass())throw new Error('Selecciona primero una clase válida.');
-      var saved=await sessionCall('saveAndActivateWorkshopPlan',[classCode,payload,true]);
-      await syncWorkshopSupabaseAccess(classCode,saved&&saved.activeSession);
-      // Do not replace the panel of a different class if the selector moved.
-      if(classCode===teacherCurrentClass())renderWorkshopPlanner(saved);
-      return saved;
+      var existing=bossPreparedPlan();
+      if(existing)return existing;
+      // A prepared boss is a saved planner draft: no game access, mission clock or boss clock yet.
+      var saved=await sessionCall('saveWorkshopPlanFast',[classCode,payload]);
+      if(!saved||!saved.plan||!saved.plan.planId)throw new Error('No se pudo confirmar la preparación del taller.');
+      if(classCode===teacherCurrentClass()){
+        mergeFastSavedPlan(saved);
+        if(typeof window.classBossRenderPanel==='function')window.classBossRenderPanel();
+      }
+      return saved.plan;
+    },
+    activate:async function(classCode,planId){
+      if(!classCode||classCode!==teacherCurrentClass())throw new Error('La clase ha cambiado. Selecciónala de nuevo.');
+      var plan=bossPreparedPlan();
+      if(!plan||String(plan.planId)!==String(planId))throw new Error('La preparación ya no existe. Vuelve a prepararla.');
+      // The games, the 400-XP objective and the workshop run begin ONLY here.
+      var opened=await sessionCall('activateWorkshopPlan',[classCode,planId,true]);
+      await syncWorkshopSupabaseAccess(classCode,opened&&opened.activeSession);
+      if(classCode===teacherCurrentClass())renderWorkshopPlanner(opened);
+      return opened;
     }
   };
   function plannerPayload(){
