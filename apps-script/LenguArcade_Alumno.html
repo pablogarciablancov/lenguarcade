@@ -3968,7 +3968,7 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
         throw error;
       }finally{
         inFlight=null;
-        armTimer(pendingImmediate?0:(failures?Math.min(60000,3000*Math.pow(2,failures)):3000));
+        armTimer(pendingImmediate?0:(failures?Math.min(60000,3000*Math.pow(2,failures)):10000));
         pendingImmediate=false;
       }
     })();
