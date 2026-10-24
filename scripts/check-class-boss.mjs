@@ -3,6 +3,17 @@ import {
   BOSS_GAMES,BOSS_DURATION_SECONDS,initialBossHealth,battleClock,battleDeadlineMs,countBossDamage
 } from '../supabase/functions/_shared/class-boss-engine.js';
 
+// The deployed legacy panel still invokes "start" while preparing.
+// That first call must only create a prepared event; a second click starts it.
+const {readFileSync}=await import('node:fs');
+const bossApi=readFileSync(new URL('../supabase/functions/class-boss/index.ts',import.meta.url),'utf8');
+assert.match(bossApi,/if\(action==="prepare"\|\|!previous\)/,
+  'An unprepared start must create an inert event, never start the timer');
+assert.match(bossApi,/state:"prepared",duration_seconds/,
+  'The first legacy call must persist the prepared state');
+assert.match(bossApi,/\.eq\("id",previous\.id\)\.eq\("state","prepared"\)/,
+  'Only the explicit subsequent start can activate the event');
+
 const started='2026-10-18T10:00:00.000Z',t=Date.parse(started);
 const battle={started_at:started,active_since:started,elapsed_seconds:0,duration_seconds:1500,
   state:'active',game_ids:['battlegrafia','lexoma','maniacgrafia'],health_total:224,intervals:[]};
