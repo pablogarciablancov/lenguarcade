@@ -1509,16 +1509,41 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
   // Minimal bridge: the cooperative boss is in a later <script>, while the
   // workshop planner and its methods intentionally live inside this IIFE.
   // Never expose writable planner state or move the workshop's existing logic.
+  function bossPreparedPlan(){
+    var plans=workshopPlannerState&&workshopPlannerState.plans||[];
+    return plans.find(function(plan){
+      return plan&&!plan.usedAt&&!plan.active&&!plan.deletedAt&&
+        String(plan.title||'').indexOf('El Devorapalabras · La defensa del Gran Archivo')===0&&
+        Number(plan.targetXp)>0&&
+        ['battlegrafia','lexoma','maniacgrafia'].every(function(id){return (plan.gameIds||[]).includes(id);});
+    })||null;
+  }
   window.laBossWorkshopBridge={
     selectedClass:teacherCurrentClass,
     activeSession:function(){return workshopPlannerState&&workshopPlannerState.activeSession||null;},
+    preparedPlan:bossPreparedPlan,
     prepare:async function(classCode,payload){
       if(!classCode||classCode!==teacherCurrentClass())throw new Error('Selecciona primero una clase válida.');
-      var saved=await sessionCall('saveAndActivateWorkshopPlan',[classCode,payload,true]);
-      await syncWorkshopSupabaseAccess(classCode,saved&&saved.activeSession);
-      // Do not replace the panel of a different class if the selector moved.
-      if(classCode===teacherCurrentClass())renderWorkshopPlanner(saved);
-      return saved;
+      var existing=bossPreparedPlan();
+      if(existing)return existing;
+      // A prepared boss is a saved planner draft: no game access, mission clock or boss clock yet.
+      var saved=await sessionCall('saveWorkshopPlanFast',[classCode,payload]);
+      if(!saved||!saved.plan||!saved.plan.planId)throw new Error('No se pudo confirmar la preparación del taller.');
+      if(classCode===teacherCurrentClass()){
+        mergeFastSavedPlan(saved);
+        if(typeof window.classBossRenderPanel==='function')window.classBossRenderPanel();
+      }
+      return saved.plan;
+    },
+    activate:async function(classCode,planId){
+      if(!classCode||classCode!==teacherCurrentClass())throw new Error('La clase ha cambiado. Selecciónala de nuevo.');
+      var plan=bossPreparedPlan();
+      if(!plan||String(plan.planId)!==String(planId))throw new Error('La preparación ya no existe. Vuelve a prepararla.');
+      // The games, the 400-XP objective and the workshop run begin ONLY here.
+      var opened=await sessionCall('activateWorkshopPlan',[classCode,planId,true]);
+      await syncWorkshopSupabaseAccess(classCode,opened&&opened.activeSession);
+      if(classCode===teacherCurrentClass())renderWorkshopPlanner(opened);
+      return opened;
     }
   };
   function plannerPayload(){
@@ -3148,7 +3173,7 @@ body.light .teacherMonitorTable th{background:#fff}
 </div>
 <script id="la-class-boss-controller">
 (function(){
-  var last=null,timer=null,requesting=false,stage=$('classBossStage'),lastDamage=0,lastCombos=0,visualEventId=null;
+  var last=null,lastClassCode='',timer=null,requesting=false,stage=$('classBossStage'),lastDamage=0,lastCombos=0,visualEventId=null;
   // Each animation frame is a separate, padded 512px image: never crop a grid.
   var spritePhases=['healthy','cracked','torn','critical'];
   var spriteAssetVersion='4c1509da99e34cc3cdf4dc2de1179cc4e017ca24';
@@ -3236,6 +3261,7 @@ body.light .teacherMonitorTable th{background:#fff}
     event_already_exists_reload:'El evento ya existe. Actualiza el panel.',
     finish_previous_event:'Finaliza primero el combate anterior.',
     boss_finished:'La batalla ha terminado. Usa una nueva edición del taller.',
+    prepare_battle_first:'Prepara primero la batalla; el cronómetro solo se activa al pulsar Comenzar batalla.',
     workshop_run_missing:'No se ha encontrado la apertura del taller. Recarga el planificador.'
   };return messages[code]||code||'No se pudo conectar con el combate.';}
   function status(s){var node=$('classBossPanelStatus');if(node)node.textContent=s||'';var screen=$('classBossStageStatus');if(screen)screen.textContent=s||'';}
@@ -3244,7 +3270,8 @@ body.light .teacherMonitorTable th{background:#fff}
     var bridge=bossWorkshop();var s=bridge?bridge.activeSession():null;
     var gameIds=s&&s.gameIds||[];
     var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
-    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Varias apariciones, descansos entre combates y un gran enfrentamiento final. Los podios conceden XP extra. Flotas mantiene un único objetivo por alumno y taller.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚔️ Iniciar combate':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
+    var prepared=bridge&&bridge.preparedPlan&&bridge.preparedPlan();
+    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Varias apariciones, descansos entre combates y un gran enfrentamiento final. Los podios conceden XP extra. Flotas mantiene un único objetivo por alumno y taller.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚔️ Comenzar batalla':prepared?'⚔️ Comenzar batalla':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
     var controls='<div class="laBossSettings">';
     [['sessionMinutes','Sesión · minutos',10,60],['appearanceCount','Apariciones',2,6],['combatSeconds','Combate · segundos',30,180],['participationXp','XP por participar en victoria',0,250]].forEach(function(field){controls+='<label>'+field[1]+'<input type="number" id="bossSetting_'+field[0]+'" min="'+field[2]+'" max="'+field[3]+'" value="'+encounterSettings[field[0]]+'"></label>';});
     controls+='<label>Objetivo al preparar taller · XP<input type="number" id="bossFleetTarget" min="1" max="5000" value="'+fleetTarget+'"></label></div><div class="laBossRewardSettings">';
@@ -3253,30 +3280,75 @@ body.light .teacherMonitorTable th{background:#fff}
     root.innerHTML+=controls;
     Object.keys(encounterSettings).forEach(function(key){if(Array.isArray(encounterSettings[key]))encounterSettings[key].forEach(function(v,i){$('bossSetting_'+key+i).onchange=function(){encounterSettings[key][i]=Math.max(0,Math.min(1000,Number(this.value)||0));};});else $('bossSetting_'+key).onchange=function(){encounterSettings[key]=Number(this.value);};});
     $('bossFleetTarget').onchange=function(){fleetTarget=Math.max(1,Math.min(5000,Number(this.value)||400));};
-    $('classBossPrepare').onclick=function(){ready?act('start'):prepare();};
+    updatePrimaryAction();
     $('classBossProject').onclick=function(){openStage();};
     refresh();
+  }
+  function updatePrimaryAction(){
+    var btn=$('classBossPrepare'),bridge=bossWorkshop(),s=bridge?bridge.activeSession():null;
+    if(!btn)return;
+    var gameIds=s&&s.gameIds||[];
+    var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
+    var prepared=bridge&&bridge.preparedPlan&&bridge.preparedPlan();
+    var battle=lastClassCode===getClass()?last:null;
+    var fresh=!!(ready&&battle&&(battle.state==='active'||battle.state==='paused'||battle.state==='prepared'));
+    btn.textContent=prepared?'⚔️ Comenzar batalla':fresh&&battle.state!=='prepared'?'📺 Ver batalla':
+      ready?'⚔️ Comenzar batalla':'⚙️ Preparar batalla';
+    btn.disabled=launchPending;
+    btn.onclick=function(){
+      if(prepared)return launchBattle();
+      if(fresh&&battle.state!=='prepared')return openStage();
+      if(ready)return launchBattle();
+      return prepare();
+    };
   }
   async function prepare(){
     var classCode=getClass();if(!classCode){status('Selecciona primero una clase.');return;}
     var bridge=bossWorkshop();var s=bridge?bridge.activeSession():null;
-    if(s&&s.classroomOpen&&!window.confirm('Se cerrará la sesión de taller que está abierta para preparar el evento cooperativo. ¿Continuar?'))return;
+    if(s&&s.classroomOpen&&!window.confirm('Hay un taller abierto. Preparar el evento no lo cerrará; al comenzar la batalla se sustituirá por el taller cooperativo. ¿Prepararlo?'))return;
     status('Preparando los tres juegos…');
     try{
       var payload={title:'El Devorapalabras · La defensa del Gran Archivo',message:'Juega y contribuye a la victoria colectiva de tu clase.',targetXp:fleetTarget,objectiveType:'xp',gameIds:['battlegrafia','lexoma','maniacgrafia'],classCodes:[classCode]};
       var bridge=bossWorkshop();if(!bridge)throw new Error('El planificador no está disponible. Recarga la página.');
       await bridge.prepare(classCode,payload);
-      await act('start');
+      updatePrimaryAction();
+      status('Batalla preparada. Los juegos siguen cerrados y el cronómetro está sin iniciar. Pulsa «Comenzar batalla» cuando llegue la clase.');
     }catch(e){status('No se pudo preparar: '+msg(e.code||e.message));}
+  }
+  var launchPending=false;
+  async function launchBattle(){
+    if(launchPending)return;
+    var classCode=getClass(),bridge=bossWorkshop();
+    if(!classCode||!bridge){status('Elige una clase y prepara el evento.');return;}
+    launchPending=true;updatePrimaryAction();
+    try{
+      var session=bridge.activeSession(),plan=bridge.preparedPlan&&bridge.preparedPlan();
+      if(!plan&&!(session&&session.classroomOpen))throw new Error('Primero prepara el taller cooperativo.');
+      status('Abriendo los juegos y comenzando la batalla…');
+      if(plan)await bridge.activate(classCode,plan.planId);
+      if(getClass()!==classCode)throw new Error('La clase seleccionada ha cambiado.');
+      // If prepare/start must be retried after a network error, both server actions
+      // are idempotent for the active workshop; its clock is never reset.
+      await edge('class-boss',{action:'prepare',classCode:classCode,encounterConfig:encounterSettings});
+      var r=await edge('class-boss',{action:'start',classCode:classCode});
+      last=r.event||null;lastClassCode=classCode;paint(last);
+      status('La batalla ha comenzado. Los juegos y el reto de '+fleetTarget+' XP ya están activos.');
+      openStage();
+    }catch(error){
+      status('No se pudo iniciar la batalla: '+msg(error.code||error.message)+'. Si los juegos ya están abiertos, vuelve a pulsar «Comenzar batalla».');
+      // Refresh recovers a partially completed launch without opening a second run.
+      refresh();
+    }finally{launchPending=false;updatePrimaryAction();}
   }
   async function act(action){
     var classCode=getClass();if(!classCode){status('Selecciona una clase.');return;}
     status('Actualizando batalla…');
     try{
       var result=await edge('class-boss',{action:action,classCode:classCode,encounterConfig:encounterSettings});
-      last=result.event||null;paint(last);
+      last=result.event||null;lastClassCode=classCode;paint(last);updatePrimaryAction();
       if(action==='start')openStage();
-      if(action==='finish')status('El combate ha terminado. El progreso de los alumnos se conserva.');
+      if(action==='prepare')status('Batalla preparada. El cronómetro NO ha empezado. Pulsa «Comenzar batalla» cuando estén listos.');
+      else if(action==='finish')status('El combate ha terminado. El progreso de los alumnos se conserva.');
       else status(last?'Combate '+(last.state==='active'?'en curso':last.state==='paused'?'en pausa':'finalizado')+'.':'Todavía no hay combate.');
     }catch(e){status('No se pudo actualizar: '+msg(e.code||e.message));}
   }
@@ -3293,6 +3365,20 @@ body.light .teacherMonitorTable th{background:#fff}
       $('classBossPause').disabled=true;$('classBossFinish').disabled=true;
       visualEventId=null;lastDamage=0;lastCombos=0;
       $('classBossLegend').textContent='Prepara un taller cooperativo y empieza el combate.';return;
+    }
+    if(b.state==='prepared'){
+      stage.setAttribute('data-outcome','');
+      monster.style.visibility='hidden';stopBossSprite();
+      $('classBossPodiumHost').innerHTML='';
+      $('classBossOutcome').classList.remove('show');
+      $('classBossPhase').textContent='BATALLA PREPARADA';
+      $('classBossLegend').textContent='El cronómetro comenzará exclusivamente al pulsar «Comenzar batalla».';
+      $('classBossHealth').textContent='Preparados: '+b.totalHealth+' puntos de vida';
+      $('classBossClock').textContent='Sin iniciar';
+      $('classBossCombos').textContent='Combos: 0';
+      $('classBossHealthBar').style.width='100%';
+      $('classBossPause').disabled=true;$('classBossFinish').disabled=false;
+      visualEventId=b.id;lastDamage=0;lastCombos=0;return;
     }
     var ratio=b.totalHealth>0?Math.max(0,Math.min(1,b.health/b.totalHealth)):1;
     var phase=ratio>.7?1:ratio>.35?2:ratio>.1?3:4;
@@ -3338,8 +3424,13 @@ body.light .teacherMonitorTable th{background:#fff}
   }
   async function refresh(){
     if(requesting||!getClass()||!$('classBossPanel'))return;requesting=true;
-    try{var r=await edge('class-boss',{action:'status',classCode:getClass()});last=r.event||null;paint(last);
-      status(last?'Batalla: '+(last.state==='active'?'en curso':last.state==='paused'?'pausada':'terminada')+'. Daño confirmado: '+last.damage+'.':'No hay batalla creada todavía.');
+    try{var requestedClass=getClass();var r=await edge('class-boss',{action:'status',classCode:requestedClass});
+      if(getClass()!==requestedClass)return;
+      last=r.event||null;lastClassCode=requestedClass;paint(last);updatePrimaryAction();
+      var draft=bossWorkshop()&&bossWorkshop().preparedPlan&&bossWorkshop().preparedPlan();
+      status(draft?'Batalla preparada, sin abrir juegos y sin cronómetro. Pulsa «Comenzar batalla» cuando estén listos.':
+        last&&last.state==='prepared'?'Batalla preparada. Pulsa «Comenzar batalla» cuando estén listos.':
+        last?'Batalla: '+(last.state==='active'?'en curso':last.state==='paused'?'pausada':'terminada')+'. Daño confirmado: '+last.damage+'.':'No hay batalla creada todavía.');
     }catch(e){status('Servicio del combate no disponible: '+msg(e.code||e.message));}
     finally{requesting=false;}
   }

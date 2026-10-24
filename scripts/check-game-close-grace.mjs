@@ -15,7 +15,7 @@ assert.match(alumno,/accessGracePeriod:!!\(runner\.accessClosing&&!runner\.acces
 assert.match(alumno,/accessFrozen=true/,'Los guardados se congelan al comenzar la finalización');
 assert.match(alumno,/runner\.accessClosing&&!runner\.explicitExitRequested/,'Un CLOSE_READY inesperado no expulsa durante la gracia');
 assert.match(alumno,/destroyGameRunner\(true\)/,'El portal puede cerrar el juego sin depender del iframe');
-assert.match(alumno,/3000\*Math\.pow\(2,failures\)\):3000/,'El sondeo visible normal es de tres segundos');
+assert.match(alumno,/3000\*Math\.pow\(2,failures\)\):10000/,'El sondeo visible normal es de diez segundos para evitar saturar la conexión');
 assert.match(alumno,/laHandleActiveGameAccessChange/,'Los cambios de acceso alcanzan al juego activo');
 
 assert.match(access,/select\("game_id,enabled,updated_at"\)/,'El estado ligero recibe el instante del cierre');

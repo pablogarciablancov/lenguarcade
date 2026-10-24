@@ -86,8 +86,8 @@ for(const gameId of allOfficialGames){
  const result=snapshotProgress(gameId,save,prior,{},raw,priorRaw,{});
  assert.ok(result.xp>=6,gameId+' debe conceder XP por progreso válido');
 }
-assert.deepEqual(capProgressionAward(240,20,170,890,14,58),{
- awardedXp:10,awardedFeathers:1,pendingXp:230,pendingFeathers:19
+assert.deepEqual(capProgressionAward(450,20,350,2390,14,58),{
+ awardedXp:10,awardedFeathers:1,pendingXp:440,pendingFeathers:19
 },'La protección debe aplazar y no borrar el excedente');
 assert.deepEqual(capProgressionAward(25,3,0,0,0,0),{
  awardedXp:25,awardedFeathers:3,pendingXp:0,pendingFeathers:0

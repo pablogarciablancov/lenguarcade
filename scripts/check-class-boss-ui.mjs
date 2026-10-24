@@ -13,6 +13,8 @@ const bossSource=bossMatch[1];
 // Keep the original planner state private. The controller may only use the
 // narrow adapter exported from that closure; not private symbols directly.
 assert.match(workshopSource,/window\.laBossWorkshopBridge\s*=\s*\{/);
+assert.match(workshopSource,/prepare:async function[\s\S]*?saveWorkshopPlanFast/,'The preparation must save a closed draft');
+assert.match(workshopSource,/activate:async function[\s\S]*?activateWorkshopPlan/,'Only explicit start opens workshop access');
 for(const privateName of [
   'workshopPlannerState','teacherCurrentClass','sessionCall',
   'syncWorkshopSupabaseAccess','renderWorkshopPlanner'
@@ -65,6 +67,10 @@ const ctx={
       id:'synthetic',state:'active',workshopOpen:true,health:232,totalHealth:240,
       remainingSeconds:1500,combos:0,damage:8,gameIds:['battlegrafia','lexoma','maniacgrafia']
     }};
+    if(request.action==='prepare'||(request.action==='status'&&requests.some(r=>r.request.action==='prepare')))return {event:{
+      id:'synthetic',state:'prepared',workshopOpen:true,health:240,totalHealth:240,
+      remainingSeconds:1500,combos:0,damage:0,gameIds:['battlegrafia','lexoma','maniacgrafia']
+    }};
     return {event:null};
   },
   $:getElementById
@@ -91,17 +97,38 @@ ctx.window.__setPlannerForTest({activeSession:null});
 assert.doesNotThrow(()=>ctx.window.classBossRenderPanel());
 assert.match(getElementById('classBossPanel').innerHTML,/Preparar taller cooperativo/);
 
-ctx.window.__setPlannerForTest({activeSession:{
-  classroomOpen:true,targetXp:400,gameIds:['battlegrafia','lexoma','maniacgrafia']
-}});
+// Exercise the teacher's explicit two-click flow with a closed draft.
+let draft=null,activationCount=0;
+const bridge=ctx.window.laBossWorkshopBridge;
+bridge.preparedPlan=()=>draft;
+bridge.prepare=async(classCode,payload)=>{
+  assert.equal(classCode,'TEST-C');
+  assert.equal(payload.targetXp,400);
+  draft={planId:'draft-boss',title:payload.title,gameIds:payload.gameIds,targetXp:payload.targetXp};
+  return draft;
+};
+bridge.activate=async(classCode,planId)=>{
+  assert.equal(classCode,'TEST-C');
+  assert.equal(planId,'draft-boss');
+  activationCount++;
+  draft=null;
+  ctx.window.__setPlannerForTest({activeSession:{
+    classroomOpen:true,targetXp:400,gameIds:['battlegrafia','lexoma','maniacgrafia']
+  }});
+  return {activeSession:bridge.activeSession()};
+};
 assert.doesNotThrow(()=>ctx.window.classBossRenderPanel());
-assert.match(getElementById('classBossPanel').innerHTML,/Iniciar combate/);
+assert.match(getElementById('classBossPanel').innerHTML,/Preparar taller cooperativo/);
 await getElementById('classBossPrepare').onclick();
-// The click handler schedules an async request without returning its Promise.
-// Flush the event loop so the fake Edge response can paint the HUD.
-await new Promise(resolve=>setImmediate(resolve));
-assert.ok(requests.some(r=>r.name==='class-boss'&&r.request.action==='start'&&r.request.classCode==='TEST-C'),
-  'Boss start did not use the selected workshop class');
+assert.ok(draft,'Preparing creates a persistent workshop draft');
+assert.equal(activationCount,0,'Preparing cannot open games');
+assert.ok(!requests.some(r=>r.request.action==='start'||r.request.action==='prepare'),
+  'Preparing cannot start or even create a running boss');
+assert.match(getElementById('classBossPrepare').textContent,/Comenzar batalla/);
+await getElementById('classBossPrepare').onclick();
+assert.equal(activationCount,1,'Only click on Comenzar batalla opens the games');
+assert.ok(requests.some(r=>r.request.action==='prepare'&&r.request.classCode==='TEST-C'));
+assert.ok(requests.some(r=>r.request.action==='start'&&r.request.classCode==='TEST-C'));
 assert.equal(getElementById('classBossHealth').textContent,'232 / 240 de vida');
 assert.equal(getElementById('classBossClock').textContent,'25:00');
 // Render confirmed snapshots at every boundary, without changing combat rules.
@@ -173,7 +200,7 @@ ctx.document.hidden=false;listeners.get('visibilitychange')();
 assert.equal(frames.size,1);
 getElementById('classBossClose').onclick();
 assert.equal(frames.size,0,'Closing projection must cancel animation');
-console.log('Class boss UI: twelve isolated frames, visibility/motion lifecycle, workshop bridge, start, four health phases, impacts, combos, outcomes and reset OK.');
+console.log('Class boss UI: prepared without clock; explicit start; twelve isolated frames, visibility/motion lifecycle, four health phases, impacts, combos, outcomes and reset OK.');
 const config={roundRewards:[150,100,75],finalRewards:[300,200,150],participationXp:25};
 const leaders=[{name:'Alumno <script>',damage:8},{name:'Segundo',damage:7},{name:'Tercero',damage:6}];
 const round={index:0,final:false,victory:true,leaderboard:leaders};

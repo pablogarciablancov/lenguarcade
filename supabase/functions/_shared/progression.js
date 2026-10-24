@@ -19,7 +19,7 @@ export const XP_REWARD_GUIDE = Object.freeze({
 });
 export function capProgressionAward(requestedXp,requestedFeathers,minuteXp,tenMinuteXp,minuteFeathers,tenMinuteFeathers){
  const xp=Math.max(0,Math.round(Number(requestedXp)||0)),feathers=Math.max(0,Math.round(Number(requestedFeathers)||0));
- const awardedXp=Math.max(0,Math.min(xp,180-Math.max(0,Number(minuteXp)||0),900-Math.max(0,Number(tenMinuteXp)||0)));
+ const awardedXp=Math.max(0,Math.min(xp,360-Math.max(0,Number(minuteXp)||0),2400-Math.max(0,Number(tenMinuteXp)||0)));
  const awardedFeathers=Math.max(0,Math.min(feathers,15-Math.max(0,Number(minuteFeathers)||0),60-Math.max(0,Number(tenMinuteFeathers)||0)));
  return{awardedXp,awardedFeathers,pendingXp:xp-awardedXp,pendingFeathers:feathers-awardedFeathers};
 }
