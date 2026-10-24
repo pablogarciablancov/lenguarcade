@@ -13,6 +13,8 @@ const bossSource=bossMatch[1];
 // Keep the original planner state private. The controller may only use the
 // narrow adapter exported from that closure; not private symbols directly.
 assert.match(workshopSource,/window\.laBossWorkshopBridge\s*=\s*\{/);
+assert.match(workshopSource,/prepare:async function[\s\S]*?saveWorkshopPlanFast/,'The preparation must save a closed draft');
+assert.match(workshopSource,/activate:async function[\s\S]*?activateWorkshopPlan/,'Only explicit start opens workshop access');
 for(const privateName of [
   'workshopPlannerState','teacherCurrentClass','sessionCall',
   'syncWorkshopSupabaseAccess','renderWorkshopPlanner'
@@ -95,19 +97,38 @@ ctx.window.__setPlannerForTest({activeSession:null});
 assert.doesNotThrow(()=>ctx.window.classBossRenderPanel());
 assert.match(getElementById('classBossPanel').innerHTML,/Preparar taller cooperativo/);
 
-ctx.window.__setPlannerForTest({activeSession:{
-  classroomOpen:true,targetXp:400,gameIds:['battlegrafia','lexoma','maniacgrafia']
-}});
+// Exercise the teacher's explicit two-click flow with a closed draft.
+let draft=null,activationCount=0;
+const bridge=ctx.window.laBossWorkshopBridge;
+bridge.preparedPlan=()=>draft;
+bridge.prepare=async(classCode,payload)=>{
+  assert.equal(classCode,'TEST-C');
+  assert.equal(payload.targetXp,400);
+  draft={planId:'draft-boss',title:payload.title,gameIds:payload.gameIds,targetXp:payload.targetXp};
+  return draft;
+};
+bridge.activate=async(classCode,planId)=>{
+  assert.equal(classCode,'TEST-C');
+  assert.equal(planId,'draft-boss');
+  activationCount++;
+  draft=null;
+  ctx.window.__setPlannerForTest({activeSession:{
+    classroomOpen:true,targetXp:400,gameIds:['battlegrafia','lexoma','maniacgrafia']
+  }});
+  return {activeSession:bridge.activeSession()};
+};
 assert.doesNotThrow(()=>ctx.window.classBossRenderPanel());
-assert.match(getElementById('classBossPanel').innerHTML,/Preparar batalla/);
+assert.match(getElementById('classBossPanel').innerHTML,/Preparar taller cooperativo/);
 await getElementById('classBossPrepare').onclick();
-assert.ok(requests.some(r=>r.name==='class-boss'&&r.request.action==='prepare'&&r.request.classCode==='TEST-C'));
-assert.ok(!requests.some(r=>r.request.action==='start'),'Preparing must NEVER start the 25-minute timer');
-assert.equal(getElementById('classBossClock').textContent,'Sin iniciar');
+assert.ok(draft,'Preparing creates a persistent workshop draft');
+assert.equal(activationCount,0,'Preparing cannot open games');
+assert.ok(!requests.some(r=>r.request.action==='start'||r.request.action==='prepare'),
+  'Preparing cannot start or even create a running boss');
 assert.match(getElementById('classBossPrepare').textContent,/Comenzar batalla/);
 await getElementById('classBossPrepare').onclick();
-assert.ok(requests.some(r=>r.name==='class-boss'&&r.request.action==='start'&&r.request.classCode==='TEST-C'),
-  'Only explicit Comenzar batalla should start the event');
+assert.equal(activationCount,1,'Only click on Comenzar batalla opens the games');
+assert.ok(requests.some(r=>r.request.action==='prepare'&&r.request.classCode==='TEST-C'));
+assert.ok(requests.some(r=>r.request.action==='start'&&r.request.classCode==='TEST-C'));
 assert.equal(getElementById('classBossHealth').textContent,'232 / 240 de vida');
 assert.equal(getElementById('classBossClock').textContent,'25:00');
 // Render confirmed snapshots at every boundary, without changing combat rules.
