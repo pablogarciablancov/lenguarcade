@@ -3,6 +3,8 @@ import {corsHeaders,jsonResponse,requireTeacherSession,requireProfileSession} fr
 
 function fail(message:string,status=400){return jsonResponse({ok:false,error:message},status);}
 function isoNow(){return new Date().toISOString();}
+// Short cache avoids re-reading thousands of game events for every classroom poll.
+const summaryCache=new Map<string,{until:number,summary:any}>();
 async function resolveClass(admin:any,org:string,code:string){
   if(!code)return null;
   const {data,error}=await admin.from("classrooms").select("id,name,section,legacy_class_code").eq("organization_id",org).eq("active",true);
@@ -63,9 +65,18 @@ async function getBossPeriods(admin:any,battle:any){
   return (runs||[]).filter((r:any)=>String(r.workshop_key||r.plan_id)===String(battle.workshop_key));
 
 }
-async function battleSummary(admin:any,battle:any,workshop:any){
+async function battleSummary(admin:any,battle:any,workshop:any,fresh=false){
   if(!battle)return null;
+  if(battle.state==="prepared"){
+    return {id:battle.id,title:"El Devorapalabras",state:"prepared",outcome:null,
+      health:battle.health_total,totalHealth:battle.health_total,damage:0,hits:0,combos:0,
+      remainingSeconds:battle.duration_seconds,workshopOpen:Boolean(workshop),gameIds:battle.game_ids,
+      startedAt:null,encounter:null};
+  }
   const now=Date.now();
+  const cacheKey=battle.id+":"+battle.updated_at+":"+Boolean(workshop);
+  const cached=summaryCache.get(cacheKey);
+  if(!fresh&&cached&&cached.until>now)return cached.summary;
   const {data:enrollments,error:enrollmentError}=await admin.from("classroom_enrollments")
     .select("profile_id").eq("classroom_id",battle.classroom_id).eq("active",true);
   if(enrollmentError)throw enrollmentError;
@@ -104,7 +115,7 @@ async function battleSummary(admin:any,battle:any,workshop:any){
     const named=(rows:any[])=>rows.map(p=>({...p,name:displayNames.get(p.profileId)||"Alumno"}));
     const shown=encounter.current||encounter.latest||encounter.rounds[0];
     const workshopOpen=Boolean(await getWorkshopForBoss(admin,battle,workshop));
-    return {id:battle.id,title:"El Devorapalabras",state:encounter.finished?"finished":workshopOpen?battle.state:"paused",
+    const summary={id:battle.id,title:"El Devorapalabras",state:encounter.finished?"finished":workshopOpen?battle.state:"paused",
       outcome:encounter.outcome,health:shown?.healthRemaining??shown?.health??0,totalHealth:shown?.health||0,
       damage:shown?.damage||0,hits:shown?.hits||0,combos:shown?.combos||0,
       remainingSeconds:battleClock(battle,now),workshopOpen,gameIds:battle.game_ids,startedAt:battle.started_at,
@@ -112,6 +123,9 @@ async function battleSummary(admin:any,battle:any,workshop:any){
         leaderboard:named(encounter.leaderboard),rounds:encounter.rounds.map((r:any)=>({...r,leaderboard:named(r.leaderboard)})),
         latest:encounter.latest?{...encounter.latest,leaderboard:named(encounter.latest.leaderboard)}:null,
         config:battle.encounter_config}};
+    if(summaryCache.size>80)summaryCache.clear();
+    summaryCache.set(cacheKey,{until:Date.now()+5000,summary});
+    return summary;
   }
   const tally=countBossDamage(events,battle,periods,now);
   const remainingSeconds=battleClock(battle,now,periods);
@@ -142,7 +156,7 @@ Deno.serve(async(request)=>{
         const workshop=await getActiveWorkshop(admin,organizationId,member.classroom_id);
         if(!workshop)continue;
         const battle=await currentBoss(admin,organizationId,member.classroom_id,workshop);
-        if(!battle||!battle.game_ids?.length)continue;
+        if(!battle||!battle.game_ids?.length||battle.state==="prepared")continue;
         if(battle.encounter_config){
           const summary=await battleSummary(admin,battle,workshop);
           return jsonResponse({ok:true,event:summary?{...summary,ownContribution:summary.encounter.leaderboard.find((p:any)=>p.profileId===profileId)||null}:null});
@@ -153,13 +167,13 @@ Deno.serve(async(request)=>{
       }
       return jsonResponse({ok:true,event:null});
     }
-    if(!["status","start","pause","resume","finish"].includes(action))return fail("invalid_action");
+    if(!["status","prepare","start","pause","resume","finish"].includes(action))return fail("invalid_action");
     const {admin,organizationId,profileId}=await requireTeacherSession(request);
     const classroom=await resolveClass(admin,organizationId,String(body.classCode||""));
     if(!classroom)return fail("class_not_found",404);
     const workshop=await getActiveWorkshop(admin,organizationId,classroom.id);
     let battle=await currentBoss(admin,organizationId,classroom.id,workshop);
-    if(action==="start"){
+    if(action==="prepare"||action==="start"){
       if(!workshop)return fail("open_workshop_first",409);
       if(!BOSS_GAMES.every(id=>(workshop.game_ids||[]).includes(id)))return fail("select_boss_games_in_workshop",409);
       const {data:run,error:runError}=await admin.from("workshop_runs")
@@ -171,29 +185,42 @@ Deno.serve(async(request)=>{
       if(!run)return fail("workshop_run_missing",409);
       const logicalKey=String(run.workshop_key||run.plan_id);
       const previous=battle&&String(battle.workshop_key)===logicalKey?battle:null;
-      if(previous)return jsonResponse({ok:true,event:await battleSummary(admin,previous,workshop),reused:true});
-      const {count,error:countError}=await admin.from("classroom_enrollments")
-        .select("profile_id",{count:"exact",head:true}).eq("classroom_id",classroom.id).eq("active",true);
-      if(countError)throw countError;
-      const config=encounterConfig(body.encounterConfig||{});
-      const rounds=encounterSchedule(config,count);
-      const duration=config.sessionMinutes*60;
-      const initialHealth=rounds[0].health;
-      const now=isoNow();
-      const {data, error}=await admin.from("class_boss_events")
-        .insert({organization_id:organizationId,classroom_id:classroom.id,
-          workshop_run_id:run.run_id,workshop_key:run.workshop_key||run.plan_id,
-          game_ids:BOSS_GAMES,state:"active",duration_seconds:duration,health_total:initialHealth,
-          started_at:now,active_since:now,created_by:profileId,encounter_config:config,encounter_rounds:rounds})
-        .select("*").single();
-      if(error){
-        if(error.code==="23505")return fail("event_already_exists_reload",409);
-        throw error;
+      if(action==="prepare"){
+        if(previous)return jsonResponse({ok:true,event:await battleSummary(admin,previous,workshop),reused:true});
+        const {count,error:countError}=await admin.from("classroom_enrollments")
+          .select("profile_id",{count:"exact",head:true}).eq("classroom_id",classroom.id).eq("active",true);
+        if(countError)throw countError;
+        const config=encounterConfig(body.encounterConfig||{});
+        const rounds=encounterSchedule(config,count);
+        const now=isoNow();
+        const {data,error}=await admin.from("class_boss_events")
+          .insert({organization_id:organizationId,classroom_id:classroom.id,
+            workshop_run_id:run.run_id,workshop_key:logicalKey,
+            game_ids:BOSS_GAMES,state:"prepared",duration_seconds:config.sessionMinutes*60,
+            health_total:rounds[0].health,started_at:now,active_since:null,
+            created_by:profileId,encounter_config:config,encounter_rounds:rounds})
+          .select("*").single();
+        if(error){
+          if(error.code==="23505")return fail("event_already_exists_reload",409);
+          throw error;
+        }
+        battle=data;
+      }else{
+        if(!previous)return fail("prepare_battle_first",409);
+        if(previous.state==="prepared"){
+          const at=isoNow();
+          const {data,error}=await admin.from("class_boss_events")
+            .update({state:"active",started_at:at,active_since:at,elapsed_seconds:0,intervals:[],updated_at:at})
+            .eq("id",previous.id).eq("state","prepared").select("*").maybeSingle();
+          if(error)throw error;
+          if(!data)return fail("event_state_changed",409);
+          battle=data;
+        }else battle=previous; // A repeated click never resets the clock.
       }
-      battle=data;
     }else if(action!=="status"){
       if(!battle)return fail("boss_not_found",404);
       if(action==="resume"&&(!workshop||!(await getWorkshopForBoss(admin,battle,workshop))))return fail("open_same_workshop_first",409);
+      if(battle.state==="prepared"&&action!=="finish")return fail("prepare_battle_first",409);
       if(action!=="finish"&&(battle.state==="finished"||battleClock(battle,Date.now(),await getBossPeriods(admin,battle))<=0))return fail("boss_finished",409);
       if(action==="pause"&&battle.state==="active"){
         const at=isoNow(); const {data,error}=await admin.from("class_boss_events")
@@ -213,7 +240,7 @@ Deno.serve(async(request)=>{
         if(error)throw error;battle=data;
       }
     }
-    const summary=await battleSummary(admin,battle,workshop);
+    const summary=await battleSummary(admin,battle,workshop,action!=="status");
     if(action==="status"&&battle&&battle.state!=="finished"&&summary?.state==="finished"&&summary.outcome){
       const now=isoNow();
       const {error}=await admin.from("class_boss_events")
