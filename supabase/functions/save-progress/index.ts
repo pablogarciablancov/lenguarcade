@@ -234,7 +234,14 @@ Deno.serve(async (request) => {
         .eq("game_id", gameId)
         .eq("result_id", resultId)
         .maybeSingle();
-      if (duplicate) return jsonResponse({ ok:true, duplicate:true });
+      if (duplicate) {
+        // The previous request may have committed and then timed out on the network.
+        // Return the authoritative persisted record so the player's XP HUD recovers.
+        const {data:record,error:recordError}=await admin.from("game_progress")
+          .select("*").eq("profile_id",profileId).eq("game_id",gameId).maybeSingle();
+        if(recordError)throw recordError;
+        return jsonResponse({ ok:true, duplicate:true, record });
+      }
     }
 
     const { data:old } = await admin.from("game_progress")
