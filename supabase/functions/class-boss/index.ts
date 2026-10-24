@@ -185,7 +185,11 @@ Deno.serve(async(request)=>{
       if(!run)return fail("workshop_run_missing",409);
       const logicalKey=String(run.workshop_key||run.plan_id);
       const previous=battle&&String(battle.workshop_key)===logicalKey?battle:null;
-      if(action==="prepare"){
+      // Compatibility with the old teacher panel: its first "start" used to
+      // fire automatically while preparing the workshop. Create an inert
+      // battle instead; a SECOND explicit click is needed to start the clock.
+      // The new panel calls "prepare" itself before an explicit "start".
+      if(action==="prepare"||!previous){
         if(previous)return jsonResponse({ok:true,event:await battleSummary(admin,previous,workshop),reused:true});
         const {count,error:countError}=await admin.from("classroom_enrollments")
           .select("profile_id",{count:"exact",head:true}).eq("classroom_id",classroom.id).eq("active",true);
