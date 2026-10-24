@@ -25,12 +25,15 @@ const source=readFileSync('supabase/functions/save-progress/index.ts','utf8');
 const sender=source.slice(source.indexOf('async function sendCompletedWorkshopAwards('),source.indexOf('Deno.serve('));
 let events=[event], deliveries=[];
 const workshop={...session,run_id:'run:today',classroom_id:'C',published:true,is_provisional:false,game_ids:['lexoma'],target_xp:0};
-const context={isForjaObjective,workshopVictory,groupWorkshops,workshopProgress,console,Date,crypto,TextEncoder,AbortSignal,
+const context={isForjaObjective,workshopVictory,groupWorkshops,workshopProgress,console,Date,crypto,TextEncoder,AbortSignal,cache:new Map(),
  Deno:{env:{get:()=> 'configured'}},
  fetch:async(url,opts)=>{deliveries.push(JSON.parse(opts.body));return {ok:true,json:async()=>({ok:true})}}};
-vm.runInNewContext(stripTypeScriptTypes(sender)+';globalThis.send=sendCompletedWorkshopAwards;',context);
+vm.runInNewContext('const fleetDeliveryCache=cache;'+stripTypeScriptTypes(sender)+';globalThis.send=sendCompletedWorkshopAwards;',context);
 const admin={from(table){const chain={};for(const op of ['select','in','eq','neq','gte','lte','order','range','or'])chain[op]=()=>chain;chain.then=(resolve)=>Promise.resolve({data:table==='workshop_runs'?[workshop]:events,error:null}).then(resolve);return chain;}};
 await context.send(admin,'student',['C'],'lexoma');
+await context.send(admin,'student',['C'],'lexoma');
+assert.equal(deliveries.length,1,'A successful marker delivery must not be repeated immediately');
+context.cache.clear(); // A different worker or a timed-out cache may legitimately retry.
 await context.send(admin,'student',['C'],'lexoma');
 assert.equal(deliveries.length,2);assert.equal(deliveries[0].awardId,deliveries[1].awardId,'Retries use the same marker idempotency key');
 assert.equal(deliveries[0].points,5);assert.equal(deliveries[0].categoryId,'CAT1');
