@@ -4289,13 +4289,15 @@ body.light .rankCard,body.light .studentHistoryItem,body.light .generalAchieveme
         }
         notice.classList.remove('hidden');
       }else{notice.classList.add('hidden');close();}
-    }catch(e){notice.classList.add('hidden');}
+    }catch(e){if(lastEvent){notice.classList.remove('hidden');notice.title='La conexión del evento tarda en responder. Se volverá a consultar automáticamente.';}else notice.classList.add('hidden');}
     finally{checking=false;}
   }
   document.getElementById('studentBossDismiss').onclick=close;
   document.getElementById('studentBossPodium').addEventListener('keydown',function(e){if(e.key==='Escape'){close();return;}if(e.key==='Tab'){e.preventDefault();document.getElementById('studentBossDismiss').focus();}});
   window.refreshStudentClassBossNotice=refresh;
-  setInterval(refresh,8000);
+  // Evita saturar el servidor cuando entran 25-30 alumnos a la vez.
+  setInterval(refresh,15000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)refresh();});
 })();
 </script>
 </body>
