@@ -201,7 +201,7 @@ function browser(){
   await ui.advance(0);
   assert.equal(ui.counts.calls,1);
   const initialPaints=ui.counts.paints;
-  await ui.advance(3000);
+  await ui.advance(10000);
   assert.equal(ui.counts.calls,2);
   assert.equal(ui.counts.paints,initialPaints,'Fingerprint idéntico: ningún cambio DOM');
   ui.setState(state('closed',true));
@@ -213,7 +213,7 @@ function browser(){
   assert.equal(ui.cards[0].items['.play'].disabled,true);
   assert.equal(ui.counts.homePaints,1);
   assert.equal(ui.counts.dashboardCalls,0);
-  await ui.advance(3000);
+  await ui.advance(10000);
   await ui.context.openGame('battlegrafia');
   assert.equal(ui.counts.baseOpens,0);
   assert.match(ui.elements.gameModalText.textContent,/Cerrado por tu profesor/);
