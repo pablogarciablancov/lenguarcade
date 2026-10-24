@@ -1,5 +1,5 @@
 import {isForjaObjective, workshopVictory, forjaVictory, groupWorkshops, workshopProgress} from "../_shared/workshop-objective.js";
-import {snapshotProgress, XP_REWARD_GUIDE, capProgressionAward} from "../_shared/progression.js";
+import {actionRewards, snapshotProgress, XP_REWARD_GUIDE, capProgressionAward} from "../_shared/progression.js";
 import {
   boundedNumber,
   corsHeaders,
@@ -518,7 +518,9 @@ Deno.serve(async (request) => {
         accuracy:record.accuracy,
         details:{
           ...(body.details && typeof body.details === "object" ? body.details : {}),
-          learning:{version:1,correctBefore:Number(old?.successes||0),correctAfter:record.successes},
+          learning:{version:1,correctBefore:Number(old?.successes||0),correctAfter:record.successes,
+            errorsBefore:Number(old?.errors||0),errorsAfter:record.errors,
+            policyVersion:2,actionXp:actionRewards(gameId,save,old?.raw_data?.save,record.successes-Number(old?.successes||0))},
           forjaVictory:victory,
           sessionCounted:shouldCountSession,
           xpAward:{

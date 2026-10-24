@@ -98,10 +98,28 @@ function calculateAuthoritativeProgress_(gameId, payload, old) {
     const defeatedDelta = Math.min(rawDefeatedDelta, Math.max(1, dc + 1));
     const totalMonsters = n(save.totalMonsters);
     const percentage = totalMonsters ? currentDefeated / totalMonsters * 100 : n(metrics.percentage);
-    const xpGain = Math.min(checkpoint ? 180 : 360, dc * 6 + defeatedDelta * 25);
+    const xpGain = dc * 12 + defeatedDelta * 25;
     const oldCorrect = n(old.successes), newCorrect = oldCorrect + dc;
     const featherGain = Math.min(checkpoint ? 10 : 20, Math.max(0, Math.floor(newCorrect / 8) - Math.floor(oldCorrect / 8)) + defeatedDelta);
     return finish(dc + de, dc, de, percentage, xpGain, featherGain);
+  }
+
+  if (gameId === 'maniacgrafia' && (save.stats?.totalWords !== undefined || save.summary?.totalWords !== undefined)) {
+    const words=Math.max(n(save.stats?.totalWords),n(save.summary?.totalWords));
+    const before=Math.max(n(previousSave.stats?.totalWords),n(previousSave.summary?.totalWords));
+    const dc=Math.min(checkpoint?24:60,Math.max(0,words-before));
+    const de=capDelta(metrics.errors,previousMetrics.errors,checkpoint?24:60);
+    const world=Math.max(1,Math.min(12,n(save.summary?.adventureWorld)||n(save.stats?.adventureWorld)||1));
+    const pct=save.summary?.adventureCompleted||save.stats?.adventureCompleted?100:Math.max(Math.min(100,words/10),(world-1)/11*100,n(metrics.percentage));
+    return finish(dc+de,dc,de,pct,dc*3,Math.min(checkpoint?8:16,Math.max(0,Math.floor((n(old.successes)+dc)/8)-Math.floor(n(old.successes)/8))));
+  }
+  if(gameId==='lexoma'&&Array.isArray(save.run?.words)){
+    const run=save.run,prior=previousSave.run;
+    const same=run.id&&run.id===prior?.id,cap=checkpoint?24:60;
+    const dc=Math.min(cap,Math.max(0,run.words.length-(same?(prior.words?.length||0):0)));
+    const de=Math.min(cap,Math.max(0,n(run.errors)-(same?n(prior.errors):0)));
+    const rewards=fairActionRewards_(gameId,save,previousSave,dc);
+    return finish(dc+de,dc,de,n(metrics.percentage),rewards.reduce((a,b)=>a+b,0),Math.min(checkpoint?8:16,Math.max(0,Math.floor((n(old.successes)+dc)/8)-Math.floor(n(old.successes)/8))));
   }
 
   if (gameId === 'rayuela') {
@@ -162,7 +180,21 @@ function calculateAuthoritativeProgress_(gameId, payload, old) {
     safeCorrect,
     safeErrors,
     n(metrics.percentage),
-    Math.min(checkpoint ? 150 : 320, safeCorrect * 6),
+    ['maniacgrafia','lexoma'].includes(gameId)?safeCorrect*(gameId==='maniacgrafia'?3:12):Math.min(checkpoint ? 150 : 320, safeCorrect * 6),
     Math.min(checkpoint ? 8 : 16, Math.max(0, Math.floor(newCorrect / 8) - Math.floor(oldCorrect / 8)))
   );
+}
+
+function fairActionRewards_(gameId,save,previous,count){
+  count=Math.min(60,Math.max(0,Math.floor(Number(count)||0)));
+  if(gameId==='lexoma'){
+    const run=save?.run,prior=previous?.run;
+    const offset=run?.id&&run.id===prior?.id?(prior.words?.length||0):0;
+    return Array.from({length:count},(_,i)=>{
+      const word=run?.words?.[offset+i]||run?.wordLog?.[offset+i]?.word||'';
+      const length=Array.from(String(word).normalize('NFC').replace(/[^a-záéíóúüñ]/gi,'')).length;
+      return length>=7?24:length>=5?18:12;
+    });
+  }
+  return Array(count).fill(gameId==='maniacgrafia'?3:gameId==='battlegrafia'?12:6);
 }

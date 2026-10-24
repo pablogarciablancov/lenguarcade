@@ -1,3 +1,13 @@
+## 2026-10-24 · Equilibrio de XP, práctica y Devorapalabras
+
+- Nuevas recompensas de plataforma: Maniacgrafía 3 XP/palabra; Battlegrafía 12 XP/frase y 25/monstruo; Forja 12/18/24 por palabra según longitud (hasta 4, 5–6, 7+ letras). Los totales y los premios históricos permanecen intactos.
+- Calibración inicial con sesiones de 5–40 minutos del 22–23/10: medianas anteriores 49,7/18,1/11,0 XP/min (Maniacgrafía/Battlegrafía/Forja). No es una promesa de igual rendimiento: revisar tras nuevas sesiones.
+- Forja reconoce correctamente la primera palabra al cambiar de partida. Los XP válidos de lotes largos pasan al mecanismo de pendientes, sin recortarlos por el antiguo tope del snapshot.
+- Talleres XP: segunda vía de práctica basada únicamente en nuevos eventos autoritativos (policyVersion 2). Para 400 XP: 300 puntos de práctica (100 palabras Maniacgrafía o 25 frases Battlegrafía o 25 palabras Forja; combinables), 10 min de intervalos entre aciertos separados como máximo 90 s y precisión >=70 %. Los umbrales escalan con el objetivo; actividad entre 5 y 20 min. No se paga por tiempo. Forja Fácil conserva su victoria específica.
+- Mismo cálculo en alumno, profesor y emisor de Flotas, con la misma clave de premio. Resultados cerrados antiguos no adquieren una segunda vía retrospectiva.
+- Devorapalabras v3: un ataque por acierto; daño 1 en Maniacgrafía, 4 en Battlegrafía y 4/6/8 en Forja. Podios por daño y vida ajustada; versiones 1/2 e instantáneas de resultados preservadas.
+- Sin cambios de esquema ni recálculo de XP antiguos. Despliegue coordinado de save-progress, student-dashboard, teacher-dashboard, class-boss y Apps Script.
+
 ## 2026-10-22 · Rayuela: lectura, rúbrica y revisión ortográfica
 
 - La galería se abre al entrar con cuenta de LenguArcade. Decisiones narrativas en lugar de botones de dirección; conversor de hojas con soporte de flechas antes y después del texto y ramas pendientes sin finales inventados.

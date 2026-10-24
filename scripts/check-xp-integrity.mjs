@@ -9,7 +9,7 @@ const old={xp:100,feathers:2,attempts:10,successes:8,errors:2,accuracy:80,percen
 const priorBattle={stats_correct:8,stats_wrong:2,defeatedMonsters:['m1'],totalMonsters:20};
 const nextBattle={stats_correct:9,stats_wrong:2,defeatedMonsters:['m1'],totalMonsters:20};
 const battle=snapshotProgress('battlegrafia',nextBattle,priorBattle,old,{}, {},{checkpoint:true});
-assert.equal(battle.xp,106,'Battlegrafía debe premiar el progreso real, no un checkpoint');
+assert.equal(battle.xp,112,'Battlegrafía debe premiar el progreso real, no un checkpoint');
 assert.equal(battle.attempts,11);
 assert.equal(battle.successes,9);
 
@@ -23,12 +23,12 @@ const defeated=snapshotProgress(
   nextBattle,
   old,{}, {},{checkpoint:true}
 );
-assert.ok(defeated.xp>100&&defeated.xp<=131,'Un avance real de Battlegrafía debe dar XP proporcional y acotado');
+assert.ok(defeated.xp>100&&defeated.xp<=137,'Un avance real de Battlegrafía debe dar XP proporcional y acotado');
 
 const genericRaw={metrics:{correct:9,errors:3,attempts:12,percentage:10}};
 const genericPrior={metrics:{correct:8,errors:2,attempts:10,percentage:9}};
 const generic=snapshotProgress('maniacgrafia',{}, {},old,genericRaw,genericPrior,{checkpoint:true});
-assert.equal(generic.xp,106,'Los juegos genéricos deben premiar aciertos nuevos, no XP del cliente');
+assert.equal(generic.xp,103,'Los juegos genéricos deben premiar aciertos nuevos, no XP del cliente');
 assert.equal(generic.attempts,12);
 
 const genericRepeat=snapshotProgress('maniacgrafia',{}, {},old,genericRaw,genericRaw,{checkpoint:true});
@@ -84,7 +84,7 @@ for(const gameId of allOfficialGames){
  const fixture=fixtures[gameId]||[{}, {},{metrics:{correct:0,errors:0,attempts:0,percentage:0}},{metrics:{correct:1,errors:0,attempts:1,percentage:10}}];
  const [prior,save,priorRaw,raw]=fixture;
  const result=snapshotProgress(gameId,save,prior,{},raw,priorRaw,{});
- assert.ok(result.xp>=6,gameId+' debe conceder XP por progreso válido');
+ assert.ok(result.xp>0,gameId+' debe conceder XP por progreso válido');
 }
 assert.deepEqual(capProgressionAward(450,20,350,2390,14,58),{
  awardedXp:10,awardedFeathers:1,pendingXp:440,pendingFeathers:19
