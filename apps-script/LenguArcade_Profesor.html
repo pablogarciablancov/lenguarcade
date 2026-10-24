@@ -3270,7 +3270,8 @@ body.light .teacherMonitorTable th{background:#fff}
     var bridge=bossWorkshop();var s=bridge?bridge.activeSession():null;
     var gameIds=s&&s.gameIds||[];
     var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
-    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Varias apariciones, descansos entre combates y un gran enfrentamiento final. Los podios conceden XP extra. Flotas mantiene un único objetivo por alumno y taller.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚙️ Preparar batalla':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
+    var prepared=bridge&&bridge.preparedPlan&&bridge.preparedPlan();
+    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Varias apariciones, descansos entre combates y un gran enfrentamiento final. Los podios conceden XP extra. Flotas mantiene un único objetivo por alumno y taller.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚔️ Comenzar batalla':prepared?'⚔️ Comenzar batalla':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
     var controls='<div class="laBossSettings">';
     [['sessionMinutes','Sesión · minutos',10,60],['appearanceCount','Apariciones',2,6],['combatSeconds','Combate · segundos',30,180],['participationXp','XP por participar en victoria',0,250]].forEach(function(field){controls+='<label>'+field[1]+'<input type="number" id="bossSetting_'+field[0]+'" min="'+field[2]+'" max="'+field[3]+'" value="'+encounterSettings[field[0]]+'"></label>';});
     controls+='<label>Objetivo al preparar taller · XP<input type="number" id="bossFleetTarget" min="1" max="5000" value="'+fleetTarget+'"></label></div><div class="laBossRewardSettings">';
@@ -3288,26 +3289,55 @@ body.light .teacherMonitorTable th{background:#fff}
     if(!btn)return;
     var gameIds=s&&s.gameIds||[];
     var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
+    var prepared=bridge&&bridge.preparedPlan&&bridge.preparedPlan();
     var battle=lastClassCode===getClass()?last:null;
-    btn.textContent=!ready?'⚙️ Preparar taller cooperativo':!battle?'⚙️ Preparar batalla':battle.state==='prepared'?'⚔️ Comenzar batalla':battle.state==='finished'?'🏆 Ver resultados':'📺 Ver batalla';
+    var fresh=!!(ready&&battle&&(battle.state==='active'||battle.state==='paused'||battle.state==='prepared'));
+    btn.textContent=fresh&&battle.state!=='prepared'?'📺 Ver batalla':
+      (prepared||ready)?'⚔️ Comenzar batalla':'⚙️ Preparar batalla';
+    btn.disabled=launchPending;
     btn.onclick=function(){
-      if(!ready)return prepare();
-      if(!battle)return act('prepare');
-      if(battle.state==='prepared')return act('start');
-      return openStage();
+      if(fresh&&battle.state!=='prepared')return openStage();
+      if(prepared||ready)return launchBattle();
+      return prepare();
     };
   }
   async function prepare(){
     var classCode=getClass();if(!classCode){status('Selecciona primero una clase.');return;}
     var bridge=bossWorkshop();var s=bridge?bridge.activeSession():null;
-    if(s&&s.classroomOpen&&!window.confirm('Se cerrará la sesión de taller que está abierta para preparar el evento cooperativo. ¿Continuar?'))return;
+    if(s&&s.classroomOpen&&!window.confirm('Hay un taller abierto. Preparar el evento no lo cerrará; al comenzar la batalla se sustituirá por el taller cooperativo. ¿Prepararlo?'))return;
     status('Preparando los tres juegos…');
     try{
       var payload={title:'El Devorapalabras · La defensa del Gran Archivo',message:'Juega y contribuye a la victoria colectiva de tu clase.',targetXp:fleetTarget,objectiveType:'xp',gameIds:['battlegrafia','lexoma','maniacgrafia'],classCodes:[classCode]};
       var bridge=bossWorkshop();if(!bridge)throw new Error('El planificador no está disponible. Recarga la página.');
       await bridge.prepare(classCode,payload);
-      await act('prepare');
+      updatePrimaryAction();
+      status('Batalla preparada. Los juegos siguen cerrados y el cronómetro está sin iniciar. Pulsa «Comenzar batalla» cuando llegue la clase.');
     }catch(e){status('No se pudo preparar: '+msg(e.code||e.message));}
+  }
+  var launchPending=false;
+  async function launchBattle(){
+    if(launchPending)return;
+    var classCode=getClass(),bridge=bossWorkshop();
+    if(!classCode||!bridge){status('Elige una clase y prepara el evento.');return;}
+    launchPending=true;updatePrimaryAction();
+    try{
+      var session=bridge.activeSession(),plan=bridge.preparedPlan&&bridge.preparedPlan();
+      if(!plan&&!(session&&session.classroomOpen))throw new Error('Primero prepara el taller cooperativo.');
+      status('Abriendo los juegos y comenzando la batalla…');
+      if(plan)await bridge.activate(classCode,plan.planId);
+      if(getClass()!==classCode)throw new Error('La clase seleccionada ha cambiado.');
+      // If prepare/start must be retried after a network error, both server actions
+      // are idempotent for the active workshop; its clock is never reset.
+      await edge('class-boss',{action:'prepare',classCode:classCode,encounterConfig:encounterSettings});
+      var r=await edge('class-boss',{action:'start',classCode:classCode});
+      last=r.event||null;lastClassCode=classCode;paint(last);
+      status('La batalla ha comenzado. Los juegos y el reto de '+fleetTarget+' XP ya están activos.');
+      openStage();
+    }catch(error){
+      status('No se pudo iniciar la batalla: '+msg(error.code||error.message)+'. Si los juegos ya están abiertos, vuelve a pulsar «Comenzar batalla».');
+      // Refresh recovers a partially completed launch without opening a second run.
+      refresh();
+    }finally{launchPending=false;updatePrimaryAction();}
   }
   async function act(action){
     var classCode=getClass();if(!classCode){status('Selecciona una clase.');return;}
