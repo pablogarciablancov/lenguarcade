@@ -263,7 +263,7 @@ function browser(){
 
   let release;
   ui.setResponder(()=>new Promise(resolve=>{release=resolve;}));
-  await ui.advance(5000);
+  await ui.advance(10000);
   const runningCalls=ui.counts.calls;
   ui.listeners.focus();
   ui.listeners.online();
