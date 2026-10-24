@@ -3148,7 +3148,7 @@ body.light .teacherMonitorTable th{background:#fff}
 </div>
 <script id="la-class-boss-controller">
 (function(){
-  var last=null,timer=null,requesting=false,stage=$('classBossStage'),lastDamage=0,lastCombos=0,visualEventId=null;
+  var last=null,lastClassCode='',timer=null,requesting=false,stage=$('classBossStage'),lastDamage=0,lastCombos=0,visualEventId=null;
   // Each animation frame is a separate, padded 512px image: never crop a grid.
   var spritePhases=['healthy','cracked','torn','critical'];
   var spriteAssetVersion='4c1509da99e34cc3cdf4dc2de1179cc4e017ca24';
@@ -3236,6 +3236,7 @@ body.light .teacherMonitorTable th{background:#fff}
     event_already_exists_reload:'El evento ya existe. Actualiza el panel.',
     finish_previous_event:'Finaliza primero el combate anterior.',
     boss_finished:'La batalla ha terminado. Usa una nueva edición del taller.',
+    prepare_battle_first:'Prepara primero la batalla; el cronómetro solo se activa al pulsar Comenzar batalla.',
     workshop_run_missing:'No se ha encontrado la apertura del taller. Recarga el planificador.'
   };return messages[code]||code||'No se pudo conectar con el combate.';}
   function status(s){var node=$('classBossPanelStatus');if(node)node.textContent=s||'';var screen=$('classBossStageStatus');if(screen)screen.textContent=s||'';}
@@ -3244,7 +3245,7 @@ body.light .teacherMonitorTable th{background:#fff}
     var bridge=bossWorkshop();var s=bridge?bridge.activeSession():null;
     var gameIds=s&&s.gameIds||[];
     var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
-    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Varias apariciones, descansos entre combates y un gran enfrentamiento final. Los podios conceden XP extra. Flotas mantiene un único objetivo por alumno y taller.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚔️ Iniciar combate':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
+    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Varias apariciones, descansos entre combates y un gran enfrentamiento final. Los podios conceden XP extra. Flotas mantiene un único objetivo por alumno y taller.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚙️ Preparar batalla':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
     var controls='<div class="laBossSettings">';
     [['sessionMinutes','Sesión · minutos',10,60],['appearanceCount','Apariciones',2,6],['combatSeconds','Combate · segundos',30,180],['participationXp','XP por participar en victoria',0,250]].forEach(function(field){controls+='<label>'+field[1]+'<input type="number" id="bossSetting_'+field[0]+'" min="'+field[2]+'" max="'+field[3]+'" value="'+encounterSettings[field[0]]+'"></label>';});
     controls+='<label>Objetivo al preparar taller · XP<input type="number" id="bossFleetTarget" min="1" max="5000" value="'+fleetTarget+'"></label></div><div class="laBossRewardSettings">';
@@ -3253,9 +3254,23 @@ body.light .teacherMonitorTable th{background:#fff}
     root.innerHTML+=controls;
     Object.keys(encounterSettings).forEach(function(key){if(Array.isArray(encounterSettings[key]))encounterSettings[key].forEach(function(v,i){$('bossSetting_'+key+i).onchange=function(){encounterSettings[key][i]=Math.max(0,Math.min(1000,Number(this.value)||0));};});else $('bossSetting_'+key).onchange=function(){encounterSettings[key]=Number(this.value);};});
     $('bossFleetTarget').onchange=function(){fleetTarget=Math.max(1,Math.min(5000,Number(this.value)||400));};
-    $('classBossPrepare').onclick=function(){ready?act('start'):prepare();};
+    updatePrimaryAction();
     $('classBossProject').onclick=function(){openStage();};
     refresh();
+  }
+  function updatePrimaryAction(){
+    var btn=$('classBossPrepare'),bridge=bossWorkshop(),s=bridge?bridge.activeSession():null;
+    if(!btn)return;
+    var gameIds=s&&s.gameIds||[];
+    var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
+    var battle=lastClassCode===getClass()?last:null;
+    btn.textContent=!ready?'⚙️ Preparar taller cooperativo':!battle?'⚙️ Preparar batalla':battle.state==='prepared'?'⚔️ Comenzar batalla':battle.state==='finished'?'🏆 Ver resultados':'📺 Ver batalla';
+    btn.onclick=function(){
+      if(!ready)return prepare();
+      if(!battle)return act('prepare');
+      if(battle.state==='prepared')return act('start');
+      return openStage();
+    };
   }
   async function prepare(){
     var classCode=getClass();if(!classCode){status('Selecciona primero una clase.');return;}
@@ -3266,7 +3281,7 @@ body.light .teacherMonitorTable th{background:#fff}
       var payload={title:'El Devorapalabras · La defensa del Gran Archivo',message:'Juega y contribuye a la victoria colectiva de tu clase.',targetXp:fleetTarget,objectiveType:'xp',gameIds:['battlegrafia','lexoma','maniacgrafia'],classCodes:[classCode]};
       var bridge=bossWorkshop();if(!bridge)throw new Error('El planificador no está disponible. Recarga la página.');
       await bridge.prepare(classCode,payload);
-      await act('start');
+      await act('prepare');
     }catch(e){status('No se pudo preparar: '+msg(e.code||e.message));}
   }
   async function act(action){
@@ -3274,9 +3289,10 @@ body.light .teacherMonitorTable th{background:#fff}
     status('Actualizando batalla…');
     try{
       var result=await edge('class-boss',{action:action,classCode:classCode,encounterConfig:encounterSettings});
-      last=result.event||null;paint(last);
+      last=result.event||null;lastClassCode=classCode;paint(last);updatePrimaryAction();
       if(action==='start')openStage();
-      if(action==='finish')status('El combate ha terminado. El progreso de los alumnos se conserva.');
+      if(action==='prepare')status('Batalla preparada. El cronómetro NO ha empezado. Pulsa «Comenzar batalla» cuando estén listos.');
+      else if(action==='finish')status('El combate ha terminado. El progreso de los alumnos se conserva.');
       else status(last?'Combate '+(last.state==='active'?'en curso':last.state==='paused'?'en pausa':'finalizado')+'.':'Todavía no hay combate.');
     }catch(e){status('No se pudo actualizar: '+msg(e.code||e.message));}
   }
@@ -3293,6 +3309,20 @@ body.light .teacherMonitorTable th{background:#fff}
       $('classBossPause').disabled=true;$('classBossFinish').disabled=true;
       visualEventId=null;lastDamage=0;lastCombos=0;
       $('classBossLegend').textContent='Prepara un taller cooperativo y empieza el combate.';return;
+    }
+    if(b.state==='prepared'){
+      stage.setAttribute('data-outcome','');
+      monster.style.visibility='hidden';stopBossSprite();
+      $('classBossPodiumHost').innerHTML='';
+      $('classBossOutcome').classList.remove('show');
+      $('classBossPhase').textContent='BATALLA PREPARADA';
+      $('classBossLegend').textContent='El cronómetro comenzará exclusivamente al pulsar «Comenzar batalla».';
+      $('classBossHealth').textContent='Preparados: '+b.totalHealth+' puntos de vida';
+      $('classBossClock').textContent='Sin iniciar';
+      $('classBossCombos').textContent='Combos: 0';
+      $('classBossHealthBar').style.width='100%';
+      $('classBossPause').disabled=true;$('classBossFinish').disabled=false;
+      visualEventId=b.id;lastDamage=0;lastCombos=0;return;
     }
     var ratio=b.totalHealth>0?Math.max(0,Math.min(1,b.health/b.totalHealth)):1;
     var phase=ratio>.7?1:ratio>.35?2:ratio>.1?3:4;
@@ -3338,8 +3368,11 @@ body.light .teacherMonitorTable th{background:#fff}
   }
   async function refresh(){
     if(requesting||!getClass()||!$('classBossPanel'))return;requesting=true;
-    try{var r=await edge('class-boss',{action:'status',classCode:getClass()});last=r.event||null;paint(last);
-      status(last?'Batalla: '+(last.state==='active'?'en curso':last.state==='paused'?'pausada':'terminada')+'. Daño confirmado: '+last.damage+'.':'No hay batalla creada todavía.');
+    try{var requestedClass=getClass();var r=await edge('class-boss',{action:'status',classCode:requestedClass});
+      if(getClass()!==requestedClass)return;
+      last=r.event||null;lastClassCode=requestedClass;paint(last);updatePrimaryAction();
+      status(last&&last.state==='prepared'?'Batalla preparada. Pulsa «Comenzar batalla» cuando estén listos.':
+        last?'Batalla: '+(last.state==='active'?'en curso':last.state==='paused'?'pausada':'terminada')+'. Daño confirmado: '+last.damage+'.':'No hay batalla creada todavía.');
     }catch(e){status('Servicio del combate no disponible: '+msg(e.code||e.message));}
     finally{requesting=false;}
   }
