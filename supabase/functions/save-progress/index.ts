@@ -24,6 +24,9 @@ function cleanAchievement(value: unknown) {
 }
 
 
+// A successful Flotas delivery needs no further HTTP calls from this Edge worker.
+// Failed deliveries can retry with the same deterministic awardId.
+const fleetDeliveryCache=new Map<string,number>();
 async function sendCompletedWorkshopAwards(
   admin: any,
   profileId: string,
@@ -100,6 +103,10 @@ async function sendCompletedWorkshopAwards(
       const awardId = "LA:" + Array.from(new Uint8Array(digest))
         .map(value => value.toString(16).padStart(2, "0"))
         .join("");
+      const cachedUntil=fleetDeliveryCache.get(awardId)||0;
+      if(cachedUntil>Date.now())continue;
+      if(fleetDeliveryCache.size>1000)fleetDeliveryCache.clear();
+      fleetDeliveryCache.set(awardId,Date.now()+60000); // retry failed/time-out sends in one minute
       try {
         const response = await fetch(endpoint, {
           method:"POST",
@@ -118,9 +125,8 @@ async function sendCompletedWorkshopAwards(
           signal:AbortSignal.timeout(5000),
         });
         const result = await response.json().catch(() => null);
-        if (!response.ok || result?.ok !== true) {
-          console.error("fleet marker award was not accepted", response.status, result?.error || "invalid_response");
-        }
+        if (response.ok && result?.ok===true)fleetDeliveryCache.set(awardId,Date.now()+86400000);
+        else console.error("fleet marker award was not accepted", response.status, result?.error || "invalid_response");
       } catch (deliveryError) {
         // The next save retries with the same awardId; the marker receiver deduplicates it.
         console.error("fleet marker award delivery failed", deliveryError);
@@ -559,7 +565,14 @@ Deno.serve(async (request) => {
       })));
     }
 
-    await sendCompletedWorkshopAwards(admin, profileId, classroomIds, gameId);
+    // The saved XP, game snapshot and audit event are committed above.
+    // Never keep a student's save waiting for an unrelated Flotas webhook.
+    // waitUntil keeps the retry-safe workshop award task alive after the response.
+    if (classroomIds.length && (shouldWriteEvent || victory)) {
+      const deliver = sendCompletedWorkshopAwards(admin, profileId, classroomIds, gameId);
+      if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(deliver);
+      else await deliver; // Local test environment without Supabase EdgeRuntime.
+    }
 
     return jsonResponse({ ok:true, duplicate:false, record });
   } catch (error) {
