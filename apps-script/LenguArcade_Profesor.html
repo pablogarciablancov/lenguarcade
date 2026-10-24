@@ -3292,12 +3292,13 @@ body.light .teacherMonitorTable th{background:#fff}
     var prepared=bridge&&bridge.preparedPlan&&bridge.preparedPlan();
     var battle=lastClassCode===getClass()?last:null;
     var fresh=!!(ready&&battle&&(battle.state==='active'||battle.state==='paused'||battle.state==='prepared'));
-    btn.textContent=fresh&&battle.state!=='prepared'?'📺 Ver batalla':
-      (prepared||ready)?'⚔️ Comenzar batalla':'⚙️ Preparar batalla';
+    btn.textContent=prepared?'⚔️ Comenzar batalla':fresh&&battle.state!=='prepared'?'📺 Ver batalla':
+      ready?'⚔️ Comenzar batalla':'⚙️ Preparar batalla';
     btn.disabled=launchPending;
     btn.onclick=function(){
+      if(prepared)return launchBattle();
       if(fresh&&battle.state!=='prepared')return openStage();
-      if(prepared||ready)return launchBattle();
+      if(ready)return launchBattle();
       return prepare();
     };
   }
@@ -3426,7 +3427,9 @@ body.light .teacherMonitorTable th{background:#fff}
     try{var requestedClass=getClass();var r=await edge('class-boss',{action:'status',classCode:requestedClass});
       if(getClass()!==requestedClass)return;
       last=r.event||null;lastClassCode=requestedClass;paint(last);updatePrimaryAction();
-      status(last&&last.state==='prepared'?'Batalla preparada. Pulsa «Comenzar batalla» cuando estén listos.':
+      var draft=bossWorkshop()&&bossWorkshop().preparedPlan&&bossWorkshop().preparedPlan();
+      status(draft?'Batalla preparada, sin abrir juegos y sin cronómetro. Pulsa «Comenzar batalla» cuando estén listos.':
+        last&&last.state==='prepared'?'Batalla preparada. Pulsa «Comenzar batalla» cuando estén listos.':
         last?'Batalla: '+(last.state==='active'?'en curso':last.state==='paused'?'pausada':'terminada')+'. Daño confirmado: '+last.damage+'.':'No hay batalla creada todavía.');
     }catch(e){status('Servicio del combate no disponible: '+msg(e.code||e.message));}
     finally{requesting=false;}
