@@ -2,6 +2,8 @@
 const arrows = /[⬅➡⬆⬇←→↑↓]/gu;
 const directions = {'⬅':[0,-1],'←':[0,-1],'➡':[0,1],'→':[0,1],'⬆':[-1,0],'↑':[-1,0],'⬇':[1,0],'↓':[1,0]};
 const tidy = s => String(s || '').replace(/\uFE0F/g,'').trim();
+const words = s => /[\p{L}\p{N}]/u.test(s);
+const key = s => tidy(s).normalize('NFC').toLocaleLowerCase('es').replace(/[^\p{L}\p{N}]/gu,'');
 function label(value) {
   let s=tidy(value).replace(/^[\s.,:;¿?]+|[\s.,:;¿?]+$/g,'').replace(/^(?:o\s+|y\s+)?(?:si quieres(?: que)?\s+|que prefieres\s*[:,]?\s*|qué prefieres\s*[:,]?\s*)/i,'');
   const lines=s.split(/\n+/).map(tidy).filter(Boolean);
@@ -19,6 +21,11 @@ export function convertGrid({id,title,values,startCell,overrides={}}) {
     const original=tidy(values[r]?.[c]);if(!original)continue;
     const cell=String.fromCharCode(65+c)+(r+1),marks=[...original.matchAll(arrows)];
     let choices=[];
+    const leading=original.slice(0,marks[0]?.index??original.length);
+    const trailing=marks.length?original.slice(marks.at(-1).index+1):'';
+    // Prefer the previous nonempty line for suffix arrows, even when the arrow
+    // is on a line of its own. Looking ahead there steals the following option.
+    const prefix=words(trailing)&&(!words(leading)||!leading.split('\n').at(-1).trim());
     for(let i=0;i<marks.length;i++){
       const m=marks[i],[dr,dc]=directions[m[0]],targetR=r+dr,targetC=c+dc;
       if(!tidy(values[targetR]?.[targetC])||targetR<1||targetR>9||targetC<1||targetC>9){
@@ -26,12 +33,12 @@ export function convertGrid({id,title,values,startCell,overrides={}}) {
         pending.set(`n_${targetR-1}_${targetC-1}`,{id:`n_${targetR-1}_${targetC-1}`,row:Math.max(0,targetR-1),col:Math.max(0,targetC-1),type:'story',title:'Camino pendiente',text:'Los autores todavía no han escrito esta parte de la historia. Puedes volver al inicio y descubrir otro camino.',choices:[]});
       }
       const before=original.slice(i?marks[i-1].index+1:0,m.index),after=original.slice(m.index+1,marks[i+1]?.index??original.length);
-      const leftLine=before.split('\n').at(-1).trim(),rightLine=after.split('\n')[0].trim();
-      let chunk=before;
-      if(!leftLine&&rightLine)chunk=rightLine;
-      else if(!leftLine&&!rightLine&&i===0&&marks.length>1)chunk=after.split(/\n\s*o\s*\n/i)[0].replace(/^\s*¿[^?]+\?\s*/,'');
+      const chunk=prefix?after:before;
       const text=overrides[cell]?.[i]||(marks.length===1?'Continuar':label(chunk));
       if(!choices.some(ch=>ch.targetId===`n_${targetR-1}_${targetC-1}`))choices.push({id:'choice_'+choices.length,text,targetId:`n_${targetR-1}_${targetC-1}`});
+    }
+    if(choices.length>1&&(new Set(choices.map(ch=>key(ch.text))).size!==choices.length||choices.some(ch=>key(ch.text)==='continuar'))){
+      issues.push({cell,reason:'ambiguous_choice_labels',message:'Revisa los textos y asigna una opción distinta a cada destino mediante overrides.'});
     }
     const type=cell===startCell?'start':choices.length?(choices.length>1?'decision':'story'):'ending';
     nodes.push({id:`n_${r-1}_${c-1}`,row:r-1,col:c-1,type,title:type==='start'?'Inicio':type==='ending'?'Final':'',text:original.replace(arrows,'').replace(/\uFE0F/g,'').trim(),choices,endingType:'neutral'});
