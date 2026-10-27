@@ -2687,6 +2687,34 @@ mountGamePairCodePanel();
       disable('[data-google-teacher-player-login]',false);
     }
   };
+  // A legacy teacher session can play, but cannot request the class gallery.
+  // Reconnect before opening Rayuela instead of silently hiding its navigation.
+  const openGameBeforeRayuelaReconnect=openGame;
+  let rayuelaReconnectPending=null;
+  openGame=function(gameId){
+    const profile=currentDashboard?.student||{};
+    const teacher=['teacher','admin','teacher-player'].includes(profile.role)||profile.teacherPlayer||profile.isTeacherPlayer||profile.clase==='PROFES';
+    if(gameId!=='rayuela'||supabaseBackend||!teacher)return openGameBeforeRayuelaReconnect(gameId);
+    if(rayuelaReconnectPending)return rayuelaReconnectPending;
+    rayuelaReconnectPending=(async()=>{
+      showLoader('Conectando la galería de Rayuela...',20);
+      try{
+        const result=await loginGoogleViaSupabase('teacher');
+        if(!result||result.source!=='supabase'||!['teacher','admin'].includes(result.dashboard?.student?.role))throw new Error('No se ha podido recuperar tu sesión de profesor.');
+        finishGoogleStudentLogin(result,'Galería de Rayuela conectada.');
+        return openGameBeforeRayuelaReconnect(gameId);
+      }catch(error){
+        const message='No se ha podido conectar la galería de Rayuela. '+(error.message||'Vuelve a intentarlo.');
+        setStatus(message);
+        q('gameModalTitle').textContent='Galería de Rayuela';
+        q('gameModalText').textContent=message;
+        q('gameModal').classList.add('open');
+      }finally{
+        hideLoader();rayuelaReconnectPending=null;
+      }
+    })();
+    return rayuelaReconnectPending;
+  };
   window.secureTestStudentLogin=async function(){
     if(busy)return;
     busy=true;
