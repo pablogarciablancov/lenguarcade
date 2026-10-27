@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
-const sceneText=require('../games/rayuela/scene-text.js');
+const sceneText=require('./scene-text.js');
 const choices=(...labels)=>labels.map((text,index)=>({id:'choice_'+index,text,targetId:'target_'+index}));
 const options=choices('Aceptas la copa','Rechazas la copa');
 const intro='Estás en un bar y de repente un señor viejo te invita a una copa.';
@@ -24,7 +24,7 @@ assert.equal(sceneText(null,options),'');
 const three=choices('Abres la puerta','Subes al tejado','Buscas la llave');
 assert.equal(sceneText('Ves una casa. Abres la puerta, subes al tejado o buscas la llave.',three),'Ves una casa.','tres decisiones');
 // Run the actual player renderer with its DOM dependencies stubbed, including escaping.
-const html=fs.readFileSync(new URL('../games/rayuela/index.html',import.meta.url),'utf8');
+const html=fs.readFileSync(new URL('./index.html',import.meta.url),'utf8');
 assert(html.includes('<script src="./scene-text.js?v=20261027"></script>'));
 const block=html.slice(html.indexOf('function renderPlayNode(){'),html.indexOf('\nfunction renderEnding('));
 const content={innerHTML:'',querySelectorAll(){return [];}},labels={};

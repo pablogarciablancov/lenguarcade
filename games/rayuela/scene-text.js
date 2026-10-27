@@ -12,7 +12,7 @@
       return tokens(choice.text || '');
     });
     // A lone continuation or a partial match is not a repeated decision list.
-    if(options.length<2 || options.some(function (option) { return !option.length; }))return original;
+    if(options.length<2 || options.length>4 || options.some(function (option) { return !option.length; }))return original;
     var words=tokens(original);
     function consume(end, remaining) {
       if(!remaining.length)return end;

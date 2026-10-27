@@ -111,5 +111,5 @@ if (migrations.length !== 1) {
 }
 console.log("Integración Rayuela OK · catálogo, XP, rúbrica, feedback y migración única.");
 
-await import("./check-rayuela-scene-text.mjs");
+await import("../games/rayuela/check-scene-text.mjs");
 
