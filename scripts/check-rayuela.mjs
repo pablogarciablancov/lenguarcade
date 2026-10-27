@@ -110,3 +110,6 @@ if (migrations.length !== 1) {
   throw new Error("Rayuela: debe existir exactamente una migración de alta; encontradas "+migrations.length+".");
 }
 console.log("Integración Rayuela OK · catálogo, XP, rúbrica, feedback y migración única.");
+
+await import("../games/rayuela/check-scene-text.mjs");
+
