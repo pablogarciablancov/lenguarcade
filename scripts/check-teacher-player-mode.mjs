@@ -20,3 +20,30 @@ const isolated=vm.createContext({__LA_TEACHER_PLAYER_ENTRY__:true});vm.runInCont
 assert.equal(await vm.runInContext('restoreSupabaseStudentSession()',isolated),false);
 assert.ok(host.includes("result.source==='supabase'&&!['teacher','admin'].includes(result.dashboard?.student?.role)"));
 console.log('Modo jugador: ruta común, marcador sin credenciales, entrada separada de sesión de alumno y rol verificado.');
+
+const reconnect=host.slice(host.indexOf('  const openGameBeforeRayuelaReconnect='),host.indexOf('  window.secureTestStudentLogin='));
+function recovery({backend=false,profile={clase:'PROFES'},failure=false,role='teacher'}={}){
+  const opened=[],elements={},calls=[];
+  const ctx=vm.createContext({currentDashboard:{student:profile},supabaseBackend:backend,
+    openGame:id=>opened.push(id),showLoader(){},hideLoader(){},setStatus:s=>calls.push(s),
+    q:id=>elements[id]??=( {textContent:'',classList:{add(){}}} ),
+    async loginGoogleViaSupabase(kind){calls.push(kind);await Promise.resolve();if(failure)throw Error('Conexión interrumpida');return {source:'supabase',dashboard:{student:{role}}};},
+    finishGoogleStudentLogin(result){ctx.currentDashboard=result.dashboard;ctx.supabaseBackend=true;}
+  });
+  vm.runInContext(reconnect,ctx);return {ctx,opened,elements,calls};
+}
+const restored=recovery();
+const first=restored.ctx.openGame('rayuela'),duplicate=restored.ctx.openGame('rayuela');
+assert.equal(first,duplicate,'doble clic comparte la reconexión');await first;
+assert.deepEqual(restored.opened,['rayuela']);assert.equal(restored.ctx.supabaseBackend,true);
+assert.equal(restored.calls.filter(c=>c==='teacher').length,1);
+for(const options of [{backend:true},{profile:{role:'student'}}]){
+  const bypass=recovery(options);await bypass.ctx.openGame('rayuela');assert.deepEqual(bypass.opened,['rayuela']);assert.equal(bypass.calls.length,0);
+}
+const other=recovery();await other.ctx.openGame('scrabble');assert.deepEqual(other.opened,['scrabble']);assert.equal(other.calls.length,0);
+for(const options of [{failure:true},{role:'student'}]){
+  const failed=recovery(options);await failed.ctx.openGame('rayuela');assert.equal(failed.opened.length,0);assert.equal(failed.ctx.supabaseBackend,false);
+  assert.match(failed.elements.gameModalText.textContent,/No se ha podido/);
+  await failed.ctx.openGame('rayuela');assert.equal(failed.calls.filter(c=>c==='teacher').length,2,'se puede reintentar tras un fallo');
+}
+console.log('Rayuela: reconexión de profesor legacy, doble clic, error visible, reintento y aislamiento de alumnos y otros juegos correctos.');

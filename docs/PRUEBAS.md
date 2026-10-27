@@ -1,3 +1,11 @@
+## 2026-10-27 · Reconexión de galería de Rayuela
+
+- Ejecutar `node scripts/check-teacher-player-mode.mjs` y `npm run check`.
+- Con una sesión de profesor de respaldo (`PROFES`), abrir Rayuela: reconecta con Google y abre el juego con la galería disponible.
+- Simular fallo de conexión: debe mostrar un aviso y permitir otro intento sin abrir una Rayuela sin galería.
+- Comprobar doble clic, rol de alumno rechazado durante la reconexión, alumno normal, profesor ya conectado y otro juego.
+- Publicación: cambio del host; tras fusionar, actualizar el despliegue estable con `npm.cmd run apps:publish -- "Recuperar galería Rayuela en profe-jugador"`. No requiere cambios de datos ni de Supabase.
+
 ## 2026-10-24 · XP equilibrada y segunda vía del taller
 
 - Ejecutar `npm run check`; `check-fair-xp.mjs` verifica recompensas, cambios de run, duplicados, conservación del histórico, paridad Apps Script, pendientes, precisión, tiempo activo, pausas de taller, podio por daño y compatibilidad v2.

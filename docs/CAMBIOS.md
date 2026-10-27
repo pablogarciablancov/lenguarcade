@@ -1,3 +1,7 @@
+## 2026-10-27 · Galería de Rayuela en profe-jugador
+
+Al abrir Rayuela desde el perfil de respaldo de profesor, el panel intenta reconectar con la sesión de profesor de Supabase antes de lanzar el juego. Evita entrar silenciosamente en una biblioteca sin galería. Si la conexión falla, muestra el error y permite reintentar; los demás juegos y el acceso de alumnos mantienen su flujo.
+
 ## 2026-10-24 · Equilibrio de XP, práctica y Devorapalabras
 
 - Nuevas recompensas de plataforma: Maniacgrafía 3 XP/palabra; Battlegrafía 12 XP/frase y 25/monstruo; Forja 12/18/24 por palabra según longitud (hasta 4, 5–6, 7+ letras). Los totales y los premios históricos permanecen intactos.
