@@ -36,7 +36,7 @@ function missionProgressValue(
 
   if (Number.isFinite(activeFrom)) {
     const events = missionEvents.filter(row => {
-      if (["teacher_adjustment","class_boss_reward"].includes(String(row.event_type || ""))) return false;
+      if (["teacher_adjustment","class_boss_reward","rayuela_ending_reward"].includes(String(row.event_type || ""))) return false;
       if (gameId && String(row.game_id) !== gameId) return false;
       const occurredAt = Date.parse(String(row.occurred_at || ""));
       if (!Number.isFinite(occurredAt) || occurredAt < activeFrom) return false;
@@ -86,7 +86,7 @@ function missionFinishedAt(mission: any, events: any[]) {
   const to = mission.active_to ? Date.parse(String(mission.active_to)) : Infinity;
   const rows = (events || []).filter(event => {
     const at = Date.parse(String(event.occurred_at || ""));
-    return !["teacher_adjustment","class_boss_reward"].includes(event.event_type) &&
+    return !["teacher_adjustment","class_boss_reward","rayuela_ending_reward"].includes(event.event_type) &&
       (!gameId || String(event.game_id) === gameId) &&
       Number.isFinite(at) && at >= from && at <= to;
   }).sort((a,b)=>Date.parse(a.occurred_at)-Date.parse(b.occurred_at));
@@ -207,8 +207,8 @@ Deno.serve(async (request) => {
     const baseXp = progress.reduce((sum, row) => sum + Number(row.xp || 0), 0);
     const baseFeathers = progress.reduce((sum, row) => sum + Number(row.feathers || 0), 0);
     const adjustments = adjustmentsResult.data || [];
-    const bonusXp = adjustments.filter(row=>row.event_type==="class_boss_reward").reduce((sum,row)=>sum+Number(row.xp_delta||0),0);
-    const manualXp = adjustments.filter(row=>row.event_type!=="class_boss_reward").reduce((sum, row) => sum + Number(row.xp_delta || 0), 0);
+    const bonusXp = adjustments.filter(row=>["class_boss_reward","rayuela_ending_reward"].includes(row.event_type)).reduce((sum,row)=>sum+Number(row.xp_delta||0),0);
+    const manualXp = adjustments.filter(row=>row.event_type==="teacher_adjustment").reduce((sum, row) => sum + Number(row.xp_delta || 0), 0);
     const manualFeathers = adjustments.reduce((sum, row) => sum + Number(row.feathers_delta || 0), 0);
     const xp = Math.max(0, baseXp + manualXp + bonusXp);
     const feathers = Math.max(0, baseFeathers + manualFeathers);

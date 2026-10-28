@@ -1,0 +1,15 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
+const host=fs.readFileSync('apps-script/LenguArcade_Alumno.html','utf8');
+const hud=host.slice(host.indexOf('function confirmGameXpHud('),host.indexOf('\nfunction updateGameMissionHud('));
+const runner={game:{gameId:'rayuela'},initialGameXp:30,confirmedGameXp:30,galleryEarnedXp:80},el={};
+const ctx={activeGameRunner:runner,$:()=>el};vm.createContext(ctx);vm.runInContext(hud,ctx);
+ctx.confirmGameXpHud(runner,{record:{xp:40}},true);assert.equal(el.textContent,'+90 XP · esta sesión');
+ctx.confirmGameXpHud(runner,{record:{xp:40}},true);assert.equal(el.textContent,'+90 XP · esta sesión');
+const source=fs.readFileSync('games/rayuela/index.html','utf8');
+const block=source.slice(source.indexOf('function renderEnding(n){'),source.indexOf('\nfunction closePlay('));
+const story={discoveredEndings:[],nodes:[{id:'best',type:'ending',title:'Un hogar seguro',text:'A salvo.',endingType:'perfect'},{id:'hidden',type:'ending',title:'Un secreto sin descubrir',endingType:'bad'}]};
+const content={innerHTML:'',querySelector(){return {}}},labels={};
+const endingCtx={project:story,playState:{path:['start','best']},awardAchievement(){},scheduleSave(){},computeStats:()=>({endings:2}),isEnding:()=>true,ENDING_TYPES:{perfect:{label:'Final perfecto',icon:'🏆'}},esc:String,gallerySession:{id:'s'},gallery:{finished(){}},startPlay(){},closePlay(){},$:id=>id==='playContent'?content:(labels[id]??={})};
+vm.createContext(endingCtx);vm.runInContext(block,endingCtx);endingCtx.renderEnding(story.nodes[0]);
+assert(content.innerHTML.includes('Final perfecto'));assert(content.innerHTML.includes('Un hogar seguro'));assert(!content.innerHTML.includes('Un secreto sin descubrir'));
+console.log('Rayuela: título y tipo de final visibles, colección sin spoilers y XP de sesión sin duplicados.');

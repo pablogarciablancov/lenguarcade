@@ -212,8 +212,8 @@ Deno.serve(async (request) => {
     const successes = rows.reduce((sum, row) => sum + Number(row.successes || 0), 0);
     const baseXp = rows.reduce((sum, row) => sum + Number(row.xp || 0), 0);
     const baseFeathers = rows.reduce((sum, row) => sum + Number(row.feathers || 0), 0);
-    const bonusXp = adjustments.filter(row=>row.event_type==="class_boss_reward").reduce((sum,row)=>sum+Number(row.xp_delta||0),0);
-    const manualXp = adjustments.filter(row=>row.event_type!=="class_boss_reward").reduce((sum, row) => sum + Number(row.xp_delta || 0), 0);
+    const bonusXp = adjustments.filter(row=>["class_boss_reward","rayuela_ending_reward"].includes(row.event_type)).reduce((sum,row)=>sum+Number(row.xp_delta||0),0);
+    const manualXp = adjustments.filter(row=>row.event_type==="teacher_adjustment").reduce((sum, row) => sum + Number(row.xp_delta || 0), 0);
     const manualFeathers = adjustments.reduce((sum, row) => sum + Number(row.feathers_delta || 0), 0);
     const xp = Math.max(0, baseXp + manualXp + bonusXp);
     const feathers = Math.max(0, baseFeathers + manualFeathers);
@@ -296,7 +296,7 @@ Deno.serve(async (request) => {
         enabled:accessByGame.get(String(game.id))?.enabled !== false,
         updatedAt:accessByGame.get(String(game.id))?.updated_at || null,
       })),
-      adjustments:adjustments.filter(row=>row.event_type!=="class_boss_reward").slice(0,100).map(row => ({
+      adjustments:adjustments.filter(row=>row.event_type==="teacher_adjustment").slice(0,100).map(row => ({
         xpDelta:Number(row.xp_delta || 0),
         plumasDelta:Number(row.feathers_delta || 0),
         reason:String(row.details?.reason || ""),

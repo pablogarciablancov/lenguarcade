@@ -1366,7 +1366,7 @@ function confirmGameXpHud(runner,response,isPrimary){
   const xp=Number(response?.record?.xp??game?.progress?.xp);
   if(!Number.isFinite(xp))return;
   runner.confirmedGameXp=Math.max(Number(runner.confirmedGameXp??runner.initialGameXp??0),xp);
-  const earned=Math.max(0,runner.confirmedGameXp-Number(runner.initialGameXp||0));
+  const earned=Math.max(0,runner.confirmedGameXp-Number(runner.initialGameXp||0))+Number(runner.galleryEarnedXp||0);
   const node=$('gameRunnerXp');if(node)node.textContent='+'+earned+' XP · esta sesión';
 }
 
@@ -1444,7 +1444,7 @@ function buildGameSessionSummary(runner,dashboard){
     if(mission.completed&&runner.sessionInitialMissions?.get(id)===false&&!missions.some(m=>m.id===id))missions.push({id,title:mission.title||'Misión'});
   }
   const level=Math.max(Number(runner.celebrationLevel||0),Number(dashboard?.general?.level||0));
-  return {gameName:runner.game.nombre||'Juego',xp:Math.max(0,Number(runner.confirmedGameXp||0)-Number(runner.initialGameXp||0)),missions,level:level>Number(runner.sessionInitialLevel||level)?level:0,saveFailed:!!(runner.failedCheckpoint||runner.pendingResult)};
+  return {gameName:runner.game.nombre||'Juego',xp:Math.max(0,Number(runner.confirmedGameXp||0)-Number(runner.initialGameXp||0))+Number(runner.galleryEarnedXp||0),missions,level:level>Number(runner.sessionInitialLevel||level)?level:0,saveFailed:!!(runner.failedCheckpoint||runner.pendingResult)};
 }
 function renderGameSessionSummary(summary){
   let node=$('gameSessionSummary');
@@ -2463,7 +2463,14 @@ window.addEventListener('message',event=>{
       postToGameWindow(runner,target,'GALLERY_REPLY',{requestId,error:'gallery_unavailable'});return;
     }
     callSupabaseFunction('rayuela-gallery',payload,token).then(data=>{
-      if(activeGameRunner===runner)postToGameWindow(runner,target,'GALLERY_REPLY',{requestId,data});
+      if(activeGameRunner===runner){
+        if(Number.isFinite(data.totalXp)){
+          if(runner.initialGalleryXp==null)runner.initialGalleryXp=data.totalXp-Number(data.awardedXp||0);
+          runner.galleryEarnedXp=Math.max(0,data.totalXp-runner.initialGalleryXp);
+          confirmGameXpHud(runner,{record:{xp:runner.confirmedGameXp}},true);
+        }
+        postToGameWindow(runner,target,'GALLERY_REPLY',{requestId,data});
+      }
     }).catch(error=>{if(activeGameRunner===runner)postToGameWindow(runner,target,'GALLERY_REPLY',{requestId,error:error.code||'gallery_unavailable'});});
   }
 

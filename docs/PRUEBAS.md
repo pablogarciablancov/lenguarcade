@@ -1,3 +1,11 @@
+## 2026-10-28 · Finales y premios de Rayuela
+
+- `npm run check`: incluye premios 20/80, repetición, roles, persistencia, tipo/título visible, colección sin spoilers y XP de sesión.
+- Probar alumno no autor en galería: alcanzar un final nuevo, volver a alcanzarlo, descubrir otro y volver a entrar. Solo el primer descubrimiento suma XP; un final perfecto suma 80, no 100.
+- Profesor y autor: colección persistente sin premio. Recorrido truncado, escena que no es final, clase ajena y evento de premio enviado a save-progress: rechazo.
+- La migración se prueba con transacción revertida: registro/evento atómicos, doble llamada, cantidades y permisos directos. Verificar títulos y tipos por lectura independiente; preservar prosa, conexiones, autoría, ortografía, lecturas y votos.
+- Publicación: fusionar, confirmar Pages, aplicar migración y actualizar funciones compatibles. Actualizar el despliegue estable de Apps Script para el contador de XP durante la sesión. Las funciones actualizadas calculan el XP del perfil también con el panel anterior.
+
 ## 2026-10-27 · Reconexión de galería de Rayuela
 
 - Ejecutar `node scripts/check-teacher-player-mode.mjs` y `npm run check`.

@@ -72,7 +72,7 @@ export function countBossDamage(events,battle,workshopRuns,nowMs=Date.now()) {
   const sorted=[...events].sort((a,b)=>ms(a.occurred_at)-ms(b.occurred_at)||String(a.id).localeCompare(String(b.id)));
   for(const event of sorted){
     const id=String(event.id||'');if(!id||unique.has(id))continue;unique.add(id);
-    if(!games.has(event.game_id)||['teacher_adjustment','class_boss_reward'].includes(event.event_type)||Number(event.xp_delta||0)<=0)continue;
+    if(!games.has(event.game_id)||['teacher_adjustment','class_boss_reward','rayuela_ending_reward'].includes(event.event_type)||Number(event.xp_delta||0)<=0)continue;
     const at=ms(event.occurred_at);
     if(!Number.isFinite(at)||at<ms(battle.started_at)||at>nowMs)continue;
     if(!windows.some(w=>at>=ms(w.from)&&at<=ms(w.to)))continue;
@@ -138,7 +138,7 @@ export function countEncounter(events,battle,runs,nowMs=Date.now()) {
       const at=ms(e.occurred_at),id=String(e.id||''),student=String(e.profile_id||'');
       if(damage>=round.health)break;
       if(!id||seen.has(id)||!student||!Number.isFinite(at)||at<from||at>=to||at>until||
-        !(battle.game_ids||[]).includes(e.game_id)||['teacher_adjustment','class_boss_reward'].includes(e.event_type)||(c.version>=2?!(fresh.get(e)>0):Number(e.xp_delta)<=0)||
+        !(battle.game_ids||[]).includes(e.game_id)||['teacher_adjustment','class_boss_reward','rayuela_ending_reward'].includes(e.event_type)||(c.version>=2?!(fresh.get(e)>0):Number(e.xp_delta)<=0)||
         !windows.some(w=>at>=ms(w.from)&&at<=ms(w.to))||(c.version<2&&at-(last.get(student)??-Infinity)<30000))continue;
       seen.add(id);last.set(student,at);
       const bucket=Math.floor((at-from)/90000),games=buckets.get(bucket)||new Set();
