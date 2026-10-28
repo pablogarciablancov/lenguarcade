@@ -1,3 +1,9 @@
+## 2026-10-28 · Colores de finales y voto del profesor
+
+Los finales buenos/perfectos se muestran en verde, los malos/derrotas en rojo y los agridulces/misteriosos/secretos en amarillo, tanto al finalizar como en la colección. Los no descubiertos no revelan su tipo.
+
+El profesor puede valorar con los mismos cinco criterios después de llegar a un final, y modificar su voto sin duplicarlo. Su nombre y condición de profesor aparecen en participación; el voto cuenta una vez en la media. La autoría y el acceso por clase siguen protegidos. Jugar como profesor sigue sin otorgar XP de lectura.
+
 ## 2026-10-28 · Finales de Rayuela y XP de lectura
 
 La galería registra cada final descubierto por alumno e historia. Los finales normales dan 20 XP al perfil de LenguArcade y los perfectos dan 80 XP en total. La repetición no vuelve a premiarse; autores y profesores pueden jugar sin obtener XP de lectura. El recorrido se valida en el servidor y un registro único junto a su evento de XP se guarda en una transacción. La escritura conserva sus premios y guardados. Las bonificaciones de lectura no se cuentan como aciertos, ataques al jefe ni XP de talleres.

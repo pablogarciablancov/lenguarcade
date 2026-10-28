@@ -51,14 +51,14 @@ export async function handle(admin:any,profileId:string,organizationId:string,ro
       return {ok:true,completed:true,...reward.data};
     }
     if(action==='rate'){
-      if(teacher||story.author_ids.includes(profileId))throw new GalleryError('self_rating',403);
+      if(story.author_ids.includes(profileId))throw new GalleryError('self_rating',403);
       const done=await admin.from('rayuela_gallery_reads').select('story_id').eq('story_id',story.id).eq('profile_id',profileId).maybeSingle();if(done.error)throw done.error;
       if(!done.data)throw new GalleryError('finish_required',403);
       const r=await admin.from('rayuela_gallery_ratings').upsert({story_id:story.id,profile_id:profileId,...scores(body),updated_at:new Date().toISOString()},{onConflict:'story_id,profile_id'});if(r.error)throw r.error;
       return {ok:true};
     }
     const discoveries=await admin.from('rayuela_gallery_endings').select('node_id').eq('story_id',story.id).eq('profile_id',profileId);if(discoveries.error)throw discoveries.error;
-    return {ok:true,project:{...story.project,discoveredEndings:discoveries.data.map((d:any)=>d.node_id)},canRate:!teacher&&!story.author_ids.includes(profileId)};
+    return {ok:true,project:{...story.project,discoveredEndings:discoveries.data.map((d:any)=>d.node_id)},canRate:!story.author_ids.includes(profileId)};
   }else if(!['list','context'].includes(action))throw new GalleryError('unknown_action');
   let query=admin.from('rayuela_gallery_stories').select('id,title,author_ids,published,project,source_project_id,orthography').eq('organization_id',organizationId).eq('classroom_id',classroomId).order('created_at');
   if(!teacher)query=query.eq('published',true);
@@ -68,12 +68,17 @@ export async function handle(admin:any,profileId:string,organizationId:string,ro
   const reads=storyIds.length?await admin.from('rayuela_gallery_reads').select('story_id,profile_id').in('story_id',storyIds):{data:[],error:null};if(reads.error)throw reads.error;
   const discoveries=await admin.from('rayuela_gallery_endings').select('story_id,node_id,xp_awarded').eq('profile_id',profileId);if(discoveries.error)throw discoveries.error;
   const totalXp=discoveries.data.reduce((sum:number,d:any)=>sum+Number(d.xp_awarded||0),0);
+  const voterNames=new Map<string,string>();
+  if(teacher&&ratings.data.length){
+    const voters=await admin.from('profiles').select('id,first_name,last_name,role').eq('organization_id',organizationId).in('id',[...new Set(ratings.data.map((v:any)=>v.profile_id))]);if(voters.error)throw voters.error;
+    for(const voter of voters.data)voterNames.set(voter.id,[voter.first_name,voter.last_name].filter(Boolean).join(' ')+(isTeacher(voter.role)?' · Profesor':''));
+  }
   let roster:any[]=[];
   if(teacher){
     const r=await admin.from('classroom_enrollments').select('profile_id,profiles!inner(id,first_name,last_name,active)').eq('classroom_id',classroomId).eq('active',true);if(r.error)throw r.error;
     roster=r.data.filter((p:any)=>p.profiles.active).map((p:any)=>({id:p.profile_id,name:[p.profiles.first_name,p.profiles.last_name].filter(Boolean).join(' ')})).sort((a:any,b:any)=>a.name.localeCompare(b.name,'es'));
   }
-  return {ok:true,rubricVersion:2,totalXp,teacher,classes,classroomId,roster,stories:stories.map((s:any)=>({id:s.id,title:s.title,scenes:s.project.nodes.length,endingsTotal:s.project.nodes.filter((n:any)=>['ending','secret'].includes(n.type)).length,endingsFound:discoveries.data.filter((d:any)=>d.story_id===s.id).length,spelling:s.orthography?{score:s.orthography.score,count:s.orthography.count}:null,own:s.author_ids.includes(profileId),completed:reads.data.some((r:any)=>r.story_id===s.id&&r.profile_id===profileId),myRating:s.author_ids.includes(profileId)?null:ratingView(ratings.data.find((r:any)=>r.story_id===s.id&&r.profile_id===profileId)),...(teacher?{orthography:s.orthography,authorIds:s.author_ids,published:s.published,summary:summary(s,ratings.data),reads:reads.data.filter((r:any)=>r.story_id===s.id).length,votes:ratings.data.filter((r:any)=>r.story_id===s.id&&!s.author_ids.includes(r.profile_id)).map((r:any)=>({profileId:r.profile_id,...ratingView(r)}))}:{})}))};
+  return {ok:true,rubricVersion:2,totalXp,teacher,classes,classroomId,roster,stories:stories.map((s:any)=>({id:s.id,title:s.title,scenes:s.project.nodes.length,endingsTotal:s.project.nodes.filter((n:any)=>['ending','secret'].includes(n.type)).length,endingsFound:discoveries.data.filter((d:any)=>d.story_id===s.id).length,spelling:s.orthography?{score:s.orthography.score,count:s.orthography.count}:null,own:s.author_ids.includes(profileId),completed:reads.data.some((r:any)=>r.story_id===s.id&&r.profile_id===profileId),myRating:s.author_ids.includes(profileId)?null:ratingView(ratings.data.find((r:any)=>r.story_id===s.id&&r.profile_id===profileId)),...(teacher?{orthography:s.orthography,authorIds:s.author_ids,published:s.published,summary:summary(s,ratings.data),reads:reads.data.filter((r:any)=>r.story_id===s.id).length,votes:ratings.data.filter((r:any)=>r.story_id===s.id&&!s.author_ids.includes(r.profile_id)).map((r:any)=>({profileId:r.profile_id,profileName:voterNames.get(r.profile_id)||'Participante',...ratingView(r)}))}:{})}))};
 }
 Deno.serve(async(request:Request)=>{
   if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
