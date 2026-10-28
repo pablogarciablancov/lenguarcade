@@ -25,7 +25,7 @@ const three=choices('Abres la puerta','Subes al tejado','Buscas la llave');
 assert.equal(sceneText('Ves una casa. Abres la puerta, subes al tejado o buscas la llave.',three),'Ves una casa.','tres decisiones');
 // Run the actual player renderer with its DOM dependencies stubbed, including escaping.
 const html=fs.readFileSync(new URL('./index.html',import.meta.url),'utf8');
-assert(html.includes('<script src="./scene-text.js?v=20261027"></script>'));
+assert(html.includes('<script src="./scene-text.js?v=20261028-separated"></script>'));
 const block=html.slice(html.indexOf('function renderPlayNode(){'),html.indexOf('\nfunction renderEnding('));
 const content={innerHTML:'',querySelectorAll(){return [];}},labels={};
 const node={id:'start',text:original,title:'Inicio',choices:options};
@@ -38,3 +38,12 @@ assert.equal(node.text,original,'el guardado/editor conserva el original');
 node.text='Aceptas la copa\nRechazas la copa';vm.runInContext('renderPlayNode();',sandbox);assert(!content.innerHTML.includes('Esta escena todavía'));
 node.text='';vm.runInContext('renderPlayNode();',sandbox);assert(content.innerHTML.includes('Esta escena todavía'));
 console.log('Rayuela: decisiones solo en botones; escena intacta, listas completas, continuidad, tildes y render real correctos.');
+
+const reviewedChoices=choices('Les saludas aunque no te entiendan','Vuelves al avión');
+const reading={version:1,sourceText:'Hablan otro idioma.\nLes saludas aunque no te  entiendan.\nVuelves al avión.',text:'Hablan otro idioma.',choices:reviewedChoices};
+assert.equal(sceneText(reading.sourceText,reviewedChoices,reading),'Hablan otro idioma.');
+assert.equal(sceneText(reading.sourceText.replace('  ','\u00a0\u00a0'),reviewedChoices,reading),'Hablan otro idioma.');
+assert.equal(sceneText('Una narración nueva.',reviewedChoices,reading),'Una narración nueva.','no usa una presentación obsoleta');
+const edited=structuredClone(reviewedChoices);edited[0].targetId='different';
+assert.equal(sceneText(reading.sourceText,edited,{...reading,text:'NO USAR'}),sceneText(reading.sourceText,edited),'los cambios de destino invalidan la presentación');
+assert.equal(sceneText('Solo opciones',reviewedChoices,{...reading,sourceText:'Solo opciones',text:''}),'','respeta escenas sin narración');
