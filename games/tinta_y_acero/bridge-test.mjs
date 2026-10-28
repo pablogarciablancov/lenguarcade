@@ -1,0 +1,10 @@
+import vm from 'node:vm';import fs from 'node:fs';import assert from 'node:assert/strict';
+const listeners={},messages=[],intervals=[],timeouts=[],parent={postMessage:m=>messages.push(m)},window={parent,addEventListener:(t,f)=>(listeners[t]??=[]).push(f),name:''};parent.parent=parent;
+const E={profile:{outbox:[]},run:{id:'run1',mode:'adventure',stats:{correct:3,battles:1},words:['sol']},snapshot:()=>({version:1})};
+let initialized=0;const UI={initialize(){initialized++},status(){},persist(){}};window.TintaUI=UI;window.TintaGame=E;
+const ctx=vm.createContext({window,URLSearchParams,location:{search:'?la=1&channel=secret'},crypto:globalThis.crypto,TintaGame:E,TintaUI:UI,setInterval:f=>intervals.push(f),setTimeout:f=>timeouts.push(f),clearTimeout(){}});vm.runInContext(fs.readFileSync(new URL('bridge.js',import.meta.url),'utf8'),ctx);
+const event=(type,payload={},source=parent,channel='secret')=>listeners.message[0]({source,data:{namespace:'lenguarcade-host',channel,type,payload}});
+event('INIT',{},{});assert.equal(initialized,0);event('INIT',{},parent,'wrong');assert.equal(initialized,0);event('INIT',{student:{studentId:'a'}});assert.equal(initialized,1);event('INIT');assert.equal(initialized,1);
+event('REQUEST_CHECKPOINT');let writes=messages.filter(m=>m.type==='CHECKPOINT');assert.equal(writes.length,1);event('REQUEST_CHECKPOINT');assert.equal(messages.filter(m=>m.type==='CHECKPOINT').length,1);event('CHECKPOINT_CONFIRMED',{checkpointId:'wrong'});assert.equal(messages.filter(m=>m.type==='CHECKPOINT').length,1);event('CHECKPOINT_CONFIRMED',{checkpointId:writes[0].payload.checkpointId});assert.equal(messages.filter(m=>m.type==='CHECKPOINT').length,2);
+writes=messages.filter(m=>m.type==='CHECKPOINT');event('CHECKPOINT_CONFIRMED',{checkpointId:writes[1].payload.checkpointId});event('REQUEST_EXIT');assert(!messages.some(m=>m.type==='CLOSE_READY'));const exit=messages.filter(m=>m.type==='CHECKPOINT').at(-1);event('CHECKPOINT_CONFIRMED',{checkpointId:exit.payload.checkpointId});assert(messages.some(m=>m.type==='CLOSE_READY'));
+console.log('PASS: bridge identity/channel checks, serialized writes, matched ACK, exit waits for persistence.');
