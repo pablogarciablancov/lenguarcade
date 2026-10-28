@@ -1,3 +1,10 @@
+## 2026-10-28 · Colores y voto de profesor en Rayuela
+
+- `npm run check`: siete tipos de final, colores en etiqueta/colección y ocultación de finales pendientes.
+- Galería en profe-jugador: llegar a un final, valorar los cinco campos, modificar una puntuación y verificar que hay un solo voto identificado como Profesor. El voto del profesor cuenta como uno en la media.
+- Verificar que los autores no votan su propia historia y que otra clase no puede votar; el profesor no obtiene XP de lectura.
+- Publicación: Pages y función rayuela-gallery. No requiere Apps Script ni migración.
+
 ## 2026-10-28 · Finales y premios de Rayuela
 
 - `npm run check`: incluye premios 20/80, repetición, roles, persistencia, tipo/título visible, colección sin spoilers y XP de sesión.
