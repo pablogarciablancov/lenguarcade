@@ -938,3 +938,8 @@ Empaquetado de la función: incluir `supabase/functions/lexitrama-online/`, `_sh
 - Repetir guardado, comprar objetos y obtener logros sin responder: no deben causar daño. Hacer aciertos en descanso o pausa tampoco debe atacar después de reanudar.
 - Comparar alumnos con distinto número de ataques: más ataques implica mejor puesto, también en el total final. Comprobar los premios del podio y que el progreso normal de juegos sigue en el marcador de Flotas.
 - Cerrar y abrir una partida de Maniacgrafía: no repetir los ataques ni los XP de palabras ya guardadas. Comprobar que sigue registrando errores y avance de aventura.
+
+
+### 2026-10-28 · Galería anónima y valoración por exploración
+
+Rayuela: entrar como Alumno de prueba, elegir 2 ESO C y D, jugar sin autores ni controles de profesor. Con 3 finales, 1 no permite valorar y 2 sí; repetir no suma. Alumno real no puede cambiar a otra clase; autor no vota. Abrir finales descubiertos no incrementa el contador. npm run check incluye pruebas de acceso, privacidad y umbral.
