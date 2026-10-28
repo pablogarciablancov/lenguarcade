@@ -90,7 +90,7 @@ console.log('Voto profesor: cinco criterios, identidad visible, edición sin dup
 const thresholdProject={nodes:[{id:'start',type:'start',choices:[{targetId:'a'},{targetId:'b'},{targetId:'c'}]},{id:'unreachable',type:'ending'},{id:'a',type:'ending'},{id:'b',type:'ending'},{id:'c',type:'secret'},{id:'scene',type:'story'}]};
 assert.equal(model.endingProgress(thresholdProject,[{node_id:'a'},{node_id:'a'},{node_id:'scene'},{node_id:'gone'}]).ratingUnlocked,false);
 assert.equal(model.endingProgress(thresholdProject,[{node_id:'a'},{node_id:'b'}]).ratingUnlocked,true);
-assert.equal(model.endingProgress(thresholdProject,[]).ratingRequired,2);
+assert.equal(model.endingProgress(thresholdProject,[]).ratingRequired,2);assert.equal(model.endingProgress(thresholdProject,[]).endingsTotal,3);
 published.project.nodes.push({...published.project.nodes[1],id:'third'});
 published.project.nodes[0].choices.push({text:'Otra salida',targetId:'third'});
 db.profiles.push({id:'new-peer',organization_id:'org'});
@@ -130,3 +130,5 @@ vm.createContext(view);vm.runInContext(cardSource,view);
 const cardData={id:'s',title:'Aventura',scenes:4,endingsTotal:3,endingsFound:1,ratingRequired:2,ratingUnlocked:false,own:false,completed:true,authorIds:['author']};
 assert(!view.card(cardData,0).includes('data-rate='));assert(view.card(cardData,0).includes('descubre 2 finales'));assert(!view.card(cardData,0).includes('Autor privado'));
 assert(view.card({...cardData,endingsFound:2,ratingUnlocked:true},0).includes('data-rate='));
+
+const isolated=structuredClone(reviewed);isolated.nodes.push({...isolated.nodes[1],id:'isolated',text:'No conectado'});assert(!model.readingProject(isolated).nodes.some(n=>n.id==='isolated'));
