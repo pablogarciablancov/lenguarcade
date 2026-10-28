@@ -85,3 +85,47 @@ assert.equal((await call('teacher','teacher',{action:'get',storyId:id})).canRate
 assert.equal((await call('student','author',{action:'get',storyId:id})).canRate,false);
 await assert.rejects(call('teacher','outsider',{action:'rate',storyId:id,...ballot}));
 console.log('Voto profesor: cinco criterios, identidad visible, edición sin duplicar, autor y clase ajena bloqueados.');
+
+// At least half (rounded up), based on unique existing ending ids.
+const thresholdProject={nodes:[{id:'a',type:'ending'},{id:'b',type:'ending'},{id:'c',type:'secret'},{id:'scene',type:'story'}]};
+assert.equal(model.endingProgress(thresholdProject,[{node_id:'a'},{node_id:'a'},{node_id:'scene'},{node_id:'gone'}]).ratingUnlocked,false);
+assert.equal(model.endingProgress(thresholdProject,[{node_id:'a'},{node_id:'b'}]).ratingUnlocked,true);
+assert.equal(model.endingProgress(thresholdProject,[]).ratingRequired,2);
+published.project.nodes.push({...published.project.nodes[1],id:'third'});
+db.profiles.push({id:'new-peer',organization_id:'org'});
+db.classroom_enrollments.push({classroom_id:'A',profile_id:'new-peer',active:true,profiles:{active:true,first_name:'Nuevo lector'}});
+await call('student','new-peer',{action:'complete',storyId:id,path:['start','end']});
+await assert.rejects(call('student','new-peer',{action:'rate',storyId:id,...ballot}),/half_endings_required/);
+await call('student','new-peer',{action:'complete',storyId:id,path:['start','best']});
+await call('student','new-peer',{action:'rate',storyId:id,...ballot});
+await call('teacher','teacher',{action:'complete',storyId:id,path:['start','end']});
+await call('teacher','teacher',{action:'rate',storyId:id,...ballot});
+assert.equal((await call('teacher','teacher',{action:'list'})).stories[0].ratingUnlocked,true);
+
+// The special pupil is recognized using server-owned data, never request flags.
+db.profiles.push({id:'test',organization_id:'org',active:true,source:'test',email:'lenguarcade.pruebas@alumno.fomento.edu'});
+db.classrooms.push({id:'C',organization_id:'org',active:true,name:'Clase C'});
+db.rayuela_gallery_stories.push({...structuredClone(published),id:'other-story',classroom_id:'C',project:{...structuredClone(snapshot),author:'Nombre privado',source:{private:true},teacherFeedback:{private:true}}});
+let testList=await call('student','test',{action:'list'});
+assert.equal(testList.teacher,false);assert.equal(testList.classes.length,2);assert.equal(testList.roster.length,0);
+assert.equal(testList.stories[0].authorIds,undefined);assert.equal(testList.stories[0].votes,undefined);
+const testStory=await call('student','test',{action:'get',classroomId:'C',storyId:'other-story'});
+assert.equal(testStory.project.author,undefined);assert.equal(testStory.project.source,undefined);assert.equal(testStory.project.teacherFeedback,undefined);
+await call('student','test',{action:'complete',classroomId:'C',storyId:'other-story',path:['start','end']});
+await call('student','test',{action:'rate',classroomId:'C',storyId:'other-story',...ballot});
+await assert.rejects(call('student','peer',{action:'get',classroomId:'C',storyId:'other-story',testReader:true}));
+await assert.rejects(call('student','test',{action:'update',classroomId:'C',storyId:'other-story',published:false}));
+await assert.rejects(call('student','test',{action:'get',classroomId:'B',storyId:'other-story'}));
+const reviewed={...structuredClone(draft),nodes:structuredClone(draft.nodes)};
+reviewed.nodes[0].reading={version:1,text:'Inicio separado',sourceText:'Inicio',choices:[{id:'choice_0',text:'Seguir',targetId:'end'}],author:'Privado'};
+const safe=model.readingProject(reviewed);assert.equal(safe.nodes[0].reading.text,'Inicio separado');assert.equal(safe.nodes[0].reading.author,undefined);
+console.log('Acceso de prueba anónimo y umbral de mitad de finales: servidor, permisos y metadatos OK.');
+
+// Render the real pupil card at both sides of the threshold.
+const gallerySource=fs.readFileSync(new URL('../games/rayuela/gallery.js',import.meta.url),'utf8');
+const cardSource=gallerySource.slice(gallerySource.indexOf('  function card('),gallerySource.indexOf('  function ballotMean('));
+const view={state:{teacher:false,roster:[{id:'author',name:'Autor privado'}]},e:String,spelling:()=>'',review:()=>'',mean:()=>'',votes:()=>''};
+vm.createContext(view);vm.runInContext(cardSource,view);
+const cardData={id:'s',title:'Aventura',scenes:4,endingsTotal:3,endingsFound:1,ratingRequired:2,ratingUnlocked:false,own:false,completed:true,authorIds:['author']};
+assert(!view.card(cardData,0).includes('data-rate='));assert(view.card(cardData,0).includes('descubre 2 finales'));assert(!view.card(cardData,0).includes('Autor privado'));
+assert(view.card({...cardData,endingsFound:2,ratingUnlocked:true},0).includes('data-rate='));

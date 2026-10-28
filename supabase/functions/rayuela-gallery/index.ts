@@ -1,19 +1,25 @@
 import {corsHeaders,jsonResponse,requireProfileSession} from '../_shared/lenguarcade.ts';
 import {studentGameAccess,workshopModeFor} from '../_shared/student-access.ts';
-import {GalleryError,isTeacher,text,cleanProject,validatePath,scores,summary,ratingView,orthographyReview} from './model.js';
+import {GalleryError,isTeacher,text,cleanProject,validatePath,scores,summary,ratingView,orthographyReview,endingProgress,readingProject} from './model.js';
 
 export async function handle(admin:any,profileId:string,organizationId:string,role:string,body:any){
   const teacher=isTeacher(role),action=String(body.action||'');
   if(!teacher&&role!=='student')throw new GalleryError('forbidden',403);
+  const identity=role==='student'?await admin.from('profiles').select('source,email,active').eq('id',profileId).eq('organization_id',organizationId).maybeSingle():{data:null,error:null};
+  if(identity.error)throw identity.error;
+  const testReader=identity.data?.active===true&&identity.data?.source==='test'&&identity.data?.email==='lenguarcade.pruebas@alumno.fomento.edu';
   let members=role==='admin'?{data:[],error:null}:await admin.from(teacher?'classroom_teachers':'classroom_enrollments').select('classroom_id').eq('profile_id',profileId).match(teacher?{}:{active:true});
   if(members.error)throw members.error;
   const classesResult=await admin.from('classrooms').select('id,name').eq('organization_id',organizationId).eq('active',true);
   if(classesResult.error)throw classesResult.error;
   const memberIds=new Set(members.data.map((m:any)=>m.classroom_id));
-  const classes=classesResult.data.filter((c:any)=>role==='admin'||memberIds.has(c.id));
+  const visibleStories=testReader?await admin.from('rayuela_gallery_stories').select('classroom_id').eq('organization_id',organizationId).eq('published',true):{data:[],error:null};
+  if(visibleStories.error)throw visibleStories.error;
+  const storyClasses=new Set(visibleStories.data.map((s:any)=>s.classroom_id));
+  const classes=classesResult.data.filter((c:any)=>role==='admin'||(testReader?storyClasses.has(c.id):memberIds.has(c.id)));
   const classroomId=text(body.classroomId,80)||classes[0]?.id;
   if(!classroomId||!classes.some((c:any)=>c.id===classroomId))throw new GalleryError('no_classroom',403);
-  if(!teacher){
+  if(!teacher&&!testReader){
     const [game,access,workshop]=await Promise.all([
       admin.from('games').select('id,status,url,integration,active').eq('id','rayuela').single(),
       admin.from('profile_game_access').select('enabled').eq('profile_id',profileId).eq('game_id','rayuela').maybeSingle(),
@@ -48,17 +54,21 @@ export async function handle(admin:any,profileId:string,organizationId:string,ro
       validatePath(story.project,body.path);
       const done=await admin.from('rayuela_gallery_reads').upsert({story_id:story.id,profile_id:profileId},{onConflict:'story_id,profile_id'});if(done.error)throw done.error;
       const reward=await admin.rpc('record_rayuela_ending',{p_story_id:story.id,p_profile_id:profileId,p_node_id:body.path[body.path.length-1]});if(reward.error)throw reward.error;
-      return {ok:true,completed:true,...reward.data};
+      const found=await admin.from('rayuela_gallery_endings').select('node_id').eq('story_id',story.id).eq('profile_id',profileId);if(found.error)throw found.error;
+      return {ok:true,completed:true,...reward.data,...endingProgress(story.project,found.data),ratingUnlocked:teacher||endingProgress(story.project,found.data).ratingUnlocked};
     }
     if(action==='rate'){
       if(story.author_ids.includes(profileId))throw new GalleryError('self_rating',403);
-      const done=await admin.from('rayuela_gallery_reads').select('story_id').eq('story_id',story.id).eq('profile_id',profileId).maybeSingle();if(done.error)throw done.error;
-      if(!done.data)throw new GalleryError('finish_required',403);
+      const found=await admin.from('rayuela_gallery_endings').select('node_id').eq('story_id',story.id).eq('profile_id',profileId);if(found.error)throw found.error;
+      if(teacher){
+        const done=await admin.from('rayuela_gallery_reads').select('story_id').eq('story_id',story.id).eq('profile_id',profileId).maybeSingle();if(done.error)throw done.error;
+        if(!done.data)throw new GalleryError('finish_required',403);
+      }else if(!endingProgress(story.project,found.data).ratingUnlocked)throw new GalleryError('half_endings_required',403);
       const r=await admin.from('rayuela_gallery_ratings').upsert({story_id:story.id,profile_id:profileId,...scores(body),updated_at:new Date().toISOString()},{onConflict:'story_id,profile_id'});if(r.error)throw r.error;
       return {ok:true};
     }
     const discoveries=await admin.from('rayuela_gallery_endings').select('node_id').eq('story_id',story.id).eq('profile_id',profileId);if(discoveries.error)throw discoveries.error;
-    return {ok:true,project:{...story.project,discoveredEndings:discoveries.data.map((d:any)=>d.node_id)},canRate:!story.author_ids.includes(profileId)};
+    return {ok:true,project:{...readingProject(story.project),discoveredEndings:discoveries.data.map((d:any)=>d.node_id)},...endingProgress(story.project,discoveries.data),canRate:!story.author_ids.includes(profileId)&&(teacher||endingProgress(story.project,discoveries.data).ratingUnlocked)};
   }else if(!['list','context'].includes(action))throw new GalleryError('unknown_action');
   let query=admin.from('rayuela_gallery_stories').select('id,title,author_ids,published,project,source_project_id,orthography').eq('organization_id',organizationId).eq('classroom_id',classroomId).order('created_at');
   if(!teacher)query=query.eq('published',true);
@@ -78,7 +88,7 @@ export async function handle(admin:any,profileId:string,organizationId:string,ro
     const r=await admin.from('classroom_enrollments').select('profile_id,profiles!inner(id,first_name,last_name,active)').eq('classroom_id',classroomId).eq('active',true);if(r.error)throw r.error;
     roster=r.data.filter((p:any)=>p.profiles.active).map((p:any)=>({id:p.profile_id,name:[p.profiles.first_name,p.profiles.last_name].filter(Boolean).join(' ')})).sort((a:any,b:any)=>a.name.localeCompare(b.name,'es'));
   }
-  return {ok:true,rubricVersion:2,totalXp,teacher,classes,classroomId,roster,stories:stories.map((s:any)=>({id:s.id,title:s.title,scenes:s.project.nodes.length,endingsTotal:s.project.nodes.filter((n:any)=>['ending','secret'].includes(n.type)).length,endingsFound:discoveries.data.filter((d:any)=>d.story_id===s.id).length,spelling:s.orthography?{score:s.orthography.score,count:s.orthography.count}:null,own:s.author_ids.includes(profileId),completed:reads.data.some((r:any)=>r.story_id===s.id&&r.profile_id===profileId),myRating:s.author_ids.includes(profileId)?null:ratingView(ratings.data.find((r:any)=>r.story_id===s.id&&r.profile_id===profileId)),...(teacher?{orthography:s.orthography,authorIds:s.author_ids,published:s.published,summary:summary(s,ratings.data),reads:reads.data.filter((r:any)=>r.story_id===s.id).length,votes:ratings.data.filter((r:any)=>r.story_id===s.id&&!s.author_ids.includes(r.profile_id)).map((r:any)=>({profileId:r.profile_id,profileName:voterNames.get(r.profile_id)||'Participante',...ratingView(r)}))}:{})}))};
+  return {ok:true,rubricVersion:2,totalXp,teacher,classes,classroomId,roster,stories:stories.map((s:any)=>({id:s.id,title:s.title,scenes:s.project.nodes.length,...endingProgress(s.project,discoveries.data.filter((d:any)=>d.story_id===s.id)),ratingUnlocked:teacher?reads.data.some((r:any)=>r.story_id===s.id&&r.profile_id===profileId):endingProgress(s.project,discoveries.data.filter((d:any)=>d.story_id===s.id)).ratingUnlocked,spelling:s.orthography?{score:s.orthography.score,count:s.orthography.count}:null,own:s.author_ids.includes(profileId),completed:reads.data.some((r:any)=>r.story_id===s.id&&r.profile_id===profileId),myRating:s.author_ids.includes(profileId)?null:ratingView(ratings.data.find((r:any)=>r.story_id===s.id&&r.profile_id===profileId)),...(teacher?{orthography:s.orthography,authorIds:s.author_ids,published:s.published,summary:summary(s,ratings.data),reads:reads.data.filter((r:any)=>r.story_id===s.id).length,votes:ratings.data.filter((r:any)=>r.story_id===s.id&&!s.author_ids.includes(r.profile_id)).map((r:any)=>({profileId:r.profile_id,profileName:voterNames.get(r.profile_id)||'Participante',...ratingView(r)}))}:{})}))};
 }
 Deno.serve(async(request:Request)=>{
   if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});

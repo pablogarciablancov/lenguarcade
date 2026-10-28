@@ -70,3 +70,17 @@ export function orthographyReview(raw){
   if(mistakes.some(m=>!m.original||!m.correction))throw new GalleryError('invalid_orthography');
   return {version:1,reviewer:'Revisión de ChatGPT',penalty:0.2,count:mistakes.length,score:Math.max(0,Math.round((10-mistakes.length*0.2)*10)/10),mistakes};
 }
+
+// Count durable, distinct discoveries of actual endings; never trust a client counter.
+export function endingProgress(project,discoveries){
+  const ids=new Set(project.nodes.filter(n=>['ending','secret'].includes(n.type)).map(n=>n.id));
+  const found=new Set(discoveries.map(d=>d.node_id).filter(id=>ids.has(id))).size;
+  const required=Math.max(1,Math.ceil(ids.size/2));
+  return {endingsTotal:ids.size,endingsFound:found,ratingRequired:required,ratingUnlocked:found>=required};
+}
+export function readingProject(raw){
+  const safe=cleanProject(raw);
+  // Keep reviewed scene/choice separation, while excluding source and author metadata.
+  safe.nodes.forEach((n,i)=>{const r=raw.nodes[i].reading;if(r?.version===1)n.reading={version:1,text:r.text,sourceText:r.sourceText,choices:r.choices.map(c=>({id:c.id,text:c.text,targetId:c.targetId}))};});
+  return safe;
+}

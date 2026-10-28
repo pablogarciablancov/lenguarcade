@@ -908,3 +908,8 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 - Los eventos guardan intervalos acumulados de aciertos calculados por el servidor. Los intervalos solapados, reintentos y eventos duplicados no añaden ataques repetidos; los aciertos cuentan aunque el límite de XP retrase su recompensa.
 - Forja y Maniacgrafía envían checkpoints tras los cambios (500 ms de agrupación y una petición pendiente), sin esperar 12 segundos o al fin de partida. Maniacgrafía usa las palabras correctas acumuladas para no repetir aciertos al terminar o reiniciar una partida.
 - Se mantienen las sesiones v1 y los resultados históricos. Las apariciones siguen ocultas hasta el combate. No se recalculan premios ni puntuaciones ya concedidas.
+
+
+### 2026-10-28 · Galería anónima y valoración por exploración
+
+Rayuela: alumno de prueba accede a las galerías publicadas de su organización con interfaz de alumno, sin autoría. Valorar exige descubrir al menos ceil(finales/2), comprobado en el servidor. Los votos anteriores se conservan. Acceso de prueba limitado a Rayuela, sin cambiar matrículas.
