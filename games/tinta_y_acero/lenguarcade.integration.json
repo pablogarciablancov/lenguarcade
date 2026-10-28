@@ -1,0 +1,12 @@
+{
+  "$schema": "lenguarcade-integration-v1",
+  "gameId": "tinta_y_acero",
+  "name": "Tinta y Acero",
+  "status": "laboratorio",
+  "integration": "embedded",
+  "entry": "games/tinta_y_acero/index.html",
+  "banner": "games/tinta_y_acero/assets/banner.svg",
+  "requires": {"studentRunner": true, "saveProgress": true, "supabaseCatalog": true},
+  "notes": "Juego aislado funcional. bridge.js usa READY/INIT, CHECKPOINT y RESULT con ACK, IDs estables y guardados por alumno. No otorga XP cliente. Pendiente integrar desde integration/*: alta canónica, límites/idempotencia servidor, transacciones de moneda verificadas, políticas de taller y misiones, métricas del profesor y prueba /exec. No publicar todavía como versión final.",
+  "metrics": ["correct", "errors", "attempts", "accuracy", "battles", "uniqueWords", "activeSeconds", "mode", "won"]
+}
