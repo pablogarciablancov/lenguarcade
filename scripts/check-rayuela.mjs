@@ -116,3 +116,4 @@ await import("../games/rayuela/check-sheets-options.mjs");
 
 
 await import("./check-rayuela-ending-hud.mjs");
+await import("../games/rayuela/check-ending-colors.mjs");
