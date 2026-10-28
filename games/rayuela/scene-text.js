@@ -6,8 +6,12 @@
       return {value:match[0].normalize('NFC').toLocaleLowerCase('es'), start:match.index};
     });
   }
-  function sceneText(value, choices) {
+  function sceneText(value, choices, reading) {
     var original=String(value == null ? '' : value);
+    var spaces=function(s){return String(s == null?'':s).normalize('NFC').replace(/\s+/gu,' ').trim();};
+    // Reviewed imported scenes keep prose separate from button labels. Invalidate
+    // the presentation if an author changes words, labels or destinations.
+    if(reading&&reading.version===1&&typeof reading.text==='string'&&spaces(reading.sourceText)===spaces(original)&&Array.isArray(reading.choices)&&reading.choices.length===(choices||[]).length&&reading.choices.every(function(c,i){var current=choices[i];return c.id===current.id&&c.targetId===current.targetId&&spaces(c.text)===spaces(current.text);}))return reading.text;
     var options=(Array.isArray(choices) ? choices : []).map(function (choice) {
       return tokens(choice.text || '');
     });

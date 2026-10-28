@@ -489,7 +489,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 
 <div id="toastStack" class="toastStack" aria-live="polite"></div>
 
-<script src="./scene-text.js?v=20261027"></script>
+<script src="./scene-text.js?v=20261028-separated"></script>
 <script src="./gallery.js?v=20261028"></script>
 <script>
 (function(){
@@ -1345,7 +1345,7 @@ function renderPlayNode(){
   }).join("");
   if(!valid.length)choices=gallerySession?'<div class="muted" style="margin-top:20px">Esta parte está pendiente de escribir. Prueba otro camino para descubrir un final.</div><button class="mainBtn" id="pendingRestart">Volver al inicio</button>':'<div class="muted" style="margin-top:20px">Este camino se ha quedado sin salida. Vuelve al editor y revisa sus conexiones.</div>';
   else if(valid.every(function(c){return !!choiceLockReason(c,playState.inventory,playState.vars);}))choices+='<div class="lockedChoicesHint">🔐 Todos los caminos están bloqueados ahora. Busca otra ruta para conseguir lo que necesitas.</div>';
-  var narrativeText=window.RayuelaSceneText(n.text,valid);
+  var narrativeText=window.RayuelaSceneText(n.text,valid,n.reading);
   var narrative=narrativeText.trim()?'<div class="storyText">'+esc(narrativeText)+'</div>':(!String(n.text||"").trim()?'<div class="storyText">Esta escena todavía no tiene texto.</div>':"");
   $("playContent").innerHTML='<article class="storyCard">'+img+'<div class="storyEyebrow">'+esc(n.chapter||typeDef(n).label)+'</div><h1>'+esc(n.title||"Escena")+'</h1>'+narrative+'<div class="storyChoices">'+choices+'</div></article>';
   var pendingRestart=$("pendingRestart");if(pendingRestart)pendingRestart.onclick=function(){startPlay();};
