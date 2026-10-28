@@ -87,11 +87,12 @@ await assert.rejects(call('teacher','outsider',{action:'rate',storyId:id,...ball
 console.log('Voto profesor: cinco criterios, identidad visible, edición sin duplicar, autor y clase ajena bloqueados.');
 
 // At least half (rounded up), based on unique existing ending ids.
-const thresholdProject={nodes:[{id:'a',type:'ending'},{id:'b',type:'ending'},{id:'c',type:'secret'},{id:'scene',type:'story'}]};
+const thresholdProject={nodes:[{id:'start',type:'start',choices:[{targetId:'a'},{targetId:'b'},{targetId:'c'}]},{id:'unreachable',type:'ending'},{id:'a',type:'ending'},{id:'b',type:'ending'},{id:'c',type:'secret'},{id:'scene',type:'story'}]};
 assert.equal(model.endingProgress(thresholdProject,[{node_id:'a'},{node_id:'a'},{node_id:'scene'},{node_id:'gone'}]).ratingUnlocked,false);
 assert.equal(model.endingProgress(thresholdProject,[{node_id:'a'},{node_id:'b'}]).ratingUnlocked,true);
 assert.equal(model.endingProgress(thresholdProject,[]).ratingRequired,2);
 published.project.nodes.push({...published.project.nodes[1],id:'third'});
+published.project.nodes[0].choices.push({text:'Otra salida',targetId:'third'});
 db.profiles.push({id:'new-peer',organization_id:'org'});
 db.classroom_enrollments.push({classroom_id:'A',profile_id:'new-peer',active:true,profiles:{active:true,first_name:'Nuevo lector'}});
 await call('student','new-peer',{action:'complete',storyId:id,path:['start','end']});

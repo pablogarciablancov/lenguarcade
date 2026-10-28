@@ -912,4 +912,4 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 
 ### 2026-10-28 · Galería anónima y valoración por exploración
 
-Rayuela: alumno de prueba accede a las galerías publicadas de su organización con interfaz de alumno, sin autoría. Valorar exige descubrir al menos ceil(finales/2), comprobado en el servidor. Los votos anteriores se conservan. Acceso de prueba limitado a Rayuela, sin cambiar matrículas.
+Rayuela: alumno de prueba accede a las galerías publicadas de su organización con interfaz de alumno, sin autoría. Valorar exige descubrir al menos ceil(finales alcanzables/2), comprobado en el servidor. Los votos anteriores se conservan. Acceso de prueba limitado a Rayuela, sin cambiar matrículas.

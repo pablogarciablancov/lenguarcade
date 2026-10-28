@@ -72,8 +72,14 @@ export function orthographyReview(raw){
 }
 
 // Count durable, distinct discoveries of actual endings; never trust a client counter.
+export function reachableNodes(project){
+  const nodes=new Map(project.nodes.map(n=>[n.id,n])),seen=new Set(),pending=project.nodes.filter(n=>n.type==='start').map(n=>n.id);
+  while(pending.length){const id=pending.pop(),n=nodes.get(id);if(!n||seen.has(id))continue;seen.add(id);if(!['ending','secret'].includes(n.type))pending.push(...(n.choices||[]).map(c=>c.targetId));}
+  return seen;
+}
 export function endingProgress(project,discoveries){
-  const ids=new Set(project.nodes.filter(n=>['ending','secret'].includes(n.type)).map(n=>n.id));
+  const reachable=reachableNodes(project);
+  const ids=new Set(project.nodes.filter(n=>reachable.has(n.id)&&['ending','secret'].includes(n.type)).map(n=>n.id));
   const found=new Set(discoveries.map(d=>d.node_id).filter(id=>ids.has(id))).size;
   const required=Math.max(1,Math.ceil(ids.size/2));
   return {endingsTotal:ids.size,endingsFound:found,ratingRequired:required,ratingUnlocked:found>=required};
@@ -82,5 +88,6 @@ export function readingProject(raw){
   const safe=cleanProject(raw);
   // Keep reviewed scene/choice separation, while excluding source and author metadata.
   safe.nodes.forEach((n,i)=>{const r=raw.nodes[i].reading;if(r?.version===1)n.reading={version:1,text:r.text,sourceText:r.sourceText,choices:r.choices.map(c=>({id:c.id,text:c.text,targetId:c.targetId}))};});
+  const reachable=reachableNodes(safe);safe.nodes=safe.nodes.filter(n=>reachable.has(n.id));
   return safe;
 }
