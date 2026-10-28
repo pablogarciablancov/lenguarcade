@@ -114,3 +114,5 @@ console.log("Integración Rayuela OK · catálogo, XP, rúbrica, feedback y migr
 await import("../games/rayuela/check-scene-text.mjs");
 await import("../games/rayuela/check-sheets-options.mjs");
 
+
+await import("./check-rayuela-ending-hud.mjs");

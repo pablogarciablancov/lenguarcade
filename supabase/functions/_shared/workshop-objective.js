@@ -42,7 +42,7 @@ export function workshopProgress(session, events) {
   const learningWatermarks=new Map();let lastWorkAt=null,lastPeriod=null;
   const seen=new Set();
   for (const event of [...events].sort((a,b)=>Date.parse(a.occurred_at)-Date.parse(b.occurred_at))) {
-    if (['teacher_adjustment','class_boss_reward'].includes(event.event_type)) continue;
+    if (['teacher_adjustment','class_boss_reward','rayuela_ending_reward'].includes(event.event_type)) continue;
     const id=event.id || event.result_id;
     if(id && seen.has(id))continue;
     if(id)seen.add(id);

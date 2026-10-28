@@ -5,7 +5,7 @@ const context={Deno:{serve(fn){handler=fn}},Response,console,
  requireProfileSession:async()=>({admin:{from(){queried=true;throw Error('Unexpected data access')}},profileId:'test'}),
  jsonResponse:(body,status=200)=>new Response(JSON.stringify(body),{status})};
 vm.runInNewContext(stripTypeScriptTypes(source),context);
-for(const eventType of ['class_boss_reward','teacher_adjustment',' CLASS_BOSS_REWARD ']){
+for(const eventType of ['class_boss_reward','teacher_adjustment','rayuela_ending_reward',' RAYUELA_ENDING_REWARD ',' CLASS_BOSS_REWARD ']){
  const response=await handler(new Request('http://test/save-progress',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({gameId:'battlegrafia',eventType,progress:{xp:999999}})}));
  assert.equal(response.status,400);assert.equal((await response.json()).error,'reserved_event_type');
 }

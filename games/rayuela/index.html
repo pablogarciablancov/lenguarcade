@@ -490,7 +490,7 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 <div id="toastStack" class="toastStack" aria-live="polite"></div>
 
 <script src="./scene-text.js?v=20261027"></script>
-<script src="./gallery.js?v=2"></script>
+<script src="./gallery.js?v=20261028"></script>
 <script>
 (function(){
 "use strict";
@@ -546,7 +546,7 @@ var NODE_TYPES={
 var ENDING_TYPES={
   perfect:{label:"Final perfecto",icon:"🏆"},
   good:{label:"Final bueno",icon:"🙂"},
-  neutral:{label:"Final neutral",icon:"😐"},
+  neutral:{label:"Final agridulce",icon:"😐"},
   bad:{label:"Final malo",icon:"☠️"},
   defeat:{label:"Derrota",icon:"💀"},
   secret:{label:"Final secreto",icon:"👑"},
@@ -1355,7 +1355,7 @@ function renderEnding(n){
   if(project.discoveredEndings.indexOf(n.id)===-1){project.discoveredEndings.push(n.id);awardAchievement("ending_found");scheduleSave("ending_discovered");}
   project.playthroughs++;var s=computeStats();if(s.endings&&project.discoveredEndings.length>=s.endings)awardAchievement("all_endings_found");
   var et=ENDING_TYPES[n.endingType]||ENDING_TYPES.good;var dots=project.nodes.filter(isEnding).map(function(e){var found=project.discoveredEndings.indexOf(e.id)!==-1;return '<span class="endingDot '+(found?'found':'locked')+'">'+(found?esc(e.title||"Final"):"?????")+'</span>';}).join("");
-  $("playContent").innerHTML='<article class="storyCard endingBox"><div class="endingIcon">'+et.icon+'</div><div class="storyEyebrow">Has descubierto</div><h1>'+esc(n.title||et.label)+'</h1><div class="storyText">'+esc(n.text||"Aquí termina este camino.")+'</div><div class="endingCollection">'+dots+'</div><div class="editorActionRow" style="justify-content:center"><button id="replayBtn" class="mainBtn">↻ Volver a jugar</button><button id="closeEndingBtn" class="ghostBtn">Salir</button></div></article>';
+  $("playContent").innerHTML='<article class="storyCard endingBox"><div class="endingIcon">'+et.icon+'</div><div class="storyEyebrow">Has descubierto · '+esc(et.label)+'</div><h1>'+esc(n.title||et.label)+'</h1><div class="storyText">'+esc(n.text||"Aquí termina este camino.")+'</div><div class="endingCollection">'+dots+'</div><div class="editorActionRow" style="justify-content:center"><button id="replayBtn" class="mainBtn">↻ Volver a jugar</button><button id="closeEndingBtn" class="ghostBtn">Salir</button></div></article>';
   if(gallerySession)gallery.finished(gallerySession.id,playState.path.slice(),$("playContent").querySelector(".storyCard"));
   $("playEndingLabel").textContent=project.discoveredEndings.length+" de "+s.endings+" finales descubiertos";$("replayBtn").onclick=function(){startPlay();};$("closeEndingBtn").onclick=closePlay;
 }

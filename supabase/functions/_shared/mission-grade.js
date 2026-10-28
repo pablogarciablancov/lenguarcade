@@ -5,7 +5,7 @@ export function assessedMissions(definitions,rows,events,profileId,classroomIds,
   let current=0;
   if(type==='save')current=scoped.filter(r=>r.last_activity_at&&(!m.active_from||Date.parse(r.last_activity_at)>=Date.parse(m.active_from))&&(!m.active_to||Date.parse(r.last_activity_at)<=Date.parse(m.active_to))).length;
   else if(m.active_from){
-   const recent=events.filter(e=>!['teacher_adjustment','class_boss_reward'].includes(e.event_type)&&(!id||e.game_id===id)&&Date.parse(e.occurred_at)>=Date.parse(m.active_from)&&(!m.active_to||Date.parse(e.occurred_at)<=Date.parse(m.active_to)));
+   const recent=events.filter(e=>!['teacher_adjustment','class_boss_reward','rayuela_ending_reward'].includes(e.event_type)&&(!id||e.game_id===id)&&Date.parse(e.occurred_at)>=Date.parse(m.active_from)&&(!m.active_to||Date.parse(e.occurred_at)<=Date.parse(m.active_to)));
    if(type==='sessions')current=recent.filter(e=>e.details?.sessionCounted!==false).length;
    if(type==='variety')current=new Set(recent.map(e=>e.game_id)).size;
    if(type==='xp')current=recent.reduce((sum,e)=>sum+num(e.xp_delta),0);

@@ -1,3 +1,9 @@
+## 2026-10-28 · Finales de Rayuela y XP de lectura
+
+La galería registra cada final descubierto por alumno e historia. Los finales normales dan 20 XP al perfil de LenguArcade y los perfectos dan 80 XP en total. La repetición no vuelve a premiarse; autores y profesores pueden jugar sin obtener XP de lectura. El recorrido se valida en el servidor y un registro único junto a su evento de XP se guarda en una transacción. La escritura conserva sus premios y guardados. Las bonificaciones de lectura no se cuentan como aciertos, ataques al jefe ni XP de talleres.
+
+Los finales muestran título y tipo (perfecto, bueno, agridulce, malo o misterioso); la colección se recupera entre sesiones. Revisión editorial de 476 finales en 25 historias, conservando textos y conexiones. Se identificaron 24 finales óptimos, 23 accesibles: en Pol y los Pirineos falta completar el camino al final feliz; Tu isla privada no contiene un final bueno escrito. No se inventan desenlaces ni enlaces.
+
 ## 2026-10-27 · Galería de Rayuela en profe-jugador
 
 Al abrir Rayuela desde el perfil de respaldo de profesor, el panel intenta reconectar con la sesión de profesor de Supabase antes de lanzar el juego. Evita entrar silenciosamente en una biblioteca sin galería. Si la conexión falla, muestra el error y permite reintentar; los demás juegos y el acceso de alumnos mantienen su flujo.

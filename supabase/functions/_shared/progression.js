@@ -2,7 +2,7 @@
 export const XP_REWARD_GUIDE = Object.freeze({
   battlegrafia:"12 XP por frase correcta nueva y 25 XP por monstruo derrotado.",
   sopa_de_tinta:"6 XP por palabra nueva correcta; límite 320 XP por guardado (150 en checkpoint).",
-  rayuela:"3 XP por elemento nuevo de estructura y 60 XP por primera entrega válida; límite 360 XP (150 en checkpoint).",
+  rayuela:"Creación: 3 XP por elemento nuevo y 60 XP por primera entrega válida. Galería: 20 XP de perfil por final nuevo, 80 XP por final perfecto; un premio por final e historia.",
   entre_lineas:"6 XP por respuesta correcta nueva y 60 XP por caso nuevo (máximo 3 por guardado); límite 360 XP (180 en checkpoint).",
   versopolis:"6 XP por composición correcta nueva y XP adicional según la puntuación nueva de la partida; límite 360 XP (180 en checkpoint).",
   lexaria:"6 XP por respuesta correcta nueva, 12 por victoria de carrera, 6 por victoria de duelo y 2 por derrota de duelo; límite 360 XP (180 en checkpoint).",

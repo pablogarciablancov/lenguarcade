@@ -47,7 +47,8 @@ export async function handle(admin:any,profileId:string,organizationId:string,ro
     if(action==='complete'){
       validatePath(story.project,body.path);
       const done=await admin.from('rayuela_gallery_reads').upsert({story_id:story.id,profile_id:profileId},{onConflict:'story_id,profile_id'});if(done.error)throw done.error;
-      return {ok:true,completed:true};
+      const reward=await admin.rpc('record_rayuela_ending',{p_story_id:story.id,p_profile_id:profileId,p_node_id:body.path[body.path.length-1]});if(reward.error)throw reward.error;
+      return {ok:true,completed:true,...reward.data};
     }
     if(action==='rate'){
       if(teacher||story.author_ids.includes(profileId))throw new GalleryError('self_rating',403);
@@ -56,7 +57,8 @@ export async function handle(admin:any,profileId:string,organizationId:string,ro
       const r=await admin.from('rayuela_gallery_ratings').upsert({story_id:story.id,profile_id:profileId,...scores(body),updated_at:new Date().toISOString()},{onConflict:'story_id,profile_id'});if(r.error)throw r.error;
       return {ok:true};
     }
-    return {ok:true,project:story.project,canRate:!teacher&&!story.author_ids.includes(profileId)};
+    const discoveries=await admin.from('rayuela_gallery_endings').select('node_id').eq('story_id',story.id).eq('profile_id',profileId);if(discoveries.error)throw discoveries.error;
+    return {ok:true,project:{...story.project,discoveredEndings:discoveries.data.map((d:any)=>d.node_id)},canRate:!teacher&&!story.author_ids.includes(profileId)};
   }else if(!['list','context'].includes(action))throw new GalleryError('unknown_action');
   let query=admin.from('rayuela_gallery_stories').select('id,title,author_ids,published,project,source_project_id,orthography').eq('organization_id',organizationId).eq('classroom_id',classroomId).order('created_at');
   if(!teacher)query=query.eq('published',true);
@@ -64,12 +66,14 @@ export async function handle(admin:any,profileId:string,organizationId:string,ro
   const stories=result.data,storyIds=stories.map((s:any)=>s.id);
   const ratings=storyIds.length?await admin.from('rayuela_gallery_ratings').select('*').in('story_id',storyIds):{data:[],error:null};if(ratings.error)throw ratings.error;
   const reads=storyIds.length?await admin.from('rayuela_gallery_reads').select('story_id,profile_id').in('story_id',storyIds):{data:[],error:null};if(reads.error)throw reads.error;
+  const discoveries=await admin.from('rayuela_gallery_endings').select('story_id,node_id,xp_awarded').eq('profile_id',profileId);if(discoveries.error)throw discoveries.error;
+  const totalXp=discoveries.data.reduce((sum:number,d:any)=>sum+Number(d.xp_awarded||0),0);
   let roster:any[]=[];
   if(teacher){
     const r=await admin.from('classroom_enrollments').select('profile_id,profiles!inner(id,first_name,last_name,active)').eq('classroom_id',classroomId).eq('active',true);if(r.error)throw r.error;
     roster=r.data.filter((p:any)=>p.profiles.active).map((p:any)=>({id:p.profile_id,name:[p.profiles.first_name,p.profiles.last_name].filter(Boolean).join(' ')})).sort((a:any,b:any)=>a.name.localeCompare(b.name,'es'));
   }
-  return {ok:true,rubricVersion:2,teacher,classes,classroomId,roster,stories:stories.map((s:any)=>({id:s.id,title:s.title,scenes:s.project.nodes.length,spelling:s.orthography?{score:s.orthography.score,count:s.orthography.count}:null,own:s.author_ids.includes(profileId),completed:reads.data.some((r:any)=>r.story_id===s.id&&r.profile_id===profileId),myRating:s.author_ids.includes(profileId)?null:ratingView(ratings.data.find((r:any)=>r.story_id===s.id&&r.profile_id===profileId)),...(teacher?{orthography:s.orthography,authorIds:s.author_ids,published:s.published,summary:summary(s,ratings.data),reads:reads.data.filter((r:any)=>r.story_id===s.id).length,votes:ratings.data.filter((r:any)=>r.story_id===s.id&&!s.author_ids.includes(r.profile_id)).map((r:any)=>({profileId:r.profile_id,...ratingView(r)}))}:{})}))};
+  return {ok:true,rubricVersion:2,totalXp,teacher,classes,classroomId,roster,stories:stories.map((s:any)=>({id:s.id,title:s.title,scenes:s.project.nodes.length,endingsTotal:s.project.nodes.filter((n:any)=>['ending','secret'].includes(n.type)).length,endingsFound:discoveries.data.filter((d:any)=>d.story_id===s.id).length,spelling:s.orthography?{score:s.orthography.score,count:s.orthography.count}:null,own:s.author_ids.includes(profileId),completed:reads.data.some((r:any)=>r.story_id===s.id&&r.profile_id===profileId),myRating:s.author_ids.includes(profileId)?null:ratingView(ratings.data.find((r:any)=>r.story_id===s.id&&r.profile_id===profileId)),...(teacher?{orthography:s.orthography,authorIds:s.author_ids,published:s.published,summary:summary(s,ratings.data),reads:reads.data.filter((r:any)=>r.story_id===s.id).length,votes:ratings.data.filter((r:any)=>r.story_id===s.id&&!s.author_ids.includes(r.profile_id)).map((r:any)=>({profileId:r.profile_id,...ratingView(r)}))}:{})}))};
 }
 Deno.serve(async(request:Request)=>{
   if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});

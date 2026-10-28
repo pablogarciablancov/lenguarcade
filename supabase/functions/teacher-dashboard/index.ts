@@ -190,7 +190,7 @@ function missionProgressValue(
 
   if (Number.isFinite(activeFrom)) {
     const recent = events.filter(event => {
-      if (["teacher_adjustment","class_boss_reward"].includes(String(event.event_type || ""))) return false;
+      if (["teacher_adjustment","class_boss_reward","rayuela_ending_reward"].includes(String(event.event_type || ""))) return false;
       if (gameId && String(event.game_id) !== gameId) return false;
       const occurredAt = Date.parse(String(event.occurred_at || ""));
       if (!Number.isFinite(occurredAt) || occurredAt < activeFrom) return false;
@@ -247,7 +247,7 @@ function missionCompletionAt(
 
   const recent = events
     .filter(event => {
-      if (["teacher_adjustment","class_boss_reward"].includes(String(event.event_type || ""))) return false;
+      if (["teacher_adjustment","class_boss_reward","rayuela_ending_reward"].includes(String(event.event_type || ""))) return false;
       if (gameId && String(event.game_id) !== gameId) return false;
       const ms = Date.parse(String(event.occurred_at || ""));
       return Number.isFinite(ms) && ms >= from && ms <= to;
@@ -1158,7 +1158,7 @@ Deno.serve(async (request) => {
     for (const row of adjustmentsResult.data || []) {
       const current = adjustmentByProfile.get(row.profile_id) || { xp:0, feathers:0, bonusXp:0 };
       current.xp += Number(row.xp_delta || 0);
-      if(row.event_type==="class_boss_reward")current.bonusXp=(current.bonusXp||0)+Number(row.xp_delta||0);
+      if(["class_boss_reward","rayuela_ending_reward"].includes(row.event_type))current.bonusXp=(current.bonusXp||0)+Number(row.xp_delta||0);
       current.feathers += Number(row.feathers_delta || 0);
       adjustmentByProfile.set(row.profile_id, current);
     }
@@ -1179,7 +1179,7 @@ Deno.serve(async (request) => {
     );
     const latestEventByProfile = new Map<string, Record<string, unknown>>();
     for (const event of eventsResult.data || []) {
-      if (["teacher_adjustment","class_boss_reward"].includes(String(event.event_type || ""))) continue;
+      if (["teacher_adjustment","class_boss_reward","rayuela_ending_reward"].includes(String(event.event_type || ""))) continue;
       const profileId = String(event.profile_id || "");
       if (!profileIdSet.has(profileId)) continue;
       if (gameId && String(event.game_id || "") !== gameId) continue;
@@ -1315,7 +1315,7 @@ Deno.serve(async (request) => {
       : [];
 
     const eventCount = (eventsResult.data || []).filter(row =>
-      !["teacher_adjustment","class_boss_reward"].includes(row.event_type) && Date.parse(row.occurred_at)>=today.getTime() && row.details?.sessionCounted!==false && (!gameId || row.game_id === gameId)
+      !["teacher_adjustment","class_boss_reward","rayuela_ending_reward"].includes(row.event_type) && Date.parse(row.occurred_at)>=today.getTime() && row.details?.sessionCounted!==false && (!gameId || row.game_id === gameId)
     ).length;
     const achievementCount = (achievementsResult.data || []).filter(row =>
       !gameId || row.game_id === gameId
