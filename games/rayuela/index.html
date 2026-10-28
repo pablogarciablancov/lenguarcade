@@ -192,6 +192,8 @@ body{background:radial-gradient(circle at 18% 4%,rgba(105,87,232,.08),transparen
 .endingDot.found.endingRegular,.endingOutcome.endingRegular{background:#fff5cc;color:#795600;border-color:#e2c766}
 .endingDot.found.endingBad,.endingOutcome.endingBad{background:#ffeded;color:#a32935;border-color:#e8a5ad}
 .endingOutcome{display:inline-block;padding:7px 12px;border:1px solid;border-radius:999px;font-size:11px;font-weight:850}
+
+.endingDot.found{cursor:pointer}.endingDot.found:hover{filter:brightness(.96);text-decoration:underline}.endingDot.found[aria-pressed="true"]{box-shadow:0 0 0 2px currentColor}.endingDot.found:focus-visible{outline:3px solid #6957b5;outline-offset:3px}
 </style>
 <link rel="stylesheet" href="./readability.css?v=20260930">
 <link rel="stylesheet" href="./gallery.css?v=2">
@@ -1358,12 +1360,17 @@ function renderPlayNode(){
   $("playContent").querySelectorAll("[data-choice]").forEach(function(btn){btn.onclick=function(){var c=getChoice(n,btn.dataset.choice);if(!c)return;var reason=choiceLockReason(c,playState.inventory,playState.vars);if(reason){toast("🔒 Camino bloqueado",reason);return;}if(String(c.text||"").trim().toLowerCase()==="no pulses aquí"){awardAchievement("secret_phrase");toast("💥 Lo has pulsado","Tiza te mira con profunda decepción.","achievement");}playState.nodeId=c.targetId;playState.path.push(c.targetId);renderPlayNode();};});
 }
 function renderEnding(n){
+  renderEndingCard(n,false);
+}
+function renderEndingCard(n,reviewing){
+  if(reviewing&&project.discoveredEndings.indexOf(n.id)===-1)return;
   function tone(type){return type==='good'||type==='perfect'?'endingGood':type==='bad'||type==='defeat'?'endingBad':'endingRegular';}
-  if(project.discoveredEndings.indexOf(n.id)===-1){project.discoveredEndings.push(n.id);awardAchievement("ending_found");scheduleSave("ending_discovered");}
-  project.playthroughs++;var s=computeStats();if(s.endings&&project.discoveredEndings.length>=s.endings)awardAchievement("all_endings_found");
-  var et=ENDING_TYPES[n.endingType]||ENDING_TYPES.good;var dots=project.nodes.filter(isEnding).map(function(e){var found=project.discoveredEndings.indexOf(e.id)!==-1;return '<span class="endingDot '+(found?'found '+tone(e.endingType):'locked')+'"'+(found?' title="'+esc((ENDING_TYPES[e.endingType]||ENDING_TYPES.neutral).label)+'"':'')+'>'+ (found?esc(e.title||"Final"):"?????")+'</span>';}).join("");
-  $("playContent").innerHTML='<article class="storyCard endingBox"><div class="endingIcon">'+et.icon+'</div><div class="storyEyebrow">Has descubierto</div><div class="endingOutcome '+tone(n.endingType)+'">'+esc(et.label)+'</div><h1>'+esc(n.title||et.label)+'</h1><div class="storyText">'+esc(n.text||"Aquí termina este camino.")+'</div><div class="endingCollection">'+dots+'</div><div class="editorActionRow" style="justify-content:center"><button id="replayBtn" class="mainBtn">↻ Volver a jugar</button><button id="closeEndingBtn" class="ghostBtn">Salir</button></div></article>';
-  if(gallerySession)gallery.finished(gallerySession.id,playState.path.slice(),$("playContent").querySelector(".storyCard"));
+  if(!reviewing&&project.discoveredEndings.indexOf(n.id)===-1){project.discoveredEndings.push(n.id);awardAchievement("ending_found");scheduleSave("ending_discovered");}
+  if(!reviewing)project.playthroughs++;var s=computeStats();if(!reviewing&&s.endings&&project.discoveredEndings.length>=s.endings)awardAchievement("all_endings_found");
+  var et=ENDING_TYPES[n.endingType]||ENDING_TYPES.good;var dots=project.nodes.filter(isEnding).map(function(e,index){var found=project.discoveredEndings.indexOf(e.id)!==-1;if(!found)return '<span class="endingDot locked">?????</span>';return '<button class="endingDot found '+tone(e.endingType)+'" title="'+esc((ENDING_TYPES[e.endingType]||ENDING_TYPES.neutral).label)+'" type="button" id="endingReview_'+index+'" aria-pressed="'+(e.id===n.id)+'">'+esc(e.title||"Final")+'</button>';}).join("");
+  $("playContent").innerHTML='<article class="storyCard endingBox"><div class="endingIcon">'+et.icon+'</div><div class="storyEyebrow">'+(reviewing?'Tu colección de finales':'Has descubierto')+'</div><div class="endingOutcome '+tone(n.endingType)+'">'+esc(et.label)+'</div><h1>'+esc(n.title||et.label)+'</h1><div class="storyText">'+esc(n.text||"Aquí termina este camino.")+'</div><div class="endingCollection">'+dots+'</div><div class="editorActionRow" style="justify-content:center"><button id="replayBtn" class="mainBtn">↻ Volver a jugar</button><button id="closeEndingBtn" class="ghostBtn">Salir</button></div></article>';
+  if(gallerySession&&!reviewing)gallery.finished(gallerySession.id,playState.path.slice(),$("playContent").querySelector(".storyCard"));
+  project.nodes.filter(isEnding).forEach(function(e,index){if(project.discoveredEndings.indexOf(e.id)===-1)return;var button=$("endingReview_"+index);if(button)button.onclick=function(){renderEndingCard(e,true);};});
   $("playEndingLabel").textContent=project.discoveredEndings.length+" de "+s.endings+" finales descubiertos";$("replayBtn").onclick=function(){startPlay();};$("closeEndingBtn").onclick=closePlay;
 }
 function closePlay(){
