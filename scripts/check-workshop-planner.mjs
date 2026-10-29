@@ -390,6 +390,35 @@ expect(closed.activeSession?.homeEnabled === true, "Cerrar clase debe conservar 
 expect(retired.activeSession?.published === false, "Retirar debe despublicar la sesión.");
 expect(accessAfterRetire.games.every((game) => !game.enabled), "Retirar debe cerrar todos los juegos de la clase.");
 
+context.Utilities.formatDate = () => "2026-09-09T17:59";
+const scheduled = context.saveAndActivateWorkshopPlan("C1", {
+  planId:"schedule-lab",
+  title:"Horario de clase",
+  message:"Juego programado",
+  targetXp:150,
+  gameIds:["g1","g3"],
+  classCodes:["C1"],
+  homeEnabled:false,
+  scheduledEnabled:true,
+  scheduleStart:"2026-09-09T18:00",
+  scheduleEnd:"2026-09-09T18:45",
+}, false);
+expect(scheduled.activeSession?.published === true && scheduled.activeSession?.scheduledEnabled === true,
+  "Programar debe publicar una ventana sin abrirla inmediatamente.");
+expect(scheduled.activeSession?.active === false,
+  "Un taller programado todavía no debe estar accesible antes de su inicio.");
+context.Utilities.formatDate = () => "2026-09-09T18:00";
+expect(context.getWorkshopSessionAdmin("C1").session.mode === "scheduled",
+  "La apertura programada debe ser automática y reconocer su hora de inicio.");
+context.Utilities.formatDate = () => "2026-09-09T18:45";
+expect(context.getWorkshopSessionAdmin("C1").session.active === false,
+  "El cierre programado debe ser automático y exacto.");
+context.Utilities.formatDate = () => "2026-09-09T18:00";
+const manualOverride = context.activateWorkshopPlan("C1","schedule-lab",true);
+expect(manualOverride.activeSession?.classroomOpen === true && manualOverride.activeSession?.scheduledEnabled === false,
+  "La apertura manual debe desactivar el horario sin alterar la preparación.");
+
+
 for (const call of [
   "getWorkshopPlannerAdmin",
   "saveWorkshopPlanFast",
@@ -407,3 +436,5 @@ if (errors.length) {
 }
 
 console.log("Planificador de Taller correcto: sesiones preparadas, activación explícita y permisos automáticos.");
+
+await import('./check-scheduled-workshops.mjs');

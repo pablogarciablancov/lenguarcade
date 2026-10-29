@@ -1,4 +1,5 @@
 import {isForjaObjective, workshopVictory, forjaVictory, groupWorkshops, workshopProgress} from "../_shared/workshop-objective.js";
+import {workshopModeFor} from "../_shared/student-access.ts";
 import {actionRewards, snapshotProgress, XP_REWARD_GUIDE, capProgressionAward} from "../_shared/progression.js";
 import {
   boundedNumber,
@@ -56,10 +57,13 @@ async function sendCompletedWorkshopAwards(
       const now = Date.now();
       const from = session.active_from ? Date.parse(String(session.active_from)) : Number.NaN;
       const to = session.active_to ? Date.parse(String(session.active_to)) : Number.NaN;
-      const isActive = !session.closed_at && (session.classroom_open === true ||
-        (session.home_enabled === true && Number.isFinite(from) && Number.isFinite(to) && now >= from && now < to));
+      const isActive = !session.closed_at && (
+        (session.classroom_open === true && session.scheduled_enabled !== true) ||
+        ((session.home_enabled === true || session.scheduled_enabled === true) &&
+          Number.isFinite(from) && Number.isFinite(to) && now >= from && now < to));
       const isEnded = Boolean(session.closed_at) ||
-        (session.home_enabled === true && Number.isFinite(to) && now >= to);
+        ((session.home_enabled === true || session.scheduled_enabled === true) &&
+          Number.isFinite(to) && now >= to);
       if (!isActive && !isEnded) continue;
 
       const startedAt = String(session.started_at || session.active_from || "");
@@ -177,7 +181,7 @@ Deno.serve(async (request) => {
     let workshopSession: Record<string, unknown> | null = null;
     if (classroomIds.length) {
       const { data:workshopRows, error:workshopError } = await admin.from("workshop_sessions")
-        .select("classroom_id,published,classroom_open,home_enabled,active_from,active_to,game_ids,updated_at")
+        .select("classroom_id,published,classroom_open,home_enabled,scheduled_enabled,active_from,active_to,game_ids,updated_at")
         .in("classroom_id", classroomIds)
         .eq("published", true)
         .limit(1);
@@ -190,18 +194,18 @@ Deno.serve(async (request) => {
     let accessClosedAt = accessEnabled ? "" : String(gameAccess?.updated_at || "");
     if (workshopSession) {
       workshopControlsAccess = true;
-      let workshopActive = workshopSession.classroom_open === true;
-      if (!workshopActive && workshopSession.home_enabled === true) {
-        const now = Date.now();
-        const from = workshopSession.active_from ? Date.parse(String(workshopSession.active_from)) : Number.NaN;
-        const to = workshopSession.active_to ? Date.parse(String(workshopSession.active_to)) : Number.NaN;
-        workshopActive = Number.isFinite(from) && Number.isFinite(to) && now >= from && now < to;
-      }
+      const mode = workshopModeFor(workshopSession);
+      const workshopActive = mode === "classroom" || mode === "home" || mode === "scheduled";
       const gameIds = Array.isArray(workshopSession.game_ids)
         ? workshopSession.game_ids.map(value => String(value || ""))
         : [];
       accessEnabled = workshopActive && gameIds.includes(gameId);
-      accessClosedAt = accessEnabled ? "" : String(workshopSession.updated_at || "");
+      // A scheduled session closes without a teacher button. Use the actual
+      // deadline as its closure time so the normal save-grace mechanism still works.
+      const deadline = Date.parse(String(workshopSession.active_to || ""));
+      accessClosedAt = accessEnabled ? "" :
+        (workshopSession.scheduled_enabled === true && Number.isFinite(deadline) &&
+          Date.now() >= deadline ? new Date(deadline).toISOString() : String(workshopSession.updated_at || ""));
     }
     if (!accessEnabled) {
       const requestedClosedAt = String(body.accessClosureAt || "");

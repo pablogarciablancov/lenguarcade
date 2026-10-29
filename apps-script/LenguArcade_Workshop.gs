@@ -168,7 +168,8 @@ var LA_WORKSHOP_SESSION_CONFIG_ = {
   SHEET: 'TallerSesiones',
   HEADERS: [
     'classCode','title','message','objectiveType','targetXp','published','classroomOpen',
-    'homeEnabled','homeStart','homeEnd','gameIds','planId','updatedAt','updatedBy'
+    'homeEnabled','homeStart','homeEnd','gameIds','planId','updatedAt','updatedBy',
+    'scheduledEnabled','scheduleStart','scheduleEnd'
   ]
 };
 
@@ -258,8 +259,14 @@ function workshopSessionPublic_(row) {
   var homeEnabled = published && workshopSessionBool_(row.homeEnabled);
   var homeStart = workshopSessionNormalizeLocalDateTime_(row.homeStart || '');
   var homeEnd = workshopSessionNormalizeLocalDateTime_(row.homeEnd || '');
-  var homeActive = !!(homeEnabled && homeStart && homeEnd && nowLocal >= homeStart && nowLocal <= homeEnd);
-  var mode = classroomOpen ? 'classroom' : (homeActive ? 'home' : 'closed');
+  var scheduledEnabled = published && workshopSessionBool_(row.scheduledEnabled);
+  var scheduleStart = workshopSessionNormalizeLocalDateTime_(row.scheduleStart || '');
+  var scheduleEnd = workshopSessionNormalizeLocalDateTime_(row.scheduleEnd || '');
+  var scheduledActive = !!(scheduledEnabled && scheduleStart && scheduleEnd &&
+    nowLocal >= scheduleStart && nowLocal < scheduleEnd);
+  var homeActive = !!(homeEnabled && homeStart && homeEnd && nowLocal >= homeStart && nowLocal < homeEnd);
+  var mode = scheduledEnabled ? (scheduledActive ? 'scheduled' : 'closed') :
+    (classroomOpen ? 'classroom' : (homeActive ? 'home' : 'closed'));
 
   return {
     classCode:String(row.classCode || ''),
@@ -273,10 +280,14 @@ function workshopSessionPublic_(row) {
     homeStart:homeStart,
     homeEnd:homeEnd,
     homeActive:homeActive,
+    scheduledEnabled:scheduledEnabled,
+    scheduleStart:scheduleStart,
+    scheduleEnd:scheduleEnd,
+    scheduledActive:scheduledActive,
     gameIds:ids,
     planId:String(row.planId || ''),
     mode:mode,
-    active:classroomOpen || homeActive,
+    active:scheduledEnabled ? scheduledActive : classroomOpen || homeActive,
     nowLocal:nowLocal,
     updatedAt:String(row.updatedAt || '')
   };
@@ -299,6 +310,10 @@ function getWorkshopSessionAdmin(classCode) {
     homeStart:'',
     homeEnd:'',
     homeActive:false,
+    scheduledEnabled:false,
+    scheduleStart:'',
+    scheduleEnd:'',
+    scheduledActive:false,
     gameIds:[],
     planId:'',
     mode:'closed',
@@ -322,6 +337,12 @@ function saveWorkshopSession(classCode, payload) {
   if (!ids.length) throw new Error('Selecciona al menos un juego para la misión.');
 
   var homeEnabled = !!payload.homeEnabled;
+  var scheduledEnabled = !!payload.scheduledEnabled;
+  var scheduleStart = workshopSessionNormalizeLocalDateTime_(payload.scheduleStart || '');
+  var scheduleEnd = workshopSessionNormalizeLocalDateTime_(payload.scheduleEnd || '');
+  if (scheduledEnabled && homeEnabled) throw new Error('No puedes programar un taller en clase y en casa a la vez.');
+  if (scheduledEnabled && (!scheduleStart || !scheduleEnd || scheduleEnd <= scheduleStart))
+    throw new Error('Indica una hora de comienzo y fin válida para el taller programado.');
   var homeStart = workshopSessionNormalizeLocalDateTime_(payload.homeStart || '');
   var homeEnd = workshopSessionNormalizeLocalDateTime_(payload.homeEnd || '');
   if (homeEnabled && (!homeStart || !homeEnd)) {
@@ -350,6 +371,9 @@ function saveWorkshopSession(classCode, payload) {
     homeEnabled:homeEnabled,
     homeStart:homeStart,
     homeEnd:homeEnd,
+    scheduledEnabled:scheduledEnabled,
+    scheduleStart:scheduleStart,
+    scheduleEnd:scheduleEnd,
     gameIds:JSON.stringify(ids),
     planId:String(payload.planId || ''),
     updatedAt:nowIso_(),
@@ -382,6 +406,9 @@ function retireWorkshopSession(classCode) {
     published:false,
     classroomOpen:false,
     homeEnabled:false,
+    scheduledEnabled:false,
+    scheduleStart:String(existing.scheduleStart || ''),
+    scheduleEnd:String(existing.scheduleEnd || ''),
     homeStart:String(existing.homeStart || ''),
     homeEnd:String(existing.homeEnd || ''),
     gameIds:String(existing.gameIds || '[]'),
@@ -399,7 +426,7 @@ var LA_WORKSHOP_PLAN_CONFIG_ = {
   HEADERS: [
     'planId','classCode','classCodes','title','message','objectiveType','targetXp','plannedAt',
     'homeEnabled','homeStart','homeEnd','gameIds','usedAt','usedByClass',
-    'createdAt','updatedAt','updatedBy'
+    'createdAt','updatedAt','updatedBy','scheduledEnabled','scheduleStart','scheduleEnd'
   ]
 };
 
@@ -475,6 +502,9 @@ function workshopPlanPublic_(row, activeSession, viewerClassCode) {
     targetXp:Math.max(0, Number(row.targetXp || 0)),
     plannedAt:workshopSessionNormalizeLocalDateTime_(row.plannedAt || ''),
     homeEnabled:workshopSessionBool_(row.homeEnabled),
+    scheduledEnabled:workshopSessionBool_(row.scheduledEnabled),
+    scheduleStart:workshopSessionNormalizeLocalDateTime_(row.scheduleStart || ''),
+    scheduleEnd:workshopSessionNormalizeLocalDateTime_(row.scheduleEnd || ''),
     homeStart:workshopSessionNormalizeLocalDateTime_(row.homeStart || ''),
     homeEnd:workshopSessionNormalizeLocalDateTime_(row.homeEnd || ''),
     gameIds:workshopSessionGameIds_(row.gameIds),
@@ -501,6 +531,12 @@ function workshopPlanValidatePayload_(payload) {
 
   var plannedAt = workshopSessionNormalizeLocalDateTime_(payload.plannedAt || '');
   var homeEnabled = !!payload.homeEnabled;
+  var scheduledEnabled = !!payload.scheduledEnabled;
+  var scheduleStart = workshopSessionNormalizeLocalDateTime_(payload.scheduleStart || '');
+  var scheduleEnd = workshopSessionNormalizeLocalDateTime_(payload.scheduleEnd || '');
+  if (scheduledEnabled && homeEnabled) throw new Error('No puedes programar un taller en clase y en casa a la vez.');
+  if (scheduledEnabled && (!scheduleStart || !scheduleEnd || scheduleEnd <= scheduleStart))
+    throw new Error('Indica una hora de comienzo y fin válida para el taller programado.');
   var homeStart = workshopSessionNormalizeLocalDateTime_(payload.homeStart || '');
   var homeEnd = workshopSessionNormalizeLocalDateTime_(payload.homeEnd || '');
   if (homeEnabled && (!homeStart || !homeEnd)) {
@@ -519,6 +555,9 @@ function workshopPlanValidatePayload_(payload) {
     homeEnabled:homeEnabled,
     homeStart:homeStart,
     homeEnd:homeEnd,
+    scheduledEnabled:scheduledEnabled,
+    scheduleStart:scheduleStart,
+    scheduleEnd:scheduleEnd,
     gameIds:gameIds,
     classCodes:workshopPlanClassCodes_(payload.classCodes, '')
   };
@@ -582,6 +621,9 @@ function saveWorkshopPlan(classCode, payload) {
     homeEnabled:clean.homeEnabled,
     homeStart:clean.homeStart,
     homeEnd:clean.homeEnd,
+    scheduledEnabled:clean.scheduledEnabled,
+    scheduleStart:clean.scheduleStart,
+    scheduleEnd:clean.scheduleEnd,
     gameIds:JSON.stringify(clean.gameIds),
     usedAt:existing ? String(existing.usedAt || '') : '',
     usedByClass:JSON.stringify(usedMap),
@@ -620,6 +662,9 @@ function saveWorkshopPlanFast(classCode, payload) {
     homeEnabled:clean.homeEnabled,
     homeStart:clean.homeStart,
     homeEnd:clean.homeEnd,
+    scheduledEnabled:clean.scheduledEnabled,
+    scheduleStart:clean.scheduleStart,
+    scheduleEnd:clean.scheduleEnd,
     gameIds:JSON.stringify(clean.gameIds),
     usedAt:existing ? String(existing.usedAt || '') : '',
     usedByClass:JSON.stringify(usedMap),
@@ -662,6 +707,9 @@ function saveAndActivateWorkshopPlan(classCode, payload, openNow) {
     homeEnabled:clean.homeEnabled,
     homeStart:clean.homeStart,
     homeEnd:clean.homeEnd,
+    scheduledEnabled:clean.scheduledEnabled,
+    scheduleStart:clean.scheduleStart,
+    scheduleEnd:clean.scheduleEnd,
     gameIds:JSON.stringify(clean.gameIds),
     usedAt:now,
     usedByClass:JSON.stringify(usedMap),
@@ -683,6 +731,9 @@ function saveAndActivateWorkshopPlan(classCode, payload, openNow) {
     homeEnabled:clean.homeEnabled,
     homeStart:clean.homeStart,
     homeEnd:clean.homeEnd,
+    scheduledEnabled:!!clean.scheduledEnabled && !openNow,
+    scheduleStart:clean.scheduleStart,
+    scheduleEnd:clean.scheduleEnd,
     gameIds:JSON.stringify(clean.gameIds),
     planId:planId,
     updatedAt:now,
@@ -783,6 +834,9 @@ function activateWorkshopPlan(classCode, planId, openNow) {
     homeEnabled:plan.homeEnabled,
     homeStart:plan.homeStart,
     homeEnd:plan.homeEnd,
+    scheduledEnabled:!!plan.scheduledEnabled && !openNow,
+    scheduleStart:plan.scheduleStart,
+    scheduleEnd:plan.scheduleEnd,
     gameIds:JSON.stringify(plan.gameIds),
     planId:plan.planId,
     updatedAt:now,
@@ -801,6 +855,9 @@ function activateWorkshopPlan(classCode, planId, openNow) {
     homeEnabled:plan.homeEnabled,
     homeStart:plan.homeStart,
     homeEnd:plan.homeEnd,
+    scheduledEnabled:plan.scheduledEnabled,
+    scheduleStart:plan.scheduleStart,
+    scheduleEnd:plan.scheduleEnd,
     gameIds:JSON.stringify(plan.gameIds),
     usedAt:now,
     usedByClass:JSON.stringify(usedMap),
@@ -825,6 +882,9 @@ function closeWorkshopPlannerSession(classCode) {
     objectiveType:workshopObjectiveType_(existing.objectiveType),
     targetXp:Number(existing.targetXp || 0),
     homeEnabled:workshopSessionBool_(existing.homeEnabled),
+    scheduledEnabled:workshopSessionBool_(existing.scheduledEnabled),
+    scheduleStart:String(existing.scheduleStart || ''),
+    scheduleEnd:String(existing.scheduleEnd || ''),
     homeStart:String(existing.homeStart || ''),
     homeEnd:String(existing.homeEnd || ''),
     gameIds:workshopSessionGameIds_(existing.gameIds),

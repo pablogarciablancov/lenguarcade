@@ -15,10 +15,15 @@ async function resolveClass(admin:any,org:string,code:string){
 }
 async function getActiveWorkshop(admin:any,org:string,classId:string){
   const {data,error}=await admin.from("workshop_sessions")
-    .select("plan_id,started_at,game_ids,published,classroom_open")
+    .select("plan_id,started_at,game_ids,published,classroom_open,scheduled_enabled,active_from,active_to")
     .eq("organization_id",org).eq("classroom_id",classId).maybeSingle();
   if(error)throw error;
-  return data?.published&&data?.classroom_open?data:null;
+  if(!data?.published)return null;
+  if(data.scheduled_enabled===true){
+    const from=Date.parse(String(data.active_from||"")),to=Date.parse(String(data.active_to||""));
+    return Number.isFinite(from)&&Number.isFinite(to)&&Date.now()>=from&&Date.now()<to?data:null;
+  }
+  return data.classroom_open===true?data:null;
 }
 async function latestBoss(admin:any,org:string,classId:string){
   const {data,error}=await admin.from("class_boss_events").select("*")

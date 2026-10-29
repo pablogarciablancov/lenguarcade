@@ -165,7 +165,7 @@ Deno.serve(async (request) => {
         .select("game_id,enabled")
         .eq("profile_id", profileId),
       admin.from("workshop_sessions")
-        .select("classroom_id,title,message,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
+        .select("classroom_id,title,message,objective_type,target_xp,published,classroom_open,home_enabled,scheduled_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
         .eq("organization_id", organizationId)
         .eq("published", true),
     ]);
@@ -200,7 +200,7 @@ Deno.serve(async (request) => {
         : []
     );
     const workshopMode = workshopModeFor(workshopSessionRow);
-    const workshopActive = workshopMode === "classroom" || workshopMode === "home";
+    const workshopActive = workshopMode === "classroom" || workshopMode === "home" || workshopMode === "scheduled";
     const progressByGame = new Map(progress.map(row => [row.game_id, row]));
     const attempts = progress.reduce((sum, row) => sum + Number(row.attempts || 0), 0);
     const successes = progress.reduce((sum, row) => sum + Number(row.successes || 0), 0);
@@ -250,6 +250,9 @@ Deno.serve(async (request) => {
       published:workshopSessionRow.published === true,
       classroomOpen:workshopSessionRow.classroom_open === true,
       homeEnabled:workshopSessionRow.home_enabled === true,
+      scheduledEnabled:workshopSessionRow.scheduled_enabled === true,
+      scheduleStart:workshopSessionRow.scheduled_enabled ? workshopSessionRow.active_from || "" : "",
+      scheduleEnd:workshopSessionRow.scheduled_enabled ? workshopSessionRow.active_to || "" : "",
       homeStart:workshopSessionRow.active_from || "",
       homeEnd:workshopSessionRow.active_to || "",
       gameIds:[...workshopSelectedGameIds],
