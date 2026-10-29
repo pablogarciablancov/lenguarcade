@@ -177,6 +177,16 @@ Deno.serve(async(request)=>{
         const battle=await currentBoss(admin,organizationId,member.classroom_id,workshop);
         if(!battle||!battle.game_ids?.length||battle.state==="prepared")continue;
         if(battle.encounter_config){
+          // Student polling must never replay the whole class history every 15 seconds.
+          // The teacher projection remains the single live combat calculator. Once
+          // all rounds are settled, students retrieve the actual podium cheaply.
+          const rounds=Array.isArray(battle.encounter_rounds)?battle.encounter_rounds:[];
+          const settled=Array.isArray(battle.round_results)?battle.round_results:[];
+          if(battle.state!=="finished" && battleClock(battle,Date.now())>0 &&
+             (rounds.length===0||!rounds.every((r:any)=>settled.some((s:any)=>s.index===r.index)))){
+            return jsonResponse({ok:true,event:{id:battle.id,title:"El Devorapalabras",
+              state:battle.state,startedAt:battle.started_at}});
+          }
           const summary=await battleSummary(admin,battle,workshop);
           return jsonResponse({ok:true,event:summary?{...summary,ownContribution:summary.encounter.leaderboard.find((p:any)=>p.profileId===profileId)||null}:null});
         }
