@@ -9,6 +9,11 @@ export function isLockedStatus(status: unknown) {
 
 export function workshopModeFor(row: Record<string, unknown> | null, now = Date.now()) {
   if (!row || row.published !== true) return "none";
+  if (row.scheduled_enabled === true) {
+    const from = row.active_from ? Date.parse(String(row.active_from)) : Number.NaN;
+    const to = row.active_to ? Date.parse(String(row.active_to)) : Number.NaN;
+    return Number.isFinite(from) && Number.isFinite(to) && now >= from && now < to ? "scheduled" : "closed";
+  }
   if (row.classroom_open === true) return "classroom";
   if (row.home_enabled === true) {
     const from = row.active_from ? Date.parse(String(row.active_from)) : Number.NaN;
