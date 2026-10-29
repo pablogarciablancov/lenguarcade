@@ -752,6 +752,10 @@ async function handleWorkshopGameAccess(
   const classroomOpen = session.classroomOpen === true;
   const homeEnabled = session.homeEnabled === true;
   const scheduledEnabled = session.scheduledEnabled === true;
+  const bossEnabled = session.bossEnabled === true;
+  if (bossEnabled && scheduledEnabled && !["battlegrafia","lexoma","maniacgrafia"].every(id => requestedIds.includes(id))) {
+    return jsonResponse({ok:false,error:"boss_games_required"},400);
+  }
   if (homeEnabled && scheduledEnabled) {
     return jsonResponse({ok:false,error:"workshop_schedule_conflicts_with_home"},400);
   }
@@ -773,6 +777,11 @@ async function handleWorkshopGameAccess(
     activeFrom = null;
     activeTo = null;
   }
+  if (bossEnabled && scheduledEnabled && (
+    (Date.parse(activeTo!) - Date.parse(activeFrom!)) < 10 * 60000 ||
+    (Date.parse(activeTo!) - Date.parse(activeFrom!)) > 60 * 60000 ||
+    (Date.parse(activeTo!) - Date.parse(activeFrom!)) % 60000 !== 0
+  )) return jsonResponse({ok:false,error:"boss_schedule_duration_invalid"},400);
   if (scheduledEnabled && Date.parse(activeTo!) - Date.parse(activeFrom!) > 12 * 60 * 60 * 1000) {
     return jsonResponse({ok:false,error:"workshop_schedule_too_long"},400);
   }
@@ -785,7 +794,7 @@ async function handleWorkshopGameAccess(
   if(priorRuns?.[0]?.published===false)return jsonResponse({ok:false,error:"workshop_deleted_create_new_edition"},409);
   const workshopKey=String(priorRuns?.[0]?.workshop_key || incomingPlanId);
   const { data:existingSession, error:existingSessionError } = await admin.from("workshop_sessions")
-    .select("plan_id,started_at,published,objective_type,classroom_open,home_enabled,scheduled_enabled,active_from,active_to")
+    .select("plan_id,started_at,published,objective_type,classroom_open,home_enabled,scheduled_enabled,boss_enabled,active_from,active_to")
     .eq("classroom_id", classroom.id)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -794,6 +803,7 @@ async function handleWorkshopGameAccess(
     existingSession?.published &&
     !(classroomOpen && !existingSession.classroom_open && !existingSession.home_enabled && !existingSession.scheduled_enabled) &&
     (existingSession.scheduled_enabled === scheduledEnabled) &&
+    (existingSession.boss_enabled === bossEnabled) &&
     (!scheduledEnabled || (Date.parse(String(existingSession.active_from)) === Date.parse(String(activeFrom)) &&
       Date.parse(String(existingSession.active_to)) === Date.parse(String(activeTo)))) &&
     existingSession?.started_at &&
@@ -829,6 +839,7 @@ async function handleWorkshopGameAccess(
     classroom_open:classroomOpen,
     home_enabled:homeEnabled,
     scheduled_enabled:scheduledEnabled,
+    boss_enabled:bossEnabled,
     active_from:activeFrom,
     active_to:activeTo,
     game_ids:requestedIds,
@@ -851,6 +862,7 @@ async function handleWorkshopGameAccess(
     classroom_open:classroomOpen,
     home_enabled:homeEnabled,
     scheduled_enabled:scheduledEnabled,
+    boss_enabled:bossEnabled,
     active_from:activeFrom,
     active_to:activeTo,
     game_ids:requestedIds,
@@ -872,6 +884,7 @@ async function handleWorkshopGameAccess(
     classroomOpen,
     homeEnabled,
     scheduledEnabled,
+    bossEnabled,
     selectedGameCount:requestedIds.length,
     activeFrom,
     activeTo,
