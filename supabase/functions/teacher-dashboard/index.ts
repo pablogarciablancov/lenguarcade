@@ -794,7 +794,8 @@ async function handleWorkshopGameAccess(
     existingSession?.published &&
     !(classroomOpen && !existingSession.classroom_open && !existingSession.home_enabled && !existingSession.scheduled_enabled) &&
     (existingSession.scheduled_enabled === scheduledEnabled) &&
-    (!scheduledEnabled || (existingSession.active_from === activeFrom && existingSession.active_to === activeTo)) &&
+    (!scheduledEnabled || (Date.parse(String(existingSession.active_from)) === Date.parse(String(activeFrom)) &&
+      Date.parse(String(existingSession.active_to)) === Date.parse(String(activeTo)))) &&
     existingSession?.started_at &&
     String(existingSession.objective_type || "xp") === String(session.objectiveType || "xp") &&
     String(existingSession.plan_id || "") === incomingPlanId
