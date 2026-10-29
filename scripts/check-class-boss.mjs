@@ -90,3 +90,5 @@ await import('./check-class-boss-balance.mjs');
 
 await import('./check-class-boss-encounters.mjs');
 await import('./check-class-boss-security.mjs');
+
+await import('./check-class-boss-load.mjs');
