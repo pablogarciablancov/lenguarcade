@@ -79,8 +79,11 @@ Deno.serve(async (request) => {
     const games = (gamesResult.data || []).map(game => {
       const access = studentGameAccess(game, accessByGame, sessionRow, selectedIds, active);
       const accessRow = accessRowsByGame.get(String(game.id)) || null;
+      const deadlineMs = Date.parse(String(sessionRow?.active_to || ""));
+      const scheduledExpiry = sessionRow?.scheduled_enabled === true &&
+        Number.isFinite(deadlineMs) && Date.now() >= deadlineMs;
       const closedAt = access.lockedByWorkshop
-        ? String(sessionRow?.updated_at || "")
+        ? (scheduledExpiry ? new Date(deadlineMs).toISOString() : String(sessionRow?.updated_at || ""))
         : (access.lockedByTeacher ? String(accessRow?.updated_at || "") : "");
       return {
         gameId:String(game.id),
