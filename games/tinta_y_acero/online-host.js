@@ -1,0 +1,6 @@
+/* Only the authenticated host calls the online backend; no credentials enter the game. */
+(()=>{const q=new URLSearchParams(location.search),channel=q.get('channel'),embedded=q.get('la')==='1'||q.get('lenguarcade')==='1';if(!embedded||!channel)return;const pending=new Map();
+function ancestor(w){let p=window;for(let i=0;i<5;i++){if(p.parent===p)break;p=p.parent;if(p===w)return true;}return false;}
+window.TintaOnline={request(payload){return new Promise((resolve,reject)=>{const requestId=crypto.randomUUID(),timer=setTimeout(()=>{pending.delete(requestId);reject(Error('La conexión tarda demasiado. Reintenta.'));},20000);pending.set(requestId,{resolve,reject,timer});let p=window;for(let i=0;i<5;i++){if(p.parent===p)break;p=p.parent;p.postMessage({namespace:'lenguarcade-game',gameId:'tinta_y_acero',channel,type:'ONLINE_REQUEST',payload:{...payload,requestId}},'*');}});}};
+window.addEventListener('message',e=>{const m=e.data;if(!ancestor(e.source)||m?.namespace!=='lenguarcade-host'||m.channel!==channel||m.type!=='ONLINE_REPLY')return;const p=pending.get(m.payload?.requestId);if(!p)return;clearTimeout(p.timer);pending.delete(m.payload.requestId);if(m.payload.error)p.reject(Error(m.payload.error));else p.resolve(m.payload.data);});
+})();

@@ -104,7 +104,8 @@ const generatedCatalog=fs.readFileSync(path.join(appsDir,"LenguArcade_GameCatalo
 if(/raw(?:cdn)?\.githack\.com/i.test(centralSources+"\n"+catalogSource+"\n"+generatedCatalog)){
   throw new Error("Arquitectura: producción no debe volver a usar RawGitHack/RawCDN.");
 }
-if(centralSources.includes("pablogarciablancov.github.io/lenguarcade/games/")){
+// Generated banner maps are verified against the canonical catalog by catalog:check.
+if(centralSources.replace(/const BANNERS=\{[^}]+\};/g, "").includes("pablogarciablancov.github.io/lenguarcade/games/")){
   throw new Error("Arquitectura: el núcleo no debe hardcodear URLs de juegos.");
 }
 if(!catalogSource.includes("https://pablogarciablancov.github.io/lenguarcade/") ||

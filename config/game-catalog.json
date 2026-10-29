@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 17,
+  "version": 18,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -360,6 +360,28 @@
       "icon": "☕",
       "entry": "games/sopa_de_tinta/",
       "banner": "sopa-de-tinta-collection-v3.webp",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "tinta_y_acero",
+      "official": true,
+      "name": "Tinta y Acero",
+      "subtitle": "El poder de las palabras",
+      "category": "RPG lingüístico",
+      "competencies": [
+        "vocabulario",
+        "acentuación",
+        "morfología",
+        "estrategia"
+      ],
+      "status": "en pruebas",
+      "sortOrder": 17,
+      "color": "#dfb76a",
+      "icon": "✒️",
+      "entry": "games/tinta_y_acero/",
+      "description": "Combate con palabras, explora tres regiones y juega en cooperativo o duelo con compañeros de clase.",
+      "banner": "https://pablogarciablancov.github.io/lenguarcade/games/tinta_y_acero/assets/tinta-y-acero-collection-v3.png",
       "active": true,
       "integration": "embedded"
     }

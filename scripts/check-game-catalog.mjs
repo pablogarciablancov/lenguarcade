@@ -15,7 +15,7 @@ const canonicalMigration=fs.readFileSync(path.join(root,"supabase","migrations",
 
 if(catalog.schema!=="lenguarcade-game-catalog-v1") throw new Error("Catálogo: schema canónico incorrecto.");
 const official=catalog.games.filter(game=>game.official);
-if(official.length!==16) throw new Error("Catálogo: deben existir exactamente 16 juegos oficiales.");
+if(official.length!==17) throw new Error("Catálogo: deben existir exactamente 17 juegos oficiales.");
 
 const ids=new Set();
 for(const game of catalog.games){
@@ -54,7 +54,7 @@ for(const required of ["description,competencies,integration,official",'eq("offi
 }
 if(student.includes("LA_EMBEDDED_GAME_OVERRIDES") ||
    student.includes("normalizeNarratoriaUrl") ||
-   student.includes("pablogarciablancov.github.io/lenguarcade/games/")){
+   student.replace(/const BANNERS=\{[^}]+\};/g, "").includes("pablogarciablancov.github.io/lenguarcade/games/")){
   throw new Error("El HTML del alumno no debe sobreescribir el catálogo central.");
 }
 for(const column of ["description","competencies","integration","official"]){
@@ -129,7 +129,7 @@ for(const [label,html] of [["alumno",student],["profesor",teacher]]){
 }
 const covers=new Set();
 for(const game of official){
-  if(!game.banner.endsWith("-collection-v3.webp") || covers.has(game.banner)) throw new Error("Portada ausente o repetida: "+game.id);
+  if(!/-collection-v3\.(webp|png)$/.test(game.banner) || covers.has(game.banner)) throw new Error("Portada ausente o repetida: "+game.id);
   covers.add(game.banner);
 }
 for(const [label,html] of [["alumno",student],["profesor",teacher]]){
@@ -139,9 +139,9 @@ for(const [label,html] of [["alumno",student],["profesor",teacher]]){
   vm.runInNewContext("const ASSET_BASE='https://assets.example/';"+map+resolver+";this.resolveCover=bannerUrl;",context);
   for(const game of official){
     for(const oldBanner of [undefined,game.banner,"dragon","https://old.example/cover.webp"]){
-      if(context.resolveCover(game.id,oldBanner)!=="https://assets.example/"+game.banner) throw new Error("Portada obsoleta en "+label+": "+game.id);
+      if(context.resolveCover(game.id,oldBanner)!==(/^https:\/\//.test(game.banner)?game.banner:"https://assets.example/"+game.banner)) throw new Error("Portada obsoleta en "+label+": "+game.id);
     }
   }
   if(context.resolveCover("custom","https://custom.example/art.webp")!=="https://custom.example/art.webp") throw new Error("Portada externa desconocida alterada.");
 }
-console.log("Catálogo canónico LenguArcade: 16 juegos oficiales; catálogo e integraciones principales sincronizados.");
+console.log("Catálogo canónico LenguArcade: 17 juegos oficiales; catálogo e integraciones principales sincronizados.");

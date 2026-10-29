@@ -55,7 +55,7 @@ function loadCatalog(){
     if(game.integration==="external"&&!game.externalUrl&&!game.entry)fail(game.id+": external necesita externalUrl o entry");
   }
   const official=catalog.games.filter(game=>game.official);
-  if(official.length!==16)fail("debe haber exactamente 16 juegos oficiales; hay "+official.length);
+  if(official.length!==17)fail("debe haber exactamente 17 juegos oficiales; hay "+official.length);
   return catalog;
 }
 function resolvedGame(catalog,game){
@@ -204,6 +204,13 @@ function checkOrWrite(file,expected,label){
   }
 }
 const catalog=loadCatalog();
+// Banner maps are generated from the same canonical source as Apps Script and SQL.
+for(const name of ["LenguArcade_Alumno.html","LenguArcade_Profesor.html"]){
+ const file=path.join(root,"apps-script",name),current=fs.readFileSync(file,"utf8");
+ const banners="{"+catalog.games.map(game=>game.id+":"+"\'"+JSON.stringify(game.banner).slice(1,-1).replaceAll("\'", "\\\'")+"\'").join(",")+"}";
+ const expected=current.replace(/const BANNERS=\{[^}]+\};/,"const BANNERS="+banners+";");
+ checkOrWrite(file,expected,"apps-script/"+name+" (portadas)");
+}
 const expectedApps=renderApps(catalog);
 const expectedSql=renderSql(catalog);
 validateGamesInsert(expectedSql,"SQL generado");
