@@ -5,6 +5,8 @@ function fail(message:string,status=400){return jsonResponse({ok:false,error:mes
 function isoNow(){return new Date().toISOString();}
 // Short cache avoids re-reading thousands of game events for every classroom poll.
 const summaryCache=new Map<string,{until:number,summary:any}>();
+// Collapse concurrent requests within one isolate; cached finished rounds need no full event replay.
+const summaryPending=new Map<string,Promise<any>>();
 async function resolveClass(admin:any,org:string,code:string){
   if(!code)return null;
   const {data,error}=await admin.from("classrooms").select("id,name,section,legacy_class_code").eq("organization_id",org).eq("active",true);
@@ -60,7 +62,7 @@ async function getBossPeriods(admin:any,battle:any){
   const {data:runs,error:runsError}=await admin.from("workshop_runs")
     .select("run_id,plan_id,workshop_key,started_at,closed_at,published,classroom_open,game_ids")
     .eq("organization_id",battle.organization_id).eq("classroom_id",battle.classroom_id)
-    .eq("published",true).order("started_at",{ascending:true});
+    .eq("workshop_key",battle.workshop_key).eq("published",true).order("started_at",{ascending:true});
   if(runsError)throw runsError;
   return (runs||[]).filter((r:any)=>String(r.workshop_key||r.plan_id)===String(battle.workshop_key));
 
@@ -77,13 +79,30 @@ async function battleSummary(admin:any,battle:any,workshop:any,fresh=false){
   const cacheKey=battle.id+":"+battle.updated_at+":"+Boolean(workshop);
   const cached=summaryCache.get(cacheKey);
   if(!fresh&&cached&&cached.until>now)return cached.summary;
-  const {data:enrollments,error:enrollmentError}=await admin.from("classroom_enrollments")
+  const pending=summaryPending.get(cacheKey);
+  if(!fresh&&pending)return pending;
+  const task=computeBattleSummary(admin,battle,workshop,now,cacheKey);
+  if(!fresh)summaryPending.set(cacheKey,task);
+  try{return await task;}
+  finally{if(summaryPending.get(cacheKey)===task)summaryPending.delete(cacheKey);}
+}
+async function computeBattleSummary(admin:any,battle:any,workshop:any,now:number,cacheKey:string){
+  // Four settled rounds are authoritative. Replaying every learner save after the battle
+  // wastes DB connections and can prevent players and teachers from logging in.
+  const allSettled=Boolean(battle.encounter_config &&
+    Array.isArray(battle.encounter_rounds) && battle.encounter_rounds.length>0 &&
+    Array.isArray(battle.round_results) &&
+    battle.encounter_rounds.every((round:any)=>battle.round_results.some((result:any)=>result.index===round.index)));
+  let members:string[]=[];
+  if(!allSettled){
+    const {data:enrollments,error:enrollmentError}=await admin.from("classroom_enrollments")
     .select("profile_id").eq("classroom_id",battle.classroom_id).eq("active",true);
-  if(enrollmentError)throw enrollmentError;
-  const members=(enrollments||[]).map((r:any)=>String(r.profile_id));
-  const periods=await getBossPeriods(admin,battle);
+    if(enrollmentError)throw enrollmentError;
+    members=(enrollments||[]).map((r:any)=>String(r.profile_id));
+  }
+  const periods=allSettled?[]:await getBossPeriods(admin,battle);
   const events:any[]=[];
-  if(members.length&&periods.length){
+  if(!allSettled&&members.length&&periods.length){
     for(let offset=0;;offset+=1000){
       const {data,error}=await admin.from("game_events")
         .select("id,profile_id,game_id,event_type,xp_delta,occurred_at,details")
@@ -124,7 +143,7 @@ async function battleSummary(admin:any,battle:any,workshop:any,fresh=false){
         latest:encounter.latest?{...encounter.latest,leaderboard:named(encounter.latest.leaderboard)}:null,
         config:battle.encounter_config}};
     if(summaryCache.size>80)summaryCache.clear();
-    summaryCache.set(cacheKey,{until:Date.now()+5000,summary});
+    summaryCache.set(cacheKey,{until:Date.now()+(allSettled?60000:8000),summary});
     return summary;
   }
   const tally=countBossDamage(events,battle,periods,now);
