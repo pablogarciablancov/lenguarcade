@@ -407,3 +407,5 @@ if (errors.length) {
 }
 
 console.log("Planificador de Taller correcto: sesiones preparadas, activación explícita y permisos automáticos.");
+
+await import('./check-scheduled-workshops.mjs');
