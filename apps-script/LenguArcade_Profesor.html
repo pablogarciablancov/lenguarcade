@@ -3356,7 +3356,8 @@ body.light .teacherMonitorTable th{background:#fff}
     var gameIds=s&&s.gameIds||[];
     var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
     var prepared=bridge&&bridge.preparedPlan&&bridge.preparedPlan();
-    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Varias apariciones, descansos entre combates y un gran enfrentamiento final. Cada acierto ataca y las acciones más laboriosas hacen más daño. El podio se ordena por daño. El taller se completa por XP o por práctica sostenida con un 70 % de aciertos, con un único premio de Flotas.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚔️ Comenzar batalla':prepared?'⚔️ Comenzar batalla':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossSchedule">📅 Programar batalla</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
+    var scheduled=!!(s&&s.scheduledEnabled&&s.bossEnabled);
+    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Varias apariciones, descansos entre combates y un gran enfrentamiento final. Cada acierto ataca y las acciones más laboriosas hacen más daño. El podio se ordena por daño. El taller se completa por XP o por práctica sostenida con un 70 % de aciertos, con un único premio de Flotas.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(scheduled?'⏱️ Batalla programada':ready?'⚔️ Comenzar batalla':prepared?'⚔️ Comenzar batalla':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossSchedule">📅 Programar batalla</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
     var controls='<div class="laBossSettings">';
     [['sessionMinutes','Sesión · minutos',10,60],['appearanceCount','Apariciones',2,6],['combatSeconds','Combate · segundos',30,180],['participationXp','XP por participar en victoria',0,250]].forEach(function(field){controls+='<label>'+field[1]+'<input type="number" id="bossSetting_'+field[0]+'" min="'+field[2]+'" max="'+field[3]+'" value="'+encounterSettings[field[0]]+'"></label>';});
     controls+='<label>Objetivo al preparar taller · XP<input type="number" id="bossFleetTarget" min="1" max="5000" value="'+fleetTarget+'"></label></div><div class="laBossRewardSettings">';
@@ -3380,12 +3381,14 @@ body.light .teacherMonitorTable th{background:#fff}
     var gameIds=s&&s.gameIds||[];
     var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
     var prepared=bridge&&bridge.preparedPlan&&bridge.preparedPlan();
+    var scheduled=!!(s&&s.scheduledEnabled&&s.bossEnabled);
     var battle=lastClassCode===getClass()?last:null;
     var fresh=!!(ready&&battle&&(battle.state==='active'||battle.state==='paused'||battle.state==='prepared'));
-    btn.textContent=prepared?'⚔️ Comenzar batalla':fresh&&battle.state!=='prepared'?'📺 Ver batalla':
+    btn.textContent=scheduled?'📺 Ver batalla programada':prepared?'⚔️ Comenzar batalla':fresh&&battle.state!=='prepared'?'📺 Ver batalla':
       ready?'⚔️ Comenzar batalla':'⚙️ Preparar batalla';
     btn.disabled=launchPending;
     btn.onclick=function(){
+      if(scheduled)return openStage();
       if(prepared)return launchBattle();
       if(fresh&&battle.state!=='prepared')return openStage();
       if(ready)return launchBattle();
@@ -3520,7 +3523,10 @@ body.light .teacherMonitorTable th{background:#fff}
       var draft=bossWorkshop()&&bossWorkshop().preparedPlan&&bossWorkshop().preparedPlan();
       status(draft?'Batalla preparada, sin abrir juegos y sin cronómetro. Pulsa «Comenzar batalla» cuando estén listos.':
         last&&last.state==='prepared'?'Batalla preparada. Pulsa «Comenzar batalla» cuando estén listos.':
-        last?'Batalla: '+(last.state==='active'?'en curso':last.state==='paused'?'pausada':'terminada')+'. Daño confirmado: '+last.damage+'.':'No hay batalla creada todavía.');
+        last?'Batalla: '+(last.state==='active'?'en curso':last.state==='paused'?'pausada':'terminada')+'. Daño confirmado: '+last.damage+'.':
+        (bossWorkshop()&&bossWorkshop().activeSession()&&bossWorkshop().activeSession().scheduledEnabled&&bossWorkshop().activeSession().bossEnabled)?
+          'Batalla programada. El dragón empezará a la hora prevista aunque no pulses Comenzar batalla.':
+          'No hay batalla creada todavía.');
     }catch(e){status('Servicio del combate no disponible: '+msg(e.code||e.message));}
     finally{requesting=false;}
   }
