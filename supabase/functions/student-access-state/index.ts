@@ -31,7 +31,7 @@ Deno.serve(async (request) => {
         .eq("profile_id", profileId)
         .eq("active", true),
       admin.from("workshop_sessions")
-        .select("classroom_id,title,message,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
+        .select("classroom_id,title,message,objective_type,target_xp,published,classroom_open,home_enabled,scheduled_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
         .eq("organization_id", organizationId)
         .eq("published", true),
     ]);
@@ -46,7 +46,7 @@ Deno.serve(async (request) => {
     const selectedIds = new Set<string>(Array.isArray(sessionRow?.game_ids)
       ? sessionRow.game_ids.map((id: unknown) => String(id || "")) : []);
     const mode = workshopModeFor(sessionRow);
-    const active = mode === "classroom" || mode === "home";
+    const active = mode === "classroom" || mode === "home" || mode === "scheduled";
     const accessRowsByGame = new Map<string, Record<string, unknown>>((accessResult.data || [])
       .map(row => [String(row.game_id), row as Record<string, unknown>]));
     const accessByGame = new Map<string, boolean>((accessResult.data || [])
@@ -64,6 +64,9 @@ Deno.serve(async (request) => {
       published:sessionRow.published === true,
       classroomOpen:sessionRow.classroom_open === true,
       homeEnabled:sessionRow.home_enabled === true,
+      scheduledEnabled:sessionRow.scheduled_enabled === true,
+      scheduleStart:sessionRow.scheduled_enabled ? sessionRow.active_from || "" : "",
+      scheduleEnd:sessionRow.scheduled_enabled ? sessionRow.active_to || "" : "",
       homeStart:sessionRow.active_from || "",
       homeEnd:sessionRow.active_to || "",
       gameIds:[...selectedIds],
