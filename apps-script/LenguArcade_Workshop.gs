@@ -169,7 +169,7 @@ var LA_WORKSHOP_SESSION_CONFIG_ = {
   HEADERS: [
     'classCode','title','message','objectiveType','targetXp','published','classroomOpen',
     'homeEnabled','homeStart','homeEnd','gameIds','planId','updatedAt','updatedBy',
-    'scheduledEnabled','scheduleStart','scheduleEnd'
+    'scheduledEnabled','scheduleStart','scheduleEnd','bossEnabled'
   ]
 };
 
@@ -284,6 +284,7 @@ function workshopSessionPublic_(row) {
     scheduleStart:scheduleStart,
     scheduleEnd:scheduleEnd,
     scheduledActive:scheduledActive,
+    bossEnabled:published && workshopSessionBool_(row.bossEnabled),
     gameIds:ids,
     planId:String(row.planId || ''),
     mode:mode,
@@ -314,6 +315,7 @@ function getWorkshopSessionAdmin(classCode) {
     scheduleStart:'',
     scheduleEnd:'',
     scheduledActive:false,
+    bossEnabled:false,
     gameIds:[],
     planId:'',
     mode:'closed',
@@ -374,6 +376,7 @@ function saveWorkshopSession(classCode, payload) {
     scheduledEnabled:scheduledEnabled,
     scheduleStart:scheduleStart,
     scheduleEnd:scheduleEnd,
+    bossEnabled:!!payload.bossEnabled,
     gameIds:JSON.stringify(ids),
     planId:String(payload.planId || ''),
     updatedAt:nowIso_(),
@@ -407,6 +410,7 @@ function retireWorkshopSession(classCode) {
     classroomOpen:false,
     homeEnabled:false,
     scheduledEnabled:false,
+    bossEnabled:false,
     scheduleStart:String(existing.scheduleStart || ''),
     scheduleEnd:String(existing.scheduleEnd || ''),
     homeStart:String(existing.homeStart || ''),
@@ -426,7 +430,7 @@ var LA_WORKSHOP_PLAN_CONFIG_ = {
   HEADERS: [
     'planId','classCode','classCodes','title','message','objectiveType','targetXp','plannedAt',
     'homeEnabled','homeStart','homeEnd','gameIds','usedAt','usedByClass',
-    'createdAt','updatedAt','updatedBy','scheduledEnabled','scheduleStart','scheduleEnd'
+    'createdAt','updatedAt','updatedBy','scheduledEnabled','scheduleStart','scheduleEnd','bossEnabled'
   ]
 };
 
@@ -503,6 +507,7 @@ function workshopPlanPublic_(row, activeSession, viewerClassCode) {
     plannedAt:workshopSessionNormalizeLocalDateTime_(row.plannedAt || ''),
     homeEnabled:workshopSessionBool_(row.homeEnabled),
     scheduledEnabled:workshopSessionBool_(row.scheduledEnabled),
+    bossEnabled:workshopSessionBool_(row.bossEnabled),
     scheduleStart:workshopSessionNormalizeLocalDateTime_(row.scheduleStart || ''),
     scheduleEnd:workshopSessionNormalizeLocalDateTime_(row.scheduleEnd || ''),
     homeStart:workshopSessionNormalizeLocalDateTime_(row.homeStart || ''),
@@ -528,6 +533,11 @@ function workshopPlanValidatePayload_(payload) {
   var gameIds = workshopSessionGameIds_(payload.gameIds).filter(function(id){ return catalogIds[id]; });
   if (payload.objectiveType === 'forja_easy_win' && gameIds.indexOf('lexoma') === -1) throw new Error('Selecciona Forja para este objetivo.');
   if (!gameIds.length) throw new Error('Selecciona al menos un juego para esta sesión.');
+  var bossEnabled=!!payload.bossEnabled;
+  if (bossEnabled && !['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.indexOf(id)!==-1;}))
+    throw new Error('Devorapalabras necesita Battlegrafía, Forja y Maniacgrafía.');
+  if (bossEnabled && payload.objectiveType === 'forja_easy_win')
+    throw new Error('Devorapalabras requiere un objetivo de XP.');
 
   var plannedAt = workshopSessionNormalizeLocalDateTime_(payload.plannedAt || '');
   var homeEnabled = !!payload.homeEnabled;
@@ -537,6 +547,11 @@ function workshopPlanValidatePayload_(payload) {
   if (scheduledEnabled && homeEnabled) throw new Error('No puedes programar un taller en clase y en casa a la vez.');
   if (scheduledEnabled && (!scheduleStart || !scheduleEnd || scheduleEnd <= scheduleStart))
     throw new Error('Indica una hora de comienzo y fin válida para el taller programado.');
+  if (bossEnabled && scheduledEnabled) {
+    var duration=(new Date(scheduleEnd).getTime()-new Date(scheduleStart).getTime())/60000;
+    if (!isFinite(duration) || duration < 10 || duration > 60 || Math.abs(duration-Math.round(duration))>0.0001)
+      throw new Error('Programa Devorapalabras entre 10 y 60 minutos completos.');
+  }
   var homeStart = workshopSessionNormalizeLocalDateTime_(payload.homeStart || '');
   var homeEnd = workshopSessionNormalizeLocalDateTime_(payload.homeEnd || '');
   if (homeEnabled && (!homeStart || !homeEnd)) {
@@ -556,6 +571,7 @@ function workshopPlanValidatePayload_(payload) {
     homeStart:homeStart,
     homeEnd:homeEnd,
     scheduledEnabled:scheduledEnabled,
+    bossEnabled:bossEnabled,
     scheduleStart:scheduleStart,
     scheduleEnd:scheduleEnd,
     gameIds:gameIds,
@@ -622,6 +638,7 @@ function saveWorkshopPlan(classCode, payload) {
     homeStart:clean.homeStart,
     homeEnd:clean.homeEnd,
     scheduledEnabled:clean.scheduledEnabled,
+    bossEnabled:clean.bossEnabled,
     scheduleStart:clean.scheduleStart,
     scheduleEnd:clean.scheduleEnd,
     gameIds:JSON.stringify(clean.gameIds),
@@ -663,6 +680,7 @@ function saveWorkshopPlanFast(classCode, payload) {
     homeStart:clean.homeStart,
     homeEnd:clean.homeEnd,
     scheduledEnabled:clean.scheduledEnabled,
+    bossEnabled:clean.bossEnabled,
     scheduleStart:clean.scheduleStart,
     scheduleEnd:clean.scheduleEnd,
     gameIds:JSON.stringify(clean.gameIds),
@@ -708,6 +726,7 @@ function saveAndActivateWorkshopPlan(classCode, payload, openNow) {
     homeStart:clean.homeStart,
     homeEnd:clean.homeEnd,
     scheduledEnabled:clean.scheduledEnabled,
+    bossEnabled:clean.bossEnabled,
     scheduleStart:clean.scheduleStart,
     scheduleEnd:clean.scheduleEnd,
     gameIds:JSON.stringify(clean.gameIds),
@@ -732,6 +751,7 @@ function saveAndActivateWorkshopPlan(classCode, payload, openNow) {
     homeStart:clean.homeStart,
     homeEnd:clean.homeEnd,
     scheduledEnabled:!!clean.scheduledEnabled && !openNow,
+    bossEnabled:clean.bossEnabled,
     scheduleStart:clean.scheduleStart,
     scheduleEnd:clean.scheduleEnd,
     gameIds:JSON.stringify(clean.gameIds),
@@ -835,6 +855,7 @@ function activateWorkshopPlan(classCode, planId, openNow) {
     homeStart:plan.homeStart,
     homeEnd:plan.homeEnd,
     scheduledEnabled:!!plan.scheduledEnabled && !openNow,
+    bossEnabled:plan.bossEnabled,
     scheduleStart:plan.scheduleStart,
     scheduleEnd:plan.scheduleEnd,
     gameIds:JSON.stringify(plan.gameIds),
@@ -856,6 +877,7 @@ function activateWorkshopPlan(classCode, planId, openNow) {
     homeStart:plan.homeStart,
     homeEnd:plan.homeEnd,
     scheduledEnabled:plan.scheduledEnabled,
+    bossEnabled:plan.bossEnabled,
     scheduleStart:plan.scheduleStart,
     scheduleEnd:plan.scheduleEnd,
     gameIds:JSON.stringify(plan.gameIds),
@@ -883,6 +905,7 @@ function closeWorkshopPlannerSession(classCode) {
     targetXp:Number(existing.targetXp || 0),
     homeEnabled:workshopSessionBool_(existing.homeEnabled),
     scheduledEnabled:workshopSessionBool_(existing.scheduledEnabled),
+    bossEnabled:workshopSessionBool_(existing.bossEnabled),
     scheduleStart:String(existing.scheduleStart || ''),
     scheduleEnd:String(existing.scheduleEnd || ''),
     homeStart:String(existing.homeStart || ''),
