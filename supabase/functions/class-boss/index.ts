@@ -19,12 +19,15 @@ async function getActiveWorkshop(admin:any,org:string,classId:string,includeClos
     .eq("organization_id",org).eq("classroom_id",classId).maybeSingle();
   if(error)throw error;
   if(!data?.published)return null;
-  if(includeClosed)return data;
+  return includeClosed||workshopCurrentlyOpen(data)?data:null;
+}
+function workshopCurrentlyOpen(data:any,now=Date.now()){
+  if(!data?.published)return false;
   if(data.scheduled_enabled===true){
     const from=Date.parse(String(data.active_from||"")),to=Date.parse(String(data.active_to||""));
-    return Number.isFinite(from)&&Number.isFinite(to)&&Date.now()>=from&&Date.now()<to?data:null;
+    return Number.isFinite(from)&&Number.isFinite(to)&&now>=from&&now<to;
   }
-  return data.classroom_open===true?data:null;
+  return data.classroom_open===true;
 }
 async function latestBoss(admin:any,org:string,classId:string){
   const {data,error}=await admin.from("class_boss_events").select("*")
@@ -229,7 +232,7 @@ Deno.serve(async(request)=>{
       for(const member of memberships||[]){
         const published=await getActiveWorkshop(admin,organizationId,member.classroom_id,true);
         if(!published)continue;
-        const workshop=await getActiveWorkshop(admin,organizationId,member.classroom_id);
+        const workshop=workshopCurrentlyOpen(published)?published:null;
         if(!workshop&&!published.scheduled_enabled)continue;
         let battle=await currentBoss(admin,organizationId,member.classroom_id,published);
         if(workshop)battle=await ensureScheduledBoss(admin,organizationId,member.classroom_id,workshop,battle);
@@ -261,7 +264,7 @@ Deno.serve(async(request)=>{
     const classroom=await resolveClass(admin,organizationId,String(body.classCode||""));
     if(!classroom)return fail("class_not_found",404);
     const published=await getActiveWorkshop(admin,organizationId,classroom.id,true);
-    const workshop=await getActiveWorkshop(admin,organizationId,classroom.id);
+    const workshop=workshopCurrentlyOpen(published)?published:null;
     let battle=await currentBoss(admin,organizationId,classroom.id,published||workshop);
     if(workshop)battle=await ensureScheduledBoss(admin,organizationId,classroom.id,workshop,battle);
     if(action==="prepare"||action==="start"){
