@@ -210,7 +210,7 @@ assert.equal(scheduledBattle.encounter_rounds.length,4);
 assert.ok(scheduledStatuses.every(item=>item?.id===scheduledBattle.id),'Pupils see the boss without teacher launching');
 assert.equal(scheduledBattle.round_results.filter(r=>r.index===0).length,1,
   'An expired round must settle only once without a teacher projecting');
-assert.equal((reads.get('game_events')||0)-readsBeforeFinished,2,
+assert.equal((reads.get('game_events')||0)-readsBeforeFinished,1,
   'Only one additional event-history query should settle the first timed round');
 
 const pastStart=new Date(Date.now()-660000).toISOString();
