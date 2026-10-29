@@ -577,7 +577,8 @@ Deno.serve(async (request) => {
     // The saved XP, game snapshot and audit event are committed above.
     // Never keep a student's save waiting for an unrelated Flotas webhook.
     // waitUntil keeps the retry-safe workshop award task alive after the response.
-    if (classroomIds.length && (shouldWriteEvent || victory)) {
+    // A checkpoint only saves learning progress; defer the expensive Flotas history scan to session results.
+    if (classroomIds.length && (shouldWriteEvent || victory) && (body.checkpoint !== true || victory)) {
       const deliver = sendCompletedWorkshopAwards(admin, profileId, classroomIds, gameId);
       if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(deliver);
       else await deliver; // Local test environment without Supabase EdgeRuntime.
