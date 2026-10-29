@@ -1,5 +1,6 @@
 // Platform XP is retained. Only the cost of each successive level changes.
 export const XP_REWARD_GUIDE = Object.freeze({
+  tinta_y_acero:"20 XP por combate nuevo y 30 por expedición ganada; sin XP por palabra; se aplican los límites de ritmo compartidos.",
   battlegrafia:"12 XP por frase correcta nueva y 25 XP por monstruo derrotado.",
   sopa_de_tinta:"6 XP por palabra nueva correcta; límite 320 XP por guardado (150 en checkpoint).",
   rayuela:"Creación: 3 XP por elemento nuevo y 60 XP por primera entrega válida. Galería: 20 XP de perfil por final nuevo, 80 XP por final perfecto; un premio por final e historia.",
@@ -250,6 +251,17 @@ export function snapshotProgress(gameId,save,previous,old={},raw={},previousRaw=
   raw=raw&&typeof raw==='object'?raw:{};
   previousRaw=previousRaw&&typeof previousRaw==='object'?previousRaw:{};
 
+  if(gameId==='tinta_y_acero'){
+    if(save.version!==1||save.run?.mode==='training')return baseResult(old,0,0,0,n(old.percentage),0,0);
+    const stats=save.stats||{},prior=previous.stats||{};
+    const countWords=p=>Object.values(p.words||{}).reduce((sum,v)=>sum+Math.min(100000,Math.max(0,Math.floor(Number(v)||0))),0);
+    const dc=Math.min(60,Math.max(0,countWords(save)-countWords(previous)));
+    const de=Math.min(60,Math.max(0,n(save.run?.stats?.errors)-(save.run?.id===previous.run?.id?n(previous.run?.stats?.errors):0)));
+    const battles=Math.min(3,Math.max(0,n(stats.battles)-n(prior.battles)));
+    const wins=Math.min(1,Math.max(0,n(stats.wins)-n(prior.wins)));
+    const regions=['boss0','boss1','boss2'].filter(k=>n(stats[k])>0).length;
+    return baseResult(old,dc+de,dc,de,Math.max(n(old.percentage),regions/3*100),battles*20+wins*30,0);
+  }
   if(gameId==='sopa_de_tinta')return sopaDeTintaSnapshot(save,previous,old,context);
   if(gameId==='battlegrafia')return battlegrafiaSnapshot(save,previous,old,context);
   if(gameId==='rayuela')return rayuelaSnapshot(save,previous,old,context);

@@ -422,3 +422,6 @@ verify_jwt = true
 
 [functions.rayuela-gallery]
 verify_jwt = true
+
+[functions.tinta-online]
+verify_jwt = true

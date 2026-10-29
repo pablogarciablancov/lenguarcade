@@ -1,0 +1,13 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';import vm from 'node:vm';import {snapshotProgress} from '../supabase/functions/_shared/progression.js';
+const catalog=JSON.parse(fs.readFileSync('config/game-catalog.json'));const g=catalog.games.find(g=>g.id==='tinta_y_acero');assert(g.active&&g.official&&g.integration==='embedded');assert(fs.existsSync(g.entry+'index.html'));assert(fs.existsSync('games/tinta_y_acero/assets/tinta-y-acero-collection-v3.png'));
+const host=fs.readFileSync('apps-script/LenguArcade_Alumno.html','utf8');assert(host.includes("callSupabaseFunction('tinta-online',payload,token)"));const teacher=fs.readFileSync('apps-script/LenguArcade_Profesor.html','utf8');assert(teacher.includes('bannerUrl(game.gameId,game.banner)'));
+const save={version:1,stats:{battles:1,wins:0},words:{sol:1},run:{id:'a',mode:'adventure',stats:{errors:0}}};let p=snapshotProgress(g.id,save,{},{});assert.equal(p.xp,20);assert.equal(snapshotProgress(g.id,save,save,p).xp,20);
+const victory={...save,stats:{battles:2,wins:1,boss0:1}};assert.equal(snapshotProgress(g.id,victory,save,p).xp,70);assert.equal(snapshotProgress(g.id,{...victory,run:{mode:'training'}},save,p).xp,20);
+assert.equal(snapshotProgress(g.id,{...save,words:{sol:10}},save,p).xp,20,'No XP per word');
+const listeners={},messages=[],parent={postMessage:m=>messages.push(m)};parent.parent=parent;const window={parent,addEventListener:(t,f)=>(listeners[t]??=[]).push(f)};
+const ctx=vm.createContext({window,URLSearchParams,location:{search:'?la=1&channel=test'},crypto:globalThis.crypto,setTimeout:()=>1,clearTimeout(){},Map,Promise,Error});vm.runInContext(fs.readFileSync('games/tinta_y_acero/online-host.js','utf8'),ctx);
+const promise=window.TintaOnline.request({action:'create'});assert.equal(messages[0].type,'ONLINE_REQUEST');assert(!('token'in messages[0].payload));listeners.message[0]({source:parent,data:{namespace:'lenguarcade-host',channel:'wrong',type:'ONLINE_REPLY',payload:{requestId:messages[0].payload.requestId,data:{bad:true}}}});listeners.message[0]({source:parent,data:{namespace:'lenguarcade-host',channel:'test',type:'ONLINE_REPLY',payload:{requestId:messages[0].payload.requestId,data:{ok:true}}}});assert.equal((await promise).ok,true);
+console.log('Tinta y Acero: catalog, titled cover, teacher views, online host channel and idempotent battle XP OK.');
+
+// Deno may expose a legacy window global. Server UMD must still bind to its own scope.
+const server=fs.readFileSync('supabase/functions/tinta-online/game.mjs','utf8').replace(/^export .*$/gm,'');const denoScope=vm.createContext({window:{},crypto:globalThis.crypto});vm.runInContext(server+'\nthis.serverAPI=scope;',denoScope);assert.equal(typeof denoScope.serverAPI.InkEngine.Game,'function');

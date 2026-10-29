@@ -1,3 +1,10 @@
+## 2026-10-29 · Tinta y Acero (integración preparada)
+
+- Alta canónica como juego oficial en pruebas, portada propia con título y mapas de portadas generados para alumno/profesor y talleres.
+- Versión actual de aventura, sprites, guardado por perfil, turnos y defensa corregidos; XP servidor por combates y expediciones, sin XP por palabra.
+- Cooperativo y duelo adaptados a sesiones, clases y controles docentes mediante `tinta-online`; se conserva la tabla de salas existente y la separación de otros juegos.
+- Publicación pendiente de autorización. Detalles: `docs/game-notes/tinta_y_acero/INTEGRACION.md`.
+
 ## 2026-10-28 · Colores de finales y voto del profesor
 
 Los finales buenos/perfectos se muestran en verde, los malos/derrotas en rojo y los agridulces/misteriosos/secretos en amarillo, tanto al finalizar como en la colección. Los no descubiertos no revelan su tipo.

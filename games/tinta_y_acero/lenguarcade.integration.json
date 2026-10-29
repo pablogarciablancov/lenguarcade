@@ -1,0 +1,26 @@
+{
+  "$schema": "lenguarcade-integration-v1",
+  "gameId": "tinta_y_acero",
+  "name": "Tinta y Acero",
+  "status": "en pruebas",
+  "integration": "embedded",
+  "entry": "games/tinta_y_acero/index.html",
+  "banner": "games/tinta_y_acero/assets/tinta-y-acero-collection-v3.png",
+  "requires": {
+    "studentRunner": true,
+    "saveProgress": true,
+    "supabaseCatalog": true
+  },
+  "notes": "Integración preparada: catálogo canónico, perfil, checkpoints, XP por combates y arena autenticada tinta-online. Publicación coordinada pendiente.",
+  "metrics": [
+    "correct",
+    "errors",
+    "attempts",
+    "accuracy",
+    "battles",
+    "uniqueWords",
+    "activeSeconds",
+    "mode",
+    "won"
+  ]
+}

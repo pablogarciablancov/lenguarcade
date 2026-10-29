@@ -1,3 +1,10 @@
+## 2026-10-29 · Tinta y Acero
+
+- `npm run check`, pruebas propias del motor, bridge, turnos y arena: correctas.
+- `scripts/check-tinta-y-acero.mjs`: catálogo, portada, host y XP sin duplicados.
+- `scripts/check-tinta-online-host.mjs`: perfil autenticado, clase/organización, pertenencia, concurrencia y cierre docente.
+- Tras publicar, ejecutar los pasos de alumno/profesor y arena real descritos en `docs/game-notes/tinta_y_acero/INTEGRACION.md`. No declarar validado el `/exec` antes de esa prueba.
+
 ## 2026-10-28 · Colores y voto de profesor en Rayuela
 
 - `npm run check`: siete tipos de final, colores en etiqueta/colección y ocultación de finales pendientes.
