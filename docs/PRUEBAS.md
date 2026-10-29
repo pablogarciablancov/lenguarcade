@@ -1,3 +1,10 @@
+## 29/10/2026 · Arena de Tinta y Acero
+
+- `node games/tinta_y_acero/multiplayer-test.mjs`: conexión lenta, cierre durante carga/consulta, reintento, respuestas tardías, edición y salas finalizadas. Incluido en `check-tinta-online-host.mjs`.
+- `node --no-warnings scripts/check-tinta-online-host.mjs`: identidad real, dos participantes y resolución de ronda.
+- Manual: abrir cooperativo/duelo, comprobar el indicador de conexión, crear con dos perfiles de la misma clase, confirmar ambos, comprobar nueva ronda y volver al refugio mientras sincroniza.
+- Límite de esta revisión: no se pudo ejecutar navegador en el entorno (inicio de Chromium/CUA bloqueado); flujo de interfaz probado mediante sus eventos reales en VM y servidor con dos perfiles simulados.
+
 ## 2026-10-29 · Tinta y Acero
 
 - `npm run check`, pruebas propias del motor, bridge, turnos y arena: correctas.
