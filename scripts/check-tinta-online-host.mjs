@@ -12,3 +12,5 @@ assert.equal((await call(C,{action:'join',code,hero:'tildamante'})).status,404);
 const resolved=await Promise.all([call(A,{action:'submit',code,round:1,move:'pass',token:B}),call(B,{action:'submit',code,round:1,move:'pass'})]);assert(resolved.every(r=>r.status===200));const current=await call(A,{action:'get',code});assert.equal(current.data.room.round,2);assert.equal(current.data.room.history.length,1);assert.equal((await call(A,{action:'submit',code,round:1,move:'pass'})).status,409);
 closed=true;assert.equal((await call(A,{action:'get',code})).status,403);closed=false;
 console.log('Tinta online host: profile identity, eight-character rooms, classroom/org isolation, membership and teacher closure OK.');
+
+await import('../games/tinta_y_acero/multiplayer-test.mjs');

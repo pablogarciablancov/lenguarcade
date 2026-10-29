@@ -1,3 +1,9 @@
+## 29/10/2026 · Recuperación de la arena de Tinta y Acero
+
+- Conexión, creación y entrada con información inmediata; reintento al fallar la carga de contexto.
+- Salir y editar palabras siguen disponibles durante consultas de sala. Las respuestas de sesiones cerradas se descartan y las salas terminadas dejan de consultar.
+- Validación de respuestas y aclaración de que hacen falta dos perfiles distintos de la misma clase. La interfaz informa si se intenta ocupar ambas plazas con el mismo perfil.
+
 ## 2026-10-29 · Tinta y Acero (integración preparada)
 
 - Alta canónica como juego oficial en pruebas, portada propia con título y mapas de portadas generados para alumno/profesor y talleres.
