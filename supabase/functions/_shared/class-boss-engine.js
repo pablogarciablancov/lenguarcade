@@ -43,9 +43,14 @@ export function eligibleBattleWindows(battle,runs,nowMs=Date.now()) {
   const active=rawWindows(battle,until);
   const intervals=[];
   for(const a of active)for(const r of runs||[]){
-    if(r.published===false||(!r.classroom_open&&!r.closed_at))continue;
-    const from=Math.max(a.from,ms(r.started_at),ms(battle.started_at));
-    const to=Math.min(a.to,r.closed_at?ms(r.closed_at):until,until);
+    const scheduled=r.scheduled_enabled===true;
+    if(r.published===false||(!scheduled&&!r.classroom_open&&!r.closed_at))continue;
+    // A scheduled classroom window is real gameplay time even though the
+    // manual classroom_open flag stays false. Bound it at both ends.
+    const from=Math.max(a.from,ms(r.started_at),ms(battle.started_at),
+      scheduled?ms(r.active_from):-Infinity);
+    const to=Math.min(a.to,r.closed_at?ms(r.closed_at):until,until,
+      scheduled?ms(r.active_to):Infinity);
     if(Number.isFinite(from)&&Number.isFinite(to)&&to>from)intervals.push({from,to});
   }
   intervals.sort((a,b)=>a.from-b.from);
