@@ -1419,7 +1419,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     var meta=['<span>🎮 '+sessionEsc(plannerGameCountLabel(s.gameIds))+'</span>'];
     if(s.objectiveType==='forja_easy_win')meta.push('<span>🎯 Ganar en Forja · Fácil</span>');
     if(Number(s.targetXp||0)>0)meta.push('<span>🎯 '+sessionEsc(s.targetXp)+' XP</span>');
-    if(s.homeEnabled)meta.push('<span>🏠 Horario de casa configurado</span>');if(s.scheduledEnabled)meta.push('<span>⏱️ '+sessionEsc(plannerDateText(s.scheduleStart))+' → '+sessionEsc(plannerDateText(s.scheduleEnd))+'</span>');
+    if(s.homeEnabled)meta.push('<span>🏠 Horario de casa configurado</span>');if(s.bossEnabled)meta.push('<span>🐉 Devorapalabras</span>');if(s.scheduledEnabled)meta.push('<span>⏱️ '+sessionEsc(plannerDateText(s.scheduleStart))+' → '+sessionEsc(plannerDateText(s.scheduleEnd))+'</span>');
     var openButton=s.classroomOpen?'':'<button type="button" id="workshopActiveOpen">▶ Abrir en clase</button>';
     host.innerHTML='<div class="workshopActiveCard '+(s.active?'':'isClosed')+'"><div><div class="workshopActiveEyebrow">Sesión visible para los alumnos</div><div class="workshopActiveTitle">'+sessionEsc(s.title||'Sesión del taller')+'</div><div class="workshopActiveMeta">'+meta.join('')+'</div></div><div><div style="text-align:right;margin-bottom:8px"><span class="workshopSessionState '+plannerSessionModeClass(s)+'">'+sessionEsc(plannerSessionModeLabel(s))+'</span></div><div class="workshopActiveActions">'+openButton+(s.classroomOpen?'<button type="button" id="workshopActiveClose">⏸ Cerrar clase</button>':'')+'<button type="button" class="dangerAction" id="workshopActiveRetire">Retirar</button></div></div></div>';
     var open=document.getElementById('workshopActiveOpen');if(open)open.onclick=openActivePlannerSession;
@@ -1449,7 +1449,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       var meta=['<span>🎮 '+sessionEsc(plannerGameCountLabel(plan.gameIds))+'</span>'];
       if(plan.objectiveType==='forja_easy_win')meta.push('<span>🎯 Ganar en Forja · Fácil</span>');
       if(Number(plan.targetXp||0)>0)meta.push('<span>🎯 '+sessionEsc(plan.targetXp)+' XP</span>');
-      if(plan.homeEnabled)meta.push('<span>🏠 Casa</span>');if(plan.scheduledEnabled)meta.push('<span>⏱️ Clase programada: '+sessionEsc(plannerDateText(plan.scheduleStart))+'</span>');
+      if(plan.homeEnabled)meta.push('<span>🏠 Casa</span>');if(plan.bossEnabled)meta.push('<span>🐉 Devorapalabras</span>');if(plan.scheduledEnabled)meta.push('<span>⏱️ Clase programada: '+sessionEsc(plannerDateText(plan.scheduleStart))+'</span>');
       if(Array.isArray(plan.classCodes)&&plan.classCodes.length>1)meta.push('<span>👥 '+sessionEsc(plan.classCodes.length)+' clases</span>');
       if(plan.usedAt)meta.push('<span>✓ Ya utilizada en esta clase</span>');
       var openButton='<button type="button" data-plan-open="'+sessionEsc(plan.planId)+'">'+(plan.usedAt?'▶ Reabrir y continuar':'▶ Abrir ahora')+'</button>';
@@ -1473,10 +1473,10 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     var selectedClasses={};((plan.classCodes&&plan.classCodes.length)?plan.classCodes:(teacherCurrentClass()?[teacherCurrentClass()]:[])).forEach(function(code){selectedClasses[String(code)]=true;});
     var classes=plannerClasses();
     var catalog=workshopPlannerState&&workshopPlannerState.catalog||[];
-    body.innerHTML='<div class="workshopEditorIntro"><div><h3>'+(plan.planId?'Editar sesión':'Nueva sesión')+'</h3><div class="sub">'+(plan.planId?'Los cambios quedan guardados en esta preparación. No afectan a los alumnos hasta que la abras.':'Elige una plantilla o prepara la sesión desde cero.')+'</div></div>'+(plan.planId?'<span class="workshopSessionState closed">Preparada</span>':'')+'</div><input id="workshopPlanId" type="hidden" value="'+sessionEsc(plan.planId||'')+'"><div class="workshopTemplateBar"><button type="button" class="workshopTemplateBtn" data-workshop-template="game"><strong>🎮 Sesión de juego</strong><span>Selecciona juegos y abre la clase cuando llegue el momento.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="xp"><strong>🎯 Reto de XP</strong><span>Prepara una sesión con objetivo visible de progreso.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="home"><strong>🏠 Trabajo en casa</strong><span>Deja preparado un horario de acceso fuera del aula.</span></button></div><div id="workshopTemplateFeedback" class="workshopTemplateFeedback">Elige una plantilla para rellenar automáticamente los campos principales.</div><div class="workshopEditorSteps">'+
+    body.innerHTML='<div class="workshopEditorIntro"><div><h3>'+(plan.planId?'Editar sesión':'Nueva sesión')+'</h3><div class="sub">'+(plan.planId?'Los cambios quedan guardados en esta preparación. No afectan a los alumnos hasta que la abras.':'Elige una plantilla o prepara la sesión desde cero.')+'</div></div>'+(plan.planId?'<span class="workshopSessionState closed">Preparada</span>':'')+'</div><input id="workshopPlanId" type="hidden" value="'+sessionEsc(plan.planId||'')+'"><input id="workshopBossEnabled" type="hidden" value="'+(plan.bossEnabled?'1':'0')+'"><div class="workshopTemplateBar"><button type="button" class="workshopTemplateBtn" data-workshop-template="game"><strong>🎮 Sesión de juego</strong><span>Selecciona juegos y abre la clase cuando llegue el momento.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="xp"><strong>🎯 Reto de XP</strong><span>Prepara una sesión con objetivo visible de progreso.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="home"><strong>🏠 Trabajo en casa</strong><span>Deja preparado un horario de acceso fuera del aula.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="boss"><strong>🐉 Devorapalabras</strong><span>Evento cooperativo con apertura y cierre automáticos.</span></button></div><div id="workshopTemplateFeedback" class="workshopTemplateFeedback">Elige una plantilla para rellenar automáticamente los campos principales.</div><div class="workshopEditorSteps">'+
       '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">1</span><div><strong>Identifica y comparte la sesión</strong><span>Prepara el taller una sola vez y asígnalo a todas las clases que lo vayan a utilizar.</span></div></div><div class="workshopFormGrid"><div class="field wide"><label>Clases que comparten esta preparación</label><div id="workshopPlanClasses" class="workshopClassPicker">'+classes.map(function(row){return '<label class="workshopClassChoice"><input type="checkbox" data-plan-class value="'+sessionEsc(row.classCode)+'" '+(selectedClasses[row.classCode]?'checked':'')+'> '+sessionEsc(row.nombreVisible)+'</label>';}).join('')+'</div><div class="workshopClassTools"><button type="button" id="workshopClassOnlyCurrent">Solo esta clase</button><button type="button" id="workshopClassAll">Seleccionar todas</button></div><div class="workshopClassShareHint">Compartir la preparación no abre el taller en todas a la vez: cada clase lo activa cuando le toca.</div></div><div class="field"><label>Título de la sesión</label><input id="workshopSessionTitle" type="text" maxlength="80" placeholder="Ej.: Taller 3 · Cazadores de tildes" value="'+sessionEsc(plan.title||'')+'"></div><div class="field"><label>Fecha prevista <span class="sub">(solo organización)</span></label><input id="workshopPlannedAt" type="datetime-local" value="'+sessionEsc(plan.plannedAt||'')+'"></div><div class="field wide"><label>Mensaje / instrucciones para los alumnos</label><textarea id="workshopSessionMessage" maxlength="400" placeholder="Ej.: Hoy trabajamos ortografía. Completa dos partidas y trata de superar el reto de XP.">'+sessionEsc(plan.message||'')+'</textarea></div><div class="field"><label>Tipo de objetivo</label><select id="workshopObjectiveType"><option value="xp" '+(plan.objectiveType!=='forja_easy_win'?'selected':'')+'>Alcanzar XP</option><option value="forja_easy_win" '+(plan.objectiveType==='forja_easy_win'?'selected':'')+'>Ganar en Forja · Fácil (7 rondas)</option></select></div><div class="field"><label>Objetivo de XP (solo para retos de XP)</label><input id="workshopSessionXp" type="number" min="0" step="25" value="'+sessionEsc(Number(plan.targetXp||0))+'"></div></div></section>'+
       '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">2</span><div><strong>Elige los juegos de esta sesión</strong><span>Al abrirla, solo estos juegos quedarán disponibles para la clase.</span></div></div><div id="workshopSessionGames" class="workshopGamePicker">'+catalog.map(function(game){var image=typeof bannerUrl==='function'?bannerUrl(game.gameId):'';return '<label class="workshopPick"><span class="workshopPickArt" style="--pick-img:url(\''+sessionEsc(image)+'\')">'+sessionEsc(teacherGameIcon(game.gameId,game.icono))+'</span><span><strong>'+sessionEsc(game.nombre)+'</strong><small>'+sessionEsc(game.categoria||game.subtitulo||'LenguArcade')+'</small></span><input type="checkbox" data-session-game value="'+sessionEsc(game.gameId)+'" '+(selected[String(game.gameId)]?'checked':'')+'></label>';}).join('')+'</div></section>'+
-      '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">3</span><div><strong>⏱️ Programar en clase</strong><span>Se abrirá y cerrará solo, por la hora del servidor, aunque cierres este panel.</span></div></div><div class="workshopHomeBox"><div class="workshopHomeHead"><div><strong>Apertura automática del taller</strong><div class="sub">Elige inicio y duración, o indica directamente el cierre.</div></div><label><input id="workshopScheduledEnabled" type="checkbox" '+(plan.scheduledEnabled?'checked':'')+'> Programar</label></div><div id="workshopScheduledTimes" class="workshopHomeTimes '+(plan.scheduledEnabled?'':'isDisabled')+'"><div class="field"><label>Comienza</label><input id="workshopScheduleStart" type="datetime-local" value="'+sessionEsc(plan.scheduleStart||plan.plannedAt||'')+'"></div><div class="field"><label>Duración</label><select id="workshopScheduleDuration"><option value="custom">Indicar hora de cierre</option><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="45">45 minutos</option><option value="60">1 hora</option><option value="90">1 hora y media</option><option value="120">2 horas</option></select></div><div class="field"><label>Se cierra</label><input id="workshopScheduleEnd" type="datetime-local" value="'+sessionEsc(plan.scheduleEnd||'')+'"></div></div></div></section>'+
+      '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">3</span><div><strong>⏱️ Programar en clase</strong><span>Se abrirá y cerrará solo, por la hora del servidor, aunque cierres este panel.</span></div></div><div class="workshopHomeBox"><div class="workshopHomeHead"><div><strong>Apertura automática del taller</strong><div class="sub">Elige inicio y duración, o indica directamente el cierre.</div></div><label><input id="workshopScheduledEnabled" type="checkbox" '+(plan.scheduledEnabled?'checked':'')+'> Programar</label></div><div id="workshopScheduledTimes" class="workshopHomeTimes '+(plan.scheduledEnabled?'':'isDisabled')+'"><div class="field"><label>Comienza</label><input id="workshopScheduleStart" type="datetime-local" value="'+sessionEsc(plan.scheduleStart||plan.plannedAt||'')+'"></div><div class="field"><label>Duración</label><select id="workshopScheduleDuration"><option value="custom">Indicar hora de cierre</option><option value="15">15 minutos</option><option value="25">25 minutos · batalla clásica</option><option value="30">30 minutos</option><option value="45">45 minutos</option><option value="60">1 hora</option><option value="90">1 hora y media</option><option value="120">2 horas</option></select></div><div class="field"><label>Se cierra</label><input id="workshopScheduleEnd" type="datetime-local" value="'+sessionEsc(plan.scheduleEnd||'')+'"></div></div></div></section>'+
       '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">4</span><div><strong>Acceso opcional desde casa</strong><span>Úsalo solo si quieres que esta misma sesión esté disponible durante un horario concreto fuera del colegio.</span></div></div><div class="workshopHomeBox"><div class="workshopHomeHead"><div><strong>🏠 Permitir acceso en casa</strong><div class="sub">El horario se activa y caduca automáticamente.</div></div><label><input id="workshopHomeEnabled" type="checkbox" '+(plan.homeEnabled?'checked':'')+'> Activar</label></div><div id="workshopHomeTimes" class="workshopHomeTimes '+(plan.homeEnabled?'':'isDisabled')+'"><div class="field"><label>Desde</label><input id="workshopHomeStart" type="datetime-local" value="'+sessionEsc(plan.homeStart||'')+'"></div><div class="field"><label>Hasta</label><input id="workshopHomeEnd" type="datetime-local" value="'+sessionEsc(plan.homeEnd||'')+'"></div></div></div></section>'+
       '</div><div class="workshopEditorActions"><button type="button" id="workshopPlanSave">💾 Guardar preparación</button><button type="button" id="workshopPlanSaveOpen">▶ Guardar y abrir ahora</button><button type="button" class="homeAction" id="workshopPlanSaveSchedule">⏱️ Guardar y programar en clase</button><button type="button" class="homeAction" id="workshopPlanSaveHome">🏠 Guardar y activar horario de casa</button><button type="button" class="secondaryAction" id="workshopPlanCancel">Limpiar editor</button></div><div class="workshopPlannerStatus" id="workshopPlannerStatus"></div>';
     var scheduleToggle=document.getElementById('workshopScheduledEnabled');
@@ -1561,6 +1561,22 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       }
       return saved.plan;
     },
+    schedule:function(classCode,target){
+      if(!classCode||classCode!==teacherCurrentClass())throw new Error('Selecciona primero una clase.');
+      workshopEditingPlanId='';workshopTemplateKind='boss';
+      renderPlannerEditor({
+        planId:'',title:'El Devorapalabras · La defensa del Gran Archivo',
+        message:'Juega y contribuye a la victoria colectiva de tu clase.',
+        objectiveType:'xp',targetXp:target||400,bossEnabled:true,
+        plannedAt:'',scheduledEnabled:true,scheduleStart:'',scheduleEnd:'',
+        homeEnabled:false,homeStart:'',homeEnd:'',
+        gameIds:['battlegrafia','lexoma','maniacgrafia'],classCodes:[classCode]
+      });
+      renderPlannerList();
+      var editor=document.querySelector('.workshopPlanEditor');
+      if(editor)editor.scrollIntoView({block:'start',behavior:'smooth'});
+      plannerStatus('El Devorapalabras está listo para programar. Elige el inicio y el cierre; no hace falta pulsar «Comenzar batalla».');
+    },
     activate:async function(classCode,planId){
       if(!classCode||classCode!==teacherCurrentClass())throw new Error('La clase ha cambiado. Selecciónala de nuevo.');
       var plan=bossPreparedPlan();
@@ -1584,6 +1600,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       homeEnabled:!!((document.getElementById('workshopHomeEnabled')||{}).checked),
       homeStart:(document.getElementById('workshopHomeStart')||{}).value||'',
       homeEnd:(document.getElementById('workshopHomeEnd')||{}).value||'',
+      bossEnabled:(document.getElementById('workshopBossEnabled')||{}).value==='1',
       scheduledEnabled:!!((document.getElementById('workshopScheduledEnabled')||{}).checked),
       scheduleStart:(document.getElementById('workshopScheduleStart')||{}).value||'',
       scheduleEnd:(document.getElementById('workshopScheduleEnd')||{}).value||'',
@@ -1685,6 +1702,8 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
   function duplicatePlannerPlan(planId){var plan=plannerPlan(planId);if(!plan)return;workshopEditingPlanId='';workshopTemplateKind='';var copy=Object.assign({},plan,{planId:'',title:(plan.title||'Sesión del taller')+' · copia',usedAt:'',active:false});renderPlannerList();renderPlannerEditor(copy);plannerStatus('Copia preparada. Guárdala para añadirla a la lista.');}
   function applyWorkshopTemplate(kind,button){
     workshopTemplateKind=String(kind||'game');
+    var bossFlag=document.getElementById('workshopBossEnabled');
+    if(bossFlag)bossFlag.value=kind==='boss'?'1':'0';
     var title=document.getElementById('workshopSessionTitle');
     var message=document.getElementById('workshopSessionMessage');
     var xp=document.getElementById('workshopSessionXp');
@@ -1702,7 +1721,23 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       if(el&&!String(el.value||'').trim())el.value=value;
     }
 
-    if(kind==='xp'){
+    if(kind==='boss'){
+      if(title)title.value='El Devorapalabras · La defensa del Gran Archivo';
+      if(message)message.value='Juega a Battlegrafía, Forja o Maniacgrafía para atacar al Devorapalabras junto a tu clase.';
+      if(xp)xp.value=400;
+      var objective=document.getElementById('workshopObjectiveType');if(objective)objective.value='xp';
+      [].slice.call(body.querySelectorAll('[data-session-game]')).forEach(function(box){
+        box.checked=['battlegrafia','lexoma','maniacgrafia'].indexOf(box.value)!==-1;
+      });
+      var scheduled=document.getElementById('workshopScheduledEnabled');
+      if(scheduled){scheduled.checked=true;scheduled.onchange();}
+      var duration=document.getElementById('workshopScheduleDuration');
+      if(duration)duration.value='25';
+      var start=document.getElementById('workshopScheduleStart');
+      if(start&&start.value)start.dispatchEvent(new Event('change'));
+      if(feedback)feedback.innerHTML='<strong>🐉 Devorapalabras listo.</strong> Los tres juegos están seleccionados. Indica cuándo comienza la batalla y usa 25 minutos (o entre 10 y 60). Al llegar la hora, el jefe comenzará automáticamente.';
+      plannerStatus('Evento cooperativo configurado. Falta indicar el horario y pulsar Guardar y programar.');
+    }else if(kind==='xp'){
       setIfBlank(title,'Reto de XP');
       setIfBlank(message,'Consigue el objetivo de XP jugando a los juegos seleccionados durante esta sesión.');
       if(xp)xp.value=100;
@@ -1761,6 +1796,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
         classroomOpen:!!session.classroomOpen,
         homeEnabled:!!session.homeEnabled,
         scheduledEnabled:!!session.scheduledEnabled,
+        bossEnabled:!!session.bossEnabled,
         scheduleStart:session.scheduleStart||'',
         scheduleEnd:session.scheduleEnd||'',
         homeStart:session.homeStart||'',
@@ -1795,6 +1831,15 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     if(mode==='schedule'){
       if(!payload.scheduledEnabled||!payload.scheduleStart||!payload.scheduleEnd||payload.scheduleEnd<=payload.scheduleStart){
         plannerStatus('Activa «Programar» e indica inicio y cierre válidos.',true);return;
+      }
+      if(payload.bossEnabled){
+        var durationMinutes=(new Date(payload.scheduleEnd).getTime()-new Date(payload.scheduleStart).getTime())/60000;
+        if(!['battlegrafia','lexoma','maniacgrafia'].every(function(id){return payload.gameIds.indexOf(id)!==-1;})){
+          plannerStatus('Devorapalabras requiere Battlegrafía, Forja y Maniacgrafía.',true);return;
+        }
+        if(durationMinutes<10||durationMinutes>60||!Number.isInteger(durationMinutes)){
+          plannerStatus('La batalla programada debe durar entre 10 y 60 minutos completos.',true);return;
+        }
       }
       if(new Date(payload.scheduleEnd).getTime()<=Date.now()){
         plannerStatus('La hora de cierre debe estar en el futuro.',true);return;
@@ -3311,7 +3356,8 @@ body.light .teacherMonitorTable th{background:#fff}
     var gameIds=s&&s.gameIds||[];
     var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
     var prepared=bridge&&bridge.preparedPlan&&bridge.preparedPlan();
-    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Varias apariciones, descansos entre combates y un gran enfrentamiento final. Cada acierto ataca y las acciones más laboriosas hacen más daño. El podio se ordena por daño. El taller se completa por XP o por práctica sostenida con un 70 % de aciertos, con un único premio de Flotas.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(ready?'⚔️ Comenzar batalla':prepared?'⚔️ Comenzar batalla':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
+    var scheduled=!!(s&&s.scheduledEnabled&&s.bossEnabled);
+    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Varias apariciones, descansos entre combates y un gran enfrentamiento final. Cada acierto ataca y las acciones más laboriosas hacen más daño. El podio se ordena por daño. El taller se completa por XP o por práctica sostenida con un 70 % de aciertos, con un único premio de Flotas.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(scheduled?'⏱️ Batalla programada':ready?'⚔️ Comenzar batalla':prepared?'⚔️ Comenzar batalla':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossSchedule">📅 Programar batalla</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
     var controls='<div class="laBossSettings">';
     [['sessionMinutes','Sesión · minutos',10,60],['appearanceCount','Apariciones',2,6],['combatSeconds','Combate · segundos',30,180],['participationXp','XP por participar en victoria',0,250]].forEach(function(field){controls+='<label>'+field[1]+'<input type="number" id="bossSetting_'+field[0]+'" min="'+field[2]+'" max="'+field[3]+'" value="'+encounterSettings[field[0]]+'"></label>';});
     controls+='<label>Objetivo al preparar taller · XP<input type="number" id="bossFleetTarget" min="1" max="5000" value="'+fleetTarget+'"></label></div><div class="laBossRewardSettings">';
@@ -3322,6 +3368,11 @@ body.light .teacherMonitorTable th{background:#fff}
     $('bossFleetTarget').onchange=function(){fleetTarget=Math.max(1,Math.min(5000,Number(this.value)||400));};
     updatePrimaryAction();
     $('classBossProject').onclick=function(){openStage();};
+    $('classBossSchedule').onclick=function(){
+      var bridge=bossWorkshop();
+      if(!getClass()||!bridge||!bridge.schedule){status('Selecciona una clase en Talleres.');return;}
+      bridge.schedule(getClass(),fleetTarget);
+    };
     refresh();
   }
   function updatePrimaryAction(){
@@ -3330,12 +3381,14 @@ body.light .teacherMonitorTable th{background:#fff}
     var gameIds=s&&s.gameIds||[];
     var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
     var prepared=bridge&&bridge.preparedPlan&&bridge.preparedPlan();
+    var scheduled=!!(s&&s.scheduledEnabled&&s.bossEnabled);
     var battle=lastClassCode===getClass()?last:null;
     var fresh=!!(ready&&battle&&(battle.state==='active'||battle.state==='paused'||battle.state==='prepared'));
-    btn.textContent=prepared?'⚔️ Comenzar batalla':fresh&&battle.state!=='prepared'?'📺 Ver batalla':
+    btn.textContent=scheduled?'📺 Ver batalla programada':prepared?'⚔️ Comenzar batalla':fresh&&battle.state!=='prepared'?'📺 Ver batalla':
       ready?'⚔️ Comenzar batalla':'⚙️ Preparar batalla';
     btn.disabled=launchPending;
     btn.onclick=function(){
+      if(scheduled)return openStage();
       if(prepared)return launchBattle();
       if(fresh&&battle.state!=='prepared')return openStage();
       if(ready)return launchBattle();
@@ -3348,7 +3401,7 @@ body.light .teacherMonitorTable th{background:#fff}
     if(s&&s.classroomOpen&&!window.confirm('Hay un taller abierto. Preparar el evento no lo cerrará; al comenzar la batalla se sustituirá por el taller cooperativo. ¿Prepararlo?'))return;
     status('Preparando los tres juegos…');
     try{
-      var payload={title:'El Devorapalabras · La defensa del Gran Archivo',message:'Juega y contribuye a la victoria colectiva de tu clase.',targetXp:fleetTarget,objectiveType:'xp',gameIds:['battlegrafia','lexoma','maniacgrafia'],classCodes:[classCode]};
+      var payload={bossEnabled:true,title:'El Devorapalabras · La defensa del Gran Archivo',message:'Juega y contribuye a la victoria colectiva de tu clase.',targetXp:fleetTarget,objectiveType:'xp',gameIds:['battlegrafia','lexoma','maniacgrafia'],classCodes:[classCode]};
       var bridge=bossWorkshop();if(!bridge)throw new Error('El planificador no está disponible. Recarga la página.');
       await bridge.prepare(classCode,payload);
       updatePrimaryAction();
@@ -3470,7 +3523,10 @@ body.light .teacherMonitorTable th{background:#fff}
       var draft=bossWorkshop()&&bossWorkshop().preparedPlan&&bossWorkshop().preparedPlan();
       status(draft?'Batalla preparada, sin abrir juegos y sin cronómetro. Pulsa «Comenzar batalla» cuando estén listos.':
         last&&last.state==='prepared'?'Batalla preparada. Pulsa «Comenzar batalla» cuando estén listos.':
-        last?'Batalla: '+(last.state==='active'?'en curso':last.state==='paused'?'pausada':'terminada')+'. Daño confirmado: '+last.damage+'.':'No hay batalla creada todavía.');
+        last?'Batalla: '+(last.state==='active'?'en curso':last.state==='paused'?'pausada':'terminada')+'. Daño confirmado: '+last.damage+'.':
+        (bossWorkshop()&&bossWorkshop().activeSession()&&bossWorkshop().activeSession().scheduledEnabled&&bossWorkshop().activeSession().bossEnabled)?
+          'Batalla programada. El dragón empezará a la hora prevista aunque no pulses Comenzar batalla.':
+          'No hay batalla creada todavía.');
     }catch(e){status('Servicio del combate no disponible: '+msg(e.code||e.message));}
     finally{requesting=false;}
   }

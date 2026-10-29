@@ -66,4 +66,13 @@ assert.equal(at([answer('rest','p',100,0,5),answer('replay','p',181,0,6)],200,mo
 assert.equal(at(rapid,200,{...modern,state:'paused',active_since:null}).rounds[0].hits,0);
 const contenders=at([...rapid,answer('less','other',190,0,10)],301,modern);
 assert.equal(contenders.leaderboard[0].profileId,'quick');
+const timedRun={...run,scheduled_enabled:true,classroom_open:false,
+  active_from:iso(180),active_to:iso(220)};
+const timedHits=[answer('inside-schedule','scheduled-pupil',181,0,1),
+  answer('after-schedule','scheduled-pupil',222,1,2)];
+assert.equal(at(timedHits,235,modern,[timedRun]).rounds[0].hits,1,
+  'Scheduled boss counts gameplay only inside the server-enforced class window');
+assert.equal(at(timedHits,235,modern,[{...timedRun,scheduled_enabled:false}]).rounds[0].hits,0,
+  'Non-scheduled closed workshop never permits boss attacks');
+console.log('Scheduled boss: open/close boundaries enforced against actual recorded student answers.');
 console.log('V2: 50 rapid answers = 50 attacks; batches, overlapping saves, retries, zero-XP answers, shop exclusion and pauses OK.');
