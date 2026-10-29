@@ -69,7 +69,20 @@ function query(table){
     lte(k,v){filters.push(row=>row[k]<=v);return this},
     order(k,opts={}){orders.push([k,opts.ascending!==false]);return this},
     limit(n){end=n-1;return this},
-    range(a,b){start=a;end=b;return this}
+    range(a,b){start=a;end=b;return this},
+    insert(record){
+      let error=null,data=null;
+      if(table==='class_boss_events'){
+        const previous=database[table].find(row=>row.classroom_id===record.classroom_id&&row.workshop_key===record.workshop_key);
+        if(previous)error={code:'23505',message:'unique_class_boss'};
+        else{
+          data={...record,id:'sim-scheduled-boss',round_results:[],intervals:[],
+            elapsed_seconds:0,created_at:new Date().toISOString(),updated_at:new Date().toISOString()};
+          database[table].push(data);
+        }
+      }else throw Error('Unexpected insert into '+table);
+      return {select(){return this},async single(){return {data,error}}};
+    }
   };
   function rows(){
     reads.set(table,(reads.get(table)||0)+1);
@@ -83,7 +96,7 @@ function query(table){
     });
     return values.slice(start,end+1);
   }
-  q.then=(resolve,reject)=>Promise.resolve({data:rows(),error:null}).then(resolve,reject);
+  q.then=(resolve,reject)=>{const result=rows();return Promise.resolve({data:result,count:result.length,error:null}).then(resolve,reject);};
   q.maybeSingle=async()=>({data:rows()[0]||null,error:null});
   q.single=async()=>({data:rows()[0]||null,error:null});
   return q;
@@ -91,12 +104,20 @@ function query(table){
 const admin={
   from:query,
   async rpc(name,args){
+    if(name==='claim_class_boss_tick'){
+      const target=database.class_boss_events.find(row=>row.id===args.p_battle_id);
+      const claimed=Boolean(target&&target.state==='active'&&(!target.last_tick_at||Date.now()-Date.parse(target.last_tick_at)>20000));
+      if(claimed)target.last_tick_at=new Date().toISOString();
+      return {data:claimed,error:null};
+    }
     assert.equal(name,'settle_class_boss_round');
     settleCalls++;
-    if(!battle.round_results.some(r=>r.index===args.p_result.index)){
-      battle.round_results.push(args.p_result);
+    const target=database.class_boss_events.find(row=>row.id===args.p_battle_id);
+    assert.ok(target);
+    if(!target.round_results.some(r=>r.index===args.p_result.index)){
+      target.round_results.push(args.p_result);
     }
-    return {data:[...battle.round_results],error:null};
+    return {data:[...target.round_results],error:null};
   }
 };
 let handler;
@@ -163,3 +184,47 @@ console.log(JSON.stringify({
   duplicateAttacksIgnored:true,realAccountsTouched:0,realXPModified:0
 },null,2));
 console.log('25-player isolated concurrency and server-handler simulation passed.');
+
+const plannedStart=new Date(Date.now()-300000).toISOString();
+const plannedEnd=new Date(Date.now()+300000).toISOString();
+const scheduledPlan='sim-scheduled-plan';
+database.workshop_sessions=[{
+  ...workshop,plan_id:scheduledPlan,started_at:plannedStart,
+  classroom_open:false,scheduled_enabled:true,boss_enabled:true,
+  active_from:plannedStart,active_to:plannedEnd
+}];
+database.workshop_runs=[{
+  ...run,plan_id:scheduledPlan,workshop_key:scheduledPlan,started_at:plannedStart,
+  run_id:'run:scheduled',updated_by:null,closed_at:null,
+  classroom_open:false,scheduled_enabled:true,boss_enabled:true,
+  active_from:plannedStart,active_to:plannedEnd
+}];
+database.class_boss_events=[];
+database.game_events=[];
+const scheduledStatuses=await Promise.all(players.map(player=>call('studentStatus',player)));
+assert.equal(database.class_boss_events.length,1,'25 simultaneous pupils must create only one timed boss');
+const scheduledBattle=database.class_boss_events[0];
+assert.equal(scheduledBattle.started_at,plannedStart,'Clock starts at the planned time, not the arrival');
+assert.equal(scheduledBattle.duration_seconds,600);
+assert.equal(scheduledBattle.encounter_rounds.length,4);
+assert.ok(scheduledStatuses.every(item=>item?.id===scheduledBattle.id),'Pupils see the boss without teacher launching');
+assert.equal(scheduledBattle.round_results.filter(r=>r.index===0).length,1,
+  'An expired round must settle only once without a teacher projecting');
+assert.equal((reads.get('game_events')||0)-readsBeforeFinished,2,
+  'Only one additional event-history query should settle the first timed round');
+
+const pastStart=new Date(Date.now()-660000).toISOString();
+const pastEnd=new Date(Date.now()-60000).toISOString();
+scheduledBattle.started_at=pastStart;scheduledBattle.active_since=pastStart;
+scheduledBattle.last_tick_at=pastStart;
+database.workshop_sessions[0].active_from=pastStart;
+database.workshop_sessions[0].active_to=pastEnd;
+database.workshop_runs[0].active_from=pastStart;
+database.workshop_runs[0].active_to=pastEnd;
+const afterEnd=await Promise.all(players.map(player=>call('studentStatus',player)));
+assert.ok(afterEnd.every(item=>item?.state==='finished'),'Ended timed boss returns the final podium');
+assert.equal(scheduledBattle.round_results.length,4,'All expired rounds are finalized without teacher');
+const readsAfterSettlement=reads.get('game_events')||0;
+await Promise.all(players.map(player=>call('studentStatus',player)));
+assert.equal(reads.get('game_events')||0,readsAfterSettlement,'Finished podium never rescans class attacks');
+console.log('Timed boss: 25 concurrent pupils, single auto-created event, exact clock, autonomous idempotent rounds and closing podium OK.');
