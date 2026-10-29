@@ -13,12 +13,13 @@ async function resolveClass(admin:any,org:string,code:string){
   if(error)throw error;
   return (data||[]).find((c:any)=>String(c.id)===code||String(c.legacy_class_code||"")===code)||null;
 }
-async function getActiveWorkshop(admin:any,org:string,classId:string){
+async function getActiveWorkshop(admin:any,org:string,classId:string,includeClosed=false){
   const {data,error}=await admin.from("workshop_sessions")
-    .select("plan_id,started_at,game_ids,published,classroom_open,scheduled_enabled,active_from,active_to")
+    .select("plan_id,started_at,game_ids,published,classroom_open,scheduled_enabled,boss_enabled,active_from,active_to")
     .eq("organization_id",org).eq("classroom_id",classId).maybeSingle();
   if(error)throw error;
   if(!data?.published)return null;
+  if(includeClosed)return data;
   if(data.scheduled_enabled===true){
     const from=Date.parse(String(data.active_from||"")),to=Date.parse(String(data.active_to||""));
     return Number.isFinite(from)&&Number.isFinite(to)&&Date.now()>=from&&Date.now()<to?data:null;
@@ -47,6 +48,55 @@ async function currentBoss(admin:any,org:string,classId:string,workshop:any){
   if(error)throw error;
   return data||null;
 }
+// Scheduled Devorapalabras is created lazily on the first authorized class
+// request. Its timestamp is the planned start, never the request arrival time.
+// Unique (classroom_id,workshop_key) protects the class from parallel creation.
+async function ensureScheduledBoss(admin:any,org:string,classId:string,workshop:any,battle:any){
+  if(battle || !workshop?.scheduled_enabled || !workshop?.boss_enabled)return battle;
+  const now=Date.now(),start=Date.parse(String(workshop.active_from||"")),
+    end=Date.parse(String(workshop.active_to||""));
+  if(!Number.isFinite(start)||!Number.isFinite(end)||now<start||now>=end)return null;
+  if(!BOSS_GAMES.every(id=>(workshop.game_ids||[]).includes(id)))return null;
+  const minutes=(end-start)/60000;
+  if(!Number.isInteger(minutes)||minutes<10||minutes>60)return null;
+  const {data:run,error:runError}=await admin.from("workshop_runs")
+    .select("run_id,workshop_key,plan_id,updated_by").eq("organization_id",org)
+    .eq("classroom_id",classId).eq("plan_id",workshop.plan_id)
+    .eq("started_at",workshop.started_at).eq("published",true).is("closed_at",null).maybeSingle();
+  if(runError)throw runError;
+  if(!run)return null;
+  const {count,error:countError}=await admin.from("classroom_enrollments")
+    .select("profile_id",{count:"exact",head:true}).eq("classroom_id",classId).eq("active",true);
+  if(countError)throw countError;
+  const config=encounterConfig({version:3,sessionMinutes:minutes});
+  const rounds=encounterSchedule(config,count);
+  const initial=new Date(start).toISOString();
+  const {data,error}=await admin.from("class_boss_events").insert({
+    organization_id:org,classroom_id:classId,workshop_run_id:run.run_id,
+    workshop_key:String(run.workshop_key||run.plan_id),
+    game_ids:BOSS_GAMES,state:"active",duration_seconds:minutes*60,
+    health_total:rounds[0].health,started_at:initial,active_since:initial,
+    created_by:run.updated_by||null,encounter_config:config,encounter_rounds:rounds
+  }).select("*").single();
+  if(error){
+    if(error.code==="23505")return currentBoss(admin,org,classId,workshop);
+    throw error;
+  }
+  return data;
+}
+// One of the 25 student polls may close an expired round when the projection
+// is not open. A tiny atomic DB claim prevents 25 expensive replay queries.
+async function settleDueScheduledRounds(admin:any,battle:any,workshop:any){
+  if(!battle?.encounter_config||!workshop?.scheduled_enabled||!workshop?.boss_enabled)return;
+  const now=Date.now();
+  const due=(battle.encounter_rounds||[]).some((r:any)=>
+    now>=Date.parse(String(battle.started_at))+Number(r.to)*1000 &&
+    !(battle.round_results||[]).some((done:any)=>done.index===r.index));
+  if(!due)return;
+  const {data:claimed,error}=await admin.rpc("claim_class_boss_tick",{p_battle_id:battle.id});
+  if(error)throw error;
+  if(claimed)await battleSummary(admin,battle,workshop,true);
+}
 function withClosedInterval(battle:any,at:string){
   const intervals=Array.isArray(battle.intervals)?[...battle.intervals]:[];
   if(battle.state==="active"&&battle.active_since)intervals.push({from:battle.active_since,to:at});
@@ -65,7 +115,7 @@ async function getWorkshopForBoss(admin:any,battle:any,workshop:any){
 }
 async function getBossPeriods(admin:any,battle:any){
   const {data:runs,error:runsError}=await admin.from("workshop_runs")
-    .select("run_id,plan_id,workshop_key,started_at,closed_at,published,classroom_open,game_ids")
+    .select("run_id,plan_id,workshop_key,started_at,closed_at,published,classroom_open,scheduled_enabled,active_from,active_to,game_ids")
     .eq("organization_id",battle.organization_id).eq("classroom_id",battle.classroom_id)
     .eq("workshop_key",battle.workshop_key).eq("published",true).order("started_at",{ascending:true});
   if(runsError)throw runsError;
@@ -177,10 +227,15 @@ Deno.serve(async(request)=>{
         .select("classroom_id").eq("profile_id",profileId).eq("active",true);
       if(membershipError)throw membershipError;
       for(const member of memberships||[]){
+        const published=await getActiveWorkshop(admin,organizationId,member.classroom_id,true);
+        if(!published)continue;
         const workshop=await getActiveWorkshop(admin,organizationId,member.classroom_id);
-        if(!workshop)continue;
-        const battle=await currentBoss(admin,organizationId,member.classroom_id,workshop);
+        if(!workshop&&!published.scheduled_enabled)continue;
+        let battle=await currentBoss(admin,organizationId,member.classroom_id,published);
+        if(workshop)battle=await ensureScheduledBoss(admin,organizationId,member.classroom_id,workshop,battle);
         if(!battle||!battle.game_ids?.length||battle.state==="prepared")continue;
+        if(published.scheduled_enabled&&published.boss_enabled)
+          await settleDueScheduledRounds(admin,battle,published);
         if(battle.encounter_config){
           // Student polling must never replay the whole class history every 15 seconds.
           // The teacher projection remains the single live combat calculator. Once
@@ -205,8 +260,10 @@ Deno.serve(async(request)=>{
     const {admin,organizationId,profileId}=await requireTeacherSession(request);
     const classroom=await resolveClass(admin,organizationId,String(body.classCode||""));
     if(!classroom)return fail("class_not_found",404);
+    const published=await getActiveWorkshop(admin,organizationId,classroom.id,true);
     const workshop=await getActiveWorkshop(admin,organizationId,classroom.id);
-    let battle=await currentBoss(admin,organizationId,classroom.id,workshop);
+    let battle=await currentBoss(admin,organizationId,classroom.id,published||workshop);
+    if(workshop)battle=await ensureScheduledBoss(admin,organizationId,classroom.id,workshop,battle);
     if(action==="prepare"||action==="start"){
       if(!workshop)return fail("open_workshop_first",409);
       if(!BOSS_GAMES.every(id=>(workshop.game_ids||[]).includes(id)))return fail("select_boss_games_in_workshop",409);
