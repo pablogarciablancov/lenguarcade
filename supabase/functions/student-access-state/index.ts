@@ -31,7 +31,7 @@ Deno.serve(async (request) => {
         .eq("profile_id", profileId)
         .eq("active", true),
       admin.from("workshop_sessions")
-        .select("classroom_id,title,message,objective_type,target_xp,published,classroom_open,home_enabled,scheduled_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
+        .select("classroom_id,title,message,objective_type,target_xp,classroom_open,home_enabled,scheduled_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
         .eq("organization_id", organizationId)
         .eq("published", true),
     ]);
@@ -41,8 +41,11 @@ Deno.serve(async (request) => {
 
     const classroomIds = new Set((enrollmentsResult.data || [])
       .map(row => String(row.classroom_id || "")).filter(Boolean));
-    const sessionRow = (sessionsResult.data || [])
+    // The query is already filtered by published=true. Keep the 14-column
+    // access-state budget while preserving the published flag for the shared guard.
+    const foundSession = (sessionsResult.data || [])
       .find(row => classroomIds.has(String(row.classroom_id || ""))) || null;
+    const sessionRow = foundSession ? {...foundSession,published:true} : null;
     const selectedIds = new Set<string>(Array.isArray(sessionRow?.game_ids)
       ? sessionRow.game_ids.map((id: unknown) => String(id || "")) : []);
     const mode = workshopModeFor(sessionRow);
