@@ -751,20 +751,30 @@ async function handleWorkshopGameAccess(
 
   const classroomOpen = session.classroomOpen === true;
   const homeEnabled = session.homeEnabled === true;
+  const scheduledEnabled = session.scheduledEnabled === true;
+  if (homeEnabled && scheduledEnabled) {
+    return jsonResponse({ok:false,error:"workshop_schedule_conflicts_with_home"},400);
+  }
+  if (scheduledEnabled && classroomOpen) {
+    return jsonResponse({ok:false,error:"workshop_schedule_requires_closed_class"},400);
+  }
   let activeFrom: string | null = null;
   let activeTo: string | null = null;
   try {
-    activeFrom = parseIso(body.activeFrom || session.homeStart);
-    activeTo = parseIso(body.activeTo || session.homeEnd);
+    activeFrom = parseIso(body.activeFrom || (scheduledEnabled ? session.scheduleStart : session.homeStart));
+    activeTo = parseIso(body.activeTo || (scheduledEnabled ? session.scheduleEnd : session.homeEnd));
   } catch {
     return jsonResponse({ ok:false, error:"invalid_workshop_window" }, 400);
   }
-  if (homeEnabled && ((!activeFrom || !activeTo) || Date.parse(activeTo) <= Date.parse(activeFrom))) {
+  if ((homeEnabled || scheduledEnabled) && ((!activeFrom || !activeTo) || Date.parse(activeTo) <= Date.parse(activeFrom))) {
     return jsonResponse({ ok:false, error:"invalid_workshop_window" }, 400);
   }
-  if (!homeEnabled) {
+  if (!homeEnabled && !scheduledEnabled) {
     activeFrom = null;
     activeTo = null;
+  }
+  if (scheduledEnabled && Date.parse(activeTo!) - Date.parse(activeFrom!) > 12 * 60 * 60 * 1000) {
+    return jsonResponse({ok:false,error:"workshop_schedule_too_long"},400);
   }
 
   const incomingPlanId = String(session.planId || "").trim().slice(0, 160);
@@ -775,14 +785,16 @@ async function handleWorkshopGameAccess(
   if(priorRuns?.[0]?.published===false)return jsonResponse({ok:false,error:"workshop_deleted_create_new_edition"},409);
   const workshopKey=String(priorRuns?.[0]?.workshop_key || incomingPlanId);
   const { data:existingSession, error:existingSessionError } = await admin.from("workshop_sessions")
-    .select("plan_id,started_at,published,objective_type,classroom_open,home_enabled")
+    .select("plan_id,started_at,published,objective_type,classroom_open,home_enabled,scheduled_enabled,active_from,active_to")
     .eq("classroom_id", classroom.id)
     .eq("organization_id", organizationId)
     .maybeSingle();
   if (existingSessionError) throw existingSessionError;
   const samePublishedPlan = Boolean(
     existingSession?.published &&
-    !(classroomOpen && !existingSession.classroom_open && !existingSession.home_enabled) &&
+    !(classroomOpen && !existingSession.classroom_open && !existingSession.home_enabled && !existingSession.scheduled_enabled) &&
+    (existingSession.scheduled_enabled === scheduledEnabled) &&
+    (!scheduledEnabled || (existingSession.active_from === activeFrom && existingSession.active_to === activeTo)) &&
     existingSession?.started_at &&
     String(existingSession.objective_type || "xp") === String(session.objectiveType || "xp") &&
     String(existingSession.plan_id || "") === incomingPlanId
@@ -800,7 +812,7 @@ async function handleWorkshopGameAccess(
     : (classroomOpen ? new Date().toISOString() : (activeFrom || new Date().toISOString()));
   const runSeed = `${classroom.id}:${incomingPlanId}:${Date.parse(startedAt)}`;
   const runId = "run:" + runSeed;
-  const closedAt = classroomOpen || homeEnabled ? null : new Date().toISOString();
+  const closedAt = classroomOpen || homeEnabled || scheduledEnabled ? null : new Date().toISOString();
 
   const { error:runError } = await admin.from("workshop_runs").upsert({
     run_id:runId,
@@ -815,6 +827,7 @@ async function handleWorkshopGameAccess(
     published:true,
     classroom_open:classroomOpen,
     home_enabled:homeEnabled,
+    scheduled_enabled:scheduledEnabled,
     active_from:activeFrom,
     active_to:activeTo,
     game_ids:requestedIds,
@@ -836,6 +849,7 @@ async function handleWorkshopGameAccess(
     published:true,
     classroom_open:classroomOpen,
     home_enabled:homeEnabled,
+    scheduled_enabled:scheduledEnabled,
     active_from:activeFrom,
     active_to:activeTo,
     game_ids:requestedIds,
@@ -856,6 +870,7 @@ async function handleWorkshopGameAccess(
     active:true,
     classroomOpen,
     homeEnabled,
+    scheduledEnabled,
     selectedGameCount:requestedIds.length,
     activeFrom,
     activeTo,
@@ -1050,11 +1065,11 @@ Deno.serve(async (request) => {
         .order("updated_at", { ascending:false })
         .limit(250),
       admin.from("workshop_sessions")
-        .select("classroom_id,title,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
+        .select("classroom_id,title,objective_type,target_xp,published,classroom_open,home_enabled,scheduled_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
         .eq("organization_id", organizationId)
         .eq("published", true),
       admin.from("workshop_runs")
-        .select("run_id,workshop_key,classroom_id,title,objective_type,target_xp,published,classroom_open,home_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,updated_at,is_provisional,reviewed_at")
+        .select("run_id,workshop_key,classroom_id,title,objective_type,target_xp,published,classroom_open,home_enabled,scheduled_enabled,active_from,active_to,game_ids,plan_id,started_at,closed_at,updated_at,is_provisional,reviewed_at")
         .eq("organization_id", organizationId)
         .order("started_at", { ascending:false })
         .limit(500),
