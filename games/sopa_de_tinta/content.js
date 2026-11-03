@@ -1,6 +1,6 @@
 (function(root){
 'use strict';
-const districts=[['narrativa','El Archivo Narrativo','#ffc57b'],['morfologia','El Taller de Palabras','#87e9c1'],['verbos','La Torre Verbal','#b7a0ff'],['sintaxis','La Estación Sintáctica','#79d9ff'],['literatura','La Galería Literaria','#ff9fc9'],['semantica','El Mercado Semántico','#ffe184'],['ortografia','El Laboratorio Ortográfico','#9ab8ff']].map(([id,name,color])=>({id,name,color}));
+const districts=[['narrativa','El Archivo Narrativo','#ffc57b'],['morfologia','El Taller de Palabras','#87e9c1'],['verbos','La Torre Verbal','#b7a0ff'],['sintaxis','La Estación de la Comunicación','#79d9ff'],['literatura','La Galería Literaria','#ff9fc9'],['semantica','El Mercado del Significado y las Lenguas','#ffe184'],['ortografia','El Laboratorio Ortográfico','#9ab8ff']].map(([id,name,color])=>({id,name,color}));
 const groups={
 narrativa:`Narrador|Voz que cuenta los hechos de una historia.
 Personaje|Ser que participa en los hechos de una narración.
@@ -163,7 +163,29 @@ Guion|Signo corto que aparece en «teórico-práctico».
 Raya|Signo largo que introduce intervenciones en un diálogo escrito.
 Ortografía|Conjunto de normas que regulan la escritura de una lengua.`
 };
-const concepts=Object.entries(groups).flatMap(([category,lines])=>lines.split('\n').map((line,i)=>{let [term,clue]=line.split('|');if(term==='Transit ivo'){term='Transitivo';clue='Verbo que puede construirse con complemento directo.';}return {id:category+'_'+i,term,gridTerm:term.toLocaleUpperCase('es').replace(/\s+/g,''),clue,explanation:term+': '+clue,category,subcategory:category==='literatura'?(i<13?'figuras_literarias':'metrica_generos'):category==='morfologia'?(i>=12?'clases_palabras':'formacion_palabras'):category,difficulty:i<10?1:i<18?2:3,course:'ESO',tags:[category]};}));
+const legacyConcepts=Object.entries(groups).flatMap(([category,lines])=>lines.split('\n').map((line,i)=>{let [term,clue]=line.split('|');if(term==='Transit ivo'){term='Transitivo';clue='Verbo que puede construirse con complemento directo.';}return {id:category+'_'+i,term,gridTerm:term.toLocaleUpperCase('es').replace(/\s+/g,''),clue,explanation:term+': '+clue,category,subcategory:category==='literatura'?(i<13?'figuras_literarias':'metrica_generos'):category==='morfologia'?(i>=12?'clases_palabras':'formacion_palabras'):category,difficulty:i<10?1:i<18?2:3,course:'ESO',tags:[category]};}));
 const difficulties=[{name:'Fácil',size:9,count:5,reverse:false},{name:'Normal',size:11,count:7,reverse:false},{name:'Difícil',size:13,count:9,reverse:true},{name:'Experto',size:14,count:11,reverse:true}];
-root.TintaContent={districts,concepts,difficulties};
+const curricularConcepts = root.LenguArcadeCurriculum.conceptos.map(entry => {
+  const category = entry.area === 'literatura'
+    ? entry.evaluacion === 1 ? 'narrativa' : 'literatura'
+    : entry.tema === 'verbo' ? 'verbos'
+    : ['estructura','formacion','categorias','analisis'].includes(entry.tema) ? 'morfologia'
+    : ['significado','plurilinguismo'].includes(entry.tema) ? 'semantica'
+    : 'sintaxis';
+  // Preserve the original ID and board spelling for existing saves when a term matches.
+  const previous = legacyConcepts.find(old => old.term.toLowerCase() === entry.termino.toLowerCase());
+  return {
+    id: previous?.id ?? entry.id,
+    term: entry.termino,
+    gridTerm: previous?.gridTerm ?? entry.cuadricula,
+    clue: entry.definicion,
+    explanation: entry.ejemplo ? entry.definicion + ' Ejemplo: ' + entry.ejemplo : entry.definicion,
+    category,
+    difficulty: entry.cuadricula.length >= 7 ? 2 : 1,
+    evaluation: entry.evaluacion
+  };
+});
+const activeIds = new Set(curricularConcepts.map(concept => concept.id));
+const concepts = [...curricularConcepts, ...legacyConcepts.filter(concept => !activeIds.has(concept.id))];
+root.TintaContent={districts,concepts,curricularConcepts,difficulties};
 })(typeof window==='undefined'?globalThis:window);
