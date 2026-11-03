@@ -209,16 +209,6 @@ const syntaxQuestions = [
   ['¿Qué nexo expresa oposición?',['y','pero','ni','porque'],1,'«Pero» es una conjunción adversativa.'],
   ['¿Cuál contiene una enumeración correcta?',['Trajo pan, leche, fruta y agua.','Trajo, pan leche fruta y agua.','Trajo pan leche, fruta y agua','Trajo: pan leche fruta y agua'],0,'Los elementos de una enumeración se separan con comas.']
 ];
-const literatureQuestions = [
-  ['«Tus ojos son dos luceros» es…',['metáfora','hipérbole','anáfora','onomatopeya'],0,'Identifica una realidad con otra sin nexo comparativo.'],
-  ['«Corre como el viento» es…',['comparación','metáfora','personificación','anáfora'],0,'Aparece el nexo comparativo «como».'],
-  ['«El viento susurraba entre los árboles» contiene…',['personificación','hipérbaton','elipsis','antítesis'],0,'Se atribuye al viento una acción humana.'],
-  ['«Te lo he dicho un millón de veces» es…',['hipérbole','metonimia','símil','epíteto'],0,'Es una exageración intencionada.'],
-  ['«Temprano levantó la muerte el vuelo, / temprano madrugó la madrugada…» ejemplifica…',['anáfora','onomatopeya','paradoja','asíndeton'],0,'Se repite «temprano» al comienzo.'],
-  ['¿Cuál es un género narrativo?',['novela','elegía','oda','soneto'],0,'La novela pertenece al género narrativo.'],
-  ['Un soneto clásico tiene normalmente…',['14 versos','8 versos','10 versos','20 versos'],0,'El soneto clásico consta de 14 versos.'],
-  ['¿Qué narrador conoce pensamientos y sentimientos de todos los personajes?',['omnisciente','testigo','protagonista','objetivo'],0,'El narrador omnisciente conoce interioridad y hechos.']
-];
 
 function xmur3(str){
   let h=1779033703^String(str).length;
@@ -279,14 +269,218 @@ function qStatic(arr,category,rng){
   const q=pick(arr,rng), zipped=q[1].map((x,i)=>({x,i})), random=shuffle(zipped,rng);
   return {category,prompt:q[0],answers:random.map(v=>v.x),correct:random.findIndex(v=>v.i===q[2]),explanation:q[3]};
 }
+const curriculumQuestions = {
+  "morfologia": [
+    [
+      "En «Aquellos libros pesan», ¿qué es «aquellos»?",
+      [
+        "Determinante",
+        "Pronombre",
+        "Adverbio",
+        "Conjunción"
+      ],
+      0,
+      "Acompaña a «libros»."
+    ],
+    [
+      "En «Escoge cualquiera», ¿qué es «cualquiera»?",
+      [
+        "Pronombre",
+        "Determinante",
+        "Preposición",
+        "Adverbio"
+      ],
+      0,
+      "Ocupa por sí solo el lugar del grupo nominal."
+    ],
+    [
+      "En «El tren llegó tarde», ¿qué es «tarde»?",
+      [
+        "Adverbio",
+        "Adjetivo",
+        "Sustantivo",
+        "Conjunción"
+      ],
+      0,
+      "Modifica a «llegó» e indica cuándo."
+    ],
+    [
+      "En «Desde la ventana veía el río», ¿qué es «desde»?",
+      [
+        "Preposición",
+        "Conjunción",
+        "Adjetivo",
+        "Pronombre"
+      ],
+      0,
+      "Introduce el grupo «la ventana»."
+    ],
+    [
+      "En «Quise salir, pero llovía», ¿qué es «pero»?",
+      [
+        "Conjunción",
+        "Preposición",
+        "Adverbio",
+        "Interjección"
+      ],
+      0,
+      "Enlaza dos oraciones."
+    ],
+    [
+      "En «¡Uf, menuda cuesta!», ¿qué es «uf»?",
+      [
+        "Interjección",
+        "Adverbio",
+        "Verbo",
+        "Adjetivo"
+      ],
+      0,
+      "Expresa por sí sola una reacción."
+    ],
+    [
+      "En «La suave brisa agitaba las hojas», ¿qué es «suave»?",
+      [
+        "Adjetivo",
+        "Adverbio",
+        "Determinante",
+        "Verbo"
+      ],
+      0,
+      "Expresa una característica de «brisa»."
+    ],
+    [
+      "En «Su paciencia me sorprendió», ¿qué es «paciencia»?",
+      [
+        "Sustantivo",
+        "Adjetivo",
+        "Pronombre",
+        "Adverbio"
+      ],
+      0,
+      "Nombra una cualidad."
+    ]
+  ],
+  "literatura": [
+    [
+      "«Nos helamos al descubrir que la foto del colegio mostraba a alguien que aún no había nacido». ¿Qué tipo de relato sugiere?",
+      [
+        "Fantástico",
+        "Maravilloso",
+        "Realista",
+        "Ciencia ficción"
+      ],
+      0,
+      "Lo inexplicable irrumpe en un mundo cotidiano."
+    ],
+    [
+      "«En el reino, los árboles hablaban y todos les pedían consejo». ¿Qué tipo de relato sugiere?",
+      [
+        "Maravilloso",
+        "Fantástico",
+        "Realista",
+        "Ciencia ficción"
+      ],
+      0,
+      "Lo sobrenatural forma parte de la normalidad del relato."
+    ],
+    [
+      "Una colonia en Marte debate qué hacer con un robot capaz de decidir por sí mismo. ¿Qué tipo de relato sugiere?",
+      [
+        "Ciencia ficción",
+        "Realista",
+        "Maravilloso",
+        "Fantástico"
+      ],
+      0,
+      "El conflicto nace de una posibilidad tecnológica."
+    ],
+    [
+      "Dos hermanos discuten porque ambos quieren quedarse con la bicicleta familiar. ¿Qué tipo de relato sugiere?",
+      [
+        "Realista",
+        "Maravilloso",
+        "Fantástico",
+        "Ciencia ficción"
+      ],
+      0,
+      "La situación podría ocurrir en el mundo cotidiano."
+    ],
+    [
+      "Un zorro pierde su comida por presumir. El relato acaba con una enseñanza. ¿Qué subgénero encaja?",
+      [
+        "Fábula",
+        "Epopeya",
+        "Cantar de gesta",
+        "Novela"
+      ],
+      0,
+      "La enseñanza final y el animal humanizado son pistas decisivas."
+    ],
+    [
+      "Un relato tradicional cuenta que una diosa creó las estaciones. ¿Qué subgénero encaja?",
+      [
+        "Mito",
+        "Novela",
+        "Fábula",
+        "Cantar de gesta"
+      ],
+      0,
+      "Explica el origen de un fenómeno mediante una divinidad."
+    ],
+    [
+      "Una tradición local cuenta que una criatura fantástica construyó el puente del pueblo. ¿Qué subgénero encaja?",
+      [
+        "Leyenda",
+        "Novela",
+        "Epopeya",
+        "Cantar de gesta"
+      ],
+      0,
+      "Vincula un hecho extraordinario a un lugar reconocible."
+    ],
+    [
+      "Un poema medieval cuenta las hazañas de un guerrero desterrado. ¿Qué subgénero encaja mejor?",
+      [
+        "Cantar de gesta",
+        "Fábula",
+        "Mito",
+        "Leyenda"
+      ],
+      0,
+      "La forma poética medieval y las hazañas de un héroe son las pistas."
+    ],
+    [
+      "Un extenso poema antiguo cuenta el regreso de un héroe griego tras la guerra de Troya. ¿Qué subgénero encaja?",
+      [
+        "Epopeya",
+        "Cantar de gesta",
+        "Fábula",
+        "Leyenda"
+      ],
+      0,
+      "Presenta hazañas heroicas de la tradición de un pueblo."
+    ],
+    [
+      "Un poema lamenta la muerte de la persona a la que se dirige. ¿Qué subgénero encaja mejor?",
+      [
+        "Elegía",
+        "Oda",
+        "Comedia",
+        "Leyenda"
+      ],
+      0,
+      "El centro del poema es el dolor por la pérdida."
+    ]
+  ]
+};
 function question(category,seed){
   const rng=seed===undefined?Math.random:seeded(seed);
   if(category==='ortografia')return qOrthography(rng);
   if(category==='verbos')return qVerbs(rng);
-  if(category==='morfologia')return qMorphology(rng);
+  if(category==='morfologia')return rng()<.55 ? qStatic(curriculumQuestions.morfologia,category,rng) : qMorphology(rng);
   if(category==='lexico')return qLexicon(rng);
   if(category==='sintaxis')return qStatic(syntaxQuestions,'sintaxis',rng);
-  if(category==='literatura')return qStatic(literatureQuestions,'literatura',rng);
+  if(category==='literatura')return qStatic(curriculumQuestions.literatura,'literatura',rng);
   return question(pick(Object.keys(TYPES),rng),seed===undefined?undefined:String(seed)+'x');
 }
 
