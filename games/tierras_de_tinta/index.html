@@ -132,7 +132,262 @@
   function inkIcon(kind){return `<svg class="ink-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#tinta-icon-${kind}"></use></svg>`}
   function iconFor(glyph){const kind={'🪵':'wood','✨':'ink','🪙':'gold','📜':'scroll','⚔':'sword','⚔️':'sword','💨':'dash','🌊':'wave','🔒':'lock','🛡':'shield','🛡️':'shield','🏹':'bow','📖':'book'}[glyph]||'star';return inkIcon(kind)}
   let SAVE_KEY='tierras_tinta_v1';
+  const curriculumQuestions = [
+  {
+    "id": "curr_2eso_1",
+    "area": "Literatura",
+    "q": "«El reloj tosió a medianoche». ¿Qué figura domina?",
+    "o": [
+      "Personificación",
+      "Antítesis",
+      "Enumeración",
+      "Comparación"
+    ],
+    "a": 0,
+    "e": "Toser es una acción propia de seres vivos y aquí se atribuye a un reloj.",
+    "h": "Toser es una acción propia de seres vivos y aquí se atribuye a un reloj."
+  },
+  {
+    "id": "curr_2eso_2",
+    "area": "Literatura",
+    "q": "«Tu risa es un cascabel». ¿Qué figura domina?",
+    "o": [
+      "Comparación",
+      "Metáfora",
+      "Asíndeton",
+      "Onomatopeya"
+    ],
+    "a": 1,
+    "e": "Se identifica la risa con un cascabel por semejanza.",
+    "h": "Se identifica la risa con un cascabel por semejanza."
+  },
+  {
+    "id": "curr_2eso_3",
+    "area": "Literatura",
+    "q": "«El arroyo brillaba como una cinta de plata». ¿Qué figura domina?",
+    "o": [
+      "Metonimia",
+      "Hipérbaton",
+      "Comparación",
+      "Antítesis"
+    ],
+    "a": 2,
+    "e": "«Como» introduce la semejanza explícita.",
+    "h": "«Como» introduce la semejanza explícita."
+  },
+  {
+    "id": "curr_2eso_4",
+    "area": "Literatura",
+    "q": "«He subido tantas escaleras que ya toco la Luna». ¿Qué figura domina?",
+    "o": [
+      "Metonimia",
+      "Comparación",
+      "Paralelismo",
+      "Hipérbole"
+    ],
+    "a": 3,
+    "e": "La exageración destaca el esfuerzo.",
+    "h": "La exageración destaca el esfuerzo."
+  },
+  {
+    "id": "curr_2eso_5",
+    "area": "Literatura",
+    "q": "«El triunfo de ayer fue la derrota de hoy». ¿Qué figura destaca?",
+    "o": [
+      "Antítesis",
+      "Onomatopeya",
+      "Enumeración",
+      "Polisíndeton"
+    ],
+    "a": 0,
+    "e": "Se contraponen «triunfo» y «derrota».",
+    "h": "Se contraponen «triunfo» y «derrota»."
+  },
+  {
+    "id": "curr_2eso_6",
+    "area": "Literatura",
+    "q": "«Compró un Picasso para el museo». ¿Qué figura aparece en «un Picasso»?",
+    "o": [
+      "Metáfora",
+      "Metonimia",
+      "Comparación",
+      "Personificación"
+    ],
+    "a": 1,
+    "e": "Se nombra una obra por su autor.",
+    "h": "Se nombra una obra por su autor."
+  },
+  {
+    "id": "curr_2eso_7",
+    "area": "Literatura",
+    "q": "«Busco tu voz en el viento. Busco tu voz en el agua». ¿Qué figura se reconoce por el comienzo repetido?",
+    "o": [
+      "Hipérbaton",
+      "Hipérbole",
+      "Anáfora",
+      "Metonimia"
+    ],
+    "a": 2,
+    "e": "Se repite «Busco tu voz» al inicio.",
+    "h": "Se repite «Busco tu voz» al inicio."
+  },
+  {
+    "id": "curr_2eso_8",
+    "area": "Literatura",
+    "q": "«Y trae mapas y trae cuerdas y trae luces». ¿Qué figura se reconoce por la conjunción repetida?",
+    "o": [
+      "Asíndeton",
+      "Perífrasis",
+      "Antítesis",
+      "Polisíndeton"
+    ],
+    "a": 3,
+    "e": "Se repite «y» de forma expresiva.",
+    "h": "Se repite «y» de forma expresiva."
+  },
+  {
+    "id": "curr_2eso_9",
+    "area": "Literatura",
+    "q": "«Abrió, leyó, cerró, salió». ¿Qué figura se reconoce por la ausencia de enlaces?",
+    "o": [
+      "Asíndeton",
+      "Polisíndeton",
+      "Símil",
+      "Metonimia"
+    ],
+    "a": 0,
+    "e": "Se omiten las conjunciones entre los verbos de la serie.",
+    "h": "Se omiten las conjunciones entre los verbos de la serie."
+  },
+  {
+    "id": "curr_2eso_10",
+    "area": "Literatura",
+    "q": "«El trueno hizo ¡bum!». ¿Qué figura aparece en «bum»?",
+    "o": [
+      "Aliteración",
+      "Onomatopeya",
+      "Metáfora",
+      "Hipérbaton"
+    ],
+    "a": 1,
+    "e": "La palabra imita un sonido.",
+    "h": "La palabra imita un sonido."
+  },
+  {
+    "id": "curr_2eso_11",
+    "area": "Literatura",
+    "q": "«Rueda y ruge la rueda rota». ¿Qué figura se reconoce por la repetición del sonido de la erre?",
+    "o": [
+      "Anáfora",
+      "Metonimia",
+      "Aliteración",
+      "Antítesis"
+    ],
+    "a": 2,
+    "e": "El recurso se basa en repetir un sonido.",
+    "h": "El recurso se basa en repetir un sonido."
+  },
+  {
+    "id": "curr_2eso_12",
+    "area": "Literatura",
+    "q": "«De verde se vistió el valle». ¿Qué figura afecta al orden de las palabras?",
+    "o": [
+      "Hipérbole",
+      "Polisíndeton",
+      "Enumeración",
+      "Hipérbaton"
+    ],
+    "a": 3,
+    "e": "Se adelanta «de verde» respecto al orden neutro.",
+    "h": "Se adelanta «de verde» respecto al orden neutro."
+  },
+  {
+    "id": "curr_2eso_13",
+    "area": "Literatura",
+    "q": "En «el astro rey» para referirse al Sol, ¿cómo se llama el rodeo expresivo?",
+    "o": [
+      "Perífrasis",
+      "Antítesis",
+      "Asíndeton",
+      "Anáfora"
+    ],
+    "a": 0,
+    "e": "Una expresión de varias palabras nombra indirectamente al Sol.",
+    "h": "Una expresión de varias palabras nombra indirectamente al Sol."
+  },
+  {
+    "id": "curr_2eso_14",
+    "area": "Literatura",
+    "q": "«Tú abres la puerta. Ella cierra la ventana». ¿Qué figura se basa en la estructura compartida?",
+    "o": [
+      "Anáfora",
+      "Paralelismo",
+      "Onomatopeya",
+      "Metonimia"
+    ],
+    "a": 1,
+    "e": "Ambas oraciones repiten la estructura sujeto, verbo y complemento.",
+    "h": "Ambas oraciones repiten la estructura sujeto, verbo y complemento."
+  },
+  {
+    "id": "curr_2eso_15",
+    "area": "Literatura",
+    "q": "«En el cajón había botones, hilos, dedales y agujas». ¿Qué recurso organiza los objetos en una serie?",
+    "o": [
+      "Polisíndeton",
+      "Hipérbaton",
+      "Enumeración",
+      "Comparación"
+    ],
+    "a": 2,
+    "e": "Los objetos aparecen listados sucesivamente.",
+    "h": "Los objetos aparecen listados sucesivamente."
+  },
+  {
+    "id": "curr_2eso_16",
+    "area": "Gramática",
+    "q": "Una alumna levanta el pulgar para confirmar que ha entendido. ¿Qué constituye el mensaje?",
+    "o": [
+      "La alumna",
+      "El gesto visto como medio de transmisión",
+      "La situación de clase",
+      "La confirmación de que ha entendido"
+    ],
+    "a": 3,
+    "e": "El mensaje es la información que transmite el gesto.",
+    "h": "El mensaje es la información que transmite el gesto."
+  },
+  {
+    "id": "curr_2eso_17",
+    "area": "Gramática",
+    "q": "«El examen fue un paseo». ¿Cómo funciona el significado de «paseo» aquí?",
+    "o": [
+      "Connotación",
+      "Denotación",
+      "Conjugación",
+      "Descripción"
+    ],
+    "a": 0,
+    "e": "Sugiere facilidad y evoca una experiencia cómoda.",
+    "h": "Sugiere facilidad y evoca una experiencia cómoda."
+  },
+  {
+    "id": "curr_2eso_18",
+    "area": "Gramática",
+    "q": "«Salimos a dar un paseo por el parque». ¿Qué predomina en el significado de «paseo»?",
+    "o": [
+      "Connotación",
+      "Denotación",
+      "Comparación",
+      "Personificación"
+    ],
+    "a": 1,
+    "e": "Se usa con el sentido directo de caminar por recreo.",
+    "h": "Se usa con el sentido directo de caminar por recreo."
+  }
+];
   const questions=[
+    ...curriculumQuestions,
     {id:'ort01',area:'Ortografía',q:'¿Qué palabra está correctamente escrita?',o:['camion','camión','cámion','camíon'],a:1,e:'«Camión» es aguda y termina en -n, por eso lleva tilde.',h:'Es una palabra aguda terminada en -n.'},
     {id:'ort02',area:'Ortografía',q:'Completa: «Ayer ___ muchas personas en el teatro».',o:['había','havía','abía','avía'],a:0,e:'El verbo «haber» se escribe con h y con b: «había».',h:'Es una forma del verbo haber.'},
     {id:'ort03',area:'Ortografía',q:'¿Cuál de estas palabras contiene un hiato?',o:['tierra','ciudad','poesía','cuadro'],a:2,e:'En «poesía», las vocales í-a pertenecen a sílabas distintas: po-e-sí-a.',h:'Busca dos vocales contiguas que se pronuncien en sílabas diferentes.'},
