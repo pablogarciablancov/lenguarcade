@@ -1,0 +1,1 @@
+{"name":"ultimo-salto","private":true,"type":"module","scripts":{"test":"node test.mjs"},"dependencies":{"three":"0.170.0"}}
