@@ -6050,6 +6050,77 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Export
   window.BG_CONTENT_BANKS = window.BG_CONTENT_BANKS || {};
+  const curriculumMorphology = [
+  {
+    "wrong": "Escribe en plural «esta actriz».",
+    "correct": "estas actrices"
+  },
+  {
+    "wrong": "Escribe en plural «aquel reloj».",
+    "correct": "aquellos relojes"
+  },
+  {
+    "wrong": "Completa con el adjetivo «andaluz» en la forma que corresponda: «Las ciudades ___».",
+    "correct": "andaluzas"
+  },
+  {
+    "wrong": "Completa con el adjetivo «feliz» en la forma que corresponda: «Los niños ___».",
+    "correct": "felices"
+  },
+  {
+    "wrong": "Completa con el adjetivo «joven» en la forma que corresponda: «Las investigadoras ___».",
+    "correct": "jóvenes"
+  },
+  {
+    "wrong": "Sustituye «los cuadernos» por un pronombre en «Marta guarda los cuadernos». Escribe la oración sin punto.",
+    "correct": "Marta los guarda"
+  },
+  {
+    "wrong": "Sustituye «la lámpara» por un pronombre en «Luis enciende la lámpara». Escribe la oración sin punto.",
+    "correct": "Luis la enciende"
+  },
+  {
+    "wrong": "Escribe la palabra compuesta que une «abre» y «latas».",
+    "correct": "abrelatas"
+  },
+  {
+    "wrong": "Escribe la palabra compuesta que une «guarda» y «barros».",
+    "correct": "guardabarros"
+  },
+  {
+    "wrong": "Escribe el diminutivo de «casa» con el sufijo «-ita».",
+    "correct": "casita"
+  },
+  {
+    "wrong": "Escribe el infinitivo derivado de «blanco» con «en-» y «-ecer».",
+    "correct": "emblanquecer"
+  },
+  {
+    "wrong": "Escribe el infinitivo derivado de «gordo» con «en-» y «-ar».",
+    "correct": "engordar"
+  },
+  {
+    "wrong": "En «Jugaron ayer», escribe solo el adverbio.",
+    "correct": "ayer"
+  },
+  {
+    "wrong": "En «Caminó hacia el puente», escribe solo la preposición.",
+    "correct": "hacia"
+  },
+  {
+    "wrong": "En «Puedes venir si quieres», escribe solo la conjunción.",
+    "correct": "si"
+  },
+  {
+    "wrong": "En «¡Bah, da igual!», escribe solo la interjección sin signos.",
+    "correct": "bah"
+  }
+];
+  const curriculumMonsters = ['h_ghoul', 'vampiro_v'];
+  curriculumMonsters.forEach((id, index) => {
+    const challenges = curriculumMorphology.slice(index * 8, (index + 1) * 8);
+    MORFOLOGIA_BANK[id] = [...challenges, ...MORFOLOGIA_BANK[id]];
+  });
   window.BG_CONTENT_BANKS.morfologia = MORFOLOGIA_BANK;
 })();
 </script>
