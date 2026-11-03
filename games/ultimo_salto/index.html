@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Último Salto · LenguArcade</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<main id="game" aria-label="Último Salto"><div id="scene" aria-label="Ruinas tridimensionales"></div><div class="vignette"></div>
+<header id="hud" hidden><div class="temple"><small id="chapter">EL TEMPLO DE LAS TILDES</small><strong id="level-name"></strong><span id="rule"></span><small id="challenge"></small></div><div class="resources"><span id="lives" title="Vidas"></span><span id="stars" title="Estrellas posibles"></span><button id="pause" aria-label="Pausa">Ⅱ</button><button id="sound" aria-label="Activar o silenciar sonido">♫</button></div></header>
+<section id="deduction" hidden aria-label="Inscripción del templo"></section>
+<section id="actionbar" hidden><div id="nearby" aria-label="Piedras a tu alcance"></div><div class="tools"><button data-tool="eye" title="Selecciona y comprueba una piedra">◉ <span>Ojo</span> <b id="eye-count"></b></button><button data-tool="rune">✧ <span>Runa</span> <b id="rune-count"></b></button><button data-tool="boots">↗ <span>Botas</span> <b id="boots-count"></b></button><span id="help">Turquesa: al alcance · Dorado: visitada<br>Flechas / WASD y Enter</span></div></section>
+<div id="toast" role="status" aria-live="polite"></div><span id="save-status">Guardado local</span>
+<section id="screen" class="screen"></section>
+<dialog id="modal"><button id="modal-close" class="close" aria-label="Cerrar">×</button><div id="modal-content"></div></dialog>
+</main><script type="module" src="src/main.js"></script></body></html>
