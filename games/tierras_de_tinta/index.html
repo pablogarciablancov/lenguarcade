@@ -132,7 +132,262 @@
   function inkIcon(kind){return `<svg class="ink-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#tinta-icon-${kind}"></use></svg>`}
   function iconFor(glyph){const kind={'🪵':'wood','✨':'ink','🪙':'gold','📜':'scroll','⚔':'sword','⚔️':'sword','💨':'dash','🌊':'wave','🔒':'lock','🛡':'shield','🛡️':'shield','🏹':'bow','📖':'book'}[glyph]||'star';return inkIcon(kind)}
   let SAVE_KEY='tierras_tinta_v1';
+  const curriculumQuestions = [
+  {
+    "id": "curr_2eso_1",
+    "area": "Literatura",
+    "q": "«El reloj tosió a medianoche». ¿Qué figura domina?",
+    "o": [
+      "Personificación",
+      "Antítesis",
+      "Enumeración",
+      "Comparación"
+    ],
+    "a": 0,
+    "e": "Toser es una acción propia de seres vivos y aquí se atribuye a un reloj.",
+    "h": "Toser es una acción propia de seres vivos y aquí se atribuye a un reloj."
+  },
+  {
+    "id": "curr_2eso_2",
+    "area": "Literatura",
+    "q": "«Tu risa es un cascabel». ¿Qué figura domina?",
+    "o": [
+      "Comparación",
+      "Metáfora",
+      "Asíndeton",
+      "Onomatopeya"
+    ],
+    "a": 1,
+    "e": "Se identifica la risa con un cascabel por semejanza.",
+    "h": "Se identifica la risa con un cascabel por semejanza."
+  },
+  {
+    "id": "curr_2eso_3",
+    "area": "Literatura",
+    "q": "«El arroyo brillaba como una cinta de plata». ¿Qué figura domina?",
+    "o": [
+      "Metonimia",
+      "Hipérbaton",
+      "Comparación",
+      "Antítesis"
+    ],
+    "a": 2,
+    "e": "«Como» introduce la semejanza explícita.",
+    "h": "«Como» introduce la semejanza explícita."
+  },
+  {
+    "id": "curr_2eso_4",
+    "area": "Literatura",
+    "q": "«He subido tantas escaleras que ya toco la Luna». ¿Qué figura domina?",
+    "o": [
+      "Metonimia",
+      "Comparación",
+      "Paralelismo",
+      "Hipérbole"
+    ],
+    "a": 3,
+    "e": "La exageración destaca el esfuerzo.",
+    "h": "La exageración destaca el esfuerzo."
+  },
+  {
+    "id": "curr_2eso_5",
+    "area": "Literatura",
+    "q": "«El triunfo de ayer fue la derrota de hoy». ¿Qué figura destaca?",
+    "o": [
+      "Antítesis",
+      "Onomatopeya",
+      "Enumeración",
+      "Polisíndeton"
+    ],
+    "a": 0,
+    "e": "Se contraponen «triunfo» y «derrota».",
+    "h": "Se contraponen «triunfo» y «derrota»."
+  },
+  {
+    "id": "curr_2eso_6",
+    "area": "Literatura",
+    "q": "«Compró un Picasso para el museo». ¿Qué figura aparece en «un Picasso»?",
+    "o": [
+      "Metáfora",
+      "Metonimia",
+      "Comparación",
+      "Personificación"
+    ],
+    "a": 1,
+    "e": "Se nombra una obra por su autor.",
+    "h": "Se nombra una obra por su autor."
+  },
+  {
+    "id": "curr_2eso_7",
+    "area": "Literatura",
+    "q": "«Busco tu voz en el viento. Busco tu voz en el agua». ¿Qué figura se reconoce por el comienzo repetido?",
+    "o": [
+      "Hipérbaton",
+      "Hipérbole",
+      "Anáfora",
+      "Metonimia"
+    ],
+    "a": 2,
+    "e": "Se repite «Busco tu voz» al inicio.",
+    "h": "Se repite «Busco tu voz» al inicio."
+  },
+  {
+    "id": "curr_2eso_8",
+    "area": "Literatura",
+    "q": "«Y trae mapas y trae cuerdas y trae luces». ¿Qué figura se reconoce por la conjunción repetida?",
+    "o": [
+      "Asíndeton",
+      "Perífrasis",
+      "Antítesis",
+      "Polisíndeton"
+    ],
+    "a": 3,
+    "e": "Se repite «y» de forma expresiva.",
+    "h": "Se repite «y» de forma expresiva."
+  },
+  {
+    "id": "curr_2eso_9",
+    "area": "Literatura",
+    "q": "«Abrió, leyó, cerró, salió». ¿Qué figura se reconoce por la ausencia de enlaces?",
+    "o": [
+      "Asíndeton",
+      "Polisíndeton",
+      "Símil",
+      "Metonimia"
+    ],
+    "a": 0,
+    "e": "Se omiten las conjunciones entre los verbos de la serie.",
+    "h": "Se omiten las conjunciones entre los verbos de la serie."
+  },
+  {
+    "id": "curr_2eso_10",
+    "area": "Literatura",
+    "q": "«El trueno hizo ¡bum!». ¿Qué figura aparece en «bum»?",
+    "o": [
+      "Aliteración",
+      "Onomatopeya",
+      "Metáfora",
+      "Hipérbaton"
+    ],
+    "a": 1,
+    "e": "La palabra imita un sonido.",
+    "h": "La palabra imita un sonido."
+  },
+  {
+    "id": "curr_2eso_11",
+    "area": "Literatura",
+    "q": "«Rueda y ruge la rueda rota». ¿Qué figura se reconoce por la repetición del sonido de la erre?",
+    "o": [
+      "Anáfora",
+      "Metonimia",
+      "Aliteración",
+      "Antítesis"
+    ],
+    "a": 2,
+    "e": "El recurso se basa en repetir un sonido.",
+    "h": "El recurso se basa en repetir un sonido."
+  },
+  {
+    "id": "curr_2eso_12",
+    "area": "Literatura",
+    "q": "«De verde se vistió el valle». ¿Qué figura afecta al orden de las palabras?",
+    "o": [
+      "Hipérbole",
+      "Polisíndeton",
+      "Enumeración",
+      "Hipérbaton"
+    ],
+    "a": 3,
+    "e": "Se adelanta «de verde» respecto al orden neutro.",
+    "h": "Se adelanta «de verde» respecto al orden neutro."
+  },
+  {
+    "id": "curr_2eso_13",
+    "area": "Literatura",
+    "q": "En «el astro rey» para referirse al Sol, ¿cómo se llama el rodeo expresivo?",
+    "o": [
+      "Perífrasis",
+      "Antítesis",
+      "Asíndeton",
+      "Anáfora"
+    ],
+    "a": 0,
+    "e": "Una expresión de varias palabras nombra indirectamente al Sol.",
+    "h": "Una expresión de varias palabras nombra indirectamente al Sol."
+  },
+  {
+    "id": "curr_2eso_14",
+    "area": "Literatura",
+    "q": "«Tú abres la puerta. Ella cierra la ventana». ¿Qué figura se basa en la estructura compartida?",
+    "o": [
+      "Anáfora",
+      "Paralelismo",
+      "Onomatopeya",
+      "Metonimia"
+    ],
+    "a": 1,
+    "e": "Ambas oraciones repiten la estructura sujeto, verbo y complemento.",
+    "h": "Ambas oraciones repiten la estructura sujeto, verbo y complemento."
+  },
+  {
+    "id": "curr_2eso_15",
+    "area": "Literatura",
+    "q": "«En el cajón había botones, hilos, dedales y agujas». ¿Qué recurso organiza los objetos en una serie?",
+    "o": [
+      "Polisíndeton",
+      "Hipérbaton",
+      "Enumeración",
+      "Comparación"
+    ],
+    "a": 2,
+    "e": "Los objetos aparecen listados sucesivamente.",
+    "h": "Los objetos aparecen listados sucesivamente."
+  },
+  {
+    "id": "curr_2eso_16",
+    "area": "Gramática",
+    "q": "Una alumna levanta el pulgar para confirmar que ha entendido. ¿Qué constituye el mensaje?",
+    "o": [
+      "La alumna",
+      "El gesto visto como medio de transmisión",
+      "La situación de clase",
+      "La confirmación de que ha entendido"
+    ],
+    "a": 3,
+    "e": "El mensaje es la información que transmite el gesto.",
+    "h": "El mensaje es la información que transmite el gesto."
+  },
+  {
+    "id": "curr_2eso_17",
+    "area": "Gramática",
+    "q": "«El examen fue un paseo». ¿Cómo funciona el significado de «paseo» aquí?",
+    "o": [
+      "Connotación",
+      "Denotación",
+      "Conjugación",
+      "Descripción"
+    ],
+    "a": 0,
+    "e": "Sugiere facilidad y evoca una experiencia cómoda.",
+    "h": "Sugiere facilidad y evoca una experiencia cómoda."
+  },
+  {
+    "id": "curr_2eso_18",
+    "area": "Gramática",
+    "q": "«Salimos a dar un paseo por el parque». ¿Qué predomina en el significado de «paseo»?",
+    "o": [
+      "Connotación",
+      "Denotación",
+      "Comparación",
+      "Personificación"
+    ],
+    "a": 1,
+    "e": "Se usa con el sentido directo de caminar por recreo.",
+    "h": "Se usa con el sentido directo de caminar por recreo."
+  }
+];
   const questions=[
+    ...curriculumQuestions,
     {id:'ort01',area:'Ortografía',q:'¿Qué palabra está correctamente escrita?',o:['camion','camión','cámion','camíon'],a:1,e:'«Camión» es aguda y termina en -n, por eso lleva tilde.',h:'Es una palabra aguda terminada en -n.'},
     {id:'ort02',area:'Ortografía',q:'Completa: «Ayer ___ muchas personas en el teatro».',o:['había','havía','abía','avía'],a:0,e:'El verbo «haber» se escribe con h y con b: «había».',h:'Es una forma del verbo haber.'},
     {id:'ort03',area:'Ortografía',q:'¿Cuál de estas palabras contiene un hiato?',o:['tierra','ciudad','poesía','cuadro'],a:2,e:'En «poesía», las vocales í-a pertenecen a sílabas distintas: po-e-sí-a.',h:'Busca dos vocales contiguas que se pronuncien en sílabas diferentes.'},
@@ -341,7 +596,7 @@
   function fireEnemyShot(e,ang,kind=e.kind){const speed=kind==='boss'?250:285;enemyShots.push({x:e.x+Math.cos(ang)*(e.r+7),y:e.y+Math.sin(ang)*(e.r+7),vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed,r:kind==='boss'?9:7,damage:kind==='boss'?13:e.damage,life:3,kind,trail:[]})}
   function gather(){nodes.forEach(n=>{if(n.alive&&dist(player,n)<29){n.alive=false;if(n.t==='tree')run.wood+=2;else run.ink+=1;gainDomain(1);burst(n.x,n.y,n.t==='tree'?'#8bcf75':'#b885ff',8);updateHud()}});drops.forEach(d=>{if(!d.taken&&dist(player,d)<38){d.taken=true;if(d.type==='health'){const healed=Math.min(player.maxHp-player.hp,Math.ceil(player.maxHp*.25));player.hp+=healed;floaters.push({x:player.x,y:player.y-30,text:'+'+healed+' VIDA',life:1.4});}else if(d.type==='slow'){run.slowTimer=8;floaters.push({x:player.x,y:player.y-30,text:'ENEMIGOS LENTOS · 8 s',life:1.4});}else if(d.type==='relic')collectRelic(d.relic);else if(d.type==='ink')run.ink+=d.amount;else run.wood+=d.amount;burst(d.x,d.y,d.type==='relic'?'#d28aff':d.type==='ink'?'#c491ff':'#ffd36d',10);updateHud()}});drops=drops.filter(d=>!d.taken&&d.life>0);landmarks.forEach(l=>{if(!l.seen&&dist(player,l)<l.r){l.seen=true;run.zones++;gainDomain(5);toast('Zona descubierta: '+l.name);save.xp=Math.min(99,save.xp+4)}});chests.forEach(c=>{if(!c.open&&!c.triggered&&dist(player,c)<36&&!run.chestChallenge){c.triggered=true;run.chestChallenge={x:c.x,y:c.y,r:18,hp:1,maxHp:1,fieldReady:true,fieldQ:pickRunQuestion(true),fieldAttempts:0,isChest:true,chest:c};toast('Sello expuesto · pulsa E cuando quieras descifrarlo')}})}
   function themedQuestions(){return selectedZone==='swamp'?questions.filter(q=>q.id.startsWith('hom')||['ort05','ort06','ort12','sem02'].includes(q.id)):selectedZone==='cliffs'?questions.filter(q=>q.area==='Acentuación'||['ort03','punt02','punt03'].includes(q.id)):selectedZone==='ruins'?questions.filter(q=>['Gramática','Morfología','Verbos'].includes(q.area)):selectedZone==='citadel'?questions:questions}
-  function pickRunQuestion(compact=false){let themed=themedQuestions(),pool=themed.filter(q=>!run.askedIds.includes(q.id));if(!pool.length)pool=questions.filter(q=>!run.askedIds.includes(q.id));if(!pool.length)return null;const q=pool[Math.floor(Math.random()*pool.length)];run.askedIds.push(q.id);return compact?{...q,o:q.o.slice(0,4)}:q}
+  function pickRunQuestion(compact=false){let themed=themedQuestions(),pool=themed.filter(q=>!run.askedIds.includes(q.id));if(!pool.length)pool=questions.filter(q=>!run.askedIds.includes(q.id));if(!pool.length)return null;const curriculum=pool.filter(q=>q.id.startsWith('curr_2eso_'));const choices=run.askedIds.length%4===0&&curriculum.length?curriculum:pool;const q=choices[Math.floor(Math.random()*choices.length)];run.askedIds.push(q.id);return compact?{...q,o:q.o.slice(0,4)}:q}
   function pickQuestion(practice=false){if(running&&!practice)return pickRunQuestion()||questions[0];let themed=questions,pool=themed.filter(q=>!save.seen.slice(-4).includes(q.id));if(!pool.length)pool=themed;const weighted=[];pool.forEach(q=>{const area=save.stats.byArea[q.area]||{asked:0,correct:0},miss=save.mistakes[q.id]||0,accuracy=area.asked?area.correct/area.asked:.65,weight=1+miss*(practice?5:3)+(accuracy<.6?3:accuracy<.8?1:0);for(let i=0;i<weight;i++)weighted.push(q)});return weighted[Math.floor(Math.random()*weighted.length)]||questions[0]}
   let quizContext=null,currentQ=null,hintUsed=false,answered=false,attempts=0;
   function openQuiz(type,data){paused=true;quizContext={type,data};currentQ=pickQuestion(type==='practice');hintUsed=false;answered=false;attempts=0;const titles={forge:'Templa el arma',practice:'Entrenamiento adaptativo',enemy:'Rompe el sello lingüístico',boss:'Contrarresta la runa del jefe',chest:'Purifica el cofre'},stakes={enemy:'Acierta al primer intento para eliminar un 32 % de su vida y ganar Claridad.',boss:'Anula la runa para debilitar al jefe. Si fallas, recuperará parte de su vida.',forge:'La respuesta correcta completa la forja; el primer intento concede oro adicional.',chest:'Un acierto perfecto concede más tinta y 18 segundos de Claridad.',practice:'Los errores detectados tendrán prioridad hasta que los domines.'};$('#quizArea').textContent=(type==='practice'?'Refuerzo · ':type==='enemy'||type==='boss'?'Combate · ':'')+currentQ.area;$('#quizTitle').textContent=titles[type]||titles.chest;$('#questionText').textContent=currentQ.q;$('#quizStakes').textContent=stakes[type]||'';$('#explanation').className='explain';$('#explanation').textContent='';$('#hintBtn').style.display='inline-block';$('#quizContinue').style.display='none';$('#answers').innerHTML=currentQ.o.map((o,i)=>`<button class="answer" data-answer="${i}">${o}</button>`).join('');$$('[data-answer]').forEach(b=>b.onclick=()=>answerQuiz(Number(b.dataset.answer),b));openModal('quizModal')}
