@@ -1,6 +1,6 @@
 {
   "schema": "lenguarcade-game-catalog-v1",
-  "version": 18,
+  "version": 19,
   "hostingBase": "https://pablogarciablancov.github.io/lenguarcade/",
   "games": [
     {
@@ -382,6 +382,28 @@
       "entry": "games/tinta_y_acero/",
       "description": "Combate con palabras, explora tres regiones y juega en cooperativo o duelo con compañeros de clase.",
       "banner": "https://pablogarciablancov.github.io/lenguarcade/games/tinta_y_acero/assets/tinta-y-acero-collection-v3.png",
+      "active": true,
+      "integration": "embedded"
+    },
+    {
+      "id": "ultimo_salto",
+      "official": true,
+      "name": "Último Salto",
+      "subtitle": "Las ruinas de las palabras",
+      "category": "Aventura y puzles lingüísticos",
+      "competencies": [
+        "acentuación",
+        "ortografía",
+        "categorías gramaticales",
+        "deducción"
+      ],
+      "status": "en pruebas",
+      "sortOrder": 18,
+      "color": "#8ce8d2",
+      "icon": "↗",
+      "entry": "games/ultimo_salto/",
+      "description": "Cruza ruinas flotantes, deduce qué palabras sostienen el camino y supera veinte niveles en cuatro zonas.",
+      "banner": "https://pablogarciablancov.github.io/lenguarcade/games/ultimo_salto/assets/cover.webp",
       "active": true,
       "integration": "embedded"
     }

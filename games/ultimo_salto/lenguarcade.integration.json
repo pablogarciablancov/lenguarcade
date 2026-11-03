@@ -1,15 +1,24 @@
 {
-  "gameId":"ultimo_salto",
-  "name":"Último Salto",
-  "subtitle":"Las ruinas de las palabras",
-  "status":"laboratorio",
-  "integration":"embedded",
-  "entry":"games/ultimo_salto/",
-  "banner":"games/ultimo_salto/assets/cover.webp",
-  "category":"Aventura y puzles lingüísticos",
-  "competencies":["acentuación","ortografía","hiatos","diptongos","deducción"],
-  "color":"#8ce8d2",
-  "icon":"↗",
-  "requires":{"studentRunner":true,"saveProgress":true,"supabaseCatalog":true},
-  "notes":"Pendiente integración coordinada en integration/*: alta en catálogo canónico, permitir gameId en runner y save-progress, snapshot para save.version=1 con profile.stars (20 niveles), XP acumulada profile.xp y logros sin XP adicional. No dar XP por saltos. Conservar resultado idempotente por run.id y checkpoint sin premio. No desplegar ni migrar desde la rama de juego. Portada original local preparada para repositorio de assets."
+  "gameId": "ultimo_salto",
+  "name": "Último Salto",
+  "subtitle": "Las ruinas de las palabras",
+  "status": "en pruebas",
+  "integration": "embedded",
+  "entry": "games/ultimo_salto/",
+  "banner": "games/ultimo_salto/assets/cover.webp",
+  "category": "Aventura y puzles lingüísticos",
+  "competencies": [
+    "acentuación",
+    "ortografía",
+    "categorías gramaticales",
+    "deducción"
+  ],
+  "color": "#8ce8d2",
+  "icon": "↗",
+  "requires": {
+    "studentRunner": true,
+    "saveProgress": true,
+    "supabaseCatalog": true
+  },
+  "notes": "Catálogo canónico y guardado por perfil. La XP se deriva de las estrellas al terminar un nivel y no se concede en checkpoints ni por salto. Publicación coordinada con el despliegue estable."
 }
