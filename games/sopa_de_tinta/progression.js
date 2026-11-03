@@ -10,6 +10,11 @@ const achievements=[
 ['partidas10','Cliente habitual','Completa 10 sopas.','wins',10],['partidas50','La mesa de siempre','Completa 50 sopas.','wins',50],['diario','Pedido del día','Completa un desafío diario.','dailyWins',1],['diarios7','Siete desayunos','Completa siete desafíos diarios diferentes.','dailyWins',7],
 ['relax','Sobremesa','Completa tres partidas relax.','relaxWins',3],['reloj','Hora del café','Completa tres contrarrelojes.','timedWins',3],['maestria','Paladar experto','Completa tres partidas de maestría.','masterWins',3],['punta','Hora punta','Supera una Hora Punta.','bossWins',1],['solo','Café solo','Supera una Hora Punta sin errores.','cleanBoss',1],
 ['nivel5','Buscapalabras','Llega al nivel 5.','level',5],['nivel10','Rastreador','Llega al nivel 10.','level',10],['misiones','Encargos cumplidos','Completa diez misiones.','missions',10],['coleccion','Mi rincón','Compra tres decoraciones.','purchases',3],
+...C.exams.map(exam=>['exam_'+exam.id,exam.name+' superada','Completa esta prueba sin fichas de ayuda.','exam_'+exam.id,1]),
+['exams_trimestres','Curso al día','Completa las tres evaluaciones trimestrales.','exams_trimestres',3],
+['exams_finales','Doble especialidad','Completa los dos finales de especialidad.','exams_finales',2],
+['exams_perfect','Expediente impecable','Consigue tres estrellas en las seis pruebas.','exams_perfect',6],
+['exams_all','Diploma de tinta','Completa las seis pruebas.','exams_all',6],
 ...C.districts.map((d,i)=>['distrito_'+d.id,['Maestro narrador','Taller completo','Verbo vivo','Vías sintácticas','Galería abierta','Sentido completo','Escritura impecable'][i],'Supera los cuatro niveles de '+d.name+'.','district_'+d.id,4])
 ].map(([id,name,desc,stat,target],i)=>({id,name,desc,stat,target,icon:i%6}));
 const cosmetics=[{id:'cafe',name:'Café de medianoche',cost:0,kind:'theme'},{id:'aurora',name:'Salón aurora',cost:100,kind:'theme'},{id:'biblioteca',name:'Biblioteca dorada',cost:180,kind:'theme'},{id:'menta',name:'Tinta de menta',cost:80,kind:'trace'},{id:'rosa',name:'Tinta de frambuesa',cost:80,kind:'trace'},{id:'oro',name:'Marco del lexicógrafo',cost:220,kind:'frame'},{id:'taza',name:'Taza de porcelana',cost:120,kind:'cup'}];
@@ -29,7 +34,16 @@ const today=day();if(p.lastDay!==today){const yesterday=new Date(Date.now()-8640
 p.hintTokens+=2;
 }
 run.score+=bonus;const xp=run.words.filter(w=>w.found).length*15+(won?80:0)+(run.mode==='boss'&&won?120:0),ink=won?12+run.words.length*2:0;p.xp+=xp;p.ink+=ink;add(p,'totalScore',run.score);p.stats.bestCombo=Math.max(p.stats.bestCombo||0,run.bestCombo);
-const key=run.mode+':'+run.category+':'+run.difficulty;const record=p.records[key]||{};const isRecord=won&&run.score>(record.score||0);if(won)p.records[key]={score:Math.max(run.score,record.score||0),time:Math.min(run.elapsed,record.time??Infinity)};
+const key=run.mode+':'+(run.examId||run.category)+':'+run.difficulty;
+if(won&&run.mode==='exam'&&C.exams.some(exam=>exam.id===run.examId)){
+  const stars=p.examStars||={};
+  stars[run.examId]=Math.max(stars[run.examId]||0,run.errors===0?3:run.errors<=2?2:1);
+  p.stats['exam_'+run.examId]=1;
+  p.stats.exams_trimestres=C.exams.filter(exam=>exam.evaluation&&stars[exam.id]).length;
+  p.stats.exams_finales=C.exams.filter(exam=>exam.area&&stars[exam.id]).length;
+  p.stats.exams_perfect=C.exams.filter(exam=>stars[exam.id]===3).length;
+  p.stats.exams_all=C.exams.filter(exam=>stars[exam.id]).length;
+}const record=p.records[key]||{};const isRecord=won&&run.score>(record.score||0);if(won)p.records[key]={score:Math.max(run.score,record.score||0),time:Math.min(run.elapsed,record.time??Infinity)};
 if(run.mode==='daily'){const best=p.daily[run.day];if(won&&(!best||run.score>best.score))p.daily[run.day]={score:run.score,time:run.elapsed,errors:run.errors,hints:run.hints};}
 for(const w of run.words)if(!w.found){const m=p.mastery[w.id]||={clean:0,help:0};m.help++;}
 run.reward={xp,ink,bonus,isRecord,stars:won?(run.errors===0&&run.hints===0?3:run.errors<=2?2:1):0,levelUp:level(p)>before};return run.reward;

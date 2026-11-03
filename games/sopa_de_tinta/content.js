@@ -182,10 +182,19 @@ const curricularConcepts = root.LenguArcadeCurriculum.conceptos.map(entry => {
     explanation: entry.ejemplo ? entry.definicion + ' Ejemplo: ' + entry.ejemplo : entry.definicion,
     category,
     difficulty: entry.cuadricula.length >= 7 ? 2 : 1,
+    area: entry.area,
     evaluation: entry.evaluacion
   };
 });
 const activeIds = new Set(curricularConcepts.map(concept => concept.id));
 const concepts = [...curricularConcepts, ...legacyConcepts.filter(concept => !activeIds.has(concept.id))];
-root.TintaContent={districts,concepts,curricularConcepts,difficulties};
+const exams = [
+  {id:'trimestre1', name:'Primera evaluación', evaluation:1, difficulty:2, seconds:240},
+  {id:'trimestre2', name:'Segunda evaluación', evaluation:2, difficulty:2, seconds:240},
+  {id:'trimestre3', name:'Tercera evaluación', evaluation:3, difficulty:2, seconds:240},
+  {id:'finalLengua', name:'Final de Lengua', area:'gramatica', difficulty:3, seconds:300},
+  {id:'finalLiteratura', name:'Final de Literatura', area:'literatura', difficulty:3, seconds:300},
+  {id:'finalCurso', name:'Gran final del curso', difficulty:3, seconds:330}
+];
+root.TintaContent={districts,concepts,curricularConcepts,difficulties,exams};
 })(typeof window==='undefined'?globalThis:window);
