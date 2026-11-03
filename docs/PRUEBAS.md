@@ -957,3 +957,8 @@ Empaquetado de la función: incluir `supabase/functions/lexitrama-online/`, `_sh
 ### 2026-10-28 · Galería anónima y valoración por exploración
 
 Rayuela: entrar como Alumno de prueba, elegir 2 ESO C y D, jugar sin autores ni controles de profesor. Con 3 finales, 1 no permite valorar y 2 sí; repetir no suma. Alumno real no puede cambiar a otra clase; autor no vota. Abrir finales descubiertos no incrementa el contador. npm run check incluye pruebas de acceso, privacidad y umbral.
+
+## Último Salto
+- Abrir el juego desde el panel del alumno y comprobar portada, entrada y salida.
+- Superar un nivel, recargar y repetir con las mismas estrellas. Comprobar guardado por perfil y ausencia de XP duplicada.
+- En el panel del profesor, comprobar catálogo, acceso y progreso del alumno en el despliegue estable.

@@ -1,5 +1,6 @@
 // Platform XP is retained. Only the cost of each successive level changes.
 export const XP_REWARD_GUIDE = Object.freeze({
+  ultimo_salto:"XP por superar un nivel o mejorar estrellas. Los saltos y checkpoints no dan XP.",
   tinta_y_acero:"20 XP por combate nuevo y 30 por expedición ganada; sin XP por palabra; se aplican los límites de ritmo compartidos.",
   battlegrafia:"12 XP por frase correcta nueva y 25 XP por monstruo derrotado.",
   sopa_de_tinta:"6 XP por palabra nueva correcta; límite 320 XP por guardado (150 en checkpoint).",
@@ -250,6 +251,24 @@ export function snapshotProgress(gameId,save,previous,old={},raw={},previousRaw=
   previous=previous&&typeof previous==='object'?previous:{};
   raw=raw&&typeof raw==='object'?raw:{};
   previousRaw=previousRaw&&typeof previousRaw==='object'?previousRaw:{};
+
+  if (gameId === 'ultimo_salto') {
+    const stars = save.version === 1 ? save.profile?.stars || {} : {};
+    const priorStars = previous.profile?.stars || {};
+    const run = save.run;
+    const level = run?.level;
+    const validLevel = save.version === 1 && Number.isInteger(level) && level >= 1 && level <= 20;
+    const starCount = value => Math.min(3, Math.max(0, Math.floor(n(value))));
+    const completed = Array.from({length:20}, (_, i) => i + 1).filter(id => starCount(stars[id]) > 0).length;
+    const result = !(context?.checkpoint===true) && validLevel && run?.done === true && run.id && !(previous.run?.done && previous.run.id === run.id);
+    const sameRun = run?.id && previous.run?.id === run.id;
+    const correct = validLevel && run.id ? Math.min(60,Math.max(0,n(run.correct)-(sameRun?n(previous.run.correct):0))) : 0;
+    const errors = validLevel && run.id ? Math.min(40,Math.max(0,n(run.errors)-(sameRun?n(previous.run.errors):0))) : 0;
+    const before = starCount(priorStars[level]);
+    const improvement = Math.max(0,starCount(stars[level])-before);
+    const xp = result && run.won === true && improvement ? (before ? 0 : 30 + level * 2) + improvement * 5 : 0;
+    return baseResult(old,correct+errors,correct,errors,completed/20*100,xp,0);
+  }
 
   if(gameId==='tinta_y_acero'){
     if(save.version!==1||save.run?.mode==='training')return baseResult(old,0,0,0,n(old.percentage),0,0);

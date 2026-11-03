@@ -15,7 +15,7 @@ const canonicalMigration=fs.readFileSync(path.join(root,"supabase","migrations",
 
 if(catalog.schema!=="lenguarcade-game-catalog-v1") throw new Error("Catálogo: schema canónico incorrecto.");
 const official=catalog.games.filter(game=>game.official);
-if(official.length!==17) throw new Error("Catálogo: deben existir exactamente 17 juegos oficiales.");
+if(official.length!==18) throw new Error("Catálogo: deben existir exactamente 18 juegos oficiales.");
 
 const ids=new Set();
 for(const game of catalog.games){
@@ -129,7 +129,8 @@ for(const [label,html] of [["alumno",student],["profesor",teacher]]){
 }
 const covers=new Set();
 for(const game of official){
-  if(!/-collection-v3\.(webp|png)$/.test(game.banner) || covers.has(game.banner)) throw new Error("Portada ausente o repetida: "+game.id);
+  const originalCover = game.id === "ultimo_salto" && game.banner.endsWith("/games/ultimo_salto/assets/cover.webp");
+  if((!originalCover && !/-collection-v3\.(webp|png)$/.test(game.banner)) || covers.has(game.banner)) throw new Error("Portada ausente o repetida: "+game.id);
   covers.add(game.banner);
 }
 for(const [label,html] of [["alumno",student],["profesor",teacher]]){
@@ -144,4 +145,4 @@ for(const [label,html] of [["alumno",student],["profesor",teacher]]){
   }
   if(context.resolveCover("custom","https://custom.example/art.webp")!=="https://custom.example/art.webp") throw new Error("Portada externa desconocida alterada.");
 }
-console.log("Catálogo canónico LenguArcade: 17 juegos oficiales; catálogo e integraciones principales sincronizados.");
+console.log("Catálogo canónico LenguArcade: 18 juegos oficiales; catálogo e integraciones principales sincronizados.");

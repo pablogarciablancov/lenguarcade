@@ -55,7 +55,7 @@ function loadCatalog(){
     if(game.integration==="external"&&!game.externalUrl&&!game.entry)fail(game.id+": external necesita externalUrl o entry");
   }
   const official=catalog.games.filter(game=>game.official);
-  if(official.length!==17)fail("debe haber exactamente 17 juegos oficiales; hay "+official.length);
+  if(official.length!==18)fail("debe haber exactamente 18 juegos oficiales; hay "+official.length);
   return catalog;
 }
 function resolvedGame(catalog,game){

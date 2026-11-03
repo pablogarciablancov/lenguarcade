@@ -71,6 +71,24 @@ function calculateAuthoritativeProgress_(gameId, payload, old) {
     };
   };
 
+  if (gameId === 'ultimo_salto') {
+    const stars = save.version === 1 ? save.profile?.stars || {} : {};
+    const priorStars = previousSave.profile?.stars || {};
+    const run = save.run;
+    const level = run?.level;
+    const validLevel = save.version === 1 && Number.isInteger(level) && level >= 1 && level <= 20;
+    const starCount = value => Math.min(3, Math.max(0, Math.floor(n(value))));
+    const completed = Array.from({length:20}, (_, i) => i + 1).filter(id => starCount(stars[id]) > 0).length;
+    const result = !(checkpoint) && validLevel && run?.done === true && run.id && !(previousSave.run?.done && previousSave.run.id === run.id);
+    const sameRun = run?.id && previousSave.run?.id === run.id;
+    const correct = validLevel && run.id ? Math.min(60,Math.max(0,n(run.correct)-(sameRun?n(previousSave.run.correct):0))) : 0;
+    const errors = validLevel && run.id ? Math.min(40,Math.max(0,n(run.errors)-(sameRun?n(previousSave.run.errors):0))) : 0;
+    const before = starCount(priorStars[level]);
+    const improvement = Math.max(0,starCount(stars[level])-before);
+    const xp = result && run.won === true && improvement ? (before ? 0 : 30 + level * 2) + improvement * 5 : 0;
+    return finish(correct+errors,correct,errors,completed/20*100,xp,0);
+  }
+
   if (gameId === 'sopa_de_tinta') {
     const stats=save.profile && save.profile.stats || {}, prior=previousSave.profile && previousSave.profile.stats || {};
     const dc=Math.min(checkpoint?24:60,Math.max(0,n(stats.words)-n(prior.words)));

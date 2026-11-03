@@ -926,3 +926,7 @@ Publicación del núcleo: código preparado para el despliegue estable de Apps S
 ### 2026-10-28 · Galería anónima y valoración por exploración
 
 Rayuela: alumno de prueba accede a las galerías publicadas de su organización con interfaz de alumno, sin autoría. Valorar exige descubrir al menos ceil(finales alcanzables/2), comprobado en el servidor. Los votos anteriores se conservan. Acceso de prueba limitado a Rayuela, sin cambiar matrículas.
+
+## 2026-11-03 · Último Salto
+- Alta oficial en pruebas. Veinte niveles, cuatro zonas y retos de acentuación y categorías gramaticales.
+- XP central por nivel superado y mejora de estrellas. Las respuestas se registran en el progreso y los checkpoints no conceden XP.
