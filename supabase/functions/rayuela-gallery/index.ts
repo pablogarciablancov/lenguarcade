@@ -16,14 +16,20 @@ export async function handle(admin:any,profileId:string,organizationId:string,ro
   const visibleStories=testReader?await admin.from('rayuela_gallery_stories').select('classroom_id').eq('organization_id',organizationId).eq('published',true):{data:[],error:null};
   if(visibleStories.error)throw visibleStories.error;
   const storyClasses=new Set(visibleStories.data.map((s:any)=>s.classroom_id));
-  const classes=classesResult.data.filter((c:any)=>role==='admin'||(testReader?storyClasses.has(c.id):memberIds.has(c.id)));
-  const classroomId=text(body.classroomId,80)||classes[0]?.id;
-  if(!classroomId||!classes.some((c:any)=>c.id===classroomId))throw new GalleryError('no_classroom',403);
+  const gate=!teacher&&!testReader&&memberIds.size?await admin.rpc('rayuela_class_exchange',{p_organization_id:organizationId,p_profile_id:profileId}):{data:null,error:null};
+  if(gate.error)throw gate.error;
+  const exchange=gate.data;
+  const exchangeIds=new Set(exchange?.unlocked===true?exchange.classroomIds:[]);
+  const classes=classesResult.data.filter((c:any)=>role==='admin'||(testReader?storyClasses.has(c.id):memberIds.has(c.id)||exchangeIds.has(c.id)));
+  const classroomId=text(body.classroomId,80)||classes.find((c:any)=>memberIds.has(c.id))?.id||classes[0]?.id;
+  if(!classroomId||!classes.some((c:any)=>c.id===classroomId))throw new GalleryError(exchange?.classroomIds.includes(classroomId)?'exchange_locked':'no_classroom',403);
   if(!teacher&&!testReader){
+    // A visit uses the student's enrolled classroom's access settings.
+    const accessClass=memberIds.has(classroomId)?classroomId:classes.find((c:any)=>memberIds.has(c.id)&&exchangeIds.has(c.id))?.id;
     const [game,access,workshop]=await Promise.all([
       admin.from('games').select('id,status,url,integration,active').eq('id','rayuela').single(),
       admin.from('profile_game_access').select('enabled').eq('profile_id',profileId).eq('game_id','rayuela').maybeSingle(),
-      admin.from('workshop_sessions').select('*').eq('classroom_id',classroomId).eq('published',true).limit(1),
+      admin.from('workshop_sessions').select('*').eq('classroom_id',accessClass).eq('published',true).limit(1),
     ]);
     for(const r of [game,access,workshop])if(r.error)throw r.error;
     const w=workshop.data?.[0]||null,mode=workshopModeFor(w);
@@ -88,7 +94,7 @@ export async function handle(admin:any,profileId:string,organizationId:string,ro
     const r=await admin.from('classroom_enrollments').select('profile_id,profiles!inner(id,first_name,last_name,active)').eq('classroom_id',classroomId).eq('active',true);if(r.error)throw r.error;
     roster=r.data.filter((p:any)=>p.profiles.active).map((p:any)=>({id:p.profile_id,name:[p.profiles.first_name,p.profiles.last_name].filter(Boolean).join(' ')})).sort((a:any,b:any)=>a.name.localeCompare(b.name,'es'));
   }
-  return {ok:true,rubricVersion:2,totalXp,teacher,classes,classroomId,roster,stories:stories.map((s:any)=>({id:s.id,title:s.title,scenes:s.project.nodes.length,...endingProgress(s.project,discoveries.data.filter((d:any)=>d.story_id===s.id)),ratingUnlocked:teacher?reads.data.some((r:any)=>r.story_id===s.id&&r.profile_id===profileId):endingProgress(s.project,discoveries.data.filter((d:any)=>d.story_id===s.id)).ratingUnlocked,spelling:s.orthography?{score:s.orthography.score,count:s.orthography.count}:null,own:s.author_ids.includes(profileId),completed:reads.data.some((r:any)=>r.story_id===s.id&&r.profile_id===profileId),myRating:s.author_ids.includes(profileId)?null:ratingView(ratings.data.find((r:any)=>r.story_id===s.id&&r.profile_id===profileId)),...(teacher?{orthography:s.orthography,authorIds:s.author_ids,published:s.published,summary:summary(s,ratings.data),reads:reads.data.filter((r:any)=>r.story_id===s.id).length,votes:ratings.data.filter((r:any)=>r.story_id===s.id&&!s.author_ids.includes(r.profile_id)).map((r:any)=>({profileId:r.profile_id,profileName:voterNames.get(r.profile_id)||'Participante',...ratingView(r)}))}:{})}))};
+  return {ok:true,exchange:exchange?{unlocked:exchange.unlocked,storiesReady:exchange.storiesReady,storiesTotal:exchange.storiesTotal,requiredVotes:exchange.requiredVotes}:null,rubricVersion:2,totalXp,teacher,classes,classroomId,roster,stories:stories.map((s:any)=>({id:s.id,title:s.title,scenes:s.project.nodes.length,...endingProgress(s.project,discoveries.data.filter((d:any)=>d.story_id===s.id)),ratingUnlocked:teacher?reads.data.some((r:any)=>r.story_id===s.id&&r.profile_id===profileId):endingProgress(s.project,discoveries.data.filter((d:any)=>d.story_id===s.id)).ratingUnlocked,spelling:s.orthography?{score:s.orthography.score,count:s.orthography.count}:null,own:s.author_ids.includes(profileId),completed:reads.data.some((r:any)=>r.story_id===s.id&&r.profile_id===profileId),myRating:s.author_ids.includes(profileId)?null:ratingView(ratings.data.find((r:any)=>r.story_id===s.id&&r.profile_id===profileId)),...(teacher?{orthography:s.orthography,authorIds:s.author_ids,published:s.published,summary:summary(s,ratings.data),reads:reads.data.filter((r:any)=>r.story_id===s.id).length,votes:ratings.data.filter((r:any)=>r.story_id===s.id&&!s.author_ids.includes(r.profile_id)).map((r:any)=>({profileId:r.profile_id,profileName:voterNames.get(r.profile_id)||'Participante',...ratingView(r)}))}:{})}))};
 }
 Deno.serve(async(request:Request)=>{
   if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
