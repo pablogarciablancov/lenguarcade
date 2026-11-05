@@ -930,3 +930,8 @@ Rayuela: alumno de prueba accede a las galerías publicadas de su organización 
 ## 2026-11-03 · Último Salto
 - Alta oficial en pruebas. Veinte niveles, cuatro zonas y retos de acentuación y categorías gramaticales.
 - XP central por nivel superado y mejora de estrellas. Las respuestas se registran en el progreso y los checkpoints no conceden XP.
+
+
+### 2026-11-05 · Intercambio de Rayuela entre clases
+
+Rayuela: 2.º ESO C y D pueden visitar y valorar el otro grupo cuando cada historia publicada de ambos tenga al menos 15 votos válidos. El acceso se verifica en el servidor; se conserva el requisito de descubrir la mitad de los finales alcanzables. La galería muestra el avance del desbloqueo.

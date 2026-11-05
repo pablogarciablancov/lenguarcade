@@ -962,3 +962,8 @@ Rayuela: entrar como Alumno de prueba, elegir 2 ESO C y D, jugar sin autores ni 
 - Abrir el juego desde el panel del alumno y comprobar portada, entrada y salida.
 - Superar un nivel, recargar y repetir con las mismas estrellas. Comprobar guardado por perfil y ausencia de XP duplicada.
 - En el panel del profesor, comprobar catálogo, acceso y progreso del alumno en el despliegue estable.
+
+
+### 2026-11-05 · Intercambio de Rayuela entre clases
+
+Rayuela: con una historia en 14 votos válidos, un alumno solo ve su clase y el servidor rechaza peticiones a la otra. Al alcanzar 15 en todas, aparecen ambos grupos; jugar, guardar finales y valorar funciona con las reglas normales. Revisar que el perfil de prueba mantiene su acceso y sus votos no cuentan para desbloquear.
