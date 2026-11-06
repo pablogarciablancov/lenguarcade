@@ -28,8 +28,14 @@ export function fleetWeeklySnapshots(dailyRows, today = madridDate()) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day < FLEET_START || day > today) continue;
     const monday = mondayOf(day);
     const week = byWeek.get(monday) || [];
-    week.push({day, xp:Math.max(0,Math.floor(Number(row.xp || 0))),
-      played:Number(row.xp || 0) > 0});
+    const xp = Math.max(0,Math.floor(Number(row.xp || 0)));
+    const existing = week.find(item => item.day === day);
+    if (existing) {
+      existing.xp += xp;
+      existing.played ||= xp > 0;
+    } else {
+      week.push({day, xp, played:xp > 0});
+    }
     byWeek.set(monday, week);
   }
   const currentWeek = mondayOf(today);
