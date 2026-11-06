@@ -29,7 +29,7 @@ as $function$
   select (e.occurred_at at time zone 'Europe/Madrid')::date as local_day,
     sum(greatest(e.xp_delta,0))::bigint as xp
   from public.game_events e
-  join public.games g on g.id=e.game_id and g.active=true
+  join public.games g on g.id=e.game_id
   where e.profile_id=p_profile
     and e.occurred_at >= (greatest(p_since,date '2026-11-02')::timestamp at time zone 'Europe/Madrid')
     and e.event_type not in ('teacher_adjustment','class_boss_reward','rayuela_ending_reward')
