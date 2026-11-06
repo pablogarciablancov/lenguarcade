@@ -1,5 +1,6 @@
 import {isForjaObjective, workshopVictory, forjaVictory, groupWorkshops, workshopProgress} from "../_shared/workshop-objective.js";
 import {workshopModeFor} from "../_shared/student-access.ts";
+import {refreshFleetWeekAwards} from "../_shared/fleet-weekly-delivery.js";
 import {actionRewards, snapshotProgress, XP_REWARD_GUIDE, capProgressionAward} from "../_shared/progression.js";
 import {
   boundedNumber,
@@ -586,6 +587,15 @@ Deno.serve(async (request) => {
       const deliver = sendCompletedWorkshopAwards(admin, profileId, classroomIds, gameId);
       if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(deliver);
       else await deliver; // Local test environment without Supabase EdgeRuntime.
+    }
+
+    // La XP semanal usa los eventos ya guardados. Nunca bloquear el guardado con Flotas.
+    // No sondear en cada checkpoint: algunos juegos guardan muchas veces por segundo.
+    if (classroomIds.length && shouldWriteEvent && (body.checkpoint !== true || victory)) {
+      const deliverWeekly = refreshFleetWeekAwards(admin,profileId,classroomIds)
+        .catch(error=>console.error("weekly fleet calculation failed",error));
+      if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(deliverWeekly);
+      else await deliverWeekly;
     }
 
     return jsonResponse({ ok:true, duplicate:false, record });

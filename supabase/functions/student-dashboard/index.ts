@@ -1,4 +1,5 @@
 import {platformXpEvents} from "../_shared/platform-xp.js";
+import {loadFleetWeeks,syncFleetWeekAwards} from "../_shared/fleet-weekly-delivery.js";
 import {isForjaObjective, workshopVictory, groupWorkshops, workshopProgress} from "../_shared/workshop-objective.js";
 import {levelProgress,learningGrade,platformMilestones} from "../_shared/progression.js";
 import {
@@ -122,7 +123,7 @@ Deno.serve(async (request) => {
       workshopSessionsResult,
     ] = await Promise.all([
       admin.from("profiles")
-        .select("id,email,first_name,last_name,avatar,last_login_at,role")
+        .select("id,email,first_name,last_name,avatar,last_login_at,role,source,active")
         .eq("id", profileId)
         .single(),
       admin.from("games")
@@ -193,6 +194,27 @@ Deno.serve(async (request) => {
     const progress = progressResult.data || [];
     const accessByGame = new Map((gameAccessResult.data || []).map(row => [String(row.game_id), row.enabled !== false]));
     const classroomIds = new Set((enrollmentsResult.data || []).map(row => String(row.classroom_id || "")).filter(Boolean));
+    // Sólo alumnos reales matriculados contribuyen; si falla Flotas el panel sigue funcionando.
+    let weeklyFleet: Record<string, unknown> | null = null;
+    if (profile.role === "student" && profile.active !== false &&
+      String(profile.source || "").toLowerCase() !== "test" && classroomIds.size) {
+      try {
+        const weeks = await loadFleetWeeks(admin,profileId);
+        const current = weeks[weeks.length-1];
+        const {data:delivered,error:deliveredError} = await admin.from("fleet_weekly_awards")
+          .select("points").eq("profile_id",profileId).eq("week_start",current.weekStart)
+          .not("delivered_at","is",null);
+        if (deliveredError) throw deliveredError;
+        weeklyFleet = {...current,creditedPoints:(delivered || [])
+          .reduce((sum,row)=>sum+Number(row.points||0),0)};
+        const deliver = syncFleetWeekAwards(admin,profileId,weeks,[...classroomIds])
+          .catch(error=>console.error("weekly fleet delivery failed",error));
+        if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(deliver);
+        else await deliver;
+      } catch (error) {
+        console.error("weekly fleet display unavailable",error);
+      }
+    }
     const workshopSessionRow = (workshopSessionsResult.data || []).find(row => classroomIds.has(String(row.classroom_id || ""))) || null;
     const workshopSelectedGameIds = new Set(
       Array.isArray(workshopSessionRow?.game_ids)
@@ -465,6 +487,7 @@ Deno.serve(async (request) => {
         totalGames:games.filter(game => !game.locked).length,
       },
       games,
+      weeklyFleet,
       workshopSession,
       events:(eventsResult.data || []).map(row => ({
         resultId:row.result_id,
