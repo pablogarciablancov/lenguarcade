@@ -4352,6 +4352,69 @@ body.light .rankCard,body.light .studentHistoryItem,body.light .generalAchieveme
   document.addEventListener('visibilitychange',function(){if(!document.hidden)refresh();});
 })();
 </script>
+
+<style id="la-fleet-weekly-hud">
+#fleetWeeklyCard{margin:16px 0;padding:16px 18px;border:1px solid #4565a5;border-radius:17px;background:linear-gradient(135deg,#142b4c,#171830);color:#f2f7ff;box-shadow:0 7px 22px #0002}
+#fleetWeeklyCard .fleetHudTitle{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+#fleetWeeklyCard h3{margin:0;color:#fff;font-size:18px;letter-spacing:.02em}
+#fleetWeeklyCard .fleetTag{font-size:10px;color:#bfe7ff;font-weight:850;letter-spacing:.09em;text-transform:uppercase}
+#fleetWeeklyCard .fleetPoints{font-size:23px;font-weight:950;color:#8cedc0;white-space:nowrap}
+#fleetWeeklyCard .fleetSegments{display:flex;gap:5px;margin:12px 0 10px}
+#fleetWeeklyCard .fleetSegment{height:10px;flex:1;border-radius:4px;background:#ffffff24}
+#fleetWeeklyCard .fleetSegment.complete{background:linear-gradient(90deg,#2ed99c,#a1f2b1)}
+#fleetWeeklyCard .fleetHudBottom{display:flex;gap:9px 22px;flex-wrap:wrap;color:#d5e5fa;font-size:12px;line-height:1.5}
+#fleetWeeklyCard .fleetHudBonus{margin-top:10px;border-top:1px solid #ffffff25;padding-top:10px;font-size:12px}
+#fleetWeeklyCard .fleetNote{margin-top:7px;font-size:11px;color:#b8c9df;line-height:1.4}
+body.light #fleetWeeklyCard{background:linear-gradient(135deg,#17365b,#24294f);color:#fff}
+@media(max-width:620px){#fleetWeeklyCard{padding:12px}#fleetWeeklyCard .fleetPoints{font-size:19px}}
+</style>
+<script>
+(function(){
+  if(window.__LA_FLEET_WEEKLY_HUD__)return;
+  window.__LA_FLEET_WEEKLY_HUD__=true;
+  function draw(d){
+    var profile=document.getElementById('perfil');
+    if(!profile)return;
+    var data=d&&d.weeklyFleet;
+    var host=document.getElementById('fleetWeeklyCard');
+    if(!data||!d.student||d.student.role!=='student'){
+      if(host)host.remove();return;
+    }
+    if(!host){
+      host=document.createElement('section');host.id='fleetWeeklyCard';
+      host.setAttribute('aria-label','Contribución semanal a la Flota de Las Tablas');
+      var before=profile.querySelector('.profileSettings');
+      if(before)profile.insertBefore(host,before);else profile.appendChild(host);
+    }
+    var xpPoints=Math.min(6,Math.max(0,Math.floor(Number(data.xpPoints||0))));
+    var bonus=Math.min(1,Math.max(0,Math.floor(Number(data.bonusPoints||0))));
+    var earned=xpPoints+bonus,credited=Math.min(7,Math.max(0,Math.floor(Number(data.creditedPoints||0))));
+    var reserved=Math.max(0,Math.floor(Number(data.xpReserved||0)));
+    var days=Math.max(0,Math.floor(Number(data.activeDays||0)));
+    var since=String(data.weekStart||'');
+    var date=since?new Date(since+'T12:00:00Z'):null;
+    var label=date&&!Number.isNaN(date.getTime())?new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short',timeZone:'UTC'}).format(date):'esta semana';
+    var segments='';
+    for(var i=0;i<6;i++)segments+='<span class="fleetSegment '+(i<xpPoints?'complete':'')+'"></span>';
+    var next=xpPoints>=6?'Has alcanzado el máximo semanal.':reserved>=250?
+      reserved+' XP en reserva para tu próximo día de juego.':
+      reserved+' / 250 XP para el próximo punto.';
+    var pending=Math.max(0,earned-credited);
+    host.innerHTML='<div class="fleetHudTitle"><div><div class="fleetTag">🏴 Flota de Las Tablas · Semana del '+(typeof esc==='function'?esc(label):label)+'</div><h3>Tu contribución a la flota</h3></div><div class="fleetPoints">+'+earned+' / 7 puntos</div></div>'+
+      '<div class="fleetSegments" role="progressbar" aria-label="Puntos de experiencia semanales" aria-valuemin="0" aria-valuemax="6" aria-valuenow="'+xpPoints+'">'+segments+'</div>'+
+      '<div class="fleetHudBottom"><span>⚡ '+(typeof esc==='function'?esc(next):next)+'</span><span>🎮 '+Math.floor(Number(data.xpEarned||0))+' XP de juego esta semana</span></div>'+
+      '<div class="fleetHudBonus">🌟 Constancia: '+(bonus?'¡+1 punto conseguido!':days+'/2 días jugando con XP')+
+      (pending?' · '+pending+' punto(s) pendiente(s) de sincronizar':' · '+credited+' acreditado(s)')+'</div>'+
+      '<div class="fleetNote">Se reinicia cada lunes. Conservas tus XP personales, tus logros y los puntos ya acreditados.</div>';
+  }
+  var base=window.renderDashboard;
+  if(typeof base==='function'){
+    window.renderDashboard=function(d){var result=base.apply(this,arguments);draw(d||{});return result;};
+    try{renderDashboard=window.renderDashboard;}catch(e){}
+  }
+  if(typeof currentDashboard!=='undefined'&&currentDashboard)draw(currentDashboard);
+})();
+</script>
 </body>
 </html>
 
