@@ -197,7 +197,9 @@
     const pool=available.length?available:QUESTIONS;
     const weight=q=>{
       const v=state.mastery[q.category]||{correct:0,wrong:0};
-      return 1+Math.min(4,v.wrong/(v.correct+1));
+      const focus={acentuación:['Tildes'],léxico:['Gramática','Literatura'],ortografía:['Ortografía','Tildes'],puntuación:['Ortografía'],gramática:['Gramática']};
+      const related=(focus[ENEMIES[battle?.enemyId]?.type]||[]);
+      return (related.includes(q.category)?2.5:1)+Math.min(4,v.wrong/(v.correct+1));
     };
     const total=pool.reduce((n,q)=>n+weight(q),0);
     let r=Math.random()*total;
@@ -336,6 +338,7 @@
   function move(dx,dy){
     if(battle||activeMode!=='adventure')return;
     const a=state.adventure,nx=a.x+dx,ny=a.y+dy;
+    const from={map:a.map,x:a.x,y:a.y};
     const row=MAPS[a.map][ny],code=row?.[nx];
     if(!code||code==='T'||code==='#'){note='Un obstáculo impide el paso.';render();return}
     a.x=nx;a.y=ny;
@@ -345,8 +348,8 @@
     else if(code==='D'){a.map='cripta';a.x=3;a.y=5;note='Has entrado en la cripta. ¡Cuidado con los guardianes!'}
     else if(code==='P'){a.map='bosque';a.x=5;a.y=5;note='Regresas al bosque con tus hallazgos.'}
     else if(code==='C'&&!a.cleared[id]){a.cleared[id]=true;state.inventory.potions++;gain(0,18);note='¡Cofre encontrado! Una poción y 18 monedas.'}
-    else if(code==='E'&&!a.cleared[id]){startBattle(a.map==='cripta'?'guardia':'tilde',{kind:'adventure',id});save();return}
-    else if(code==='B'&&!a.cleared[id]){startBattle('draco',{kind:'adventure',id,boss:true});save();return}
+    else if(code==='E'&&!a.cleared[id]){startBattle(a.map==='cripta'?'guardia':'tilde',{kind:'adventure',id,from});save();return}
+    else if(code==='B'&&!a.cleared[id]){startBattle('draco',{kind:'adventure',id,boss:true,from});save();return}
     else note=a.map==='cripta'?'Los muros guardan antiguas palabras olvidadas.':'Las hojas susurran historias del reino.';
     save();render();
   }
@@ -363,19 +366,30 @@
     const label=$('bg2-extra-saving');
     if(label)label.textContent=currentStorage?.store===localStorage?'Guardado local por perfil (sin sincronizar)':'Guardado temporal de esta pestaña';
   }
+  function retreat(){
+    if(!battle)return;
+    if(battle.context.kind==='expedition')state.expedition.path.pop();
+    if(battle.context.kind==='adventure'){
+      const from=battle.context.from;
+      if(from){state.adventure.map=from.map;state.adventure.x=from.x;state.adventure.y=from.y}
+      else{state.adventure.map='bosque';state.adventure.x=3;state.adventure.y=4}
+    }
+    battle=null;note='Te has retirado del combate sin recibir recompensas.';
+    save();
+  }
   function handleClick(event){
     const button=event.target.closest('[data-x]');
     if(!button)return;
     const action=button.dataset.x,value=button.dataset.value;
     if(action==='close')return close();
-    if(action==='go-modes'){battle=null;activeMode='menu';note='Elige un modo para continuar.';render();return}
+    if(action==='go-modes'){retreat();activeMode='menu';note='Elige un modo para continuar.';render();return}
     if(action==='class'&&HEROES[value]&&!state.hero){
       const h=HEROES[value];const p=window.player||window.BG?.player||{};
       state.hero={classId:value,name:String(p.name||'Aventurero').slice(0,30),level:1,xp:0,gold:0,attack:h.attack,maxHp:h.maxHp,hp:h.maxHp,maxMana:h.maxMana,mana:h.maxMana};
       note='Tu héroe está preparado. ¡Comienza la aventura!';save();render();return;
     }
     if(!state?.hero)return;
-    if(action==='mode'&&['expedition','adventure'].includes(value)){battle=null;activeMode=value;note=value==='expedition'?'Decide tu ruta para empezar.':'¡Explora el reino!';render();return}
+    if(action==='mode'&&['expedition','adventure'].includes(value)){retreat();activeMode=value;note=value==='expedition'?'Decide tu ruta para empezar.':'¡Explora el reino!';render();return}
     if(action==='choice'){chooseRoute(Number(value));return}
     if(action==='combat-action'){applyAction(value);return}
     if(action==='answer'){answer(Number(value));return}
@@ -395,7 +409,7 @@
   }
   function close(){
     if(!opened)return;
-    save();opened=false;battle=null;
+    retreat();save();opened=false;
     $('bg2-extra-root')?.classList.remove('open');
     $('bg2-mode-archive')?.classList.remove('open');
   }
@@ -419,10 +433,13 @@
       card.innerHTML=`<small>NUEVO MODO RPG · PROTOTIPO</small><h3>${emoji} ${label}</h3><p>${desc}</p><small id="bg2-extra-status-${mode}">Progreso independiente</small><button type="button" data-bg2-extra-launch="${mode}">JUGAR</button>`;
       grid.appendChild(card);
     }
-    grid.addEventListener('click',event=>{
-      const button=event.target.closest('[data-bg2-extra-launch]');
-      if(button)open(button.dataset.bg2ExtraLaunch);
-    },{once:false});
+    if(!grid.dataset.bg2ExtraBound){
+      grid.dataset.bg2ExtraBound='1';
+      grid.addEventListener('click',event=>{
+        const button=event.target.closest('[data-bg2-extra-launch]');
+        if(button)open(button.dataset.bg2ExtraLaunch);
+      });
+    }
   }
   let archiveObserved=false;
   function watchArchive(){
@@ -460,11 +477,11 @@
     document.addEventListener('keydown',onKey);
     mountHubButton();
     watchArchive();
-    const observer=new MutationObserver(()=>{
-      if(!$('bg2-rpg-hub')||!$('bg2-mode-archive-grid')){mountHubButton();watchArchive()}
-      else observer.disconnect();
-    });
-    observer.observe(document.body,{childList:true,subtree:true});
+    // El archivo de partidas se crea al pulsar «PARTIDAS»; observar solo esa interacción.
+    document.addEventListener('click',event=>{
+      if(event.target.closest('[data-action="games"]'))requestAnimationFrame(watchArchive);
+    },true);
+    setTimeout(mountHubButton,450);
   }
   window.BG2RPGModesV1={open,close,questionCount:QUESTIONS.length,modeIds:['expedition','adventure']};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
