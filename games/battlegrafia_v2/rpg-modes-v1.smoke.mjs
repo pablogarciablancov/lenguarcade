@@ -65,7 +65,7 @@ assert.equal(expedition.length,5);
 assert.ok(expedition.at(-1).some(e=>e.enemy==='draco'),'La expedición debe terminar con un jefe');
 assert.ok(expedition.slice(0,4).some(stage=>stage.length>1),'Deben existir decisiones de ruta');
 
-assert.ok(index.includes('./rpg-modes-v1.js?v=1'),'El módulo debe estar cargado en la Battlegrafía oficial');
+assert.ok(index.includes('./rpg-modes-v1.js?v=2'),'El módulo debe estar cargado en la Battlegrafía oficial');
 assert.ok(css.includes('#bg2-extra-root'),'Falta la capa visual aislada');
 assert.ok(!source.includes("setItem('bg_modeId'"),'No tocar el modo oficial');
 assert.ok(!source.includes('battlegrafia_v2_save_slots_v1_'),'No tocar ranuras oficiales');

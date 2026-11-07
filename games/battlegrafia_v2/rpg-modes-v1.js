@@ -137,7 +137,7 @@
   const health=(value,max,cls='')=>`<div class="x-bar ${cls}"><i style="width:${Math.max(0,Math.min(100,Math.round(value/Math.max(1,max)*100)))}%"></i></div>`;
   function addCss(){
     if($('bg2-extra-css'))return;
-    const el=document.createElement('link');el.id='bg2-extra-css';el.rel='stylesheet';el.href='./rpg-modes-v1.css?v=1';document.head.appendChild(el);
+    const el=document.createElement('link');el.id='bg2-extra-css';el.rel='stylesheet';el.href='./rpg-modes-v1.css?v=2';document.head.appendChild(el);
   }
   function root(){
     let node=$('bg2-extra-root');
@@ -150,48 +150,27 @@
     node.addEventListener('click',handleClick);
     return node;
   }
+  let encounter=null;
+  let facing='down', movingUntil=0, resolving=false, sceneTimer=0;
+  const reducedMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canvas=()=>'<canvas class="x-scene" id="bg2-pixel-scene" aria-label="Escenario pixel art"></canvas>';
   function hud(){
     const h=state.hero;
-    return `<section class="x-panel x-hud">
-      <img class="x-avatar" src="${heroImg()}" alt="Héroe ${escape(h.classId)}">
-      <div><div class="x-row"><strong>${escape(h.name)}</strong><span class="x-pill">${HEROES[h.classId].name} · nivel ${h.level}</span></div><div class="x-muted">Vida ${h.hp}/${h.maxHp} · Energía ${h.mana}/${h.maxMana}</div>${health(h.hp,h.maxHp)}${health(h.mana,h.maxMana,'x-mp')}</div>
-      <div class="x-hud-extra"><strong>🪙 ${h.gold}</strong><div class="x-muted">✦ ${h.xp} XP del prototipo<br>🧪 ${state.inventory.potions} pociones<br>⚜️ ${state.inventory.relics.length} reliquias</div></div>
-    </section>`;
+    return `<header class="x-hud"><div class="x-portrait">${HEROES[h.classId].name.slice(0,1)}</div><div class="x-vitals"><strong>${escape(h.name)} <small>NV. ${h.level}</small></strong><label>PV ${h.hp}/${h.maxHp}${health(h.hp,h.maxHp)}</label><label>PM ${h.mana}/${h.maxMana}${health(h.mana,h.maxMana,'x-mp')}</label></div><div class="x-loot"><b>${h.gold} ORO</b><span>${state.inventory.potions} POCIONES</span><small title="${escape(state.inventory.relics.join(' · '))}">${state.inventory.relics.length} RELIQUIAS · ${h.xp} EXP</small></div></header>`;
   }
   function classSelect(){
-    return `<div class="x-wrap"><section class="x-panel"><h2>Forja a tu héroe</h2><p>Elige una clase para los dos modos. Sus habilidades, inventario y progresión serán compartidos.</p></section><section class="x-grid3">${Object.entries(HEROES).map(([id,h])=>`<button class="x-choice x-class" data-x="class" data-value="${id}"><img src="${ASSET}heros/sprite_hero_${h.sprite}.webp" alt=""><strong>${h.name}</strong><span>${h.desc}</span><span>❤ ${h.maxHp} · ✨ ${h.maxMana}</span></button>`).join('')}</section></div>`;
+    return `<div class="x-screen x-selection">${canvas()}<div class="x-title"><small>LAS CRÓNICAS DE LA TINTA</small><h2>Elige a tu héroe</h2><p>Un mismo destino. Tres maneras de escribirlo.</p></div><div class="x-class-list">${Object.entries(HEROES).map(([id,h])=>`<button class="x-class" data-x="class" data-value="${id}"><span class="x-class-sigil ${id}"></span><strong>${h.name}</strong><small>${h.desc}</small><span>${h.maxHp} PV · ${h.maxMana} PM</span></button>`).join('')}</div></div>`;
   }
   function modes(){
-    return `<div class="x-wrap">${hud()}<section class="x-panel"><h2>Dos caminos, un solo héroe</h2><p class="x-muted">Los modos comparten nivel, monedas, pociones y conocimientos. El avance se guarda aparte del Battlegrafía oficial.</p></section><div class="x-grid2">
-    <button class="x-choice" data-x="mode" data-value="expedition"><b>⚔️</b><strong>EXPEDICIONES</strong><span>Elige rutas, afronta encuentros por turnos y derrota al jefe de una expedición de cinco etapas.</span><small>Expediciones completadas: ${state.expedition.completed}</small></button>
-    <button class="x-choice" data-x="mode" data-value="adventure"><b>🗺️</b><strong>REINOS DE LA TINTA</strong><span>Explora el bosque, habla con el cronista, encuentra cofres y entra en la cripta del dragón.</span><small>${state.adventure.boss?'Jefe derrotado':'Aventura en curso'}</small></button></div></div>`;
+    return `<div class="x-screen x-menu">${canvas()}${hud()}<div class="x-title"><small>BATTLEGRAFÍA RPG</small><h2>Las crónicas de la tinta</h2><p>Dos caminos. Un solo héroe.</p></div><nav class="x-destinations"><button data-x="mode" data-value="expedition"><small>I · CINCO ETAPAS</small><strong>Expediciones</strong><span>Elige tu ruta hacia el dragón</span></button><button data-x="mode" data-value="adventure"><small>II · EXPLORACIÓN</small><strong>Reinos de la Tinta</strong><span>El bosque esconde un antiguo secreto</span></button></nav></div>`;
   }
   function expedition(){
-    const e=state.expedition;
-    const complete=e.stage>=EXPEDITION.length;
-    return `<div class="x-wrap">${hud()}<section class="x-panel"><div class="x-row x-space"><div><h2>⚔️ Expediciones</h2><p class="x-muted">Una aventura corta con rutas y decisiones: riesgo, recompensa y estrategia.</p></div><button class="x-btn" data-x="mode" data-value="adventure">IR AL MAPA</button></div></section>
-    <div class="x-steps">${EXPEDITION.map((_,i)=>`<div class="x-step ${i<e.stage?'done':i===e.stage?'current':''}">${i<e.stage?'✓ ':''}${i+1}${i===4?' · JEFE':''}</div>`).join('')}</div>
-    ${complete?`<section class="x-panel"><h2>🏆 Expedición completada</h2><p>¡Diacritik ha caído! Has completado ${e.completed} expedición(es). Puedes repetirla para practicar y mejorar a tu héroe.</p><div class="x-row" style="margin-top:12px"><button class="x-btn gold" data-x="restart-expedition">NUEVA EXPEDICIÓN</button></div></section>`:
-    `<section class="x-panel"><h3>${['El primer cruce','La encrucijada','El descanso','El último obstáculo','La guarida del dragón'][e.stage]}</h3><p class="x-muted">Elige cómo continuar. Tu decisión modifica los encuentros y recompensas.</p></section>
-    <div class="x-grid2">${EXPEDITION[e.stage].map((c,i)=>`<button class="x-choice" data-x="choice" data-value="${i}"><b>${c.icon}</b><strong>${c.label}</strong><span>${c.desc}</span><span>${c.enemy?'⚔️ Combate':'✦ Evento'}</span></button>`).join('')}</div>`}
-    <section class="x-panel x-note">${escape(note)}</section></div>`;
+    const e=state.expedition,complete=e.stage>=EXPEDITION.length;
+    return `<div class="x-screen x-route">${canvas()}${hud()}<div class="x-location"><small>EXPEDICIONES · ${complete?'COMPLETADA':'ETAPA '+(e.stage+1)+' / 5'}</small><h2>El sendero del cronista</h2></div><div class="x-route-nodes">${EXPEDITION.map((stage,i)=>stage.map((n,j)=>`<button style="left:${(78+i*118)/6.4}%;top:${(stage.length===1?170:j?235:110)/3.6}%" class="x-node ${i===e.stage?'available':i<e.stage&&e.path[i]===n.id?'visited':'locked'}" data-x="choice" data-value="${j}" ${i!==e.stage?'disabled':''} title="${escape(n.desc)}" aria-label="${escape(n.label)}"><span>${escape(n.label)}</span><small>${n.enemy?'COMBATE':'ENCUENTRO'}</small></button>`).join('')).join('')}</div>${complete?'<div class="x-victory"><small>EL REINO RECUERDA TU NOMBRE</small><h2>Expedición completada</h2><button class="x-btn gold" data-x="restart-expedition">NUEVA EXPEDICIÓN</button></div>':''}<div class="x-dialogue"><small>CRÓNICA</small><p>${escape(note)}</p></div></div>`;
   }
   function adventure(){
-    const a=state.adventure,layout=MAPS[a.map];
-    const icon={V:'🏠',N:'📜',C:'🎁',E:'👾',D:'🚪',P:'🚪',B:'🐉'};
-    const cells=layout.map((row,y)=>Array.from(row).map((code,x)=>{
-      const isPlayer=x===a.x&&y===a.y;
-      const id=a.map+':'+x+':'+y;
-      const completed=!!a.cleared[id];
-      const walkable=!['T','#'].includes(code);
-      const adjacent=Math.abs(x-a.x)+Math.abs(y-a.y)===1;
-      const character=isPlayer?`<img src="${heroImg()}" alt="Tu héroe">`:((code==='E'||code==='C'||code==='B')&&completed?'':(icon[code]||''));
-      const cls=['x-tile',walkable?(a.map==='cripta'?'dungeon':code==='.'?'path':'special'):code==='T'?'wall':'rock',isPlayer?'player':'',adjacent&&walkable?'adjacent':''].filter(Boolean).join(' ');
-      return `<button class="${cls}" data-x="tile" data-xcoord="${x}" data-ycoord="${y}" ${walkable?'':'disabled'} aria-label="${isPlayer?'Tu posición':code==='E'?'Enemigo':code==='B'?'Jefe':code==='C'?'Cofre':'Casilla'}">${character}</button>`;
-    }).join('')).join('');
-    return `<div class="x-wrap">${hud()}<section class="x-panel"><div class="x-row x-space"><div><h2>🗺️ Reinos de la Tinta</h2><p class="x-muted">${a.map==='bosque'?'El bosque de las tildes':'La cripta del Dragón'} · Mueve al héroe con WASD, flechas o los botones.</p></div><button class="x-btn" data-x="mode" data-value="expedition">IR A EXPEDICIONES</button></div></section>
-    <div class="x-world-layout"><section class="x-panel"><div class="x-world" role="group" aria-label="Mapa explorable de diez columnas">${cells}</div><div class="x-pad"><span></span><button class="x-btn" data-x="move" data-value="up" aria-label="Arriba">▲</button><span></span><button class="x-btn" data-x="move" data-value="left" aria-label="Izquierda">◀</button><span class="x-center">✥</span><button class="x-btn" data-x="move" data-value="right" aria-label="Derecha">▶</button><span></span><button class="x-btn" data-x="move" data-value="down" aria-label="Abajo">▼</button><span></span></div></section>
-    <div class="x-wrap"><section class="x-panel"><h3>📖 Tu misión</h3><p>${a.boss?'¡Has derrotado a Diacritik! Puedes seguir explorando.':'Encuentra al cronista 📜, supera los enemigos 👾 y entra en la cripta 🚪 para enfrentarte al dragón 🐉.'}</p><p class="x-muted" style="margin-top:8px">Cofres: 🎁 · Refugio: 🏠 · Enemigos vencidos permanecen despejados.</p></section><section class="x-panel"><h3>📍 Crónica</h3><p class="x-note">${escape(note)}</p></section><section class="x-panel"><h3>🎒 Mochila</h3><div class="x-inventory"><span>🧪 Pociones ${state.inventory.potions}</span><span>💰 ${state.hero.gold} monedas</span><span>⭐ Nivel ${state.hero.level}</span>${state.inventory.relics.map(relic=>'<span>⚜️ '+escape(relic)+'</span>').join('')}</div></section></div></div></div>`;
+    const a=state.adventure;
+    return `<div class="x-screen x-exploration">${canvas()}${hud()}<div class="x-location"><small>REINOS DE LA TINTA</small><h2>${a.map==='bosque'?'El bosque de las tildes':'La cripta del dragón'}</h2><span>${a.boss?'El reino está a salvo':a.npc?'Encuentra al dragón en la cripta':'Busca al cronista'}</span></div><div class="x-world-controls" role="group" aria-label="Mapa interactivo">${MAPS[a.map].map((row,y)=>Array.from(row).map((code,x)=>`<button data-x="tile" data-xcoord="${x}" data-ycoord="${y}" ${['T','#'].includes(code)?'disabled':''} aria-label="${({N:'Cronista',C:'Cofre',E:'Enemigo',D:'Entrada a la cripta',P:'Salida al bosque',B:'Dragón',V:'Refugio'})[code]||'Camino'} ${x},${y}"></button>`).join('')).join('')}</div><div class="x-pad"><button class="x-btn" data-x="move" data-value="up" aria-label="Arriba">↑</button><button class="x-btn" data-x="move" data-value="left" aria-label="Izquierda">←</button><button class="x-btn" data-x="move" data-value="down" aria-label="Abajo">↓</button><button class="x-btn" data-x="move" data-value="right" aria-label="Derecha">→</button></div><div class="x-dialogue"><small>${a.npc&&note.startsWith('Cronista')?'EL CRONISTA':'CRÓNICA · WASD / FLECHAS'}</small><p>${escape(note)}</p></div></div>`;
   }
   function chooseQuestion(){
     const recent=new Set(state.recent);
@@ -218,22 +197,14 @@
     render();
   }
   function battleView(){
-    const t=ENEMIES[battle.enemyId],h=state.hero;
-    const question=battle.question;
-    const f=battle.feedback;
-    return `<div class="x-wrap">${hud()}<section class="x-panel"><div class="x-row x-space"><div><h2>⚔️ ${escape(t.name)}</h2><p class="x-muted">Combate por turnos · ${escape(t.type)}</p></div><span class="x-pill">${activeMode==='expedition'?'EXPEDICIÓN':'REINOS DE LA TINTA'}</span></div><div class="x-battle">
-    <div class="x-fighter"><img src="${heroImg()}" alt="Tu héroe"><strong>${escape(h.name)}</strong></div>
-    <div class="x-fighter"><img src="${enemyImg(battle.enemyId)}" alt="${escape(t.name)}"><strong>${escape(t.name)} · ${Math.max(0,battle.enemyHp)} / ${battle.enemyMax} PV</strong></div></div>
-    ${health(battle.enemyHp,battle.enemyMax,'x-enemy')}</section>
-    ${f?`<section class="x-panel"><h3>${battle.result==='win'?'🏆 ¡Victoria!':battle.result==='lose'?'💔 Has caído':'✨ Resultado del turno'}</h3><p class="x-note">${escape(f)}</p><button class="x-btn gold" style="margin-top:12px" data-x="next">${battle.result?'TERMINAR COMBATE':'SIGUIENTE TURNO'}</button></section>`:
-    question?`<section class="x-panel"><span class="x-pill">${escape(question.category)}</span><h3 style="margin:10px 0 12px">${escape(question.prompt)}</h3><div class="x-answers">${question.options.map((s,i)=>`<button class="x-btn" data-x="answer" data-value="${i}">${String.fromCharCode(65+i)} · ${escape(s)}</button>`).join('')}</div><p class="x-muted" style="margin-top:10px">Tu respuesta decidirá el efecto de la habilidad seleccionada.</p></section>`:
-    `<section class="x-panel"><h3>Elige tu acción</h3><p class="x-muted">Cada acción utiliza un desafío lingüístico. Defender no causa daño al rival.</p><div class="x-actions" style="margin-top:12px">
-    <button class="x-btn gold" data-x="combat-action" data-value="attack">⚔️ ATACAR</button>
-    <button class="x-btn" data-x="combat-action" data-value="guard">🛡️ DEFENDER</button>
-    <button class="x-btn" data-x="combat-action" data-value="spell" ${h.mana<3?'disabled':''}>✨ HECHIZO (3)</button>
-    <button class="x-btn" data-x="combat-action" data-value="potion" ${state.inventory.potions<1||h.hp>=h.maxHp?'disabled':''}>🧪 POCIÓN (${state.inventory.potions})</button>
-    </div></section>`}
-    <section class="x-panel x-note">${escape(note)}</section></div>`;
+    const t=ENEMIES[battle.enemyId],h=state.hero,q=battle.question,f=battle.feedback;
+    return `<div class="x-screen x-combat">${canvas()}${hud()}<div class="x-enemy-hud"><small>${escape(t.type).toUpperCase()}</small><strong>${escape(t.name)}</strong><span>${battle.enemyHp} / ${battle.enemyMax} PV</span>${health(battle.enemyHp,battle.enemyMax,'x-enemy')}</div><section class="x-command" aria-live="polite">${resolving?'<div class="x-resolving">La tinta cobra vida…</div>':f?`<div class="x-result"><small>${battle.result==='win'?'VICTORIA':battle.result==='lose'?'DERROTA':'CRÓNICA DEL TURNO'}</small><p>${escape(f)}</p><button class="x-btn gold" data-x="next">${battle.result?'CONTINUAR':'SIGUIENTE TURNO'} →</button></div>`:q?`<div class="x-rune"><small>${escape(q.category)} · ${battle.action==='spell'?'CONJURO':battle.action==='guard'?'BARRERA':'ATAQUE'}</small><h3>${escape(q.prompt)}</h3><div class="x-answers">${q.options.map((v,i)=>`<button class="x-btn" data-x="answer" data-value="${i}"><b>${String.fromCharCode(65+i)}</b> ${escape(v)}</button>`).join('')}</div></div>`:`<div class="x-actions">${[['attack','ATACAR','Golpe de acero'],['guard','DEFENDER','Escudo · +2 PM'],['spell','HECHIZO','3 PM'],['potion','POCIÓN',state.inventory.potions+' disponibles']].map(([id,label,desc])=>`<button class="x-btn" data-x="combat-action" data-value="${id}" ${id==='spell'&&h.mana<3||id==='potion'&&(state.inventory.potions<1||h.hp>=h.maxHp)?'disabled':''}><i class="x-action-icon ${id}"></i><strong>${label}</strong><small>${desc}</small></button>`).join('')}</div>`}</section></div>`;
+  }
+  function animateTurn(damage,counter){
+    battle.fx={damage,counter,action:battle.action,time:performance.now()};
+    resolving=true;render();
+    clearTimeout(sceneTimer);
+    sceneTimer=setTimeout(()=>{resolving=false;if(opened)render()},reducedMotion()?40:1150);
   }
   function applyAction(action){
     if(!battle||battle.feedback||battle.question)return;
@@ -245,9 +216,9 @@
       const heal=Math.min(34,h.maxHp-h.hp);
       h.hp+=heal;
       battle.action='potion';
-      retaliation(0);
+      const counter=retaliation(0);
       battle.feedback=`Recuperas ${heal} PV con una poción. ${battle.result==='lose'?'La criatura te ha derrotado.':'El enemigo aprovecha tu turno para atacar.'}`;
-      save();render();return;
+      save();animateTurn(0,counter);return;
     }
     battle.action=action;
     battle.question=chooseQuestion();
@@ -282,7 +253,7 @@
     extra=correct?(battle.action==='guard'?`Tu escudo bloquea ${Math.min(shield,ENEMIES[battle.enemyId].attack+4)} de daño. Recuperas energía.`:`Tu habilidad inflige ${dmg} PV de daño.`):'La habilidad no llega a activarse.';
     battle.feedback=`${correct?'¡Correcto!':'Respuesta incorrecta.'} ${q.why} ${extra} ${counter?'Recibes '+counter+' PV de daño.':'No recibes daño este turno.'}`;
     battle.question=null;
-    save();render();
+    save();animateTurn(dmg,counter);
   }
   function finishBattle(){
     if(!battle?.feedback)return;
@@ -319,6 +290,13 @@
     }
   }
   function chooseRoute(i){
+    if(resolving||battle||state.expedition.stage>=EXPEDITION.length)return;
+    const chosen=EXPEDITION[state.expedition.stage]?.[i];if(!chosen)return;
+    resolving=true;
+    window.BG2PixelScene?.travel(state.expedition.stage,i);
+    sceneTimer=setTimeout(()=>{resolving=false;if(opened)chooseRouteNow(i)},reducedMotion()?0:450);
+  }
+  function chooseRouteNow(i){
     if(battle||state.expedition.stage>=EXPEDITION.length)return;
     const option=EXPEDITION[state.expedition.stage]?.[i];
     if(!option)return;
@@ -332,6 +310,7 @@
       note='Consigues 28 monedas, 10 XP y la Pluma rúnica: tus hechizos infligen 8 PV adicionales.';
     }
     state.expedition.stage++;
+    encounter=option.event;
     save();render();
   }
   function startExpeditionAgain(){
@@ -342,7 +321,9 @@
     save();render();
   }
   function move(dx,dy){
-    if(battle||activeMode!=='adventure')return;
+    if(battle||activeMode!=='adventure'||performance.now()<movingUntil)return;
+    facing=dy<0?'up':dy>0?'down':dx<0?'left':'right';
+    movingUntil=performance.now()+160;
     const a=state.adventure,nx=a.x+dx,ny=a.y+dy;
     const from={map:a.map,x:a.x,y:a.y};
     const row=MAPS[a.map][ny],code=row?.[nx];
@@ -373,10 +354,16 @@
     if(!opened||!state)return;
     const view=$('bg2-extra-content');if(!view)return;
     view.innerHTML=!state.hero?classSelect():battle?battleView():activeMode==='expedition'?expedition():activeMode==='adventure'?adventure():modes();
+    if(encounter){
+      view.querySelector('.x-screen')?.insertAdjacentHTML('beforeend',`<section class="x-encounter"><small>${encounter==='rest'?'EL REFUGIO DEL CRONISTA':'BOTÍN RECUPERADO'}</small><h2>${encounter==='rest'?'Junto a la hoguera':'Un tesoro recuperado'}</h2><p>${escape(note)}</p><button class="x-btn gold" data-x="dismiss-encounter">CONTINUAR →</button></section>`);
+    }
+    const scene=$('bg2-pixel-scene');
+    window.BG2PixelScene?.mount(scene,battle?{type:'battle',hero:state.hero.classId,enemy:battle.enemyId,crypt:activeMode==='adventure'&&state.adventure.map==='cripta',fx:battle.fx}:activeMode==='adventure'&&state.hero?{type:'world',hero:state.hero.classId,...state.adventure,layout:MAPS[state.adventure.map],dir:facing}:activeMode==='expedition'&&state.hero?{type:'route',hero:state.hero.classId,stages:EXPEDITION,...state.expedition}:{type:'menu',hero:state.hero?.classId});
     const label=$('bg2-extra-saving');
     if(label)label.textContent=!currentStorage?.store?'Perfil aún no disponible: sin guardar':currentStorage.store===localStorage?'Guardado local por perfil (sin sincronizar)':'Guardado temporal de esta pestaña';
   }
   function retreat(){
+    clearTimeout(sceneTimer);resolving=false;encounter=null;
     if(!battle)return;
     if(battle.context.kind==='expedition')state.expedition.path.pop();
     if(battle.context.kind==='adventure'){
@@ -384,6 +371,7 @@
       if(from){state.adventure.map=from.map;state.adventure.x=from.x;state.adventure.y=from.y}
       else{state.adventure.map='bosque';state.adventure.x=3;state.adventure.y=4}
     }
+    clearTimeout(sceneTimer);resolving=false;
     battle=null;note='Te has retirado del combate sin recibir recompensas.';
     save();
   }
@@ -391,7 +379,9 @@
     const button=event.target.closest('[data-x]');
     if(!button)return;
     const action=button.dataset.x,value=button.dataset.value;
+    if(resolving&&action!=='close'&&action!=='go-modes')return;
     if(action==='close')return close();
+    if(action==='dismiss-encounter'){encounter=null;render();return}
     if(action==='go-modes'){retreat();activeMode='menu';note='Elige un modo para continuar.';render();return}
     if(action==='class'&&HEROES[value]&&!state.hero){
       const h=HEROES[value];const p=window.player||window.BG?.player||{};
@@ -409,7 +399,7 @@
     if(action==='tile'){moveTo(Number(button.dataset.xcoord),Number(button.dataset.ycoord));return}
   }
   function open(mode='menu'){
-    load();
+    load();encounter=null;
     const modal=root();
     opened=true;
     activeMode=['expedition','adventure'].includes(mode)?mode:'menu';
@@ -419,6 +409,7 @@
   }
   function close(){
     if(!opened)return;
+    clearTimeout(sceneTimer);resolving=false;window.BG2PixelScene?.stop();
     retreat();save();opened=false;
     $('bg2-extra-root')?.classList.remove('open');
     $('bg2-mode-archive')?.classList.remove('open');
