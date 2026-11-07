@@ -1,0 +1,472 @@
+(function battlegrafiaRpgModesV1() {
+  'use strict';
+  if (window.BG2RPGModesV1) return;
+  const $=id=>document.getElementById(id);
+  const ASSET='https://cdn.jsdelivr.net/gh/pablogarciablancov/BATTLEGRAFIA-FINAL@main/img/';
+  const HEROES={
+    guerrero:{name:'Guerrero',sprite:'guerrero',maxHp:110,attack:3,maxMana:6,desc:'Más vida y golpes contundentes.'},
+    mago:{name:'Mago',sprite:'mago',maxHp:88,attack:1,maxMana:10,desc:'Domina los conjuros de tinta.'},
+    explorador:{name:'Explorador',sprite:'ninja',maxHp:96,attack:2,maxMana:8,desc:'Un equilibrio entre velocidad y resistencia.'}
+  };
+  const ENEMIES={
+    tilde:{name:'Esdrulia',file:'esdrulia.webp',hp:65,attack:12,type:'acentuación',xp:18,gold:16},
+    sombra:{name:'Lexikon',file:'lexikon.webp',hp:70,attack:11,type:'léxico',xp:18,gold:15},
+    espectro:{name:'Espectro agudo',file:'sprite_espectro_agudo.webp',hp:80,attack:14,type:'acentuación',xp:23,gold:20},
+    draco:{name:'Diacritik',file:'diacritik.webp',hp:135,attack:16,type:'ortografía',xp:50,gold:45},
+    duende:{name:'Puntor',file:'puntor.webp',hp:65,attack:12,type:'puntuación',xp:18,gold:16},
+    guardia:{name:'Oxiton',file:'oxiton.webp',hp:93,attack:15,type:'gramática',xp:26,gold:25}
+  };
+  const QUESTIONS=[
+    ['Tildes','¿Qué palabra está correctamente acentuada?',['camion','camión','cámion'],1,'Camión es aguda terminada en -n y lleva tilde.'],
+    ['Tildes','¿Cuál es una palabra esdrújula?',['brújula','reloj','papel'],0,'Brújula es esdrújula: la sílaba tónica es la antepenúltima.'],
+    ['Tildes','Completa: «A mí ___ gusta leer».',['me','mé','mè'],0,'Me es un pronombre átono y no lleva tilde.'],
+    ['Tildes','¿Cuál lleva tilde diacrítica?',['tu (posesivo)','tú (pronombre)','ti (pronombre)'],1,'Tú, pronombre personal, lleva tilde para diferenciarse de tu.'],
+    ['Tildes','Elige la escritura correcta.',['arbol','árbol','arból'],1,'Árbol es llana terminada en consonante distinta de -n o -s.'],
+    ['Tildes','¿Qué afirmación sobre «café» es correcta?',['Es llana','Es aguda terminada en vocal','Es esdrújula'],1,'Café es aguda y termina en vocal: lleva tilde.'],
+    ['Ortografía','¿Qué oración está bien escrita?',['Voy haber una película.','Voy a ver una película.','Voy ha ver una película.'],1,'A ver expresa intención de mirar; haber es un verbo diferente.'],
+    ['Ortografía','¿Cuál es la forma correcta?',['tubo (de tener)','tuvo (de tener)','tubo (de tuvo)'],1,'Tuvo es la tercera persona de tener en pretérito perfecto simple.'],
+    ['Ortografía','Completa: «___ mucha gente en la plaza».',['Hav ia','Había','Abía'],1,'Había procede del verbo haber y empieza por h.'],
+    ['Ortografía','¿Qué palabra está bien escrita?',['excepción','escepción','exepción'],0,'Excepción se escribe con x y con c.'],
+    ['Ortografía','¿Qué opción utiliza correctamente «porque»?',['¿Porque vienes?','No fui porque estaba enfermo.','No sé porque vino.'],1,'Porque introduce una causa o explicación.'],
+    ['Ortografía','Elige la oración correcta.',['He hecho los deberes.','He echo los deberes.','E hecho los deberes.'],0,'He es de haber y hecho es el participio de hacer.'],
+    ['Gramática','En «El gato duerme», ¿qué palabra es un sustantivo?',['El','gato','duerme'],1,'Gato nombra un ser; es un sustantivo.'],
+    ['Gramática','¿Qué palabra funciona como adjetivo?',['rápido en «un tren rápido»','corre en «corre rápido»','el en «el tren»'],0,'Rápido modifica al nombre tren y funciona como adjetivo.'],
+    ['Gramática','¿Cuál de estas palabras es un determinante?',['ella','aquellos','correr'],1,'Aquellos puede acompañar al nombre y determinarlo.'],
+    ['Gramática','¿Cuál de estas formas es infinitivo?',['cantando','canté','cantar'],2,'El infinitivo es una forma no personal del verbo: cantar.'],
+    ['Gramática','En «Nosotros estudiamos», ¿cuál es el pronombre?',['Nosotros','estudiamos','ninguno'],0,'Nosotros es un pronombre personal.'],
+    ['Gramática','¿Cuál de estas palabras es una preposición?',['desde','muy','pero'],0,'Desde es una preposición. Muy es adverbio y pero conjunción.'],
+    ['Literatura','¿Qué subgénero narrativo suele dejar una enseñanza moral?',['fábula','epopeya','leyenda'],0,'La fábula normalmente concluye con una moraleja.'],
+    ['Literatura','¿Cuál es un subgénero teatral?',['elegía','tragedia','oda'],1,'La tragedia es un subgénero teatral.'],
+    ['Literatura','«Tus ojos son dos luceros» es un ejemplo de...',['metáfora','onomatopeya','polisíndeton'],0,'La metáfora identifica un elemento real con otro figurado.'],
+    ['Literatura','«Te lo he dicho mil veces» es...',['hipérbole','antítesis','aliteración'],0,'La hipérbole exagera deliberadamente una realidad.'],
+    ['Literatura','¿Qué figura repite palabras al inicio de versos?',['anáfora','metonimia','hipérbaton'],0,'La anáfora consiste en repetir una o varias palabras al comienzo.'],
+    ['Literatura','¿Qué subgénero lírico expresa dolor o lamento?',['elegía','comedia','mito'],0,'La elegía expresa habitualmente tristeza o dolor ante una pérdida.'],
+    ['Literatura','«El viento susurró» contiene...',['personificación','enumeración','asíndeton'],0,'Atribuir al viento una acción humana es personificación.'],
+    ['Ortografía','¿Qué secuencia está escrita correctamente?',['vaca, ventana, vuelo','baca, bentana, buelo','vaca, bentana, buelo'],0,'Vaca, ventana y vuelo respetan las grafías correctas.'],
+    ['Tildes','¿Qué palabra no necesita tilde?',['joven','fácil','lápiz'],0,'Joven es llana terminada en -n.'],
+    ['Gramática','En «La niña canta», ¿cuál es el verbo?',['La','niña','canta'],2,'Canta expresa la acción y es la forma verbal.'],
+    ['Literatura','¿Cuál es un subgénero narrativo tradicional?',['cantar de gesta','drama','canción'],0,'El cantar de gesta es un relato épico en verso.']
+  ].map((q,i)=>({id:i,category:q[0],prompt:q[1],options:q[2],answer:q[3],why:q[4]}));
+  const MAPS={
+    bosque:[
+      'TTTTTTTTTT',
+      'T..C..E..T',
+      'T.TTT..T.T',
+      'T.N..E...T',
+      'T..V...T.T',
+      'T....D...T',
+      'TTTTTTTTTT'
+    ],
+    cripta:[
+      '##########',
+      '#...#...B#',
+      '#.#.E.#..#',
+      '#..C...#.#',
+      '#.....E..#',
+      '#..P.....#',
+      '##########'
+    ]
+  };
+  const EXPEDITION=[
+    [
+      {id:'tilde',label:'Sendero de las tildes',icon:'🌲',desc:'Un esbirro guarda la vereda. Combate directo.',enemy:'tilde'},
+      {id:'sombra',label:'Cueva de las palabras',icon:'🕯️',desc:'Un Lexikon acecha entre las rocas.',enemy:'sombra'}
+    ],
+    [
+      {id:'chest',label:'Cofre del cronista',icon:'🎁',desc:'Encuentra monedas y una poción.',event:'chest'},
+      {id:'duende',label:'Cruce sombrío',icon:'⚔️',desc:'Más experiencia a cambio de un combate.',enemy:'duende'}
+    ],
+    [
+      {id:'rest',label:'Hoguera del refugio',icon:'🔥',desc:'Restaura vida y energía mágica.',event:'rest'},
+      {id:'espectro',label:'Ruinas encantadas',icon:'👻',desc:'Enfrenta a un enemigo más poderoso.',enemy:'espectro'}
+    ],
+    [
+      {id:'treasure',label:'Alijo de un explorador',icon:'💎',desc:'Recompensa segura antes del jefe final.',event:'treasure'},
+      {id:'guardia',label:'Guardianes del umbral',icon:'🛡️',desc:'Combate de élite con mayor recompensa.',enemy:'guardia'}
+    ],
+    [
+      {id:'boss',label:'El dragón de la tilde',icon:'🐉',desc:'Derrota a Diacritik y completa la expedición.',enemy:'draco'}
+    ]
+  ];
+  let state=null;
+  let currentStorage=null;
+  let opened=false;
+  let activeMode='expedition';
+  let battle=null;
+  let note='Elige tu próximo destino.';
+  const sessionKey='bg2_rpg_extra_v1_session';
+  const hash=s=>{let n=2166136261;for(let i=0;i<s.length;i++){n^=s.charCodeAt(i);n=Math.imul(n,16777619)}return (n>>>0).toString(36)};
+  function storageInfo(){
+    const embedded=!!window.__LENGUARCADE_EMBEDDED;
+    const verified=!!window.__LENGUARCADE_PROFILE_READY && !!window.__LENGUARCADE_PROFILE_KEY;
+    if(verified)return {store:localStorage,key:'bg2_rpg_extra_v1_user_'+hash(String(window.__LENGUARCADE_PROFILE_KEY))};
+    if(embedded)return {store:sessionStorage,key:sessionKey};
+    return {store:sessionStorage,key:sessionKey};
+  }
+  function fresh(){
+    return {
+      version:1,
+      hero:null,
+      inventory:{potions:2,relics:[]},
+      mastery:{},recent:[],
+      expedition:{stage:0,completed:0,path:[]},
+      adventure:{map:'bosque',x:3,y:4,cleared:{},npc:false,boss:false},
+      totalBattles:0
+    };
+  }
+  function load(){
+    currentStorage=storageInfo();
+    try{
+      const raw=JSON.parse(currentStorage.store.getItem(currentStorage.key)||'null');
+      state=raw && raw.version===1 && raw.expedition && raw.adventure && raw.inventory && raw.mastery && Array.isArray(raw.recent) ? raw : fresh();
+    }catch(e){state=fresh()}
+    if(!state.expedition.path)state.expedition.path=[];
+    if(!state.adventure.cleared)state.adventure.cleared={};
+    battle=null;
+  }
+  function save(){
+    if(!state||!currentStorage)return;
+    try{currentStorage.store.setItem(currentStorage.key,JSON.stringify(state))}catch(e){console.warn('[Battlegrafía RPG] No se pudo guardar el prototipo:',e)}
+    refreshCards();
+  }
+  const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;',"'":'&#39;'}[c]));
+  const heroImg=()=>ASSET+'heros/sprite_hero_'+(HEROES[state?.hero?.classId]?.sprite||'mago')+'.webp';
+  const enemyImg=enemy=>ASSET+'monsters/'+ENEMIES[enemy].file;
+  const health=(value,max,cls='')=>`<div class="x-bar ${cls}"><i style="width:${Math.max(0,Math.min(100,Math.round(value/Math.max(1,max)*100)))}%"></i></div>`;
+  function addCss(){
+    if($('bg2-extra-css'))return;
+    const el=document.createElement('link');el.id='bg2-extra-css';el.rel='stylesheet';el.href='./rpg-modes-v1.css?v=1';document.head.appendChild(el);
+  }
+  function root(){
+    let node=$('bg2-extra-root');
+    if(node)return node;
+    node=document.createElement('section');
+    node.id='bg2-extra-root';
+    node.setAttribute('role','dialog');node.setAttribute('aria-modal','true');node.setAttribute('aria-label','Nuevos modos RPG de Battlegrafía');
+    node.innerHTML=`<div class="x-top"><div><div class="x-sub">BATTLEGRAFÍA · NUEVAS CRÓNICAS</div><div class="x-brand">LAS CRÓNICAS DE LA TINTA</div></div><div class="x-row"><button class="x-btn" data-x="go-modes">MODOS</button><button class="x-btn danger" data-x="close" aria-label="Cerrar y volver a Battlegrafía">✕ SALIR</button></div></div><main class="x-main" id="bg2-extra-content"></main><div class="x-bottom"><span>PROTOTIPO JUGABLE · SIN RECOMPENSAS OFICIALES</span><span id="bg2-extra-saving">Progreso independiente</span></div>`;
+    document.body.appendChild(node);
+    node.addEventListener('click',handleClick);
+    return node;
+  }
+  function hud(){
+    const h=state.hero;
+    return `<section class="x-panel x-hud">
+      <img class="x-avatar" src="${heroImg()}" alt="Héroe ${escape(h.classId)}">
+      <div><div class="x-row"><strong>${escape(h.name)}</strong><span class="x-pill">${HEROES[h.classId].name} · nivel ${h.level}</span></div><div class="x-muted">Vida ${h.hp}/${h.maxHp} · Energía ${h.mana}/${h.maxMana}</div>${health(h.hp,h.maxHp)}${health(h.mana,h.maxMana,'x-mp')}</div>
+      <div class="x-hud-extra"><strong>🪙 ${h.gold}</strong><div class="x-muted">✦ ${h.xp} XP del prototipo<br>🧪 ${state.inventory.potions} pociones</div></div>
+    </section>`;
+  }
+  function classSelect(){
+    return `<div class="x-wrap"><section class="x-panel"><h2>Forja a tu héroe</h2><p>Elige una clase para los dos modos. Sus habilidades, inventario y progresión serán compartidos.</p></section><section class="x-grid3">${Object.entries(HEROES).map(([id,h])=>`<button class="x-choice x-class" data-x="class" data-value="${id}"><img src="${ASSET}heros/sprite_hero_${h.sprite}.webp" alt=""><strong>${h.name}</strong><span>${h.desc}</span><span>❤ ${h.maxHp} · ✨ ${h.maxMana}</span></button>`).join('')}</section></div>`;
+  }
+  function modes(){
+    return `<div class="x-wrap">${hud()}<section class="x-panel"><h2>Dos caminos, un solo héroe</h2><p class="x-muted">Los modos comparten nivel, monedas, pociones y conocimientos. El avance se guarda aparte del Battlegrafía oficial.</p></section><div class="x-grid2">
+    <button class="x-choice" data-x="mode" data-value="expedition"><b>⚔️</b><strong>EXPEDICIONES</strong><span>Elige rutas, afronta encuentros por turnos y derrota al jefe de una expedición de cinco etapas.</span><small>Expediciones completadas: ${state.expedition.completed}</small></button>
+    <button class="x-choice" data-x="mode" data-value="adventure"><b>🗺️</b><strong>REINOS DE LA TINTA</strong><span>Explora el bosque, habla con el cronista, encuentra cofres y entra en la cripta del dragón.</span><small>${state.adventure.boss?'Jefe derrotado':'Aventura en curso'}</small></button></div></div>`;
+  }
+  function expedition(){
+    const e=state.expedition;
+    const complete=e.stage>=EXPEDITION.length;
+    return `<div class="x-wrap">${hud()}<section class="x-panel"><div class="x-row x-space"><div><h2>⚔️ Expediciones</h2><p class="x-muted">Una aventura corta con rutas y decisiones: riesgo, recompensa y estrategia.</p></div><button class="x-btn" data-x="mode" data-value="adventure">IR AL MAPA</button></div></section>
+    <div class="x-steps">${EXPEDITION.map((_,i)=>`<div class="x-step ${i<e.stage?'done':i===e.stage?'current':''}">${i<e.stage?'✓ ':''}${i+1}${i===4?' · JEFE':''}</div>`).join('')}</div>
+    ${complete?`<section class="x-panel"><h2>🏆 Expedición completada</h2><p>¡Diacritik ha caído! Has completado ${e.completed} expedición(es). Puedes repetirla para practicar y mejorar a tu héroe.</p><div class="x-row" style="margin-top:12px"><button class="x-btn gold" data-x="restart-expedition">NUEVA EXPEDICIÓN</button></div></section>`:
+    `<section class="x-panel"><h3>${['El primer cruce','La encrucijada','El descanso','El último obstáculo','La guarida del dragón'][e.stage]}</h3><p class="x-muted">Elige cómo continuar. Tu decisión modifica los encuentros y recompensas.</p></section>
+    <div class="x-grid2">${EXPEDITION[e.stage].map((c,i)=>`<button class="x-choice" data-x="choice" data-value="${i}"><b>${c.icon}</b><strong>${c.label}</strong><span>${c.desc}</span><span>${c.enemy?'⚔️ Combate':'✦ Evento'}</span></button>`).join('')}</div>`}
+    <section class="x-panel x-note">${escape(note)}</section></div>`;
+  }
+  function adventure(){
+    const a=state.adventure,layout=MAPS[a.map];
+    const icon={V:'🏠',N:'📜',C:'🎁',E:'👾',D:'🚪',P:'🚪',B:'🐉'};
+    const cells=layout.map((row,y)=>Array.from(row).map((code,x)=>{
+      const isPlayer=x===a.x&&y===a.y;
+      const id=a.map+':'+x+':'+y;
+      const completed=!!a.cleared[id];
+      const walkable=!['T','#'].includes(code);
+      const adjacent=Math.abs(x-a.x)+Math.abs(y-a.y)===1;
+      const character=isPlayer?`<img src="${heroImg()}" alt="Tu héroe">`:((code==='E'||code==='C'||code==='B')&&completed?'':(icon[code]||''));
+      const cls=['x-tile',walkable?(a.map==='cripta'?'dungeon':code==='.'?'path':'special'):code==='T'?'wall':'rock',isPlayer?'player':'',adjacent&&walkable?'adjacent':''].filter(Boolean).join(' ');
+      return `<button class="${cls}" data-x="tile" data-xcoord="${x}" data-ycoord="${y}" ${walkable?'':'disabled'} aria-label="${isPlayer?'Tu posición':code==='E'?'Enemigo':code==='B'?'Jefe':code==='C'?'Cofre':'Casilla'}">${character}</button>`;
+    }).join('')).join('');
+    return `<div class="x-wrap">${hud()}<section class="x-panel"><div class="x-row x-space"><div><h2>🗺️ Reinos de la Tinta</h2><p class="x-muted">${a.map==='bosque'?'El bosque de las tildes':'La cripta del Dragón'} · Mueve al héroe con WASD, flechas o los botones.</p></div><button class="x-btn" data-x="mode" data-value="expedition">IR A EXPEDICIONES</button></div></section>
+    <div class="x-world-layout"><section class="x-panel"><div class="x-world" role="group" aria-label="Mapa explorable de diez columnas">${cells}</div><div class="x-pad"><span></span><button class="x-btn" data-x="move" data-value="up" aria-label="Arriba">▲</button><span></span><button class="x-btn" data-x="move" data-value="left" aria-label="Izquierda">◀</button><span class="x-center">✥</span><button class="x-btn" data-x="move" data-value="right" aria-label="Derecha">▶</button><span></span><button class="x-btn" data-x="move" data-value="down" aria-label="Abajo">▼</button><span></span></div></section>
+    <div class="x-wrap"><section class="x-panel"><h3>📖 Tu misión</h3><p>${a.boss?'¡Has derrotado a Diacritik! Puedes seguir explorando.':'Encuentra al cronista 📜, supera los enemigos 👾 y entra en la cripta 🚪 para enfrentarte al dragón 🐉.'}</p><p class="x-muted" style="margin-top:8px">Cofres: 🎁 · Refugio: 🏠 · Enemigos vencidos permanecen despejados.</p></section><section class="x-panel"><h3>📍 Crónica</h3><p class="x-note">${escape(note)}</p></section><section class="x-panel"><h3>🎒 Mochila</h3><div class="x-inventory"><span>🧪 Pociones ${state.inventory.potions}</span><span>💰 ${state.hero.gold} monedas</span><span>⭐ Nivel ${state.hero.level}</span></div></section></div></div></div>`;
+  }
+  function chooseQuestion(){
+    const recent=new Set(state.recent);
+    const available=QUESTIONS.filter(q=>!recent.has(q.id));
+    const pool=available.length?available:QUESTIONS;
+    const weight=q=>{
+      const v=state.mastery[q.category]||{correct:0,wrong:0};
+      return 1+Math.min(4,v.wrong/(v.correct+1));
+    };
+    const total=pool.reduce((n,q)=>n+weight(q),0);
+    let r=Math.random()*total;
+    const question=pool.find(q=>(r-=weight(q))<=0)||pool[pool.length-1];
+    state.recent.push(question.id);
+    if(state.recent.length>12)state.recent.shift();
+    return question;
+  }
+  function startBattle(enemyId,context){
+    const t=ENEMIES[enemyId];
+    if(!t)return;
+    battle={enemyId,enemyHp:t.hp,enemyMax:t.hp,context,action:null,question:null,feedback:null,result:null};
+    note='¡'+t.name+' te corta el paso!';
+    render();
+  }
+  function battleView(){
+    const t=ENEMIES[battle.enemyId],h=state.hero;
+    const question=battle.question;
+    const f=battle.feedback;
+    return `<div class="x-wrap">${hud()}<section class="x-panel"><div class="x-row x-space"><div><h2>⚔️ ${escape(t.name)}</h2><p class="x-muted">Combate por turnos · ${escape(t.type)}</p></div><span class="x-pill">${activeMode==='expedition'?'EXPEDICIÓN':'REINOS DE LA TINTA'}</span></div><div class="x-battle">
+    <div class="x-fighter"><img src="${heroImg()}" alt="Tu héroe"><strong>${escape(h.name)}</strong></div>
+    <div class="x-fighter"><img src="${enemyImg(battle.enemyId)}" alt="${escape(t.name)}"><strong>${escape(t.name)} · ${Math.max(0,battle.enemyHp)} / ${battle.enemyMax} PV</strong></div></div>
+    ${health(battle.enemyHp,battle.enemyMax,'x-enemy')}</section>
+    ${f?`<section class="x-panel"><h3>${battle.result==='win'?'🏆 ¡Victoria!':battle.result==='lose'?'💔 Has caído':'✨ Resultado del turno'}</h3><p class="x-note">${escape(f)}</p><button class="x-btn gold" style="margin-top:12px" data-x="next">${battle.result?'TERMINAR COMBATE':'SIGUIENTE TURNO'}</button></section>`:
+    question?`<section class="x-panel"><span class="x-pill">${escape(question.category)}</span><h3 style="margin:10px 0 12px">${escape(question.prompt)}</h3><div class="x-answers">${question.options.map((s,i)=>`<button class="x-btn" data-x="answer" data-value="${i}">${String.fromCharCode(65+i)} · ${escape(s)}</button>`).join('')}</div><p class="x-muted" style="margin-top:10px">Tu respuesta decidirá el efecto de la habilidad seleccionada.</p></section>`:
+    `<section class="x-panel"><h3>Elige tu acción</h3><p class="x-muted">Cada acción utiliza un desafío lingüístico. Defender no causa daño al rival.</p><div class="x-actions" style="margin-top:12px">
+    <button class="x-btn gold" data-x="combat-action" data-value="attack">⚔️ ATACAR</button>
+    <button class="x-btn" data-x="combat-action" data-value="guard">🛡️ DEFENDER</button>
+    <button class="x-btn" data-x="combat-action" data-value="spell" ${h.mana<3?'disabled':''}>✨ HECHIZO (3)</button>
+    <button class="x-btn" data-x="combat-action" data-value="potion" ${state.inventory.potions<1||h.hp>=h.maxHp?'disabled':''}>🧪 POCIÓN (${state.inventory.potions})</button>
+    </div></section>`}
+    <section class="x-panel x-note">${escape(note)}</section></div>`;
+  }
+  function applyAction(action){
+    if(!battle||battle.feedback||battle.question)return;
+    const h=state.hero;
+    if(action==='spell'&&h.mana<3)return;
+    if(action==='potion'){
+      if(state.inventory.potions<1||h.hp>=h.maxHp)return;
+      state.inventory.potions--;
+      const heal=Math.min(34,h.maxHp-h.hp);
+      h.hp+=heal;
+      battle.action='potion';
+      retaliation(0);
+      battle.feedback=`Recuperas ${heal} PV con una poción. ${battle.result==='lose'?'La criatura te ha derrotado.':'El enemigo aprovecha tu turno para atacar.'}`;
+      save();render();return;
+    }
+    battle.action=action;
+    battle.question=chooseQuestion();
+    save();render();
+  }
+  function retaliation(shield){
+    const enemy=ENEMIES[battle.enemyId];
+    const damage=Math.max(0,enemy.attack+Math.floor(Math.random()*5)-shield);
+    const h=state.hero;
+    h.hp=Math.max(0,h.hp-damage);
+    if(h.hp===0)battle.result='lose';
+    return damage;
+  }
+  function answer(index){
+    if(!battle?.question||battle.feedback)return;
+    const q=battle.question;
+    if(!Number.isInteger(index)||index<0||index>=q.options.length)return;
+    const correct=q.answer===index;
+    const record=state.mastery[q.category]||(state.mastery[q.category]={correct:0,wrong:0});
+    record[correct?'correct':'wrong']++;
+    const h=state.hero;
+    let dmg=0,shield=0,extra='';
+    if(correct){
+      if(battle.action==='attack')dmg=18+h.attack*3+h.level*2;
+      if(battle.action==='spell'){h.mana-=3;dmg=31+h.attack*2+h.level*2}
+      if(battle.action==='guard'){shield=19+h.level*2;h.mana=Math.min(h.maxMana,h.mana+2)}
+    }else if(battle.action==='spell'){h.mana=Math.max(0,h.mana-1)}
+    battle.enemyHp=Math.max(0,battle.enemyHp-dmg);
+    if(battle.enemyHp===0)battle.result='win';
+    let counter=0;
+    if(!battle.result)counter=retaliation(shield);
+    extra=correct?(battle.action==='guard'?`Tu escudo bloquea ${Math.min(shield,ENEMIES[battle.enemyId].attack+4)} de daño. Recuperas energía.`:`Tu habilidad inflige ${dmg} PV de daño.`):'La habilidad no llega a activarse.';
+    battle.feedback=`${correct?'¡Correcto!':'Respuesta incorrecta.'} ${q.why} ${extra} ${counter?'Recibes '+counter+' PV de daño.':'No recibes daño este turno.'}`;
+    battle.question=null;
+    save();render();
+  }
+  function finishBattle(){
+    if(!battle?.feedback)return;
+    if(!battle.result){battle.feedback=null;battle.action=null;render();return}
+    const won=battle.result==='win',t=ENEMIES[battle.enemyId],context=battle.context;
+    if(won){
+      gain(t.xp,t.gold);
+      state.totalBattles++;
+      if(context.kind==='expedition'){
+        state.expedition.stage=Math.min(EXPEDITION.length,state.expedition.stage+1);
+        if(state.expedition.stage===EXPEDITION.length){
+          state.expedition.completed++;
+          note='¡Has liberado la guarida y completado una expedición!';
+        }else note=`¡${t.name} derrotado! Has conseguido ${t.xp} XP y ${t.gold} monedas del prototipo.`;
+      }else{
+        state.adventure.cleared[context.id]=true;
+        if(context.boss){state.adventure.boss=true;note='¡Diacritik ha sido derrotado! La cripta vuelve a estar en paz.'}
+        else note=`Has derrotado a ${t.name} y el camino queda despejado.`;
+      }
+    }else{
+      state.hero.hp=state.hero.maxHp;
+      state.hero.mana=state.hero.maxMana;
+      if(context.kind==='expedition'){state.expedition.stage=0;state.expedition.path=[];note='La expedición ha terminado. Descansas y puedes intentarla de nuevo.'}
+      else{state.adventure.map='bosque';state.adventure.x=3;state.adventure.y=4;note='Has regresado al refugio. Conservas el progreso conseguido.'}
+    }
+    battle=null;save();render();
+  }
+  function gain(xp,gold){
+    const h=state.hero;
+    h.gold+=gold;h.xp+=xp;
+    while(h.xp>=h.level*65&&h.level<30){
+      h.xp-=h.level*65;h.level++;
+      h.maxHp+=8;h.hp=Math.min(h.maxHp,h.hp+18);h.maxMana+=1;h.mana=Math.min(h.maxMana,h.mana+2);
+    }
+  }
+  function chooseRoute(i){
+    if(battle||state.expedition.stage>=EXPEDITION.length)return;
+    const option=EXPEDITION[state.expedition.stage]?.[i];
+    if(!option)return;
+    state.expedition.path.push(option.id);
+    if(option.enemy){startBattle(option.enemy,{kind:'expedition'});save();return}
+    if(option.event==='chest'){state.inventory.potions++;gain(0,22);note='Encuentras una poción y 22 monedas.'}
+    if(option.event==='rest'){state.hero.hp=Math.min(state.hero.maxHp,state.hero.hp+40);state.hero.mana=state.hero.maxMana;note='La hoguera restaura 40 PV y toda tu energía.'}
+    if(option.event==='treasure'){gain(10,28);note='Consigues 28 monedas y 10 puntos de experiencia del prototipo.'}
+    state.expedition.stage++;
+    save();render();
+  }
+  function startExpeditionAgain(){
+    if(state.expedition.stage<EXPEDITION.length)return;
+    state.expedition.stage=0;state.expedition.path=[];
+    state.hero.hp=state.hero.maxHp;state.hero.mana=state.hero.maxMana;
+    note='Una nueva expedición comienza.';
+    save();render();
+  }
+  function move(dx,dy){
+    if(battle||activeMode!=='adventure')return;
+    const a=state.adventure,nx=a.x+dx,ny=a.y+dy;
+    const row=MAPS[a.map][ny],code=row?.[nx];
+    if(!code||code==='T'||code==='#'){note='Un obstáculo impide el paso.';render();return}
+    a.x=nx;a.y=ny;
+    const id=a.map+':'+nx+':'+ny;
+    if(code==='N'){a.npc=true;note='Cronista: «Los conocimientos son tu mejor arma. Busca la cripta en el sur y salva el bosque».'}
+    else if(code==='V'){a.map='bosque';a.x=3;a.y=4;state.hero.hp=state.hero.maxHp;state.hero.mana=state.hero.maxMana;note='Descansas en el refugio y recuperas toda la vida.'}
+    else if(code==='D'){a.map='cripta';a.x=3;a.y=5;note='Has entrado en la cripta. ¡Cuidado con los guardianes!'}
+    else if(code==='P'){a.map='bosque';a.x=5;a.y=5;note='Regresas al bosque con tus hallazgos.'}
+    else if(code==='C'&&!a.cleared[id]){a.cleared[id]=true;state.inventory.potions++;gain(0,18);note='¡Cofre encontrado! Una poción y 18 monedas.'}
+    else if(code==='E'&&!a.cleared[id]){startBattle(a.map==='cripta'?'guardia':'tilde',{kind:'adventure',id});save();return}
+    else if(code==='B'&&!a.cleared[id]){startBattle('draco',{kind:'adventure',id,boss:true});save();return}
+    else note=a.map==='cripta'?'Los muros guardan antiguas palabras olvidadas.':'Las hojas susurran historias del reino.';
+    save();render();
+  }
+  function moveTo(x,y){
+    const a=state.adventure;
+    const dist=Math.abs(x-a.x)+Math.abs(y-a.y);
+    if(dist!==1){note='Selecciona una casilla contigua o utiliza las flechas.';render();return}
+    move(x-a.x,y-a.y);
+  }
+  function render(){
+    if(!opened||!state)return;
+    const view=$('bg2-extra-content');if(!view)return;
+    view.innerHTML=!state.hero?classSelect():battle?battleView():activeMode==='expedition'?expedition():activeMode==='adventure'?adventure():modes();
+    const label=$('bg2-extra-saving');
+    if(label)label.textContent=currentStorage?.store===localStorage?'Guardado local por perfil (sin sincronizar)':'Guardado temporal de esta pestaña';
+  }
+  function handleClick(event){
+    const button=event.target.closest('[data-x]');
+    if(!button)return;
+    const action=button.dataset.x,value=button.dataset.value;
+    if(action==='close')return close();
+    if(action==='go-modes'){battle=null;activeMode='menu';note='Elige un modo para continuar.';render();return}
+    if(action==='class'&&HEROES[value]&&!state.hero){
+      const h=HEROES[value];const p=window.player||window.BG?.player||{};
+      state.hero={classId:value,name:String(p.name||'Aventurero').slice(0,30),level:1,xp:0,gold:0,attack:h.attack,maxHp:h.maxHp,hp:h.maxHp,maxMana:h.maxMana,mana:h.maxMana};
+      note='Tu héroe está preparado. ¡Comienza la aventura!';save();render();return;
+    }
+    if(!state?.hero)return;
+    if(action==='mode'&&['expedition','adventure'].includes(value)){battle=null;activeMode=value;note=value==='expedition'?'Decide tu ruta para empezar.':'¡Explora el reino!';render();return}
+    if(action==='choice'){chooseRoute(Number(value));return}
+    if(action==='combat-action'){applyAction(value);return}
+    if(action==='answer'){answer(Number(value));return}
+    if(action==='next'){finishBattle();return}
+    if(action==='restart-expedition'){startExpeditionAgain();return}
+    if(action==='move'){const dirs={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};if(dirs[value])move(...dirs[value]);return}
+    if(action==='tile'){moveTo(Number(button.dataset.xcoord),Number(button.dataset.ycoord));return}
+  }
+  function open(mode='menu'){
+    load();
+    const modal=root();
+    opened=true;
+    activeMode=['expedition','adventure'].includes(mode)?mode:'menu';
+    note='El conocimiento será tu mejor arma.';
+    modal.classList.add('open');
+    render();
+  }
+  function close(){
+    if(!opened)return;
+    save();opened=false;battle=null;
+    $('bg2-extra-root')?.classList.remove('open');
+    $('bg2-mode-archive')?.classList.remove('open');
+  }
+  function refreshCards(){
+    for(const mode of ['expedition','adventure']){
+      const el=$('bg2-extra-status-'+mode);
+      if(el&&state){
+        el.textContent=mode==='expedition'?`${state.expedition.completed} completadas · Etapa ${Math.min(state.expedition.stage+1,5)}/5`:state.adventure.boss?'Dragón derrotado':'Exploración disponible';
+      }
+    }
+  }
+  function appendModeCards(){
+    const grid=$('bg2-mode-archive-grid');
+    if(!grid||grid.querySelector('[data-bg2-extra-launch]'))return;
+    for(const [mode,label,emoji,desc] of [
+      ['expedition','EXPEDICIONES','⚔️','Rutas alternativas, combates por turnos y jefe final.'],
+      ['adventure','REINOS DE LA TINTA','🗺️','Explora un mapa, encuentra secretos y supera una mazmorra.']
+    ]){
+      const card=document.createElement('article');
+      card.className='bg2-extra-mode-card';
+      card.innerHTML=`<small>NUEVO MODO RPG · PROTOTIPO</small><h3>${emoji} ${label}</h3><p>${desc}</p><small id="bg2-extra-status-${mode}">Progreso independiente</small><button type="button" data-bg2-extra-launch="${mode}">JUGAR</button>`;
+      grid.appendChild(card);
+    }
+    grid.addEventListener('click',event=>{
+      const button=event.target.closest('[data-bg2-extra-launch]');
+      if(button)open(button.dataset.bg2ExtraLaunch);
+    },{once:false});
+  }
+  let archiveObserved=false;
+  function watchArchive(){
+    const grid=$('bg2-mode-archive-grid');
+    if(!grid||archiveObserved)return false;
+    archiveObserved=true;
+    const observer=new MutationObserver(()=>{
+      if(!grid.querySelector('[data-bg2-extra-launch]'))requestAnimationFrame(appendModeCards);
+    });
+    observer.observe(grid,{childList:true});
+    appendModeCards();
+    return true;
+  }
+  function mountHubButton(){
+    const hub=$('bg2-rpg-hub');
+    const nav=hub?.querySelector('.bg2-rpg-menu');
+    if(!nav||hub.querySelector('[data-bg2-extra-hub]'))return false;
+    const b=document.createElement('button');
+    b.type='button';b.className='bg2-rpg-action bg2-extra-hub-button';
+    b.dataset.bg2ExtraHub='1';
+    b.innerHTML='<span class="bg2-cursor">⚔</span><span><b>NUEVOS MODOS RPG</b><small>Expediciones y Reinos de la Tinta · prototipo jugable</small></span>';
+    b.addEventListener('click',()=>open('menu'));
+    nav.insertBefore(b,nav.children[1]||null);
+    return true;
+  }
+  function onKey(event){
+    if(!opened)return;
+    if(event.key==='Escape'){event.preventDefault();close();return}
+    if(battle||activeMode!=='adventure'||!state?.hero)return;
+    const dirs={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],w:[0,-1],W:[0,-1],s:[0,1],S:[0,1],a:[-1,0],A:[-1,0],d:[1,0],D:[1,0]};
+    if(dirs[event.key]){event.preventDefault();move(...dirs[event.key])}
+  }
+  function boot(){
+    addCss();root();
+    document.addEventListener('keydown',onKey);
+    mountHubButton();
+    watchArchive();
+    const observer=new MutationObserver(()=>{
+      if(!$('bg2-rpg-hub')||!$('bg2-mode-archive-grid')){mountHubButton();watchArchive()}
+      else observer.disconnect();
+    });
+    observer.observe(document.body,{childList:true,subtree:true});
+  }
+  window.BG2RPGModesV1={open,close,questionCount:QUESTIONS.length,modeIds:['expedition','adventure']};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
+})();
