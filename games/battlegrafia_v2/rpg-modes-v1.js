@@ -122,6 +122,7 @@
       state=raw && raw.version===1 && raw.expedition && raw.adventure && raw.inventory && raw.mastery && Array.isArray(raw.recent) ? raw : fresh();
     }catch(e){state=fresh()}
     if(!state.expedition.path)state.expedition.path=[];
+    if(!Array.isArray(state.inventory.relics))state.inventory.relics=[];
     if(!state.adventure.cleared)state.adventure.cleared={};
     battle=null;
   }
@@ -154,7 +155,7 @@
     return `<section class="x-panel x-hud">
       <img class="x-avatar" src="${heroImg()}" alt="Héroe ${escape(h.classId)}">
       <div><div class="x-row"><strong>${escape(h.name)}</strong><span class="x-pill">${HEROES[h.classId].name} · nivel ${h.level}</span></div><div class="x-muted">Vida ${h.hp}/${h.maxHp} · Energía ${h.mana}/${h.maxMana}</div>${health(h.hp,h.maxHp)}${health(h.mana,h.maxMana,'x-mp')}</div>
-      <div class="x-hud-extra"><strong>🪙 ${h.gold}</strong><div class="x-muted">✦ ${h.xp} XP del prototipo<br>🧪 ${state.inventory.potions} pociones</div></div>
+      <div class="x-hud-extra"><strong>🪙 ${h.gold}</strong><div class="x-muted">✦ ${h.xp} XP del prototipo<br>🧪 ${state.inventory.potions} pociones<br>⚜️ ${state.inventory.relics.length} reliquias</div></div>
     </section>`;
   }
   function classSelect(){
@@ -190,7 +191,7 @@
     }).join('')).join('');
     return `<div class="x-wrap">${hud()}<section class="x-panel"><div class="x-row x-space"><div><h2>🗺️ Reinos de la Tinta</h2><p class="x-muted">${a.map==='bosque'?'El bosque de las tildes':'La cripta del Dragón'} · Mueve al héroe con WASD, flechas o los botones.</p></div><button class="x-btn" data-x="mode" data-value="expedition">IR A EXPEDICIONES</button></div></section>
     <div class="x-world-layout"><section class="x-panel"><div class="x-world" role="group" aria-label="Mapa explorable de diez columnas">${cells}</div><div class="x-pad"><span></span><button class="x-btn" data-x="move" data-value="up" aria-label="Arriba">▲</button><span></span><button class="x-btn" data-x="move" data-value="left" aria-label="Izquierda">◀</button><span class="x-center">✥</span><button class="x-btn" data-x="move" data-value="right" aria-label="Derecha">▶</button><span></span><button class="x-btn" data-x="move" data-value="down" aria-label="Abajo">▼</button><span></span></div></section>
-    <div class="x-wrap"><section class="x-panel"><h3>📖 Tu misión</h3><p>${a.boss?'¡Has derrotado a Diacritik! Puedes seguir explorando.':'Encuentra al cronista 📜, supera los enemigos 👾 y entra en la cripta 🚪 para enfrentarte al dragón 🐉.'}</p><p class="x-muted" style="margin-top:8px">Cofres: 🎁 · Refugio: 🏠 · Enemigos vencidos permanecen despejados.</p></section><section class="x-panel"><h3>📍 Crónica</h3><p class="x-note">${escape(note)}</p></section><section class="x-panel"><h3>🎒 Mochila</h3><div class="x-inventory"><span>🧪 Pociones ${state.inventory.potions}</span><span>💰 ${state.hero.gold} monedas</span><span>⭐ Nivel ${state.hero.level}</span></div></section></div></div></div>`;
+    <div class="x-wrap"><section class="x-panel"><h3>📖 Tu misión</h3><p>${a.boss?'¡Has derrotado a Diacritik! Puedes seguir explorando.':'Encuentra al cronista 📜, supera los enemigos 👾 y entra en la cripta 🚪 para enfrentarte al dragón 🐉.'}</p><p class="x-muted" style="margin-top:8px">Cofres: 🎁 · Refugio: 🏠 · Enemigos vencidos permanecen despejados.</p></section><section class="x-panel"><h3>📍 Crónica</h3><p class="x-note">${escape(note)}</p></section><section class="x-panel"><h3>🎒 Mochila</h3><div class="x-inventory"><span>🧪 Pociones ${state.inventory.potions}</span><span>💰 ${state.hero.gold} monedas</span><span>⭐ Nivel ${state.hero.level}</span>${state.inventory.relics.map(relic=>'<span>⚜️ '+escape(relic)+'</span>').join('')}</div></section></div></div></div>`;
   }
   function chooseQuestion(){
     const recent=new Set(state.recent);
@@ -271,8 +272,8 @@
     let dmg=0,shield=0,extra='';
     if(correct){
       if(battle.action==='attack')dmg=18+h.attack*3+h.level*2;
-      if(battle.action==='spell'){h.mana-=3;dmg=31+h.attack*2+h.level*2}
-      if(battle.action==='guard'){shield=19+h.level*2;h.mana=Math.min(h.maxMana,h.mana+2)}
+      if(battle.action==='spell'){h.mana-=3;dmg=31+h.attack*2+h.level*2+(state.inventory.relics.includes('Pluma rúnica')?8:0)}
+      if(battle.action==='guard'){shield=19+h.level*2+(state.inventory.relics.includes('Broche protector')?6:0);h.mana=Math.min(h.maxMana,h.mana+2)}
     }else if(battle.action==='spell'){h.mana=Math.max(0,h.mana-1)}
     battle.enemyHp=Math.max(0,battle.enemyHp-dmg);
     if(battle.enemyHp===0)battle.result='win';
@@ -325,7 +326,11 @@
     if(option.enemy){startBattle(option.enemy,{kind:'expedition'});save();return}
     if(option.event==='chest'){state.inventory.potions++;gain(0,22);note='Encuentras una poción y 22 monedas.'}
     if(option.event==='rest'){state.hero.hp=Math.min(state.hero.maxHp,state.hero.hp+40);state.hero.mana=state.hero.maxMana;note='La hoguera restaura 40 PV y toda tu energía.'}
-    if(option.event==='treasure'){gain(10,28);note='Consigues 28 monedas y 10 puntos de experiencia del prototipo.'}
+    if(option.event==='treasure'){
+      gain(10,28);
+      if(!state.inventory.relics.includes('Pluma rúnica'))state.inventory.relics.push('Pluma rúnica');
+      note='Consigues 28 monedas, 10 XP y la Pluma rúnica: tus hechizos infligen 8 PV adicionales.';
+    }
     state.expedition.stage++;
     save();render();
   }
@@ -348,7 +353,11 @@
     else if(code==='V'){a.map='bosque';a.x=3;a.y=4;state.hero.hp=state.hero.maxHp;state.hero.mana=state.hero.maxMana;note='Descansas en el refugio y recuperas toda la vida.'}
     else if(code==='D'){a.map='cripta';a.x=3;a.y=5;note='Has entrado en la cripta. ¡Cuidado con los guardianes!'}
     else if(code==='P'){a.map='bosque';a.x=5;a.y=5;note='Regresas al bosque con tus hallazgos.'}
-    else if(code==='C'&&!a.cleared[id]){a.cleared[id]=true;state.inventory.potions++;gain(0,18);note='¡Cofre encontrado! Una poción y 18 monedas.'}
+    else if(code==='C'&&!a.cleared[id]){
+      a.cleared[id]=true;state.inventory.potions++;gain(0,18);
+      if(a.map==='cripta'&&!state.inventory.relics.includes('Broche protector'))state.inventory.relics.push('Broche protector');
+      note=a.map==='cripta'?'¡Broche protector obtenido! Tus defensas bloquean 6 PV más.':'¡Cofre encontrado! Una poción y 18 monedas.';
+    }
     else if(code==='E'&&!a.cleared[id]){startBattle(a.map==='cripta'?'guardia':'tilde',{kind:'adventure',id,from});save();return}
     else if(code==='B'&&!a.cleared[id]){startBattle('draco',{kind:'adventure',id,boss:true,from});save();return}
     else note=a.map==='cripta'?'Los muros guardan antiguas palabras olvidadas.':'Las hojas susurran historias del reino.';
