@@ -5,7 +5,7 @@ Se añaden **dos modos RPG jugables** a Battlegrafía Fantasy Arcade (games/batt
 - **Expediciones:** 5 etapas con bifurcaciones, eventos, combates, descanso, recompensas y jefe final.
 - **Reinos de la Tinta:** mapas de bosque y cripta de 10 × 7, movimiento por teclado o pulsación, NPC, cofres, enemigos persistentes y jefe.
 
-Comparten un héroe (guerrero, mago o explorador), nivel, vida, energía, monedas, pociones e historial de aciertos por categoría. El combate es por turnos, con ataque, defensa, hechizo y poción. Defender no causa daño al rival; retirarse no permite saltar enemigos.
+Comparten un héroe (guerrero, mago o explorador), nivel, vida, energía, monedas, pociones, reliquias equipables por efecto e historial de aciertos por categoría. El combate es por turnos, con ataque, defensa, hechizo y poción. Defender no causa daño al rival; retirarse no permite saltar enemigos.
 
 ## Aislamiento y seguridad
 - Módulos nuevos: rpg-modes-v1.js y rpg-modes-v1.css.
@@ -23,9 +23,9 @@ Desde la raíz del repositorio:
 ## Pruebas manuales recomendadas
 1. Abrir Battlegrafía → NUEVOS MODOS RPG, elegir clase y acceder a los dos modos.
 2. Abrir Partidas y verificar que aparecen dos tarjetas nuevas además de las cuatro originales.
-3. En Expediciones, probar combates, cofre, descanso, defensa (sin daño), pociones, hechizos y jefe final.
+3. En Expediciones, probar combates, cofre, descanso, defensa (sin daño), pociones, hechizos, reliquia Pluma rúnica y jefe final.
 4. Retirarse del combate y comprobar que no se salta la etapa ni se cobran recompensas.
-5. En Reinos, probar WASD/flechas, NPC, cofres, cripta y accesibilidad del jefe.
+5. En Reinos, probar WASD/flechas, NPC, cofres, cripta, Broche protector, accesibilidad del jefe y mejoras compartidas entre modos.
 6. Comprobar que un enemigo derrotado no se repite al regresar a su casilla.
 7. Cerrar y reabrir y comprobar persistencia local con perfil verificado.
 8. Verificar que Aventura, Supervivencia, Dominio y Estrategia conservan sus partidas.
