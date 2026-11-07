@@ -97,10 +97,11 @@
   const sessionKey='bg2_rpg_extra_v1_session';
   const hash=s=>{let n=2166136261;for(let i=0;i<s.length;i++){n^=s.charCodeAt(i);n=Math.imul(n,16777619)}return (n>>>0).toString(36)};
   function storageInfo(){
-    const embedded=!!window.__LENGUARCADE_EMBEDDED;
+    const embedded=!!window.__LENGUARCADE_EMBEDDED || (window.parent!==window && new URLSearchParams(location.search).get('lenguarcade')==='1');
     const verified=!!window.__LENGUARCADE_PROFILE_READY && !!window.__LENGUARCADE_PROFILE_KEY;
     if(verified)return {store:localStorage,key:'bg2_rpg_extra_v1_user_'+hash(String(window.__LENGUARCADE_PROFILE_KEY))};
-    if(embedded)return {store:sessionStorage,key:sessionKey};
+    // Sin un perfil verificado no se reutiliza almacenamiento entre alumnos.
+    if(embedded)return {store:null,key:null};
     return {store:sessionStorage,key:sessionKey};
   }
   function fresh(){
@@ -117,7 +118,7 @@
   function load(){
     currentStorage=storageInfo();
     try{
-      const raw=JSON.parse(currentStorage.store.getItem(currentStorage.key)||'null');
+      const raw=currentStorage.store?JSON.parse(currentStorage.store.getItem(currentStorage.key)||'null'):null;
       state=raw && raw.version===1 && raw.expedition && raw.adventure && raw.inventory && raw.mastery && Array.isArray(raw.recent) ? raw : fresh();
     }catch(e){state=fresh()}
     if(!state.expedition.path)state.expedition.path=[];
@@ -125,7 +126,7 @@
     battle=null;
   }
   function save(){
-    if(!state||!currentStorage)return;
+    if(!state||!currentStorage?.store)return;
     try{currentStorage.store.setItem(currentStorage.key,JSON.stringify(state))}catch(e){console.warn('[Battlegrafía RPG] No se pudo guardar el prototipo:',e)}
     refreshCards();
   }
@@ -364,7 +365,7 @@
     const view=$('bg2-extra-content');if(!view)return;
     view.innerHTML=!state.hero?classSelect():battle?battleView():activeMode==='expedition'?expedition():activeMode==='adventure'?adventure():modes();
     const label=$('bg2-extra-saving');
-    if(label)label.textContent=currentStorage?.store===localStorage?'Guardado local por perfil (sin sincronizar)':'Guardado temporal de esta pestaña';
+    if(label)label.textContent=!currentStorage?.store?'Perfil aún no disponible: sin guardar':currentStorage.store===localStorage?'Guardado local por perfil (sin sincronizar)':'Guardado temporal de esta pestaña';
   }
   function retreat(){
     if(!battle)return;
