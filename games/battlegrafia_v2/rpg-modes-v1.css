@@ -108,3 +108,9 @@
 #bg2-extra-root .x-encounter small{font:10px monospace;color:#e2c48c}
 #bg2-extra-root .x-encounter p{max-width:400px;line-height:1.5}
 @keyframes x-reveal{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+#bg2-extra-root .x-class-sprite,#bg2-extra-root .x-reward-art,#bg2-extra-root .x-portrait canvas{image-rendering:pixelated}
+#bg2-extra-root .x-class-sprite{width:70px;height:80px}
+#bg2-extra-root .x-portrait canvas{width:36px;height:48px}
+#bg2-extra-root .x-encounter{inset:19% 25%;gap:12px}
+#bg2-extra-root .x-reward-art{width:180px;height:100px}
+@media(max-height:650px){#bg2-extra-root .x-class-sprite{width:44px;height:50px}#bg2-extra-root .x-encounter{gap:6px;padding:15px}#bg2-extra-root .x-reward-art{width:120px;height:70px}}

@@ -76,7 +76,7 @@ function paint(now){
    const fx=o.fx,elapsed=fx?(now-fx.time):9999;
    const attack=fx&&elapsed<500&&fx.damage>0, counter=fx&&elapsed>=650&&elapsed<1050&&fx.counter>0;
    const hx=175+(attack&&fx.action==='attack'?Math.sin(elapsed/500*Math.PI)*52:0),ex=470;
-   hero(c,hx,273,o.hero,'right',0,3.1);
+   hero(c,hx,273+Math.sin(t*2),o.hero,'right',0,3.1);
 
    // enemy silhouettes are scaled large, original pixel art rather than remote sprites
    c.save();c.translate(ex+(attack?Math.sin(elapsed*.1)*4:0),265);c.scale(o.enemy==='draco'?2:2.5,2.5);monster(c,0,0,o.enemy==='draco',t);c.restore();
@@ -90,8 +90,14 @@ function paint(now){
    if(counter){c.fillStyle='#fc7e6e';c.font='bold 21px monospace';c.fillText('-'+fx.counter,hx,178-(elapsed-650)*.04);rect(c,0,0,640,360,'#cf54441b')}
   }else{hero(c,320,267,o.hero||'guerrero','down',0,3);fire(c,385,274,t)}
  }
+ const reward=canvas.ownerDocument?.querySelector('#bg2-extra-root .x-reward-art');
+ if(reward){const rc=reward.getContext('2d');rc.clearRect(0,0,120,80);rc.save();rc.translate(60,60);rc.scale(2,2);if(o.encounter==='rest')fire(rc,0,0,t);else chest(rc,0,0,reduced()||t>.3);rc.restore();if(o.encounter!=='rest'){rc.fillStyle='#f7dd96';rc.font='12px monospace';rc.fillText(o.encounter==='treasure'?'+28 ORO · RELIQUIA':'+22 ORO · POCIÓN',5,15)}}
  if(!reduced())raf=requestAnimationFrame(paint);
 }
 function stop(){cancelAnimationFrame(raf);raf=0;canvas=null;options=null;travel=null}
-window.BG2PixelScene={travel(stage,index){travel={stage,index,time:performance.now()};if(reduced()&&canvas)paint(performance.now())},mount(el,o){travel=null;const old=options;if(old?.type==='world'&&o.type==='world'&&old.map===o.map&&(old.x!==o.x||old.y!==o.y))previous={map:old.map,x:old.x*64+32,y:old.y*46+43,at:performance.now()};else previous=null;cancelAnimationFrame(raf);canvas=el;options=o;start=performance.now();if(canvas){canvas.width=640;canvas.height=360;paint(start)}},stop};
+window.BG2PixelScene={travel(stage,index){travel={stage,index,time:performance.now()};if(reduced()&&canvas)paint(performance.now())},mount(el,o){travel=null;const old=options;if(old?.type==='world'&&o.type==='world'&&old.map===o.map&&(old.x!==o.x||old.y!==o.y))previous={map:old.map,x:old.x*64+32,y:old.y*46+43,at:performance.now()};else previous=null;cancelAnimationFrame(raf);canvas=el;options=o;start=performance.now();if(canvas){canvas.width=640;canvas.height=360;
+ const doc=canvas.ownerDocument,portrait=doc?.querySelector('#bg2-extra-root .x-portrait');
+ if(portrait){portrait.textContent='';const pc=doc.createElement('canvas');pc.width=42;pc.height=60;portrait.appendChild(pc);hero(pc.getContext('2d'),21,58,o.hero,'down',0,1.5)}
+ doc?.querySelectorAll('#bg2-extra-root [data-class-sprite]').forEach(el=>{const cc=el.getContext('2d');cc.clearRect(0,0,70,80);hero(cc,35,76,el.dataset.classSprite,'down',0,2)});
+ paint(start)}},stop};
 })();

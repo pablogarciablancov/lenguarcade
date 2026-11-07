@@ -36,3 +36,29 @@ Desde la raíz del repositorio:
 - Arte y animaciones propios completos, sonido y más profundidad táctica.
 - Banco lingüístico común; este prototipo utiliza 29 preguntas locales.
 - Progresión en la nube, integración pedagógica y XP oficial solo tras validar el anti-duplicado y el aislamiento por alumno.
+## Rediseño visual de escenas (7 noviembre 2026)
+
+- Expediciones usa rutas conectadas, nodos con estados y desplazamiento animado del héroe.
+- Reinos dibuja bosque y cripta en una escena pixel art continua, con sprites originales por código, cuatro orientaciones y pasos interpolados.
+- HUD compacto con retrato dibujado; ventanas contextuales y controles sobre el escenario.
+- Combate con animación de avance, tajo, proyectil, barrera, curación, daño flotante y contraataque posterior. Las acciones quedan bloqueadas durante la resolución y se cancelan al salir.
+- Tesoro y hoguera tienen encuentro visual propio. Cofres abiertos, objetos y criaturas pertenecen a la misma paleta local, sin depender de los sprites remotos para los modos nuevos.
+- rpg-scene-v1.js mantiene un solo bucle activo y lo cancela al cerrar; respeta movimiento reducido.
+- Vista aislada: games/battlegrafia_v2/rpg-preview.html. Puede abrirse con el servidor local habitual sin conectar a LenguArcade.
+
+### Validación efectuada
+
+Ejecutados y correctos:
+
+    node games/battlegrafia_v2/rpg-modes-v1.smoke.mjs
+    node games/battlegrafia_v2/rpg-modes-v1.behavior.mjs
+    node scripts/check-battlegrafia-production.mjs
+    node scripts/check-battlegrafia.mjs
+
+Las pruebas de comportamiento ejercitan funciones reales del prototipo en una VM aislada: selección de ruta y bloqueo de doble acción, ataque, defensa sin daño, hechizo, poción, respuesta incorrecta, victoria, jefe de expedición, tesoro, descanso, NPC, colisión, retirada, derrota y persistencia. No son pruebas de navegador.
+
+### Validación pendiente — no dar por terminada
+
+No se ha podido abrir esta revisión en el navegador disponible: localhost apunta a la copia anterior del usuario y la revisión automática rechazó el CDN de previsualización externo por falta de autorización para transmitir/ejecutar los archivos allí. No se han obtenido capturas del rediseño ni validado 1366×768, 1440×900 o 1920×1080. La PR permanece en borrador.
+
+Antes de fusionar: actualizar la carpeta local de prueba, servir rpg-preview.html, probar ambos modos con interacción real y capturar mapa, exploración y combate. Revisar tamaño de sprites, etiquetas de ruta, barra de comandos y adaptación dentro del portal. El arte es pixel art original dibujado por código; queda pendiente evaluar su calidad visual en pantalla y diferenciar más las siluetas de los enemigos.
