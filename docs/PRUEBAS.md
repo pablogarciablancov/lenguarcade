@@ -972,3 +972,8 @@ Rayuela: con una historia en 14 votos válidos, un alumno solo ve su clase y el 
 ### 2026-11-12 · Recuento de escenas de Rayuela
 
 Rayuela: la tarjeta de una hoja de 72 celdas escritas muestra 72 de 81 y 9 casillas sin texto. Una de 81 muestra 81 de 81 sin aviso. Un marcador automático de camino pendiente no se cuenta como celda escrita. Los proyectos ajenos a Sheets conservan su contador habitual.
+
+
+### 2026-11-12 · Media de la rayuela propia
+
+Rayuela: autor ve media global de su historia; lector no recibe esa media, aunque envíe own o authorIds falsos. Sin votos muestra Sin valoraciones todavía. Los votos individuales y la autoría ajena siguen ocultos.

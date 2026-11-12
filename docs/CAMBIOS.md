@@ -940,3 +940,8 @@ Rayuela: 2.º ESO C y D pueden visitar y valorar el otro grupo cuando cada histo
 ### 2026-11-12 · Recuento de escenas de Rayuela
 
 Rayuela: la galería diferencia las escenas escritas de las 81 casillas de la hoja original y señala las vacías. Los marcadores de caminos sin escribir no cuentan como escenas. Auditoría de las 13 hojas de 2.º D: 10 con 81; Detectives 72, Concesionario 75 y Golpe del millón 72, idénticos al contenido importado. Se preservan todos los proyectos y votos.
+
+
+### 2026-11-12 · Media de la rayuela propia
+
+Rayuela: los alumnos ven únicamente la valoración media global de las historias de las que son autores. El servidor omite esa media en las demás; no se exponen criterios desglosados ni votos individuales. El profesor mantiene su panel.

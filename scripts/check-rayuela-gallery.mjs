@@ -161,3 +161,17 @@ assert(!('sceneSlots' in model.sceneProgress({project:sheetStory.project})));
 assert(view.card({...cardData,scenes:72,sceneSlots:81,scenesMissing:9},0).includes('72 de 81 escenas escritas'));
 assert(view.card({...cardData,scenes:72,sceneSlots:81,scenesMissing:9},0).includes('9 casillas sin texto'));
 console.log('Escenas de Sheets: celdas escritas, casillas vacías y marcadores pendientes distinguidos.');
+
+
+// Ownership comes from stored authors, never from client input.
+const ownList=await call('student','author',{action:'list'});
+const ownCard=ownList.stories.find(s=>s.id===id);
+assert.equal(ownCard.ownAverage,model.summary(published,db.rayuela_gallery_ratings).average);
+assert.equal(ownCard.summary,undefined);assert.equal(ownCard.votes,undefined);assert.equal(ownCard.authorIds,undefined);
+const peerList=await call('student','peer',{action:'list',authorIds:['peer'],own:true});
+assert.equal(peerList.stories.find(s=>s.id===id).ownAverage,undefined);
+const renderedOwn=view.card({...cardData,own:true,ownAverage:8.25},0);
+assert(renderedOwn.includes('Valoración media: 8.25 / 10'));
+assert(!view.card({...cardData,own:false,ownAverage:8.25},0).includes('Valoración media'));
+assert(view.card({...cardData,own:true,ownAverage:null},0).includes('Sin valoraciones todavía'));
+console.log('Media del autor: solo su propia historia, sin votos individuales ni medias de otros.');
