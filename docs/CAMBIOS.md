@@ -1,3 +1,10 @@
+## 2026-11-12 · Limitar las consultas simultáneas del panel del alumno
+
+- La carga del panel lanzaba 12 consultas a la vez por alumno, una ráfaga de hasta 360 consultas con 30 alumnos. Los errores 546 persistían en `student-dashboard` incluso tras eliminar la segunda validación de GoTrue.
+- Se limitan las consultas iniciales a lotes de dos por alumno; todas mantienen el orden de resultados, los campos, las reglas de XP, logros, sesiones, talleres y guardados. Sin cambio de esquema.
+- Se incorpora simulación determinista de 30 alumnos y 12 lecturas con concurrencia máxima de 60 operaciones.
+- La validación en producción con 30 alumnos reales sigue pendiente.
+
 ## 2026-11-12 · Accesos simultáneos a LenguArcade
 
 - Diagnóstico en Supabase: `student-dashboard` y `google-student-login` devolvían 546/504 durante el acceso simultáneo de una clase; se observaron tiempos de espera en `/auth/v1/user` y consultas SQL, aunque el proyecto seguía activo.
