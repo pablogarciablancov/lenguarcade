@@ -9,10 +9,12 @@ import { performance } from 'node:perf_hooks';
 const source=fs.readFileSync('apps-script/LenguArcade_Alumno.html','utf8');
 const auth=source.slice(source.indexOf('let secureSessionVerified=false;'),source.indexOf('const sessionVerificationToken=token;'));
 const bridge=source.slice(source.indexOf('callServer=async function(fn,args){'),source.indexOf('renderClasses=function(){};'));
+const logout=source.slice(source.indexOf('async function secureStudentLogout(){'),source.indexOf('login=secureStudentLogin;'));
 const google=source.slice(source.indexOf('async function loginGoogleViaSupabase(kind){'),source.indexOf('function finishGoogleStudentLogin(result,message){'));
 assert.ok(auth.startsWith('let secureSessionVerified=false;'));
 assert.ok(bridge.startsWith('callServer=async function(fn,args){'));
 assert.ok(google.startsWith('async function loginGoogleViaSupabase(kind){'));
+assert.ok(logout.startsWith('async function secureStudentLogout(){'));
 
 const STUDENTS=30;
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -134,7 +136,7 @@ function browser(api,email,store=localStorage()){
     $:id=>elements[id],
     secureLoginElement:selector=>loginCard.querySelector(selector),
   });
-  vm.runInContext(auth+'\n'+bridge+'\n'+google,context);
+  vm.runInContext(auth+'\n'+bridge+'\n'+logout+'\n'+google,context);
   const evaluate=(expression,vars={})=>{
     Object.assign(context,vars);
     return vm.runInContext(expression,context);
