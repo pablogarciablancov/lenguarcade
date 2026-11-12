@@ -6,6 +6,12 @@ project_id = "lenguarcade"
 
 # Los endpoints que leen la identidad JWT sin llamar a GoTrue
 # NECESITAN validar la firma y caducidad en el gateway.
+[functions.pin-login]
+verify_jwt = true
+
+[functions.save-progress]
+verify_jwt = true
+
 [functions.google-student-login]
 verify_jwt = true
 
