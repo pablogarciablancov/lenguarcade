@@ -43,4 +43,19 @@ assert.equal(ids[0].award_id, "LA:WEEK:2026-11-02:perfil-1:XP:1");
 assert.equal(fleetAwardsForWeek("perfil-1",week).length,3);
 assert.deepEqual(fleetAwardsForWeek("perfil-1",week),fleetAwardsForWeek("perfil-1",week));
 assert.equal(snapshots([["2026-10-30",10000]])[0].earnedPoints,0);
-console.log("Flota semanal: 250 XP/punto, topes, constancia, lunes, Madrid e IDs estables OK");
+
+const migration=await import("node:fs").then(fs=>fs.readFileSync("supabase/migrations/20261112171647_fleet_all_game_xp_including_rayuela.sql","utf8"));
+assert.match(migration,/join public\.games g on g\.id=e\.game_id/);
+assert.match(migration,/e\.game_id <> 'lenguarcade_admin'/);
+assert.match(migration,/e\.event_type <> 'teacher_adjustment'/);
+assert.doesNotMatch(migration,/rayuela_ending_reward.*(?:<>|not in|not like)/);
+assert.doesNotMatch(migration,/class_boss_reward.*(?:<>|not in|not like)/);
+// La XP de cualquier juego se suma por fecha; los límites se aplican al total diario.
+const fromAllGames=snapshots([["2026-11-12",650]],"2026-11-12").at(-1);
+assert.equal(fromAllGames.xpEarned,650);
+assert.equal(fromAllGames.xpPoints,2);
+const bonusCarry=snapshots([["2026-11-05",1300],["2026-11-06",800]],"2026-11-06").at(-1);
+assert.equal(bonusCarry.xpPoints,6);
+assert.equal(bonusCarry.bonusPoints,1);
+
+console.log("Flota semanal: 250 XP/punto, topes, constancia, lunes, Madrid e todos los juegos e IDs estables OK");
