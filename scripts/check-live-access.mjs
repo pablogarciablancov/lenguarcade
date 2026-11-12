@@ -54,12 +54,13 @@ function evaluateTypeScript(source,context,tail=''){
   const context={Deno:{env:{get:key=>env[key]}},Response,TextDecoder,Uint8Array,atob,Date,
     createClient:(_url,key)=>key==='service'?admin:{auth:{async getUser(){getUserCalls++;throw new Error('No debe llamar a Auth');}}},
     corsHeaders:{'Content-Type':'application/json'}};
-  const requireSession=evaluateTypeScript(sharedSource,context,'requireProfileSession');
+  const sessionApi=evaluateTypeScript(sharedSource,context,'({requireProfileSession,authUserIdFromGatewayVerifiedJwt})');
+  const requireSession=sessionApi.requireProfileSession;
   function request(role='authenticated'){
     const payload={sub:id,role,exp:Math.floor(Date.now()/1000)+3600};
     return new Request('https://example.test',{headers:{Authorization:'Bearer header.'+Buffer.from(JSON.stringify(payload)).toString('base64url')+'.signature'}});
   }
-  const gatewayUserId=evaluateTypeScript(sharedSource,context,'authUserIdFromGatewayVerifiedJwt');
+  const gatewayUserId=sessionApi.authUserIdFromGatewayVerifiedJwt;
   assert.equal(gatewayUserId(request()),id);
   assert.equal(gatewayUserId(request('anon')),'');
   assert.equal(gatewayUserId(new Request('https://example.test')),'');
