@@ -1,5 +1,5 @@
 import {platformXpEvents} from "../_shared/platform-xp.js";
-import {loadFleetWeeks,syncFleetWeekAwards} from "../_shared/fleet-weekly-delivery.js";
+import {loadFleetWeeks,syncFleetWeekAwards,isFleetTeacherPilot} from "../_shared/fleet-weekly-delivery.js";
 import {isForjaObjective, workshopVictory, groupWorkshops, workshopProgress} from "../_shared/workshop-objective.js";
 import {levelProgress,learningGrade,platformMilestones} from "../_shared/progression.js";
 import {
@@ -206,10 +206,12 @@ Deno.serve(async (request) => {
     const progress = progressResult.data || [];
     const accessByGame = new Map((gameAccessResult.data || []).map(row => [String(row.game_id), row.enabled !== false]));
     const classroomIds = new Set((enrollmentsResult.data || []).map(row => String(row.classroom_id || "")).filter(Boolean));
-    // Sólo alumnos reales matriculados contribuyen; si falla Flotas el panel sigue funcionando.
+    // Alumnos matriculados y un único profesor-jugador piloto pueden contribuir.
+    // No alterar rol, matrícula, seguridad ni los rankings escolares.
     let weeklyFleet: Record<string, unknown> | null = null;
-    if (profile.role === "student" && profile.active !== false &&
-      String(profile.source || "").toLowerCase() !== "test" && classroomIds.size) {
+    const enrolledStudent = profile.role === "student" && profile.active !== false &&
+      String(profile.source || "").toLowerCase() !== "test" && classroomIds.size > 0;
+    if (enrolledStudent || isFleetTeacherPilot(profile)) {
       try {
         const weeks = await loadFleetWeeks(admin,profileId);
         const current = weeks[weeks.length-1];
