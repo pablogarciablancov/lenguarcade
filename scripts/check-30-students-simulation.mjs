@@ -62,10 +62,7 @@ function fakeSupabase(){
       if(!id)return response(401,{error:'unauthorized'});
       if(path==='/functions/v1/pin-login'){
         calls.pin++;
-        if(body.pin!=='1234'||!String(body.email||'').endsWith('@alumno.fomento.edu'))
-          return response(401,{error:'invalid_credentials'});
-        sessions.set(id,body.email);
-        return response(200,{ok:true,profile:{email:body.email}});
+        return response(410,{error:'google_login_required'});
       }
       if(path==='/functions/v1/student-profile'&&body.action==='logout'){
         calls.logout++;
@@ -198,20 +195,21 @@ await phase('recarga',async client=>{
 });
 assert.equal(api.calls.signup,STUDENTS,'Recargar no genera usuarios adicionales');
 
-// Fase 5: salidas simultáneas, revocación real en el mock y acceso por PIN.
+// Fase 5: salidas simultáneas, revocación y nueva entrada exclusiva por Google.
 await phase('logout',async client=>{
   assert.equal(await client.evaluate('secureStudentLogout()'),true);
 });
 assert.equal(api.sessions.size,0);
-await phase('pin',async client=>{
-  const result=await client.evaluate('loginSupabaseStudent(simEmail,"1234",true)',{simEmail:client.email});
+await phase('googleReentry',async client=>{
+  const result=await client.evaluate('loginGoogleViaSupabase("student")');
   client.activate(result);
   assert.equal(result.dashboard.general.xp,15);
   assert.equal(result.dashboard.student.email,client.email);
 });
-assert.equal(api.calls.pin,STUDENTS);
-assert.equal(api.calls.signup,STUDENTS,'El PIN reutiliza la identidad ya creada');
-assert.equal(api.calls.dashboard,STUDENTS*4,'Google, guardado, recarga y PIN cargan el panel');
+assert.equal(api.calls.pin,0,'Ningún alumno ha utilizado PIN');
+assert.equal(api.calls.google,STUDENTS*2,'Todos han entrado exclusivamente por Google');
+assert.equal(api.calls.signup,STUDENTS,'Google reutiliza cada identidad');
+assert.equal(api.calls.dashboard,STUDENTS*4,'Google, guardado, recarga y reentrada cargan el panel');
 assert.equal(api.calls.refresh,0);
 assert.equal(api.calls.logout,STUDENTS);
 assert.equal(api.sessions.size,STUDENTS);
@@ -226,5 +224,5 @@ console.log(JSON.stringify({
   stageDurationsMs:durations,
   xpPerUser:15,
   productionWrites:0,
-  warning:'No es una prueba de carga de Google/GoTrue/PostgREST reales.',
+  warning:'Google y Supabase simulados: no mide infraestructura real.',
 },null,2));
