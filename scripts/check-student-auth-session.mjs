@@ -7,7 +7,7 @@ import vm from 'node:vm';
 const source=fs.readFileSync('apps-script/LenguArcade_Alumno.html','utf8');
 const auth=source.slice(source.indexOf('let secureSessionVerified=false;'),source.indexOf('const sessionVerificationToken=token;'));
 const bridge=source.slice(source.indexOf('callServer=async function(fn,args){'),source.indexOf('renderClasses=function(){};'));
-const logout=source.slice(source.indexOf('async function secureStudentLogout(){'),source.indexOf('login=secureStudentLogin;'));
+const logout=source.slice(source.indexOf('async function secureStudentLogout(){'),source.indexOf('login=function(){return window.secureStudentLogin();};'));
 const google=source.slice(source.indexOf('async function loginGoogleViaSupabase(kind){'),source.indexOf('function finishGoogleStudentLogin(result,message){'));
 assert.ok(auth.startsWith('let secureSessionVerified=false;'));
 assert.ok(bridge.startsWith('callServer=async function(fn,args){'));
