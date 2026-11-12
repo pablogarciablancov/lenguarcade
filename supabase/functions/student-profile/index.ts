@@ -34,20 +34,10 @@ Deno.serve(async (request) => {
       return jsonResponse({ ok:true, avatar, message:"Avatar actualizado correctamente." });
     }
 
+    // El PIN se ha retirado. Conservar la acción explícitamente bloqueada
+    // evita que una versión antigua del navegador siga modificándolo.
     if (action === "changePin") {
-      const oldPin = String(body.oldPin || "").trim();
-      const newPin = String(body.newPin || "").trim();
-      if (!/^\d{4,8}$/.test(oldPin) || !/^\d{4,8}$/.test(newPin)) {
-        return jsonResponse({ ok:false, error:"invalid_pin_format" }, 400);
-      }
-      const { data:changed, error } = await admin.rpc("change_profile_pin", {
-        target_profile_id:profileId,
-        old_pin:oldPin,
-        new_pin:newPin,
-      });
-      if (error) throw error;
-      if (!changed) return jsonResponse({ ok:false, error:"wrong_current_pin" }, 401);
-      return jsonResponse({ ok:true, message:"PIN actualizado correctamente." });
+      return jsonResponse({ ok:false, error:"google_login_required" }, 410);
     }
 
     if (action === "logout") {
