@@ -8,15 +8,23 @@ export async function loadFleetWeeks(admin, profileId) {
   return fleetWeeklySnapshots(data || []);
 }
 
+// Piloto explícito: profesor-jugador autorizado para comprobar la entrega real
+// sin añadir profesores a clases ni tratarlos como alumnos en Supabase.
+export function isFleetTeacherPilot(profile) {
+  return profile?.role === "teacher" && profile?.active !== false &&
+    String(profile?.source || "").toLowerCase() === "google" &&
+    String(profile?.email || "").trim().toLowerCase() === "pgarciab@fomento.edu";
+}
+
 // La entrega es asíncrona: nunca retrasa el guardado del juego ni el acceso al panel.
 // El registro local y el identificador remoto hacen seguros los reintentos simultáneos.
 export async function syncFleetWeekAwards(admin, profileId, weeks, classroomIds) {
-  if (!classroomIds?.length) return;
   const {data:profile,error:profileError} = await admin.from("profiles")
-    .select("role,source,active").eq("id",profileId).maybeSingle();
+    .select("role,source,active,email").eq("id",profileId).maybeSingle();
   if (profileError) throw profileError;
-  if (!profile || profile.role !== "student" || profile.active === false ||
-    String(profile.source || "").toLowerCase() === "test") return;
+  const enrolledStudent = Boolean(classroomIds?.length) && profile?.role === "student" &&
+    profile?.active !== false && String(profile?.source || "").toLowerCase() !== "test";
+  if (!enrolledStudent && !isFleetTeacherPilot(profile)) return;
 
   const endpoint = Deno.env.get("FLEET_MARKER_WEBHOOK_URL") || "";
   const secret = Deno.env.get("FLEET_MARKER_WEBHOOK_SECRET") || "";

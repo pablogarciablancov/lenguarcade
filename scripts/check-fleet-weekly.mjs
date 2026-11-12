@@ -3,6 +3,8 @@ import {
   mondayOf, madridDate, fleetWeeklySnapshots, fleetAwardsForWeek, FLEET_START,
 } from "../supabase/functions/_shared/fleet-weekly.js";
 
+import {isFleetTeacherPilot} from "../supabase/functions/_shared/fleet-weekly-delivery.js";
+
 const snapshots=(rows,today="2026-11-06")=>fleetWeeklySnapshots(
   rows.map(([local_day,xp])=>({local_day,xp})),today
 );
@@ -71,5 +73,19 @@ assert.equal(validateAward(validProfile,"LA:WEEK:2026-11-09:"+validProfile+":XP:
 assert.equal(validateAward(validProfile,"LA:WEEK:2026-11-09:"+validProfile+":CONSTANCIA",1),true);
 assert.equal(validateAward(validProfile,workshopId,5),true);
 assert.equal(validateAward(validProfile,workshopId,1),false);
+
+const pilot={role:"teacher",source:"google",active:true,email:"pgarciab@fomento.edu"};
+assert.equal(isFleetTeacherPilot(pilot),true);
+assert.equal(isFleetTeacherPilot({...pilot,email:"otro@fomento.edu"}),false);
+assert.equal(isFleetTeacherPilot({...pilot,role:"student"}),false);
+assert.equal(isFleetTeacherPilot({...pilot,source:"test"}),false);
+assert.equal(isFleetTeacherPilot({...pilot,active:false}),false);
+assert.equal(isFleetTeacherPilot({...pilot,email:"pgarciab@gmail.com"}),false);
+// Ejemplo de su semana real: 234 XP todavía no alcanzan un punto.
+const pilotWeek=snapshots([["2026-11-12",234]],"2026-11-12").at(-1);
+assert.equal(pilotWeek.xpPoints,0);
+assert.equal(snapshots([["2026-11-12",252]],"2026-11-12").at(-1).xpPoints,1);
+const dashboardSource=(await import("node:fs")).readFileSync("supabase/functions/student-dashboard/index.ts","utf8");
+assert.match(dashboardSource,/enrolledStudent \|\| isFleetTeacherPilot\(profile\)/);
 
 console.log("Flota semanal: 250 XP/punto, topes, constancia, lunes, Madrid, todos los juegos e IDs estables OK");
