@@ -167,7 +167,7 @@ body.avatarEditorOpen{overflow:hidden}
 </head>
 <body class="authPending">
 <div class="loader open" id="loader"><div class="loaderBox"><div class="loaderTitle">Cargando LenguArcade</div><div class="sub" id="loaderText">Preparando interfaz...</div><div class="loaderBar"><div class="loaderFill" id="loaderFill"></div></div><div><span class="loaderPct" id="loaderPct">0%</span> <span class="sub">estimado</span></div></div></div>
-<div class="app"><aside class="rail"><div class="logoBox"><div class="pixel">LENGU<br>ARCADE</div></div><nav class="nav"><button type="button" class="active" data-target="inicio">🏠 Inicio</button><button type="button" data-target="juegos">🎮 Mis juegos</button><button type="button" data-target="misiones">🎯 Misiones</button><button type="button" data-target="ranking">🏆 Ranking</button><button type="button" data-target="perfil">👤 Perfil</button></nav><div class="railFooter"><button type="button" class="ghost" id="themeBtn">🌓 Modo claro/oscuro</button><button type="button" class="ghost" id="logoutBtn">Salir</button><div class="sub">Aprender jugando. Jugar para expresarse mejor.</div></div></aside><main class="main"><section id="inicio" class="hero"><div class="topCard brand"><div class="brandIcon">✒️</div><div><h1 class="title"><span class="grad">LenguArcade</span></h1><div class="sub">El salón recreativo de las palabras</div></div></div><div class="topCard profile"><div class="avatar" role="img" aria-label="Avatar del alumno"><canvas id="studentAvatar" width="40" height="48"></canvas></div><div><div class="who" id="studentName">Inicia sesión</div><div class="sub" id="studentMail">Elige tu clase, tu nombre y tu PIN.</div></div><div class="stats"><div class="stat"><span>Nivel</span><b id="level">-</b><div class="bar"><div class="fill" id="levelFill"></div></div></div><div class="stat"><span>XP</span><b id="xp">0</b></div><button type="button" id="xpRulesOpen" class="xpRulesTrigger" aria-haspopup="dialog" aria-controls="xpRulesDialog"><span aria-hidden="true">✦</span> ¿Cómo se gana la XP? <span class="xpRulesArrow" aria-hidden="true">↗</span></button><div class="stat"><span>Plumas</span><b id="plumas">0</b></div><div class="stat"><span>Nota</span><b id="grade">-</b></div></div></div></section><section class="card" id="loginCard"><div class="head"><div><h2>Entrada de alumno</h2><div class="sub">Carga rápida: primero clase; después, solo los alumnos de esa clase.</div></div><span class="sub" id="version">v0.4</span></div><div class="login"><div class="field"><label>Clase</label><select id="classSelect"></select></div><div class="field"><label>Alumno</label><select id="studentSelect"></select></div><div class="field"><label>PIN</label><input id="pin" type="password" placeholder="1001"></div><button type="button" id="loginBtn">Entrar</button></div><div class="status" id="status">Cargando...</div></section><section class="layout"><div class="card" id="juegos"><div class="head"><div><h2>Juegos activos</h2><div class="sub">Biblioteca de juegos de Lengua</div></div></div><div class="games" id="games"></div></div><aside class="sidePanels"><div class="card" id="misiones"><h2>Tablón de misiones</h2><div class="sub" id="missionBoardHint">Retos activos ordenados por prioridad y fecha límite.</div><div id="missions"></div></div><div class="card" id="ranking"><h2>Ranking de clase</h2><div id="rankingRows"></div></div></aside></section><section class="card" id="perfil"><div class="head"><div><h2>Perfil</h2><div class="sub">Diseña tu personaje y personaliza tu avatar.</div></div></div><div class="profileSettings"><div class="avatarBuilder"><h3>Tu personaje</h3><div class="avatarPreview"><canvas id="avatarPreview" width="40" height="48"></canvas></div><div class="avatarActions"><button type="button" class="ghost" id="randomAvatarBtn">Aleatorio</button><button type="button" id="saveAvatarBtn">Guardar</button></div><div class="status avatarStatus" id="avatarStatus">Inicia sesión para personalizarlo.</div></div><div><h3>Personalización</h3><div class="avatarControls" id="avatarControls"></div></div></div></section></main></div><dialog id="xpRulesDialog" class="xpRulesDialog" aria-labelledby="xpRulesTitle" aria-describedby="xpRulesIntro">
+<div class="app"><aside class="rail"><div class="logoBox"><div class="pixel">LENGU<br>ARCADE</div></div><nav class="nav"><button type="button" class="active" data-target="inicio">🏠 Inicio</button><button type="button" data-target="juegos">🎮 Mis juegos</button><button type="button" data-target="misiones">🎯 Misiones</button><button type="button" data-target="ranking">🏆 Ranking</button><button type="button" data-target="perfil">👤 Perfil</button></nav><div class="railFooter"><button type="button" class="ghost" id="themeBtn">🌓 Modo claro/oscuro</button><button type="button" class="ghost" id="logoutBtn">Salir</button><div class="sub">Aprender jugando. Jugar para expresarse mejor.</div></div></aside><main class="main"><section id="inicio" class="hero"><div class="topCard brand"><div class="brandIcon">✒️</div><div><h1 class="title"><span class="grad">LenguArcade</span></h1><div class="sub">El salón recreativo de las palabras</div></div></div><div class="topCard profile"><div class="avatar" role="img" aria-label="Avatar del alumno"><canvas id="studentAvatar" width="40" height="48"></canvas></div><div><div class="who" id="studentName">Inicia sesión</div><div class="sub" id="studentMail">Entra con tu cuenta de Google de Fomento.</div></div><div class="stats"><div class="stat"><span>Nivel</span><b id="level">-</b><div class="bar"><div class="fill" id="levelFill"></div></div></div><div class="stat"><span>XP</span><b id="xp">0</b></div><button type="button" id="xpRulesOpen" class="xpRulesTrigger" aria-haspopup="dialog" aria-controls="xpRulesDialog"><span aria-hidden="true">✦</span> ¿Cómo se gana la XP? <span class="xpRulesArrow" aria-hidden="true">↗</span></button><div class="stat"><span>Plumas</span><b id="plumas">0</b></div><div class="stat"><span>Nota</span><b id="grade">-</b></div></div></div></section><section class="card" id="loginCard"><div class="head"><div><h2>Entrada con Google de Fomento</h2><div class="sub">Utiliza exclusivamente tu cuenta institucional para acceder.</div></div><span class="sub" id="version">v0.4</span></div><div hidden><select id="classSelect"></select><select id="studentSelect"></select><input id="pin" type="hidden"><button type="button" id="loginBtn">Acceso antiguo deshabilitado</button></div><div class="status" id="status">Preparando acceso con Google...</div></section><section class="layout"><div class="card" id="juegos"><div class="head"><div><h2>Juegos activos</h2><div class="sub">Biblioteca de juegos de Lengua</div></div></div><div class="games" id="games"></div></div><aside class="sidePanels"><div class="card" id="misiones"><h2>Tablón de misiones</h2><div class="sub" id="missionBoardHint">Retos activos ordenados por prioridad y fecha límite.</div><div id="missions"></div></div><div class="card" id="ranking"><h2>Ranking de clase</h2><div id="rankingRows"></div></div></aside></section><section class="card" id="perfil"><div class="head"><div><h2>Perfil</h2><div class="sub">Diseña tu personaje y personaliza tu avatar.</div></div></div><div class="profileSettings"><div class="avatarBuilder"><h3>Tu personaje</h3><div class="avatarPreview"><canvas id="avatarPreview" width="40" height="48"></canvas></div><div class="avatarActions"><button type="button" class="ghost" id="randomAvatarBtn">Aleatorio</button><button type="button" id="saveAvatarBtn">Guardar</button></div><div class="status avatarStatus" id="avatarStatus">Inicia sesión para personalizarlo.</div></div><div><h3>Personalización</h3><div class="avatarControls" id="avatarControls"></div></div></div></section></main></div><dialog id="xpRulesDialog" class="xpRulesDialog" aria-labelledby="xpRulesTitle" aria-describedby="xpRulesIntro">
   <div class="xpRulesHeader">
     <div><span class="xpRulesKicker">GUÍA DE PROGRESO</span><h2 id="xpRulesTitle">¿Cómo se gana la XP?</h2></div>
     <button type="button" class="xpRulesClose" id="xpRulesClose" aria-label="Cerrar explicación de XP">✕</button>
@@ -182,7 +182,7 @@ body.avatarEditorOpen{overflow:hidden}
 <div class="modal" id="gameModal"><div class="dialog"><h2 id="gameModalTitle">Juego</h2><p class="sub" id="gameModalText"></p><div class="actions"><button type="button" id="gameModalMain">Entendido</button><button type="button" class="ghost" id="gameModalClose">Cerrar</button></div></div></div>
 <script>
 const ASSET_BASE='https://raw.githubusercontent.com/pablogarciiblancov/lenguarcade-assets/main/assets/games/'.replace('pablogarciiblancov','pablogarciablancov');const BANNERS={battlegrafia:'battlegrafia-collection-v3.webp',maniacgrafia:'maniacgrafia-collection-v3.webp',narratoria:'narratoria-collection-v3.webp',versopolis:'versopolis-collection-v3.webp',scrabble:'scrabble-collection-v3.webp',conjuga_apuesta:'conjuga-apuesta-collection-v3.webp',verb_battle:'verb-battle-collection-v3.webp',rayuela:'rayuela-collection-v3.webp',entre_lineas:'entre-lineas-collection-v3.webp',tower_defense:'tower-defense-collection-v3.webp',word_play:'word-play-collection-v3.webp',tierras_de_tinta:'tierras-de-tinta-collection-v3.webp',lexaria:'lexaria-collection-v3.webp',lexitrama:'lexitrama-collection-v3.webp',lexoma:'lexoma-collection-v3.webp',sopa_de_tinta:'sopa-de-tinta-collection-v3.webp',tinta_y_acero:'https://pablogarciablancov.github.io/lenguarcade/games/tinta_y_acero/assets/tinta-y-acero-collection-v3.png',ultimo_salto:'https://pablogarciablancov.github.io/lenguarcade/games/ultimo_salto/assets/cover.webp'};
-let meta=null,token=window.__LA_TEACHER_PLAYER_ENTRY__?'':localStorage.getItem('LA_STUDENT_TOKEN')||'',currentDashboard=null,busy=false,loaderTimer=null,loaderValue=0;const $=id=>document.getElementById(id);function callServer(fn,args){return new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn].apply(null,args||[]);});}function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}function bannerUrl(id,banner){if(BANNERS[id])return /^https:\/\//i.test(BANNERS[id])?BANNERS[id]:ASSET_BASE+BANNERS[id];const direct=String(banner||'');if(/^https:\/\//i.test(direct))return direct;return ASSET_BASE+((/\.(?:png|jpe?g|webp|svg)$/i.test(direct)?direct:'')||'maniacgrafia-collection-v3.webp');}function setStatus(t){$('status').textContent=t;}function showLoader(text,start){$('loader').classList.add('open');loaderValue=start||8;updateLoader(text||'Cargando...',loaderValue);clearInterval(loaderTimer);loaderTimer=setInterval(()=>{loaderValue=Math.min(92,loaderValue+Math.ceil((94-loaderValue)/12));updateLoader(null,loaderValue)},450)}function updateLoader(text,pct){if(text)$('loaderText').textContent=text;$('loaderPct').textContent=Math.round(pct)+'%';$('loaderFill').style.width=Math.round(pct)+'%'}function hideLoader(){clearInterval(loaderTimer);updateLoader('Listo.',100);setTimeout(()=>$('loader').classList.remove('open'),180)}function setBusy(v,t){busy=v;if(v)showLoader(t||'Cargando...',20);else hideLoader();if(t)setStatus(t)}function jump(id,btn){document.getElementById(id)?.scrollIntoView({block:'start'});document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active')}function toggleTheme(){document.body.classList.toggle('light');localStorage.setItem('LA_THEME',document.body.classList.contains('light')?'light':'dark')}function logout(){localStorage.removeItem('LA_STUDENT_TOKEN');localStorage.removeItem('LA_DASHBOARD_CACHE');token='';currentDashboard=null;$('loginCard').classList.remove('hidden');setStatus('Sesión cerrada.')}async function boot(){const catalogCacheVersion='20261005-forja-v1';if(localStorage.getItem('LA_CATALOG_CACHE_VERSION')!==catalogCacheVersion){localStorage.removeItem('LA_DASHBOARD_CACHE');localStorage.removeItem('LA_META_CACHE');localStorage.setItem('LA_CATALOG_CACHE_VERSION',catalogCacheVersion);}if(localStorage.getItem('LA_THEME')==='light')document.body.classList.add('light');bind();showLoader('Preparando interfaz...',8);if(token)$('loginCard').classList.add('hidden');const cachedDash=window.__LA_TEACHER_PLAYER_ENTRY__?null:readCache('LA_DASHBOARD_CACHE');if(cachedDash){currentDashboard=cachedDash;renderDashboard(cachedDash)}try{const cachedMeta=readCache('LA_META_CACHE');if(cachedMeta){meta=cachedMeta;renderClasses(false);updateLoader('Usando datos guardados...',35)}meta=await callServer('getPublicMetaV03');saveCache('LA_META_CACHE',meta);$('version').textContent='v'+(meta.version||'0.4');renderClasses(!cachedMeta);updateLoader('Cargando sesión...',65);if(token){try{currentDashboard=await callServer('getStudentDashboardByToken',[token]);saveCache('LA_DASHBOARD_CACHE',currentDashboard);renderDashboard(currentDashboard);$('loginCard').classList.add('hidden');}catch(e){localStorage.removeItem('LA_STUDENT_TOKEN');token='';$('loginCard').classList.remove('hidden');setStatus('Sesión caducada. Entra de nuevo.');}}else setStatus('Datos básicos cargados.');}catch(e){$('loginCard').classList.remove('hidden');setStatus('Error al cargar: '+(e.message||e));}finally{hideLoader()}}function bind(){document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>jump(b.dataset.target,b)));$('themeBtn').onclick=toggleTheme;$('logoutBtn').onclick=logout;$('loginBtn').onclick=login;$('gameModalClose').onclick=()=>$('gameModal').classList.remove('open');$('gameModalMain').onclick=()=>$('gameModal').classList.remove('open')}function renderClasses(loadStudents=true){const sel=$('classSelect');sel.innerHTML=meta.classes.map(c=>`<option value="${esc(c.classCode)}">${esc(c.nombreVisible)}</option>`).join('');sel.onchange=loadStudentsForClass;if(loadStudents)loadStudentsForClass();}async function loadStudentsForClass(){if(busy)return;const cls=$('classSelect').value;setStatus('Cargando alumnos de '+cls+'...');const key='LA_STUDENTS_'+cls;const cached=readCache(key);if(cached)renderStudents(cached);try{const students=await callServer('getStudentsByClassV03',[cls]);saveCache(key,students);renderStudents(students);setStatus('Alumnos cargados. Escribe tu PIN.');}catch(e){setStatus('Error al cargar alumnos: '+(e.message||e));}}function renderStudents(students){$('studentSelect').innerHTML=students.map(s=>`<option value="${esc(s.studentId)}">${esc(s.nombre)} ${esc(s.apellidos)}</option>`).join('')}async function login(){if(busy)return;setBusy(true,'Entrando...');try{const res=await callServer('loginStudent',[$('studentSelect').value,$('pin').value]);token=res.token;localStorage.setItem('LA_STUDENT_TOKEN',token);currentDashboard=res.dashboard;saveCache('LA_DASHBOARD_CACHE',currentDashboard);renderDashboard(currentDashboard);$('loginCard').classList.add('hidden');setStatus('Sesión iniciada.');}catch(e){$('loginCard').classList.remove('hidden');setStatus('No se ha podido entrar: '+(e.message||e));}finally{setBusy(false);}}function renderDashboard(d){const s=d.student,g=d.general;$('loginCard').classList.add('hidden');$('studentName').textContent=s.nombre+' '+s.apellidos;$('studentMail').textContent=s.email+' · '+s.clase;$('xp').textContent=g.xp;$('level').textContent=g.level;$('plumas').textContent=g.plumas;$('grade').textContent=d.grade.score||0;$('levelFill').style.width=(g.levelProgress||0)+'%';renderGames(d.games);renderRows('missions',d.missions.map(m=>({l:m.title+' ('+m.progress+'/'+m.target+')',r:m.completed?'✅':'⌛'})));renderRows('rankingRows',d.ranking.map((r,i)=>({l:(i+1)+'. '+r.nombre,r:r.xp+' XP'})));}
+let meta=null,token='',currentDashboard=null,busy=false,loaderTimer=null,loaderValue=0;const $=id=>document.getElementById(id);function callServer(fn,args){return new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn].apply(null,args||[]);});}function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}function bannerUrl(id,banner){if(BANNERS[id])return /^https:\/\//i.test(BANNERS[id])?BANNERS[id]:ASSET_BASE+BANNERS[id];const direct=String(banner||'');if(/^https:\/\//i.test(direct))return direct;return ASSET_BASE+((/\.(?:png|jpe?g|webp|svg)$/i.test(direct)?direct:'')||'maniacgrafia-collection-v3.webp');}function setStatus(t){$('status').textContent=t;}function showLoader(text,start){$('loader').classList.add('open');loaderValue=start||8;updateLoader(text||'Cargando...',loaderValue);clearInterval(loaderTimer);loaderTimer=setInterval(()=>{loaderValue=Math.min(92,loaderValue+Math.ceil((94-loaderValue)/12));updateLoader(null,loaderValue)},450)}function updateLoader(text,pct){if(text)$('loaderText').textContent=text;$('loaderPct').textContent=Math.round(pct)+'%';$('loaderFill').style.width=Math.round(pct)+'%'}function hideLoader(){clearInterval(loaderTimer);updateLoader('Listo.',100);setTimeout(()=>$('loader').classList.remove('open'),180)}function setBusy(v,t){busy=v;if(v)showLoader(t||'Cargando...',20);else hideLoader();if(t)setStatus(t)}function jump(id,btn){document.getElementById(id)?.scrollIntoView({block:'start'});document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active')}function toggleTheme(){document.body.classList.toggle('light');localStorage.setItem('LA_THEME',document.body.classList.contains('light')?'light':'dark')}function logout(){localStorage.removeItem('LA_STUDENT_TOKEN');localStorage.removeItem('LA_DASHBOARD_CACHE');token='';currentDashboard=null;$('loginCard').classList.remove('hidden');setStatus('Sesión cerrada.')}async function boot(){const catalogCacheVersion='20261005-forja-v1';if(localStorage.getItem('LA_CATALOG_CACHE_VERSION')!==catalogCacheVersion){localStorage.removeItem('LA_DASHBOARD_CACHE');localStorage.removeItem('LA_META_CACHE');localStorage.setItem('LA_CATALOG_CACHE_VERSION',catalogCacheVersion);}if(localStorage.getItem('LA_THEME')==='light')document.body.classList.add('light');bind();showLoader('Preparando interfaz...',8);if(token)$('loginCard').classList.add('hidden');const cachedDash=window.__LA_TEACHER_PLAYER_ENTRY__?null:readCache('LA_DASHBOARD_CACHE');if(cachedDash){currentDashboard=cachedDash;renderDashboard(cachedDash)}try{const cachedMeta=readCache('LA_META_CACHE');if(cachedMeta){meta=cachedMeta;renderClasses(false);updateLoader('Usando datos guardados...',35)}meta=await callServer('getPublicMetaV03');saveCache('LA_META_CACHE',meta);$('version').textContent='v'+(meta.version||'0.4');renderClasses(!cachedMeta);updateLoader('Cargando sesión...',65);if(token){try{currentDashboard=await callServer('getStudentDashboardByToken',[token]);saveCache('LA_DASHBOARD_CACHE',currentDashboard);renderDashboard(currentDashboard);$('loginCard').classList.add('hidden');}catch(e){localStorage.removeItem('LA_STUDENT_TOKEN');token='';$('loginCard').classList.remove('hidden');setStatus('Sesión caducada. Entra de nuevo.');}}else setStatus('Datos básicos cargados.');}catch(e){$('loginCard').classList.remove('hidden');setStatus('Error al cargar: '+(e.message||e));}finally{hideLoader()}}function bind(){document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>jump(b.dataset.target,b)));$('themeBtn').onclick=toggleTheme;$('logoutBtn').onclick=logout;$('loginBtn').onclick=login;$('gameModalClose').onclick=()=>$('gameModal').classList.remove('open');$('gameModalMain').onclick=()=>$('gameModal').classList.remove('open')}function renderClasses(loadStudents=true){const sel=$('classSelect');sel.innerHTML=meta.classes.map(c=>`<option value="${esc(c.classCode)}">${esc(c.nombreVisible)}</option>`).join('');sel.onchange=loadStudentsForClass;if(loadStudents)loadStudentsForClass();}async function loadStudentsForClass(){if(busy)return;const cls=$('classSelect').value;setStatus('Cargando alumnos de '+cls+'...');const key='LA_STUDENTS_'+cls;const cached=readCache(key);if(cached)renderStudents(cached);try{const students=await callServer('getStudentsByClassV03',[cls]);saveCache(key,students);renderStudents(students);setStatus('Alumnos cargados. Escribe tu PIN.');}catch(e){setStatus('Error al cargar alumnos: '+(e.message||e));}}function renderStudents(students){$('studentSelect').innerHTML=students.map(s=>`<option value="${esc(s.studentId)}">${esc(s.nombre)} ${esc(s.apellidos)}</option>`).join('')}async function login(){if(busy)return;setBusy(true,'Entrando...');try{const res=await callServer('loginStudent',[$('studentSelect').value,$('pin').value]);token=res.token;localStorage.setItem('LA_STUDENT_TOKEN',token);currentDashboard=res.dashboard;saveCache('LA_DASHBOARD_CACHE',currentDashboard);renderDashboard(currentDashboard);$('loginCard').classList.add('hidden');setStatus('Sesión iniciada.');}catch(e){$('loginCard').classList.remove('hidden');setStatus('No se ha podido entrar: '+(e.message||e));}finally{setBusy(false);}}function renderDashboard(d){const s=d.student,g=d.general;$('loginCard').classList.add('hidden');$('studentName').textContent=s.nombre+' '+s.apellidos;$('studentMail').textContent=s.email+' · '+s.clase;$('xp').textContent=g.xp;$('level').textContent=g.level;$('plumas').textContent=g.plumas;$('grade').textContent=d.grade.score||0;$('levelFill').style.width=(g.levelProgress||0)+'%';renderGames(d.games);renderRows('missions',d.missions.map(m=>({l:m.title+' ('+m.progress+'/'+m.target+')',r:m.completed?'✅':'⌛'})));renderRows('rankingRows',d.ranking.map((r,i)=>({l:(i+1)+'. '+r.nombre,r:r.xp+' XP'})));}
 // Pictogramas vectoriales del catálogo: sin emojis y sin recursos gráficos nuevos.
 const GAME_CARD_ICON_PATHS={
   "battlegrafia":"M6 3l12 18 M18 3L6 21 M4 5l3-2 2 3-3 2 M20 5l-3-2-2 3 3 2",
@@ -806,7 +806,10 @@ const LA_SUPABASE_KEY='sb_publishable_zScSYh0tbpXLcY_5iyzsqQ_wepkdqKe';
 const LA_SUPABASE_SESSION_KEY='LA_SUPABASE_SESSION';
 const LA_LEGACY_SESSION_KEY='LA_LEGACY_STUDENT_TOKEN';
 let supabaseBackend=false;
-let legacySessionToken=localStorage.getItem(LA_LEGACY_SESSION_KEY)||'';
+let legacySessionToken='';
+// El acceso antiguo no debe restablecer una sesión basada en PIN.
+localStorage.removeItem('LA_STUDENT_TOKEN');
+localStorage.removeItem(LA_LEGACY_SESSION_KEY);
 const legacyTokenBySupabaseToken=new Map();
 let studentSessionGeneration=0;
 let supabaseIdentityPromise=null;
@@ -816,8 +819,7 @@ function supabaseErrorMessage(code,status){
   if(code==='session_expired')return 'La sesión ha caducado. Vuelve a entrar.';
   if(code==='invalid_credentials'||status===401)return 'Credenciales incorrectas.';
   if(code==='temporarily_blocked'||status===429)return 'Demasiados intentos. Espera unos minutos.';
-  if(code==='wrong_current_pin')return 'El PIN actual no es correcto.';
-  if(code==='invalid_pin_format')return 'El PIN debe tener entre 4 y 8 nÃºmeros.';
+  if(code==='google_login_required')return 'Entra con tu cuenta de Google de Fomento.';
   if(code==='invalid_avatar')return 'La configuraciÃ³n del avatar no es vÃ¡lida.';
   return 'No se ha podido conectar con LenguArcade.';
 }
@@ -937,30 +939,15 @@ async function loadSupabaseDashboard(accessToken){
   return callSupabaseFunction('student-dashboard',{},accessToken);
 }
 
-async function loginSupabaseStudent(email,pinValue,persist){
-  // El rival necesita una identidad separada de la sesión principal.
-  const auth=persist?await getOrCreateSupabaseAnonymousSession():await createSupabaseAnonymousSession();
-  const loginResult=await callSupabaseFunction('pin-login',{email,pin:pinValue},auth.access_token);
-  const dashboard=await loadSupabaseDashboard(auth.access_token);
-  return {ok:true,source:'supabase',token:auth.access_token,refreshToken:auth.refresh_token,student:loginResult.profile,dashboard};
+// Los accesos por PIN y clave quedan retirados. No generar identidades
+// anónimas ni volver a ejecutar rutas antiguas desde este cliente.
+async function loginSupabaseStudent() {
+  throw new Error('El acceso con PIN ya no está disponible. Entra con Google de Fomento.');
 }
-
-async function loginSupabaseTeacher(password,persist){
-  const auth=persist?await getOrCreateSupabaseAnonymousSession():await createSupabaseAnonymousSession();
-  const loginResult=await callSupabaseFunction('teacher-login',{password},auth.access_token);
-  const dashboard=await loadSupabaseDashboard(auth.access_token);
-  return {ok:true,source:'supabase',teacherMode:true,token:auth.access_token,refreshToken:auth.refresh_token,student:loginResult.profile,dashboard};
+async function loginSupabaseTeacher() {
+  throw new Error('La clave de profesor se ha retirado. Entra con Google de Fomento.');
 }
-
-function connectLegacyStudentInBackground(email,pinValue,accessToken){
-  const generation=studentSessionGeneration;
-  studentCallServerBase('loginStudent',[email,pinValue]).then(result=>{
-    if(generation!==studentSessionGeneration||!secureSessionVerified||!supabaseBackend)return;
-    legacySessionToken=result.token;
-    localStorage.setItem(LA_LEGACY_SESSION_KEY,legacySessionToken);
-    legacyTokenBySupabaseToken.set(accessToken,legacySessionToken);
-  }).catch(error=>console.warn('La copia de respaldo en Sheets no pudo iniciar sesiÃ³n.',error));
-}
+function connectLegacyStudentInBackground() {}
 
 function legacyTokenFor(accessToken){
   return legacyTokenBySupabaseToken.get(accessToken)||(accessToken===token?legacySessionToken:'');
@@ -1012,7 +999,7 @@ async function restoreSupabaseStudentSession(){
     supabaseBackend=false;
     secureSessionVerified=false;
     setSecureLoginStatus(error.code==='session_expired'
-      ?'Tu sesión ha caducado. Entra de nuevo con tu cuenta o PIN.'
+      ?'Tu sesión ha caducado. Entra de nuevo con tu cuenta de Google de Fomento.'
       :'No se ha podido recuperar la sesión. Entra de nuevo.');
     return false;
   }
@@ -1055,23 +1042,8 @@ callServer=async function(fn,args){
       const dashboard=await loadSupabaseDashboard(accessToken);
       return Object.assign({},updated,{dashboard});
     }
-    if(fn==='changeStudentPinV03'){
-      const accessToken=await ensureSupabaseAccessToken(args[0]||token);
-      const changed=await callSupabaseFunction('student-profile',{action:'changePin',oldPin:args[1],newPin:args[2]},accessToken);
-      const legacyToken=legacyTokenFor(accessToken);
-      if(legacyToken)studentCallServerBase('changeStudentPinV03',[legacyToken,args[1],args[2]]).catch(()=>{});
-      return changed;
-    }
-    if(fn==='loginGameOpponent'){
-      const opponent=await loginSupabaseStudent(args[1],args[2],false);
-      const game=(opponent.dashboard.games||[]).find(item=>item.gameId===args[3])||null;
-      if(legacySessionToken){
-        studentCallServerBase('loginGameOpponent',[legacySessionToken,args[1],args[2],args[3]]).then(result=>{
-          legacyTokenBySupabaseToken.set(opponent.token,result.token);
-        }).catch(()=>{});
-      }
-      return {ok:true,token:opponent.token,student:opponent.dashboard.student,game};
-    }
+    if(fn==='changeStudentPinV03')throw new Error('El PIN ya no se utiliza. Entra con Google de Fomento.');
+    if(fn==='loginGameOpponent')throw new Error('Utiliza el código de vinculación de jugadores, no un PIN.');
   }
   const result=await studentCallServerBase(fn,args);
   if(fn==='getStudentDashboardByToken')secureSessionVerified=true;
@@ -1088,68 +1060,23 @@ function secureLoginElement(selector){
 }
 
 function mountSecureStudentLogin(){
+  // Pantalla transitoria sin credenciales; el bloque de Google monta su
+  // formulario definitivo al terminar de cargar el HTML.
   document.body.classList.add('authPending');
   const card=$('loginCard');
   card.classList.remove('hidden');
-  card.innerHTML=`
-    <div class="authShell">
-      <section class="authWelcome">
-        <div class="authWelcomeLogo" aria-hidden="true"></div>
-        <h1><span class="grad">LenguArcade</span></h1>
-        <p>Tu universo de juegos de Lengua. Identifícate antes de entrar para que tu progreso, tus logros y tu personaje sean solo tuyos.</p>
-      </section>
-      <section class="authForm" aria-labelledby="secureLoginTitle">
-        <div class="sub">ACCESO DE ALUMNOS</div>
-        <h2 id="secureLoginTitle">Entra en tu cuenta</h2>
-        <p class="sub">Usa tu correo institucional completo y tu PIN personal.</p>
-        <span class="authDomain">@alumno.fomento.edu</span>
-        <div class="field">
-          <label>Correo institucional</label>
-          <input name="studentEmail" type="email" inputmode="email" autocomplete="username" placeholder="nombre.apellidos@alumno.fomento.edu" spellcheck="false">
-        </div>
-        <div class="field">
-          <label>PIN</label>
-          <input name="studentPin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" placeholder="Tu PIN">
-        </div>
-        <button type="button" data-secure-login>Entrar en LenguArcade</button>
-        <div class="status authStatus" data-auth-status>Introduce tus datos para continuar.</div>
-        <div class="teacherAccess">
-          <button type="button" class="teacherToggle" data-teacher-toggle>Entrar como profesor</button>
-          <div class="teacherPanel" data-teacher-panel>
-            <p>Modo profe jugador: usa tu clave de profesor y entrarás al arcade con tu propio perfil para probar y competir.</p>
-            <div class="field">
-              <label>Clave de profesor</label>
-              <input name="teacherPassword" type="password" autocomplete="current-password" placeholder="Clave de profesor">
-            </div>
-            <button type="button" data-teacher-login>Entrar como profe jugador</button>
-          </div>
-        </div>
-        <div class="authSecurity"><span>✓</span><span>No mostramos listas de clases ni de alumnos. Si has iniciado sesión con una cuenta escolar de Google, también comprobamos que coincida con el correo introducido.</span></div>
-      </section>
-    </div>`;
-
-  ['version','status'].forEach(id=>{
-    const hidden=document.createElement('span');
-    hidden.id=id;
-    hidden.hidden=true;
-    card.appendChild(hidden);
-  });
-
-  const email=secureLoginElement('[name="studentEmail"]');
-  const pinInput=secureLoginElement('[name="studentPin"]');
-  const button=secureLoginElement('[data-secure-login]');
-  const teacherToggle=secureLoginElement('[data-teacher-toggle]');
-  const teacherPanel=secureLoginElement('[data-teacher-panel]');
-  const teacherPassword=secureLoginElement('[name="teacherPassword"]');
-  const teacherButton=secureLoginElement('[data-teacher-login]');
-  const submit=()=>secureStudentLogin();
-  button.onclick=submit;
-  teacherToggle.onclick=()=>teacherPanel.classList.toggle('open');
-  teacherButton.onclick=()=>secureTeacherLogin();
-  email.addEventListener('keydown',event=>{if(event.key==='Enter')pinInput.focus();});
-  pinInput.addEventListener('keydown',event=>{if(event.key==='Enter')submit();});
-  teacherPassword.addEventListener('keydown',event=>{if(event.key==='Enter')secureTeacherLogin();});
-  setTimeout(()=>email.focus(),0);
+  card.innerHTML=`<div class="authShell">
+    <section class="authWelcome">
+      <div class="authWelcomeLogo" aria-hidden="true"></div>
+      <h1><span class="grad">LenguArcade</span></h1>
+      <p>Entra exclusivamente con tu cuenta de Google de Fomento.</p>
+    </section>
+    <section class="authForm">
+      <h2>Acceso del colegio</h2>
+      <p class="sub">Preparando la conexión segura con Google...</p>
+      <div class="status authStatus" data-auth-status>Comprobando tu sesión...</div>
+    </section>
+    </div><span id="version" hidden></span><span id="status" hidden></span>`;
 }
 
 function setSecureLoginStatus(message){
@@ -1162,89 +1089,13 @@ function revealStudentApp(){
   $('loginCard').classList.add('hidden');
 }
 
+// Los handlers anteriores quedan desactivados; Google redefine las
+// funciones públicas en mountGoogleStudentLogin al inicializarse.
 async function secureTeacherLogin(){
-  if(busy)return;
-  const passwordInput=secureLoginElement('[name="teacherPassword"]');
-  const button=secureLoginElement('[data-teacher-login]');
-  const password=String(passwordInput.value||'');
-  if(password.length<8){
-    setSecureLoginStatus('Introduce la clave completa de profesor.');
-    return;
-  }
-  busy=true;
-  button.disabled=true;
-  setSecureLoginStatus('Entrando como profe jugador...');
-  try{
-    const result=await loginSupabaseTeacher(password,true);
-    secureSessionVerified=true;
-    token=result.token;
-    supabaseBackend=true;
-    studentSessionGeneration++;
-    legacySessionToken='';
-    localStorage.removeItem('LA_STUDENT_TOKEN');
-    localStorage.removeItem(LA_LEGACY_SESSION_KEY);
-    currentDashboard=result.dashboard;
-    saveCache('LA_DASHBOARD_CACHE',currentDashboard);
-    passwordInput.value='';
-    renderDashboard(currentDashboard);
-    revealStudentApp();
-    setStatus('Modo profesor jugador activado.');
-  }catch(error){
-    secureSessionVerified=false;
-    setSecureLoginStatus(error.message||'No se ha podido iniciar sesión como profesor.');
-  }finally{
-    busy=false;
-    button.disabled=false;
-  }
+  throw new Error('Entra con la cuenta Google de Fomento.');
 }
-
 async function secureStudentLogin(){
-  if(busy)return;
-  const email=String(secureLoginElement('[name="studentEmail"]').value||'').trim().toLowerCase();
-  const pinValue=String(secureLoginElement('[name="studentPin"]').value||'').trim();
-  const button=secureLoginElement('[data-secure-login]');
-  if(!/^[^@\s]+@alumno\.fomento\.edu$/i.test(email)){
-    setSecureLoginStatus('Introduce tu correo completo @alumno.fomento.edu.');
-    return;
-  }
-  if(!/^\d{4,8}$/.test(pinValue)){
-    setSecureLoginStatus('El PIN debe tener entre 4 y 8 números.');
-    return;
-  }
-  busy=true;
-  button.disabled=true;
-  setSecureLoginStatus('Comprobando tus datos...');
-  try{
-    let result;
-    try{
-      result=await loginSupabaseStudent(email,pinValue,true);
-    }catch(error){
-      if(error.status&&error.status<500)throw error;
-      result=await studentCallServerBase('loginStudent',[email,pinValue]);
-    }
-    secureSessionVerified=true;
-    token=result.token;
-    supabaseBackend=result.source==='supabase';
-    studentSessionGeneration++;
-    if(supabaseBackend){
-      localStorage.removeItem('LA_STUDENT_TOKEN');
-      connectLegacyStudentInBackground(email,pinValue,token);
-    }else{
-      legacySessionToken=token;
-      localStorage.setItem('LA_STUDENT_TOKEN',token);
-      localStorage.setItem(LA_LEGACY_SESSION_KEY,token);
-    }
-    currentDashboard=result.dashboard;
-    saveCache('LA_DASHBOARD_CACHE',currentDashboard);
-    renderDashboard(currentDashboard);
-    revealStudentApp();
-  }catch(error){
-    secureSessionVerified=false;
-    setSecureLoginStatus(error.message||'No se ha podido iniciar sesión.');
-  }finally{
-    busy=false;
-    button.disabled=false;
-  }
+  throw new Error('Entra con la cuenta Google de Fomento.');
 }
 
 async function secureStudentLogout(){
@@ -1274,10 +1125,6 @@ async function secureStudentLogout(){
     secureSessionVerified=false;
     document.body.classList.add('authPending');
     $('loginCard').classList.remove('hidden');
-    const pinInput=secureLoginElement('[name="studentPin"]');
-    if(pinInput)pinInput.value='';
-    const emailInput=secureLoginElement('[name="studentEmail"]');
-    if(emailInput)emailInput.value='';
     setSecureLoginStatus('Sesión cerrada correctamente.');
     return true;
   }catch(error){
@@ -1289,7 +1136,7 @@ async function secureStudentLogout(){
   }
 }
 
-login=secureStudentLogin;
+login=function(){return window.secureStudentLogin();};
 logout=secureStudentLogout;
 $('logoutBtn').onclick=secureStudentLogout;
 

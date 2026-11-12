@@ -1,3 +1,11 @@
+## 2026-11-12 · Acceso exclusivo mediante Google de Fomento
+
+- Se elimina el formulario antiguo de correo/PIN de la pantalla de alumno, incluso durante la carga. Queda únicamente la cuenta institucional Google: `@alumno.fomento.edu` para alumnos y `@fomento.edu` para profesores.
+- Se retiran las rutas de login por PIN y clave docente en Apps Script y Supabase; las Edge Functions heredadas responden HTTP 410, y el cambio de PIN queda bloqueado. Las sesiones Google pueden conservarse y refrescarse.
+- Se conserva el código efímero de 6 cifras **para conectar jugadores**, que no es una credencial de acceso.
+- No se modifican perfiles, XP, partidas, talleres, RLS ni tablas. Las migraciones antiguas de hashes PIN quedan únicamente como legado, sin acceso desde las rutas operativas.
+- Para actualizar el acceso publicado en Apps Script será necesario desplegar el nuevo HTML y los `.gs` del repositorio, manteniendo el ID de despliegue existente. Las Edge Functions se publican por separado.
+
 ## 2026-11-12 · Limitar las consultas simultáneas del panel del alumno
 
 - La carga del panel lanzaba 12 consultas a la vez por alumno, una ráfaga de hasta 360 consultas con 30 alumnos. Los errores 546 persistían en `student-dashboard` incluso tras eliminar la segunda validación de GoTrue.

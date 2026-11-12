@@ -144,12 +144,7 @@ function isTeacherAllowed_(email) {
 }
 
 function loginStudentByIdOrEmail(loginValue, pin) {
-  const value = String(loginValue || '').trim();
-  if (!value) throw new Error('Falta el usuario.');
-  if (value.indexOf('@') !== -1) return loginStudent(value, pin);
-  const student = findStudentById_(value);
-  if (!student) throw new Error('No encuentro ese alumno.');
-  return loginStudent(student.email, pin);
+  throw new Error('El acceso con PIN se ha retirado. Entra con tu cuenta de Google de Fomento.');
 }
 
 // -----------------------------------------------------------------------------
@@ -187,16 +182,7 @@ function getStudentsByClassV03(classCode) {
 }
 
 function changeStudentPinV03(token, oldPin, newPin) {
-  ensureSheets_();
-  const studentId = requireSession_(token, 'student');
-  const student = findStudent_(studentId);
-  if (!student) throw new Error('Alumno no encontrado.');
-  if (String(student.pin || '') !== String(oldPin || '')) throw new Error('El PIN actual no es correcto.');
-  const clean = String(newPin || '').trim();
-  if (!/^\d{4,8}$/.test(clean)) throw new Error('El nuevo PIN debe tener entre 4 y 8 números.');
-  updateStudent_(studentId, { pin:clean });
-  clearCacheV03_();
-  return { ok:true, message:'PIN actualizado correctamente.' };
+  throw new Error('El PIN ya no se utiliza. Accede con Google de Fomento.');
 }
 
 function updateStudentAvatar(token, avatarConfig) {

@@ -1,3 +1,11 @@
+## 2026-11-12 · Acceso solo Google de Fomento
+
+- `npm run check` incluye autenticación Google alumno/profesor, restauración, refresh, logout, guardado y simulación de 30 usuarios que entran exclusivamente con Google.
+- Comprobar que el HTML no muestra correo/PIN ni clave docente, ni siquiera transitoriamente, y que los endpoints `pin-login` y `teacher-login` responden 410 sin crear sesiones. La acción `student-profile/changePin` también debe devolver 410.
+- Verificar `@alumno.fomento.edu` en alumno, `@fomento.edu` en profesor y profe-jugador, incluida la experiencia de alumno de prueba; una cuenta ajena al dominio no debe entrar.
+- Comprobar la reconexión tras recarga, XP/progreso, apertura de juego, Rayuela, rankings y multijugador mediante **código de jugador**, sin PIN.
+- **Para producción**: publicar las tres Edge Functions y después actualizar el despliegue de Apps Script existente; comprobar la URL `/exec`, no solamente el archivo de GitHub. La actualización de GitHub no publica por sí sola el HTML de Apps Script.
+
 ## 2026-11-12 · Limitar ráfagas de consultas del dashboard
 
 - `node --no-warnings scripts/check-dashboard-query-batching.mjs` simula 30 paneles × 12 lecturas: máximo dos lecturas concurrentes por alumno (60 globales), resultado y orden intactos.

@@ -76,11 +76,11 @@ if (!sql.includes("function public.establish_pin_session") ||
 if (/\bservice_role\b.*(?:html|client|browser)/i.test(sql)) {
   errors.push("La migracion sugiere exponer service_role al navegador.");
 }
-if (!pinLogin.includes('Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")') ||
-    !pinLogin.includes('authUserIdFromGatewayVerifiedJwt(request)') ||
-    pinLogin.includes('userClient.auth.getUser()') ||
-    !pinLogin.includes('adminClient.rpc("establish_pin_session"')) {
-  errors.push("La Edge Function de PIN debe validar al usuario y delegar la sesion en el RPC seguro.");
+if (!pinLogin.includes('error:"google_login_required"') ||
+    !pinLogin.includes('}, 410)') ||
+    pinLogin.includes('establish_pin_session') ||
+    pinLogin.includes('plain_pin:')) {
+  errors.push("La Edge Function de PIN debe rechazar siempre el acceso antiguo (410).");
 }
 if (pinLogin.includes("SUPABASE_SERVICE_ROLE_KEY=")) {
   errors.push("La Edge Function contiene una clave service_role incrustada.");
@@ -91,10 +91,10 @@ if (!teacherMigration.includes("create table private.teacher_secrets") ||
     !teacherMigration.includes("to service_role")) {
   errors.push("La autenticacion del profesor debe usar un hash privado y un RPC de service_role.");
 }
-if (!teacherLogin.includes('userClient.auth.getUser()') ||
-    !teacherLogin.includes('admin.rpc("establish_teacher_session"') ||
-    teacherLogin.includes("SUPABASE_SERVICE_ROLE_KEY=")) {
-  errors.push("La Edge Function del profesor debe validar Auth sin incrustar secretos.");
+if (!teacherLogin.includes('error:"google_login_required"') ||
+    !teacherLogin.includes('}, 410)') ||
+    teacherLogin.includes('establish_teacher_session')) {
+  errors.push("La Edge Function con clave docente debe permanecer desactivada (410).");
 }
 
 for (const column of ["description","competencies","integration","official"]) {
