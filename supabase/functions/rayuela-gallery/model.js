@@ -91,3 +91,12 @@ export function readingProject(raw){
   const reachable=reachableNodes(safe);safe.nodes=safe.nodes.filter(n=>reachable.has(n.id));
   return safe;
 }
+
+
+// Spreadsheet grids have 81 writing cells. Generated missing-path placeholders are not written scenes.
+export function sceneProgress(story){
+  if(!String(story.source_project_id||'').startsWith('sheets_'))return {scenes:story.project.nodes.length};
+  const nodes=story.project.nodes.filter(n=>n.row>=0&&n.row<9&&n.col>=0&&n.col<9);
+  const written=new Set(nodes.filter(n=>String(n.text||'').trim()&&!(n.title==='Camino pendiente'&&String(n.text).startsWith('Los autores todavía no han escrito esta parte'))).map(n=>n.row+','+n.col)).size;
+  return {scenes:written,sceneSlots:81,scenesMissing:81-written};
+}

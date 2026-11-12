@@ -151,3 +151,13 @@ await call('student','peer',{...visit,action:'rate',...ballot});
 await assert.rejects(call('student','peer',{...visit,action:'update',published:false}),/forbidden/);
 await assert.rejects(call('student','peer',{...visit,classroomId:'B',action:'get'}),/no_classroom/);
 console.log('Intercambio Rayuela: bloqueo del servidor, cambio de clase, anonimato y voto tras descubrir finales correctos.');
+
+
+const sheetStory={source_project_id:'sheets_test',project:{nodes:Array.from({length:72},(_,i)=>({id:'n'+i,row:Math.floor(i/9),col:i%9,text:'Escena escrita',title:''}))}};
+assert.deepEqual(model.sceneProgress(sheetStory),{scenes:72,sceneSlots:81,scenesMissing:9});
+sheetStory.project.nodes.push({row:8,col:0,title:'Camino pendiente',text:'Los autores todavía no han escrito esta parte de la historia.'});
+assert.equal(model.sceneProgress(sheetStory).scenes,72);
+assert(!('sceneSlots' in model.sceneProgress({project:sheetStory.project})));
+assert(view.card({...cardData,scenes:72,sceneSlots:81,scenesMissing:9},0).includes('72 de 81 escenas escritas'));
+assert(view.card({...cardData,scenes:72,sceneSlots:81,scenesMissing:9},0).includes('9 casillas sin texto'));
+console.log('Escenas de Sheets: celdas escritas, casillas vacías y marcadores pendientes distinguidos.');
