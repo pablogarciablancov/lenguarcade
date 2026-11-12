@@ -1,3 +1,9 @@
+## 2026-11-12 · Limitar ráfagas de consultas del dashboard
+
+- `node --no-warnings scripts/check-dashboard-query-batching.mjs` simula 30 paneles × 12 lecturas: máximo dos lecturas concurrentes por alumno (60 globales), resultado y orden intactos.
+- `npm run check`: ejecutar todos los controles de regresión, incluidos autenticación, XP, talleres y guardado.
+- Publicar únicamente `student-dashboard` tras CI; consultar los logs por `deployment_id`/`version` para separar peticiones antiguas aún activas de la nueva versión. Comprobar 30 accesos reales sin 504/546.
+
 ## 2026-11-12 · Acceso simultáneo y JWT validado por Supabase
 
 - Ejecutar `node --no-warnings scripts/check-live-access.mjs`, `node scripts/check-supabase-schema.mjs` y `npm run check` sobre la rama de integración. Verifican `verify_jwt=true`, claims JWT válidos/no válidos, sesión revocada y que no reaparezca la llamada a `/auth/v1/user` en las rutas optimizadas.
