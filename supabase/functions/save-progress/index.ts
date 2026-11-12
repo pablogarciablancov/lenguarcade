@@ -148,7 +148,8 @@ Deno.serve(async (request) => {
   if (request.method !== "POST") return jsonResponse({ ok:false, error:"method_not_allowed" }, 405);
 
   try {
-    const { admin, profileId } = await requireProfileSession(request);
+    // La verificación JWT del gateway evita una consulta GoTrue por guardado.
+    const { admin, profileId } = await requireProfileSession(request, { gatewayVerifiedJwt:true });
     const body = await request.json().catch(() => ({}));
     if (["teacher_adjustment","class_boss_reward","rayuela_ending_reward"].includes(String(body.eventType || "").trim().toLowerCase())) {
       return jsonResponse({ok:false,error:"reserved_event_type"},400);

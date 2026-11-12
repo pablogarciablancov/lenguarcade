@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { corsHeaders, jsonResponse } from "../_shared/lenguarcade.ts";
+import { authUserIdFromGatewayVerifiedJwt, corsHeaders, jsonResponse } from "../_shared/lenguarcade.ts";
 
 function cleanEmail(value: unknown) {
   return String(value || "").trim().toLowerCase();
@@ -45,12 +45,10 @@ Deno.serve(async (request) => {
       return jsonResponse({ ok:false, error:"forbidden_google_account" }, 403);
     }
 
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global:{ headers:{ Authorization:authorization } },
-      auth:{ persistSession:false, autoRefreshToken:false },
-    });
-    const { data:userData, error:userError } = await userClient.auth.getUser();
-    if (userError || !userData.user) return jsonResponse({ ok:false, error:"unauthorized" }, 401);
+    // verify_jwt=true en Supabase: el gateway autentica la firma antes de entrar.
+    // Evitar una petición adicional a /auth/v1/user por cada alumno que entra.
+    const authUserId = authUserIdFromGatewayVerifiedJwt(request);
+    if (!authUserId) return jsonResponse({ ok:false, error:"unauthorized" }, 401);
 
     const admin = createClient(supabaseUrl, serviceRoleKey, {
       auth:{ persistSession:false, autoRefreshToken:false },
@@ -106,17 +104,17 @@ Deno.serve(async (request) => {
     const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
     await admin.from("app_sessions")
       .update({ revoked_at:new Date().toISOString() })
-      .eq("auth_user_id", userData.user.id)
+      .eq("auth_user_id", authUserId)
       .is("revoked_at", null);
     const { error:sessionError } = await admin.from("app_sessions").insert({
-      auth_user_id:userData.user.id,
+      auth_user_id:authUserId,
       profile_id:profile.id,
       expires_at:expiresAt,
     });
     if (sessionError) throw sessionError;
     await admin.from("profiles").update({
       last_login_at:new Date().toISOString(),
-      auth_user_id:userData.user.id,
+      auth_user_id:authUserId,
     }).eq("id", profile.id);
 
     return jsonResponse({

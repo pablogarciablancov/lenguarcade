@@ -15,6 +15,21 @@ assert.ok(start>0,'El sincronizador del alumno debe estar presente');
 const clientSource=html.slice(start+8,html.indexOf('</script>',start));
 assert.match(read('supabase/config.toml'),/\[functions\.student-access-state\]\s*verify_jwt = true/);
 assert.ok(!handlerSource.includes('student-dashboard'));
+// Ninguna ruta de alta concurrencia debe duplicar la verificación remota de Auth.
+const gatewayConfig=read('supabase/config.toml');
+for (const name of ['pin-login','google-student-login','student-dashboard','save-progress','student-access-state']) {
+  assert.match(gatewayConfig,new RegExp('\\[functions\\.'+name+'\\]\\s*verify_jwt = true'));
+}
+const googleLoginSource=read('supabase/functions/google-student-login/index.ts');
+const pinLoginSource=read('supabase/functions/pin-login/index.ts');
+const studentDashboardSource=read('supabase/functions/student-dashboard/index.ts');
+const progressSource=read('supabase/functions/save-progress/index.ts');
+for(const source of [googleLoginSource,pinLoginSource]){
+  assert.match(source,/authUserIdFromGatewayVerifiedJwt\(request\)/);
+  assert.doesNotMatch(source,/userClient\.auth\.getUser\(\)/);
+}
+assert.match(studentDashboardSource,/requireProfileSession\(request,\s*\{\s*gatewayVerifiedJwt:true\s*\}\)/);
+assert.match(progressSource,/requireProfileSession\(request,\s*\{\s*gatewayVerifiedJwt:true\s*\}\)/);
 
 function evaluateTypeScript(source,context,tail=''){
   const withoutImports=source.replace(/^import\s+(?:\{[\s\S]*?\}|[^;]+)\s+from\s+[^;]+;\s*/gm,'');
@@ -39,11 +54,20 @@ function evaluateTypeScript(source,context,tail=''){
   const context={Deno:{env:{get:key=>env[key]}},Response,TextDecoder,Uint8Array,atob,Date,
     createClient:(_url,key)=>key==='service'?admin:{auth:{async getUser(){getUserCalls++;throw new Error('No debe llamar a Auth');}}},
     corsHeaders:{'Content-Type':'application/json'}};
-  const requireSession=evaluateTypeScript(sharedSource,context,'requireProfileSession');
+  const sessionApi=evaluateTypeScript(sharedSource,context,'({requireProfileSession,authUserIdFromGatewayVerifiedJwt})');
+  const requireSession=sessionApi.requireProfileSession;
   function request(role='authenticated'){
     const payload={sub:id,role,exp:Math.floor(Date.now()/1000)+3600};
     return new Request('https://example.test',{headers:{Authorization:'Bearer header.'+Buffer.from(JSON.stringify(payload)).toString('base64url')+'.signature'}});
   }
+  const gatewayUserId=sessionApi.authUserIdFromGatewayVerifiedJwt;
+  assert.equal(gatewayUserId(request()),id);
+  assert.equal(gatewayUserId(request('anon')),'');
+  assert.equal(gatewayUserId(new Request('https://example.test')),'');
+  const stale=JSON.stringify({sub:id,role:'authenticated',exp:Math.floor(Date.now()/1000)-1});
+  assert.equal(gatewayUserId(new Request('https://example.test',{
+    headers:{Authorization:'Bearer header.'+Buffer.from(stale).toString('base64url')+'.signature'},
+  })),'');
   const result=await requireSession(request(),{gatewayVerifiedJwt:true});
   assert.equal(result.profileId,'p1');
   assert.equal(getUserCalls,0);

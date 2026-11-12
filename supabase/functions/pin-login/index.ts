@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { authUserIdFromGatewayVerifiedJwt } from "../_shared/lenguarcade.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,14 +47,9 @@ Deno.serve(async (request) => {
     return jsonResponse({ ok:false, error:"invalid_credentials" }, 401);
   }
 
-  const userClient = createClient(supabaseUrl, anonKey, {
-    global:{ headers:{ Authorization:authorization } },
-    auth:{ persistSession:false, autoRefreshToken:false },
-  });
-  const { data:userData, error:userError } = await userClient.auth.getUser();
-  if (userError || !userData.user) {
-    return jsonResponse({ ok:false, error:"unauthorized" }, 401);
-  }
+  // Solo con verify_jwt=true: el gateway ya ha verificado la identidad.
+  const authUserId = authUserIdFromGatewayVerifiedJwt(request);
+  if (!authUserId) return jsonResponse({ ok:false, error:"unauthorized" }, 401);
 
   const adminClient = createClient(supabaseUrl, serviceRoleKey, {
     auth:{ persistSession:false, autoRefreshToken:false },
@@ -61,7 +57,7 @@ Deno.serve(async (request) => {
   const { data, error } = await adminClient.rpc("establish_pin_session", {
     login_email:email,
     plain_pin:pin,
-    login_auth_user_id:userData.user.id,
+    login_auth_user_id:authUserId,
   });
   if (error) {
     console.error("pin-login RPC failed", error);

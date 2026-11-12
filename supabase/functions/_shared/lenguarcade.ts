@@ -18,6 +18,27 @@ export function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+// ÚNICAMENTE para funciones que tienen verify_jwt=true en el gateway de Supabase.
+// La firma y la caducidad del JWT ya se comprobaron antes de llegar a Deno.
+// No usar nunca en endpoints públicos ni con verify_jwt=false.
+export function authUserIdFromGatewayVerifiedJwt(request: Request): string {
+  const authorization = request.headers.get("Authorization") || "";
+  if (!authorization.startsWith("Bearer ")) return "";
+  try {
+    const parts = authorization.slice(7).split(".");
+    if (parts.length !== 3) return "";
+    const encoded = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = atob(encoded.padEnd(Math.ceil(encoded.length / 4) * 4, "="));
+    const claims = JSON.parse(new TextDecoder().decode(Uint8Array.from(decoded, char => char.charCodeAt(0))));
+    if (claims.role !== "authenticated" ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claims.sub) ||
+        !Number.isFinite(claims.exp) || claims.exp <= Math.floor(Date.now() / 1000)) return "";
+    return claims.sub;
+  } catch (_error) {
+    return "";
+  }
+}
+
 export async function requireProfileSession(request: Request, options: { gatewayVerifiedJwt?: boolean } = {}) {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
@@ -30,27 +51,8 @@ export async function requireProfileSession(request: Request, options: { gateway
     });
   }
 
-  let authUserId = "";
-  if (options.gatewayVerifiedJwt) {
-    // Solo usar en una Edge Function desplegada con verify_jwt=true: el gateway
-    // comprueba la firma y caducidad antes de que la petición llegue aquí.
-    // Evita llamar a /auth/v1/user cada cinco segundos por cada alumno.
-    try {
-      const parts = authorization.slice(7).split(".");
-      if (parts.length !== 3) throw new Error("invalid JWT");
-      const encoded = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-      const decoded = atob(encoded.padEnd(Math.ceil(encoded.length / 4) * 4, "="));
-      const claims = JSON.parse(new TextDecoder().decode(Uint8Array.from(decoded, char => char.charCodeAt(0))));
-      if (claims.role !== "authenticated" ||
-          !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claims.sub) ||
-          !Number.isFinite(claims.exp) || claims.exp <= Math.floor(Date.now() / 1000)) {
-        throw new Error("invalid claims");
-      }
-      authUserId = claims.sub;
-    } catch (_error) {
-      authUserId = "";
-    }
-  } else {
+  let authUserId = options.gatewayVerifiedJwt ? authUserIdFromGatewayVerifiedJwt(request) : "";
+  if (!options.gatewayVerifiedJwt) {
     const userClient = createClient(supabaseUrl, anonKey, {
       global:{ headers:{ Authorization:authorization } },
       auth:{ persistSession:false, autoRefreshToken:false },
