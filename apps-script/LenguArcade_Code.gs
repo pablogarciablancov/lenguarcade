@@ -106,71 +106,15 @@ function getStudentsByClass(classCode) {
 }
 
 function loginStudent(email, pin) {
-  const cleanEmail = normalizeStudentLoginEmail_(email);
-  const cleanPin = String(pin || '').trim();
-  const throttle = getStudentLoginThrottle_(cleanEmail);
-  if (throttle.blockedUntil > Date.now()) {
-    throw new Error('Demasiados intentos. Espera unos minutos antes de volver a probar.');
-  }
-
-  const student = findStudentByEmail_(cleanEmail);
-  const activeUserEmail = String(getActiveUserEmail_() || '').trim().toLowerCase();
-  const activeSchoolAccount = activeUserEmail.endsWith(LA_CONFIG.STUDENT_DOMAIN);
-  const accountMatches = !activeSchoolAccount || activeUserEmail === cleanEmail;
-  const valid = student &&
-    isTrue_(student.activo) &&
-    /^\d{4,8}$/.test(cleanPin) &&
-    String(student.pin || '') === cleanPin &&
-    accountMatches;
-
-  if (!valid) {
-    registerStudentLoginFailure_(cleanEmail, throttle);
-    Utilities.sleep(300);
-    throw new Error('Correo o PIN incorrectos.');
-  }
-
-  clearStudentLoginFailures_(cleanEmail);
-  const token = createSession_('student', student.studentId);
-  return { ok:true, token:token, student:safeStudent_(student), dashboard:getStudentDashboardCore_(student.studentId) };
+  throw new Error('El acceso con PIN se ha retirado. Entra con tu cuenta de Google de Fomento.');
 }
 
 function loginGameOpponent(primaryToken, email, pin, gameId) {
-  const primaryStudentId = requireSession_(primaryToken, 'student');
-  const cleanEmail = normalizeStudentLoginEmail_(email);
-  const cleanPin = String(pin || '').trim();
-  const throttle = getStudentLoginThrottle_(cleanEmail);
-  if (throttle.blockedUntil > Date.now()) {
-    throw new Error('Demasiados intentos. Espera unos minutos antes de volver a probar.');
-  }
-  const student = findStudentByEmail_(cleanEmail);
-  const valid = student &&
-    isTrue_(student.activo) &&
-    String(student.studentId) !== String(primaryStudentId) &&
-    /^\d{4,8}$/.test(cleanPin) &&
-    String(student.pin || '') === cleanPin;
-  if (!valid) {
-    registerStudentLoginFailure_(cleanEmail, throttle);
-    Utilities.sleep(300);
-    throw new Error('Correo o PIN incorrectos, o el contrincante coincide con el jugador principal.');
-  }
-  const game = findGame_(gameId);
-  if (!game) throw new Error('Juego no reconocido.');
-  clearStudentLoginFailures_(cleanEmail);
-  const opponentToken = createSession_('student', student.studentId);
-  return {
-    ok:true,
-    token:opponentToken,
-    student:safeStudent_(student),
-    game:getStudentGameRecord_(student, game)
-  };
+  throw new Error('El acceso de otro jugador por PIN se ha retirado. Utiliza el código de vinculación de jugadores.');
 }
 
 function loginTeacher(password) {
-  ensureSheets_();
-  const expected = getConfigValue_('TEACHER_PASSWORD');
-  if (!expected) throw new Error('No hay una clave de profesor configurada.');
-  if (String(password || '') !== String(expected)) throw new Error('Clave de profesor incorrecta.');
-  return { ok:true, token:createSession_('teacher', 'teacher'), version:LA_CONFIG.VERSION };
+  throw new Error('El acceso con clave se ha retirado. Entra con tu cuenta de Google de Fomento.');
 }
 
 function getStudentDashboardByToken(token) {
