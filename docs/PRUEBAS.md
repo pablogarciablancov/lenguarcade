@@ -1,3 +1,10 @@
+## 2026-11-12 · Acceso simultáneo y JWT validado por Supabase
+
+- Ejecutar `node --no-warnings scripts/check-live-access.mjs`, `node scripts/check-supabase-schema.mjs` y `npm run check` sobre la rama de integración. Verifican `verify_jwt=true`, claims JWT válidos/no válidos, sesión revocada y que no reaparezca la llamada a `/auth/v1/user` en las rutas optimizadas.
+- Verificar un acceso nuevo con Google y otro con PIN; recargar sesión, cerrar sesión y comprobar rechazo tras revocación.
+- Comprobar el panel completo (clase, ranking, misiones, logros, Flota, juegos y talleres). Abrir un juego, guardar progreso y volver a entrar: XP y partida deben persistir sin duplicados.
+- Prueba de clase en horario acordado: 30 accesos simultáneos con cuentas reales autorizadas; comparar registros de `google-student-login` y `student-dashboard` (200 frente a 504/546) y los tiempos de respuesta con una medición previa equivalente. No declarar resuelto hasta comprobarlo en producción.
+
 ## 29/10/2026 · Arena de Tinta y Acero
 
 - `node games/tinta_y_acero/multiplayer-test.mjs`: conexión lenta, cierre durante carga/consulta, reintento, respuestas tardías, edición y salas finalizadas. Incluido en `check-tinta-online-host.mjs`.
