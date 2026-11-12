@@ -77,7 +77,8 @@ if (/\bservice_role\b.*(?:html|client|browser)/i.test(sql)) {
   errors.push("La migracion sugiere exponer service_role al navegador.");
 }
 if (!pinLogin.includes('Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")') ||
-    !pinLogin.includes('userClient.auth.getUser()') ||
+    !pinLogin.includes('authUserIdFromGatewayVerifiedJwt(request)') ||
+    pinLogin.includes('userClient.auth.getUser()') ||
     !pinLogin.includes('adminClient.rpc("establish_pin_session"')) {
   errors.push("La Edge Function de PIN debe validar al usuario y delegar la sesion en el RPC seguro.");
 }
