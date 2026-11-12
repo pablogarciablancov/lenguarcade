@@ -122,11 +122,11 @@ if (!/function updateStudentAvatar\(token,\s*avatarConfig\)[\s\S]*?requireSessio
 if (!/function normalizeStudentAvatar_\(avatarConfig\)[\s\S]*?LA_AVATAR_OPTIONS\[key\]\.indexOf\(value\)\s*<\s*0/.test(serverSource)) {
   errors.push("updateStudentAvatar debe validar todas las opciones del avatar.");
 }
-if (!/function loginStudent\(email,\s*pin\)[\s\S]*?normalizeStudentLoginEmail_\(email\)[\s\S]*?findStudentByEmail_\(cleanEmail\)/.test(serverSource)) {
-  errors.push("El acceso del alumno debe buscar exclusivamente por correo institucional.");
+if (!/function loginStudent\(email,\s*pin\)\s*\{\s*throw new Error\('El acceso con PIN se ha retirado/.test(serverSource)) {
+  errors.push("El acceso con PIN debe permanecer bloqueado en Apps Script.");
 }
-if (!/function loginStudent\(email,\s*pin\)[\s\S]*?getStudentLoginThrottle_\(cleanEmail\)[\s\S]*?registerStudentLoginFailure_/.test(serverSource)) {
-  errors.push("El acceso del alumno debe limitar los intentos fallidos.");
+if (!/function loginGameOpponent\(primaryToken, email, pin, gameId\)\s*\{\s*throw new Error/.test(serverSource)) {
+  errors.push("El rival no debe autenticarse mediante PIN.");
 }
 if (!/function getStudentsByClass\(classCode\)\s*\{\s*throw new Error/.test(serverSource) ||
     !/function getStudentsByClassV03\(classCode\)\s*\{\s*throw new Error/.test(serverSource)) {
