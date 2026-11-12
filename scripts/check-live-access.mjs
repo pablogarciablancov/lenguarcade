@@ -24,10 +24,10 @@ const googleLoginSource=read('supabase/functions/google-student-login/index.ts')
 const pinLoginSource=read('supabase/functions/pin-login/index.ts');
 const studentDashboardSource=read('supabase/functions/student-dashboard/index.ts');
 const progressSource=read('supabase/functions/save-progress/index.ts');
-for(const source of [googleLoginSource,pinLoginSource]){
-  assert.match(source,/authUserIdFromGatewayVerifiedJwt\(request\)/);
-  assert.doesNotMatch(source,/userClient\.auth\.getUser\(\)/);
-}
+assert.match(googleLoginSource,/authUserIdFromGatewayVerifiedJwt\(request\)/);
+assert.doesNotMatch(googleLoginSource,/userClient\.auth\.getUser\(\)/);
+assert.match(pinLoginSource,/google_login_required/);
+assert.doesNotMatch(pinLoginSource,/establish_pin_session/);
 assert.match(studentDashboardSource,/requireProfileSession\(request,\s*\{\s*gatewayVerifiedJwt:true\s*\}\)/);
 assert.match(progressSource,/requireProfileSession\(request,\s*\{\s*gatewayVerifiedJwt:true\s*\}\)/);
 
