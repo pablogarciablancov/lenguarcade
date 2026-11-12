@@ -58,4 +58,18 @@ const bonusCarry=snapshots([["2026-11-05",1300],["2026-11-06",800]],"2026-11-06"
 assert.equal(bonusCarry.xpPoints,6);
 assert.equal(bonusCarry.bonusPoints,1);
 
-console.log("Flota semanal: 250 XP/punto, topes, constancia, lunes, Madrid e todos los juegos e IDs estables OK");
+
+const receiverHelper=(await import("node:fs")).readFileSync("integrations/flota-las-tablas/validar-puntos-lenguarcade.gs","utf8");
+const validateAward=new Function(receiverHelper+";return validarPuntosPremioLenguArcade_;")();
+const validProfile="11111111-1111-4111-8111-111111111111";
+const weeklyId="LA:WEEK:2026-11-09:"+validProfile+":XP:1";
+const workshopId="LA:"+"a".repeat(64);
+assert.equal(validateAward(validProfile,weeklyId,1),true);
+assert.equal(validateAward(validProfile,weeklyId,5),false);
+assert.equal(validateAward("22222222-2222-4222-8222-222222222222",weeklyId,1),false);
+assert.equal(validateAward(validProfile,"LA:WEEK:2026-11-09:"+validProfile+":XP:7",1),false);
+assert.equal(validateAward(validProfile,"LA:WEEK:2026-11-09:"+validProfile+":CONSTANCIA",1),true);
+assert.equal(validateAward(validProfile,workshopId,5),true);
+assert.equal(validateAward(validProfile,workshopId,1),false);
+
+console.log("Flota semanal: 250 XP/punto, topes, constancia, lunes, Madrid, todos los juegos e IDs estables OK");
