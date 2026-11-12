@@ -44,14 +44,15 @@ const centralServer = fs.readFileSync(path.resolve("apps-script", "LenguArcade_C
 const centralStudent = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Alumno.html"), "utf8");
 const generatedCatalog = fs.readFileSync(path.resolve("apps-script", "LenguArcade_GameCatalog.gs"), "utf8");
 
-if (!/function loginGameOpponent\(primaryToken,\s*email,\s*pin,\s*gameId\)[\s\S]*?requireSession_\(primaryToken,\s*'student'\)/.test(centralServer)) {
-  errors.push("El acceso del contrincante debe exigir la sesión del jugador principal.");
+const pairServer = fs.readFileSync(path.resolve("apps-script", "LenguArcade_Classroom.gs"), "utf8");
+if (!/function loginGameOpponentByCode\(primaryAccessToken, code, gameId\)[\s\S]*?callSupabaseStudentDashboard_\(primaryAccessToken\)/.test(pairServer)) {
+  errors.push("El acceso por código del contrincante debe validar la sesión del jugador principal.");
 }
-const opponentLoginSource = centralServer.match(/function loginGameOpponent\([^)]*\)\s*\{([\s\S]*?)\n\}/);
-if (!opponentLoginSource ||
-    !opponentLoginSource[1].includes("getStudentGameRecord_") ||
-    opponentLoginSource[1].includes("getStudentDashboardCore_")) {
-  errors.push("El acceso del contrincante debe cargar solo su partida, no todo su panel.");
+if (!/function loginGameOpponentByCode[\s\S]*?callSupabaseStudentDashboard_\(data\.token\)[\s\S]*?opponentDashboard\.games/.test(pairServer)) {
+  errors.push("El código de pareja debe cargar el juego del contrincante desde su sesión verificada.");
+}
+if (!/function loginGameOpponent\(primaryToken, email, pin, gameId\)\s*\{\s*throw new Error/.test(centralServer)) {
+  errors.push("El acceso del contrincante por PIN debe permanecer deshabilitado.");
 }
 if (!/function saveGameCheckpoint\(payload\)[\s\S]*?requireSession_\(payload\.sessionToken,\s*'student'\)/.test(centralServer)) {
   errors.push("Los puntos de control de Scrabble deben exigir una sesión de alumno.");
