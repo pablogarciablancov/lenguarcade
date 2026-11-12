@@ -3,7 +3,7 @@ import {
   mondayOf, madridDate, fleetWeeklySnapshots, fleetAwardsForWeek, FLEET_START,
 } from "../supabase/functions/_shared/fleet-weekly.js";
 
-import {isFleetTeacherPilot} from "../supabase/functions/_shared/fleet-weekly-delivery.js";
+import {isFleetTeacherPilot,isAcknowledgedFleetAward,FLEET_WEBHOOK_TIMEOUT_MS,FLEET_DELIVERY_MAX_AWARDS} from "../supabase/functions/_shared/fleet-weekly-delivery.js";
 
 const snapshots=(rows,today="2026-11-06")=>fleetWeeklySnapshots(
   rows.map(([local_day,xp])=>({local_day,xp})),today
@@ -87,5 +87,18 @@ assert.equal(pilotWeek.xpPoints,0);
 assert.equal(snapshots([["2026-11-12",252]],"2026-11-12").at(-1).xpPoints,1);
 const dashboardSource=(await import("node:fs")).readFileSync("supabase/functions/student-dashboard/index.ts","utf8");
 assert.match(dashboardSource,/enrolledStudent \|\| isFleetTeacherPilot\(profile\)/);
+
+assert.equal(FLEET_WEBHOOK_TIMEOUT_MS,25000);
+assert.ok(FLEET_DELIVERY_MAX_AWARDS > 0 && FLEET_DELIVERY_MAX_AWARDS <= 4);
+const expected={award_id:weeklyId,points:1};
+assert.equal(isAcknowledgedFleetAward({ok:true,awardId:weeklyId,points:1},expected),true);
+assert.equal(isAcknowledgedFleetAward({ok:true,awardId:weeklyId,points:1,duplicate:true},expected),true);
+assert.equal(isAcknowledgedFleetAward({ok:true,awardId:weeklyId,points:5},expected),false);
+assert.equal(isAcknowledgedFleetAward({ok:true,awardId:"other",points:1},expected),false);
+assert.equal(isAcknowledgedFleetAward({ok:false,awardId:weeklyId,points:1},expected),false);
+assert.equal(isAcknowledgedFleetAward(null,expected),false);
+const deliverySource=(await import("node:fs")).readFileSync("supabase/functions/_shared/fleet-weekly-delivery.js","utf8");
+assert.match(deliverySource,/for \(const award of pending \|\| \[\]\)/);
+assert.doesNotMatch(deliverySource,/Promise\.all\(batch\.map/);
 
 console.log("Flota semanal: 250 XP/punto, topes, constancia, lunes, Madrid, todos los juegos e IDs estables OK");
