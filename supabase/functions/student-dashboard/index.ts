@@ -102,6 +102,17 @@ function missionFinishedAt(mission: any, events: any[]) {
   return null;
 }
 
+// Evita que 30 accesos simultáneos disparen 12 × 30 consultas a PostgreSQL.
+// Mantiene el orden de los resultados y no cambia los cálculos de XP/guardados.
+export async function batchedDashboardReads(tasks: Array<() => PromiseLike<any>>, concurrency = 2) {
+  const results: any[] = [];
+  for (let i = 0; i < tasks.length; i += concurrency) {
+    const batch = await Promise.all(tasks.slice(i, i + concurrency).map(task => task()));
+    results.push(...batch);
+  }
+  return results;
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers:corsHeaders });
   if (request.method !== "POST") return jsonResponse({ ok:false, error:"method_not_allowed" }, 405);
@@ -122,51 +133,51 @@ Deno.serve(async (request) => {
       evaluationsResult,
       gameAccessResult,
       workshopSessionsResult,
-    ] = await Promise.all([
-      admin.from("profiles")
+    ] = await batchedDashboardReads([
+      () => admin.from("profiles")
         .select("id,email,first_name,last_name,avatar,last_login_at,role,source,active")
         .eq("id", profileId)
         .single(),
-      admin.from("games")
+      () => admin.from("games")
         .select("id,name,subtitle,category,status,sort_order,color,icon,url,banner,active,description,competencies,integration,official")
         .eq("active", true)
         .eq("official", true)
         .order("sort_order"),
-      admin.from("game_progress")
+      () => admin.from("game_progress")
         .select("game_id,xp,level,percentage,accuracy,attempts,successes,errors,streak,sessions,achievements_count,missions_completed,feathers,last_activity_at,raw_data")
         .eq("profile_id", profileId),
-      admin.from("game_events")
+      () => admin.from("game_events")
         .select("result_id,game_id,event_type,xp_delta,feathers_delta,accuracy,details,occurred_at")
         .eq("profile_id", profileId)
         .order("occurred_at", { ascending:false })
         .limit(8),
-      admin.from("player_achievements")
+      () => admin.from("player_achievements")
         .select("game_id,achievement_id,unlocked_at,achievement_definitions(title,description,xp_reward,hidden)")
         .eq("profile_id", profileId)
         .order("unlocked_at", { ascending:false })
         .limit(100),
-      admin.from("classroom_enrollments")
+      () => admin.from("classroom_enrollments")
         .select("classroom_id,classrooms(name,section,legacy_class_code)")
         .eq("profile_id", profileId)
         .eq("active", true),
-      admin.from("mission_definitions")
+      () => admin.from("mission_definitions")
         .select("id,title,description,game_id,mission_type,target,reward_xp,reward_feathers,active_from,active_to,classroom_id,target_profile_id,featured,priority,organization_id,active,publication_status,created_at,updated_at")
         .eq("organization_id", organizationId)
         .order("updated_at", { ascending:false })
         .limit(250),
-      admin.from("game_events")
+      () => admin.from("game_events")
         .select("game_id,event_type,xp_delta,accuracy,occurred_at,details")
         .eq("profile_id", profileId)
         .order("occurred_at", { ascending:false })
         .limit(5000),
-      platformXpEvents(admin,[profileId]),
-      admin.from("evaluations")
+      () => platformXpEvents(admin,[profileId]),
+      () => admin.from("evaluations")
         .select("scope,game_id,score,breakdown,updated_at")
         .eq("profile_id", profileId),
-      admin.from("profile_game_access")
+      () => admin.from("profile_game_access")
         .select("game_id,enabled")
         .eq("profile_id", profileId),
-      admin.from("workshop_sessions")
+      () => admin.from("workshop_sessions")
         .select("classroom_id,title,message,objective_type,target_xp,published,classroom_open,home_enabled,scheduled_enabled,active_from,active_to,game_ids,plan_id,started_at,updated_at")
         .eq("organization_id", organizationId)
         .eq("published", true),
