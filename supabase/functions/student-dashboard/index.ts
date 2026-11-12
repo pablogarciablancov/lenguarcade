@@ -107,7 +107,8 @@ Deno.serve(async (request) => {
   if (request.method !== "POST") return jsonResponse({ ok:false, error:"method_not_allowed" }, 405);
 
   try {
-    const { admin, profileId, organizationId } = await requireProfileSession(request);
+    // El gateway valida el JWT; no duplicar /auth/v1/user al abrir 30 alumnos.
+    const { admin, profileId, organizationId } = await requireProfileSession(request, { gatewayVerifiedJwt:true });
     const [
       profileResult,
       gamesResult,
