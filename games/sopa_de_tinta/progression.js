@@ -15,7 +15,9 @@ const achievements=[
 ['exams_finales','Doble especialidad','Completa los dos finales de especialidad.','exams_finales',2],
 ['exams_perfect','Expediente impecable','Consigue tres estrellas en las seis pruebas.','exams_perfect',6],
 ['exams_all','Diploma de tinta','Completa las seis pruebas.','exams_all',6],
-...C.districts.map((d,i)=>['distrito_'+d.id,['Maestro narrador','Taller completo','Verbo vivo','Vías sintácticas','Galería abierta','Sentido completo','Escritura impecable'][i],'Supera los cuatro niveles de '+d.name+'.','district_'+d.id,4])
+...(C.legacyDistricts||C.districts).map((d,i)=>['distrito_'+d.id,['Maestro narrador','Taller completo','Verbo vivo','Vías sintácticas','Galería abierta','Sentido completo','Escritura impecable'][i],'Supera los cuatro niveles de '+d.name+'.','district_'+d.id,4])
+,...C.cafes.filter(cafe=>cafe.evaluation).map(cafe=>['cafe_'+cafe.evaluation,cafe.name+' completado','Supera todos los pedidos de este café.','cafe_'+cafe.evaluation,1]),
+...C.districts.map(d=>['curso_distrito_'+d.id,d.name+' completado','Supera todos los pedidos del distrito.','curso_distrito_'+d.id,1])
 ].map(([id,name,desc,stat,target],i)=>({id,name,desc,stat,target,icon:i%6}));
 const cosmetics=[{id:'cafe',name:'Café de medianoche',cost:0,kind:'theme'},{id:'aurora',name:'Salón aurora',cost:100,kind:'theme'},{id:'biblioteca',name:'Biblioteca dorada',cost:180,kind:'theme'},{id:'menta',name:'Tinta de menta',cost:80,kind:'trace'},{id:'rosa',name:'Tinta de frambuesa',cost:80,kind:'trace'},{id:'oro',name:'Marco del lexicógrafo',cost:220,kind:'frame'},{id:'taza',name:'Taza de porcelana',cost:120,kind:'cup'}];
 function fresh(){return {version:1,updatedAt:0,xp:0,ink:0,hintTokens:8,achievements:{},adventure:{},mastery:{},discovered:{},records:{},daily:{},owned:['cafe'],equipped:{theme:'cafe'},stats:{},settings:{sound:true,music:false,reduced:false,contrast:false},streak:0,lastDay:'',missions:null};}
@@ -34,15 +36,21 @@ const today=day();if(p.lastDay!==today){const yesterday=new Date(Date.now()-8640
 p.hintTokens+=2;
 }
 run.score+=bonus;const xp=run.words.filter(w=>w.found).length*15+(won?80:0)+(run.mode==='boss'&&won?120:0),ink=won?12+run.words.length*2:0;p.xp+=xp;p.ink+=ink;add(p,'totalScore',run.score);p.stats.bestCombo=Math.max(p.stats.bestCombo||0,run.bestCombo);
-const key=run.mode+':'+(run.examId||run.category)+':'+run.difficulty;
+if(won&&run.orderId&&C.orders.some(order=>order.id===run.orderId)){
+  const orders=p.orders||={};
+  orders[run.orderId]=Math.max(orders[run.orderId]||0,run.errors===0&&run.hints===0?3:run.errors<=2?2:1);
+  for(const district of C.districts)p.stats['curso_distrito_'+district.id]=district.orderIds.every(id=>orders[id])?1:0;
+  for(const cafe of C.cafes.filter(item=>item.evaluation))p.stats['cafe_'+cafe.evaluation]=C.orders.filter(order=>order.evaluation===cafe.evaluation).every(order=>orders[order.id])?1:0;
+}
+const key=run.mode+':'+(run.orderId||run.examId||run.category)+':'+run.difficulty;
 if(won&&run.mode==='exam'&&C.exams.some(exam=>exam.id===run.examId)){
   const stars=p.examStars||={};
   stars[run.examId]=Math.max(stars[run.examId]||0,run.errors===0?3:run.errors<=2?2:1);
   p.stats['exam_'+run.examId]=1;
-  p.stats.exams_trimestres=C.exams.filter(exam=>exam.evaluation&&stars[exam.id]).length;
+  p.stats.exams_trimestres=['trimestre1','trimestre2','trimestre3'].filter(id=>stars[id]).length;
   p.stats.exams_finales=C.exams.filter(exam=>exam.area&&stars[exam.id]).length;
-  p.stats.exams_perfect=C.exams.filter(exam=>stars[exam.id]===3).length;
-  p.stats.exams_all=C.exams.filter(exam=>stars[exam.id]).length;
+  p.stats.exams_perfect=['trimestre1','trimestre2','trimestre3','finalLengua','finalLiteratura','finalCurso'].filter(id=>stars[id]===3).length;
+  p.stats.exams_all=['trimestre1','trimestre2','trimestre3','finalLengua','finalLiteratura','finalCurso'].filter(id=>stars[id]).length;
 }const record=p.records[key]||{};const isRecord=won&&run.score>(record.score||0);if(won)p.records[key]={score:Math.max(run.score,record.score||0),time:Math.min(run.elapsed,record.time??Infinity)};
 if(run.mode==='daily'){const best=p.daily[run.day];if(won&&(!best||run.score>best.score))p.daily[run.day]={score:run.score,time:run.elapsed,errors:run.errors,hints:run.hints};}
 for(const w of run.words)if(!w.found){const m=p.mastery[w.id]||={clean:0,help:0};m.help++;}
