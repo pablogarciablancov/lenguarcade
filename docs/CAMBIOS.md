@@ -935,3 +935,8 @@ Rayuela: alumno de prueba accede a las galerías publicadas de su organización 
 ### 2026-11-05 · Intercambio de Rayuela entre clases
 
 Rayuela: 2.º ESO C y D pueden visitar y valorar el otro grupo cuando cada historia publicada de ambos tenga al menos 15 votos válidos. El acceso se verifica en el servidor; se conserva el requisito de descubrir la mitad de los finales alcanzables. La galería muestra el avance del desbloqueo.
+
+
+### 2026-11-12 · Recuento de escenas de Rayuela
+
+Rayuela: la galería diferencia las escenas escritas de las 81 casillas de la hoja original y señala las vacías. Los marcadores de caminos sin escribir no cuentan como escenas. Auditoría de las 13 hojas de 2.º D: 10 con 81; Detectives 72, Concesionario 75 y Golpe del millón 72, idénticos al contenido importado. Se preservan todos los proyectos y votos.

@@ -967,3 +967,8 @@ Rayuela: entrar como Alumno de prueba, elegir 2 ESO C y D, jugar sin autores ni 
 ### 2026-11-05 · Intercambio de Rayuela entre clases
 
 Rayuela: con una historia en 14 votos válidos, un alumno solo ve su clase y el servidor rechaza peticiones a la otra. Al alcanzar 15 en todas, aparecen ambos grupos; jugar, guardar finales y valorar funciona con las reglas normales. Revisar que el perfil de prueba mantiene su acceso y sus votos no cuentan para desbloquear.
+
+
+### 2026-11-12 · Recuento de escenas de Rayuela
+
+Rayuela: la tarjeta de una hoja de 72 celdas escritas muestra 72 de 81 y 9 casillas sin texto. Una de 81 muestra 81 de 81 sin aviso. Un marcador automático de camino pendiente no se cuenta como celda escrita. Los proyectos ajenos a Sheets conservan su contador habitual.
