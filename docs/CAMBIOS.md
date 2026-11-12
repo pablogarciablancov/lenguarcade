@@ -1,3 +1,11 @@
+## 2026-11-12 · Accesos simultáneos a LenguArcade
+
+- Diagnóstico en Supabase: `student-dashboard` y `google-student-login` devolvían 546/504 durante el acceso simultáneo de una clase; se observaron tiempos de espera en `/auth/v1/user` y consultas SQL, aunque el proyecto seguía activo.
+- Las funciones de acceso Google/PIN, el panel del alumno y el guardado usan la identidad del JWT que **ya valida el gateway** (`verify_jwt=true`) y mantienen la comprobación de sesión de aplicación, perfil activo y permisos. Se elimina la segunda llamada a GoTrue por cada operación.
+- Se conservan XP, logros, guardados, flota, talleres y funcionalidades docentes. Sin migraciones ni modificación de datos.
+- Despliegue: funciones `google-student-login`, `pin-login`, `student-dashboard` y `save-progress` con su dependencia común. No requiere publicar Apps Script.
+- La prueba de 30 accesos reales concurrentes queda pendiente de ejecución con alumnos autorizados; una ejecución local no equivale a tráfico de producción.
+
 ## 29/10/2026 · Recuperación de la arena de Tinta y Acero
 
 - Conexión, creación y entrada con información inmediata; reintento al fallar la carga de contexto.
