@@ -26,8 +26,8 @@ function cleanAchievement(value: unknown) {
 }
 
 
-// A successful Flotas delivery needs no further HTTP calls from this Edge worker.
-// Failed deliveries can retry with the same deterministic awardId.
+// Evita volver a comprobar repetidamente talleres que ya quedaron en cola.
+// La entrega HTTP solo ocurre en fleet-dispatch, nunca en save-progress.
 const fleetDeliveryCache=new Map<string,number>();
 async function sendCompletedWorkshopAwards(
   admin: any,
@@ -35,9 +35,7 @@ async function sendCompletedWorkshopAwards(
   classroomIds: string[],
   currentGameId: string,
 ) {
-  const endpoint = Deno.env.get("FLEET_MARKER_WEBHOOK_URL") || "";
-  const secret = Deno.env.get("FLEET_MARKER_WEBHOOK_SECRET") || "";
-  if (!endpoint || !secret || !classroomIds.length) return;
+  if (!classroomIds.length) return;
 
   try {
     const { data:sessions, error } = await admin.from("workshop_runs")
@@ -111,31 +109,14 @@ async function sendCompletedWorkshopAwards(
       const cachedUntil=fleetDeliveryCache.get(awardId)||0;
       if(cachedUntil>Date.now())continue;
       if(fleetDeliveryCache.size>1000)fleetDeliveryCache.clear();
-      fleetDeliveryCache.set(awardId,Date.now()+60000); // retry failed/time-out sends in one minute
-      try {
-        const response = await fetch(endpoint, {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body:JSON.stringify({
-            token:secret,
-            profileId,
-            awardId,
-            challengeCompleted:true,
-            subject:"LenguArcade",
-            asignatura:"LenguArcade",
-            categoryId:"CAT1",
-            points:5,
-            title:String(session.title || "Taller").slice(0, 100) + ": reto completado",
-          }),
-          signal:AbortSignal.timeout(5000),
-        });
-        const result = await response.json().catch(() => null);
-        if (response.ok && result?.ok===true)fleetDeliveryCache.set(awardId,Date.now()+86400000);
-        else console.error("fleet marker award was not accepted", response.status, result?.error || "invalid_response");
-      } catch (deliveryError) {
-        // The next save retries with the same awardId; the marker receiver deduplicates it.
-        console.error("fleet marker award delivery failed", deliveryError);
-      }
+      const title=String(session.title || "Taller").slice(0, 100) + ": reto completado";
+      const {error:queueError}=await admin.from("fleet_workshop_awards")
+        .upsert({award_id:awardId,profile_id:profileId,points:5,title},
+          {onConflict:"award_id",ignoreDuplicates:true});
+      if(queueError)throw queueError;
+      // Se garantiza la entrega en la cola, sin depender del bloqueo de Apps Script.
+      // Si el trabajador tarda, reintentará exactamente el mismo awardId.
+      fleetDeliveryCache.set(awardId,Date.now()+86400000);
     }
   } catch (awardError) {
     // Marker delivery must not discard an already-saved game checkpoint.
@@ -582,7 +563,7 @@ Deno.serve(async (request) => {
 
     // The saved XP, game snapshot and audit event are committed above.
     // Never keep a student's save waiting for an unrelated Flotas webhook.
-    // waitUntil keeps the retry-safe workshop award task alive after the response.
+    // waitUntil mantiene el registro de premios de taller fuera del guardado.
     // A checkpoint only saves learning progress; defer the expensive Flotas history scan to session results.
     if (classroomIds.length && (shouldWriteEvent || victory) && (body.checkpoint !== true || victory)) {
       const deliver = sendCompletedWorkshopAwards(admin, profileId, classroomIds, gameId);
@@ -590,7 +571,7 @@ Deno.serve(async (request) => {
       else await deliver; // Local test environment without Supabase EdgeRuntime.
     }
 
-    // La XP semanal usa los eventos ya guardados. Nunca bloquear el guardado con Flotas.
+    // La XP semanal se añade a la cola; nunca hay solicitudes HTTP a Flota aquí.
     // No sondear en cada checkpoint: algunos juegos guardan muchas veces por segundo.
     if (classroomIds.length && shouldWriteEvent && (body.checkpoint !== true || victory)) {
       const deliverWeekly = refreshFleetWeekAwards(admin,profileId,classroomIds)

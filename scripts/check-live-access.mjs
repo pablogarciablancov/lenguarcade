@@ -225,7 +225,7 @@ function browser(){
   await ui.advance(0);
   assert.equal(ui.counts.calls,1);
   const initialPaints=ui.counts.paints;
-  await ui.advance(10000);
+  await ui.advance(20000);
   assert.equal(ui.counts.calls,2);
   assert.equal(ui.counts.paints,initialPaints,'Fingerprint idéntico: ningún cambio DOM');
   ui.setState(state('closed',true));
@@ -287,7 +287,7 @@ function browser(){
 
   let release;
   ui.setResponder(()=>new Promise(resolve=>{release=resolve;}));
-  await ui.advance(10000);
+  await ui.advance(20000);
   const runningCalls=ui.counts.calls;
   ui.listeners.focus();
   ui.listeners.online();

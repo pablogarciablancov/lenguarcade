@@ -3879,7 +3879,7 @@ body.la-screen-nav[data-la-screen="perfil"] #perfil{
         throw error;
       }finally{
         inFlight=null;
-        armTimer(pendingImmediate?0:(failures?Math.min(60000,3000*Math.pow(2,failures)):10000));
+        armTimer(pendingImmediate?0:(failures?Math.min(60000,3000*Math.pow(2,failures)):20000));
         pendingImmediate=false;
       }
     })();
@@ -4162,6 +4162,11 @@ body.light .rankCard,body.light .studentHistoryItem,body.light .generalAchieveme
 <script id="la-student-boss-status">
 (function(){
   var checking=false,seen={},lastEvent=null,popupTimer=null,previousFocus=null;
+  var bossPollTimer=null;
+  function scheduleBossRefresh(delay){
+    clearTimeout(bossPollTimer);
+    bossPollTimer=setTimeout(refresh,delay);
+  }
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function clock(seconds){var n=Math.max(0,Math.ceil(Number(seconds)||0));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
   function close(){var popup=document.getElementById('studentBossPodium');if(popup.classList.contains('hidden'))return;popup.classList.add('hidden');if(popupTimer)clearTimeout(popupTimer);popupTimer=null;var focus=previousFocus;previousFocus=null;if(focus&&focus.focus)focus.focus();}
@@ -4183,12 +4188,17 @@ body.light .rankCard,body.light .studentHistoryItem,body.light .generalAchieveme
     if(popupTimer)clearTimeout(popupTimer);if(!final)popupTimer=setTimeout(close,12000);
   }
   async function refresh(){
-    var notice=document.getElementById('studentClassBossNotice');if(checking||!token||!notice||document.hidden)return;
+    if(checking)return;
+    var notice=document.getElementById('studentClassBossNotice');
+    if(!token||!notice||document.hidden){scheduleBossRefresh(30000);return;}
     checking=true;
+    var nextDelay=45000;
     try{
       var result=await callSupabaseFunction('class-boss',{action:'studentStatus'},token),b=result&&result.event;
       lastEvent=b;
       if(b){
+        nextDelay=b.state==='active'||b.state==='prepared'||(b.encounter&&['combat','paused'].includes(b.encounter.phase))
+          ? 15000 : 60000;
         var e=b.encounter;
         if(!e)notice.textContent='⚔️ El Devorapalabras · Tus progresos confirmados cuentan para el combate.';
         else{
@@ -4200,15 +4210,21 @@ body.light .rankCard,body.light .studentHistoryItem,body.light .generalAchieveme
         }
         notice.classList.remove('hidden');
       }else{notice.classList.add('hidden');close();}
-    }catch(e){if(lastEvent){notice.classList.remove('hidden');notice.title='La conexión del evento tarda en responder. Se volverá a consultar automáticamente.';}else notice.classList.add('hidden');}
-    finally{checking=false;}
+    }catch(e){
+      nextDelay=30000;
+      if(lastEvent){notice.classList.remove('hidden');notice.title='La conexión del evento tarda en responder. Se volverá a consultar automáticamente.';}
+      else notice.classList.add('hidden');
+    }finally{checking=false;scheduleBossRefresh(nextDelay);}
   }
   document.getElementById('studentBossDismiss').onclick=close;
   document.getElementById('studentBossPodium').addEventListener('keydown',function(e){if(e.key==='Escape'){close();return;}if(e.key==='Tab'){e.preventDefault();document.getElementById('studentBossDismiss').focus();}});
   window.refreshStudentClassBossNotice=refresh;
-  // Evita saturar el servidor cuando entran 25-30 alumnos a la vez.
-  setInterval(refresh,15000);
-  document.addEventListener('visibilitychange',function(){if(!document.hidden)refresh();});
+  // Se consulta cada 15 s durante el combate y se espacian los sondeos inactivos.
+  scheduleBossRefresh(5000);
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden)scheduleBossRefresh(1000);
+    else clearTimeout(bossPollTimer);
+  });
 })();
 </script>
 

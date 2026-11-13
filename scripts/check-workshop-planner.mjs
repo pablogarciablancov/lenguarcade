@@ -9,6 +9,7 @@ const server = fs.readFileSync(path.join(root, "apps-script", "LenguArcade_Works
 const teacherDashboard = fs.readFileSync(path.join(root, "supabase", "functions", "teacher-dashboard", "index.ts"), "utf8");
 const studentDashboard = fs.readFileSync(path.join(root, "supabase", "functions", "student-dashboard", "index.ts"), "utf8");
 const saveProgress = fs.readFileSync(path.join(root, "supabase", "functions", "save-progress", "index.ts"), "utf8");
+const fleetDispatcher = fs.readFileSync(path.join(root, "supabase", "functions", "fleet-dispatch", "index.ts"), "utf8");
 const workshopAccessMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "20260924191500_add_workshop_game_access.sql"), "utf8");
 const workshopSessionMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "20260924204500_add_class_workshop_sessions.sql"), "utf8");
 const workshopHistoryMigration = fs.readFileSync(path.join(root, "supabase", "migrations", "202610100001_workshop_run_history.sql"), "utf8");
@@ -103,9 +104,10 @@ expect(
   "El cálculo de XP del taller debe paginar eventos con orden estable para no truncar sesiones largas.",
 );
 expect(
-  saveProgress.includes('subject:"LenguArcade"') &&
-    saveProgress.includes('asignatura:"LenguArcade"') &&
-    saveProgress.includes('categoryId:"CAT1"') &&
+  fleetDispatcher.includes('subject:"LenguArcade"') &&
+    fleetDispatcher.includes('asignatura:"LenguArcade"') &&
+    fleetDispatcher.includes('categoryId:"CAT1"') &&
+    saveProgress.includes('from("fleet_workshop_awards")') &&
     saveProgress.includes('query.in("game_id", selectedGames)'),
   "Todos los juegos seleccionados deben sumar XP al mismo objetivo y enviar la asignatura LenguArcade al marcador.",
 );
