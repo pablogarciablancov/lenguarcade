@@ -3,7 +3,7 @@ import {
   mondayOf, madridDate, fleetWeeklySnapshots, fleetAwardsForWeek, FLEET_START,
 } from "../supabase/functions/_shared/fleet-weekly.js";
 
-import {isFleetTeacherPilot,isAcknowledgedFleetAward,FLEET_WEBHOOK_TIMEOUT_MS,FLEET_DELIVERY_MAX_AWARDS} from "../supabase/functions/_shared/fleet-weekly-delivery.js";
+import {isFleetTeacherPilot,isAcknowledgedFleetAward,FLEET_WEBHOOK_TIMEOUT_MS,FLEET_DELIVERY_MAX_AWARDS,fleetRetryDelayMs,FLEET_UNLINKED_RETRY_MS,FLEET_TRANSIENT_RETRY_MS} from "../supabase/functions/_shared/fleet-weekly-delivery.js";
 
 const snapshots=(rows,today="2026-11-06")=>fleetWeeklySnapshots(
   rows.map(([local_day,xp])=>({local_day,xp})),today
@@ -116,6 +116,18 @@ assert.match(worker,/FLEET_DELIVERY_MAX_AWARDS/);
 assert.match(worker,/await fetch\(endpoint/);
 assert.match(worker,/isAcknowledgedFleetAward\(result,award\)/);
 assert.match(worker,/fleet_workshop_awards/);
+assert.equal(fleetRetryDelayMs("No existe una vinculación para este perfil."),FLEET_UNLINKED_RETRY_MS);
+assert.equal(fleetRetryDelayMs("El perfil está duplicado en Alumnos."),FLEET_UNLINKED_RETRY_MS);
+assert.equal(fleetRetryDelayMs("TimeoutError"),FLEET_TRANSIENT_RETRY_MS);
+assert.equal(fleetRetryDelayMs("invalid_ack"),FLEET_TRANSIENT_RETRY_MS);
+assert.ok(FLEET_UNLINKED_RETRY_MS>FLEET_TRANSIENT_RETRY_MS);
+assert.match(worker,/\.or\("retry_after\.is\.null,retry_after\.lte\."\+nowIso\)/);
+assert.match(worker,/await deferRetry\(award,result\?\.error \|\| "invalid_ack"\)/);
+assert.match(worker,/await deferRetry\(award,String\(error\?\.message \|\| error\)\)/);
+const retryMigration=fs.readFileSync("supabase/migrations/20261117142750_fleet_dispatch_retry_backoff_avoid_queue_starvation.sql","utf8");
+assert.match(retryMigration,/fleet_weekly_awards[\s\S]*retry_after/);
+assert.match(retryMigration,/fleet_workshop_awards[\s\S]*retry_after/);
+assert.doesNotMatch(retryMigration,/update.*delivered_at/i);
 assert.match(html,/scheduleBossRefresh\(5000\)/);
 assert.match(html,/20000\)\);/);
 const saveSource=fs.readFileSync("supabase/functions/save-progress/index.ts","utf8");
