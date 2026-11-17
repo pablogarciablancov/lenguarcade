@@ -1,4 +1,4 @@
-import {platformXpEvents} from "../_shared/platform-xp.js";
+import {platformXpTotals} from "../_shared/platform-xp.js";
 import {loadFleetWeeks,syncFleetWeekAwards,isFleetTeacherPilot} from "../_shared/fleet-weekly-delivery.js";
 import {isForjaObjective, workshopVictory, groupWorkshops, workshopProgress} from "../_shared/workshop-objective.js";
 import {levelProgress,learningGrade,platformMilestones} from "../_shared/progression.js";
@@ -170,7 +170,7 @@ Deno.serve(async (request) => {
         .eq("profile_id", profileId)
         .order("occurred_at", { ascending:false })
         .limit(5000),
-      () => platformXpEvents(admin,[profileId]),
+      () => platformXpTotals(admin,[profileId]),
       () => admin.from("evaluations")
         .select("scope,game_id,score,breakdown,updated_at")
         .eq("profile_id", profileId),
@@ -444,7 +444,7 @@ Deno.serve(async (request) => {
         const [profilesRank,progressRank,adjustRank]=await Promise.all([
           admin.from("profiles").select("id,first_name,last_name,source").in("id",ids).eq("role","student").eq("active",true),
           admin.from("game_progress").select("profile_id,xp").in("profile_id",ids),
-          platformXpEvents(admin,ids),
+          platformXpTotals(admin,ids),
         ]);
         const rankFailure=[profilesRank.error,progressRank.error,adjustRank.error].find(Boolean);
         if(rankFailure)throw rankFailure;
