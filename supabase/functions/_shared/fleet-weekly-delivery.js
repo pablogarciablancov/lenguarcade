@@ -5,6 +5,19 @@ import {FLEET_START, fleetWeeklySnapshots, fleetAwardsForWeek} from "./fleet-wee
 export const FLEET_WEBHOOK_TIMEOUT_MS = 25000;
 export const FLEET_DELIVERY_MAX_AWARDS = 2;
 
+// Google puede rechazar temporalmente un premio. Un perfil sin vínculo en Flota
+// no debe bloquear otros premios: dejamos el premio PENDIENTE y lo reintentamos
+// con una pausa más larga, nunca lo descartamos ni cambiamos su award_id.
+export const FLEET_UNLINKED_RETRY_MS = 60 * 60 * 1000;
+export const FLEET_TRANSIENT_RETRY_MS = 3 * 60 * 1000;
+
+export function fleetRetryDelayMs(reason) {
+  const text = String(reason || "").toLowerCase();
+  const unlinked = text.includes("no existe una vinculación") ||
+    text.includes("el perfil está duplicado");
+  return unlinked ? FLEET_UNLINKED_RETRY_MS : FLEET_TRANSIENT_RETRY_MS;
+}
+
 export function isAcknowledgedFleetAward(result, award) {
   return result?.ok === true &&
     String(result.awardId || "") === String(award?.award_id || "") &&

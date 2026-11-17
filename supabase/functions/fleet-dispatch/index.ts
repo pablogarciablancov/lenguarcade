@@ -1,6 +1,6 @@
 import {createClient} from "npm:@supabase/supabase-js@2";
 import {
-  FLEET_WEBHOOK_TIMEOUT_MS, FLEET_DELIVERY_MAX_AWARDS, isAcknowledgedFleetAward,
+  FLEET_WEBHOOK_TIMEOUT_MS, FLEET_DELIVERY_MAX_AWARDS, isAcknowledgedFleetAward, fleetRetryDelayMs,
 } from "../_shared/fleet-weekly-delivery.js";
 
 // Ejecutado exclusivamente por Supabase Cron. El secreto se genera en SQL y
@@ -29,16 +29,28 @@ Deno.serve(async request => {
   if (!leaseOwner) return Response.json({ok:true,busy:true});
 
   let delivered=0,failed=0;
+  // El premio permanece pendiente; el aplazamiento solo evita que un error
+  // repetido impida entregar los puntos de otros alumnos.
+  async function deferRetry(award,reason) {
+    const table=award.kind==="workshop"?"fleet_workshop_awards":"fleet_weekly_awards";
+    const retryAfter=new Date(Date.now()+fleetRetryDelayMs(reason)).toISOString();
+    const {error}=await admin.from(table).update({retry_after:retryAfter})
+      .eq("award_id",award.award_id).is("delivered_at",null);
+    if(error)console.error("fleet dispatcher could not schedule retry",error);
+  }
   try {
     // Un taller terminado tiene prioridad, pero las recompensas semanales
     // permanecen en cola hasta su confirmación individual.
+    const nowIso=new Date().toISOString();
     const [{data:workshops,error:workshopError},{data:weekly,error:weeklyError}]=await Promise.all([
       admin.from("fleet_workshop_awards")
         .select("award_id,profile_id,points,title").is("delivered_at",null)
+        .or("retry_after.is.null,retry_after.lte."+nowIso)
         .order("created_at",{ascending:true}).order("award_id",{ascending:true})
         .limit(FLEET_DELIVERY_MAX_AWARDS),
       admin.from("fleet_weekly_awards")
         .select("award_id,profile_id,points,award_key").is("delivered_at",null)
+        .or("retry_after.is.null,retry_after.lte."+nowIso)
         .order("week_start",{ascending:true}).order("award_id",{ascending:true})
         .limit(FLEET_DELIVERY_MAX_AWARDS),
     ]);
@@ -59,6 +71,7 @@ Deno.serve(async request => {
           (award.kind==="workshop" && Number(award.points)!==5)) {
         failed++;
         console.error("fleet dispatcher invalid points",award.kind);
+        await deferRetry(award,"invalid_points");
         continue;
       }
       try {
@@ -77,6 +90,7 @@ Deno.serve(async request => {
         if (!response.ok || !isAcknowledgedFleetAward(result,award)) {
           failed++;
           console.error("fleet dispatcher rejected",response.status,result?.error || "invalid_ack");
+          await deferRetry(award,result?.error || "invalid_ack");
           continue;
         }
         const table=award.kind==="workshop"?"fleet_workshop_awards":"fleet_weekly_awards";
@@ -89,6 +103,7 @@ Deno.serve(async request => {
         failed++;
         // No dar por entregado sin ACK. award_id estable => reintentos seguros.
         console.error("fleet dispatcher delivery error",error);
+        await deferRetry(award,String(error?.message || error));
       }
     }
     return Response.json({ok:true,processed:delivered+failed,delivered,failed});
