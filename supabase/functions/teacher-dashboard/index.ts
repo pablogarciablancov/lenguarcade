@@ -1,4 +1,4 @@
-import {platformXpEvents} from "../_shared/platform-xp.js";
+import {platformXpTotals} from "../_shared/platform-xp.js";
 import {isForjaObjective, workshopVictory, groupWorkshops, workshopProgress} from "../_shared/workshop-objective.js";
 import {assessedMissions} from "../_shared/mission-grade.js";
 import {levelProgress,learningGrade} from "../_shared/progression.js";
@@ -1163,7 +1163,7 @@ Deno.serve(async (request) => {
             .in("profile_id", profileIds)
         : Promise.resolve(emptyResult),
       activityProfileIds.length
-        ? platformXpEvents(admin,activityProfileIds)
+        ? platformXpTotals(admin,activityProfileIds)
         : Promise.resolve(emptyResult),
       profileIds.length
         ? admin.from("profile_game_access")
