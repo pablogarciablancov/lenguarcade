@@ -13,3 +13,10 @@ export async function platformXpEvents(admin,profileIds) {
     if((page.data||[]).length<1000)return {data,error:null};
   }
 }
+
+// Solo los totales, sin descargar miles de filas con JSON de partidas.
+// El RPC es SECURITY INVOKER y solamente ejecutable por service_role.
+export async function platformXpTotals(admin,profileIds) {
+  if (!profileIds.length) return {data:[],error:null};
+  return await admin.rpc("platform_xp_totals",{p_profile_ids:profileIds});
+}
