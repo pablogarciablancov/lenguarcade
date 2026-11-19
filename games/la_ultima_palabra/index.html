@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>La Última Palabra · LenguArcade</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="illustrated.css?v=3">
+  <link rel="stylesheet" href="illustrated.css?v=4">
 </head>
 <body>
   <main class="shell">
@@ -21,11 +21,11 @@
       <div id="screen" class="screen"><div class="titlecard"><div class="sigil">✦</div><small>LA HORA DEL ASEDIO</small><h1>La Última<br><em>Palabra</em></h1><p>La tinta da vida a tus defensores. Resuelve retos de Lengua, levanta edificios y resiste cuatro oleadas.</p><button id="startButton" class="primary">DEFENDER LA BIBLIOTECA</button><button id="startTreeButton" class="secondary">ÁRBOL DE MEJORAS</button><div class="titlefoot">UNA PARTIDA · CUATRO OLEADAS · CAMPO ABIERTO</div></div></div>
     </section>
     <section class="command" id="command" hidden>
-      <div class="build-panel"><div class="panel-heading"><span>✦ EL ARSENAL</span><small id="sealsLabel">◈ 0 sellos</small></div><div id="buildings" class="building-list"></div><p id="placeHint" class="place-hint">Elige un edificio y pulsa en cualquier punto del campo. Pulsa uno construido para mejorarlo.</p><div class="repair-row"><button id="repairButton">✚ Reparar muralla <b>20 tinta</b></button><button id="nextButton" class="primary">INICIAR OLEADA</button></div><button id="treeButton" class="tree-button">♛ ÁRBOL DE MEJORAS <span>PROGRESO PERMANENTE</span></button></div>
+      <div class="build-panel"><div class="panel-heading"><span>✦ EL ARSENAL</span><small id="sealsLabel">◈ 0 sellos</small></div><div id="buildings" class="building-list"></div><p class="counter-guide">🐺 SABUESO → ARQUEROS &nbsp;·&nbsp; 🛡 ESCUDERO → MAGOS &nbsp;·&nbsp; 🔮 HECHICERO → GUERREROS<br>LA TINTA SOLO SE GANA CON ACIERTOS</p><p id="placeHint" class="place-hint">Elige un edificio y pulsa en cualquier punto del campo. Pulsa uno construido para mejorarlo.</p><div class="repair-row"><button id="repairButton">✚ Reparar muralla <b>20 tinta</b></button><button id="nextButton" class="primary">INICIAR OLEADA</button></div><button id="treeButton" class="tree-button">♛ ÁRBOL DE MEJORAS <span>PROGRESO PERMANENTE</span></button></div>
       <div class="challenge-panel"><div class="panel-heading"><span>✎ ATRIL DE RETOS</span><small id="streakLabel">ACIERTOS 0</small></div><div id="challenge" class="challenge"></div><div id="feedback" role="status" aria-live="polite"></div></div>
     </section>
     <section id="treeOverlay" class="tree-overlay" aria-label="Árbol de mejoras" hidden><div class="tree-top"><button id="treeBack">VOLVER AL ASEDIO</button><div><small>CRÓNICAS DE LA BIBLIOTECA</small><h2>Árbol de mejoras</h2></div><div id="treeWallet">◈ 0 SELLOS</div></div><div class="tree-body"><div id="treeBranches" class="tree-branches"></div><aside id="treeInfo" class="tree-info"></aside></div><div class="tree-foot">Consigue sellos al responder y superar oleadas. Las mejoras se aplican al comenzar la siguiente partida.</div></section>
   </main>
-  <script type="module" src="main.js?v=3"></script>
+  <script type="module" src="main.js?v=4"></script>
 </body>
 </html>
