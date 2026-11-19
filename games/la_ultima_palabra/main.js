@@ -1,7 +1,7 @@
-import {drawScene} from './art.js';
-import {BUILDINGS,WAVES,UPGRADES,FIELD,buildingAt,createState,price,build,repair,startWave,answer,selectUpgrade,step} from './core.js';
-import {QUESTIONS,freshDeck,checkAnswer} from './questions.js';
-import {BRANCHES,earnedSeals,buySkill,applySkills} from './tree.js';
+import {drawScene} from './art.js?v=2';
+import {BUILDINGS,WAVES,UPGRADES,FIELD,buildingAt,createState,price,build,repair,startWave,answer,selectUpgrade,step} from './core.js?v=2';
+import {QUESTIONS,freshDeck,checkAnswer} from './questions.js?v=2';
+import {BRANCHES,earnedSeals,buySkill,applySkills} from './tree.js?v=2';
 
 const $=id=>document.getElementById(id),canvas=$('battle'),ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
 const params=new URLSearchParams(location.search),embedded=params.get('la')==='1'||params.get('lenguarcade')==='1',channel=params.get('channel')||'';
