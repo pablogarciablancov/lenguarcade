@@ -1,4 +1,4 @@
-import {drawScene} from './art.js?v=2';
+import {drawScene} from './art.js?v=3';
 import {BUILDINGS,WAVES,UPGRADES,FIELD,buildingAt,createState,price,build,repair,startWave,answer,selectUpgrade,step} from './core.js?v=2';
 import {QUESTIONS,freshDeck,checkAnswer} from './questions.js?v=2';
 import {BRANCHES,earnedSeals,buySkill,applySkills} from './tree.js?v=2';
@@ -63,7 +63,7 @@ function screenUpgrades(){const choices=[UPGRADES[(state.wave-1)%4],UPGRADES[sta
 function finish(){const victory=state.phase==='won';profile||={};profile.best=Math.max(profile.best||0,state.wave);if(victory)profile.completed=(profile.completed||0)+1;const reward=earnedSeals(state);profile.seals=(profile.seals||0)+reward;result();
   $('screen').hidden=false;$('screen').innerHTML=`<div class="titlecard"><div class="sigil">${victory?'✦':'⚔'}</div><small>${victory?'EL REINO RECUERDA':'EL ASEDIO CONTINÚA'}</small><h1>${victory?'La última palabra<br><em>es tuya</em>':'La muralla<br><em>ha caído</em>'}</h1><p>${victory?'La horda se retira. Tus palabras mantuvieron en pie la biblioteca.':'La biblioteca aguarda otro intento. Cambia tus edificios y refuerza el campo.'}</p><div class="score">${state.correct} aciertos · ${state.kills} enemigos · ${state.wave}/4 oleadas</div><p>+${reward} sellos para el árbol de mejoras · Récord: ${profile.best}/4 oleadas</p><button id="retryButton" class="primary">VOLVER A DEFENDER</button><button id="endTreeButton" class="secondary">ÁRBOL DE MEJORAS</button></div>`;$('retryButton').addEventListener('click',start);$('endTreeButton').addEventListener('click',openTree);persist();}
 
-function canvasPoint(e){const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/960,r.height/540),left=r.left+(r.width-960*scale)/2,top=r.top+(r.height-540*scale)/2;return {x:(e.clientX-left)/scale,y:(e.clientY-top)/scale};}
+function canvasPoint(e){const r=canvas.getBoundingClientRect(),scale=Math.min(r.width/960,r.height/540),left=r.left+(r.width-960*scale)/2,top=r.bottom-540*scale;return {x:(e.clientX-left)/scale,y:(e.clientY-top)/scale};}
 canvas.addEventListener('pointermove',e=>{if(!started||paused||$('screen').hidden===false||$('treeOverlay').hidden===false){hover=null;return;}const p=canvasPoint(e);hover=p.x>=0&&p.x<=960&&p.y>=0&&p.y<=540?{...p,type:selected}:null;});
 canvas.addEventListener('pointerleave',()=>hover=null);
 canvas.addEventListener('click',e=>{if(!started||paused||!$('screen').hidden||!$('treeOverlay').hidden)return;const {x,y}=canvasPoint(e),existing=buildingAt(state,x,y),type=existing?.type||selected;
