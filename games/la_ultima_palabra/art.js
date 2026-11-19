@@ -1,4 +1,4 @@
-import {BUILDINGS,WAVES,FIELD,buildingAt} from './core.js';
+import {BUILDINGS,WAVES,FIELD,buildingAt} from './core.js?v=2';
 
 // The battlefield and six original painted units are self-contained game assets.
 // Every atlas cell has generous transparent margins, so adjacent sprites never bleed.
