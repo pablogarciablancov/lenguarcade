@@ -2,7 +2,7 @@ import {BUILDINGS,WAVES,FIELD,buildingAt} from './core.js?v=2';
 
 // The battlefield and six original painted units are self-contained game assets.
 // Every atlas cell has generous transparent margins, so adjacent sprites never bleed.
-const field=new Image(),atlas=new Image();field.src='assets/battlefield.webp';atlas.src='assets/units.webp';
+const atlas=new Image();atlas.src='assets/units.webp';
 const columns={guard:0,bow:1,mage:2,ghoul:3,brute:4,boss:5};
 const colors={guard:'#5dd2c4',bow:'#c7e2a7',mage:'#b9d9f3'};
 function box(c,x,y,w,h,fill,stroke=null,line=2){c.fillStyle=fill;c.fillRect(x,y,w,h);if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.strokeRect(x,y,w,h);}}
@@ -78,8 +78,7 @@ function projectile(c,p){const f=1-p.life/.24,x=p.x+(p.tx-p.x)*f,y=p.y+(p.ty-p.y
   c.save();c.shadowBlur=15;c.shadowColor=p.kind==='mage'?'#69f6df':'#ffdd99';oval(c,x,y,p.kind==='mage'?11:7,p.kind==='mage'?7:3,p.kind==='mage'?'#77f9d8':'#fff1ba');oval(c,x-5,y,3,2,'#fff');c.restore();}
 export function drawScene(c,state,t,placement=null){
   c.clearRect(0,0,960,540);c.imageSmoothingEnabled=true;
-  if(field.complete&&field.naturalWidth)c.drawImage(field,0,0,960,540);
-  else {box(c,0,0,960,540,'#6c7442');box(c,0,164,960,350,'#9b784c');}
+  // Terrain is painted once by the arena behind this transparent canvas.
   // Free movement takes place across the entire visible battleground.
   c.fillStyle='#1c251b23';c.fillRect(175,0,26,540);
   wall(c,t);

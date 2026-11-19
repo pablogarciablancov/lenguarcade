@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>La Última Palabra · LenguArcade</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="illustrated.css?v=2">
+  <link rel="stylesheet" href="illustrated.css?v=3">
 </head>
 <body>
   <main class="shell">
@@ -15,8 +15,8 @@
       <button id="pauseButton" class="iconbutton" title="Pausar" aria-label="Pausar" hidden>Ⅱ</button>
     </header>
     <section class="arena" aria-label="Campo de batalla">
-      <canvas id="battle" width="960" height="540" aria-label="Castillo y tres caminos por los que se acerca la horda"></canvas>
-      <div class="battle-overlay"><span id="waveStatus">EL REINO ESPERA</span><span id="battleHint">Construye una defensa en cada camino</span></div>
+      <canvas id="battle" width="960" height="540" aria-label="Castillo y campo abierto por el que se acerca la horda"></canvas>
+      <div class="battle-overlay"><span id="waveStatus">EL REINO ESPERA</span><span id="battleHint">Construye defensas libremente sobre el terreno</span></div>
       <div id="notice" role="status" aria-live="polite"></div>
       <div id="screen" class="screen"><div class="titlecard"><div class="sigil">✦</div><small>LA HORA DEL ASEDIO</small><h1>La Última<br><em>Palabra</em></h1><p>La tinta da vida a tus defensores. Resuelve retos de Lengua, levanta edificios y resiste cuatro oleadas.</p><button id="startButton" class="primary">DEFENDER LA BIBLIOTECA</button><button id="startTreeButton" class="secondary">ÁRBOL DE MEJORAS</button><div class="titlefoot">UNA PARTIDA · CUATRO OLEADAS · CAMPO ABIERTO</div></div></div>
     </section>
@@ -26,6 +26,6 @@
     </section>
     <section id="treeOverlay" class="tree-overlay" aria-label="Árbol de mejoras" hidden><div class="tree-top"><button id="treeBack">VOLVER AL ASEDIO</button><div><small>CRÓNICAS DE LA BIBLIOTECA</small><h2>Árbol de mejoras</h2></div><div id="treeWallet">◈ 0 SELLOS</div></div><div class="tree-body"><div id="treeBranches" class="tree-branches"></div><aside id="treeInfo" class="tree-info"></aside></div><div class="tree-foot">Consigue sellos al responder y superar oleadas. Las mejoras se aplican al comenzar la siguiente partida.</div></section>
   </main>
-  <script type="module" src="main.js?v=2"></script>
+  <script type="module" src="main.js?v=3"></script>
 </body>
 </html>
