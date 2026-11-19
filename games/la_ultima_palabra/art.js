@@ -1,10 +1,10 @@
-import {BUILDINGS,WAVES,FIELD,buildingAt} from './core.js?v=2';
+import {BUILDINGS,WAVES,FIELD,buildingAt} from './core.js?v=4';
 
 // The battlefield and six original painted units are self-contained game assets.
 // Every atlas cell has generous transparent margins, so adjacent sprites never bleed.
-const atlas=new Image();atlas.src='assets/units.webp';
+const atlas=new Image(),raiders=new Image();atlas.src='assets/units.webp';raiders.src='assets/raiders.webp';
 const columns={guard:0,bow:1,mage:2,ghoul:3,brute:4,boss:5};
-const colors={guard:'#5dd2c4',bow:'#c7e2a7',mage:'#b9d9f3'};
+const newColumns={hound:0,shield:1,warlock:2};
 function box(c,x,y,w,h,fill,stroke=null,line=2){c.fillStyle=fill;c.fillRect(x,y,w,h);if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.strokeRect(x,y,w,h);}}
 function path(c,points,fill,stroke='#242532',line=3){c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke();}}
 function oval(c,x,y,rx,ry,fill){c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fillStyle=fill;c.fill();}
@@ -53,19 +53,22 @@ function building(c,b,t){
   for(let i=0;i<Math.min(b.level,4);i++)oval(c,x+5+i*9,y+55,2,2,'#f7d792');
 }
 function unit(c,x,y,kind,t,flash=0,scale=1,shadow=1){
-  const index=columns[kind],col=index%3,row=Math.floor(index/3);
-  const bob=Math.sin(t*5+x*.15)*2;
+  const isNew=kind in newColumns,index=isNew?newColumns[kind]:columns[kind],col=index%3,row=isNew?0:Math.floor(index/3);
+  const bob=Math.sin(t*8+x*.15)*.75;
   c.save();oval(c,x,y+1,26*scale*shadow,6*scale*shadow,'#29241e75');
   c.translate(Math.round(x),Math.round(y+bob));
-  c.rotate(Math.sin(t*4+x)*.025);
+  c.rotate(Math.sin(t*5+x)*.018);
   const size=78*scale;
-  if(atlas.complete&&atlas.naturalWidth){c.drawImage(atlas,col*512,row*512,512,512,-size/2,-size,size,size);}
+  const sheet=isNew?raiders:atlas,cell=isNew?724:512;
+  // Atlas feet sit inside transparent cell padding. Offset the art so boots
+  // touch the shadow at the actor's actual battlefield position.
+  if(sheet.complete&&sheet.naturalWidth){c.drawImage(sheet,col*cell,row*cell,cell,cell,-size/2,-size+size*.14,size,size);}
   else {box(c,-11*scale,-34*scale,22*scale,34*scale,kind==='ghoul'?'#694669':kind==='brute'?'#65445a':'#347789','#26272b',2);oval(c,0,-30*scale,8*scale,8*scale,'#f4dfbd');}
   if(flash>0){c.globalCompositeOperation='source-atop';c.globalAlpha=.55;box(c,-size/2,-size,size,size,'#fff7e7');}
   c.restore();
 }
 function squad(c,entity,t,enemy=false){
-  const kind=entity.boss?'boss':enemy?(entity.tank?'brute':'ghoul'):entity.type;
+  const kind=enemy?(entity.kind|| (entity.boss?'boss':entity.tank?'brute':'ghoul')):entity.type;
   const y=entity.y,x=entity.x;
   if(entity.boss){unit(c,x,y,kind,t,entity.flash,1.65);return;}
   const size=entity.tank?1.13:1;

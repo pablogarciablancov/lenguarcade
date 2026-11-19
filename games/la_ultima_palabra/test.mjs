@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createState,build,buildingAt,repair,startWave,step,answer,selectUpgrade,BUILDINGS,WAVES,FIELD} from './core.js';
+import {createState,build,buildingAt,repair,startWave,step,answer,selectUpgrade,damageAgainst,BUILDINGS,WAVES,FIELD} from './core.js';
 import {BRANCHES,applySkills,buySkill,earnedSeals} from './tree.js';
 import {QUESTIONS,checkAnswer,freshDeck} from './questions.js';
 
@@ -18,6 +18,17 @@ const upgrade=createState();upgrade.phase='upgrade';upgrade.wave=1;assert.equal(
 const profile={seals:55,tree:{}};assert.equal(buySkill(profile,'wall2'),false);assert.equal(buySkill(profile,'wall1'),true);assert.equal(profile.seals,35);assert.equal(buySkill(profile,'wall2'),true);assert.equal(profile.seals,0);
 const boosted=createState();applySkills(boosted,profile);assert.equal(boosted.wall,145);assert.equal(boosted.maxWall,145);
 assert.equal(earnedSeals({...boosted,wave:2,correct:10,phase:'lost'}),25);
+assert.ok(damageAgainst('hound','bow')>damageAgainst('hound','guard'));
+assert.ok(damageAgainst('shield','mage')>damageAgainst('shield','bow'));
+assert.ok(damageAgainst('warlock','guard')>damageAgainst('warlock','mage'));
+const passive=createState();build(passive,'guard',290,235);build(passive,'bow',415,310);
+const passiveInk=passive.ink;
+for(let wave=0;wave<3&&passive.phase==='prep';wave++){
+  startWave(passive);let ticks=0;while(passive.phase==='battle'&&ticks++<4000)step(passive,.1);
+  if(passive.phase==='upgrade')selectUpgrade(passive,'forge');
+}
+assert.equal(passive.ink,passiveInk,'Ni las bajas ni las oleadas generan tinta');
+assert.equal(passive.phase,'lost','Dos edificios sin retos no bastan para superar la campaña');
 const campaign=createState();campaign.ink=2500;for(const [x,y] of [[280,200],[310,300],[290,420]]){build(campaign,'guard',x,y);build(campaign,'guard',x,y);build(campaign,'bow',x+50,y);build(campaign,'mage',x+100,y);}
 for(let wave=0;wave<4;wave++){assert.equal(startWave(campaign),true);let ticks=0;while(campaign.phase==='battle'&&ticks++<2500)step(campaign,.1);assert.ok(ticks<2500,`Oleada ${wave+1} termina`);if(wave<3){assert.equal(campaign.phase,'upgrade');assert.equal(selectUpgrade(campaign,'forge'),true);}else assert.equal(campaign.phase,'won');}
 for(const q of QUESTIONS){assert.ok(q.why&&q.prompt&&q.topic);assert.equal(checkAnswer(q,q.typed??q.answer),true);if(q.choices){assert.equal(q.choices.length,4);assert.equal(new Set(q.choices).size,4);assert.equal(checkAnswer(q,(q.answer+1)%4),false);}}

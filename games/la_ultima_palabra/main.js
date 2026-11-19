@@ -1,5 +1,5 @@
-import {drawScene} from './art.js?v=3';
-import {BUILDINGS,WAVES,UPGRADES,FIELD,buildingAt,createState,price,build,repair,startWave,answer,selectUpgrade,step} from './core.js?v=2';
+import {drawScene} from './art.js?v=4';
+import {BUILDINGS,WAVES,UPGRADES,FIELD,buildingAt,createState,price,build,repair,startWave,answer,selectUpgrade,step} from './core.js?v=4';
 import {QUESTIONS,freshDeck,checkAnswer} from './questions.js?v=2';
 import {BRANCHES,earnedSeals,buySkill,applySkills} from './tree.js?v=2';
 
