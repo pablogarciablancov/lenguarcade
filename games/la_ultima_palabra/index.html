@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>La Última Palabra · LenguArcade</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="crest">✦</span><div><small>CRÓNICAS DE LA BIBLIOTECA</small><strong>LA ÚLTIMA PALABRA</strong></div></div>
+      <div class="meters"><div><small>OLEADA</small><b id="waveLabel">— / 4</b></div><div><small>TINTA</small><b id="inkLabel">0</b></div><div><small>MURALLA</small><b id="wallLabel">100 / 100</b></div></div>
+      <button id="pauseButton" class="iconbutton" title="Pausar" aria-label="Pausar" hidden>Ⅱ</button>
+    </header>
+    <section class="arena" aria-label="Campo de batalla">
+      <canvas id="battle" width="960" height="540" aria-label="Castillo y tres caminos por los que se acerca la horda"></canvas>
+      <div class="battle-overlay"><span id="waveStatus">EL REINO ESPERA</span><span id="battleHint">Construye una defensa en cada camino</span></div>
+      <div id="notice" role="status" aria-live="polite"></div>
+      <div id="screen" class="screen"><div class="titlecard"><div class="sigil">✦</div><small>LA HORA DEL ASEDIO</small><h1>La Última<br><em>Palabra</em></h1><p>La tinta da vida a tus defensores. Resuelve retos de Lengua, levanta edificios y resiste cuatro oleadas.</p><button id="startButton" class="primary">DEFENDER LA BIBLIOTECA</button><div class="titlefoot">UNA PARTIDA · CUATRO OLEADAS · TRES CAMINOS</div></div></div>
+    </section>
+    <section class="command" id="command" hidden>
+      <div class="build-panel"><div class="panel-heading"><span>✦ EL ARSENAL</span><small>Elige un edificio y un camino</small></div><div id="buildings" class="building-list"></div><div id="lanes" class="lane-list"></div><div class="repair-row"><button id="repairButton">✚ Reparar muralla <b>20 tinta</b></button><button id="nextButton" class="primary">INICIAR OLEADA</button></div></div>
+      <div class="challenge-panel"><div class="panel-heading"><span>✎ ATRIL DE RETOS</span><small id="streakLabel">ACIERTOS 0</small></div><div id="challenge" class="challenge"></div><div id="feedback" role="status" aria-live="polite"></div></div>
+    </section>
+  </main>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "gameId": "la_ultima_palabra",
+  "name": "La Última Palabra",
+  "subtitle": "Defiende la biblioteca",
+  "status": "en pruebas",
+  "integration": "embedded",
+  "entry": "games/la_ultima_palabra/",
+  "banner": "games/la_ultima_palabra/cover.svg",
+  "category": "Defensa y estrategia lingüística",
+  "competencies": ["ortografía", "morfología", "verbos", "estrategia"],
+  "color": "#e9bb68",
+  "icon": "✦",
+  "requires": {"studentRunner": true, "saveProgress": true, "supabaseCatalog": true},
+  "notes": "Juego individual de cuatro oleadas. El recurso tinta solo vive en la partida y no se convierte en XP. El resultado lleva score 0 hasta acordar la fórmula de XP en integración. Requiere alta en el catálogo canónico, sincronización de derivados y publicación coordinada; no modificar el núcleo desde la rama de juego."
+}
