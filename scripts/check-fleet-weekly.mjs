@@ -128,7 +128,7 @@ const retryMigration=fs.readFileSync("supabase/migrations/20261117142750_fleet_d
 assert.match(retryMigration,/fleet_weekly_awards[\s\S]*retry_after/);
 assert.match(retryMigration,/fleet_workshop_awards[\s\S]*retry_after/);
 assert.doesNotMatch(retryMigration,/update.*delivered_at/i);
-assert.match(html,/scheduleBossRefresh\(5000\)/);
+assert.doesNotMatch(html,/scheduleBossRefresh\(/);
 assert.match(html,/20000\)\);/);
 const saveSource=fs.readFileSync("supabase/functions/save-progress/index.ts","utf8");
 assert.match(saveSource,/from\("fleet_workshop_awards"\)/);

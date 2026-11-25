@@ -998,3 +998,9 @@ Rayuela: la tarjeta de una hoja de 72 celdas escritas muestra 72 de 81 y 9 casil
 ### 2026-11-12 · Media de la rayuela propia
 
 Rayuela: autor ve media global de su historia; lector no recibe esa media, aunque envíe own o authorIds falsos. Sin votos muestra Sin valoraciones todavía. Los votos individuales y la autoría ajena siguen ocultos.
+## Retirada del Devorapalabras y prueba de clase (2026-11-25)
+
+- Ejecutar `npm run check`. Revisar que el profesor no ve la plantilla ni el panel del evento; el alumno no hace peticiones a `class-boss`.
+- Tras aplicar la migración y desplegar la función, una petición autenticada antigua a `class-boss` debe responder 410 y no crear batallas ni XP; los talleres normales y las recompensas históricas siguen visibles.
+- Validar con 30 cuentas reales en la red del colegio: entradas Google, apertura de juegos, guardados simultáneos, XP y puntos de Flota. Registrar tasas de 200/504/546 y duración de `google-student-login`, `student-dashboard`, `student-access-state` y `save-progress`.
+- Repetir una sesión con 45–60 usuarios simulados contra un entorno de pruebas, sin escribir XP de alumnos. Si una petición falla antes de llegar a Supabase, contrastar la traza con EduSafe y el equipo de informática.

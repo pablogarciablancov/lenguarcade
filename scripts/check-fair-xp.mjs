@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {snapshotProgress,actionRewards,capProgressionAward} from '../supabase/functions/_shared/progression.js';
 import {workshopProgress,groupWorkshops} from '../supabase/functions/_shared/workshop-objective.js';
-import {encounterConfig,encounterSchedule,countEncounter} from '../supabase/functions/_shared/class-boss-engine.js';
 const old={xp:12345,feathers:5,attempts:0,successes:0,errors:0};
 const before={run:{id:'one',words:[],errors:0}},after={run:{id:'one',words:['SOL','CASAS','CAMINAR'],errors:1}};
 const forja=snapshotProgress('lexoma',after,before,old,{metrics:{}},{},{checkpoint:true});
@@ -39,17 +38,7 @@ const closed={...run,closed_at:iso(200)};assert.equal(workshopProgress(closed,pr
 const gapPeriods=groupWorkshops([{...run,closed_at:iso(200),workshop_key:'same'},{...run,run_id:'r2',started_at:iso(800),workshop_key:'same'}])[0];
 assert.equal(workshopProgress(gapPeriods,practice).support.activeSeconds,180,'Closed periods do not add active time');
 const xpRoute=workshopProgress(run,[{...practice[0],xp_delta:400}]);assert.equal(xpRoute.completionRoute,'xp');assert.equal(xpRoute.awardRun.run_id,'r');
-const v3=encounterConfig();assert.equal(v3.version,3);assert.equal(encounterConfig({version:2}).version,2);
-assert.ok(encounterSchedule(v3,30)[0].health>encounterSchedule({version:2},30)[0].health);
-const battle={state:'active',started_at:iso(0),active_since:iso(0),intervals:[],game_ids:run.game_ids,duration_seconds:1500,encounter_config:v3,encounter_rounds:[{index:0,from:0,to:120,health:1000,final:false}],round_results:[]};
-const hits=[event('m','maniacgrafia',10,0,4),{...event('b','battlegrafia',11,0,2),profile_id:'b'},{...event('f','lexoma',12,0,1,0,0,[24]),profile_id:'f'}];
-const fight=countEncounter(hits,battle,[run],start+20000);assert.equal(fight.rounds[0].hits,7);assert.equal(fight.rounds[0].damage,24,'4 + 8 + 8 effort damage plus 4 cooperation');assert.equal(fight.leaderboard[0].profileId,'f','Podium uses damage, not fastest raw answer count');
-assert.deepEqual(countEncounter([...hits,...hits],battle,[run],start+20000),fight);
-const overlapping=[event('f1','lexoma',10,0,2,0,0,[12,18]),event('f2','lexoma',11,1,3,0,0,[18,24])];
-assert.equal(countEncounter(overlapping,battle,[run],start+20000).rounds[0].damage,18,'Only fresh answer indices deal damage: 4+6+8');
-const almost={...battle,encounter_rounds:[{index:0,from:0,to:120,health:5,final:false}]};
-const final=countEncounter([event('last','battlegrafia',10,0,20)],almost,[run],start+20000);assert.equal(final.rounds[0].hits,2);assert.equal(final.rounds[0].damage,5);
-console.log('Fair XP: historical totals, game pacing, long words, legacy parity, pending XP, sustained practice, accuracy, gaps, one award route, weighted attacks, damage podium, v2 compatibility and overlap deduplication OK.');
+console.log('Fair XP: historical totals, game pacing, long words, legacy parity, pending XP, sustained practice, accuracy, gaps, one award route, historical reward compatibility OK.');
 // Exercise the actual UI functions: an access poll must preserve a practice completion.
 const html=fs.readFileSync('apps-script/LenguArcade_Alumno.html','utf8');
 const access=html.slice(html.indexOf('  function updateAccess(state){'),html.indexOf('  function syncAccess(){'));
@@ -62,14 +51,3 @@ const render=html.slice(html.indexOf('  function renderStudentMission(){'),html.
 const card={innerHTML:''};Object.assign(ui,{document:{getElementById:()=>card},workshopSessionState:{session:{published:true,title:'Prueba',targetXp:400,progressXp:312,progressPercent:100,completed:true,completionRoute:'practice',practiceProgress:result.support}},sessionEsc:String,sessionModeClass:()=>'',sessionModeLabel:()=> 'En clase'});
 vm.runInContext(render+';renderStudentMission()',ui);assert.match(card.innerHTML,/Completado por práctica/);assert.match(card.innerHTML,/70 %/);
 console.log('Practice UI: real mission rendering and live access polling preserve completion and reset it for a new workshop.');
-for(const pupils of [25,30]){
- const schedule=encounterSchedule(v3,pupils),traffic=[];
- for(let p=0;p<pupils;p++){
-  const game=run.game_ids[p%3],step=game==='maniacgrafia'?7:game==='battlegrafia'?25:30;
-  let count=0;for(let sec=1+p%7;sec<1500;sec+=step)traffic.push({...event(p+'-'+sec,game,sec,count,++count),profile_id:'p'+p});
- }
- const simulation=countEncounter(traffic,{...battle,encounter_rounds:schedule},[run],start+1500000);
- assert.equal(simulation.outcome,'victory');assert.ok(simulation.rounds.every(r=>r.victory));
- const solo=countEncounter(traffic.filter(e=>e.profile_id==='p0'),{...battle,encounter_rounds:schedule},[run],start+1500000);assert.equal(solo.outcome,'defeat');
- console.log('V3 simulated classroom:',pupils,'pupils, all appearances winnable at plausible paces; solo cannot win.');
-}

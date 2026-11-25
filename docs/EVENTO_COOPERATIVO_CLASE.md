@@ -1,4 +1,8 @@
-# Evento cooperativo de clase · El Devorapalabras
+# Archivo histórico · Evento cooperativo de clase · El Devorapalabras
+
+Retirado el 25 de noviembre de 2026. Esta especificación conserva el contexto histórico;
+la interfaz y el servicio ya no permiten iniciar el evento. Los premios de XP ya
+otorgados permanecen registrados.
 
 **Estado:** MVP implementado en la PR #172; pendiente de integración/publicación y validación autenticada con alumnos. No equivale a un despliegue en producción.
 
