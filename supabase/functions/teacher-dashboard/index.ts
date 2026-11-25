@@ -752,10 +752,9 @@ async function handleWorkshopGameAccess(
   const classroomOpen = session.classroomOpen === true;
   const homeEnabled = session.homeEnabled === true;
   const scheduledEnabled = session.scheduledEnabled === true;
-  const bossEnabled = session.bossEnabled === true;
-  if (bossEnabled && scheduledEnabled && !["battlegrafia","lexoma","maniacgrafia"].every(id => requestedIds.includes(id))) {
-    return jsonResponse({ok:false,error:"boss_games_required"},400);
-  }
+  // Retired event: old clients must not publish new boss-enabled workshops.
+  if (session.bossEnabled === true) return jsonResponse({ok:false,error:"class_boss_retired"},410);
+  const bossEnabled = false;
   if (homeEnabled && scheduledEnabled) {
     return jsonResponse({ok:false,error:"workshop_schedule_conflicts_with_home"},400);
   }
@@ -777,11 +776,6 @@ async function handleWorkshopGameAccess(
     activeFrom = null;
     activeTo = null;
   }
-  if (bossEnabled && scheduledEnabled && (
-    (Date.parse(activeTo!) - Date.parse(activeFrom!)) < 10 * 60000 ||
-    (Date.parse(activeTo!) - Date.parse(activeFrom!)) > 60 * 60000 ||
-    (Date.parse(activeTo!) - Date.parse(activeFrom!)) % 60000 !== 0
-  )) return jsonResponse({ok:false,error:"boss_schedule_duration_invalid"},400);
   if (scheduledEnabled && Date.parse(activeTo!) - Date.parse(activeFrom!) > 12 * 60 * 60 * 1000) {
     return jsonResponse({ok:false,error:"workshop_schedule_too_long"},400);
   }

@@ -968,3 +968,10 @@ Rayuela: la galería diferencia las escenas escritas de las 81 casillas de la ho
 ### 2026-11-12 · Media de la rayuela propia
 
 Rayuela: los alumnos ven únicamente la valoración media global de las historias de las que son autores. El servidor omite esa media en las demás; no se exponen criterios desglosados ni votos individuales. El profesor mantiene su panel.
+## 2026-11-25 · Retirada del Devorapalabras
+
+- Se eliminan la plantilla, el panel y la proyección del profesor, y el aviso, el podio y el sondeo periódico del alumno.
+- La función del evento responde 410 incluso a clientes antiguos; los servidores de talleres rechazan cualquier nueva configuración con `bossEnabled`.
+- Una migración desactiva la marca del evento en talleres existentes y cierra batallas pendientes. No borra partidas, eventos de XP ni premios históricos. Retira las funciones SQL que liquidaban premios nuevos.
+- Las simulaciones de 30 alumnos y la limitación de consultas del panel solo prueban el código con servicios simulados. La disponibilidad en la red escolar y EduSafe necesitan una prueba real con trazas de red y errores 504/546.
+- En los registros de Supabase del 12 de noviembre (07:00–17:00 UTC) constan 5.895 respuestas 200 de `class-boss` y 51 errores 546; `save-progress` registró 176 errores 546 y `student-dashboard`, 219. Es evidencia de saturación o espera del backend durante aquel periodo, no una prueba sobre el filtro escolar.

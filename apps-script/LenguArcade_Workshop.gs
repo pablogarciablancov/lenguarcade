@@ -533,11 +533,8 @@ function workshopPlanValidatePayload_(payload) {
   var gameIds = workshopSessionGameIds_(payload.gameIds).filter(function(id){ return catalogIds[id]; });
   if (payload.objectiveType === 'forja_easy_win' && gameIds.indexOf('lexoma') === -1) throw new Error('Selecciona Forja para este objetivo.');
   if (!gameIds.length) throw new Error('Selecciona al menos un juego para esta sesión.');
-  var bossEnabled=!!payload.bossEnabled;
-  if (bossEnabled && !['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.indexOf(id)!==-1;}))
-    throw new Error('Devorapalabras necesita Battlegrafía, Forja y Maniacgrafía.');
-  if (bossEnabled && payload.objectiveType === 'forja_easy_win')
-    throw new Error('Devorapalabras requiere un objetivo de XP.');
+  if (payload.bossEnabled) throw new Error('Este evento ya no está disponible. Prepara un taller normal.');
+  var bossEnabled=false;
 
   var plannedAt = workshopSessionNormalizeLocalDateTime_(payload.plannedAt || '');
   var homeEnabled = !!payload.homeEnabled;
@@ -547,11 +544,6 @@ function workshopPlanValidatePayload_(payload) {
   if (scheduledEnabled && homeEnabled) throw new Error('No puedes programar un taller en clase y en casa a la vez.');
   if (scheduledEnabled && (!scheduleStart || !scheduleEnd || scheduleEnd <= scheduleStart))
     throw new Error('Indica una hora de comienzo y fin válida para el taller programado.');
-  if (bossEnabled && scheduledEnabled) {
-    var duration=(new Date(scheduleEnd).getTime()-new Date(scheduleStart).getTime())/60000;
-    if (!isFinite(duration) || duration < 10 || duration > 60 || Math.abs(duration-Math.round(duration))>0.0001)
-      throw new Error('Programa Devorapalabras entre 10 y 60 minutos completos.');
-  }
   var homeStart = workshopSessionNormalizeLocalDateTime_(payload.homeStart || '');
   var homeEnd = workshopSessionNormalizeLocalDateTime_(payload.homeEnd || '');
   if (homeEnabled && (!homeStart || !homeEnd)) {

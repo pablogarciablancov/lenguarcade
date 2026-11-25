@@ -1419,7 +1419,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     var meta=['<span>🎮 '+sessionEsc(plannerGameCountLabel(s.gameIds))+'</span>'];
     if(s.objectiveType==='forja_easy_win')meta.push('<span>🎯 Ganar en Forja · Fácil</span>');
     if(Number(s.targetXp||0)>0)meta.push('<span>🎯 '+sessionEsc(s.targetXp)+' XP</span>');
-    if(s.homeEnabled)meta.push('<span>🏠 Horario de casa configurado</span>');if(s.bossEnabled)meta.push('<span>🐉 Devorapalabras</span>');if(s.scheduledEnabled)meta.push('<span>⏱️ '+sessionEsc(plannerDateText(s.scheduleStart))+' → '+sessionEsc(plannerDateText(s.scheduleEnd))+'</span>');
+    if(s.homeEnabled)meta.push('<span>🏠 Horario de casa configurado</span>');if(s.scheduledEnabled)meta.push('<span>⏱️ '+sessionEsc(plannerDateText(s.scheduleStart))+' → '+sessionEsc(plannerDateText(s.scheduleEnd))+'</span>');
     var openButton=s.classroomOpen?'':'<button type="button" id="workshopActiveOpen">▶ Abrir en clase</button>';
     host.innerHTML='<div class="workshopActiveCard '+(s.active?'':'isClosed')+'"><div><div class="workshopActiveEyebrow">Sesión visible para los alumnos</div><div class="workshopActiveTitle">'+sessionEsc(s.title||'Sesión del taller')+'</div><div class="workshopActiveMeta">'+meta.join('')+'</div></div><div><div style="text-align:right;margin-bottom:8px"><span class="workshopSessionState '+plannerSessionModeClass(s)+'">'+sessionEsc(plannerSessionModeLabel(s))+'</span></div><div class="workshopActiveActions">'+openButton+(s.classroomOpen?'<button type="button" id="workshopActiveClose">⏸ Cerrar clase</button>':'')+'<button type="button" class="dangerAction" id="workshopActiveRetire">Retirar</button></div></div></div>';
     var open=document.getElementById('workshopActiveOpen');if(open)open.onclick=openActivePlannerSession;
@@ -1449,7 +1449,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       var meta=['<span>🎮 '+sessionEsc(plannerGameCountLabel(plan.gameIds))+'</span>'];
       if(plan.objectiveType==='forja_easy_win')meta.push('<span>🎯 Ganar en Forja · Fácil</span>');
       if(Number(plan.targetXp||0)>0)meta.push('<span>🎯 '+sessionEsc(plan.targetXp)+' XP</span>');
-      if(plan.homeEnabled)meta.push('<span>🏠 Casa</span>');if(plan.bossEnabled)meta.push('<span>🐉 Devorapalabras</span>');if(plan.scheduledEnabled)meta.push('<span>⏱️ Clase programada: '+sessionEsc(plannerDateText(plan.scheduleStart))+'</span>');
+      if(plan.homeEnabled)meta.push('<span>🏠 Casa</span>');if(plan.scheduledEnabled)meta.push('<span>⏱️ Clase programada: '+sessionEsc(plannerDateText(plan.scheduleStart))+'</span>');
       if(Array.isArray(plan.classCodes)&&plan.classCodes.length>1)meta.push('<span>👥 '+sessionEsc(plan.classCodes.length)+' clases</span>');
       if(plan.usedAt)meta.push('<span>✓ Ya utilizada en esta clase</span>');
       var openButton='<button type="button" data-plan-open="'+sessionEsc(plan.planId)+'">'+(plan.usedAt?'▶ Reabrir y continuar':'▶ Abrir ahora')+'</button>';
@@ -1473,10 +1473,10 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     var selectedClasses={};((plan.classCodes&&plan.classCodes.length)?plan.classCodes:(teacherCurrentClass()?[teacherCurrentClass()]:[])).forEach(function(code){selectedClasses[String(code)]=true;});
     var classes=plannerClasses();
     var catalog=workshopPlannerState&&workshopPlannerState.catalog||[];
-    body.innerHTML='<div class="workshopEditorIntro"><div><h3>'+(plan.planId?'Editar sesión':'Nueva sesión')+'</h3><div class="sub">'+(plan.planId?'Los cambios quedan guardados en esta preparación. No afectan a los alumnos hasta que la abras.':'Elige una plantilla o prepara la sesión desde cero.')+'</div></div>'+(plan.planId?'<span class="workshopSessionState closed">Preparada</span>':'')+'</div><input id="workshopPlanId" type="hidden" value="'+sessionEsc(plan.planId||'')+'"><input id="workshopBossEnabled" type="hidden" value="'+(plan.bossEnabled?'1':'0')+'"><div class="workshopTemplateBar"><button type="button" class="workshopTemplateBtn" data-workshop-template="game"><strong>🎮 Sesión de juego</strong><span>Selecciona juegos y abre la clase cuando llegue el momento.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="xp"><strong>🎯 Reto de XP</strong><span>Prepara una sesión con objetivo visible de progreso.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="home"><strong>🏠 Trabajo en casa</strong><span>Deja preparado un horario de acceso fuera del aula.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="boss"><strong>🐉 Devorapalabras</strong><span>Evento cooperativo con apertura y cierre automáticos.</span></button></div><div id="workshopTemplateFeedback" class="workshopTemplateFeedback">Elige una plantilla para rellenar automáticamente los campos principales.</div><div class="workshopEditorSteps">'+
+    body.innerHTML='<div class="workshopEditorIntro"><div><h3>'+(plan.planId?'Editar sesión':'Nueva sesión')+'</h3><div class="sub">'+(plan.planId?'Los cambios quedan guardados en esta preparación. No afectan a los alumnos hasta que la abras.':'Elige una plantilla o prepara la sesión desde cero.')+'</div></div>'+(plan.planId?'<span class="workshopSessionState closed">Preparada</span>':'')+'</div><input id="workshopPlanId" type="hidden" value="'+sessionEsc(plan.planId||'')+'"><div class="workshopTemplateBar"><button type="button" class="workshopTemplateBtn" data-workshop-template="game"><strong>🎮 Sesión de juego</strong><span>Selecciona juegos y abre la clase cuando llegue el momento.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="xp"><strong>🎯 Reto de XP</strong><span>Prepara una sesión con objetivo visible de progreso.</span></button><button type="button" class="workshopTemplateBtn" data-workshop-template="home"><strong>🏠 Trabajo en casa</strong><span>Deja preparado un horario de acceso fuera del aula.</span></button></div><div id="workshopTemplateFeedback" class="workshopTemplateFeedback">Elige una plantilla para rellenar automáticamente los campos principales.</div><div class="workshopEditorSteps">'+
       '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">1</span><div><strong>Identifica y comparte la sesión</strong><span>Prepara el taller una sola vez y asígnalo a todas las clases que lo vayan a utilizar.</span></div></div><div class="workshopFormGrid"><div class="field wide"><label>Clases que comparten esta preparación</label><div id="workshopPlanClasses" class="workshopClassPicker">'+classes.map(function(row){return '<label class="workshopClassChoice"><input type="checkbox" data-plan-class value="'+sessionEsc(row.classCode)+'" '+(selectedClasses[row.classCode]?'checked':'')+'> '+sessionEsc(row.nombreVisible)+'</label>';}).join('')+'</div><div class="workshopClassTools"><button type="button" id="workshopClassOnlyCurrent">Solo esta clase</button><button type="button" id="workshopClassAll">Seleccionar todas</button></div><div class="workshopClassShareHint">Compartir la preparación no abre el taller en todas a la vez: cada clase lo activa cuando le toca.</div></div><div class="field"><label>Título de la sesión</label><input id="workshopSessionTitle" type="text" maxlength="80" placeholder="Ej.: Taller 3 · Cazadores de tildes" value="'+sessionEsc(plan.title||'')+'"></div><div class="field"><label>Fecha prevista <span class="sub">(solo organización)</span></label><input id="workshopPlannedAt" type="datetime-local" value="'+sessionEsc(plan.plannedAt||'')+'"></div><div class="field wide"><label>Mensaje / instrucciones para los alumnos</label><textarea id="workshopSessionMessage" maxlength="400" placeholder="Ej.: Hoy trabajamos ortografía. Completa dos partidas y trata de superar el reto de XP.">'+sessionEsc(plan.message||'')+'</textarea></div><div class="field"><label>Tipo de objetivo</label><select id="workshopObjectiveType"><option value="xp" '+(plan.objectiveType!=='forja_easy_win'?'selected':'')+'>Alcanzar XP</option><option value="forja_easy_win" '+(plan.objectiveType==='forja_easy_win'?'selected':'')+'>Ganar en Forja · Fácil (7 rondas)</option></select></div><div class="field"><label>Objetivo de XP (solo para retos de XP)</label><input id="workshopSessionXp" type="number" min="0" step="25" value="'+sessionEsc(Number(plan.targetXp||0))+'"></div></div></section>'+
       '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">2</span><div><strong>Elige los juegos de esta sesión</strong><span>Al abrirla, solo estos juegos quedarán disponibles para la clase.</span></div></div><div id="workshopSessionGames" class="workshopGamePicker">'+catalog.map(function(game){var image=typeof bannerUrl==='function'?bannerUrl(game.gameId,game.banner):'';return '<label class="workshopPick"><span class="workshopPickArt" style="--pick-img:url(\''+sessionEsc(image)+'\')">'+sessionEsc(teacherGameIcon(game.gameId,game.icono))+'</span><span><strong>'+sessionEsc(game.nombre)+'</strong><small>'+sessionEsc(game.categoria||game.subtitulo||'LenguArcade')+'</small></span><input type="checkbox" data-session-game value="'+sessionEsc(game.gameId)+'" '+(selected[String(game.gameId)]?'checked':'')+'></label>';}).join('')+'</div></section>'+
-      '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">3</span><div><strong>⏱️ Programar en clase</strong><span>Se abrirá y cerrará solo, por la hora del servidor, aunque cierres este panel.</span></div></div><div class="workshopHomeBox"><div class="workshopHomeHead"><div><strong>Apertura automática del taller</strong><div class="sub">Elige inicio y duración, o indica directamente el cierre.</div></div><label><input id="workshopScheduledEnabled" type="checkbox" '+(plan.scheduledEnabled?'checked':'')+'> Programar</label></div><div id="workshopScheduledTimes" class="workshopHomeTimes '+(plan.scheduledEnabled?'':'isDisabled')+'"><div class="field"><label>Comienza</label><input id="workshopScheduleStart" type="datetime-local" value="'+sessionEsc(plan.scheduleStart||plan.plannedAt||'')+'"></div><div class="field"><label>Duración</label><select id="workshopScheduleDuration"><option value="custom">Indicar hora de cierre</option><option value="15">15 minutos</option><option value="25">25 minutos · batalla clásica</option><option value="30">30 minutos</option><option value="45">45 minutos</option><option value="60">1 hora</option><option value="90">1 hora y media</option><option value="120">2 horas</option></select></div><div class="field"><label>Se cierra</label><input id="workshopScheduleEnd" type="datetime-local" value="'+sessionEsc(plan.scheduleEnd||'')+'"></div></div></div></section>'+
+      '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">3</span><div><strong>⏱️ Programar en clase</strong><span>Se abrirá y cerrará solo, por la hora del servidor, aunque cierres este panel.</span></div></div><div class="workshopHomeBox"><div class="workshopHomeHead"><div><strong>Apertura automática del taller</strong><div class="sub">Elige inicio y duración, o indica directamente el cierre.</div></div><label><input id="workshopScheduledEnabled" type="checkbox" '+(plan.scheduledEnabled?'checked':'')+'> Programar</label></div><div id="workshopScheduledTimes" class="workshopHomeTimes '+(plan.scheduledEnabled?'':'isDisabled')+'"><div class="field"><label>Comienza</label><input id="workshopScheduleStart" type="datetime-local" value="'+sessionEsc(plan.scheduleStart||plan.plannedAt||'')+'"></div><div class="field"><label>Duración</label><select id="workshopScheduleDuration"><option value="custom">Indicar hora de cierre</option><option value="15">15 minutos</option><option value="25">25 minutos</option><option value="30">30 minutos</option><option value="45">45 minutos</option><option value="60">1 hora</option><option value="90">1 hora y media</option><option value="120">2 horas</option></select></div><div class="field"><label>Se cierra</label><input id="workshopScheduleEnd" type="datetime-local" value="'+sessionEsc(plan.scheduleEnd||'')+'"></div></div></div></section>'+
       '<section class="workshopEditorStep"><div class="workshopStepHead"><span class="workshopStepNo">4</span><div><strong>Acceso opcional desde casa</strong><span>Úsalo solo si quieres que esta misma sesión esté disponible durante un horario concreto fuera del colegio.</span></div></div><div class="workshopHomeBox"><div class="workshopHomeHead"><div><strong>🏠 Permitir acceso en casa</strong><div class="sub">El horario se activa y caduca automáticamente.</div></div><label><input id="workshopHomeEnabled" type="checkbox" '+(plan.homeEnabled?'checked':'')+'> Activar</label></div><div id="workshopHomeTimes" class="workshopHomeTimes '+(plan.homeEnabled?'':'isDisabled')+'"><div class="field"><label>Desde</label><input id="workshopHomeStart" type="datetime-local" value="'+sessionEsc(plan.homeStart||'')+'"></div><div class="field"><label>Hasta</label><input id="workshopHomeEnd" type="datetime-local" value="'+sessionEsc(plan.homeEnd||'')+'"></div></div></div></section>'+
       '</div><div class="workshopEditorActions"><button type="button" id="workshopPlanSave">💾 Guardar preparación</button><button type="button" id="workshopPlanSaveOpen">▶ Guardar y abrir ahora</button><button type="button" class="homeAction" id="workshopPlanSaveSchedule">⏱️ Guardar y programar en clase</button><button type="button" class="homeAction" id="workshopPlanSaveHome">🏠 Guardar y activar horario de casa</button><button type="button" class="secondaryAction" id="workshopPlanCancel">Limpiar editor</button></div><div class="workshopPlannerStatus" id="workshopPlannerStatus"></div>';
     var scheduleToggle=document.getElementById('workshopScheduledEnabled');
@@ -1526,68 +1526,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     if(workshopEditingPlanId&&!plannerPlan(workshopEditingPlanId))workshopEditingPlanId='';
     renderPlannerEditor(plannerEditorPlan());
     setTeacherSessionBusy(false);
-    // The optional event must never prevent existing workshops from loading.
-    if(typeof window.classBossRenderPanel==='function'){
-      try{window.classBossRenderPanel();}
-      catch(error){console.error('No se pudo mostrar El Devorapalabras; Talleres sigue disponible.',error);}
-    }
   }
-  // Minimal bridge: the cooperative boss is in a later <script>, while the
-  // workshop planner and its methods intentionally live inside this IIFE.
-  // Never expose writable planner state or move the workshop's existing logic.
-  function bossPreparedPlan(){
-    var plans=workshopPlannerState&&workshopPlannerState.plans||[];
-    return plans.find(function(plan){
-      return plan&&!plan.usedAt&&!plan.active&&!plan.deletedAt&&
-        String(plan.title||'').indexOf('El Devorapalabras · La defensa del Gran Archivo')===0&&
-        Number(plan.targetXp)>0&&
-        ['battlegrafia','lexoma','maniacgrafia'].every(function(id){return (plan.gameIds||[]).includes(id);});
-    })||null;
-  }
-  window.laBossWorkshopBridge={
-    selectedClass:teacherCurrentClass,
-    activeSession:function(){return workshopPlannerState&&workshopPlannerState.activeSession||null;},
-    preparedPlan:bossPreparedPlan,
-    prepare:async function(classCode,payload){
-      if(!classCode||classCode!==teacherCurrentClass())throw new Error('Selecciona primero una clase válida.');
-      var existing=bossPreparedPlan();
-      if(existing)return existing;
-      // A prepared boss is a saved planner draft: no game access, mission clock or boss clock yet.
-      var saved=await sessionCall('saveWorkshopPlanFast',[classCode,payload]);
-      if(!saved||!saved.plan||!saved.plan.planId)throw new Error('No se pudo confirmar la preparación del taller.');
-      if(classCode===teacherCurrentClass()){
-        mergeFastSavedPlan(saved);
-        if(typeof window.classBossRenderPanel==='function')window.classBossRenderPanel();
-      }
-      return saved.plan;
-    },
-    schedule:function(classCode,target){
-      if(!classCode||classCode!==teacherCurrentClass())throw new Error('Selecciona primero una clase.');
-      workshopEditingPlanId='';workshopTemplateKind='boss';
-      renderPlannerEditor({
-        planId:'',title:'El Devorapalabras · La defensa del Gran Archivo',
-        message:'Juega y contribuye a la victoria colectiva de tu clase.',
-        objectiveType:'xp',targetXp:target||400,bossEnabled:true,
-        plannedAt:'',scheduledEnabled:true,scheduleStart:'',scheduleEnd:'',
-        homeEnabled:false,homeStart:'',homeEnd:'',
-        gameIds:['battlegrafia','lexoma','maniacgrafia'],classCodes:[classCode]
-      });
-      renderPlannerList();
-      var editor=document.querySelector('.workshopPlanEditor');
-      if(editor)editor.scrollIntoView({block:'start',behavior:'smooth'});
-      plannerStatus('El Devorapalabras está listo para programar. Elige el inicio y el cierre; no hace falta pulsar «Comenzar batalla».');
-    },
-    activate:async function(classCode,planId){
-      if(!classCode||classCode!==teacherCurrentClass())throw new Error('La clase ha cambiado. Selecciónala de nuevo.');
-      var plan=bossPreparedPlan();
-      if(!plan||String(plan.planId)!==String(planId))throw new Error('La preparación ya no existe. Vuelve a prepararla.');
-      // The games, the 400-XP objective and the workshop run begin ONLY here.
-      var opened=await sessionCall('activateWorkshopPlan',[classCode,planId,true]);
-      await syncWorkshopSupabaseAccess(classCode,opened&&opened.activeSession);
-      if(classCode===teacherCurrentClass())renderWorkshopPlanner(opened);
-      return opened;
-    }
-  };
   function plannerPayload(){
     var editor=document.getElementById('workshopPlanEditorBody');
     return {
@@ -1600,7 +1539,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       homeEnabled:!!((document.getElementById('workshopHomeEnabled')||{}).checked),
       homeStart:(document.getElementById('workshopHomeStart')||{}).value||'',
       homeEnd:(document.getElementById('workshopHomeEnd')||{}).value||'',
-      bossEnabled:(document.getElementById('workshopBossEnabled')||{}).value==='1',
+      bossEnabled:false,
       scheduledEnabled:!!((document.getElementById('workshopScheduledEnabled')||{}).checked),
       scheduleStart:(document.getElementById('workshopScheduleStart')||{}).value||'',
       scheduleEnd:(document.getElementById('workshopScheduleEnd')||{}).value||'',
@@ -1692,7 +1631,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       var result=await sessionCall('getWorkshopPlannerAdmin',[classCode]);
       var historyData=await edge('teacher-dashboard',{classCode:classCode,gameId:''});
       result.workshopOutcomes=Array.isArray(historyData.workshopOutcomes)?historyData.workshopOutcomes:[];
-      mount.innerHTML='<section class="workshopRouteSection"><div class="workshopRouteHead"><div><div class="sub">RUTA RECOMENDADA</div><h3>🚀 Talleres preconfigurados</h3><div class="sub">Los talleres todavía no abiertos aparecen primero. Reabrir continúa el mismo taller; Nueva edición crea otro independiente. Puedes abrir un taller directamente o cargarlo en el editor.</div></div></div><div id="workshopRouteList" class="workshopRouteList"></div></section><div id="workshopActiveHost"></div><section id="classBossPanel" class="laBossPanel"></section><div class="workshopPlannerGrid"><section class="workshopPlanLibrary"><div class="workshopPanelTitle"><div><h3>Tus talleres</h3><div class="sub">Próximos, borradores y sesiones ya utilizadas.</div></div><button type="button" id="workshopNewPlan">＋ Crear taller</button></div><div class="workshopListSummary" id="workshopListSummary"></div><div class="workshopPlanTabs" id="workshopPlanTabs"></div><div id="workshopPlanList" class="workshopPlanList"></div></section><section class="workshopPlanEditor"><div class="workshopPanelTitle"><div><h3>Preparar la sesión</h3><div class="sub">Guardar no publica nada automáticamente.</div></div></div><div id="workshopPlanEditorBody" class="workshopPlanEditorBody"></div></section></div>';
+      mount.innerHTML='<section class="workshopRouteSection"><div class="workshopRouteHead"><div><div class="sub">RUTA RECOMENDADA</div><h3>🚀 Talleres preconfigurados</h3><div class="sub">Los talleres todavía no abiertos aparecen primero. Reabrir continúa el mismo taller; Nueva edición crea otro independiente. Puedes abrir un taller directamente o cargarlo en el editor.</div></div></div><div id="workshopRouteList" class="workshopRouteList"></div></section><div id="workshopActiveHost"></div><div class="workshopPlannerGrid"><section class="workshopPlanLibrary"><div class="workshopPanelTitle"><div><h3>Tus talleres</h3><div class="sub">Próximos, borradores y sesiones ya utilizadas.</div></div><button type="button" id="workshopNewPlan">＋ Crear taller</button></div><div class="workshopListSummary" id="workshopListSummary"></div><div class="workshopPlanTabs" id="workshopPlanTabs"></div><div id="workshopPlanList" class="workshopPlanList"></div></section><section class="workshopPlanEditor"><div class="workshopPanelTitle"><div><h3>Preparar la sesión</h3><div class="sub">Guardar no publica nada automáticamente.</div></div></div><div id="workshopPlanEditorBody" class="workshopPlanEditorBody"></div></section></div>';
       document.getElementById('workshopNewPlan').onclick=newPlannerPlan;
       renderWorkshopPlanner(result);
     }catch(error){mount.innerHTML='<div class="workshopPlannerEmpty"><strong>No se pudieron cargar las sesiones</strong>'+sessionEsc(error.message||error)+'</div>';}
@@ -1702,8 +1641,6 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
   function duplicatePlannerPlan(planId){var plan=plannerPlan(planId);if(!plan)return;workshopEditingPlanId='';workshopTemplateKind='';var copy=Object.assign({},plan,{planId:'',title:(plan.title||'Sesión del taller')+' · copia',usedAt:'',active:false});renderPlannerList();renderPlannerEditor(copy);plannerStatus('Copia preparada. Guárdala para añadirla a la lista.');}
   function applyWorkshopTemplate(kind,button){
     workshopTemplateKind=String(kind||'game');
-    var bossFlag=document.getElementById('workshopBossEnabled');
-    if(bossFlag)bossFlag.value=kind==='boss'?'1':'0';
     var title=document.getElementById('workshopSessionTitle');
     var message=document.getElementById('workshopSessionMessage');
     var xp=document.getElementById('workshopSessionXp');
@@ -1721,23 +1658,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
       if(el&&!String(el.value||'').trim())el.value=value;
     }
 
-    if(kind==='boss'){
-      if(title)title.value='El Devorapalabras · La defensa del Gran Archivo';
-      if(message)message.value='Juega a Battlegrafía, Forja o Maniacgrafía para atacar al Devorapalabras junto a tu clase.';
-      if(xp)xp.value=400;
-      var objective=document.getElementById('workshopObjectiveType');if(objective)objective.value='xp';
-      [].slice.call(body.querySelectorAll('[data-session-game]')).forEach(function(box){
-        box.checked=['battlegrafia','lexoma','maniacgrafia'].indexOf(box.value)!==-1;
-      });
-      var scheduled=document.getElementById('workshopScheduledEnabled');
-      if(scheduled){scheduled.checked=true;scheduled.onchange();}
-      var duration=document.getElementById('workshopScheduleDuration');
-      if(duration)duration.value='25';
-      var start=document.getElementById('workshopScheduleStart');
-      if(start&&start.value)start.dispatchEvent(new Event('change'));
-      if(feedback)feedback.innerHTML='<strong>🐉 Devorapalabras listo.</strong> Los tres juegos están seleccionados. Indica cuándo comienza la batalla y usa 25 minutos (o entre 10 y 60). Al llegar la hora, el jefe comenzará automáticamente.';
-      plannerStatus('Evento cooperativo configurado. Falta indicar el horario y pulsar Guardar y programar.');
-    }else if(kind==='xp'){
+    if(kind==='xp'){
       setIfBlank(title,'Reto de XP');
       setIfBlank(message,'Consigue el objetivo de XP jugando a los juegos seleccionados durante esta sesión.');
       if(xp)xp.value=100;
@@ -1796,7 +1717,7 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
         classroomOpen:!!session.classroomOpen,
         homeEnabled:!!session.homeEnabled,
         scheduledEnabled:!!session.scheduledEnabled,
-        bossEnabled:!!session.bossEnabled,
+        bossEnabled:false,
         scheduleStart:session.scheduleStart||'',
         scheduleEnd:session.scheduleEnd||'',
         homeStart:session.homeStart||'',
@@ -1831,15 +1752,6 @@ body.light .workshopAccessSummary{color:#176b4a;background:rgba(54,211,153,.12)}
     if(mode==='schedule'){
       if(!payload.scheduledEnabled||!payload.scheduleStart||!payload.scheduleEnd||payload.scheduleEnd<=payload.scheduleStart){
         plannerStatus('Activa «Programar» e indica inicio y cierre válidos.',true);return;
-      }
-      if(payload.bossEnabled){
-        var durationMinutes=(new Date(payload.scheduleEnd).getTime()-new Date(payload.scheduleStart).getTime())/60000;
-        if(!['battlegrafia','lexoma','maniacgrafia'].every(function(id){return payload.gameIds.indexOf(id)!==-1;})){
-          plannerStatus('Devorapalabras requiere Battlegrafía, Forja y Maniacgrafía.',true);return;
-        }
-        if(durationMinutes<10||durationMinutes>60||!Number.isInteger(durationMinutes)){
-          plannerStatus('La batalla programada debe durar entre 10 y 60 minutos completos.',true);return;
-        }
       }
       if(new Date(payload.scheduleEnd).getTime()<=Date.now()){
         plannerStatus('La hora de cierre debe estar en el futuro.',true);return;
@@ -3180,364 +3092,7 @@ body.light .teacherMonitorTable th{background:#fff}
 </script>
 
 
-<style>
-.laBossPanel{border:1px solid #705ba0;border-radius:22px;overflow:hidden;margin:14px 0;background:radial-gradient(ellipse at 85% -25%,rgba(170,99,236,.32),transparent 60%),linear-gradient(135deg,#181127,#271b3d 60%,#111a31);color:#f9f2ff;padding:20px;box-shadow:0 16px 32px #08061555}
-.laBossPanelHead{display:flex;justify-content:space-between;gap:20px;align-items:center}
-.laBossPanel h3{font-size:24px;margin:6px 0}.laBossPanel p{color:#dacbec;max-width:720px;margin:5px 0 12px;font-size:14px;line-height:1.5}
-.laBossPanel .laBossEyebrow{font-size:11px;font-weight:900;letter-spacing:2px;color:#eacbff}
-.laBossActions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}.laBossActions button{width:auto;background:linear-gradient(110deg,#9753c2,#534dc4);padding:10px 18px}
-.laBossActions button.ghost{border:1px solid #877099;background:#ffffff12}
-.laBossPanel .laBossStatus{font-size:12px;color:#e8d4fe;margin-top:11px}
-.laBossCurtain{position:fixed;inset:0;z-index:1000;display:none;flex-direction:column;overflow:hidden;background:radial-gradient(ellipse at center 65%,#44254f 0,#1f1531 45%,#090a1c 90%);color:#fff;font-family:Inter,system-ui,sans-serif}
-.laBossCurtain.open{display:flex}
-.laBossCurtain::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(110deg,transparent 0 75px,#fff1 76px 77px,transparent 78px 140px);opacity:.13;pointer-events:none}
-.laBossTop{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 20px;background:#050b1ba8;border-bottom:1px solid #b7a0d033}
-.laBossTop small{display:block;letter-spacing:2px;font-size:11px;color:#d7baff;font-weight:800}.laBossTop strong{font-size:clamp(18px,1.6vw,24px)}
-.laBossTop button{width:auto;background:#251a40;color:#fff;border:1px solid #fff4;padding:8px 14px}
-.laBossMain{position:relative;display:flex;flex:1;min-height:0;flex-direction:column;align-items:center;justify-content:center;padding:6px 3vw}
-.laBossTitle{text-align:center;margin-bottom:0;font-family:Georgia,serif;font-size:clamp(23px,2.6vw,40px);color:#ffe4bd;text-shadow:0 4px 16px #000}
-.laBossLegend{text-align:center;color:#e2d2ea;margin:3px 0 4px;font-size:14px}
-.laBossMonster{position:relative;width:min(92vh,96vw,1080px);flex:1;min-height:0;max-height:70vh;filter:drop-shadow(0 12px 26px #080317)}
-.laBossDragon{position:absolute;inset:0;transform-origin:50% 85%;transition:opacity 1s,filter .6s}
-.laBossSpriteSurface{width:100%;height:100%}
-.laBossSprite{display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
-.laBossAura{position:absolute;inset:4%;border-radius:50%;background:radial-gradient(ellipse,#bc79fb35,transparent 65%);pointer-events:none;animation:laBossAura 5s ease-in-out infinite}
-.laBossMonster[data-phase="3"] .laBossAura{opacity:.6}.laBossMonster[data-phase="4"] .laBossAura{opacity:.35}
-.laBossSpriteStatus{position:absolute;bottom:5%;left:0;right:0;text-align:center;color:#e2d2ea;font-size:13px}
-.laBossSpriteStatus:empty{display:none}
-.laBossImpact{position:absolute;left:50%;top:32%;color:#fff1bb;font-size:clamp(30px,5vw,64px);font-weight:1000;text-shadow:0 3px 0 #561a65,0 0 20px #ffcf70;opacity:0;pointer-events:none;white-space:nowrap}
-.laBossMonster.hurt .laBossSpriteSurface{animation:laBossHit .4s ease-in-out}
-.laBossMonster.hurt .laBossImpact{animation:laBossDamage .9s ease-out both}
-.laBossMonster.combo.hurt .laBossAura{animation:laBossCombo .9s ease-out}
-.laBossCurtain[data-outcome="victory"] .laBossDragon{animation:laBossCollapse 1.8s ease-out forwards}
-.laBossCurtain[data-outcome="victory"] .laBossAura{background:radial-gradient(ellipse,#8fffe155,transparent 65%)}
-.laBossCurtain[data-outcome="defeat"] .laBossDragon{animation:laBossRoar 2.5s ease-in-out infinite}
-.laBossCurtain[data-outcome="defeat"] .laBossAura{background:radial-gradient(ellipse,#ff5f9955,transparent 65%)}
-.laBossBar{width:min(780px,85vw);border-radius:20px;background:#080d1b;border:2px solid #9279ae;padding:5px;box-shadow:0 10px 25px #0009}
-.laBossBarFill{height:clamp(16px,2.2vh,25px);width:100%;border-radius:13px;background:linear-gradient(90deg,#f06778,#c83377,#9743e9);box-shadow:0 0 20px #f03b8c99;transition:width .5s ease}
-.laBossStats{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;margin-top:8px;font-weight:900;font-size:clamp(14px,1.7vw,22px)}
-.laBossFoot{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 20px;background:#080c1ecc;border-top:1px solid #b7a0d033}
-.laBossFoot button{width:auto;padding:8px 14px}.laBossFoot .laBossEnd{background:#83364b}
-.laBossFoot .laBossPause{background:#55438f}
-.laBossOutcome{display:none;text-align:center;flex:none;margin-top:8px;padding:8px 24px;border:1px solid #e8c58770;border-radius:18px;background:#110f2ce6}
-.laBossOutcome.show{display:block}.laBossOutcome h2{font:900 clamp(20px,2.5vw,36px) Georgia,serif;color:#ffe2a8;margin:0 0 4px}
-.laBossOutcome p{font-size:clamp(13px,1.4vw,20px);color:#fff;margin:0}
-.laBossPhase{font-size:11px;letter-spacing:2px;font-weight:800;color:#e7c38e;margin:2px 0 4px;text-transform:uppercase;flex:none}
-.laBossMain>*:not(.laBossMonster){flex-shrink:0}.laBossTop,.laBossFoot{flex-shrink:0}
-@keyframes laBossAura{50%{transform:scale(1.06);opacity:.6}}
-@keyframes laBossHit{0%,100%{transform:translateX(0)}22%,65%{transform:translateX(-10px) rotate(-2deg);filter:brightness(1.8)}43%,85%{transform:translateX(10px)}}
-@keyframes laBossCombo{25%{opacity:1;filter:brightness(3)}100%{filter:none}}
-@keyframes laBossDamage{0%{opacity:0;transform:translate(-50%,10px)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-60px)}}
-@keyframes laBossCollapse{to{transform:translateY(12px) rotate(10deg) scale(.85);opacity:.25;filter:grayscale(.8)}}
-@keyframes laBossRoar{50%{transform:translateY(-12px) scale(1.04)}}
-@media(prefers-reduced-motion:reduce){#classBossStage .laBossMonster *{animation:none;transition:none}.laBossCurtain[data-outcome="victory"] .laBossDragon{opacity:.25;transform:translateY(8px) rotate(8deg) scale(.9)}.laBossBarFill{transition:none}}
-@media(max-height:720px){.laBossMain{padding:4px 3vw}.laBossTitle{font-size:25px}.laBossLegend{font-size:13px;margin-bottom:4px}.laBossMonster{max-height:64vh}.laBossStats{margin-top:6px}.laBossFoot{padding:8px 20px}}
-@media(max-width:700px){.laBossPanelHead{display:block}.laBossTop,.laBossFoot{padding:8px 12px}.laBossTop strong{font-size:18px}.laBossTop small{font-size:9px}.laBossStats{gap:12px}.laBossMonster{width:90vw}.laBossFoot{flex-wrap:wrap}.laBossFoot>span{font-size:12px}.laBossFoot .laBossActions{margin-top:0}}
-</style>
-<style>
-.laBossSettings{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px}.laBossSettings label,.laBossRewardSettings label{display:grid;gap:6px;font-size:12px;color:#d6c8ee}.laBossSettings input,.laBossRewardSettings input{box-sizing:border-box;width:100%;padding:9px;border-radius:9px;border:1px solid #8864bb66;background:#171328;color:#fff;font:inherit;font-size:15px}.laBossRewardSettings{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px}.laBossRewardSettings fieldset{display:flex;flex:1;gap:10px;border:1px solid #8864bb66;border-radius:12px;padding:12px;min-width:220px}.laBossRewardSettings legend{font-size:12px;color:#dfc8ff}.laBossRewardSettings label{flex:1;min-width:0}.laBossConfigHint{font-size:12px;color:#beacd4}.laBossPodiumHost{position:absolute;inset:8% 4% 12%;z-index:4;pointer-events:none;display:flex;flex-direction:column;justify-content:center;text-align:center}.laBossPodiumHost:empty{display:none}.laBossPodiumHost h2{color:#ffe59e;font-size:clamp(20px,3.8vh,38px)}.laBossPodium{display:flex;justify-content:center;align-items:flex-end;gap:12px;margin:12px auto;width:min(700px,100%)}.laBossWinner{display:flex;flex:1;min-width:0;flex-direction:column;gap:8px;padding:18px 10px;border:1px solid #bba8da;background:linear-gradient(#352c4d,#171326);border-radius:18px 18px 6px 6px;box-shadow:0 12px 30px #0005}.laBossWinner.place1{padding-top:35px;border-color:#ffd66a;background:linear-gradient(#57462a,#231c30)}.laBossWinner>span{font-size:35px}.laBossWinner strong{overflow-wrap:anywhere;color:#fff}.laBossWinner small{color:#daccec}.laBossWinner b{color:#ffe59e}.laBossWinner em{font-style:normal;font-size:28px;color:#daccec}.laBossPodiumHost p{color:#e1d5ed}@media(max-height:700px){.laBossWinner{padding:8px;gap:4px}.laBossWinner.place1{padding-top:20px}.laBossPodiumHost h2{margin:5px}.laBossWinner>span{font-size:25px}}
-</style>
-<div id="classBossStage" class="laBossCurtain" role="dialog" aria-label="Batalla cooperativa de clase" aria-modal="true">
-  <header class="laBossTop"><div><small>LENGUARCADE · EVENTO COOPERATIVO</small><strong>La defensa del Gran Archivo</strong></div><button type="button" id="classBossClose">✕ Volver al profesor</button></header>
-  <main class="laBossMain">
-    <h1 class="laBossTitle">EL DEVORAPALABRAS</h1>
-    <p class="laBossLegend" id="classBossLegend">Varias apariciones · Un gran combate final. ¡Salvad el Gran Archivo!</p>
-    <div class="laBossPhase" id="classBossPhase" aria-live="polite">Fase I · Guardián de tinta</div>
-    <div class="laBossMonster" id="classBossMonster" data-phase="1" aria-hidden="true">
-      <div class="laBossAura"></div>
-      <div class="laBossDragon"><div class="laBossSpriteSurface"><canvas class="laBossSprite" id="classBossSprite" width="512" height="448"></canvas></div></div>
-      <span class="laBossSpriteStatus" id="classBossSpriteStatus">Preparando el dragón…</span>
-      <span class="laBossImpact" id="classBossImpact"></span>
-    </div>
-    <div class="laBossBar" aria-label="Vida del jefe"><div class="laBossBarFill" id="classBossHealthBar"></div></div>
-    <div class="laBossStats"><span id="classBossHealth">—</span><span id="classBossClock">25:00</span><span id="classBossCombos">Combos: 0</span></div>
-    <div id="classBossPodiumHost" class="laBossPodiumHost" aria-live="polite"></div>
-    <div id="classBossOutcome" class="laBossOutcome" aria-live="polite"><h2 id="classBossOutcomeTitle">¡VICTORIA!</h2><p id="classBossOutcomeText">Habéis salvado el Gran Archivo.</p></div>
-  </main>
-  <footer class="laBossFoot"><span id="classBossStageStatus">Esperando los progresos confirmados de la clase.</span><div class="laBossActions"><button type="button" class="laBossPause" id="classBossPause">Pausar</button><button type="button" class="laBossEnd" id="classBossFinish">Finalizar</button></div></footer>
-</div>
-<script id="la-class-boss-controller">
-(function(){
-  var last=null,lastClassCode='',timer=null,requesting=false,stage=$('classBossStage'),lastDamage=0,lastCombos=0,visualEventId=null;
-  // Each animation frame is a separate, padded 512px image: never crop a grid.
-  var spritePhases=['healthy','cracked','torn','critical'];
-  var spriteAssetVersion='4c1509da99e34cc3cdf4dc2de1179cc4e017ca24';
-  var spriteImages=[[],[],[],[]],spritePhase=1,spriteFrame=0,spriteRaf=0,spriteAt=0;
-  var spriteQueue=[],spriteLoading=0,spriteStarted=false;
-  var spriteReduced=typeof window.matchMedia==='function'?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
-  function drawBossSprite(){
-    var canvas=$('classBossSprite'),phaseImages=spriteImages[spritePhase-1];
-    var frame=spriteReduced&&spriteReduced.matches?0:spriteFrame,img=phaseImages[frame];
-    if(!img||!img.complete||!img.naturalWidth){
-      frame=phaseImages.findIndex(function(candidate){return candidate&&candidate.complete&&candidate.naturalWidth;});
-      img=phaseImages[frame];
-    }
-    if(!canvas||!img)return;
-    var context=canvas.getContext('2d');if(!context)return;
-    context.clearRect(0,0,512,448);context.imageSmoothingEnabled=false;
-    // Zoom the whole isolated frame, using only its known transparent margins.
-    // All 48 opaque silhouettes remain inside a clear 24px canvas border.
-    context.drawImage(img,-25.6,-102.4,563.2,563.2);
-    $('classBossSpriteStatus').textContent='';
-    canvas.setAttribute('data-phase',String(spritePhase));canvas.setAttribute('data-frame',String(frame));
-  }
-  function loadBossSpriteQueue(){
-    // Bound concurrent requests; initial phase comes first, others preload.
-    while(spriteLoading<4&&spriteQueue.length){
-      (function(job){
-        var img=new Image(),fallback=false;spriteImages[job.phase][job.frame]=img;spriteLoading++;
-        var file=spritePhases[job.phase]+'-'+String(job.frame).padStart(2,'0')+'.webp';
-        function done(){spriteLoading--;loadBossSpriteQueue();}
-        img.onload=function(){if(spritePhase===job.phase+1)drawBossSprite();done();};
-        img.onerror=function(){
-          if(!fallback){fallback=true;img.src='https://cdn.jsdelivr.net/gh/pablogarciablancov/lenguarcade-assets@'+spriteAssetVersion+'/assets/events/devorapalabras/frames-v2/'+file;}
-          else{
-            if(spritePhase===job.phase+1&&!spriteImages[job.phase].some(function(candidate){return candidate&&candidate.complete&&candidate.naturalWidth;}))$('classBossSpriteStatus').textContent='No se ha podido cargar el dragón. El combate sigue activo.';
-            done();
-          }
-        };
-        img.src='https://raw.githubusercontent.com/pablogarciablancov/lenguarcade-assets/'+spriteAssetVersion+'/assets/events/devorapalabras/frames-v2/'+file;
-      })(spriteQueue.shift());
-    }
-  }
-  function stopBossSprite(){
-    if(spriteRaf&&typeof window.cancelAnimationFrame==='function')window.cancelAnimationFrame(spriteRaf);
-    spriteRaf=0;spriteAt=0;
-  }
-  function animateBossSprite(now){
-    spriteRaf=0;
-    if(!stage.classList.contains('open')||document.hidden)return;
-    if(spriteReduced&&spriteReduced.matches){drawBossSprite();return;}
-    if(!spriteAt||now-spriteAt>=110){
-      if(spriteAt)spriteFrame=(spriteFrame+1)%12;
-      spriteAt=now;drawBossSprite();
-    }
-    if(!(spriteReduced&&spriteReduced.matches)&&stage.getAttribute('data-outcome')!=='victory')spriteRaf=window.requestAnimationFrame(animateBossSprite);
-  }
-  function syncBossSprite(phase){
-    if(phase!==spritePhase){spritePhase=phase;spriteFrame=0;spriteAt=0;}
-    if(!stage.classList.contains('open'))return;
-    // Visual loading/animation must never break the workshop controller.
-    try{
-      if(typeof Image!=='function')return;
-      if(!spriteStarted){
-        spriteStarted=true;
-        var order=[spritePhase-1];
-        for(var p=0;p<4;p++)if(p!==spritePhase-1)order.push(p);
-        order.forEach(function(phaseIndex){for(var frame=0;frame<12;frame++)spriteQueue.push({phase:phaseIndex,frame:frame});});
-        loadBossSpriteQueue();
-      }
-      drawBossSprite();
-      if(spriteReduced&&spriteReduced.matches||stage.getAttribute('data-outcome')==='victory')stopBossSprite();
-      else if(!spriteRaf&&!document.hidden&&typeof window.requestAnimationFrame==='function')spriteRaf=window.requestAnimationFrame(animateBossSprite);
-    }catch(error){console.warn('[Devorapalabras] No se pudo mostrar el sprite.',error);}
-  }
-  if(spriteReduced&&typeof spriteReduced.addEventListener==='function')spriteReduced.addEventListener('change',function(){stopBossSprite();syncBossSprite(spritePhase);});
-  if(typeof document.addEventListener==='function')document.addEventListener('visibilitychange',function(){if(document.hidden)stopBossSprite();else syncBossSprite(spritePhase);});
-  var encounterSettings={sessionMinutes:25,appearanceCount:4,combatSeconds:120,roundRewards:[150,100,75],finalRewards:[300,200,150],participationXp:25},fleetTarget=400;
-  function safeBoss(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-  function podiumMarkup(rows,rewards){return '<div class="laBossPodium">'+[1,0,2].map(function(index){var p=rows[index];return p?'<article class="laBossWinner place'+(index+1)+'"><span>'+['🥇','🥈','🥉'][index]+'</span><strong>'+safeBoss(p.name)+'</strong><small>'+p.hits+' ataques · '+p.damage+' de daño</small><b>+'+Number(rewards[index]||0)+' XP</b><em>'+(index+1)+'º</em></article>':'';}).join('')+'</div>';}
-  function bossWorkshop(){return window.laBossWorkshopBridge||null;}
-  function getClass(){var bridge=bossWorkshop();return bridge?bridge.selectedClass():'';}
-  function fmt(seconds){var n=Math.max(0,Math.ceil(Number(seconds)||0));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0');}
-  function msg(code){var messages={
-    open_workshop_first:'Abre primero un taller para esta clase.',
-    select_boss_games_in_workshop:'El taller debe incluir Battlegrafía, Forja y Maniacgrafía.',
-    event_already_exists_reload:'El evento ya existe. Actualiza el panel.',
-    finish_previous_event:'Finaliza primero el combate anterior.',
-    boss_finished:'La batalla ha terminado. Usa una nueva edición del taller.',
-    prepare_battle_first:'Prepara primero la batalla; el cronómetro solo se activa al pulsar Comenzar batalla.',
-    workshop_run_missing:'No se ha encontrado la apertura del taller. Recarga el planificador.'
-  };return messages[code]||code||'No se pudo conectar con el combate.';}
-  function status(s){var node=$('classBossPanelStatus');if(node)node.textContent=s||'';var screen=$('classBossStageStatus');if(screen)screen.textContent=s||'';}
-  function renderPanel(){
-    var root=$('classBossPanel');if(!root)return;
-    var bridge=bossWorkshop();var s=bridge?bridge.activeSession():null;
-    var gameIds=s&&s.gameIds||[];
-    var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
-    var prepared=bridge&&bridge.preparedPlan&&bridge.preparedPlan();
-    var scheduled=!!(s&&s.scheduledEnabled&&s.bossEnabled);
-    root.innerHTML='<div class="laBossPanelHead"><div><div class="laBossEyebrow">NUEVO · EVENTO COOPERATIVO</div><h3>📜 El Devorapalabras</h3><p>Varias apariciones, descansos entre combates y un gran enfrentamiento final. Cada acierto ataca y las acciones más laboriosas hacen más daño. El podio se ordena por daño. El taller se completa por XP o por práctica sostenida con un 70 % de aciertos, con un único premio de Flotas.</p></div><div class="laBossActions"><button type="button" id="classBossPrepare">'+(scheduled?'⏱️ Batalla programada':ready?'⚔️ Comenzar batalla':prepared?'⚔️ Comenzar batalla':'⚙️ Preparar taller cooperativo')+'</button><button type="button" class="ghost" id="classBossSchedule">📅 Programar batalla</button><button type="button" class="ghost" id="classBossProject">📺 Proyectar batalla</button></div></div><div class="laBossStatus" id="classBossPanelStatus">Elige una clase y prepara los tres juegos.</div>';
-    var controls='<div class="laBossSettings">';
-    [['sessionMinutes','Sesión · minutos',10,60],['appearanceCount','Apariciones',2,6],['combatSeconds','Combate · segundos',30,180],['participationXp','XP por participar en victoria',0,250]].forEach(function(field){controls+='<label>'+field[1]+'<input type="number" id="bossSetting_'+field[0]+'" min="'+field[2]+'" max="'+field[3]+'" value="'+encounterSettings[field[0]]+'"></label>';});
-    controls+='<label>Objetivo al preparar taller · XP<input type="number" id="bossFleetTarget" min="1" max="5000" value="'+fleetTarget+'"></label></div><div class="laBossRewardSettings">';
-    ['roundRewards','finalRewards'].forEach(function(key){controls+='<fieldset><legend>'+ (key==='roundRewards'?'Podio por victoria · XP':'Podio final · XP')+'</legend>';encounterSettings[key].forEach(function(value,i){controls+='<label>'+['🥇','🥈','🥉'][i]+'<input type="number" id="bossSetting_'+key+i+'" min="0" max="1000" value="'+value+'"></label>';});controls+='</fieldset>';});
-    controls+='</div><p class="laBossConfigHint">La última aparición dura el doble y tiene más vida. Los cambios se aplican a la próxima sesión; pausar ataques no detiene el reloj.</p>';
-    root.innerHTML+=controls;
-    Object.keys(encounterSettings).forEach(function(key){if(Array.isArray(encounterSettings[key]))encounterSettings[key].forEach(function(v,i){$('bossSetting_'+key+i).onchange=function(){encounterSettings[key][i]=Math.max(0,Math.min(1000,Number(this.value)||0));};});else $('bossSetting_'+key).onchange=function(){encounterSettings[key]=Number(this.value);};});
-    $('bossFleetTarget').onchange=function(){fleetTarget=Math.max(1,Math.min(5000,Number(this.value)||400));};
-    updatePrimaryAction();
-    $('classBossProject').onclick=function(){openStage();};
-    $('classBossSchedule').onclick=function(){
-      var bridge=bossWorkshop();
-      if(!getClass()||!bridge||!bridge.schedule){status('Selecciona una clase en Talleres.');return;}
-      bridge.schedule(getClass(),fleetTarget);
-    };
-    refresh();
-  }
-  function updatePrimaryAction(){
-    var btn=$('classBossPrepare'),bridge=bossWorkshop(),s=bridge?bridge.activeSession():null;
-    if(!btn)return;
-    var gameIds=s&&s.gameIds||[];
-    var ready=!!(s&&s.classroomOpen&&Number(s.targetXp)>0&&['battlegrafia','lexoma','maniacgrafia'].every(function(id){return gameIds.includes(id);}));
-    var prepared=bridge&&bridge.preparedPlan&&bridge.preparedPlan();
-    var scheduled=!!(s&&s.scheduledEnabled&&s.bossEnabled);
-    var battle=lastClassCode===getClass()?last:null;
-    var fresh=!!(ready&&battle&&(battle.state==='active'||battle.state==='paused'||battle.state==='prepared'));
-    btn.textContent=scheduled?'📺 Ver batalla programada':prepared?'⚔️ Comenzar batalla':fresh&&battle.state!=='prepared'?'📺 Ver batalla':
-      ready?'⚔️ Comenzar batalla':'⚙️ Preparar batalla';
-    btn.disabled=launchPending;
-    btn.onclick=function(){
-      if(scheduled)return openStage();
-      if(prepared)return launchBattle();
-      if(fresh&&battle.state!=='prepared')return openStage();
-      if(ready)return launchBattle();
-      return prepare();
-    };
-  }
-  async function prepare(){
-    var classCode=getClass();if(!classCode){status('Selecciona primero una clase.');return;}
-    var bridge=bossWorkshop();var s=bridge?bridge.activeSession():null;
-    if(s&&s.classroomOpen&&!window.confirm('Hay un taller abierto. Preparar el evento no lo cerrará; al comenzar la batalla se sustituirá por el taller cooperativo. ¿Prepararlo?'))return;
-    status('Preparando los tres juegos…');
-    try{
-      var payload={bossEnabled:true,title:'El Devorapalabras · La defensa del Gran Archivo',message:'Juega y contribuye a la victoria colectiva de tu clase.',targetXp:fleetTarget,objectiveType:'xp',gameIds:['battlegrafia','lexoma','maniacgrafia'],classCodes:[classCode]};
-      var bridge=bossWorkshop();if(!bridge)throw new Error('El planificador no está disponible. Recarga la página.');
-      await bridge.prepare(classCode,payload);
-      updatePrimaryAction();
-      status('Batalla preparada. Los juegos siguen cerrados y el cronómetro está sin iniciar. Pulsa «Comenzar batalla» cuando llegue la clase.');
-    }catch(e){status('No se pudo preparar: '+msg(e.code||e.message));}
-  }
-  var launchPending=false;
-  async function launchBattle(){
-    if(launchPending)return;
-    var classCode=getClass(),bridge=bossWorkshop();
-    if(!classCode||!bridge){status('Elige una clase y prepara el evento.');return;}
-    launchPending=true;updatePrimaryAction();
-    try{
-      var session=bridge.activeSession(),plan=bridge.preparedPlan&&bridge.preparedPlan();
-      if(!plan&&!(session&&session.classroomOpen))throw new Error('Primero prepara el taller cooperativo.');
-      status('Abriendo los juegos y comenzando la batalla…');
-      if(plan)await bridge.activate(classCode,plan.planId);
-      if(getClass()!==classCode)throw new Error('La clase seleccionada ha cambiado.');
-      // If prepare/start must be retried after a network error, both server actions
-      // are idempotent for the active workshop; its clock is never reset.
-      await edge('class-boss',{action:'prepare',classCode:classCode,encounterConfig:encounterSettings});
-      var r=await edge('class-boss',{action:'start',classCode:classCode});
-      last=r.event||null;lastClassCode=classCode;paint(last);
-      status('La batalla ha comenzado. Los juegos y el reto de '+fleetTarget+' XP ya están activos.');
-      openStage();
-    }catch(error){
-      status('No se pudo iniciar la batalla: '+msg(error.code||error.message)+'. Si los juegos ya están abiertos, vuelve a pulsar «Comenzar batalla».');
-      // Refresh recovers a partially completed launch without opening a second run.
-      refresh();
-    }finally{launchPending=false;updatePrimaryAction();}
-  }
-  async function act(action){
-    var classCode=getClass();if(!classCode){status('Selecciona una clase.');return;}
-    status('Actualizando batalla…');
-    try{
-      var result=await edge('class-boss',{action:action,classCode:classCode,encounterConfig:encounterSettings});
-      last=result.event||null;lastClassCode=classCode;paint(last);updatePrimaryAction();
-      if(action==='start')openStage();
-      if(action==='prepare')status('Batalla preparada. El cronómetro NO ha empezado. Pulsa «Comenzar batalla» cuando estén listos.');
-      else if(action==='finish')status('El combate ha terminado. El progreso de los alumnos se conserva.');
-      else status(last?'Combate '+(last.state==='active'?'en curso':last.state==='paused'?'en pausa':'finalizado')+'.':'Todavía no hay combate.');
-    }catch(e){status('No se pudo actualizar: '+msg(e.code||e.message));}
-  }
-  function paint(b){
-    var monster=$('classBossMonster');
-    $('classBossPodiumHost').innerHTML='';monster.style.visibility='visible';
-    if(!b){
-      stage.setAttribute('data-outcome','');monster.setAttribute('data-phase','1');syncBossSprite(1);
-      monster.classList.remove('hurt');monster.classList.remove('combo');
-      $('classBossOutcome').classList.remove('show');
-      $('classBossPhase').textContent='Fase I · Guardián de tinta';
-      $('classBossHealth').textContent='—';$('classBossClock').textContent='25:00';
-      $('classBossCombos').textContent='Combos: 0';$('classBossHealthBar').style.width='100%';
-      $('classBossPause').disabled=true;$('classBossFinish').disabled=true;
-      visualEventId=null;lastDamage=0;lastCombos=0;
-      $('classBossLegend').textContent='Prepara un taller cooperativo y empieza el combate.';return;
-    }
-    if(b.state==='prepared'){
-      stage.setAttribute('data-outcome','');
-      monster.style.visibility='hidden';stopBossSprite();
-      $('classBossPodiumHost').innerHTML='';
-      $('classBossOutcome').classList.remove('show');
-      $('classBossPhase').textContent='BATALLA PREPARADA';
-      $('classBossLegend').textContent='El cronómetro comenzará exclusivamente al pulsar «Comenzar batalla».';
-      $('classBossHealth').textContent='Preparados: '+b.totalHealth+' puntos de vida';
-      $('classBossClock').textContent='Sin iniciar';
-      $('classBossCombos').textContent='Combos: 0';
-      $('classBossHealthBar').style.width='100%';
-      $('classBossPause').disabled=true;$('classBossFinish').disabled=false;
-      visualEventId=b.id;lastDamage=0;lastCombos=0;return;
-    }
-    var ratio=b.totalHealth>0?Math.max(0,Math.min(1,b.health/b.totalHealth)):1;
-    var phase=ratio>.7?1:ratio>.35?2:ratio>.1?3:4;
-    var sameEvent=visualEventId===b.id;
-    monster.setAttribute('data-phase',String(phase));
-    stage.setAttribute('data-outcome',b.state==='finished'?(b.outcome==='victory'?'victory':'defeat'):'');
-    syncBossSprite(phase);
-    $('classBossPhase').textContent=['Fase I · Guardián de tinta','Fase II · El pergamino se agrieta','Fase III · Alas desgarradas','Fase IV · La tinta se desvanece'][phase-1];
-    if(!sameEvent){monster.classList.remove('hurt');monster.classList.remove('combo');}
 
-    $('classBossHealth').textContent=b.health+' / '+b.totalHealth+' de vida';
-    $('classBossClock').textContent=fmt(b.remainingSeconds);
-    $('classBossCombos').textContent='Combos: '+b.combos;
-    $('classBossHealthBar').style.width=(ratio*100)+'%';
-    $('classBossLegend').textContent=!b.workshopOpen?'El taller está cerrado, pero la cuenta atrás continúa.':b.state==='paused'?'Ataques en pausa; el reloj sigue avanzando.':['La criatura ha despertado en el Gran Archivo…','¡La armadura de papel empieza a romperse!','¡Sus alas se desgarran! Seguid recuperando palabras.','¡Último esfuerzo! Apenas le queda tinta.'][phase-1];
-    var finish=b.state==='finished';
-    $('classBossOutcome').classList.toggle('show',finish);
-    $('classBossOutcomeTitle').textContent=b.outcome==='victory'?'¡VICTORIA DE LA CLASE!':'EL DEVORAPALABRAS RESISTE';
-    $('classBossOutcomeText').textContent=b.outcome==='victory'?'¡Habéis salvado juntos el Gran Archivo!':'La criatura conserva el Archivo. Volveremos a intentarlo juntos.';
-    $('classBossPause').disabled=finish||!b.workshopOpen;
-    $('classBossPause').textContent=b.state==='paused'?'▶ Reanudar':'⏸ Pausar ataques';
-    $('classBossFinish').disabled=finish;
-    if(sameEvent&&b.damage>lastDamage&&stage.classList.contains('open')){
-      monster.classList.remove('hurt');void monster.offsetWidth;
-      monster.classList.toggle('combo',b.combos>lastCombos);
-      $('classBossImpact').textContent=(b.combos>lastCombos?'¡COMBO! ':'')+'−'+(b.damage-lastDamage);
-      monster.classList.add('hurt');
-    }
-    if(b.encounter){
-      var enc=b.encounter,active=enc.phase==='combat',latest=enc.latest;
-      monster.style.visibility=active?'visible':'hidden';if(!active)stopBossSprite();
-      $('classBossClock').textContent=active?fmt(enc.combatSeconds):'';
-      $('classBossPhase').textContent=active?(enc.current.final?'⚔️ COMBATE FINAL':'Aparición '+(enc.current.index+1)+' de '+enc.rounds.length):enc.finished?'LA DEFENSA DEL GRAN ARCHIVO':enc.phase==='paused'?'ATAQUES EN PAUSA':'EL MONSTRUO VOLVERÁ';
-      $('classBossLegend').textContent=active?(enc.config.version>=3?'Cada acierto = 1 ataque; fuerza equilibrada por juego. Podio por daño. Sesión: ':'Cada acierto = 1 ataque. Sesión: ')+fmt(b.remainingSeconds)+' restantes.':enc.finished?'Daño total de todas las apariciones.':enc.phase==='paused'?'El reloj de la sesión sigue avanzando.':'Sigue jugando. El Devorapalabras puede volver en cualquier momento.';
-      var rows=enc.finished?enc.leaderboard:latest&&latest.victory?latest.leaderboard:null;
-      var cfg=enc.config,won=enc.finished?b.outcome==='victory':latest&&latest.victory;
-      if(!active&&rows&&rows.length){
-        $('classBossOutcome').classList.remove('show');
-        $('classBossPodiumHost').innerHTML='<h2>'+(enc.finished?'🏆 PODIO FINAL': '¡MONSTRUO DERROTADO!')+'</h2>'+podiumMarkup(rows,won?(enc.finished?cfg.finalRewards:cfg.roundRewards):[0,0,0])+'<p>'+(enc.finished?'Clasificación por daño acumulado.':('Aparición '+(latest.index+1)+' · +'+cfg.participationXp+' XP para los demás participantes.'))+'</p>';
-      }
-    }
-    visualEventId=b.id;lastDamage=b.damage;lastCombos=b.combos;
-  }
-  async function refresh(){
-    if(requesting||!getClass()||!$('classBossPanel'))return;requesting=true;
-    try{var requestedClass=getClass();var r=await edge('class-boss',{action:'status',classCode:requestedClass});
-      if(getClass()!==requestedClass)return;
-      last=r.event||null;lastClassCode=requestedClass;paint(last);updatePrimaryAction();
-      var draft=bossWorkshop()&&bossWorkshop().preparedPlan&&bossWorkshop().preparedPlan();
-      status(draft?'Batalla preparada, sin abrir juegos y sin cronómetro. Pulsa «Comenzar batalla» cuando estén listos.':
-        last&&last.state==='prepared'?'Batalla preparada. Pulsa «Comenzar batalla» cuando estén listos.':
-        last?'Batalla: '+(last.state==='active'?'en curso':last.state==='paused'?'pausada':'terminada')+'. Daño confirmado: '+last.damage+'.':
-        (bossWorkshop()&&bossWorkshop().activeSession()&&bossWorkshop().activeSession().scheduledEnabled&&bossWorkshop().activeSession().bossEnabled)?
-          'Batalla programada. El dragón empezará a la hora prevista aunque no pulses Comenzar batalla.':
-          'No hay batalla creada todavía.');
-    }catch(e){status('Servicio del combate no disponible: '+msg(e.code||e.message));}
-    finally{requesting=false;}
-  }
-  function openStage(){stage.classList.add('open');paint(last);refresh();if(timer)clearInterval(timer);timer=setInterval(refresh,3000);}
-  function closeStage(){stage.classList.remove('open');stopBossSprite();if(timer)clearInterval(timer);timer=null;}
-  $('classBossClose').onclick=closeStage;
-  $('classBossPause').onclick=function(){act(last&&last.state==='paused'?'resume':'pause');};
-  $('classBossFinish').onclick=function(){if(window.confirm('¿Finalizar la batalla cooperativa? El progreso de juego seguirá intacto.'))act('finish');};
-  window.classBossRenderPanel=renderPanel;
-})();
-</script>
 </body>
 </html>
 

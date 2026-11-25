@@ -16,7 +16,8 @@ assert.ok(bridge.startsWith('callServer=async function(fn,args){'));
 assert.ok(google.startsWith('async function loginGoogleViaSupabase(kind){'));
 assert.ok(logout.startsWith('async function secureStudentLogout(){'));
 
-const STUDENTS=30;
+const STUDENTS=Number(process.env.LENGUARCADE_SIMULATED_STUDENTS || 30);
+assert.ok(Number.isSafeInteger(STUDENTS)&&STUDENTS>=1&&STUDENTS<=60);
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function localStorage(){
   const map=new Map();
@@ -216,7 +217,7 @@ assert.equal(api.sessions.size,STUDENTS);
 assert.equal(api.metrics().identities,STUDENTS);
 
 console.log(JSON.stringify({
-  simulation:'30 alumnos aislados, código cliente real y backend simulado',
+  simulation:STUDENTS+' alumnos aislados, código cliente real y backend simulado',
   users:STUDENTS,passed:true,
   requests:api.calls,
   networkCalls:api.metrics().networkCalls,
