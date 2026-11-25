@@ -52,5 +52,5 @@ assert.doesNotMatch(ui,/class-boss|classBoss|Devorapalabras/);
 assert.doesNotMatch(get('apps-script/LenguArcade_Alumno.html'),/class-boss|studentClassBossNotice|Devorapalabras/);
 assert.match(teacher,/session\.bossEnabled === true\) return jsonResponse\(\{ok:false,error:"class_boss_retired"\},410\)/);
 assert.match(gs,/if \(payload\.bossEnabled\) throw new Error/);
-assert.match(get('supabase/migrations/20261125190000_retire_class_boss.sql'),/update public\.workshop_sessions set boss_enabled = false/);
+assert.match(get('supabase/migrations/20261125194400_retire_class_boss.sql'),/update public\.workshop_sessions set boss_enabled = false/);
 console.log('Timed workshops: pre-start, start, exclusion, automatic expiry, override protection, legacy modes and end-of-session save grace OK.');
